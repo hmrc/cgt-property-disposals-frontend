@@ -1,0 +1,97 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+@import play.api.mvc.Call
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+
+@this(
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        completeReturnSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.complete_return_summary,
+        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+)
+
+@(
+        completeReturn: CompleteReturn,
+        rebasingEligibilityUtil: RebasingEligibilityUtil,
+        subscribedDetails: SubscribedDetails,
+        representativeType: Option[RepresentativeType],
+        isIndirectDisposal: Boolean,
+        isFurtherReturn: Option[Boolean],
+        backLink: Call
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+
+@key = @{ "amendCya" }
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+
+@title = @{
+  val messageKey =
+      if(isAgent) s"$key.agent.title"
+      else s"$key.title"
+
+    messages(messageKey)
+}
+
+@mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
+
+    @backLinkComponent(backLink)
+
+    @caption(
+        if(isAgent) {
+        s"${messages("account.agent.prefix")} ${subscribedDetails.makeAccountName}"
+    } else {
+        subscribedDetails.makeAccountName()
+    }
+    )
+
+    @pageHeading(title)
+
+
+    @completeReturnSummary(
+        completeReturn,
+        rebasingEligibilityUtil,
+        subscribedDetails,
+        representativeType,
+        isIndirectDisposal,
+        isFurtherReturn
+    )
+
+    <p>@messages(s"$key.p1")</p>
+
+    @printLink(messages(s"$key.printLink"))
+
+  @cancelOrContinue(
+      messages("button.cancel"),
+      routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.checkAnswers).url,
+      None,
+      None
+  )
+
+}

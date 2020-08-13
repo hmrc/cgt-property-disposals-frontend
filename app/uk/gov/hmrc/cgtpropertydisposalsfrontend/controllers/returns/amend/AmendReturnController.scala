@@ -19,11 +19,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend
 import com.google.inject.Inject
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingToAmendReturn
@@ -40,8 +41,10 @@ class AmendReturnController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
+  rebasingEligibilityUtil: RebasingEligibilityUtil,
   youNeedToCalculatePage: pages.you_need_to_calculate,
-  confirmCancelPage: pages.confirm_cancel
+  confirmCancelPage: pages.confirm_cancel,
+  checkYourAnswersPage: pages.check_your_answers
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -55,26 +58,65 @@ class AmendReturnController @Inject() (
       }
     }
 
-  def confirmCancel(): Action[AnyContent] =
+  def confirmCancel(back: String): Action[AnyContent] =
     authenticatedActionWithSessionData { implicit request =>
-      Ok(confirmCancelPage(confirmCancelForm, routes.AmendReturnController.youNeedToCalculate()))
+      confirmCancelBackLinkMappings.get(back) match {
+        case None           =>
+          logger.warn(s"Could not get back link location for '$back'")
+          errorHandler.errorResult()
+
+        case Some(backLink) =>
+          Ok(
+            confirmCancelPage(
+              confirmCancelForm,
+              backLink,
+              routes.AmendReturnController.confirmCancelSubmit(back)
+            )
+          )
+      }
     }
 
-  def confirmCancelSubmit(): Action[AnyContent] =
+  def confirmCancelSubmit(back: String): Action[AnyContent] =
     authenticatedActionWithSessionData { implicit request =>
-      confirmCancelForm
-        .bindFromRequest()
-        .fold(
-          formWithErrors =>
-            BadRequest(confirmCancelPage(formWithErrors, routes.AmendReturnController.youNeedToCalculate())),
-          { cancel =>
-            val redirectTo =
-              if (cancel) controllers.returns.routes.ViewReturnController.displayReturn()
-              else routes.AmendReturnController.youNeedToCalculate()
+      confirmCancelBackLinkMappings.get(back) match {
+        case None           =>
+          logger.warn(s"Could not get back link location for '$back'")
+          errorHandler.errorResult()
 
-            Redirect(redirectTo)
-          }
+        case Some(backLink) =>
+          confirmCancelForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                BadRequest(
+                  confirmCancelPage(formWithErrors, backLink, routes.AmendReturnController.confirmCancelSubmit(back))
+                ),
+              { cancel =>
+                val redirectTo =
+                  if (cancel) controllers.returns.routes.ViewReturnController.displayReturn()
+                  else backLink
+
+                Redirect(redirectTo)
+              }
+            )
+      }
+    }
+
+  def checkYourAnswers(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withStartingToAmendReturn(request) { journey =>
+        Ok(
+          checkYourAnswersPage(
+            journey.originalReturn.completeReturn,
+            rebasingEligibilityUtil,
+            journey.subscribedDetails,
+            journey.originalReturn.completeReturn.representativeType(),
+            journey.originalReturn.completeReturn.isIndirectDisposal(),
+            Some(!journey.originalReturn.isFirstReturn),
+            routes.AmendReturnController.youNeedToCalculate()
+          )
         )
+      }
     }
 
   private def withStartingToAmendReturn(
@@ -88,6 +130,17 @@ class AmendReturnController @Inject() (
 }
 
 object AmendReturnController {
+
+  object ConfirmCancelBackLocations {
+    val calculateAmounts: String = "calculateAmounts"
+    val checkAnswers: String     = "checkAnswers"
+  }
+
+  val confirmCancelBackLinkMappings: Map[String, Call] =
+    Map(
+      ConfirmCancelBackLocations.calculateAmounts -> routes.AmendReturnController.youNeedToCalculate(),
+      ConfirmCancelBackLocations.checkAnswers     -> routes.AmendReturnController.checkYourAnswers()
+    )
 
   val confirmCancelForm: Form[Boolean] =
     Form(

@@ -21,7 +21,7 @@ import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingToAmendReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -53,10 +53,7 @@ class AmendReturnControllerSpec
 
   "AmendReturnController" when {
 
-    "handling requests to display the 'you must calculate' page" must {
-
-      def performAction(): Future[Result] = controller.youNeedToCalculate()(FakeRequest())
-
+    def redirectToStartBehaviour(performAction: () => Future[Result]) =
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         {
@@ -64,6 +61,12 @@ class AmendReturnControllerSpec
           case _                        => false
         }
       )
+
+    "handling requests to display the 'you must calculate' page" must {
+
+      def performAction(): Future[Result] = controller.youNeedToCalculate()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
 
       "display the page" in {
         inSequence {
@@ -79,9 +82,11 @@ class AmendReturnControllerSpec
               .displayReturn()
               .url
             doc.select("#cancelOrContinue-cancel").attr("href")   shouldBe routes.AmendReturnController
-              .confirmCancel()
+              .confirmCancel(AmendReturnController.ConfirmCancelBackLocations.calculateAmounts)
               .url
-            doc.select("#cancelOrContinue-continue").attr("href") shouldBe "#"
+            doc.select("#cancelOrContinue-continue").attr("href") shouldBe routes.AmendReturnController
+              .checkYourAnswers()
+              .url
           }
         )
 
@@ -90,42 +95,90 @@ class AmendReturnControllerSpec
 
     "handling requests to display the confirm cancellation page" must {
 
-      def performAction(): Future[Result] =
-        controller.confirmCancel()(FakeRequest())
+      def performAction(back: String): Future[Result] =
+        controller.confirmCancel(back)(FakeRequest())
 
-      "display the page" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(SessionData.empty)
+      "show an error page" when {
+
+        "the back location is not understood" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty)
+          }
+
+          checkIsTechnicalErrorPage(performAction("abc"))
         }
 
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("confirmCancelAmendReturn.title"),
-          { doc =>
-            doc.select("#back").attr("href") shouldBe routes.AmendReturnController.youNeedToCalculate().url
+      }
 
-            doc
-              .select("#content > article > form")
-              .attr("action") shouldBe routes.AmendReturnController.confirmCancelSubmit().url
+      "display the page" when {
+
+        def test(
+          back: String,
+          expectedBackLink: Call
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty)
           }
-        )
+
+          checkPageIsDisplayed(
+            performAction(back),
+            messageFromMessageKey("confirmCancelAmendReturn.title"),
+            { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.AmendReturnController.confirmCancelSubmit(back).url
+            }
+          )
+        }
+
+        "the user came from the 'you need to calculate page'" in {
+          test(
+            AmendReturnController.ConfirmCancelBackLocations.calculateAmounts,
+            routes.AmendReturnController.youNeedToCalculate()
+          )
+        }
+
+        "the user came from the amend cya page" in {
+          test(
+            AmendReturnController.ConfirmCancelBackLocations.checkAnswers,
+            routes.AmendReturnController.checkYourAnswers()
+          )
+        }
 
       }
     }
 
     "handling submits on the confirm cancellation page" must {
 
-      def performAction(formData: (String, String)*): Future[Result] =
-        controller.confirmCancelSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+      def performAction(formData: (String, String)*)(back: String): Future[Result] =
+        controller.confirmCancelSubmit(back)(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      "show an error page" when {
+
+        "the back location is not understood" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty)
+          }
+
+          checkIsTechnicalErrorPage(performAction()("abc"))
+        }
+
+      }
 
       "display a form error" when {
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
           checkPageIsDisplayed(
-            performAction(data: _*),
+            performAction(data: _*)(AmendReturnController.ConfirmCancelBackLocations.checkAnswers),
             messageFromMessageKey("confirmCancelAmendReturn.title"),
             { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AmendReturnController.checkYourAnswers().url
+
               doc
                 .select("#error-summary-display > ul > li > a")
                 .text() shouldBe messageFromMessageKey(
@@ -166,20 +219,84 @@ class AmendReturnControllerSpec
           }
 
           checkIsRedirect(
-            performAction("confirmCancelAmendReturn" -> "true"),
+            performAction("confirmCancelAmendReturn" -> "true")(
+              AmendReturnController.ConfirmCancelBackLocations.calculateAmounts
+            ),
             controllers.returns.routes.ViewReturnController.displayReturn()
           )
         }
 
         "the user doesn't want to cancel" in {
+          AmendReturnController.confirmCancelBackLinkMappings.foreach {
+            case (backKey, backLink) =>
+              withClue(s"For back key '$backKey' and back location '${backLink.url}': ") {
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(SessionData.empty)
+                }
+
+                checkIsRedirect(
+                  performAction("confirmCancelAmendReturn" -> "false")(backKey),
+                  backLink
+                )
+              }
+          }
+        }
+
+      }
+
+    }
+
+    "handling requests to display the check your answers page" must {
+
+      def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "display the page" when {
+
+        def test(session: SessionData, expectedTitle: String) = {
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty)
+            mockGetSession(
+              session
+            )
           }
 
-          checkIsRedirect(
-            performAction("confirmCancelAmendReturn" -> "false"),
-            routes.AmendReturnController.youNeedToCalculate()
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(expectedTitle),
+            { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AmendReturnController.youNeedToCalculate().url
+
+              doc.select("#cancelOrContinue-cancel").attr("href") shouldBe routes.AmendReturnController
+                .confirmCancel(AmendReturnController.ConfirmCancelBackLocations.checkAnswers)
+                .url
+
+              doc.select("#cancelOrContinue-continue").isEmpty shouldBe true
+              doc.select("#returnSummary").isEmpty             shouldBe false
+            }
+          )
+        }
+
+        "the user is not an agent" in {
+          test(
+            SessionData.empty.copy(
+              journeyStatus = Some(sample[StartingToAmendReturn]),
+              userType = Some(UserType.Individual)
+            ),
+            "amendCya.title"
+          )
+        }
+
+        "the user is an agent" in {
+          test(
+            SessionData.empty.copy(
+              journeyStatus = Some(sample[StartingToAmendReturn]),
+              userType = Some(UserType.Agent)
+            ),
+            "amendCya.agent.title"
           )
         }
 

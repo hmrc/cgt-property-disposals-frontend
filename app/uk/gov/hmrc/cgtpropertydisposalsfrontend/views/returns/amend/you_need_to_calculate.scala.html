@@ -21,15 +21,14 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-    cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
+        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
 )
 
 @(backLink: Call)(implicit messages:Messages, appConfig: ViewConfig, request: RequestWithSessionData[_])
@@ -52,11 +51,7 @@
       <li>@messages(s"$key.li2")</li>
   </ul>
 
-  <p>
-      <a href="@{triage.routes.FurtherReturnGuidanceController.guidance(FurtherReturnGuidanceController.BackLinkLocations.calculateAmounts)}">
-          @messages(s"$key.link1")
-      </a>
-  </p>
+  <p><a href="#">@messages(s"$key.link1")</a></p>
 
   <h2 class="heading-medium">@messages(s"$key.h2")</h2>
 
@@ -64,9 +59,9 @@
 
   @cancelOrContinue(
     messages("button.cancel"),
-    routes.AmendReturnController.confirmCancel().url,
+    routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.calculateAmounts).url,
     Some(messages("button.continue")),
-    Some("#")
+    Some(routes.AmendReturnController.checkYourAnswers().url)
   )
 
 }
