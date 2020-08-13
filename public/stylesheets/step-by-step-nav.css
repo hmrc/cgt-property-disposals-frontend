@@ -37,6 +37,10 @@ button.app-step-nav__button {
     border-image: initial;
 }
 
+button.app-step-nav__button:focus {
+    outline-width: 2px;
+}
+
 .app-step-nav__button {
     color: #005ea5;
     cursor: pointer;

@@ -3014,13 +3014,13 @@ inYearLosses.furtherReturn.personalRep.helpText2=If the person made a loss on th
 inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText2=If the estate made a loss on the disposal you have reported in this return you should also include that amount in this total.
 inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText2=If the estate made a loss on the disposal you have reported in this return you should also include that amount in this total.
 
-inYearLosses.furtherReturn.link=<a href="{0}" target="_blank">How to work out your overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.agent.link=<a href="{0}" target="_blank">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.trust.link=<a href="{0}" target="_blank">How to work out the trust’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.capacitor.link=<a href="{0}" target="_blank">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.personalRep.link=<a href="{0}" target="_blank">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.link=<a href="{0}">How to work out your overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.agent.link=<a href="{0}">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.trust.link=<a href="{0}">How to work out the trust’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.capacitor.link=<a href="{0}">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.personalRep.link=<a href="{0}">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.link=<a href="{0}">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.link=<a href="{0}">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
 
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.agent.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
