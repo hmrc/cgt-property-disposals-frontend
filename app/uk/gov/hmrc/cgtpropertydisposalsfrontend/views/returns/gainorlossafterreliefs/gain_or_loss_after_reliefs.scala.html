@@ -22,8 +22,6 @@
 @import cats.instances.string._
 @import cats.syntax.eq._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
@@ -160,11 +158,6 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
         helpText = None
       )
 
-      <p id="howToWorkOut">@Html(
-          messages(
-              s"$key$userKey.link",
-              triageRoutes.FurtherReturnGuidanceController.guidance(FurtherReturnGuidanceController.BackLinkLocations.gainOrLossAfterReliefs)
-          ))</p>
     @submitButton(messages("button.saveAndContinue"))
     }
 
