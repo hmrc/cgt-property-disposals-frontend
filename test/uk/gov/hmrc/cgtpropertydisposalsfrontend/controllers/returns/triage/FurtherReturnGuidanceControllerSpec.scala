@@ -25,7 +25,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.BackLinkLocations
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.sample
@@ -641,6 +641,66 @@ class FurtherReturnGuidanceControllerSpec
                   userType,
                   BackLinkLocations.calculateAmounts,
                   controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
+                )
+            }
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling requests to display the overall gain guidance page" must {
+
+      def performAction(): Future[Result] =
+        controller.taxableGainGuidance()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(),
+        isValidJourney
+      )
+
+      "the user is filling out a draft return and" when {
+
+        "display the page" when {
+
+          def test(
+            individualUserType: IndividualUserType,
+            userType: UserType
+          ): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturnForSingleDisposals(
+                  IncompleteSingleDisposalTriageAnswers.empty.copy(
+                    individualUserType = Some(individualUserType)
+                  ),
+                  userType
+                )._1
+              )
+            }
+
+            val userKey = userMessageKey(individualUserType, userType)
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"taxableGainOrLossGuidance$userKey.title"),
+              doc =>
+                doc
+                  .select("#back")
+                  .attr("href") shouldBe returns.yeartodatelliability.routes.YearToDateLiabilityController
+                  .taxableGainOrLoss()
+                  .url
+            )
+          }
+
+          "the user came from the overall gain page" in {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                test(
+                  individualUserType,
+                  userType
                 )
             }
           }
