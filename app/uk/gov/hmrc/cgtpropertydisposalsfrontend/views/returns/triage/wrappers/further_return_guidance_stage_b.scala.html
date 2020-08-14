@@ -19,21 +19,18 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
 @this(
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
     stageBExample1: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example1,
     stageBExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example2,
     stageBExample3: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example3,
     stageBExample4: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example4,
-        stepHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.step_header
+    stepHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.step_header
 )
 
 @(userKey: String)(implicit messages:Messages, appConfig: ViewConfig)
 
     @key = @{ "furtherReturnGuidance" }
 
-    @caption(messages(s"$key.stage-b"))
-    <h2 class="heading-large">@messages(s"$key$userKey.stage-b.headingText")</h2>
     @if(userKey.contains(".personalRepInPeriodOfAdmin")){
         <p>@messages(s"$key$userKey.stage-b.p1")</p>
         <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>

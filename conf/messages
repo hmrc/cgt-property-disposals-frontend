@@ -3713,6 +3713,13 @@ yearToDateLiability.error.tooLarge=The overall Capital Gains Tax liability must 
 
 yearToDateLiability.cyaChange=the overall Capital Gains Tax liability
 
+yearToDateLiabilityGuidance.title=Work out your overall Capital Gains Tax liability on your UK property-related disposals
+yearToDateLiabilityGuidance.agent.title=Work out your client's overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiabilityGuidance.trust.title=Work out the trust’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiabilityGuidance.capacitor.title=Work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiabilityGuidance.personalRep.title=Work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiabilityGuidance.personalRepInPeriodOfAdmin.title=Work out the estate’s overall Capital Gains Tax liability on their UK property-related disposals
+
 
 taxDue.title=Enter the Capital Gains Tax due for this return
 taxDue.p1=We used the details that were entered into this return to work out the amount of Capital Gains Tax due.
