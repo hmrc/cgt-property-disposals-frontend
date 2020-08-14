@@ -61,13 +61,15 @@ POST /multiple-disposals/property-types                     uk.gov.hmrc.cgtprope
 GET  /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDate()
 POST /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDateSubmit()
 
-GET /multiple-disposals/disposal-date-shares                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.disposalDateOfShares()
-POST /multiple-disposals/disposal-date-shares                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.disposalDateOfSharesSubmit()
+GET /multiple-disposals/disposal-date-shares                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.disposalDateOfShares()
+POST /multiple-disposals/disposal-date-shares               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.disposalDateOfSharesSubmit()
 
 GET  /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswers()
 POST /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswersSubmit()
 
 GET /exit/same-completion-date                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate()
 
-GET /further-return/help                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelp()
-POST /further-return/help                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelpSubmit()
+GET  /further-return/help                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelp()
+POST /further-return/help                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelpSubmit()
+
+GET  /how-work-out-capital-gains-tax-liability              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.guidance(back: String)

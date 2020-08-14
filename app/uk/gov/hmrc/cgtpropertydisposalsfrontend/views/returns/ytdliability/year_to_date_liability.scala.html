@@ -116,7 +116,7 @@
             customErrorKey = customErrorKey
         )
 
-        <p id="link"><a href="#">@Html(messages(s"$key$userKey.link", viewConfig.personalAllowanceUrl))</a></p>
+        <p id="link"><a href="#">@messages(s"$key$userKey.link")</a></p>
 
         @submitButton(messages("button.saveAndContinue"))
     }

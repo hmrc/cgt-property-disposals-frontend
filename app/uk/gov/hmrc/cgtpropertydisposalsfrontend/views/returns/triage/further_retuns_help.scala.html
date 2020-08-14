@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentative
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
@@ -74,7 +75,11 @@ warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
     </ul>
 
     <p>
-    @Html(messages("further-returns.help.link", triage.routes.CommonTriageQuestionsController.furtherReturnHelp()))
+    @Html(
+        messages(
+            "further-returns.help.link",
+            triage.routes.FurtherReturnGuidanceController.guidance(FurtherReturnGuidanceController.BackLinkLocations.furtherReturnStart)
+        ))
     </p>
 
   <p>
