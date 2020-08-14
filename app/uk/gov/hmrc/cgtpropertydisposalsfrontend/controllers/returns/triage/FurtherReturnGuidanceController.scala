@@ -48,7 +48,7 @@ class FurtherReturnGuidanceController @Inject() (
 
   def guidance(back: String): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withJourneyState(request) { (_, state) =>
         backLinkMappings.get(back) match {
           case None           =>
             logger.warn(s"Could not find back link location for '$back'")
@@ -75,7 +75,7 @@ class FurtherReturnGuidanceController @Inject() (
 
   def taxableGainGuidance(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withJourneyState(request) { (_, state) =>
         Ok(
           taxableGainGuidancePage(
             returns.yeartodatelliability.routes.YearToDateLiabilityController.taxableGainOrLoss(),
@@ -107,7 +107,7 @@ class FurtherReturnGuidanceController @Inject() (
         _.draftReturn.representativeType()
       )
 
-  private def withState(request: RequestWithSessionData[_])(
+  private def withJourneyState(request: RequestWithSessionData[_])(
     f: (
       SessionData,
       Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
