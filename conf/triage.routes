@@ -73,3 +73,4 @@ GET  /further-return/help                                   uk.gov.hmrc.cgtprope
 POST /further-return/help                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelpSubmit()
 
 GET  /how-work-out-capital-gains-tax-liability              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.guidance(back: String)
+GET  /how-work-out-overall-gain                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.taxableGainGuidance()

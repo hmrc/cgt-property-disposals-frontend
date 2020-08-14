@@ -36,7 +36,8 @@ class FurtherReturnGuidanceController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
-  guidancePage: views.html.returns.triage.further_return_guidance
+  guidancePage: views.html.returns.triage.further_return_guidance,
+  taxableGainGuidancePage: views.html.returns.ytdliability.further_return_taxable_gain_guidance
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -69,6 +70,25 @@ class FurtherReturnGuidanceController @Inject() (
             )
         }
 
+      }
+    }
+
+  def taxableGainGuidance(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withJourneyState(request) { (_, state) =>
+        Ok(
+          taxableGainGuidancePage(
+            returns.yeartodatelliability.routes.YearToDateLiabilityController.taxableGainOrLoss(),
+            state.fold(
+              _.fold(
+                _.subscribedDetails.isATrust,
+                _.subscribedDetails.isATrust
+              ),
+              _.subscribedDetails.isATrust
+            ),
+            getRepresentativeType(state)
+          )
+        )
       }
     }
 

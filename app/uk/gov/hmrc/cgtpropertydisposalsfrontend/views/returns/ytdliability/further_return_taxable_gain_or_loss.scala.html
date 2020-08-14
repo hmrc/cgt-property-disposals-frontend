@@ -28,6 +28,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -166,7 +167,11 @@
             customErrorKey = customErrorKey
         )
 
-        <p id="link"><a href="#">@messages(s"$key$userKey.furtherReturn.link")</a></p>
+        <p id="link">
+            <a href="@{triage.routes.FurtherReturnGuidanceController.taxableGainGuidance()}">
+                @messages(s"$key$userKey.furtherReturn.link")
+            </a>
+        </p>
 
         @submitButton(messages("button.saveAndContinue"))
     }
