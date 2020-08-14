@@ -651,7 +651,7 @@ class FurtherReturnGuidanceControllerSpec
 
     }
 
-    "handling requests to display the overall gain guidance page" must {
+    "handling requests to display the overall gain guidance page for a single disposal" must {
 
       def performAction(): Future[Result] =
         controller.taxableGainGuidance()(FakeRequest())
@@ -711,6 +711,65 @@ class FurtherReturnGuidanceControllerSpec
 
     }
 
+    "handling requests to display the overall gain guidance page for a multiple disposal" must {
+
+      def performAction(): Future[Result] =
+        controller.taxableGainGuidance()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(),
+        isValidJourney
+      )
+
+      "the user is filling out a draft return and" when {
+
+        "display the page" when {
+
+          def test(
+            individualUserType: IndividualUserType,
+            userType: UserType
+          ): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturnForMultipleDisposals(
+                  IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                    individualUserType = Some(individualUserType)
+                  ),
+                  userType
+                )._1
+              )
+            }
+
+            val userKey = userMessageKey(individualUserType, userType)
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"taxableGainOrLossGuidance$userKey.title"),
+              doc =>
+                doc
+                  .select("#back")
+                  .attr("href") shouldBe returns.yeartodatelliability.routes.YearToDateLiabilityController
+                  .taxableGainOrLoss()
+                  .url
+            )
+          }
+
+          "the user came from the overall gain page" in {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                test(
+                  individualUserType,
+                  userType
+                )
+            }
+          }
+
+        }
+
+      }
+
+    }
   }
 
 }
