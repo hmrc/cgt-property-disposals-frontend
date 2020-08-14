@@ -88,9 +88,9 @@
         @reliefDetailsSummary(s.reliefDetails, subscribedDetails.isATrust, representativeType)
 
         @s.gainOrLossAfterReliefs.map{ glar =>
-            if(isFurtherReturn.contains(true){
-            <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
-        @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
+            @if(isFurtherReturn.contains(true)){
+                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
             }
         }
 
@@ -120,9 +120,9 @@
         @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
         @m.gainOrLossAfterReliefs.map{ glar =>
-            if(isFurtherReturn.contains(true){
-            <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
-        @glarSummary(glar, subscribedDetails.isATrust, representativeType, true)
+            @if(isFurtherReturn.contains(true)){
+                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                @glarSummary(glar, subscribedDetails.isATrust, representativeType, true)
             }
         }
 
@@ -165,9 +165,9 @@
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
         @s.gainOrLossAfterReliefs.map{ glar =>
-            if(isFurtherReturn.contains(true){
-            <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
-        @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
+            @if(isFurtherReturn.contains(true)){
+                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
             }
         }
 
@@ -198,9 +198,9 @@
         )
 
         @multipleIndirect.gainOrLossAfterReliefs.map{ glar =>
-            if(isFurtherReturn.contains(true){
-            <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
-        @glarSummary(glar, subscribedDetails.isATrust, representativeType, true)
+            @if(isFurtherReturn.contains(true)){
+                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                @glarSummary(glar, subscribedDetails.isATrust, representativeType, true)
             }
         }
 
@@ -224,9 +224,9 @@
         @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
         @singleMixedUse.gainOrLossAfterReliefs.map{ glar =>
-            if(isFurtherReturn.contains(true){
-            <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
-        @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
+            @if(isFurtherReturn.contains(true)){
+                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
             }
         }
 
