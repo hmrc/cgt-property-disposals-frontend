@@ -3543,6 +3543,13 @@ netLoss.furtherReturn.error.tooManyDecimals=Net loss must be an amount of money 
 
 taxableGainOrLoss.furtherReturn.cyaChange=if a net gain or loss was made on the property sale or disposal
 
+taxableGainOrLossGuidance.title=Work out your net gain or loss for the year
+taxableGainOrLossGuidance.agent.title=Work out your client’s net gain or loss for the year
+taxableGainOrLossGuidance.trust.title=Work out the trust’s net gain or loss for the year
+taxableGainOrLossGuidance.capacitor.title=Work out the person’s net gain or loss for the year
+taxableGainOrLossGuidance.personalRep.title=Work out the person’s net gain or loss for the year
+taxableGainOrLossGuidance.personalRepInPeriodOfAdmin.title=Work out the estate’s net gain or loss for the year
+
 
 estimatedIncome.title=What do you believe your gross income will be in this tax year?
 estimatedIncome.agent.title=What does your client believe their gross income will be in this tax year?

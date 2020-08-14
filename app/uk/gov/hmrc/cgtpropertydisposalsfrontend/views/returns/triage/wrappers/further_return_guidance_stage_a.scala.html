@@ -19,7 +19,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
 @this(
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
     stageAExample1: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example1,
     stageAExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example2,
@@ -32,8 +31,6 @@
 
     @key = @{ "furtherReturnGuidance" }
 
-    @caption(messages(s"$key.stage-a"))
-    <h2 class="heading-large">@messages(s"$key$userKey.stage-a.headingText")</h2>
     <div id="step-by-step-navigation" class="app-step-nav app-step-nav--large app-step-nav--active" data-show-text="Show" data-hide-text="Hide" data-show-all-text="Show all" data-hide-all-text="Hide all">
       <ol class="app-step-nav__steps">
         <li class="app-step-nav__step js-step" id="step-a1">
