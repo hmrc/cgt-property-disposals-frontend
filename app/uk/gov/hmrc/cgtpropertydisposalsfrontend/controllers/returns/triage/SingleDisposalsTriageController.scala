@@ -156,18 +156,10 @@ class SingleDisposalsTriageController @Inject() (
             )
               state.map(_._2)
             else {
-              val furtherReturn = state.fold(_.isFurtherReturn, _._2.isFurtherReturn).contains(true)
-              val newAnswers    =
-                if (furtherReturn)
-                  answers.fold(
-                    _.copy(disposalMethod = Some(disposalMethod)),
-                    _.copy(disposalMethod = disposalMethod)
-                  )
-                else
-                  answers.fold(
-                    _.copy(disposalMethod = Some(disposalMethod)),
-                    _.copy(disposalMethod = disposalMethod)
-                  )
+              val newAnswers = answers.fold(
+                _.copy(disposalMethod = Some(disposalMethod)),
+                _.copy(disposalMethod = disposalMethod)
+              )
 
               state.bimap(
                 _.copy(newReturnTriageAnswers = Right(newAnswers)),
@@ -184,7 +176,8 @@ class SingleDisposalsTriageController @Inject() (
                         reliefDetailsAnswers = None,
                         exemptionAndLossesAnswers = None,
                         yearToDateLiabilityAnswers = None,
-                        supportingEvidenceAnswers = None
+                        supportingEvidenceAnswers = None,
+                        gainOrLossAfterReliefs = None
                       )
                     )
                   case (Left(Right(d)), r) =>
@@ -197,7 +190,8 @@ class SingleDisposalsTriageController @Inject() (
                         ),
                         exemptionAndLossesAnswers = None,
                         yearToDateLiabilityAnswers = None,
-                        supportingEvidenceAnswers = None
+                        supportingEvidenceAnswers = None,
+                        gainOrLossAfterReliefs = None
                       )
                     )
                   case (Left(Left(d)), r)  =>
@@ -207,7 +201,8 @@ class SingleDisposalsTriageController @Inject() (
                         mixedUsePropertyDetailsAnswers = d.mixedUsePropertyDetailsAnswers.map(_.unset(_.disposalPrice)),
                         exemptionAndLossesAnswers = None,
                         yearToDateLiabilityAnswers = None,
-                        supportingEvidenceAnswers = None
+                        supportingEvidenceAnswers = None,
+                        gainOrLossAfterReliefs = None
                       )
                     )
                 }
@@ -493,7 +488,6 @@ class SingleDisposalsTriageController @Inject() (
                       )
                     ),
                   { date =>
-                    val furtherReturn = state.fold(_.isFurtherReturn, _._2.isFurtherReturn).contains(true)
                     val result        = triageAnswers
                       .fold(_.disposalDate, c => Some(c.disposalDate)) match {
                       case Some(existingDisposalDate) if existingDisposalDate.value === date =>
@@ -501,7 +495,7 @@ class SingleDisposalsTriageController @Inject() (
                       case _                                                                 =>
                         for {
                           taxYear       <- taxYearService.taxYear(date)
-                          updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers, furtherReturn)
+                          updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers)
                           newState       = state.bimap(
                                              _.copy(newReturnTriageAnswers = Right(updatedAnswers)),
                                              {
@@ -573,7 +567,8 @@ class SingleDisposalsTriageController @Inject() (
             .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers
             .flatMap(_.unsetAllButIncomeDetails()),
-          supportingEvidenceAnswers = None
+          supportingEvidenceAnswers = None,
+          gainOrLossAfterReliefs = None
         )
 
       case Left(Right(currentDraftReturn: DraftSingleIndirectDisposalReturn)) =>
@@ -583,7 +578,8 @@ class SingleDisposalsTriageController @Inject() (
             .map(_.unsetAllButAcquisitionMethod(currentDraftReturn.triageAnswers)),
           yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers
             .flatMap(_.unsetAllButIncomeDetails()),
-          supportingEvidenceAnswers = None
+          supportingEvidenceAnswers = None,
+          gainOrLossAfterReliefs = None
         )
 
       case Left(Left(currentDraftReturn: DraftSingleMixedUseDisposalReturn))  =>
@@ -593,15 +589,15 @@ class SingleDisposalsTriageController @Inject() (
             currentDraftReturn.mixedUsePropertyDetailsAnswers.map(_.unset(_.acquisitionPrice)),
           yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers
             .flatMap(_.unsetAllButIncomeDetails()),
-          supportingEvidenceAnswers = None
+          supportingEvidenceAnswers = None,
+          gainOrLossAfterReliefs = None
         )
     }
 
   private def updateDisposalDate(
-                                  d: LocalDate,
-                                  taxYear: Option[TaxYear],
-                                  answers: SingleDisposalTriageAnswers,
-                                  furtherReturn: Boolean
+    d: LocalDate,
+    taxYear: Option[TaxYear],
+    answers: SingleDisposalTriageAnswers
   ): IncompleteSingleDisposalTriageAnswers = {
     def updateCompleteAnswers(
       c: CompleteSingleDisposalTriageAnswers,
@@ -627,7 +623,7 @@ class SingleDisposalsTriageController @Inject() (
     } { taxYear =>
       answers.fold(
         _.copy(
-          disposalDate = if (furtherReturn) None else Some(DisposalDate(d, taxYear)),
+          disposalDate = Some(DisposalDate(d, taxYear)),
           tooEarlyDisposalDate = None,
           completionDate = None
         ),
@@ -832,7 +828,11 @@ class SingleDisposalsTriageController @Inject() (
                               yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers.flatMap {
                                 case _: CalculatedYTDAnswers    => None
                                 case n: NonCalculatedYTDAnswers =>
-                                  Some(n.unset(_.hasEstimatedDetails))
+                                  Some(
+                                    n.unset(_.hasEstimatedDetails)
+                                      .unset(_.yearToDateLiability)
+                                      .unset(_.mandatoryEvidence)
+                                  )
                               }
                             ),
                           indirectDraftReturn =>
@@ -841,7 +841,11 @@ class SingleDisposalsTriageController @Inject() (
                               yearToDateLiabilityAnswers = indirectDraftReturn.yearToDateLiabilityAnswers.flatMap {
                                 case _: CalculatedYTDAnswers    => None
                                 case n: NonCalculatedYTDAnswers =>
-                                  Some(n.unset(_.hasEstimatedDetails))
+                                  Some(
+                                    n.unset(_.hasEstimatedDetails)
+                                      .unset(_.yearToDateLiability)
+                                      .unset(_.mandatoryEvidence)
+                                  )
                               }
                             )
                         ),
@@ -851,7 +855,9 @@ class SingleDisposalsTriageController @Inject() (
                             yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap {
                               case _: CalculatedYTDAnswers    => None
                               case n: NonCalculatedYTDAnswers =>
-                                Some(n.unset(_.hasEstimatedDetails))
+                                Some(
+                                  n.unset(_.hasEstimatedDetails).unset(_.yearToDateLiability).unset(_.mandatoryEvidence)
+                                )
                             }
                           )
                       )
@@ -1080,7 +1086,6 @@ class SingleDisposalsTriageController @Inject() (
                       )
                     ),
                   { date =>
-                    val furtherReturn = state.fold(_.isFurtherReturn, _._2.isFurtherReturn).contains(true)
                     val result        = triageAnswers
                       .fold(_.disposalDate, c => Some(c.disposalDate)) match {
                       case Some(existingDisposalDate) if existingDisposalDate.value === date.value =>
@@ -1088,10 +1093,9 @@ class SingleDisposalsTriageController @Inject() (
                       case _                                                                       =>
                         for {
                           taxYear                         <- taxYearService.taxYear(date.value)
-                          updatedDisposalDate              = updateDisposalDate(date.value, taxYear, triageAnswers, furtherReturn)
-                          updatedDisposalAndCompletionDate =
-                            updatedDisposalDate
-                              .copy(completionDate = if (furtherReturn) None else Some(CompletionDate(date.value)))
+                          updatedDisposalDate              = updateDisposalDate(date.value, taxYear, triageAnswers)
+                          updatedDisposalAndCompletionDate = updatedDisposalDate
+                                                               .copy(completionDate = Some(CompletionDate(date.value)))
                           newState                         = state.bimap(
                                                                _.copy(newReturnTriageAnswers = Right(updatedDisposalAndCompletionDate)),
                                                                {

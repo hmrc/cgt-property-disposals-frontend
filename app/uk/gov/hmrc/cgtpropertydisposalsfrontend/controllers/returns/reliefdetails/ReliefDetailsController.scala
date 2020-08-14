@@ -246,25 +246,21 @@ class ReliefDetailsController @Inject() (
             else {
               val updatedAnswers =
                 if (draftReturn.triageAnswers.isPeriodOfAdmin)
-                  if (fillingOutReturn.isFurtherReturn.contains(true))
-                    answers.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
-                  else
-                    answers.fold(
-                      _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p))),
-                      _.copy(privateResidentsRelief = AmountInPence.fromPounds(p))
-                    )
+                  answers.fold(
+                    _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p))),
+                    _.copy(privateResidentsRelief = AmountInPence.fromPounds(p))
+                  )
                 else
                   answers
                     .unset(_.lettingsRelief)
-                    .copy(privateResidentsRelief =
-                      if (fillingOutReturn.isFurtherReturn.contains(true)) None else Some(AmountInPence.fromPounds(p))
-                    )
+                    .copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p)))
 
               draftReturn.copy(
                 reliefDetailsAnswers = Some(updatedAnswers),
                 yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(
                   _.unsetAllButIncomeDetails()
-                )
+                ),
+                gainOrLossAfterReliefs = None
               )
             }
           }

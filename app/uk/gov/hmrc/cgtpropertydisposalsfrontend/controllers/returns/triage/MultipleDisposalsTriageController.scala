@@ -52,8 +52,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, multipledisposals => triagePages}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.IncompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -742,22 +740,13 @@ class MultipleDisposalsTriageController @Inject() (
                       else
                         Right(
                           draftReturn.copy(
-                            triageAnswers =
-                              if (state.fold(_.isFurtherReturn, _._1.isFurtherReturn).contains(true))
-                                newAnswers.unset(_.completionDate)
-                              else newAnswers,
+                            triageAnswers = newAnswers,
                             examplePropertyDetailsAnswers = None,
                             yearToDateLiabilityAnswers =
                               if (state.fold(_.isFurtherReturn, _._1.isFurtherReturn).contains(true))
                                 draftReturn.yearToDateLiabilityAnswers.map {
-                                  case answers: CalculatedYTDAnswers    =>
-                                    IncompleteCalculatedYTDAnswers.empty.copy(hasEstimatedDetails =
-                                      answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
-                                    )
-                                  case answers: NonCalculatedYTDAnswers =>
-                                    IncompleteNonCalculatedYTDAnswers.empty.copy(hasEstimatedDetails =
-                                      answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
-                                    )
+                                  case answers: CalculatedYTDAnswers    => answers.unset(_.hasEstimatedDetails)
+                                  case answers: NonCalculatedYTDAnswers => answers.unset(_.hasEstimatedDetails)
                                 }
                               else None,
                             supportingEvidenceAnswers = None
@@ -838,14 +827,16 @@ class MultipleDisposalsTriageController @Inject() (
                       multipleIndirect =>
                         multipleIndirect.copy(
                           exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
-                          yearToDateLiabilityAnswers = None
+                          yearToDateLiabilityAnswers = None,
+                          gainOrLossAfterReliefs = None // as well as disposal date of shares
                         ),
                       multiple =>
                         multiple.copy(
                           examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers.map(
                             _.unset(_.disposalDate)
                           ),
-                          yearToDateLiabilityAnswers = None
+                          yearToDateLiabilityAnswers = None,
+                          gainOrLossAfterReliefs = None // as well as disposal date of shares
                         )
                     )
                 )
@@ -966,13 +957,15 @@ class MultipleDisposalsTriageController @Inject() (
                                               multipleIndirect =>
                                                 multipleIndirect.copy(
                                                   exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
-                                                  yearToDateLiabilityAnswers = None
+                                                  yearToDateLiabilityAnswers = None,
+                                                  gainOrLossAfterReliefs = None
                                                 ),
                                               multiple =>
                                                 multiple.copy(
                                                   examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers
                                                     .map(_.unset(_.disposalDate)),
-                                                  yearToDateLiabilityAnswers = None
+                                                  yearToDateLiabilityAnswers = None,
+                                                  gainOrLossAfterReliefs = None
                                                 )
                                             )
                                         )

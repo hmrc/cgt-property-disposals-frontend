@@ -33,11 +33,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, SessionData, TimeUtils, UserType}
@@ -485,7 +483,6 @@ class CommonTriageQuestionsController @Inject() (
     numberOfProperties: NumberOfProperties
   ): Either[StartingNewDraftReturn, FillingOutReturn] = {
     val individualUserType = getIndividualUserType(state)
-    val furtherReturn      = isFurtherReturn(state)
     numberOfProperties match {
       case NumberOfProperties.One         =>
         val newTriageAnswers =
@@ -519,8 +516,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                if (furtherReturn) Some(RepresenteeAnswers.IncompleteRepresenteeAnswers.empty)
-                else fillingOutReturn.draftReturn.representeeAnswers
+                fillingOutReturn.draftReturn.representeeAnswers
               )
             )
         )
@@ -578,15 +574,9 @@ class CommonTriageQuestionsController @Inject() (
                 supportingEvidenceAnswers = None,
                 exemptionAndLossesAnswers =
                   if (furtherReturn)
-                    Some(
-                      IncompleteExemptionAndLossesAnswers.empty.copy(
-                        inYearLosses =
-                          multiple.exemptionAndLossesAnswers.flatMap(_.fold(_.inYearLosses, e => Some(e.inYearLosses))),
-                        previousYearsLosses = multiple.exemptionAndLossesAnswers
-                          .flatMap(_.fold(_.previousYearsLosses, e => Some(e.previousYearsLosses)))
-                      )
-                    )
-                  else None
+                    multiple.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                  else None,
+                gainOrLossAfterReliefs = None
               ),
             single =>
               single.copy(
@@ -595,28 +585,16 @@ class CommonTriageQuestionsController @Inject() (
                 propertyAddress = None,
                 disposalDetailsAnswers = None,
                 acquisitionDetailsAnswers = None,
-                reliefDetailsAnswers =
-                  if (furtherReturn)
-                    Some(
-                      IncompleteReliefDetailsAnswers.empty.copy(
-                        otherReliefs = single.reliefDetailsAnswers.flatMap(_.fold(_.otherReliefs, _.otherReliefs))
-                      )
-                    )
-                  else None,
+                reliefDetailsAnswers = single.reliefDetailsAnswers
+                  .map(_.unsetPrrAndLettingRelief(answers.fold(_.isPeriodOfAdmin(), _.isPeriodOfAdmin()))),
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss = None,
                 supportingEvidenceAnswers = None,
                 exemptionAndLossesAnswers =
                   if (furtherReturn)
-                    Some(
-                      IncompleteExemptionAndLossesAnswers.empty.copy(
-                        inYearLosses =
-                          single.exemptionAndLossesAnswers.flatMap(_.fold(_.inYearLosses, e => Some(e.inYearLosses))),
-                        previousYearsLosses = single.exemptionAndLossesAnswers
-                          .flatMap(_.fold(_.previousYearsLosses, e => Some(e.previousYearsLosses)))
-                      )
-                    )
-                  else None
+                    single.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                  else None,
+                gainOrLossAfterReliefs = None
               ),
             singleIndirect =>
               singleIndirect.copy(
@@ -629,15 +607,9 @@ class CommonTriageQuestionsController @Inject() (
                 supportingEvidenceAnswers = None,
                 exemptionAndLossesAnswers =
                   if (furtherReturn)
-                    Some(
-                      IncompleteExemptionAndLossesAnswers.empty.copy(
-                        inYearLosses = singleIndirect.exemptionAndLossesAnswers
-                          .flatMap(_.fold(_.inYearLosses, e => Some(e.inYearLosses))),
-                        previousYearsLosses = singleIndirect.exemptionAndLossesAnswers
-                          .flatMap(_.fold(_.previousYearsLosses, e => Some(e.previousYearsLosses)))
-                      )
-                    )
-                  else None
+                    singleIndirect.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                  else None,
+                gainOrLossAfterReliefs = None
               ),
             multipleIndirect =>
               multipleIndirect.copy(
@@ -648,15 +620,9 @@ class CommonTriageQuestionsController @Inject() (
                 supportingEvidenceAnswers = None,
                 exemptionAndLossesAnswers =
                   if (furtherReturn)
-                    Some(
-                      IncompleteExemptionAndLossesAnswers.empty.copy(
-                        inYearLosses = multipleIndirect.exemptionAndLossesAnswers
-                          .flatMap(_.fold(_.inYearLosses, e => Some(e.inYearLosses))),
-                        previousYearsLosses = multipleIndirect.exemptionAndLossesAnswers
-                          .flatMap(_.fold(_.previousYearsLosses, e => Some(e.previousYearsLosses)))
-                      )
-                    )
-                  else None
+                    multipleIndirect.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                  else None,
+                gainOrLossAfterReliefs = None
               ),
             singleMixedUse =>
               singleMixedUse.copy(
@@ -667,15 +633,9 @@ class CommonTriageQuestionsController @Inject() (
                 supportingEvidenceAnswers = None,
                 exemptionAndLossesAnswers =
                   if (furtherReturn)
-                    Some(
-                      IncompleteExemptionAndLossesAnswers.empty.copy(
-                        inYearLosses = singleMixedUse.exemptionAndLossesAnswers
-                          .flatMap(_.fold(_.inYearLosses, e => Some(e.inYearLosses))),
-                        previousYearsLosses = singleMixedUse.exemptionAndLossesAnswers
-                          .flatMap(_.fold(_.previousYearsLosses, e => Some(e.previousYearsLosses)))
-                      )
-                    )
-                  else None
+                    singleMixedUse.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                  else None,
+                gainOrLossAfterReliefs = None
               )
           )
         )

@@ -36,7 +36,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, NumberUtils, SessionData}
@@ -292,16 +291,12 @@ class DisposalDetailsController @Inject() (
                       disposalDetailsAnswers = Some(newAnswers),
                       acquisitionDetailsAnswers =
                         if (fillingOutReturn.isFurtherReturn.contains(true))
-                          Some(
-                            IncompleteAcquisitionDetailsAnswers.empty.copy(shouldUseRebase =
-                              i.acquisitionDetailsAnswers
-                                .flatMap(_.fold(_.shouldUseRebase, c => Some(c.shouldUseRebase)))
-                            )
-                          )
+                          None
                         else
                           i.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(i.triageAnswers)),
                       yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
-                        .flatMap(_.unsetAllButIncomeDetails())
+                        .flatMap(_.unsetAllButIncomeDetails()),
+                      gainOrLossAfterReliefs = None
                     ),
                   s =>
                     s.copy(
@@ -312,7 +307,8 @@ class DisposalDetailsController @Inject() (
                       reliefDetailsAnswers = s.reliefDetailsAnswers
                         .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
                       yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers
-                        .flatMap(_.unsetAllButIncomeDetails())
+                        .flatMap(_.unsetAllButIncomeDetails()),
+                      gainOrLossAfterReliefs = None
                     )
                 )
               }

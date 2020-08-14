@@ -215,7 +215,7 @@ class RepresenteeController @Inject() (
                   val newAnswers =
                     IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(isFirstReturn))
 
-                  updateDraftReturnAndSession(newAnswers, journey, clearDraftReturn = !isFirstReturn).fold(
+                  updateDraftReturnAndSession(newAnswers, journey).fold(
                     { e =>
                       logger.warn("Could not update draft return", e)
                       errorHandler.errorResult()
@@ -260,7 +260,7 @@ class RepresenteeController @Inject() (
   def confirmPersonSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
-        withIsFirstReturn(answers) { isFirstReturn =>
+        withIsFirstReturn(answers) { _ =>
           answers match {
             case incompleteRepresenteeAnswers @ IncompleteRepresenteeAnswers(
                   Some(name),
@@ -294,7 +294,7 @@ class RepresenteeController @Inject() (
                         )
                       else IncompleteRepresenteeAnswers.empty
 
-                    updateDraftReturnAndSession(newAnswers, journey, clearDraftReturn = !isFirstReturn)
+                    updateDraftReturnAndSession(newAnswers, journey)
                       .fold(
                         { e =>
                           logger.warn("Could not update draft return", e)
@@ -457,8 +457,7 @@ class RepresenteeController @Inject() (
                                    id = Some(matchedId),
                                    isFirstReturn = Some(isFirstReturn)
                                  ),
-                                 journey,
-                                 clearDraftReturn = !isFirstReturn
+                                 journey
                                ).leftMap[NameMatchError](e => ServiceError(NameMatchServiceError.BackendError(e)))
                 } yield ()
 
