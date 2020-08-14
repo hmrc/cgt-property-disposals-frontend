@@ -770,6 +770,126 @@ class FurtherReturnGuidanceControllerSpec
       }
 
     }
+
+    "handling requests to display the overall liability guidance page for a single disposal" must {
+
+      def performAction(): Future[Result] =
+        controller.overallGainGuidance()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(),
+        isValidJourney
+      )
+
+      "the user is filling out a draft return and" when {
+
+        "display the page" when {
+
+          def test(
+                    individualUserType: IndividualUserType,
+                    userType: UserType
+                  ): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturnForSingleDisposals(
+                  IncompleteSingleDisposalTriageAnswers.empty.copy(
+                    individualUserType = Some(individualUserType)
+                  ),
+                  userType
+                )._1
+              )
+            }
+
+            val userKey = userMessageKey(individualUserType, userType)
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"yearToDateLiabilityGuidance$userKey.title"),
+              doc =>
+                doc
+                  .select("#back")
+                  .attr("href") shouldBe returns.yeartodatelliability.routes.YearToDateLiabilityController
+                  .yearToDateLiability()
+                  .url
+            )
+          }
+
+          "the user came from the overall liability page" in {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                test(
+                  individualUserType,
+                  userType
+                )
+            }
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling requests to display the overall liability guidance page for a multiple disposal" must {
+
+      def performAction(): Future[Result] =
+        controller.overallGainGuidance()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(),
+        isValidJourney
+      )
+
+      "the user is filling out a draft return and" when {
+
+        "display the page" when {
+
+          def test(
+                    individualUserType: IndividualUserType,
+                    userType: UserType
+                  ): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturnForMultipleDisposals(
+                  IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                    individualUserType = Some(individualUserType)
+                  ),
+                  userType
+                )._1
+              )
+            }
+
+            val userKey = userMessageKey(individualUserType, userType)
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"yearToDateLiabilityGuidance$userKey.title"),
+              doc =>
+                doc
+                  .select("#back")
+                  .attr("href") shouldBe returns.yeartodatelliability.routes.YearToDateLiabilityController
+                  .yearToDateLiability()
+                  .url
+            )
+          }
+
+          "the user came from the overall liability page" in {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                test(
+                  individualUserType,
+                  userType
+                )
+            }
+          }
+
+        }
+
+      }
+
+    }
   }
 
 }
