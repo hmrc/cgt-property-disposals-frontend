@@ -786,9 +786,9 @@ class FurtherReturnGuidanceControllerSpec
         "display the page" when {
 
           def test(
-                    individualUserType: IndividualUserType,
-                    userType: UserType
-                  ): Unit = {
+            individualUserType: IndividualUserType,
+            userType: UserType
+          ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -846,9 +846,9 @@ class FurtherReturnGuidanceControllerSpec
         "display the page" when {
 
           def test(
-                    individualUserType: IndividualUserType,
-                    userType: UserType
-                  ): Unit = {
+            individualUserType: IndividualUserType,
+            userType: UserType
+          ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
