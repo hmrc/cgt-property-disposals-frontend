@@ -25,10 +25,10 @@
 @(userKey: String)(implicit messages:Messages)
 @key = @{ "furtherReturnGuidance" }
 <p>@messages(s"$key$userKey.stage-a.example3.p1")</p>
-<h4 class="govuk-heading-m">@messages(s"$key$userKey.stage-a.step1.example3.headingText")</h4>
+<h4 class="heading-medium">@messages(s"$key$userKey.stage-a.step1.example3.headingText")</h4>
 
 <p>@messages(s"$key$userKey.stage-a.step1.example3.p1")</p>
-<h5 class="govuk-heading-s">@Html(messages(s"$key$userKey.stage-a.step1.example3.property1"))</h5>
+<h5 class="heading-small">@Html(messages(s"$key$userKey.stage-a.step1.example3.property1"))</h5>
 @calcSum(
     List(
         SumPartDisplay(
@@ -70,7 +70,7 @@
     )
 )
 
-<h5 class="govuk-heading-s">@Html(messages(s"$key$userKey.stage-a.step1.example3.property2"))</h5>
+<h5 class="heading-small">@Html(messages(s"$key$userKey.stage-a.step1.example3.property2"))</h5>
 @calcSum(
     List(
         SumPartDisplay(
@@ -112,7 +112,7 @@
     )
 )
 
-<h4 class="govuk-heading-m">@messages(s"$key$userKey.stage-a.step2.example3.headingText")</h4>
+<h4 class="heading-medium">@messages(s"$key$userKey.stage-a.step2.example3.headingText")</h4>
 <p>@messages(s"$key$userKey.stage-a.step2.example3.p1")</p>
 
 @calcSum(
