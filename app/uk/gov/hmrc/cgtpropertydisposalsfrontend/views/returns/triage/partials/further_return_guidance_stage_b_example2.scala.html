@@ -75,3 +75,24 @@
         total = true
     )
 )
+
+@calcSum(
+  List(
+    SumPartDisplay(
+      label = messages(s"$key.stage-b.step3.example2.table3.row1.key"),
+      operator = None,
+      amount = messages(s"$key.stage-b.step3.example2.table3.row1.value")
+    ),
+    SumPartDisplay(
+      label = messages(s"$key.stage-b.step3.example2.table3.row2.key"),
+      operator = Some("+"),
+      amount = messages(s"$key.stage-b.step3.example2.table3.row2.value")
+    )
+  ),
+  SumPartDisplay(
+    label = messages(s"$key.stage-b.step3.example2.table3.total.key"),
+    operator = Some("="),
+    amount = messages(s"$key.stage-b.step3.example2.table3.total.value"),
+    total = true
+  )
+)
