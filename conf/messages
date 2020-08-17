@@ -5435,7 +5435,7 @@ furtherReturnGuidance.stage-b.step3.example1.table3.row2.value=£17,472
 furtherReturnGuidance.stage-b.step3.example1.table3.total.key=Richard’s new overall Capital Gains Tax liability on his UK property-related disposals for the tax year so far
 furtherReturnGuidance.stage-b.step3.example1.table3.total.value=£18,372
 
-furtherReturnGuidance.stage-b.step1.example2.p1=Kavita has already worked out her net gain for the tax year 2020 to 2021 to be £99,400.
+furtherReturnGuidance.stage-b.step1.example2.p1=Kavita has already worked out her net gain for the tax year 2020 to 2021 to be £89,700.
 furtherReturnGuidance.stage-b.step1.example2.headingText=Step B1 - Kavita works out her taxable income for the tax year 2020 to 2021
 
 furtherReturnGuidance.stage-b.step1.example2.table1.row1.key=She starts with her expected gross annual income
@@ -5447,13 +5447,7 @@ furtherReturnGuidance.stage-b.step1.example2.table1.total.value=£47,500
 
 furtherReturnGuidance.stage-b.step2.example2.headingText=Step B2 - Kavita works out the rate of Capital Gains Tax she must pay
 
-furtherReturnGuidance.stage-b.step2.example2.table1.row1.key=She starts with her taxable income
-furtherReturnGuidance.stage-b.step2.example2.table1.row1.value=£47,500
-furtherReturnGuidance.stage-b.step2.example2.table1.row2.key=She subtracts the basic band rate threshold for tax year 2020 to 2021
-furtherReturnGuidance.stage-b.step2.example2.table1.row2.value=£37,500
-furtherReturnGuidance.stage-b.step2.example2.table1.total.key=Amount of income to be charged at the basic rate
-furtherReturnGuidance.stage-b.step2.example2.table1.total.value=£0
-
+furtherReturnGuidance.stage-b.step2.example2.basicRate=Because Kavita’s taxable income is higher than the basic rate threshold for the tax year 2020 to 2021 of £37,500 then all of her net gain (£89,700) will be charged at the higher rate. This means she does not need to calculate how much will be charged at the basic rate, as that will be £0.
 
 furtherReturnGuidance.stage-b.step3.example2.headingText=Step B3 - Kavita works out her overall Capital Gains Tax liability on her UK property-related disposals for the tax year so far
 
