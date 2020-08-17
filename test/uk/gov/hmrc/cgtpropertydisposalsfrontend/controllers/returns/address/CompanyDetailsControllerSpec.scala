@@ -2247,7 +2247,8 @@ class CompanyDetailsControllerSpec
                 disposalPrice = AmountInPence.fromPounds(10)
               )
             ),
-            yearToDateLiabilityAnswers = None
+            yearToDateLiabilityAnswers = None,
+            gainOrLossAfterReliefs = None
           )
 
           test(
@@ -2275,7 +2276,8 @@ class CompanyDetailsControllerSpec
                 disposalPrice = Some(AmountInPence.fromPounds(10))
               )
             ),
-            yearToDateLiabilityAnswers = None
+            yearToDateLiabilityAnswers = None,
+            gainOrLossAfterReliefs = None
           )
 
           test(
@@ -2708,7 +2710,8 @@ class CompanyDetailsControllerSpec
                 acquisitionPrice = AmountInPence.fromPounds(100)
               )
             ),
-            yearToDateLiabilityAnswers = None
+            yearToDateLiabilityAnswers = None,
+            gainOrLossAfterReliefs = None
           )
 
           test(
@@ -2735,7 +2738,8 @@ class CompanyDetailsControllerSpec
                 acquisitionPrice = Some(AmountInPence.fromPounds(100))
               )
             ),
-            yearToDateLiabilityAnswers = None
+            yearToDateLiabilityAnswers = None,
+            gainOrLossAfterReliefs = None
           )
 
           test(

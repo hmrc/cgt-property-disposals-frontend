@@ -828,7 +828,7 @@ class MultipleDisposalsTriageController @Inject() (
                         multipleIndirect.copy(
                           exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
                           yearToDateLiabilityAnswers = None,
-                          gainOrLossAfterReliefs = None // as well as disposal date of shares
+                          gainOrLossAfterReliefs = None
                         ),
                       multiple =>
                         multiple.copy(
@@ -836,7 +836,7 @@ class MultipleDisposalsTriageController @Inject() (
                             _.unset(_.disposalDate)
                           ),
                           yearToDateLiabilityAnswers = None,
-                          gainOrLossAfterReliefs = None // as well as disposal date of shares
+                          gainOrLossAfterReliefs = None
                         )
                     )
                 )

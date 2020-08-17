@@ -822,13 +822,7 @@ class YearToDateLiabilityController @Inject() (
                 draftReturn: DraftReturn
               ) =>
             handleNonCalculatedEstimatedDetailsSubmit(
-              if (fillingOutReturn.isFurtherReturn.contains(true))
-                nonCalculatedAnswers
-                  .unset(_.yearToDateLiability)
-                  .unset(_.mandatoryEvidence)
-                  .unset(_.checkForRepayment)
-              else
-                nonCalculatedAnswers,
+              nonCalculatedAnswers,
               draftReturn,
               fillingOutReturn
             )

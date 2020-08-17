@@ -294,7 +294,8 @@ class CompanyDetailsController @Inject() (
                         )
                     val updatedDraftReturn = m.copy(
                       exampleCompanyDetailsAnswers = Some(updatedAnswers),
-                      yearToDateLiabilityAnswers = None
+                      yearToDateLiabilityAnswers = None,
+                      gainOrLossAfterReliefs = None
                     )
                     val result             = for {
                       _ <- returnsService.storeDraftReturn(
@@ -402,7 +403,8 @@ class CompanyDetailsController @Inject() (
                         )
                     val updatedDraftReturn = m.copy(
                       exampleCompanyDetailsAnswers = Some(updatedAnswers),
-                      yearToDateLiabilityAnswers = None
+                      yearToDateLiabilityAnswers = None,
+                      gainOrLossAfterReliefs = None
                     )
                     val result             = for {
                       _ <- returnsService.storeDraftReturn(
