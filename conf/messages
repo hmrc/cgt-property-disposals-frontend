@@ -54,7 +54,7 @@ landingPage.beforeYouStart.list1.bullet9=property type, if you’re a non-reside
 landingPage.ifAgent.h2=If you’re an agent
 landingPage.ifAgent.p1=Find out how to <a href="{0}">report your client’s Capital Gains Tax on UK property disposals</a>.
 landingPage.ifTrust.h2=If you’re representing a trust
-landingPage.ifTrust.p1=The trust must be  <a href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Trust Registration Number.
+landingPage.ifTrust.p1=The trust must be <a href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Trust Registration Number.
 landingPage.capacitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
 landingPage.capacitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
 landingPage.capacitorOrPersonalRepresentative.p2=To use this service for another person, you’ll need to:
@@ -216,13 +216,13 @@ accessibilityStatement.howAccessible.p2=This service is partially compliant with
 accessibilityStatement.reportingProblems.title=Reporting accessibility problems with this service
 accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a href="{0}" target="_blank">accessibility problem (opens in a new window or tab)</a>.
 accessibilityStatement.notHappy.title=What to do if you are not happy with how we respond to your complaint
-accessibilityStatement.notHappy.p1=The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint, <a href="{0}">contact the Equality Advisory and Support Service (EASS)</a>, or the  <a href="{1}">Equality Commission for Northern Ireland (ECNI)</a> if you live in Northern Ireland.
+accessibilityStatement.notHappy.p1=The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint, <a href="{0}">contact the Equality Advisory and Support Service (EASS)</a>, or the <a href="{1}">Equality Commission for Northern Ireland (ECNI)</a> if you live in Northern Ireland.
 accessibilityStatement.contactingUs.title=Contacting us by phone or getting a visit from us in person
 accessibilityStatement.contactingUs.p1=We provide a text relay service if you are deaf, hearing impaired or have a speech impediment.
 accessibilityStatement.contactingUs.p2=We can provide a British Sign Language (BSL) interpreter, or you can arrange a visit from an HMRC advisor to help you complete the service.
 accessibilityStatement.contactingUs.p3=Find out how to <a href="{0}">contact us</a>.
 accessibilityStatement.howWeTested.title=How we tested this service
-accessibilityStatement.howWeTested.p1=The service was tested on 6 December 2019  and checked for compliance with WCAG 2.1 AA. It  was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>. Since then, it has been extended and the full service will be tested by HMRC within the next three months. Tests will include disabled users.
+accessibilityStatement.howWeTested.p1=The service was tested on 6 December 2019 and checked for compliance with WCAG 2.1 AA. It was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>. Since then, it has been extended and the full service will be tested by HMRC within the next three months. Tests will include disabled users.
 accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 6 April 2020.
 
 #===================================================
@@ -3714,7 +3714,7 @@ yearToDateLiability.error.tooLarge=The overall Capital Gains Tax liability must 
 yearToDateLiability.cyaChange=the overall Capital Gains Tax liability
 
 yearToDateLiabilityGuidance.title=Work out your overall Capital Gains Tax liability on your UK property-related disposals
-yearToDateLiabilityGuidance.agent.title=Work out your client's overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiabilityGuidance.agent.title=Work out your client’s overall Capital Gains Tax liability on their UK property-related disposals
 yearToDateLiabilityGuidance.trust.title=Work out the trust’s overall Capital Gains Tax liability on their UK property-related disposals
 yearToDateLiabilityGuidance.capacitor.title=Work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
 yearToDateLiabilityGuidance.personalRep.title=Work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
