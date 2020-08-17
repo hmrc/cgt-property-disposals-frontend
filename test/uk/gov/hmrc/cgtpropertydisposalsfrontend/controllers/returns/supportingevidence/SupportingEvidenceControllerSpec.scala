@@ -27,10 +27,11 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, SupportingEvidenceAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
@@ -50,7 +51,10 @@ class SupportingEvidenceControllerSpec
     with SessionSupport
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
+
+  val mockUUIDGenerator = mock[UUIDGenerator]
 
   val mockUpscanService: UpscanService = mock[UpscanService]
 
@@ -59,7 +63,8 @@ class SupportingEvidenceControllerSpec
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[ReturnsService].toInstance(mockReturnsService),
-      bind[UpscanService].toInstance(mockUpscanService)
+      bind[UpscanService].toInstance(mockUpscanService),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     )
 
   lazy val controller = instanceOf[SupportingEvidenceController]
@@ -105,8 +110,9 @@ class SupportingEvidenceControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case _: FillingOutReturn => true
-        case _                   => false
+        case _: FillingOutReturn      => true
+        case _: StartingToAmendReturn => true
+        case _                        => false
       }
     )
 
@@ -179,6 +185,11 @@ class SupportingEvidenceControllerSpec
 
       def performAction(): Future[Result] =
         controller.doYouWantToUploadSupportingEvidence()(FakeRequest())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.doYouWantToUploadSupportingEvidence(),
+        mockUUIDGenerator
+      )
 
       "display the page" when {
 
@@ -257,6 +268,11 @@ class SupportingEvidenceControllerSpec
           FakeRequest().withFormUrlEncodedBody(data: _*)
         )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.doYouWantToUploadSupportingEvidenceSubmit(),
+        mockUUIDGenerator
+      )
+
       "display the technical error page" when {
 
         "an error occurs storing the draft return and the user wants to upload supporting evidence" in {
@@ -273,11 +289,7 @@ class SupportingEvidenceControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              draftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Left(Error("some error")))
+            mockStoreDraftReturn(journey.copy(draftReturn = draftReturn))(Left(Error("some error")))
           }
 
           checkIsTechnicalErrorPage(
@@ -299,11 +311,8 @@ class SupportingEvidenceControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              draftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Left(Error("some error")))
+            mockStoreDraftReturn(journey.copy(draftReturn = draftReturn))(Left(Error("some error")))
+
           }
 
           checkIsTechnicalErrorPage(
@@ -353,17 +362,14 @@ class SupportingEvidenceControllerSpec
               )
             )
 
+          val updatedJourney              = journey.copy(draftReturn = updatedDraftReturn)
           val updatedSession: SessionData =
-            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -395,17 +401,15 @@ class SupportingEvidenceControllerSpec
               )
             )
 
+          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+
           val updatedSession: SessionData =
-            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -427,15 +431,12 @@ class SupportingEvidenceControllerSpec
             sessionWithSingleDisposalState(Some(answers))
 
           val updatedDraftReturn = draftReturn
+          val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
           }
 
           checkIsRedirect(
@@ -469,17 +470,15 @@ class SupportingEvidenceControllerSpec
               )
             )
 
+          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+
           val updatedSession: SessionData =
-            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -497,6 +496,11 @@ class SupportingEvidenceControllerSpec
 
       def performAction(): Future[Result] =
         controller.uploadSupportingEvidence()(FakeRequest())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.uploadSupportingEvidence(),
+        mockUUIDGenerator
+      )
 
       "show check your answers page" when {
 
@@ -662,15 +666,12 @@ class SupportingEvidenceControllerSpec
                 )
               )
             )
+          val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Left(Error("update failed")))
+            mockStoreDraftReturn(updatedJourney)(Left(Error("update failed")))
           }
 
           checkIsTechnicalErrorPage(
@@ -785,18 +786,15 @@ class SupportingEvidenceControllerSpec
                 )
               )
             )
+          val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
           val updatedSession: SessionData =
-            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -811,12 +809,19 @@ class SupportingEvidenceControllerSpec
 
     "handling actions on check your answer" must {
 
+      def performAction(): Future[Result] =
+        controller.checkYourAnswers()(FakeRequest())
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswers(),
+        mockUUIDGenerator
+      )
+
       "display the file upload page" when {
 
         "the user has already answered yes to adding supporting evidences and has not uploaded any evidences so far" in {
-
-          def performAction(): Future[Result] =
-            controller.checkYourAnswers()(FakeRequest())
 
           val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
             doYouWantToUploadSupportingEvidence = Some(true),
@@ -847,9 +852,6 @@ class SupportingEvidenceControllerSpec
 
       "display the do you want to upload supporting evidence page" when {
 
-        def performAction(): Future[Result] =
-          controller.checkYourAnswers()(FakeRequest())
-
         "the use has never answered this question" in {
 
           val answers = IncompleteSupportingEvidenceAnswers.empty
@@ -870,9 +872,6 @@ class SupportingEvidenceControllerSpec
       }
 
       "display supporting evidence expired page" when {
-
-        def performAction(): Future[Result] =
-          controller.checkYourAnswers()(FakeRequest())
 
         "there are expired supporting evidences" in {
 
@@ -898,9 +897,6 @@ class SupportingEvidenceControllerSpec
       }
 
       "display the check your answers page" when {
-
-        def performAction(): Future[Result] =
-          controller.checkYourAnswers()(FakeRequest())
 
         "the user has completed the supporting evidence section" in {
 
@@ -953,8 +949,6 @@ class SupportingEvidenceControllerSpec
         def performAction(): Future[Result] =
           controller.checkYourAnswersSubmit()(FakeRequest())
 
-        behave like redirectToStartBehaviour(() => performAction())
-
         "an error occurs when storing the draft return" in {
 
           val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
@@ -969,15 +963,13 @@ class SupportingEvidenceControllerSpec
           val (session, journey, draftReturn) =
             sessionWithSingleDisposalState(Some(answers))
 
+          val updatedJourney =
+            journey.copy(draftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)))
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              draftReturn
-                .copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Left(Error("some error")))
+            mockStoreDraftReturn(updatedJourney)(Left(Error("some error")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -990,6 +982,11 @@ class SupportingEvidenceControllerSpec
           controller.checkYourAnswersSubmit()(FakeRequest())
 
         behave like redirectToStartBehaviour(() => performAction())
+
+        behave like amendReturnToFillingOutReturnSpecBehaviour(
+          controller.checkYourAnswersSubmit(),
+          mockUUIDGenerator
+        )
 
         "the user accepts the check your answers and is on a single disposal journey" in {
 
@@ -1007,18 +1004,14 @@ class SupportingEvidenceControllerSpec
 
           val updatedDraftReturn          =
             draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedJourney              = journey.copy(draftReturn = updatedDraftReturn)
           val updatedSession: SessionData =
-            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              draftReturn
-                .copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -1045,18 +1038,14 @@ class SupportingEvidenceControllerSpec
 
           val updatedDraftReturn          =
             draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedJourney              = journey.copy(draftReturn = updatedDraftReturn)
           val updatedSession: SessionData =
-            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              draftReturn
-                .copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -1104,10 +1093,10 @@ class SupportingEvidenceControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockStoreDraftReturn(
-              draftReturn
-                .copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
+              journey.copy(draftReturn =
+                draftReturn
+                  .copy(supportingEvidenceAnswers = Some(updatedAnswers))
+              )
             )(Left(Error("update failed")))
           }
 
@@ -1142,18 +1131,14 @@ class SupportingEvidenceControllerSpec
 
           val updatedDraftReturn          =
             draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedJourney              = journey.copy(draftReturn = updatedDraftReturn)
           val updatedSession: SessionData =
-            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              draftReturn
-                .copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -1186,18 +1171,14 @@ class SupportingEvidenceControllerSpec
 
           val updatedDraftReturn          =
             draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedJourney              = journey.copy(draftReturn = updatedDraftReturn)
           val updatedSession: SessionData =
-            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              draftReturn
-                .copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -1230,18 +1211,14 @@ class SupportingEvidenceControllerSpec
 
           val updatedDraftReturn          =
             draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedJourney              = journey.copy(draftReturn = updatedDraftReturn)
           val updatedSession: SessionData =
-            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              draftReturn
-                .copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -1300,10 +1277,7 @@ class SupportingEvidenceControllerSpec
             mockGetSession(session)
             mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
             mockStoreDraftReturn(
-              draftReturn
-                .copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
+              journey.copy(draftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)))
             )(Left(Error("update failed")))
           }
 
@@ -1442,19 +1416,15 @@ class SupportingEvidenceControllerSpec
 
           val updatedDraftReturn          =
             draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedJourney              = journey.copy(draftReturn = updatedDraftReturn)
           val updatedSession: SessionData =
-            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
-            mockStoreDraftReturn(
-              draftReturn
-                .copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 

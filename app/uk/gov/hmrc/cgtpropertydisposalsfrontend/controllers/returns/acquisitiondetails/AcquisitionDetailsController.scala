@@ -34,11 +34,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, RebasingCu
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
@@ -59,6 +61,7 @@ class AcquisitionDetailsController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
+  uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
   val rebasingEligibilityUtil: RebasingEligibilityUtil,
@@ -75,7 +78,8 @@ class AcquisitionDetailsController @Inject() (
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
-    with SessionUpdates {
+    with SessionUpdates
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   type JourneyState =
     Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn]
@@ -84,15 +88,13 @@ class AcquisitionDetailsController @Inject() (
     state.fold(_.triageAnswers.representativeType(), _.triageAnswers.representativeType())
 
   private def withFillingOutReturnAndAcquisitionDetailsAnswers(
-    request: RequestWithSessionData[_]
-  )(
     f: (
       SessionData,
       FillingOutReturn,
       JourneyState,
       AcquisitionDetailsAnswers
     ) => Future[Result]
-  ): Future[Result] = {
+  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
     def defaultAnswers(
       triageAnswers: SingleDisposalTriageAnswers,
       representeeAnswers: Option[RepresenteeAnswers],
@@ -118,8 +120,11 @@ class AcquisitionDetailsController @Inject() (
     }
 
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((_, s: StartingToAmendReturn)) =>
+        convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
+
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
           ) =>
         d.acquisitionDetailsAnswers.fold[Future[Result]](
           defaultAnswers(d.triageAnswers, d.representeeAnswers, isIndirectDisposal = false).fold[Future[Result]](
@@ -135,6 +140,7 @@ class AcquisitionDetailsController @Inject() (
                 _,
                 _,
                 d: DraftSingleIndirectDisposalReturn,
+                _,
                 _
               )
             )
@@ -145,7 +151,7 @@ class AcquisitionDetailsController @Inject() (
           )(answers => f(s, r, Left(d), answers))
         )(f(s, r, Left(d), _))
 
-      case _ => Redirect(controllers.routes.StartController.start())
+      case _                                   => Redirect(controllers.routes.StartController.start())
     }
   }
 
@@ -258,26 +264,17 @@ class AcquisitionDetailsController @Inject() (
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink)),
           { value =>
-            val newDraftReturn =
-              updateState(value, currentAnswers, currentState)
+            val newDraftReturn = updateState(value, currentAnswers, currentState)
+            val newJourney     = currentFillingOutReturn.copy(draftReturn = newDraftReturn.merge)
 
             val result = for {
               _ <- if (newDraftReturn.merge === currentState.merge)
                      EitherT.pure(())
                    else
-                     returnsService.storeDraftReturn(
-                       newDraftReturn.merge,
-                       currentFillingOutReturn.subscribedDetails.cgtReference,
-                       currentFillingOutReturn.agentReferenceNumber
-                     )
+                     returnsService.storeDraftReturn(newJourney)
               _ <- EitherT(
                      updateSession(sessionStore, request)(
-                       _.copy(journeyStatus =
-                         Some(
-                           currentFillingOutReturn
-                             .copy(draftReturn = newDraftReturn.merge)
-                         )
-                       )
+                       _.copy(journeyStatus = Some(newJourney))
                      )
                    )
             } yield ()
@@ -322,7 +319,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionMethod(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
+      withFillingOutReturnAndAcquisitionDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           withAssetType(state) { assetType =>
             commonDisplayBehaviour(answers)(
@@ -349,7 +346,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionMethodSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
+      withFillingOutReturnAndAcquisitionDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           withAssetType(state) { assetType =>
             commonSubmitBehaviour(
@@ -395,7 +392,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionDate(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
+      withFillingOutReturnAndAcquisitionDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalDate(state) {
             case (disposalDate) =>
@@ -429,7 +426,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
+      withFillingOutReturnAndAcquisitionDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalDate(state) {
             case (disposalDate) =>
@@ -486,7 +483,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionPrice(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           withAcquisitionMethod(answers) { acquisitionMethod =>
             withAssetType(state) { assetType =>
@@ -520,7 +517,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionPriceSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           withAcquisitionMethod(answers) { acquisitionMethod =>
             withAssetType(state) { assetType =>
@@ -572,7 +569,7 @@ class AcquisitionDetailsController @Inject() (
 
   def periodOfAdminMarketValue(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, _, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, _, state, answers) =>
         withPeriodOfAdmin(state) { dateOfDeath =>
           withAssetType(state) { assetType =>
             commonDisplayBehaviour(answers)(
@@ -601,7 +598,7 @@ class AcquisitionDetailsController @Inject() (
 
   def periodOfAdminMarketValueSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withPeriodOfAdmin(state) { dateOfDeath =>
           withAssetType(state) { assetType =>
             commonSubmitBehaviour(
@@ -646,7 +643,7 @@ class AcquisitionDetailsController @Inject() (
 
   def rebasedAcquisitionPrice(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
           withAcquisitionDate(answers) { acquisitionDate =>
             if (
@@ -699,7 +696,7 @@ class AcquisitionDetailsController @Inject() (
 
   def rebasedAcquisitionPriceSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
           withAcquisitionDate(answers) { acquisitionDate =>
             rebasingEligibilityUtil
@@ -788,7 +785,7 @@ class AcquisitionDetailsController @Inject() (
 
   def improvementCosts(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
           withAcquisitionDate(answers) { acquisitionDate =>
             val rebaseDate = rebasingEligibilityUtil
@@ -841,7 +838,7 @@ class AcquisitionDetailsController @Inject() (
 
   def improvementCostsSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
           withAcquisitionDate(answers) { acquisitionDate =>
             val rebaseDate = rebasingEligibilityUtil
@@ -916,7 +913,7 @@ class AcquisitionDetailsController @Inject() (
 
   def shouldUseRebase(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, _, state, _) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, _, state, _) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasAUkResident) =>
           if (wasAUkResident)
             Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
@@ -937,7 +934,7 @@ class AcquisitionDetailsController @Inject() (
 
   def shouldUseRebaseSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
           withAcquisitionDate(answers) { acquisitionDate =>
             if (
@@ -1000,7 +997,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionFees(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
           withAcquisitionDate(answers) { acquisitionDate =>
             commonDisplayBehaviour(answers)(
@@ -1035,7 +1032,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionFeesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
           withAcquisitionDate(answers) { acquisitionDate =>
             commonSubmitBehaviour(
@@ -1118,7 +1115,7 @@ class AcquisitionDetailsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasAUkResident) =>
           answers match {
             case c: CompleteAcquisitionDetailsAnswers =>
@@ -1314,20 +1311,13 @@ class AcquisitionDetailsController @Inject() (
         _.copy(acquisitionDetailsAnswers = Some(completeAnswers))
       )
 
+    val newJourney = fillingOutReturn.copy(draftReturn = newDraftReturn)
+
     val result = for {
-      _ <- returnsService.storeDraftReturn(
-             newDraftReturn,
-             fillingOutReturn.subscribedDetails.cgtReference,
-             fillingOutReturn.agentReferenceNumber
-           )
+      _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
              updateSession(sessionStore, request)(
-               _.copy(journeyStatus =
-                 Some(
-                   fillingOutReturn
-                     .copy(draftReturn = newDraftReturn)
-                 )
-               )
+               _.copy(journeyStatus = Some(newJourney))
              )
            )
     } yield ()

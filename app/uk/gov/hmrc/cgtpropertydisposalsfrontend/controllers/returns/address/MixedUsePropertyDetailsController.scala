@@ -26,11 +26,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => addressRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{StartingToAmendToFillingOutReturnBehaviour, routes => returnsRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.{CompleteMixedUsePropertyDetailsAnswers, IncompleteMixedUsePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
@@ -53,6 +54,7 @@ class MixedUsePropertyDetailsController @Inject() (
   val sessionStore: SessionStore,
   val ukAddressLookupService: UKAddressLookupService,
   returnsService: ReturnsService,
+  uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
   val enterPostcodePage: views.html.address.enter_postcode,
@@ -71,7 +73,8 @@ class MixedUsePropertyDetailsController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
-    with AddressController[EnteringSingleMixedUsePropertyDetails] {
+    with AddressController[EnteringSingleMixedUsePropertyDetails]
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   import MixedUsePropertyDetailsController._
 
@@ -79,9 +82,13 @@ class MixedUsePropertyDetailsController @Inject() (
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, EnteringSingleMixedUsePropertyDetails)] =
+  ): Either[Future[Result], (SessionData, EnteringSingleMixedUsePropertyDetails)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, f @ FillingOutReturn(_, _, _, draftReturn: DraftSingleMixedUseDisposalReturn, _))) =>
+      case Some((_, s: StartingToAmendReturn))                                                                      =>
+        implicit val r: RequestWithSessionData[_] = request
+        Left(convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator))
+
+      case Some((sessionData, f @ FillingOutReturn(_, _, _, draftReturn: DraftSingleMixedUseDisposalReturn, _, _))) =>
         val answers = draftReturn.mixedUsePropertyDetailsAnswers
           .getOrElse(IncompleteMixedUsePropertyDetailsAnswers.empty)
         Right(
@@ -94,7 +101,7 @@ class MixedUsePropertyDetailsController @Inject() (
           )
         )
 
-      case _                                                                                                     => Left(Redirect(controllers.routes.StartController.start()))
+      case _                                                                                                        => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(
@@ -114,13 +121,11 @@ class MixedUsePropertyDetailsController @Inject() (
         val updatedDraftReturn = journey.draftReturn
           .copy(mixedUsePropertyDetailsAnswers = Some(answers.unset(_.address).copy(address = Some(a))))
 
+        val updatedJourney = journey.journey.copy(draftReturn = updatedDraftReturn)
+
         returnsService
-          .storeDraftReturn(
-            updatedDraftReturn,
-            journey.journey.subscribedDetails.cgtReference,
-            journey.journey.agentReferenceNumber
-          )
-          .map(_ => journey.journey.copy(draftReturn = updatedDraftReturn))
+          .storeDraftReturn(updatedJourney)
+          .map(_ => updatedJourney)
 
     }
 
@@ -258,23 +263,18 @@ class MixedUsePropertyDetailsController @Inject() (
   private def updateDraftReturnAndSession(
     r: EnteringSingleMixedUsePropertyDetails,
     updatedDraftReturn: DraftSingleMixedUseDisposalReturn
-  )(implicit request: RequestWithSessionData[AnyContent]) =
+  )(implicit request: RequestWithSessionData[AnyContent]) = {
+    val updatedJourney = r.journey.copy(draftReturn = updatedDraftReturn)
+
     for {
-      _ <- returnsService.storeDraftReturn(
-             updatedDraftReturn,
-             r.journey.subscribedDetails.cgtReference,
-             r.journey.agentReferenceNumber
-           )
+      _ <- returnsService.storeDraftReturn(updatedJourney)
       _ <- EitherT(
              updateSession(sessionStore, request)(
-               _.copy(journeyStatus =
-                 Some(
-                   r.journey.copy(draftReturn = updatedDraftReturn)
-                 )
-               )
+               _.copy(journeyStatus = Some(updatedJourney))
              )
            )
     } yield ()
+  }
 
   def enterAcquisitionValue(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>

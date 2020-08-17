@@ -33,8 +33,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{representee, routes => returnsRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{StartingToAmendToFillingOutReturnBehaviour, representee, routes => returnsRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
@@ -83,7 +83,8 @@ class SingleDisposalsTriageController @Inject() (
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
-    with SessionUpdates {
+    with SessionUpdates
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   import SingleDisposalsTriageController._
 
@@ -97,7 +98,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def howDidYouDisposeOfProperty(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         displayTriagePage(state, triageAnswers)(
           _.fold(
             incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(()) else None,
@@ -126,7 +127,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def howDidYouDisposeOfPropertySubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         handleTriagePageSubmit(state, triageAnswers)(
           _.fold(
             incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(()) else None,
@@ -221,7 +222,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def wereYouAUKResident(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         displayTriagePage(state, triageAnswers)(
           _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
           _ => routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -248,7 +249,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def wereYouAUKResidentSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         handleTriagePageSubmit(state, triageAnswers)(
           _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
           _ => routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -331,7 +332,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def didYouDisposeOfAResidentialProperty(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         displayTriagePage(state, triageAnswers)(
           _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
           _ => routes.SingleDisposalsTriageController.wereYouAUKResident()
@@ -360,7 +361,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def didYouDisposeOfAResidentialPropertySubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         handleTriagePageSubmit(state, triageAnswers)(
           _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
           _ => routes.SingleDisposalsTriageController.wereYouAUKResident()
@@ -433,7 +434,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def whenWasDisposalDate(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           displayTriagePage(state, triageAnswers)(
             _.fold(_.assetType, c => Some(c.assetType)),
@@ -464,7 +465,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def whenWasDisposalDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           val isATrust =
             state.fold(
@@ -510,12 +511,7 @@ class SingleDisposalsTriageController @Inject() (
                                            )
                           _             <- newState.fold(
                                              _ => EitherT.pure(()),
-                                             r =>
-                                               returnsService.storeDraftReturn(
-                                                 r.draftReturn,
-                                                 r.subscribedDetails.cgtReference,
-                                                 r.agentReferenceNumber
-                                               )
+                                             returnsService.storeDraftReturn(_)
                                            )
                           _             <- EitherT(
                                              updateSession(sessionStore, request)(
@@ -634,7 +630,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def whenWasCompletionDate(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         displayTriagePage(state, triageAnswers)(
           _.fold(_.disposalDate, c => Some(c.disposalDate)),
           _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
@@ -661,7 +657,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def whenWasCompletionDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         handleTriagePageSubmit(state, triageAnswers)(
           _.fold(_.disposalDate, c => Some(c.disposalDate)),
           _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
@@ -739,7 +735,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def countryOfResidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         displayTriagePage(state, triageAnswers)(
           _.fold(
             _.wasAUKResident.filterNot(identity),
@@ -774,7 +770,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def countryOfResidenceSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         handleTriagePageSubmit(state, triageAnswers)(
           _.fold(
             _.wasAUKResident.filterNot(identity),
@@ -873,7 +869,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def assetTypeForNonUkResidents(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         displayTriagePage(state, triageAnswers)(
           _.fold(
             _.countryOfResidence,
@@ -902,7 +898,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def assetTypeForNonUkResidentsSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         handleTriagePageSubmit(state, triageAnswers)(
           _.fold(
             _.countryOfResidence,
@@ -1033,7 +1029,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def disposalDateOfShares(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           displayTriagePage(state, triageAnswers)(
             _.fold(
@@ -1064,7 +1060,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def disposalDateOfSharesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
             case Some(assetType) if assetType === AssetType.IndirectDisposal =>
@@ -1110,12 +1106,7 @@ class SingleDisposalsTriageController @Inject() (
                                                              )
                           _                               <- newState.fold(
                                                                _ => EitherT.pure(()),
-                                                               r =>
-                                                                 returnsService.storeDraftReturn(
-                                                                   r.draftReturn,
-                                                                   r.subscribedDetails.cgtReference,
-                                                                   r.agentReferenceNumber
-                                                                 )
+                                                               returnsService.storeDraftReturn(_)
                                                              )
                           _                               <- EitherT(
                                                                updateSession(sessionStore, request)(
@@ -1152,7 +1143,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         lazy val displayReturnToSummaryLink = state.fold(_ => false, _ => true)
         val isIndividual                    = state
           .fold(_.subscribedDetails, _._2.subscribedDetails)
@@ -1490,7 +1481,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         triageAnswers match {
           case _: IncompleteSingleDisposalTriageAnswers      =>
             Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
@@ -1525,24 +1516,22 @@ class SingleDisposalsTriageController @Inject() (
                       startingNewDraftReturn.representeeAnswers
                     )
 
+              val newJourney = FillingOutReturn(
+                startingNewDraftReturn.subscribedDetails,
+                startingNewDraftReturn.ggCredId,
+                startingNewDraftReturn.agentReferenceNumber,
+                newDraftReturn,
+                startingNewDraftReturn.previousSentReturns,
+                None
+              )
+
               val result = for {
-                _         <- returnsService.storeDraftReturn(
-                               newDraftReturn,
-                               startingNewDraftReturn.subscribedDetails.cgtReference,
-                               startingNewDraftReturn.agentReferenceNumber
-                             )
-                newJourney = FillingOutReturn(
-                               startingNewDraftReturn.subscribedDetails,
-                               startingNewDraftReturn.ggCredId,
-                               startingNewDraftReturn.agentReferenceNumber,
-                               newDraftReturn,
-                               startingNewDraftReturn.previousSentReturns
-                             )
-                _         <- EitherT(
-                               updateSession(sessionStore, request)(
-                                 _.copy(journeyStatus = Some(newJourney))
-                               )
-                             )
+                _ <- returnsService.storeDraftReturn(newJourney)
+                _ <- EitherT(
+                       updateSession(sessionStore, request)(
+                         _.copy(journeyStatus = Some(newJourney))
+                       )
+                     )
               } yield newJourney
 
               result.fold(
@@ -1620,11 +1609,7 @@ class SingleDisposalsTriageController @Inject() (
                            )
                          ) EitherT.pure(())
                          else
-                           returnsService.storeDraftReturn(
-                             newFillingOutReturn.draftReturn,
-                             newFillingOutReturn.subscribedDetails.cgtReference,
-                             newFillingOutReturn.agentReferenceNumber
-                           )
+                           returnsService.storeDraftReturn(newFillingOutReturn)
                      )
                 _ <- EitherT(
                        updateSession(sessionStore, request)(
@@ -1676,18 +1661,19 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def withSingleDisposalTriageAnswers(
-    request: RequestWithSessionData[_]
-  )(
     f: (SessionData, JourneyState, SingleDisposalTriageAnswers) => Future[Result]
-  ): Future[Result] =
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((_, s: StartingToAmendReturn))                                  =>
+        convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
+
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Right(t), _, _))) =>
         f(session, Left(s), populateDisposalMethodInPeriodOfAdmin(t))
 
       case Some(
             (
               session,
-              r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _)
+              r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _)
             )
           ) =>
         f(session, Right(Right(d) -> r), populateDisposalMethodInPeriodOfAdmin(d.triageAnswers))
@@ -1700,6 +1686,7 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 d: DraftSingleIndirectDisposalReturn,
+                _,
                 _
               )
             )
@@ -1714,6 +1701,7 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 d: DraftSingleMixedUseDisposalReturn,
+                _,
                 _
               )
             )

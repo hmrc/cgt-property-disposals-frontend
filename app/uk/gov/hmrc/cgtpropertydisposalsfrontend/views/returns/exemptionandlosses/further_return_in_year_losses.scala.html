@@ -46,15 +46,14 @@
     form: Form[BigDecimal],
     backLink: Call,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType],
-    isFurtherReturn: Option[Boolean]
+    representativeType: Option[RepresentativeType]
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "inYearLosses" }
 @valueKey = @{ "inYearLossesValue" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
-@furtherReturnKey = @{ if(isFurtherReturn.contains(true)) ".furtherReturn" else "" }
+@furtherReturnKey = @{ ".furtherReturn" }
 
 @userKey = @{
     representativeType match {

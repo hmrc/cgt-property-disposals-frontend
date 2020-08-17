@@ -31,16 +31,16 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, DateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
@@ -60,7 +60,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     extends AddressControllerSpec[FillingOutReturnAddressJourney]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
-    with ReturnsServiceSupport {
+    with ReturnsServiceSupport
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
+
+  val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
   val incompleteAnswers =
     IncompleteExamplePropertyDetailsAnswers.empty.copy(
@@ -81,6 +84,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       sample[GGCredId],
       None,
       draftReturn,
+      None,
       None
     ),
     Left(draftReturn),
@@ -89,7 +93,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
   override def overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     ) ::: super.overrideBindings
 
   lazy val controller = instanceOf[PropertyDetailsController]
@@ -139,10 +144,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           ) =>
         val newAnswers =
           incompleteAnswers.copy(address = Some(a), disposalDate = None)
+
         mockStoreDraftReturn(
-          draftReturn.copy(examplePropertyDetailsAnswers = Some(newAnswers)),
-          newDetails.journey.subscribedDetails.cgtReference,
-          newDetails.journey.agentReferenceNumber
+          newDetails.journey.copy(draftReturn = draftReturn.copy(examplePropertyDetailsAnswers = Some(newAnswers)))
         )(r)
 
       case (_, _: NonUkAddress, _) =>
@@ -153,8 +157,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case _: FillingOutReturn => true
-        case _                   => false
+        case _: FillingOutReturn      => true
+        case _: StartingToAmendReturn => true
+        case _                        => false
       }
     )
 
@@ -172,6 +177,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       def performAction(): Future[Result] =
         controller.multipleDisposalsGuidance()(FakeRequest())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleDisposalsGuidance(),
+        mockUUIDGenerator
+      )
 
       "redirect to the check your answers page" when {
 
@@ -393,6 +403,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleDisposalsGuidanceSubmit(),
+        mockUUIDGenerator
+      )
+
       "redirect to the check your answers page" when {
 
         "the user is on a single disposal journey" in {
@@ -512,6 +527,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.multipleDisposalsHasUkPostcode()(FakeRequest())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleDisposalsHasUkPostcode(),
+        mockUUIDGenerator
+      )
+
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
       behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(
@@ -585,6 +605,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         controller.singleDisposalHasUkPostcodeSubmit()(
           FakeRequest().withFormUrlEncodedBody(formData: _*)
         )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleDisposalsHasUkPostcodeSubmit(),
+        mockUUIDGenerator
+      )
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
@@ -674,6 +699,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.multipleDisposalsEnterLandUprn()(FakeRequest())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleDisposalsEnterLandUprn(),
+        mockUUIDGenerator
+      )
+
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
       behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(
@@ -756,6 +786,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           "address-county"  -> ukAddress.county,
           "postcode"        -> Some(ukAddress.postcode.value)
         ).collect { case (key, Some(value)) => key -> value }
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleDisposalsEnterLandUprnSubmit(),
+        mockUUIDGenerator
+      )
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
@@ -907,11 +942,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 journeyStatus = Some(nonResidentialFillingOutReturn)
               )
             )
-            mockStoreDraftReturn(
-              newDraftReturn,
-              newJourney.subscribedDetails.cgtReference,
-              newJourney.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(newJourney)(Right(()))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus = Some(newJourney))
             )(Right(()))
@@ -955,11 +986,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 journeyStatus = Some(journey)
               )
             )
-            mockStoreDraftReturn(
-              newDraftReturn,
-              newJourney.subscribedDetails.cgtReference,
-              newJourney.agentReferenceNumber
-            )(Left(Error("")))
+            mockStoreDraftReturn(newJourney)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData(newAddress): _*))
@@ -974,11 +1001,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 journeyStatus = Some(journey)
               )
             )
-            mockStoreDraftReturn(
-              newDraftReturn,
-              newJourney.subscribedDetails.cgtReference,
-              newJourney.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(newJourney)(Right(()))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus = Some(newJourney))
             )(Left(Error("")))
@@ -998,6 +1021,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterUkAddress(),
+        mockUUIDGenerator
+      )
+
       behave like displayEnterUkAddressPage(
         UserType.Individual,
         None,
@@ -1015,6 +1043,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterUkAddressSubmit(),
+        mockUUIDGenerator
+      )
+
       behave like submitEnterUkAddress(
         performAction,
         returnsAddressRoutes.PropertyDetailsController.checkYourAnswers()
@@ -1028,6 +1061,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         controller.enterPostcode()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterPostcode(),
+        mockUUIDGenerator
+      )
 
       List(Some(Capacitor), Some(PersonalRepresentative), None).foreach { individualUserType =>
         behave like enterPostcodePage(
@@ -1058,6 +1096,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterPostcodeSubmit(),
+        mockUUIDGenerator
+      )
+
       behave like submitEnterPostcode(
         performAction,
         returnsAddressRoutes.PropertyDetailsController.selectAddress()
@@ -1071,6 +1114,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         controller.selectAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.selectAddress(),
+        mockUUIDGenerator
+      )
 
       List(Some(Capacitor), Some(PersonalRepresentative), None).foreach { individualUserType =>
         behave like displaySelectAddress(
@@ -1109,6 +1157,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.selectAddressSubmit(),
+        mockUUIDGenerator
+      )
+
       behave like submitSelectAddress(
         performAction,
         controllers.returns.address.routes.PropertyDetailsController
@@ -1143,6 +1196,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         controller.disposalDate()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalDate(),
+        mockUUIDGenerator
+      )
 
       behave like noDateOfDeathForPersonalRepBehaviour(performAction)
 
@@ -1408,6 +1466,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalDateSubmit(),
+        mockUUIDGenerator
+      )
+
       behave like noDateOfDeathForPersonalRepBehaviour(() => performAction())
 
       "redirect to the task list page" when {
@@ -1627,24 +1690,16 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           updatedDraftReturn: DraftReturn
         ): Unit = {
 
-          val journey =
+          val journey        =
             sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
-          val session = SessionData.empty.copy(journeyStatus = Some(journey))
+          val session        = SessionData.empty.copy(journeyStatus = Some(journey))
+          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
-              Right(())
-            )
-            mockStoreSession(
-              session
-                .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
           }
 
           checkIsRedirect(
@@ -1773,6 +1828,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         controller.disposalPrice()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalPrice(),
+        mockUUIDGenerator
+      )
 
       "redirect to the check your answers page" when {
 
@@ -1998,6 +2058,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalPriceSubmit(),
+        mockUUIDGenerator
+      )
+
       "not update the session" when {
 
         "the data submitted is the same as one that already exists in session" in {
@@ -2091,24 +2156,16 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           updatedDraftReturn: DraftReturn
         ): Unit = {
 
-          val journey =
+          val journey        =
             sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
-          val session = SessionData.empty.copy(journeyStatus = Some(journey))
+          val session        = SessionData.empty.copy(journeyStatus = Some(journey))
+          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
-              Right(())
-            )
-            mockStoreSession(
-              session
-                .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
           }
 
           checkIsRedirect(
@@ -2185,6 +2242,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         controller.acquisitionPrice()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.acquisitionPrice(),
+        mockUUIDGenerator
+      )
 
       "redirect to the check your answers page" when {
 
@@ -2554,6 +2616,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.acquisitionPriceSubmit(),
+        mockUUIDGenerator
+      )
+
       "not update the session" when {
         "the data submitted is the same as one that already exists in session" in {
 
@@ -2679,18 +2746,15 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           updatedDraftReturn: DraftReturn
         ): Unit = {
 
-          val journey =
+          val journey        =
             sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
-          val session = SessionData.empty.copy(journeyStatus = Some(journey))
+          val session        = SessionData.empty.copy(journeyStatus = Some(journey))
+          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Right(())
             )
             mockStoreSession(
@@ -2771,6 +2835,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         controller.checkYourAnswers()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswers(),
+        mockUUIDGenerator
+      )
 
       val address          = sample[UkAddress]
       val disposalDate     = sample[DisposalDate]
@@ -2988,11 +3057,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockGetSession(
               SessionData.empty.copy(journeyStatus = Some(currentJourney))
             )
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              currentJourney.subscribedDetails.cgtReference,
-              currentJourney.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus = Some(updatedJourney))
             )(Right(()))
@@ -3030,11 +3095,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockGetSession(
               SessionData.empty.copy(journeyStatus = Some(currentJourney))
             )
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              currentJourney.subscribedDetails.cgtReference,
-              currentJourney.agentReferenceNumber
-            )(Left(Error("")))
+            mockStoreDraftReturn(updatedJourney)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -3046,11 +3107,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockGetSession(
               SessionData.empty.copy(journeyStatus = Some(currentJourney))
             )
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              currentJourney.subscribedDetails.cgtReference,
-              currentJourney.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus = Some(updatedJourney))
             )(Left(Error("")))
@@ -3069,6 +3126,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswersSubmit(),
+        mockUUIDGenerator
+      )
 
       "redirect to the task list" in {
         inSequence {

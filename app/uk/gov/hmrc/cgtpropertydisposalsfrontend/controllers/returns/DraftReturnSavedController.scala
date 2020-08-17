@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -49,47 +49,39 @@ class DraftReturnSavedController @Inject() (
   def draftReturnSaved(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
-        case Some(
-              FillingOutReturn(
-                subscribedDetails,
-                _,
-                agentReferenceNumber,
-                draftReturn,
-                _
-              )
-            ) =>
-          val draftReturnWithLastUpdated = draftReturn.fold(
-            _.copy(lastUpdatedDate = TimeUtils.today()),
-            _.copy(lastUpdatedDate = TimeUtils.today()),
-            _.copy(lastUpdatedDate = TimeUtils.today()),
-            _.copy(lastUpdatedDate = TimeUtils.today()),
-            _.copy(lastUpdatedDate = TimeUtils.today())
-          )
-
-          val response = returnsService
-            .storeDraftReturn(
-              draftReturnWithLastUpdated,
-              subscribedDetails.cgtReference,
-              agentReferenceNumber
+        case Some(fillingOutReturn: FillingOutReturn) =>
+          if (fillingOutReturn.isAmendReturn)
+            Redirect(routes.TaskListController.taskList())
+          else {
+            val draftReturnWithLastUpdated = fillingOutReturn.draftReturn.fold(
+              _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today())
             )
 
-          response.fold(
-            { e =>
-              logger.error(
-                s"For cgt reference ${subscribedDetails.cgtReference.value}, got the following error ${e.value}"
-              )
-              errorHandler.errorResult()
-            },
-            _ =>
-              Ok(
-                returnSavedPage(
-                  draftReturnWithLastUpdated,
-                  subscribedDetails.isATrust
-                )
-              )
-          )
+            val response =
+              returnsService.storeDraftReturn(fillingOutReturn.copy(draftReturn = draftReturnWithLastUpdated))
 
-        case _ =>
+            response.fold(
+              { e =>
+                logger.error(
+                  s"For cgt reference ${fillingOutReturn.subscribedDetails.cgtReference.value}, got the following error ${e.value}"
+                )
+                errorHandler.errorResult()
+              },
+              _ =>
+                Ok(
+                  returnSavedPage(
+                    draftReturnWithLastUpdated,
+                    fillingOutReturn.subscribedDetails.isATrust
+                  )
+                )
+            )
+          }
+
+        case _                                        =>
           Future.successful(Redirect(baseRoutes.StartController.start()))
       }
 

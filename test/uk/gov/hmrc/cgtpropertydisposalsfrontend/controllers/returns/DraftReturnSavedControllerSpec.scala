@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, accounts, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -93,11 +93,7 @@ class DraftReturnSavedControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(journey.copy(draftReturn = updatedDraftReturn))(Right(()))
           }
 
           val formattedDate: String =
@@ -132,7 +128,8 @@ class DraftReturnSavedControllerSpec
 
         def fillingOutReturn(name: Either[TrustName, IndividualName]) =
           sample[FillingOutReturn].copy(
-            subscribedDetails = sample[SubscribedDetails].copy(name = name)
+            subscribedDetails = sample[SubscribedDetails].copy(name = name),
+            originalReturn = None
           )
 
         "the user is an individual" in {
@@ -202,7 +199,7 @@ class DraftReturnSavedControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          val journey            = sample[FillingOutReturn]
+          val journey            = sample[FillingOutReturn].copy(originalReturn = None)
           val updatedDraftReturn = journey.draftReturn.fold(
             _.copy(lastUpdatedDate = TimeUtils.today()),
             _.copy(lastUpdatedDate = TimeUtils.today()),
@@ -216,16 +213,27 @@ class DraftReturnSavedControllerSpec
             mockGetSession(
               SessionData.empty.copy(journeyStatus = Some(journey))
             )
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(journey.copy(draftReturn = updatedDraftReturn))(
               Left(Error("Some Error"))
             )
           }
 
           checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "redirect to the task list page" when {
+
+        "the return is an amend return" in {
+          val journey = sample[FillingOutReturn].copy(originalReturn = Some(sample[CompleteReturnWithSummary]))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(journey)))
+          }
+
+          checkIsRedirect(performAction(), routes.TaskListController.taskList())
         }
 
       }

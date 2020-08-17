@@ -765,12 +765,7 @@ class RepresenteeController @Inject() (
     for {
       _ <- newJourney.fold(
              _ => EitherT.pure[Future, Error](()),
-             newFillingOutReturn =>
-               returnsService.storeDraftReturn(
-                 newFillingOutReturn.draftReturn,
-                 newFillingOutReturn.subscribedDetails.cgtReference,
-                 newFillingOutReturn.agentReferenceNumber
-               )
+             returnsService.storeDraftReturn(_)
            )
       _ <- EitherT(
              updateSession(sessionStore, request)(

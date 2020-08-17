@@ -31,7 +31,7 @@
         warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(draftReturn: DraftMultipleDisposalsReturn, isFurtherReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftMultipleDisposalsReturn, isFurtherOrAmendReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("service.title")}
 @representeeState = @{
@@ -59,7 +59,7 @@
 }
 
 @gainOrLossAfterReliefsState = @{
-  if(isFurtherReturn.contains(true)){
+  if(isFurtherOrAmendReturn.contains(true)){
     examplePropertyDetailsState match {
         case Complete =>
             Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))

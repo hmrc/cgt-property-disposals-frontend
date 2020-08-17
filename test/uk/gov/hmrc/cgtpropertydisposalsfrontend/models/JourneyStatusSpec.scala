@@ -46,7 +46,8 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             sample[GGCredId],
             None,
             draftReturn,
-            previousSentReturns
+            previousSentReturns,
+            None
           )
 
         "the user is a trust and" when {
@@ -56,13 +57,13 @@ class JourneyStatusSpec extends WordSpec with Matchers {
               Left(sample[TrustName]),
               None,
               sample[DraftReturn]
-            ).isFurtherReturn shouldBe Some(false)
+            ).isFurtherOrAmendReturn shouldBe Some(false)
 
             fillingOutReturn(
               Left(sample[TrustName]),
               Some(PreviousReturnData(List.empty, None)),
               sample[DraftReturn]
-            ).isFurtherReturn shouldBe Some(false)
+            ).isFurtherOrAmendReturn shouldBe Some(false)
           }
 
           "the user has previously sent returns" in {
@@ -70,7 +71,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
               Left(sample[TrustName]),
               Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
               sample[DraftReturn]
-            ).isFurtherReturn shouldBe Some(true)
+            ).isFurtherOrAmendReturn shouldBe Some(true)
           }
 
         }
@@ -84,7 +85,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
               sample[DraftSingleDisposalReturn].copy(
                 triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
               )
-            ).isFurtherReturn shouldBe None
+            ).isFurtherOrAmendReturn shouldBe None
           }
 
           "the user is completing the return for themselves and" when {
@@ -101,13 +102,13 @@ class JourneyStatusSpec extends WordSpec with Matchers {
                 Right(sample[IndividualName]),
                 None,
                 draftReturn
-              ).isFurtherReturn shouldBe Some(false)
+              ).isFurtherOrAmendReturn shouldBe Some(false)
 
               fillingOutReturn(
                 Right(sample[IndividualName]),
                 Some(PreviousReturnData(List.empty, None)),
                 draftReturn
-              ).isFurtherReturn shouldBe Some(false)
+              ).isFurtherOrAmendReturn shouldBe Some(false)
             }
 
             "the user has previously sent returns" in {
@@ -115,7 +116,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
                 Right(sample[IndividualName]),
                 Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
                 draftReturn
-              ).isFurtherReturn shouldBe Some(true)
+              ).isFurtherOrAmendReturn shouldBe Some(true)
             }
 
           }
@@ -136,7 +137,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
                 draftReturn.copy(
                   representeeAnswers = None
                 )
-              ).isFurtherReturn shouldBe None
+              ).isFurtherOrAmendReturn shouldBe None
 
               fillingOutReturn(
                 Right(sample[IndividualName]),
@@ -148,7 +149,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
                     )
                   )
                 )
-              ).isFurtherReturn shouldBe None
+              ).isFurtherOrAmendReturn shouldBe None
             }
 
             "the user has said this is the first return for the person" in {
@@ -162,7 +163,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
                     )
                   )
                 )
-              ).isFurtherReturn shouldBe Some(false)
+              ).isFurtherOrAmendReturn shouldBe Some(false)
             }
 
             "the user has said this is not the first return for the person" in {
@@ -176,7 +177,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
                     )
                   )
                 )
-              ).isFurtherReturn shouldBe Some(true)
+              ).isFurtherOrAmendReturn shouldBe Some(true)
             }
 
           }

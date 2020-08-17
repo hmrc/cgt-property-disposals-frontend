@@ -35,10 +35,10 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.{SelectorAndValue, TagAttributePairAndValue, UserTypeDisplay}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, representee, triage}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour, representee, triage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -64,7 +64,8 @@ class MultipleDisposalsTriageControllerSpec
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
-    with ReturnsServiceSupport {
+    with ReturnsServiceSupport
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
 
   val mockTaxYearService = mock[TaxYearService]
 
@@ -118,10 +119,11 @@ class MultipleDisposalsTriageControllerSpec
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean =
     journeyStatus match {
-      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft          => true
-      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn, _)         => true
-      case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _) => true
-      case _                                                                     => false
+      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft             => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn, _, _)         => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _, _) => true
+      case _: StartingToAmendReturn                                                 => true
+      case _                                                                        => false
     }
 
   def setIndividualUserType(
@@ -252,6 +254,11 @@ class MultipleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.guidance(),
+        mockUUIDGenerator
+      )
+
       "display the page" when {
 
         def test(
@@ -371,6 +378,11 @@ class MultipleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.guidanceSubmit(),
+        mockUUIDGenerator
+      )
+
       "redirect to how many disposals page" when {
 
         "the user has not completed the section" in {
@@ -422,6 +434,11 @@ class MultipleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.howManyDisposals(),
+        mockUUIDGenerator
       )
 
       "display the page" when {
@@ -515,6 +532,11 @@ class MultipleDisposalsTriageControllerSpec
         )
 
       val key = "multipleDisposalsNumberOfProperties"
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.howManyDisposalsSubmit(),
+        mockUUIDGenerator
+      )
 
       "redirect to single disposal cya page" when {
 
@@ -644,11 +666,7 @@ class MultipleDisposalsTriageControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(
-                updatedDraftReturn,
-                journey.subscribedDetails.cgtReference,
-                journey.agentReferenceNumber
-              )(
+              mockStoreDraftReturn(updatedJourney)(
                 Right(())
               )
               mockStoreSession(
@@ -755,11 +773,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Left(Error(""))
             )
           }
@@ -771,11 +785,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Right(())
             )
             mockStoreSession(
@@ -799,6 +809,11 @@ class MultipleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.wereYouAUKResident(),
+        mockUUIDGenerator
       )
 
       "display the page" when {
@@ -963,6 +978,11 @@ class MultipleDisposalsTriageControllerSpec
 
       val key = "multipleDisposalsWereYouAUKResident"
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.wereYouAUKResidentSubmit(),
+        mockUUIDGenerator
+      )
+
       "redirect to redirect to cya page" when {
 
         val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
@@ -1087,11 +1107,7 @@ class MultipleDisposalsTriageControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(updatedJourney)(
                   Right(())
                 )
                 mockStoreSession(
@@ -1179,11 +1195,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Left(Error(""))
             )
           }
@@ -1195,11 +1207,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Right(())
             )
             mockStoreSession(
@@ -1222,6 +1230,11 @@ class MultipleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.wereAllPropertiesResidential(),
+        mockUUIDGenerator
       )
 
       "display the page" when {
@@ -1310,6 +1323,11 @@ class MultipleDisposalsTriageControllerSpec
         )
 
       val key = "multipleDisposalsWereAllPropertiesResidential"
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.wereAllPropertiesResidentialSubmit(),
+        mockUUIDGenerator
+      )
 
       "redirect to redirect to cya page" when {
 
@@ -1444,11 +1462,7 @@ class MultipleDisposalsTriageControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(
-                updatedDraftReturn,
-                journey.subscribedDetails.cgtReference,
-                journey.agentReferenceNumber
-              )(
+              mockStoreDraftReturn(updatedJourney)(
                 Right(())
               )
               mockStoreSession(
@@ -1549,11 +1563,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Left(Error(""))
             )
           }
@@ -1565,11 +1575,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Right(())
             )
             mockStoreSession(
@@ -1592,6 +1598,11 @@ class MultipleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whenWereContractsExchanged(),
+        mockUUIDGenerator
       )
 
       "display the page" when {
@@ -1686,6 +1697,11 @@ class MultipleDisposalsTriageControllerSpec
 
       val today = LocalDate.now(Clock.systemUTC())
       val key   = "multipleDisposalsTaxYear"
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whenWereContractsExchangedSubmit(),
+        mockUUIDGenerator
+      )
 
       "redirect to redirect to cya page" when {
 
@@ -1834,11 +1850,7 @@ class MultipleDisposalsTriageControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(updatedJourney)(
                   Right(())
                 )
                 mockStoreSession(
@@ -1952,11 +1964,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Left(Error(""))
             )
           }
@@ -1968,11 +1976,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Right(())
             )
             mockStoreSession(
@@ -2022,6 +2026,11 @@ class MultipleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.countryOfResidence(),
+        mockUUIDGenerator
       )
 
       "display the page" when {
@@ -2232,6 +2241,11 @@ class MultipleDisposalsTriageControllerSpec
       val key     = "countryCode"
       val country = Country("HK")
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.countryOfResidenceSubmit(),
+        mockUUIDGenerator
+      )
+
       "redirect to redirect to cya page" when {
 
         val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
@@ -2333,11 +2347,7 @@ class MultipleDisposalsTriageControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(updatedJourney)(
                   Right(())
                 )
                 mockStoreSession(
@@ -2462,11 +2472,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Left(Error(""))
             )
           }
@@ -2478,11 +2484,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Right(())
             )
             mockStoreSession(
@@ -2505,6 +2507,11 @@ class MultipleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.assetTypeForNonUkResidents(),
+        mockUUIDGenerator
       )
 
       "display the page" when {
@@ -2668,6 +2675,11 @@ class MultipleDisposalsTriageControllerSpec
       val country = Country("HK")
 
       val key = "multipleDisposalsAssetTypeForNonUkResidents"
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.assetTypeForNonUkResidentsSubmit(),
+        mockUUIDGenerator
+      )
 
       "redirect to redirect to cya page" when {
 
@@ -2837,11 +2849,7 @@ class MultipleDisposalsTriageControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(updatedJourney)(
                   Right(())
                 )
                 mockStoreSession(
@@ -2968,11 +2976,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Left(Error(""))
             )
           }
@@ -2984,11 +2988,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Right(())
             )
             mockStoreSession(
@@ -3011,6 +3011,11 @@ class MultipleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.completionDate(),
+        mockUUIDGenerator
       )
 
       "display the page" when {
@@ -3124,6 +3129,11 @@ class MultipleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.completionDateSubmit(),
+        mockUUIDGenerator
+      )
+
       "show a form error" when {
 
         def testFormError(
@@ -3209,11 +3219,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(journey.copy(draftReturn = updatedDraftReturn))(
               Left(Error(""))
             )
           }
@@ -3340,11 +3346,7 @@ class MultipleDisposalsTriageControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(
-                updatedDraftReturn,
-                journey.subscribedDetails.cgtReference,
-                journey.agentReferenceNumber
-              )(Right(()))
+              mockStoreDraftReturn(updatedJourney)(Right(()))
               mockStoreSession(
                 session.copy(journeyStatus = Some(updatedJourney))
               )(Right(()))
@@ -3397,6 +3399,11 @@ class MultipleDisposalsTriageControllerSpec
 
       def performAction(): Future[Result] =
         controller.disposalDateOfShares()(FakeRequest())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalDateOfShares(),
+        mockUUIDGenerator
+      )
 
       behave like noDateOfDeathForPersonalRepBehaviour(performAction)
 
@@ -3456,6 +3463,11 @@ class MultipleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalDateOfSharesSubmit(),
+        mockUUIDGenerator
       )
 
       behave like noDateOfDeathForPersonalRepBehaviour(() => performAction())
@@ -3620,11 +3632,7 @@ class MultipleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockGetTaxYear(submittedDate)(Right(taxYear))
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(updatedJourney))
             )(Right(()))
@@ -3779,6 +3787,11 @@ class MultipleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswers(),
+        mockUUIDGenerator
+      )
+
       "redirect to the who is individual representing page when no individual user type can be found and the subscribed " +
         "user type is individual" in {
         testRedirectWhenIncomplete(
@@ -3882,11 +3895,7 @@ class MultipleDisposalsTriageControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Right(()))
+                mockStoreDraftReturn(updatedJourney)(Right(()))
                 mockStoreSession(
                   session.copy(journeyStatus = Some(updatedJourney))
                 )(Right(()))
@@ -3985,11 +3994,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(updatedJourney))
             )(Left(Error("")))
@@ -4230,11 +4235,7 @@ class MultipleDisposalsTriageControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(
-                updatedDraftReturn,
-                journey.subscribedDetails.cgtReference,
-                journey.agentReferenceNumber
-              )(Right(()))
+              mockStoreDraftReturn(updatedJourney)(Right(()))
               mockStoreSession(
                 session.copy(journeyStatus = Some(updatedJourney))
               )(Right(()))
@@ -4348,12 +4349,18 @@ class MultipleDisposalsTriageControllerSpec
     }
 
     "handling submits on the check your answers page" when {
+
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswersSubmit(),
+        mockUUIDGenerator
       )
 
       "the user has not started a new draft return yet" must {
@@ -4378,7 +4385,8 @@ class MultipleDisposalsTriageControllerSpec
           journey.ggCredId,
           journey.agentReferenceNumber,
           newDraftReturn,
-          journey.previousSentReturns
+          journey.previousSentReturns,
+          None
         )
 
         "show an error page" when {
@@ -4388,11 +4396,7 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockGenerateUUID(draftId)
-              mockStoreDraftReturn(
-                newDraftReturn,
-                journey.subscribedDetails.cgtReference,
-                journey.agentReferenceNumber
-              )(Left(Error("")))
+              mockStoreDraftReturn(newJourney)(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -4403,11 +4407,7 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockGenerateUUID(draftId)
-              mockStoreDraftReturn(
-                newDraftReturn,
-                journey.subscribedDetails.cgtReference,
-                journey.agentReferenceNumber
-              )(Right(()))
+              mockStoreDraftReturn(newJourney)(Right(()))
               mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
                 Left(Error(""))
               )
@@ -4425,11 +4425,7 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockGenerateUUID(draftId)
-              mockStoreDraftReturn(
-                newDraftReturn,
-                journey.subscribedDetails.cgtReference,
-                journey.agentReferenceNumber
-              )(Right(()))
+              mockStoreDraftReturn(newJourney)(Right(()))
               mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
                 Right(())
               )

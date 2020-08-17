@@ -26,11 +26,13 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -47,6 +49,7 @@ class GainOrLossAfterReliefsController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
+  uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   gainOrLossAfterReliefsPage: views.html.returns.gainorlossafterreliefs.gain_or_loss_after_reliefs,
   checkYourAnswersPage: views.html.returns.gainorlossafterreliefs.check_your_answers
@@ -54,13 +57,14 @@ class GainOrLossAfterReliefsController @Inject() (
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
-    with Logging {
+    with Logging
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   import GainOrLossAfterReliefsController._
 
   def enterGainOrLossAfterReliefs(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (fillingOutReturn, draftReturn, answer) =>
+      withFillingOutReturnAndAnswers { (fillingOutReturn, draftReturn, answer) =>
         Ok(
           gainOrLossAfterReliefsPage(
             answer.fold(gainOrLossAfterReliefsForm)(value => gainOrLossAfterReliefsForm.fill(value.inPounds())),
@@ -77,7 +81,7 @@ class GainOrLossAfterReliefsController @Inject() (
 
   def enterGainOrLossAfterReliefsSubmit: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) {
+      withFillingOutReturnAndAnswers {
         case (fillingOutReturn, draftReturn, answer) =>
           gainOrLossAfterReliefsForm
             .bindFromRequest()
@@ -102,48 +106,41 @@ class GainOrLossAfterReliefsController @Inject() (
                 else {
                   val updatedAmount      = AmountInPence.fromPounds(value)
                   val updatedDraftReturn =
-                      draftReturn.fold(
-                        _.copy(
-                          gainOrLossAfterReliefs = Some(updatedAmount),
-                          exemptionAndLossesAnswers = None,
-                          yearToDateLiabilityAnswers = None
-                        ),
-                        _.copy(
-                          gainOrLossAfterReliefs = Some(updatedAmount),
-                          exemptionAndLossesAnswers = None,
-                          yearToDateLiabilityAnswers = None
-                        ),
-                        _.copy(
-                          gainOrLossAfterReliefs = Some(updatedAmount),
-                          exemptionAndLossesAnswers = None,
-                          yearToDateLiabilityAnswers = None
-                        ),
-                        _.copy(
-                          gainOrLossAfterReliefs = Some(updatedAmount),
-                          exemptionAndLossesAnswers = None,
-                          yearToDateLiabilityAnswers = None
-                        ),
-                        _.copy(
-                          gainOrLossAfterReliefs = Some(updatedAmount),
-                          exemptionAndLossesAnswers = None,
-                          yearToDateLiabilityAnswers = None
-                        )
+                    draftReturn.fold(
+                      _.copy(
+                        gainOrLossAfterReliefs = Some(updatedAmount),
+                        exemptionAndLossesAnswers = None,
+                        yearToDateLiabilityAnswers = None
+                      ),
+                      _.copy(
+                        gainOrLossAfterReliefs = Some(updatedAmount),
+                        exemptionAndLossesAnswers = None,
+                        yearToDateLiabilityAnswers = None
+                      ),
+                      _.copy(
+                        gainOrLossAfterReliefs = Some(updatedAmount),
+                        exemptionAndLossesAnswers = None,
+                        yearToDateLiabilityAnswers = None
+                      ),
+                      _.copy(
+                        gainOrLossAfterReliefs = Some(updatedAmount),
+                        exemptionAndLossesAnswers = None,
+                        yearToDateLiabilityAnswers = None
+                      ),
+                      _.copy(
+                        gainOrLossAfterReliefs = Some(updatedAmount),
+                        exemptionAndLossesAnswers = None,
+                        yearToDateLiabilityAnswers = None
                       )
+                    )
+
+                  val updatedJourney = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
 
                   val result = for {
-                    _ <- returnsService.storeDraftReturn(
-                           updatedDraftReturn,
-                           fillingOutReturn.subscribedDetails.cgtReference,
-                           fillingOutReturn.agentReferenceNumber
-                         )
+                    _ <- returnsService.storeDraftReturn(updatedJourney)
                     _ <- EitherT(
                            updateSession(sessionStore, request)(
-                             _.copy(journeyStatus =
-                               Some(
-                                 fillingOutReturn
-                                   .copy(draftReturn = updatedDraftReturn)
-                               )
-                             )
+                             _.copy(journeyStatus = Some(updatedJourney))
                            )
                          )
                   } yield ()
@@ -165,7 +162,7 @@ class GainOrLossAfterReliefsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (journeyStatus, draftReturn, answers) =>
+      withFillingOutReturnAndAnswers { (journeyStatus, draftReturn, answers) =>
         answers match {
           case Some(completeInitialGainOrLossAnswers) =>
             Ok(
@@ -187,21 +184,21 @@ class GainOrLossAfterReliefsController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (_, _, _) =>
+      withFillingOutReturnAndAnswers { (_, _, _) =>
         Redirect(controllers.returns.routes.TaskListController.taskList())
       }
     }
 
   private def withFillingOutReturnAndAnswers(
-    request: RequestWithSessionData[_]
-  )(
     processReturnAndAnswersIntoResult: (
       FillingOutReturn,
       DraftReturn,
       Option[AmountInPence]
     ) => Future[Result]
-  ): Future[Result] =
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(s: StartingToAmendReturn) =>
+        convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
 
       case Some(
             fillingOutReturn @ FillingOutReturn(
@@ -209,16 +206,17 @@ class GainOrLossAfterReliefsController @Inject() (
               _,
               _,
               d,
+              _,
               _
             )
-          ) if fillingOutReturn.isFurtherReturn.contains(true) =>
+          ) if fillingOutReturn.isFurtherOrAmendReturn.contains(true) =>
         processReturnAndAnswersIntoResult(
           fillingOutReturn,
           d,
           d.gainOrLossAfterReliefs
         )
 
-      case _ => Redirect(controllers.routes.StartController.start())
+      case _                              => Redirect(controllers.routes.StartController.start())
     }
 
 }

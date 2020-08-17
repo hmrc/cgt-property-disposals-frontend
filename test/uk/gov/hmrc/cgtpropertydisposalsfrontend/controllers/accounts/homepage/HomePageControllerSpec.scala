@@ -1147,7 +1147,8 @@ class HomePageControllerSpec
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
           sample[DraftSingleDisposalReturn],
-          Some(PreviousReturnData(subscribed.sentReturns, None))
+          Some(PreviousReturnData(subscribed.sentReturns, None)),
+          None
         )
         val justSubmittedReturn = JustSubmittedReturn(
           subscribed.subscribedDetails,
@@ -1612,7 +1613,8 @@ class HomePageControllerSpec
         subscribed.ggCredId,
         subscribed.agentReferenceNumber,
         draftReturn,
-        Some(PreviousReturnData(List.empty, None))
+        Some(PreviousReturnData(List.empty, None)),
+        None
       )
 
       "show an error page" when {
@@ -1668,7 +1670,8 @@ class HomePageControllerSpec
             subscribed.ggCredId,
             subscribed.agentReferenceNumber,
             draftReturn,
-            Some(PreviousReturnData(subscribed.sentReturns, previousYearToDate))
+            Some(PreviousReturnData(subscribed.sentReturns, previousYearToDate)),
+            None
           ),
         controllers.returns.routes.TaskListController.taskList()
       )

@@ -163,11 +163,7 @@ class ChangeRepresenteeEmailController @Inject() (
         EitherT.pure[Future, Error](_),
         fillingOutReturn =>
           returnsService
-            .storeDraftReturn(
-              fillingOutReturn.draftReturn,
-              fillingOutReturn.subscribedDetails.cgtReference,
-              fillingOutReturn.agentReferenceNumber
-            )
+            .storeDraftReturn(fillingOutReturn)
             .map(_ => fillingOutReturn)
       )
 

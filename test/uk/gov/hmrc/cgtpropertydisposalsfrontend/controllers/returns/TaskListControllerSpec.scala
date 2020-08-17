@@ -141,7 +141,8 @@ class TaskListControllerSpec
         withClue(s"For draft return $draftReturn: ") {
           val fillingOutReturn = sample[FillingOutReturn].copy(
             draftReturn = removeEvidence(draftReturn),
-            previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence])))
+            previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence]))),
+            originalReturn = None
           )
 
           inSequence {
@@ -193,7 +194,8 @@ class TaskListControllerSpec
       ): Unit = {
         val fillingOutReturn = sample[FillingOutReturn].copy(
           draftReturn = removeEvidence(draftReturn),
-          previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence])))
+          previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence]))),
+          originalReturn = None
         )
 
         inSequence {
@@ -1112,11 +1114,12 @@ class TaskListControllerSpec
               mockGetSession(
                 SessionData.empty.copy(
                   journeyStatus = Some(
-                    sample[FillingOutReturn].copy(draftReturn =
-                      sample[DraftSingleDisposalReturn].copy(
+                    sample[FillingOutReturn].copy(
+                      draftReturn = sample[DraftSingleDisposalReturn].copy(
                         supportingEvidenceAnswers = None,
                         yearToDateLiabilityAnswers = None
-                      )
+                      ),
+                      originalReturn = None
                     )
                   )
                 )
@@ -2089,11 +2092,12 @@ class TaskListControllerSpec
               mockGetSession(
                 SessionData.empty.copy(
                   journeyStatus = Some(
-                    sample[FillingOutReturn].copy(draftReturn =
-                      sample[DraftSingleIndirectDisposalReturn].copy(
+                    sample[FillingOutReturn].copy(
+                      draftReturn = sample[DraftSingleIndirectDisposalReturn].copy(
                         supportingEvidenceAnswers = None,
                         yearToDateLiabilityAnswers = None
-                      )
+                      ),
+                      originalReturn = None
                     )
                   )
                 )

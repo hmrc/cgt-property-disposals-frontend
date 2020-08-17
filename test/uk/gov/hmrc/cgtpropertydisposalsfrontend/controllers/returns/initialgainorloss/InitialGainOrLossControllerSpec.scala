@@ -280,15 +280,12 @@ class InitialGainOrLossControllerSpec
             sessionWithState(Some(AmountInPence(1L)))
           val updatedDraftReturn              =
             updateDraftReturn(draftReturn, AmountInPence(0L))
+          val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Left(Error("")))
+            mockStoreDraftReturn(updatedJourney)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("initialGainOrLoss" -> "2"))
@@ -303,11 +300,7 @@ class InitialGainOrLossControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(updatedJourney))
             )(Left(Error("")))
@@ -486,11 +479,7 @@ class InitialGainOrLossControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(
-                newDraftReturn,
-                updatedJourney.subscribedDetails.cgtReference,
-                updatedJourney.agentReferenceNumber
-              )(Right(()))
+              mockStoreDraftReturn(updatedJourney)(Right(()))
               mockStoreSession(
                 session.copy(journeyStatus = Some(updatedJourney))
               )(Right(()))

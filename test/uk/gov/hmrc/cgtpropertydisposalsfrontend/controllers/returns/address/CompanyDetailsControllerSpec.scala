@@ -30,15 +30,15 @@ import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
@@ -59,22 +59,27 @@ class CompanyDetailsControllerSpec
     with SessionSupport
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
+
+  val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case FillingOutReturn(_, _, _, _: DraftSingleIndirectDisposalReturn, _)    => true
-        case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _) => true
-        case _                                                                     => false
+        case FillingOutReturn(_, _, _, _: DraftSingleIndirectDisposalReturn, _, _)    => true
+        case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _, _) => true
+        case _: StartingToAmendReturn                                                 => true
+        case _                                                                        => false
       }
     )
 
   override val overrideBindings = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
     bind[SessionStore].toInstance(mockSessionStore),
-    bind[ReturnsService].toInstance(mockReturnsService)
+    bind[ReturnsService].toInstance(mockReturnsService),
+    bind[UUIDGenerator].toInstance(mockUUIDGenerator)
   )
 
   lazy val controller = instanceOf[CompanyDetailsController]
@@ -264,6 +269,11 @@ class CompanyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.isUk(),
+        mockUUIDGenerator
+      )
+
       "display the page" when {
 
         def test(result: Future[Result], expectedTitleKey: String): Unit =
@@ -369,6 +379,11 @@ class CompanyDetailsControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.isUkSubmit(),
+        mockUUIDGenerator
+      )
 
       "show a form error" when {
 
@@ -558,6 +573,11 @@ class CompanyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterUkAddress(),
+        mockUUIDGenerator
+      )
+
       "display the page" when {
 
         def test(result: Future[Result], expectedTitleKey: String): Unit =
@@ -699,6 +719,11 @@ class CompanyDetailsControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterUkAddressSubmit(),
+        mockUUIDGenerator
+      )
 
       "return a form error" when {
 
@@ -1157,11 +1182,7 @@ class CompanyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              newDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(newJourney)(
               Left(Error(""))
             )
           }
@@ -1178,11 +1199,7 @@ class CompanyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              newDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(newJourney)(
               Right(())
             )
             mockStoreSession(newSession)(Left(Error("")))
@@ -1212,11 +1229,7 @@ class CompanyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              newDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(newJourney)(
               Right(())
             )
             mockStoreSession(newSession)(Right(()))
@@ -1241,6 +1254,11 @@ class CompanyDetailsControllerSpec
         controller.enterNonUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterNonUkAddress(),
+        mockUUIDGenerator
+      )
 
       "display the page" when {
 
@@ -1388,6 +1406,11 @@ class CompanyDetailsControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterNonUkAddressSubmit(),
+        mockUUIDGenerator
+      )
 
       "return a form error" when {
 
@@ -1822,11 +1845,7 @@ class CompanyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              newDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(newJourney)(
               Left(Error(""))
             )
           }
@@ -1843,11 +1862,7 @@ class CompanyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              newDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(newJourney)(
               Right(())
             )
             mockStoreSession(newSession)(Left(Error("")))
@@ -1883,11 +1898,7 @@ class CompanyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              newDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(newJourney)(
               Right(())
             )
             mockStoreSession(newSession)(Right(()))
@@ -1914,6 +1925,11 @@ class CompanyDetailsControllerSpec
         controller.multipleIndirectDisposalPrice()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleIndirectDisposalPrice(),
+        mockUUIDGenerator
+      )
 
       "display the page" when {
 
@@ -2111,6 +2127,11 @@ class CompanyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleIndirectDisposalPriceSubmit(),
+        mockUUIDGenerator
+      )
+
       "not update the session" when {
 
         "the data submitted is the same as one that already exists in session" in {
@@ -2202,26 +2223,22 @@ class CompanyDetailsControllerSpec
           updatedDraftReturn: DraftReturn
         ): Unit = {
 
-          val journey = sample[FillingOutReturn].copy(
+          val journey        = sample[FillingOutReturn].copy(
             draftReturn = oldDraftReturn
           )
-          val session = SessionData.empty.copy(
+          val session        = SessionData.empty.copy(
             journeyStatus = Some(journey)
           )
+          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(updatedJourney)(
               Right(())
             )
             mockStoreSession(
-              session
-                .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+              session.copy(journeyStatus = Some(updatedJourney))
             )(Right(()))
           }
 
@@ -2299,6 +2316,11 @@ class CompanyDetailsControllerSpec
         controller.multipleIndirectAcquisitionPrice()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleIndirectAcquisitionPrice(),
+        mockUUIDGenerator
+      )
 
       "display the page" when {
 
@@ -2579,6 +2601,11 @@ class CompanyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleIndirectAcquisitionPriceSubmit(),
+        mockUUIDGenerator
+      )
+
       "not update the session" when {
 
         "the data submitted is the same as one that already exists in session" in {
@@ -2669,23 +2696,17 @@ class CompanyDetailsControllerSpec
           oldDraftReturn: DraftReturn,
           updatedDraftReturn: DraftReturn
         ): Unit = {
-          val journey =
+          val journey        =
             sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
-          val session = SessionData.empty.copy(journeyStatus = Some(journey))
+          val session        = SessionData.empty.copy(journeyStatus = Some(journey))
+          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
-              Right(())
-            )
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(
-              session
-                .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+              session.copy(journeyStatus = Some(updatedJourney))
             )(Right(()))
           }
 
@@ -2760,6 +2781,11 @@ class CompanyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswers(),
+        mockUUIDGenerator
+      )
+
       "redirect to the is uk page" when {
 
         "there is no address in the session" in {
@@ -2830,6 +2856,11 @@ class CompanyDetailsControllerSpec
         controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswersSubmit(),
+        mockUUIDGenerator
+      )
 
       "redirect to the tasklist" in {
         inSequence {

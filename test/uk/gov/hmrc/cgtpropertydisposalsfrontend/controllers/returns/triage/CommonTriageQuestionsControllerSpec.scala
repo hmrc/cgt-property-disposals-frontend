@@ -25,12 +25,12 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
@@ -54,13 +54,17 @@ class CommonTriageQuestionsControllerSpec
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
-    with ReturnsServiceSupport {
+    with ReturnsServiceSupport
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
+
+  val mockUUIDGenerator = mock[UUIDGenerator]
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     )
 
   lazy val controller = instanceOf[CommonTriageQuestionsController]
@@ -69,8 +73,8 @@ class CommonTriageQuestionsControllerSpec
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean =
     journeyStatus match {
-      case _: StartingNewDraftReturn | _: FillingOutReturn => true
-      case _                                               => false
+      case _: StartingNewDraftReturn | _: FillingOutReturn | _: StartingToAmendReturn => true
+      case _                                                                          => false
     }
 
   def setNameForUserType(
@@ -140,7 +144,8 @@ class CommonTriageQuestionsControllerSpec
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
-      previousSentReturns = previousReturns
+      previousSentReturns = previousReturns,
+      originalReturn = None
     )
 
     (
@@ -161,7 +166,8 @@ class CommonTriageQuestionsControllerSpec
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
-      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
+      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+      originalReturn = None
     )
 
     (
@@ -181,6 +187,11 @@ class CommonTriageQuestionsControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whoIsIndividualRepresenting(),
+        mockUUIDGenerator
       )
 
       "redirect to the how many properties page" when {
@@ -404,6 +415,11 @@ class CommonTriageQuestionsControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whoIsIndividualRepresentingSubmit(),
+        mockUUIDGenerator
+      )
+
       "redirect to the how many properties page" when {
 
         "the user is a trust" in {
@@ -494,11 +510,7 @@ class CommonTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedJourney.draftReturn,
-              fillingOutReturn.subscribedDetails.cgtReference,
-              fillingOutReturn.agentReferenceNumber
-            )(Left(Error("")))
+            mockStoreDraftReturn(updatedJourney)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData))
@@ -508,11 +520,7 @@ class CommonTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedJourney.draftReturn,
-              fillingOutReturn.subscribedDetails.cgtReference,
-              fillingOutReturn.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(updatedJourney))
             )(Left(Error("")))
@@ -780,6 +788,11 @@ class CommonTriageQuestionsControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.furtherReturnHelp(),
+        mockUUIDGenerator
+      )
+
       "display the page" when {
 
         "the user is starting a new draft return and" when {
@@ -965,12 +978,18 @@ class CommonTriageQuestionsControllerSpec
     }
 
     "handling submit to further returns help page" must {
+
       def performAction(): Future[Result] =
         controller.furtherReturnHelpSubmit()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.furtherReturnHelpSubmit(),
+        mockUUIDGenerator
       )
 
       "an individual representing themselves gets redirected to how many properties" in {
@@ -1022,6 +1041,11 @@ class CommonTriageQuestionsControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.howManyProperties(),
+        mockUUIDGenerator
+      )
+
       "display the page" when {
 
         "the user has not answered the question yet" in {
@@ -1065,7 +1089,7 @@ class CommonTriageQuestionsControllerSpec
             )
           }
           val expectedBacklink =
-            if (sessionData._2.isFurtherReturn.contains(true))
+            if (sessionData._2.isFurtherOrAmendReturn.contains(true))
               routes.CommonTriageQuestionsController.furtherReturnHelp().url
             else routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url
 
@@ -1102,7 +1126,7 @@ class CommonTriageQuestionsControllerSpec
               sessionData._1
             )
           }
-          val isFurtherReturn  = sessionData._2.asInstanceOf[FillingOutReturn].isFurtherReturn
+          val isFurtherReturn  = sessionData._2.asInstanceOf[FillingOutReturn].isFurtherOrAmendReturn
           val expectedBacklink =
             if (isFurtherReturn.contains(true)) routes.CommonTriageQuestionsController.furtherReturnHelp()
             else representeeRoutes.RepresenteeController.checkYourAnswers()
@@ -1143,7 +1167,7 @@ class CommonTriageQuestionsControllerSpec
             )
           }
           val expectedBacklink =
-            if (sessionData._2.isFurtherReturn.contains(true))
+            if (sessionData._2.isFurtherOrAmendReturn.contains(true))
               routes.CommonTriageQuestionsController.furtherReturnHelp()
             else returns.representee.routes.RepresenteeController.checkYourAnswers()
 
@@ -1281,6 +1305,11 @@ class CommonTriageQuestionsControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.howManyPropertiesSubmit(),
+        mockUUIDGenerator
+      )
+
       "show a form error" when {
 
         def test(
@@ -1342,14 +1371,12 @@ class CommonTriageQuestionsControllerSpec
               draftReturn.representeeAnswers
             )
 
+          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Left(Error("")))
+            mockStoreDraftReturn(updatedJourney)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData))
@@ -1620,6 +1647,11 @@ class CommonTriageQuestionsControllerSpec
           taxYearAfter6April2020 = Some(false)
         )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalDateTooEarly(),
+        mockUUIDGenerator
+      )
+
       "redirect to the relevant check you answers endpoint" when {
 
         def test(sessionData: SessionData, expectedRedirect: Call): Unit = {
@@ -1820,6 +1852,11 @@ class CommonTriageQuestionsControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.ukResidentCanOnlyDisposeResidential(),
+        mockUUIDGenerator
       )
 
       "redirect to the check your answers page" when {
@@ -2114,6 +2151,11 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.previousReturnExistsWithSameCompletionDate()(FakeRequest())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.previousReturnExistsWithSameCompletionDate(),
+        mockUUIDGenerator
+      )
+
       "display the page" when {
 
         "the user is an individual" in {
@@ -2252,11 +2294,7 @@ class CommonTriageQuestionsControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(
-        updatedJourney.draftReturn,
-        journey.subscribedDetails.cgtReference,
-        journey.agentReferenceNumber
-      )(Right(()))
+      mockStoreDraftReturn(updatedJourney)(Right(()))
       mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(
         Right(())
       )
@@ -2281,11 +2319,7 @@ class CommonTriageQuestionsControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(
-        updatedJourney.draftReturn,
-        journey.subscribedDetails.cgtReference,
-        journey.agentReferenceNumber
-      )(Right(()))
+      mockStoreDraftReturn(updatedJourney)(Right(()))
       mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(
         Right(())
       )

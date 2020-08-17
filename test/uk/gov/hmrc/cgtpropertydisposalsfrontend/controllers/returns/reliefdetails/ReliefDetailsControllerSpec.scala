@@ -30,14 +30,14 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
@@ -59,13 +59,17 @@ class ReliefDetailsControllerSpec
     with SessionSupport
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
+
+  val mockUUIDGenerator = mock[UUIDGenerator]
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     )
 
   lazy val controller = instanceOf[ReliefDetailsController]
@@ -80,8 +84,9 @@ class ReliefDetailsControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case _: FillingOutReturn => true
-        case _                   => false
+        case _: FillingOutReturn      => true
+        case _: StartingToAmendReturn => true
+        case _                        => false
       }
     )
 
@@ -236,6 +241,11 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.privateResidentsRelief(),
+        mockUUIDGenerator
+      )
+
       val key      = "privateResidentsRelief"
       val valueKey = "privateResidentsReliefValue"
 
@@ -346,6 +356,11 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.privateResidentsReliefSubmit(),
+        mockUUIDGenerator
+      )
+
       "show a form error" when {
 
         def test(data: (String, String)*)(
@@ -447,15 +462,12 @@ class ReliefDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, newDraftReturn) =
                 getSessionJourneyAndDraftReturn(userType, individualUserType)
+              val newJourney                         = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Left(Error("")))
+                mockStoreDraftReturn(newJourney)(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(
@@ -471,15 +483,12 @@ class ReliefDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, newDraftReturn) =
                 getSessionJourneyAndDraftReturn(userType, individualUserType)
+              val newJourney                         = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
@@ -638,11 +647,7 @@ class ReliefDetailsControllerSpec
                     mockGetSession(
                       session
                     )
-                    mockStoreDraftReturn(
-                      updatedDraftReturn,
-                      journey.subscribedDetails.cgtReference,
-                      journey.agentReferenceNumber
-                    )(Right(()))
+                    mockStoreDraftReturn(updatedJourney)(Right(()))
                     mockStoreSession(updatedSession)(Right(()))
                   }
 
@@ -675,6 +680,11 @@ class ReliefDetailsControllerSpec
       )
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.lettingsRelief(),
+        mockUUIDGenerator
+      )
 
       behave like noPrivateResidentsReliefBehaviour(performAction)
 
@@ -811,6 +821,11 @@ class ReliefDetailsControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.lettingsReliefSubmit(),
+        mockUUIDGenerator
+      )
 
       behave like noPrivateResidentsReliefBehaviour(() => performAction(Seq.empty))
 
@@ -962,15 +977,12 @@ class ReliefDetailsControllerSpec
                   userType,
                   individualUserType
                 )
+              val newJourney                         = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Left(Error(""))
                 )
               }
@@ -994,25 +1006,16 @@ class ReliefDetailsControllerSpec
                   userType,
                   individualUserType
                 )
+              val newJourney                         = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(journeyStatus =
-                    Some(
-                      journey.copy(
-                        draftReturn = newDraftReturn
-                      )
-                    )
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Left(Error("")))
               }
 
@@ -1191,6 +1194,11 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.otherReliefs(),
+        mockUUIDGenerator
+      )
+
       behave like noLettingsReliefBehaviour(performAction)
 
       val otherReliefs =
@@ -1325,6 +1333,11 @@ class ReliefDetailsControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.otherReliefsSubmit(),
+        mockUUIDGenerator
+      )
 
       behave like noLettingsReliefBehaviour(() => performAction(Seq.empty))
 
@@ -1523,17 +1536,14 @@ class ReliefDetailsControllerSpec
           yearToDateLiabilityAnswers = None,
           supportingEvidenceAnswers = None
         )
+        val newJourney      = currentJourney.copy(draftReturn = newDraftReturn)
 
         "there is an error updating the draft return" in {
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(currentSession)
-            mockStoreDraftReturn(
-              newDraftReturn,
-              currentJourney.subscribedDetails.cgtReference,
-              currentJourney.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(newJourney)(
               Left(Error(""))
             )
           }
@@ -1554,21 +1564,11 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(currentSession)
-            mockStoreDraftReturn(
-              newDraftReturn,
-              currentJourney.subscribedDetails.cgtReference,
-              currentJourney.agentReferenceNumber
-            )(
+            mockStoreDraftReturn(newJourney)(
               Right(())
             )
             mockStoreSession(
-              currentSession.copy(journeyStatus =
-                Some(
-                  currentJourney.copy(
-                    draftReturn = newDraftReturn
-                  )
-                )
-              )
+              currentSession.copy(journeyStatus = Some(newJourney))
             )(Left(Error("")))
           }
 
@@ -1830,6 +1830,11 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswers(),
+        mockUUIDGenerator
+      )
+
       "redirect to the private residence relief page" when {
 
         "there are no relief details answers in session" in {
@@ -1997,16 +2002,15 @@ class ReliefDetailsControllerSpec
                   individualUserType
                 )
 
+              val newDraftReturn = draftReturn.copy(
+                reliefDetailsAnswers = Some(completeAnswers)
+              )
+              val newJourney     = journey.copy(draftReturn = newDraftReturn)
+
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  draftReturn.copy(
-                    reliefDetailsAnswers = Some(completeAnswers)
-                  ),
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Left(Error("")))
+                mockStoreDraftReturn(newJourney)(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -2023,26 +2027,15 @@ class ReliefDetailsControllerSpec
                   individualUserType
                 )
 
+              val newDraftReturn = draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
+              val newJourney     = journey.copy(draftReturn = newDraftReturn)
+
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  draftReturn.copy(
-                    reliefDetailsAnswers = Some(completeAnswers)
-                  ),
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Right(()))
+                mockStoreDraftReturn(newJourney)(Right(()))
                 mockStoreSession(
-                  session.copy(
-                    journeyStatus = Some(
-                      journey.copy(draftReturn =
-                        draftReturn.copy(
-                          reliefDetailsAnswers = Some(completeAnswers)
-                        )
-                      )
-                    )
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Left(Error("")))
               }
 
@@ -2072,11 +2065,7 @@ class ReliefDetailsControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(updatedJourney)(
                   Right(())
                 )
                 mockStoreSession(
@@ -2186,6 +2175,11 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswersSubmit(),
+        mockUUIDGenerator
+      )
+
       "redirect to the task list page" in {
         forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
           (userType: UserType, individualUserType: IndividualUserType) =>
@@ -2278,23 +2272,18 @@ class ReliefDetailsControllerSpec
     oldDraftReturn: DraftSingleDisposalReturn,
     newDraftReturn: DraftSingleDisposalReturn
   ): Unit = {
-    val journey = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
-    val session = SessionData.empty.copy(journeyStatus = Some(journey))
+    val journey    = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
+    val session    = SessionData.empty.copy(journeyStatus = Some(journey))
+    val newJourney = journey.copy(draftReturn = newDraftReturn)
 
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(
-        newDraftReturn,
-        journey.subscribedDetails.cgtReference,
-        journey.agentReferenceNumber
-      )(
+      mockStoreDraftReturn(newJourney)(
         Right(())
       )
       mockStoreSession(
-        session.copy(
-          journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
-        )
+        session.copy(journeyStatus = Some(newJourney))
       )(Right(()))
     }
 

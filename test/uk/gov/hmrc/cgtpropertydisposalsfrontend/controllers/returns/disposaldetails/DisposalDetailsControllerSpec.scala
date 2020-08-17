@@ -30,14 +30,14 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
@@ -57,15 +57,19 @@ class DisposalDetailsControllerSpec
     with SessionSupport
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
 
   import DisposalDetailsControllerSpec._
+
+  val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     )
 
   lazy val controller = instanceOf[DisposalDetailsController]
@@ -76,8 +80,9 @@ class DisposalDetailsControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case _: FillingOutReturn => true
-        case _                   => false
+        case _: FillingOutReturn      => true
+        case _: StartingToAmendReturn => true
+        case _                        => false
       }
     )
 
@@ -256,6 +261,11 @@ class DisposalDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.howMuchDidYouOwn(),
+        mockUUIDGenerator
+      )
+
       "display the page" when {
 
         "the user has not answered the question before" in {
@@ -383,6 +393,11 @@ class DisposalDetailsControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.howMuchDidYouOwnSubmit(),
+        mockUUIDGenerator
+      )
 
       "show a form error" when {
 
@@ -600,15 +615,12 @@ class DisposalDetailsControllerSpec
                   draftReturn,
                   IncompleteDisposalDetailsAnswers(Some(newShare), None, None)
                 )
+              val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Left(Error(""))
                 )
               }
@@ -645,25 +657,16 @@ class DisposalDetailsControllerSpec
                   draftReturn,
                   IncompleteDisposalDetailsAnswers(Some(newShare), None, None)
                 )
+              val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(
-                    journeyStatus = Some(
-                      journey.copy(
-                        draftReturn = newDraftReturn
-                      )
-                    )
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Left(Error("")))
               }
 
@@ -704,20 +707,17 @@ class DisposalDetailsControllerSpec
               )
               val newDraftReturn                  =
                 updateDraftReturn(draftReturn, updatedAnswers)
+              val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
                   session.copy(
-                    journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
+                    journeyStatus = Some(newJourney)
                   )
                 )(Right(()))
               }
@@ -759,21 +759,16 @@ class DisposalDetailsControllerSpec
               )
               val newDraftReturn                  =
                 updateDraftReturn(draftReturn, updatedAnswers)
+              val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(
-                    journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Right(()))
               }
 
@@ -816,22 +811,15 @@ class DisposalDetailsControllerSpec
                   draftReturn,
                   IncompleteDisposalDetailsAnswers(Some(newShare), None, None)
                 )
+                val newJourney     = journey.copy(draftReturn = newDraftReturn)
 
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(
-                    newDraftReturn,
-                    journey.subscribedDetails.cgtReference,
-                    journey.agentReferenceNumber
-                  )(
+                  mockStoreDraftReturn(newJourney)(
                     Right(())
                   )
-                  mockStoreSession(
-                    session.copy(
-                      journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
-                    )
-                  )(Right(()))
+                  mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
                 }
                 checkIsRedirect(
                   performAction(
@@ -913,21 +901,16 @@ class DisposalDetailsControllerSpec
                   None
                 )
               )
+            val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(
-                newDraftReturn,
-                journey.subscribedDetails.cgtReference,
-                journey.agentReferenceNumber
-              )(
+              mockStoreDraftReturn(newJourney)(
                 Right(())
               )
               mockStoreSession(
-                session.copy(
-                  journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
-                )
+                session.copy(journeyStatus = Some(newJourney))
               )(Right(()))
             }
 
@@ -968,21 +951,16 @@ class DisposalDetailsControllerSpec
                   None
                 )
               )
+            val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(
-                newDraftReturn,
-                journey.subscribedDetails.cgtReference,
-                journey.agentReferenceNumber
-              )(
+              mockStoreDraftReturn(newJourney)(
                 Right(())
               )
               mockStoreSession(
-                session.copy(
-                  journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
-                )
+                session.copy(journeyStatus = Some(newJourney))
               )(Right(()))
             }
 
@@ -1062,6 +1040,11 @@ class DisposalDetailsControllerSpec
       }
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whatWasDisposalPrice(),
+        mockUUIDGenerator
+      )
 
       behave like noDisposalMethodBehaviour(performAction)
 
@@ -1218,6 +1201,11 @@ class DisposalDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whatWasDisposalPriceSubmit(),
+        mockUUIDGenerator
+      )
+
       behave like noDisposalMethodBehaviour(() => performAction(Seq.empty))
 
       behave like noPropertyShareBehaviour(() => performAction(Seq.empty))
@@ -1337,15 +1325,12 @@ class DisposalDetailsControllerSpec
                 draftReturn,
                 currentAnswers.copy(disposalPrice = newDisposalPrice)
               )
+              val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Left(Error(""))
                 )
               }
@@ -1384,25 +1369,16 @@ class DisposalDetailsControllerSpec
                 draftReturn,
                 currentAnswers.copy(disposalPrice = newDisposalPrice)
               )
+              val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(journeyStatus =
-                    Some(
-                      journey.copy(
-                        draftReturn = newDraftReturn
-                      )
-                    )
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Left(Error("")))
               }
 
@@ -1450,25 +1426,16 @@ class DisposalDetailsControllerSpec
               )
               val newDraftReturn   =
                 updateDraftReturn(draftReturn, updatedAnswers)
+              val newJourney       = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(journeyStatus =
-                    Some(
-                      journey.copy(
-                        draftReturn = newDraftReturn
-                      )
-                    )
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Right(()))
               }
 
@@ -1513,26 +1480,15 @@ class DisposalDetailsControllerSpec
               )
               val newDraftReturn   =
                 updateDraftReturn(draftReturn, updatedAnswers)
+              val newJourney       = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
-                mockStoreSession(
-                  session.copy(journeyStatus =
-                    Some(
-                      journey.copy(
-                        draftReturn = newDraftReturn
-                      )
-                    )
-                  )
-                )(Right(()))
+                mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
               }
 
               checkIsRedirect(
@@ -1569,25 +1525,16 @@ class DisposalDetailsControllerSpec
                 draftReturn,
                 currentAnswers.copy(disposalPrice = AmountInPence.fromPounds(newDisposalPrice))
               )
+              val newJourney       = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(journeyStatus =
-                    Some(
-                      journey.copy(
-                        draftReturn = newDraftReturn
-                      )
-                    )
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Right(()))
               }
 
@@ -1740,6 +1687,11 @@ class DisposalDetailsControllerSpec
       }
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whatWasDisposalPrice(),
+        mockUUIDGenerator
+      )
 
       behave like noDisposalMethodBehaviour(performAction)
 
@@ -1897,6 +1849,11 @@ class DisposalDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whatWasDisposalPriceSubmit(),
+        mockUUIDGenerator
+      )
+
       behave like noDisposalMethodBehaviour(() => performAction(Seq.empty))
 
       behave like noPropertyShareBehaviour(() => performAction(Seq.empty))
@@ -2013,15 +1970,12 @@ class DisposalDetailsControllerSpec
                 draftReturn,
                 currentAnswers.copy(disposalPrice = newDisposalPrice)
               )
+              val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Left(Error(""))
                 )
               }
@@ -2060,25 +2014,16 @@ class DisposalDetailsControllerSpec
                 draftReturn,
                 currentAnswers.copy(disposalPrice = newDisposalPrice)
               )
+              val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(journeyStatus =
-                    Some(
-                      journey.copy(
-                        draftReturn = newDraftReturn
-                      )
-                    )
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Left(Error("")))
               }
 
@@ -2126,25 +2071,16 @@ class DisposalDetailsControllerSpec
               )
               val newDraftReturn   =
                 updateDraftReturn(draftReturn, updatedAnswers)
+              val newJourney       = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(journeyStatus =
-                    Some(
-                      journey.copy(
-                        draftReturn = newDraftReturn
-                      )
-                    )
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Right(()))
               }
 
@@ -2189,25 +2125,16 @@ class DisposalDetailsControllerSpec
               )
               val newDraftReturn   =
                 updateDraftReturn(draftReturn, updatedAnswers)
+              val newJourney       = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(journeyStatus =
-                    Some(
-                      journey.copy(
-                        draftReturn = newDraftReturn
-                      )
-                    )
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Right(()))
               }
 
@@ -2245,25 +2172,16 @@ class DisposalDetailsControllerSpec
                 draftReturn,
                 currentAnswers.copy(disposalPrice = AmountInPence.fromPounds(newDisposalPrice))
               )
+              val newJourney       = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(journeyStatus =
-                    Some(
-                      journey.copy(
-                        draftReturn = newDraftReturn
-                      )
-                    )
-                  )
+                  session.copy(journeyStatus = Some(newJourney))
                 )(Right(()))
               }
 
@@ -2446,6 +2364,11 @@ class DisposalDetailsControllerSpec
       }
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whatWereDisposalFees(),
+        mockUUIDGenerator
+      )
 
       behave like noDisposalMethodBehaviour(performAction)
 
@@ -2634,6 +2557,11 @@ class DisposalDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whatWereDisposalFeesSubmit(),
+        mockUUIDGenerator
+      )
+
       behave like noDisposalMethodBehaviour(() => performAction(Seq.empty))
 
       behave like noPropertyShareBehaviour(() => performAction(Seq.empty))
@@ -2772,15 +2700,12 @@ class DisposalDetailsControllerSpec
                   disposalFees = newDisposalFees
                 )
               )
+              val newJourney      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Left(Error(""))
                 )
               }
@@ -2822,19 +2747,16 @@ class DisposalDetailsControllerSpec
                   disposalFees = newDisposalFees
                 )
               )
+              val newJourney      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn)))
+                  session.copy(journeyStatus = Some(newJourney))
                 )(
                   Left(Error(""))
                 )
@@ -2884,20 +2806,15 @@ class DisposalDetailsControllerSpec
                 disposalFees = Some(AmountInPence.fromPounds(disposalFees))
               )
               val newDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
+              val newJourney     = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
-                mockStoreSession(
-                  session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn)))
-                )(
+                mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
                   Right(())
                 )
               }
@@ -2943,20 +2860,15 @@ class DisposalDetailsControllerSpec
               )
               val newDraftReturn  =
                 updateDraftReturn(draftReturn, updatedAnswers)
+              val newJourney      = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
-                mockStoreSession(
-                  session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn)))
-                )(
+                mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
                   Right(())
                 )
               }
@@ -2999,18 +2911,16 @@ class DisposalDetailsControllerSpec
                   disposalFees = AmountInPence.fromPounds(newDisposalFees)
                 )
               )
+              val newJourney      = journey.copy(draftReturn = newDraftReturn)
+
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  newDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(
+                mockStoreDraftReturn(newJourney)(
                   Right(())
                 )
                 mockStoreSession(
-                  session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn)))
+                  session.copy(journeyStatus = Some(newJourney))
                 )(
                   Right(())
                 )
@@ -3147,6 +3057,11 @@ class DisposalDetailsControllerSpec
       )
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswers(),
+        mockUUIDGenerator
+      )
 
       "skip the how much did you own page and redirect to the disposal price page" when {
 
@@ -3335,16 +3250,16 @@ class DisposalDetailsControllerSpec
                   Some(individualUserType)
                 )
 
+              val newDraftReturn = draftReturn.copy(
+                disposalDetailsAnswers = Some(completeAnswers)
+              )
+
+              val newJourney = journey.copy(draftReturn = newDraftReturn)
+
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  draftReturn.copy(
-                    disposalDetailsAnswers = Some(completeAnswers)
-                  ),
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Left(Error("")))
+                mockStoreDraftReturn(newJourney)(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -3370,27 +3285,17 @@ class DisposalDetailsControllerSpec
                   Some(individualUserType)
                 )
 
+              val newDraftReturn = draftReturn.copy(
+                disposalDetailsAnswers = Some(completeAnswers)
+              )
+
+              val newJourney = journey.copy(draftReturn = newDraftReturn)
+
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  draftReturn.copy(
-                    disposalDetailsAnswers = Some(completeAnswers)
-                  ),
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Right(()))
-                mockStoreSession(
-                  session.copy(
-                    journeyStatus = Some(
-                      journey.copy(draftReturn =
-                        draftReturn.copy(
-                          disposalDetailsAnswers = Some(completeAnswers)
-                        )
-                      )
-                    )
-                  )
-                )(Left(Error("")))
+                mockStoreDraftReturn(newJourney)(Right(()))
+                mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -3510,27 +3415,16 @@ class DisposalDetailsControllerSpec
                   Some(individualUserType)
                 )
 
+              val newDraftReturn = draftReturn.copy(
+                disposalDetailsAnswers = Some(completeAnswers)
+              )
+              val newJourney     = journey.copy(draftReturn = newDraftReturn)
+
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  draftReturn.copy(
-                    disposalDetailsAnswers = Some(completeAnswers)
-                  ),
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Right(()))
-                mockStoreSession(
-                  session.copy(
-                    journeyStatus = Some(
-                      journey.copy(draftReturn =
-                        draftReturn.copy(
-                          disposalDetailsAnswers = Some(completeAnswers)
-                        )
-                      )
-                    )
-                  )
-                )(Right(()))
+                mockStoreDraftReturn(newJourney)(Right(()))
+                mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
               }
 
               testIsCheckYourAnswers(
@@ -3562,6 +3456,11 @@ class DisposalDetailsControllerSpec
         controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswersSubmit(),
+        mockUUIDGenerator
+      )
 
       "redirect to the task list page" in {
         forAll(acceptedUserTypeGen, disposalMethodGen, individualUserTypeGen) {

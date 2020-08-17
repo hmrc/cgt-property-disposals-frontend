@@ -32,10 +32,12 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, NumberUtils, SessionData}
@@ -56,6 +58,7 @@ class DisposalDetailsController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
+  uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
   howMuchDidYouOwnPage: views.html.returns.disposaldetails.how_much_did_you_own,
@@ -66,24 +69,26 @@ class DisposalDetailsController @Inject() (
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
-    with SessionUpdates {
+    with SessionUpdates
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   type JourneyState =
     Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn]
 
   private def withFillingOutReturnAndDisposalDetailsAnswers(
-    request: RequestWithSessionData[_]
-  )(
     f: (
       SessionData,
       FillingOutReturn,
       JourneyState,
       DisposalDetailsAnswers
     ) => Future[Result]
-  ): Future[Result] =
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((_, s: StartingToAmendReturn)) =>
+        convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
+
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
           ) =>
         d.disposalDetailsAnswers
           .fold[Future[Result]](
@@ -98,6 +103,7 @@ class DisposalDetailsController @Inject() (
                 _,
                 _,
                 d: DraftSingleIndirectDisposalReturn,
+                _,
                 _
               )
             )
@@ -110,7 +116,7 @@ class DisposalDetailsController @Inject() (
             f(s, r, Left(d), answers)
           )(f(s, r, Left(d), _))
 
-      case _ => Redirect(controllers.routes.StartController.start())
+      case _                                   => Redirect(controllers.routes.StartController.start())
     }
 
   private def withDisposalMethod(draftReturn: JourneyState)(
@@ -185,24 +191,16 @@ class DisposalDetailsController @Inject() (
           formWithErrors => BadRequest(page(formWithErrors, backLink)),
           { value =>
             val newDraftReturn = updateAnswers(value, answers, draftReturn)
+            val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn.merge)
 
             val result = for {
               _ <- if (newDraftReturn.merge === draftReturn.merge)
                      EitherT.pure(())
                    else
-                     returnsService.storeDraftReturn(
-                       newDraftReturn.merge,
-                       fillingOutReturn.subscribedDetails.cgtReference,
-                       fillingOutReturn.agentReferenceNumber
-                     )
+                     returnsService.storeDraftReturn(newJourney)
               _ <- EitherT(
                      updateSession(sessionStore, request)(
-                       _.copy(journeyStatus =
-                         Some(
-                           fillingOutReturn
-                             .copy(draftReturn = newDraftReturn.merge)
-                         )
-                       )
+                       _.copy(journeyStatus = Some(newJourney))
                      )
                    )
             } yield ()
@@ -233,7 +231,7 @@ class DisposalDetailsController @Inject() (
 
   def howMuchDidYouOwn(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      withFillingOutReturnAndDisposalDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           displayPage(answers)(
             form = _.fold(
@@ -257,7 +255,7 @@ class DisposalDetailsController @Inject() (
 
   def howMuchDidYouOwnSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      withFillingOutReturnAndDisposalDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           submitBehaviour(fillingOutReturn, state, answers)(
             form = shareOfPropertyForm
@@ -325,7 +323,7 @@ class DisposalDetailsController @Inject() (
 
   def whatWasDisposalPrice(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      withFillingOutReturnAndDisposalDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalMethodAndShareOfProperty(state, answers) {
             case (disposalMethod, _) =>
@@ -353,7 +351,7 @@ class DisposalDetailsController @Inject() (
 
   def whatWasDisposalPriceSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      withFillingOutReturnAndDisposalDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalMethodAndShareOfProperty(state, answers) {
             case (disposalMethod, _) =>
@@ -412,7 +410,7 @@ class DisposalDetailsController @Inject() (
 
   def whatWereDisposalFees(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      withFillingOutReturnAndDisposalDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalMethodAndShareOfProperty(state, answers) {
             case (_, _) =>
@@ -441,7 +439,7 @@ class DisposalDetailsController @Inject() (
 
   def whatWereDisposalFeesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      withFillingOutReturnAndDisposalDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalMethodAndShareOfProperty(state, answers) {
             case (_, _) =>
@@ -502,7 +500,7 @@ class DisposalDetailsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      withFillingOutReturnAndDisposalDetailsAnswers {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalMethod(state) {
             case (disposalMethod) =>
@@ -534,20 +532,13 @@ class DisposalDetailsController @Inject() (
                       _.copy(disposalDetailsAnswers = Some(completeAnswers))
                     )
 
+                  val updatedJourney = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
+
                   val result = for {
-                    _ <- returnsService.storeDraftReturn(
-                           updatedDraftReturn,
-                           fillingOutReturn.subscribedDetails.cgtReference,
-                           fillingOutReturn.agentReferenceNumber
-                         )
+                    _ <- returnsService.storeDraftReturn(updatedJourney)
                     _ <- EitherT(
                            updateSession(sessionStore, request)(
-                             _.copy(journeyStatus =
-                               Some(
-                                 fillingOutReturn
-                                   .copy(draftReturn = updatedDraftReturn)
-                               )
-                             )
+                             _.copy(journeyStatus = Some(updatedJourney))
                            )
                          )
                   } yield ()
@@ -587,7 +578,7 @@ class DisposalDetailsController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      withFillingOutReturnAndDisposalDetailsAnswers {
         case _ =>
           Redirect(controllers.returns.routes.TaskListController.taskList())
       }

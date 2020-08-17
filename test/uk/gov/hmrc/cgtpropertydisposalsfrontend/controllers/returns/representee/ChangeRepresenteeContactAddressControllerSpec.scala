@@ -136,26 +136,26 @@ trait ChangeRepresenteeContactAddressControllerSpec
             if isDefinedAndContainsContactDetails(representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, s: DraftSingleDisposalReturn, _)
+        case FillingOutReturn(_, _, _, s: DraftSingleDisposalReturn, _, _)
             if isDefinedAndContainsContactDetails(s.representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn, _)
+        case FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn, _, _)
             if isDefinedAndContainsContactDetails(m.representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, i: DraftSingleIndirectDisposalReturn, _)
+        case FillingOutReturn(_, _, _, i: DraftSingleIndirectDisposalReturn, _, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn, _)
+        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn, _, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn, _)
+        case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn, _, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
-        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn, _)
+        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn, _, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
         case _ => false
@@ -371,11 +371,7 @@ class FillingOutReturnChangeRepresenteeAddressSpec extends ChangeRepresenteeCont
           val newFillingOutReturn =
             updateFillingOutReturn(fillingOutReturn, newAnswers)
 
-          mockStoreDraftReturn(
-            newFillingOutReturn.draftReturn,
-            newFillingOutReturn.subscribedDetails.cgtReference,
-            newFillingOutReturn.agentReferenceNumber
-          )(mockResult)
+          mockStoreDraftReturn(newFillingOutReturn)(mockResult)
       }
 
   }

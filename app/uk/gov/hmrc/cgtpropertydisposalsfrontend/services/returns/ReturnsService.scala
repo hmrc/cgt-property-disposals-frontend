@@ -28,11 +28,12 @@ import play.api.http.Status.OK
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.CountryCode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, _}
@@ -50,9 +51,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait ReturnsService {
 
   def storeDraftReturn(
-    draftReturn: DraftReturn,
-    cgtReference: CgtReference,
-    agentReferenceNumber: Option[AgentReferenceNumber]
+    fillingOutReturn: FillingOutReturn
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
@@ -89,32 +88,35 @@ class ReturnsServiceImpl @Inject() (
     with Logging {
 
   def storeDraftReturn(
-    draftReturn: DraftReturn,
-    cgtReference: CgtReference,
-    agentReferenceNumber: Option[AgentReferenceNumber]
+    fillingOutReturn: FillingOutReturn
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, Unit] =
-    connector.storeDraftReturn(draftReturn, cgtReference).subflatMap { httpResponse =>
-      if (httpResponse.status === OK) {
-        auditService.sendEvent(
-          "draftReturnUpdated",
-          DraftReturnUpdated(
-            draftReturn,
-            cgtReference.value,
-            agentReferenceNumber.map(_.value)
-          ),
-          "draft-return-updated"
-        )
-        Right(())
-      } else
-        Left(
-          Error(
-            s"Call to store draft return came back with status ${httpResponse.status}}"
-          )
-        )
-    }
+    if (fillingOutReturn.isAmendReturn)
+      EitherT.pure(())
+    else
+      connector
+        .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.subscribedDetails.cgtReference)
+        .subflatMap { httpResponse =>
+          if (httpResponse.status === OK) {
+            auditService.sendEvent(
+              "draftReturnUpdated",
+              DraftReturnUpdated(
+                fillingOutReturn.draftReturn,
+                fillingOutReturn.subscribedDetails.cgtReference.value,
+                fillingOutReturn.agentReferenceNumber.map(_.value)
+              ),
+              "draft-return-updated"
+            )
+            Right(())
+          } else
+            Left(
+              Error(
+                s"Call to store draft return came back with status ${httpResponse.status}}"
+              )
+            )
+        }
 
   def deleteDraftReturns(
     draftReturnIds: List[UUID]
