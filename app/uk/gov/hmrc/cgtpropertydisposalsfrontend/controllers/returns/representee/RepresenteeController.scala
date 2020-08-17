@@ -370,7 +370,8 @@ class RepresenteeController @Inject() (
 
                 updateDraftReturnAndSession(
                   newAnswers,
-                  journey
+                  journey,
+                  clearDraftReturn = false
                 ).fold(
                   { e =>
                     logger.warn("Could not update session or draft return", e)

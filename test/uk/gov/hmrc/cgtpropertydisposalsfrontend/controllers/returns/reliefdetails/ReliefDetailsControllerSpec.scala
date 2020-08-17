@@ -337,7 +337,8 @@ class ReliefDetailsControllerSpec
       ) =
         d.copy(
           reliefDetailsAnswers = Some(newAnswers),
-          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+          gainOrLossAfterReliefs = None
         )
 
       val key      = "privateResidentsRelief"

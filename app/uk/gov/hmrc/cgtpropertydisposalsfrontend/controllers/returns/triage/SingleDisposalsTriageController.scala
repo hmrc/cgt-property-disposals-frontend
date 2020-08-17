@@ -488,7 +488,7 @@ class SingleDisposalsTriageController @Inject() (
                       )
                     ),
                   { date =>
-                    val result        = triageAnswers
+                    val result = triageAnswers
                       .fold(_.disposalDate, c => Some(c.disposalDate)) match {
                       case Some(existingDisposalDate) if existingDisposalDate.value === date =>
                         EitherT.pure(Some(existingDisposalDate.taxYear))
@@ -1086,7 +1086,7 @@ class SingleDisposalsTriageController @Inject() (
                       )
                     ),
                   { date =>
-                    val result        = triageAnswers
+                    val result = triageAnswers
                       .fold(_.disposalDate, c => Some(c.disposalDate)) match {
                       case Some(existingDisposalDate) if existingDisposalDate.value === date.value =>
                         EitherT.pure(Some(existingDisposalDate.taxYear))

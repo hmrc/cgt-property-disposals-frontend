@@ -572,10 +572,7 @@ class CommonTriageQuestionsController @Inject() (
                 examplePropertyDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
                 supportingEvidenceAnswers = None,
-                exemptionAndLossesAnswers =
-                  if (furtherReturn)
-                    multiple.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                  else None,
+                exemptionAndLossesAnswers = None,
                 gainOrLossAfterReliefs = None
               ),
             single =>

@@ -1652,7 +1652,7 @@ class RepresenteeControllerSpec
             None,
             false,
             false,
-            None
+            Some(false)
           ),
           Capacitor
         )._1
@@ -1679,7 +1679,7 @@ class RepresenteeControllerSpec
             None,
             false,
             false,
-            None
+            Some(false)
           )
 
           val (session, sndr) = sessionWithStartingNewDraftReturn(
@@ -1721,7 +1721,7 @@ class RepresenteeControllerSpec
             None,
             false,
             false,
-            None
+            Some(false)
           )
 
           val (session, sndr) = sessionWithStartingNewDraftReturn(
@@ -3217,7 +3217,7 @@ class RepresenteeControllerSpec
         val (session, fillingOutReturn, draftReturn) =
           sessionWithFillingOutReturn(answers, Capacitor)
 
-        val newAnswers     = answers.copy(isFirstReturn = Some(true))
+        val newAnswers     = IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(true))
         val newDraftReturn = draftReturn.copy(representeeAnswers = Some(newAnswers))
         val newSession     = session.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
 
@@ -3262,15 +3262,7 @@ class RepresenteeControllerSpec
           val (session, fillingOutReturn, draftReturn) =
             sessionWithFillingOutReturn(answers, Capacitor)
 
-          val newAnswers = IncompleteRepresenteeAnswers(
-            Some(answers.name),
-            Some(answers.id),
-            answers.dateOfDeath,
-            Some(answers.contactDetails),
-            hasConfirmedPerson = true,
-            hasConfirmedContactDetails = true,
-            isFirstReturn = Some(false)
-          )
+          val newAnswers = IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(false))
 
           val newDraftReturn = draftReturn.copy(representeeAnswers = Some(newAnswers))
           val newSession     = session.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))

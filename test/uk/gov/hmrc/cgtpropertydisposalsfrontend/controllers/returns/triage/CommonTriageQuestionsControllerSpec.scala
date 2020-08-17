@@ -44,6 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 
 import scala.concurrent.Future
 
@@ -130,7 +131,11 @@ class CommonTriageQuestionsControllerSpec
     previousReturns: Option[PreviousReturnData] = None
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn      = sample[DraftSingleDisposalReturn].copy(
-      triageAnswers = singleDisposalTriageAnswers
+      triageAnswers = singleDisposalTriageAnswers,
+      gainOrLossAfterReliefs = None,
+      exemptionAndLossesAnswers = None,
+      reliefDetailsAnswers =
+        if (singleDisposalTriageAnswers.isPeriodOfAdmin()) Some(IncompleteReliefDetailsAnswers.empty) else None
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
@@ -726,7 +731,9 @@ class CommonTriageQuestionsControllerSpec
                   representeeAnswers = None,
                   examplePropertyDetailsAnswers = None,
                   yearToDateLiabilityAnswers = None,
-                  supportingEvidenceAnswers = None
+                  supportingEvidenceAnswers = None,
+                  exemptionAndLossesAnswers = None,
+                  gainOrLossAfterReliefs = None
                 ),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )

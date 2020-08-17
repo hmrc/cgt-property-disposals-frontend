@@ -373,7 +373,8 @@ class SingleDisposalsTriageControllerSpec
           reliefDetailsAnswers = None,
           exemptionAndLossesAnswers = None,
           yearToDateLiabilityAnswers = None,
-          supportingEvidenceAnswers = None
+          supportingEvidenceAnswers = None,
+          gainOrLossAfterReliefs = None
         )
 
       val requiredPreviousAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
@@ -524,7 +525,8 @@ class SingleDisposalsTriageControllerSpec
               reliefDetailsAnswers = None,
               exemptionAndLossesAnswers = None,
               yearToDateLiabilityAnswers = None,
-              supportingEvidenceAnswers = None
+              supportingEvidenceAnswers = None,
+              gainOrLossAfterReliefs = None
             )
 
           "the section is complete" in {
@@ -562,7 +564,8 @@ class SingleDisposalsTriageControllerSpec
                   reliefDetailsAnswers = None,
                   exemptionAndLossesAnswers = None,
                   yearToDateLiabilityAnswers = None,
-                  supportingEvidenceAnswers = None
+                  supportingEvidenceAnswers = None,
+                  gainOrLossAfterReliefs = None
                 ),
               checkIsRedirect(
                 _,
@@ -1947,7 +1950,8 @@ class SingleDisposalsTriageControllerSpec
                   .unset(_.pendingUpscanUpload)
               )
           },
-          supportingEvidenceAnswers = None
+          supportingEvidenceAnswers = None,
+          gainOrLossAfterReliefs = None
         )
 
       val tomorrow = today.plusDays(1L)
@@ -3129,10 +3133,12 @@ class SingleDisposalsTriageControllerSpec
             case n: NonCalculatedYTDAnswers =>
               Some(
                 n.unset(
-                  _.hasEstimatedDetails
-                )
+                    _.hasEstimatedDetails
+                  )
+                  .unset(_.mandatoryEvidence)
               )
-          }
+          },
+          gainOrLossAfterReliefs = None
         )
 
       val requiredPreviousAnswers =
@@ -4228,7 +4234,8 @@ class SingleDisposalsTriageControllerSpec
                   .unset(_.pendingUpscanUpload)
               )
           },
-          supportingEvidenceAnswers = None
+          supportingEvidenceAnswers = None,
+          gainOrLossAfterReliefs = None
         )
 
       val tomorrow = today.plusDays(1L)
@@ -5546,7 +5553,8 @@ class SingleDisposalsTriageControllerSpec
 
       "the user is filling in a draft return and" when {
         val draftReturn             =
-          sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers)
+          sample[DraftSingleDisposalReturn]
+            .copy(triageAnswers = currentAnswers, gainOrLossAfterReliefs = None, yearToDateLiabilityAnswers = None)
         val updatedDraftReturn      = updateDraftReturn(draftReturn, updatedAnswers)
         val fillingOutReturn        =
           sample[FillingOutReturn].copy(draftReturn = draftReturn)
@@ -5632,7 +5640,8 @@ class SingleDisposalsTriageControllerSpec
     representeeAnswers: Option[RepresenteeAnswers] = None
   ): Unit = {
     val draftReturn        =
-      sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers, representeeAnswers = representeeAnswers)
+      sample[DraftSingleDisposalReturn]
+        .copy(triageAnswers = currentAnswers, representeeAnswers = representeeAnswers, gainOrLossAfterReliefs = None)
     val updatedDraftReturn = updateDraftReturn(draftReturn)
 
     val fillingOutReturn        =
