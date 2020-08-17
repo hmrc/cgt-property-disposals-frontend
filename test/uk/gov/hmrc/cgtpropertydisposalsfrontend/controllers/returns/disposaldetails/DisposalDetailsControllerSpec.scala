@@ -378,7 +378,8 @@ class DisposalDetailsControllerSpec
           initialGainOrLoss = None,
           reliefDetailsAnswers =
             d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
-          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+          gainOrLossAfterReliefs = None
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))

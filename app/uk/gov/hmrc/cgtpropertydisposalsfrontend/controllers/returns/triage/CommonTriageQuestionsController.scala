@@ -550,7 +550,8 @@ class CommonTriageQuestionsController @Inject() (
         .unset(_.completionDate)
         .copy(individualUserType = Some(individualUserType))
 
-    val answers = triageAnswersFomState(state)
+    val answers       = triageAnswersFomState(state)
+    val furtherReturn = isFurtherReturn(state)
 
     state.bimap(
       _.copy(
@@ -570,7 +571,9 @@ class CommonTriageQuestionsController @Inject() (
                 representeeAnswers = None,
                 examplePropertyDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
-                supportingEvidenceAnswers = None
+                supportingEvidenceAnswers = None,
+                exemptionAndLossesAnswers = None,
+                gainOrLossAfterReliefs = None
               ),
             single =>
               single.copy(
@@ -579,10 +582,16 @@ class CommonTriageQuestionsController @Inject() (
                 propertyAddress = None,
                 disposalDetailsAnswers = None,
                 acquisitionDetailsAnswers = None,
-                reliefDetailsAnswers = None,
+                reliefDetailsAnswers = single.reliefDetailsAnswers
+                  .map(_.unsetPrrAndLettingRelief(answers.fold(_.isPeriodOfAdmin(), _.isPeriodOfAdmin()))),
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss = None,
-                supportingEvidenceAnswers = None
+                supportingEvidenceAnswers = None,
+                exemptionAndLossesAnswers =
+                  if (furtherReturn)
+                    single.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                  else None,
+                gainOrLossAfterReliefs = None
               ),
             singleIndirect =>
               singleIndirect.copy(
@@ -592,7 +601,12 @@ class CommonTriageQuestionsController @Inject() (
                 disposalDetailsAnswers = None,
                 acquisitionDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
-                supportingEvidenceAnswers = None
+                supportingEvidenceAnswers = None,
+                exemptionAndLossesAnswers =
+                  if (furtherReturn)
+                    singleIndirect.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                  else None,
+                gainOrLossAfterReliefs = None
               ),
             multipleIndirect =>
               multipleIndirect.copy(
@@ -600,7 +614,12 @@ class CommonTriageQuestionsController @Inject() (
                 representeeAnswers = None,
                 exampleCompanyDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
-                supportingEvidenceAnswers = None
+                supportingEvidenceAnswers = None,
+                exemptionAndLossesAnswers =
+                  if (furtherReturn)
+                    multipleIndirect.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                  else None,
+                gainOrLossAfterReliefs = None
               ),
             singleMixedUse =>
               singleMixedUse.copy(
@@ -608,7 +627,12 @@ class CommonTriageQuestionsController @Inject() (
                 representeeAnswers = None,
                 mixedUsePropertyDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
-                supportingEvidenceAnswers = None
+                supportingEvidenceAnswers = None,
+                exemptionAndLossesAnswers =
+                  if (furtherReturn)
+                    singleMixedUse.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                  else None,
+                gainOrLossAfterReliefs = None
               )
           )
         )
@@ -622,6 +646,11 @@ class CommonTriageQuestionsController @Inject() (
       _.fold(_.individualUserType, c => c.individualUserType),
       _.fold(_.individualUserType, c => c.individualUserType)
     )
+
+  private def isFurtherReturn(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Boolean =
+    state.fold(_.isFurtherReturn, _.isFurtherReturn).contains(true)
 
   private def getNumberOfProperties(
     state: Either[StartingNewDraftReturn, FillingOutReturn]

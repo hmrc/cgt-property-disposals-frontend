@@ -2134,7 +2134,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 disposalPrice = AmountInPence.fromPounds(10)
               )
             ),
-            yearToDateLiabilityAnswers = None
+            yearToDateLiabilityAnswers = None,
+            gainOrLossAfterReliefs = None
           )
 
           test(
@@ -2163,7 +2164,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 disposalPrice = Some(AmountInPence.fromPounds(10))
               )
             ),
-            yearToDateLiabilityAnswers = None
+            yearToDateLiabilityAnswers = None,
+            gainOrLossAfterReliefs = None
           )
 
           test(
@@ -2719,7 +2721,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 acquisitionPrice = AmountInPence.fromPounds(100)
               )
             ),
-            yearToDateLiabilityAnswers = None
+            yearToDateLiabilityAnswers = None,
+            gainOrLossAfterReliefs = None
           )
 
           test(
@@ -2747,7 +2750,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 acquisitionPrice = Some(AmountInPence.fromPounds(100))
               )
             ),
-            yearToDateLiabilityAnswers = None
+            yearToDateLiabilityAnswers = None,
+            gainOrLossAfterReliefs = None
           )
 
           test(

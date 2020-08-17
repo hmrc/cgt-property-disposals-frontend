@@ -290,9 +290,13 @@ class DisposalDetailsController @Inject() (
                     i.copy(
                       disposalDetailsAnswers = Some(newAnswers),
                       acquisitionDetailsAnswers =
-                        i.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(i.triageAnswers)),
+                        if (fillingOutReturn.isFurtherReturn.contains(true))
+                          None
+                        else
+                          i.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(i.triageAnswers)),
                       yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
-                        .flatMap(_.unsetAllButIncomeDetails())
+                        .flatMap(_.unsetAllButIncomeDetails()),
+                      gainOrLossAfterReliefs = None
                     ),
                   s =>
                     s.copy(
@@ -303,7 +307,8 @@ class DisposalDetailsController @Inject() (
                       reliefDetailsAnswers = s.reliefDetailsAnswers
                         .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
                       yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers
-                        .flatMap(_.unsetAllButIncomeDetails())
+                        .flatMap(_.unsetAllButIncomeDetails()),
+                      gainOrLossAfterReliefs = None
                     )
                 )
               }

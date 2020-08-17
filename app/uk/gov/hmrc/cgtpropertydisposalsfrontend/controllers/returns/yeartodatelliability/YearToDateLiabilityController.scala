@@ -941,12 +941,23 @@ class YearToDateLiabilityController @Inject() (
       )
         draftReturn
       else {
-        val newAnswers = nonCalculatedAnswers
-          .unset(_.taxDue)
-          .unset(_.mandatoryEvidence)
-          .unset(_.expiredEvidence)
-          .unset(_.pendingUpscanUpload)
-          .copy(hasEstimatedDetails = Some(hasEstimated))
+        val newAnswers =
+          if (fillingOutReturn.isFurtherReturn.contains(true))
+            nonCalculatedAnswers
+              .unset(_.checkForRepayment)
+              .unset(_.expiredEvidence)
+              .unset(_.mandatoryEvidence)
+              .unset(_.pendingUpscanUpload)
+              .unset(_.taxDue)
+              .unset(_.yearToDateLiability)
+              .copy(hasEstimatedDetails = Some(hasEstimated))
+          else
+            nonCalculatedAnswers
+              .unset(_.taxDue)
+              .unset(_.mandatoryEvidence)
+              .unset(_.expiredEvidence)
+              .unset(_.pendingUpscanUpload)
+              .copy(hasEstimatedDetails = Some(hasEstimated))
 
         updateDraftReturn(newAnswers, draftReturn)
       }
@@ -1366,13 +1377,22 @@ class YearToDateLiabilityController @Inject() (
                 )
                   draftReturn
                 else {
-                  val newAnswers = nonCalculatedAnswers
-                    .unset(_.hasEstimatedDetails)
-                    .unset(_.taxDue)
-                    .unset(_.mandatoryEvidence)
-                    .unset(_.expiredEvidence)
-                    .unset(_.pendingUpscanUpload)
-                    .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
+                  val newAnswers =
+                    if (fillingOutReturn.isFurtherReturn.contains(true))
+                      nonCalculatedAnswers
+                        .unset(_.hasEstimatedDetails)
+                        .unset(_.yearToDateLiability)
+                        .unset(_.taxDue)
+                        .unset(_.checkForRepayment)
+                        .unset(_.mandatoryEvidence)
+                    else
+                      nonCalculatedAnswers
+                        .unset(_.hasEstimatedDetails)
+                        .unset(_.taxDue)
+                        .unset(_.mandatoryEvidence)
+                        .unset(_.expiredEvidence)
+                        .unset(_.pendingUpscanUpload)
+                        .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
 
                   updateDraftReturn(newAnswers, draftReturn)
                 }
@@ -1458,7 +1478,12 @@ class YearToDateLiabilityController @Inject() (
 
                   case Some(yearToDateLiability) =>
                     handledConfirmFurtherReturnTaxDue(
-                      nonCalculatedAnswers,
+                      if (fillingOutReturn.isFurtherReturn.contains(true))
+                        nonCalculatedAnswers
+                          .unset(_.yearToDateLiability)
+                          .unset(_.checkForRepayment)
+                          .unset(_.mandatoryEvidence)
+                      else nonCalculatedAnswers,
                       previousYtd,
                       yearToDateLiability,
                       fillingOutReturn
@@ -1779,9 +1804,12 @@ class YearToDateLiabilityController @Inject() (
                 )
                   draftReturn
                 else {
-                  val newAnswers = nonCalculatedAnswers
-                    .unset(_.yearToDateLiability)
-                    .copy(yearToDateLiability = Some(yearToDateLiability))
+                  val newAnswers =
+                    nonCalculatedAnswers
+                      .unset(_.yearToDateLiability)
+                      .unset(_.mandatoryEvidence)
+                      .unset(_.taxDue)
+                      .copy(yearToDateLiability = Some(yearToDateLiability))
 
                   updateDraftReturn(newAnswers, draftReturn)
                 }

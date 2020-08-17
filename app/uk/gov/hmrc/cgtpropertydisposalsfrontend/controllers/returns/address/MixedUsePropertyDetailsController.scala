@@ -235,7 +235,8 @@ class MixedUsePropertyDetailsController @Inject() (
                     )
                 val updatedDraftReturn = r.draftReturn.copy(
                   mixedUsePropertyDetailsAnswers = Some(updatedAnswers),
-                  yearToDateLiabilityAnswers = None
+                  yearToDateLiabilityAnswers = None,
+                  gainOrLossAfterReliefs = None
                 )
                 val result             = updateDraftReturnAndSession(r, updatedDraftReturn)
 
@@ -339,7 +340,8 @@ class MixedUsePropertyDetailsController @Inject() (
                     )
                 val updatedDraftReturn = r.draftReturn.copy(
                   mixedUsePropertyDetailsAnswers = Some(updatedAnswers),
-                  yearToDateLiabilityAnswers = None
+                  yearToDateLiabilityAnswers = None,
+                  gainOrLossAfterReliefs = None
                 )
                 val result             = updateDraftReturnAndSession(r, updatedDraftReturn)
 
