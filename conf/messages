@@ -5175,7 +5175,7 @@ furtherReturnGuidance.stage-a.step2.example1.table1.total.key=Net gain on UK pro
 furtherReturnGuidance.stage-a.step2.example1.table1.total.value=£67,400 gain
 
 furtherReturnGuidance.stage-a.step1.example2.p1=Kavita sold 2 UK residential properties that both had a contract exchange date in this tax year. She wants to use the loss from a second disposal to reduce net gain on the first.
-furtherReturnGuidance.stage-a.step1.example2.headingText=Step 1 - Kavita works out the gain or loss after reliefs for each disposal she has made so far this tax year.
+furtherReturnGuidance.stage-a.step1.example2.headingText=Step A1 - Kavita works out the gain or loss after reliefs for each disposal she has made so far this tax year.
 furtherReturnGuidance.stage-a.step1.example2.p2=She includes the disposals she is including in this return.
 furtherReturnGuidance.stage-a.step1.example2.p3=<strong class="bold">Property 1 - UK residential property disposal in May 2020</strong>
 
@@ -5211,7 +5211,7 @@ furtherReturnGuidance.stage-a.step1.example2.table2.row6.value=£0
 furtherReturnGuidance.stage-a.step1.example2.table2.total.key=Loss after reliefs for property 2
 furtherReturnGuidance.stage-a.step1.example2.table2.total.value=£51,900 loss
 
-furtherReturnGuidance.stage-a.step2.example2.headingText=Step 2 - Kavita works out her net gain for the year.
+furtherReturnGuidance.stage-a.step2.example2.headingText=Step A2 - Kavita works out her net gain for the year.
 furtherReturnGuidance.stage-a.step2.example2.p1=She adds together all the UK property related gains or losses after reliefs
 furtherReturnGuidance.stage-a.step2.example2.table1.row1.key=She starts with property 1 gain after reliefs
 furtherReturnGuidance.stage-a.step2.example2.table1.row1.value=£157,900 gain
@@ -5219,7 +5219,7 @@ furtherReturnGuidance.stage-a.step2.example2.table1.row2.key=She adds property 2
 furtherReturnGuidance.stage-a.step2.example2.table1.row2.value=-£51,900 loss
 furtherReturnGuidance.stage-a.step2.example2.table1.row3.key=Total gains or losses after reliefs on all UK property related disposals
 furtherReturnGuidance.stage-a.step2.example2.table1.row3.value=£106,000 gain
-furtherReturnGuidance.stage-a.step2.example2.table1.row4.key=She subtracts allowable in-year Capital Gains Tax losses from shares that can be deducted
+furtherReturnGuidance.stage-a.step2.example2.table1.row4.key=She subtracts allowable in-year Capital Gains Tax losses
 furtherReturnGuidance.stage-a.step2.example2.table1.row4.value=£4000
 furtherReturnGuidance.stage-a.step2.example2.table1.row5.key=She subtracts allowable previous years Capital Gains Tax losses
 furtherReturnGuidance.stage-a.step2.example2.table1.row5.value=£0
