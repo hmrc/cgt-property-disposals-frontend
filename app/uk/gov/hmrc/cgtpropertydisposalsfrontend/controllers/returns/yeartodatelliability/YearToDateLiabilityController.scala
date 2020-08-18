@@ -1551,7 +1551,6 @@ class YearToDateLiabilityController @Inject() (
         val newAnswers = {
           if (fillingOutReturn.isFurtherReturn.contains(true))
             nonCalculatedAnswers
-              .unset(_.yearToDateLiability)
               .unset(_.checkForRepayment)
               .unset(_.mandatoryEvidence)
               .unset(_.expiredEvidence)
