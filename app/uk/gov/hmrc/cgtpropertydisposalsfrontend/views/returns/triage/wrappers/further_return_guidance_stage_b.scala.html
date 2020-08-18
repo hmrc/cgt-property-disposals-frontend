@@ -32,7 +32,7 @@
     @key = @{ "furtherReturnGuidance" }
 
     @if(userKey.contains(".personalRepInPeriodOfAdmin")){
-        <p>@messages(s"$key$userKey.stage-b.p1")</p>
+        <p>@Html(messages(s"$key$userKey.stage-b.p1", appConfig.cgtRatesUrl))</p>
         <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
         @details(
             messages(s"$key$userKey.stage-b.example4.link"),
@@ -61,7 +61,7 @@
           <li class="app-step-nav__step js-step" id="step-b2">
             @stepHeader(2, messages(s"$key.stage-b.step-b2"))
             <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-b2">
-              <p>@Html(messages(s"$key$userKey.stage-b.step-b2.p1"))</p>
+              <p>@Html(messages(s"$key$userKey.stage-b.step-b2.p1", appConfig.cgtRatesUrl))</>
               <ol class="list list-number">
                 <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li1"))</li>
                 <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li2"))</li>

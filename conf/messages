@@ -5536,7 +5536,7 @@ furtherReturnGuidance.trust.stage-b.example3.table1.total.value=£20,594
 
 
 
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.p1=Multiply the estate’s net gain for the year by the relevant rate of tax for the tax year for the estate (opens in a new window) to work out its overall Capital Gains Tax liability on its UK property-related disposals.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.p1=Multiply the estate’s net gain for the year by the relevant <a href="{0}" target="_blank">rate of tax for the tax year for the estate (opens in a new window)</a> to work out its overall Capital Gains Tax liability on its UK property-related disposals.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.link=Personal representative Akash sold 2 properties for Taylor family estate
 
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.headingText=Akash works out Taylor family estate’s overall Capital Gains Tax liability for residential property in tax year 2020 to 2021.
