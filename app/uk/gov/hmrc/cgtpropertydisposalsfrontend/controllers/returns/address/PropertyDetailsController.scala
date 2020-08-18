@@ -636,7 +636,8 @@ class PropertyDetailsController @Inject() (
                         )
                     val updatedDraftReturn = m.copy(
                       examplePropertyDetailsAnswers = Some(updatedAnswers),
-                      yearToDateLiabilityAnswers = None
+                      yearToDateLiabilityAnswers = None,
+                      gainOrLossAfterReliefs = None
                     )
                     val result             = for {
                       _ <- returnsService.storeDraftReturn(
@@ -743,7 +744,8 @@ class PropertyDetailsController @Inject() (
                         )
                     val updatedDraftReturn = m.copy(
                       examplePropertyDetailsAnswers = Some(updatedAnswers),
-                      yearToDateLiabilityAnswers = None
+                      yearToDateLiabilityAnswers = None,
+                      gainOrLossAfterReliefs = None
                     )
                     val result             = for {
                       _ <- returnsService.storeDraftReturn(

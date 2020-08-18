@@ -318,7 +318,8 @@ class MultipleDisposalsTriageController @Inject() (
                               .unset(_.acquisitionPrice)
                           ),
                           yearToDateLiabilityAnswers = None,
-                          supportingEvidenceAnswers = None
+                          supportingEvidenceAnswers = None,
+                          gainOrLossAfterReliefs = None
                         ),
                       multiple =>
                         multiple.copy(
@@ -328,7 +329,8 @@ class MultipleDisposalsTriageController @Inject() (
                               .unset(_.acquisitionPrice)
                           ),
                           yearToDateLiabilityAnswers = None,
-                          supportingEvidenceAnswers = None
+                          supportingEvidenceAnswers = None,
+                          gainOrLossAfterReliefs = None
                         )
                     )
                 )
@@ -740,7 +742,13 @@ class MultipleDisposalsTriageController @Inject() (
                           draftReturn.copy(
                             triageAnswers = newAnswers,
                             examplePropertyDetailsAnswers = None,
-                            yearToDateLiabilityAnswers = None,
+                            yearToDateLiabilityAnswers =
+                              if (state.fold(_.isFurtherReturn, _._1.isFurtherReturn).contains(true))
+                                draftReturn.yearToDateLiabilityAnswers.map {
+                                  case answers: CalculatedYTDAnswers    => answers.unset(_.hasEstimatedDetails)
+                                  case answers: NonCalculatedYTDAnswers => answers.unset(_.hasEstimatedDetails)
+                                }
+                              else None,
                             supportingEvidenceAnswers = None
                           )
                         )
@@ -819,14 +827,16 @@ class MultipleDisposalsTriageController @Inject() (
                       multipleIndirect =>
                         multipleIndirect.copy(
                           exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
-                          yearToDateLiabilityAnswers = None
+                          yearToDateLiabilityAnswers = None,
+                          gainOrLossAfterReliefs = None
                         ),
                       multiple =>
                         multiple.copy(
                           examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers.map(
                             _.unset(_.disposalDate)
                           ),
-                          yearToDateLiabilityAnswers = None
+                          yearToDateLiabilityAnswers = None,
+                          gainOrLossAfterReliefs = None
                         )
                     )
                 )
@@ -947,13 +957,15 @@ class MultipleDisposalsTriageController @Inject() (
                                               multipleIndirect =>
                                                 multipleIndirect.copy(
                                                   exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
-                                                  yearToDateLiabilityAnswers = None
+                                                  yearToDateLiabilityAnswers = None,
+                                                  gainOrLossAfterReliefs = None
                                                 ),
                                               multiple =>
                                                 multiple.copy(
                                                   examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers
                                                     .map(_.unset(_.disposalDate)),
-                                                  yearToDateLiabilityAnswers = None
+                                                  yearToDateLiabilityAnswers = None,
+                                                  gainOrLossAfterReliefs = None
                                                 )
                                             )
                                         )

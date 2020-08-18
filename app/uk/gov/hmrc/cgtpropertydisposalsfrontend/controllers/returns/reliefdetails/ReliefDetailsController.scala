@@ -259,7 +259,8 @@ class ReliefDetailsController @Inject() (
                 reliefDetailsAnswers = Some(updatedAnswers),
                 yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(
                   _.unsetAllButIncomeDetails()
-                )
+                ),
+                gainOrLossAfterReliefs = None
               )
             }
           }

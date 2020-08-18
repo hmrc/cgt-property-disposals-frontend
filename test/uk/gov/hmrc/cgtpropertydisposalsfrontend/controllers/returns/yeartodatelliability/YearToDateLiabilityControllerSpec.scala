@@ -4678,11 +4678,12 @@ class YearToDateLiabilityControllerSpec
             None,
             None,
             answers.yearToDateLiability,
-            answers.checkForRepayment
+            None
           )
           val draftReturn                 = sample[DraftSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
-            yearToDateLiabilityAnswers = Some(answers)
+            yearToDateLiabilityAnswers = Some(answers),
+            gainOrLossAfterReliefs = None
           )
           val journey                     = sample[FillingOutReturn].copy(
             draftReturn = draftReturn,
@@ -4696,7 +4697,8 @@ class YearToDateLiabilityControllerSpec
           )
           val newJourney                  = journey.copy(
             draftReturn = draftReturn.copy(
-              yearToDateLiabilityAnswers = Some(newAnswers)
+              yearToDateLiabilityAnswers = Some(newAnswers),
+              gainOrLossAfterReliefs = None
             )
           )
 
@@ -5905,7 +5907,7 @@ class YearToDateLiabilityControllerSpec
           )
           val newAnswers      = IncompleteNonCalculatedYTDAnswers
             .fromCompleteAnswers(answers)
-            .copy(yearToDateLiability = Some(AmountInPence(10000L)))
+            .copy(yearToDateLiability = Some(AmountInPence(10000L)), taxDue = None, mandatoryEvidence = None)
 
           val (session, journey, draftReturn) = sessionWithSingleDisposalState(
             Some(answers),

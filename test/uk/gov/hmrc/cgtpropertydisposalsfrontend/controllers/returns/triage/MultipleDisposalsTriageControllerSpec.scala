@@ -957,7 +957,8 @@ class MultipleDisposalsTriageControllerSpec
               .unset(_.acquisitionPrice)
           ),
           yearToDateLiabilityAnswers = None,
-          supportingEvidenceAnswers = None
+          supportingEvidenceAnswers = None,
+          gainOrLossAfterReliefs = None
         )
 
       val key = "multipleDisposalsWereYouAUKResident"
@@ -2650,12 +2651,17 @@ class MultipleDisposalsTriageControllerSpec
 
       def updateDraftReturn(
         d: DraftMultipleDisposalsReturn,
-        newAnswers: MultipleDisposalsTriageAnswers
+        newAnswers: MultipleDisposalsTriageAnswers,
+        isFurtherReturn: Boolean
       ) =
         d.copy(
           triageAnswers = newAnswers,
           examplePropertyDetailsAnswers = None,
-          yearToDateLiabilityAnswers = None,
+          yearToDateLiabilityAnswers = if (isFurtherReturn) d.yearToDateLiabilityAnswers.map {
+            case answers: CalculatedYTDAnswers    => answers.unset(_.hasEstimatedDetails)
+            case answers: NonCalculatedYTDAnswers => answers.unset(_.hasEstimatedDetails)
+          }
+          else None,
           supportingEvidenceAnswers = None
         )
 
@@ -2824,7 +2830,7 @@ class MultipleDisposalsTriageControllerSpec
                   Some(answers.completionDate)
                 )
               val updatedDraftReturn =
-                updateDraftReturn(draftReturn, updatedAnswers)
+                updateDraftReturn(draftReturn, updatedAnswers, journey.isFurtherReturn.contains(true))
               val updatedJourney     =
                 journey.copy(draftReturn = updatedDraftReturn)
 
@@ -2955,7 +2961,7 @@ class MultipleDisposalsTriageControllerSpec
             Some(answers.taxYear),
             Some(answers.completionDate)
           )
-        val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
+        val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers, journey.isFurtherReturn.contains(true))
         val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
         "there is an error updating the draft return" in {
@@ -3107,7 +3113,8 @@ class MultipleDisposalsTriageControllerSpec
           examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
             _.unset(_.disposalDate)
           ),
-          yearToDateLiabilityAnswers = None
+          yearToDateLiabilityAnswers = None,
+          gainOrLossAfterReliefs = None
         )
 
       val today = TimeUtils.today()
@@ -3462,7 +3469,8 @@ class MultipleDisposalsTriageControllerSpec
           examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
             _.unset(_.disposalDate)
           ),
-          yearToDateLiabilityAnswers = None
+          yearToDateLiabilityAnswers = None,
+          gainOrLossAfterReliefs = None
         )
 
       "show a form error" when {

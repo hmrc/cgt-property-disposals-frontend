@@ -302,7 +302,8 @@ class AcquisitionDetailsController @Inject() (
       i =>
         i.copy(
           acquisitionDetailsAnswers = Some(newAnswers),
-          yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+          yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+          gainOrLossAfterReliefs = None
         ),
       s => {
 
@@ -313,7 +314,8 @@ class AcquisitionDetailsController @Inject() (
           acquisitionDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
           reliefDetailsAnswers = reliefDetailsAnswers,
-          yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+          yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+          gainOrLossAfterReliefs = None
         )
       }
     )

@@ -306,7 +306,8 @@ class AcquisitionDetailsControllerSpec
       acquisitionDetailsAnswers = Some(newAnswers),
       initialGainOrLoss = None,
       reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
-      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+      gainOrLossAfterReliefs = None
     )
 
   def commonUpdateDraftReturn(
@@ -315,7 +316,8 @@ class AcquisitionDetailsControllerSpec
   ) =
     d.copy(
       acquisitionDetailsAnswers = Some(newAnswers),
-      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+      gainOrLossAfterReliefs = None
     )
 
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
