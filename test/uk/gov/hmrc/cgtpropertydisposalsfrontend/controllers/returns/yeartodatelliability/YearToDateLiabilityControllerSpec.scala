@@ -4677,7 +4677,7 @@ class YearToDateLiabilityControllerSpec
             None,
             None,
             None,
-            None,
+            answers.yearToDateLiability,
             None
           )
           val draftReturn                 = sample[DraftSingleDisposalReturn].copy(
