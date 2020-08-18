@@ -102,13 +102,33 @@ class GainOrLossAfterReliefsController @Inject() (
                 else {
                   val updatedAmount      = AmountInPence.fromPounds(value)
                   val updatedDraftReturn =
-                    draftReturn.fold(
-                      _.copy(gainOrLossAfterReliefs = Some(updatedAmount)),
-                      _.copy(gainOrLossAfterReliefs = Some(updatedAmount)),
-                      _.copy(gainOrLossAfterReliefs = Some(updatedAmount)),
-                      _.copy(gainOrLossAfterReliefs = Some(updatedAmount)),
-                      _.copy(gainOrLossAfterReliefs = Some(updatedAmount))
-                    )
+                      draftReturn.fold(
+                        _.copy(
+                          gainOrLossAfterReliefs = Some(updatedAmount),
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None
+                        ),
+                        _.copy(
+                          gainOrLossAfterReliefs = Some(updatedAmount),
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None
+                        ),
+                        _.copy(
+                          gainOrLossAfterReliefs = Some(updatedAmount),
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None
+                        ),
+                        _.copy(
+                          gainOrLossAfterReliefs = Some(updatedAmount),
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None
+                        ),
+                        _.copy(
+                          gainOrLossAfterReliefs = Some(updatedAmount),
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None
+                        )
+                      )
 
                   val result = for {
                     _ <- returnsService.storeDraftReturn(

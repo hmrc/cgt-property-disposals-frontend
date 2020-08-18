@@ -556,7 +556,7 @@ class GainOrLossAfterReliefsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockStoreDraftReturn(
-              updatedDraftReturn,
+              updatedDraftReturn.copy(exemptionAndLossesAnswers = None, yearToDateLiabilityAnswers = None),
               journey.subscribedDetails.cgtReference,
               journey.agentReferenceNumber
             )(Left(Error("")))
@@ -567,8 +567,8 @@ class GainOrLossAfterReliefsControllerSpec
 
         "there is an error updating the session" in {
           val (session, journey, draftReturn) = sessionWithSingleDisposalState(None)
-          val updatedDraftReturn              =
-            updateDraftReturn(draftReturn, AmountInPence(0L))
+          val updatedDraftReturn              = updateDraftReturn(draftReturn, AmountInPence(0L))
+            .copy(exemptionAndLossesAnswers = None, yearToDateLiabilityAnswers = None)
           val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
@@ -596,6 +596,7 @@ class GainOrLossAfterReliefsControllerSpec
         ) = {
           val (session, journey, draftReturn) = sessionWithSingleDisposalState(None)
           val newDraftReturn                  = updateDraftReturn(draftReturn, newGainOrLossAfterReliefs)
+            .copy(exemptionAndLossesAnswers = None, yearToDateLiabilityAnswers = None)
           val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
 
           inSequence {
