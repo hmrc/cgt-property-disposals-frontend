@@ -31,6 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorSc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
@@ -508,6 +509,57 @@ class ExemptionAndLossesControllerSpec
                 }
               )
           }
+        }
+
+        "the user is on a further return" in {
+          val disposalDate = sample[DisposalDate]
+
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithSingleDisposalsState(
+                    None,
+                    Some(disposalDate),
+                    userType,
+                    Some(individualUserType),
+                    isFurtherReturn = true
+                  )._1
+                )
+              }
+
+              val userKey = userMessageKey(individualUserType, userType)
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey(
+                  s"$key.furtherReturn.main$userKey.title",
+                  disposalDate.taxYear.startDateInclusive.getYear.toString,
+                  disposalDate.taxYear.endDateExclusive.getYear.toString
+                ),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe returns.routes.TaskListController
+                    .taskList()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.ExemptionAndLossesController
+                    .inYearLossesSubmit()
+                    .url
+                  doc
+                    .select("#guidanceLink")
+                    .attr("href")   shouldBe returns.triage.routes.FurtherReturnGuidanceController
+                    .guidance(
+                      FurtherReturnGuidanceController.BackLinkLocations.inYearLosses
+                    )
+                    .url
+                }
+              )
+          }
+
         }
 
       }
