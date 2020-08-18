@@ -1554,6 +1554,8 @@ class YearToDateLiabilityController @Inject() (
               .unset(_.yearToDateLiability)
               .unset(_.checkForRepayment)
               .unset(_.mandatoryEvidence)
+              .unset(_.expiredEvidence)
+              .unset(_.pendingUpscanUpload)
               .copy(taxDue = Some(taxDue))
           else
             nonCalculatedAnswers
