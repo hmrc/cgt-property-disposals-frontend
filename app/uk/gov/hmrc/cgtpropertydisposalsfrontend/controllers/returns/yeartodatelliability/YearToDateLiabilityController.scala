@@ -1385,6 +1385,7 @@ class YearToDateLiabilityController @Inject() (
                         .unset(_.taxDue)
                         .unset(_.checkForRepayment)
                         .unset(_.mandatoryEvidence)
+                        .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
                     else
                       nonCalculatedAnswers
                         .unset(_.hasEstimatedDetails)
@@ -1478,12 +1479,7 @@ class YearToDateLiabilityController @Inject() (
 
                   case Some(yearToDateLiability) =>
                     handledConfirmFurtherReturnTaxDue(
-                      if (fillingOutReturn.isFurtherReturn.contains(true))
-                        nonCalculatedAnswers
-                          .unset(_.yearToDateLiability)
-                          .unset(_.checkForRepayment)
-                          .unset(_.mandatoryEvidence)
-                      else nonCalculatedAnswers,
+                      nonCalculatedAnswers,
                       previousYtd,
                       yearToDateLiability,
                       fillingOutReturn
@@ -1552,11 +1548,22 @@ class YearToDateLiabilityController @Inject() (
       if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue))
         Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
       else {
-        val newAnswers = nonCalculatedAnswers
-          .unset(_.mandatoryEvidence)
-          .unset(_.expiredEvidence)
-          .unset(_.pendingUpscanUpload)
-          .copy(taxDue = Some(taxDue))
+        val newAnswers = {
+          if (fillingOutReturn.isFurtherReturn.contains(true))
+            nonCalculatedAnswers
+              .unset(_.yearToDateLiability)
+              .unset(_.checkForRepayment)
+              .unset(_.mandatoryEvidence)
+              .unset(_.expiredEvidence)
+              .unset(_.pendingUpscanUpload)
+              .copy(taxDue = Some(taxDue))
+          else
+            nonCalculatedAnswers
+              .unset(_.mandatoryEvidence)
+              .unset(_.expiredEvidence)
+              .unset(_.pendingUpscanUpload)
+              .copy(taxDue = Some(taxDue))
+        }
 
         val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
         val result         = for {
