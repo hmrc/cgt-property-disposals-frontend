@@ -1406,6 +1406,7 @@ class YearToDateLiabilityController @Inject() (
   def nonCalculatedEnterTaxDue(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        val isFurtherReturn = fillingOutReturn.isFurtherReturn.contains(true)
         answers match {
           case _: CalculatedYTDAnswers                       =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1418,8 +1419,8 @@ class YearToDateLiabilityController @Inject() (
                     Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
                   case Some(yearToDateLiability) =>
-                    if (nonCalculatedAnswers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).isEmpty)
-                      Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
+                    if (nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability).isEmpty)
+                      Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
                     else
                       Ok(
                         furtherReturnCheckTaxDuePage(
@@ -1442,7 +1443,7 @@ class YearToDateLiabilityController @Inject() (
                     )
                   )(
                     page =
-                      if (fillingOutReturn.isFurtherReturn.contains(true))
+                      if (isFurtherReturn)
                         furtherReturnEnterTaxDuePage(
                           _,
                           _,
@@ -1453,8 +1454,13 @@ class YearToDateLiabilityController @Inject() (
                       else
                         nonCalculatedEnterTaxDuePage(_, _)
                   )(
-                    requiredPreviousAnswer = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
-                    redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
+                    requiredPreviousAnswer = { answers =>
+                      if (isFurtherReturn) answers.fold(_.yearToDateLiability, _.yearToDateLiability).map(_ => ())
+                      else answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).map(_ => ())
+                    },
+                    redirectToIfNoRequiredPreviousAnswer =
+                      if (isFurtherReturn) routes.YearToDateLiabilityController.yearToDateLiability()
+                      else routes.YearToDateLiabilityController.hasEstimatedDetails()
                   )
                 }
             }
@@ -1466,6 +1472,8 @@ class YearToDateLiabilityController @Inject() (
   def nonCalculatedEnterTaxDueSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        val isFurtherReturn = fillingOutReturn.isFurtherReturn.contains(true)
+
         answers match {
           case _: CalculatedYTDAnswers                       =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1494,7 +1502,7 @@ class YearToDateLiabilityController @Inject() (
                     nonCalculatedAnswers
                   )(form = nonCalculatedTaxDueForm)(
                     page =
-                      if (fillingOutReturn.isFurtherReturn.contains(true))
+                      if (isFurtherReturn)
                         furtherReturnEnterTaxDuePage(
                           _,
                           _,
@@ -1505,11 +1513,13 @@ class YearToDateLiabilityController @Inject() (
                       else
                         nonCalculatedEnterTaxDuePage(_, _)
                   )(
-                    requiredPreviousAnswer = _.fold(
-                      _.hasEstimatedDetails,
-                      c => Some(c.hasEstimatedDetails)
-                    ),
-                    redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
+                    requiredPreviousAnswer = { answers =>
+                      if (isFurtherReturn) answers.fold(_.yearToDateLiability, _.yearToDateLiability).map(_ => ())
+                      else answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).map(_ => ())
+                    },
+                    redirectToIfNoRequiredPreviousAnswer =
+                      if (isFurtherReturn) routes.YearToDateLiabilityController.yearToDateLiability()
+                      else routes.YearToDateLiabilityController.hasEstimatedDetails()
                   ) { (amount, draftReturn) =>
                     val taxDue = AmountInPence.fromPounds(amount)
 
