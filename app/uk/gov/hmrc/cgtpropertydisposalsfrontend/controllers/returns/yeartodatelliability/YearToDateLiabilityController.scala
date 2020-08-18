@@ -906,7 +906,6 @@ class YearToDateLiabilityController @Inject() (
       else {
         val newAnswers = calculatedAnswers
           .unset(_.calculatedTaxDue)
-          .unset(_.taxDue)
           .unset(_.mandatoryEvidence)
           .unset(_.pendingUpscanUpload)
           .copy(hasEstimatedDetails = Some(hasEstimated))
@@ -1822,9 +1821,7 @@ class YearToDateLiabilityController @Inject() (
                 else {
                   val newAnswers =
                     nonCalculatedAnswers
-                      .unset(_.yearToDateLiability)
                       .unset(_.mandatoryEvidence)
-                      .unset(_.taxDue)
                       .copy(yearToDateLiability = Some(yearToDateLiability))
 
                   updateDraftReturn(newAnswers, draftReturn)

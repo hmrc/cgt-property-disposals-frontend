@@ -1641,12 +1641,14 @@ class YearToDateLiabilityControllerSpec
             }
 
             "the journey was complete" in {
+              val taxDue = sample[AmountInPence]
+
               val answers = CompleteCalculatedYTDAnswers(
                 estimatedIncome = AmountInPence.zero,
                 personalAllowance = None,
                 hasEstimatedDetails = false,
                 calculatedTaxDue = sample[CalculatedTaxDue],
-                taxDue = sample[AmountInPence],
+                taxDue = taxDue,
                 Some(sample[MandatoryEvidence])
               )
 
@@ -1656,7 +1658,7 @@ class YearToDateLiabilityControllerSpec
                   personalAllowance = None,
                   hasEstimatedDetails = Some(true),
                   None,
-                  None,
+                  taxDue = Some(taxDue),
                   None,
                   None,
                   None
@@ -5909,11 +5911,16 @@ class YearToDateLiabilityControllerSpec
         "all updates are successful" in {
           val submittedAnswer = "100"
           val answers         = sample[CompleteNonCalculatedYTDAnswers].copy(
-            yearToDateLiability = Some(AmountInPence(1L))
+            yearToDateLiability = Some(AmountInPence(1L)),
+            taxDue = AmountInPence(10L)
           )
           val newAnswers      = IncompleteNonCalculatedYTDAnswers
             .fromCompleteAnswers(answers)
-            .copy(yearToDateLiability = Some(AmountInPence(10000L)), taxDue = None, mandatoryEvidence = None)
+            .copy(
+              yearToDateLiability = Some(AmountInPence(10000L)),
+              taxDue = Some(AmountInPence(10L)),
+              mandatoryEvidence = None
+            )
 
           val (session, journey, draftReturn) = sessionWithSingleDisposalState(
             Some(answers),
