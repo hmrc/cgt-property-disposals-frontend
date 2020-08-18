@@ -3163,15 +3163,15 @@ annualExemptAmount.personalRepInPeriodOfAdmin.helpText=During the period of admi
 annualExemptAmount.personalRepInPeriodOfAdmin.agent.helpText=During the period of administration, all of the Annual Exempt Amount can be included in the estate’s return. This is the case even if the time between 6 April and the day the person died was very short.
 
 annualExemptAmount.details.1.header=What is the Annual Exempt Amount?
-annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
+annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
 annualExemptAmount.details.2.header=Who are vulnerable beneficiaries?
 annualExemptAmount.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
 annualExemptAmount.details.3.header=What is the Annual Exempt Amount?
-annualExemptAmount.details.3.body=The <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a> is an annual tax-free allowance. It is available to certain people who need to pay Capital Gains Tax. Most people only have to pay Capital Gains Tax on their gains for the tax year above the Annual Exempt Amount. Any losses or reliefs must have been subtracted from the gain already.
+annualExemptAmount.details.3.body=The <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> is an annual tax-free allowance. It is available to certain people who need to pay Capital Gains Tax. Most people only have to pay Capital Gains Tax on their gains for the tax year above the Annual Exempt Amount. Any losses or reliefs must have been subtracted from the gain already.
 
 annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
-annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new window).</a>
-annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new window).</a>
+annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new window)</a>.
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new window)</a>.
 
 annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.agent.error.tooLarge=Annual Exempt Amount must be {0} or less
