@@ -32,6 +32,7 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AmountOfMoneyErrorScenarios, AuthSupport, ControllerSpec, SessionSupport, returns}
@@ -3781,6 +3782,11 @@ class YearToDateLiabilityControllerSpec
                 doc.select("#taxableGainOrLoss > div:nth-child(2) > label").text() shouldBe expectedNetGainLabel
                 doc.select("#taxableGainOrLoss > div:nth-child(4) > label").text() shouldBe expectedNetLossLabel
                 doc.select("#link").text()                                         shouldBe expectedLinkText
+                doc
+                  .select("#link")
+                  .attr("href")                                                    shouldBe controllers.returns.triage.routes.FurtherReturnGuidanceController
+                  .taxableGainGuidance()
+                  .url
               }
             )
 
@@ -6048,7 +6054,7 @@ class YearToDateLiabilityControllerSpec
               isFurtherReturn = true,
               individualUserType = Some(Self)
             )._1,
-            routes.YearToDateLiabilityController.taxDue(),
+            routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
             "repayment.title",
             "repayment.helpText"
           )
@@ -6063,7 +6069,7 @@ class YearToDateLiabilityControllerSpec
               Some(Self),
               isFurtherReturn = true
             )._1,
-            routes.YearToDateLiabilityController.taxDue(),
+            routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
             "repayment.agent.title",
             "repayment.agent.helpText"
           )
@@ -6079,7 +6085,7 @@ class YearToDateLiabilityControllerSpec
               isFurtherReturn = true,
               individualUserType = None
             )._1,
-            routes.YearToDateLiabilityController.taxDue(),
+            routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
             "repayment.trust.title",
             "repayment.trust.helpText"
           )
@@ -6100,7 +6106,7 @@ class YearToDateLiabilityControllerSpec
               isFurtherReturn = true,
               individualUserType = Some(Capacitor)
             )._1,
-            routes.YearToDateLiabilityController.taxDue(),
+            routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
             "repayment.capacitor.title",
             "repayment.capacitor.helpText"
           )
@@ -6173,7 +6179,7 @@ class YearToDateLiabilityControllerSpec
 
     }
 
-    "handling submits on the repayment page" ignore {
+    "handling submits on the repayment page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.repaymentSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))

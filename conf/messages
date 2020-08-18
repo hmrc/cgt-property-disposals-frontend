@@ -404,7 +404,7 @@ further-returns.personalRep.help.l1=calculate the person’s Capital Gains Tax l
 further-returns.personalRepInPeriodOfAdmin.help.l1=calculate the estate’s Capital Gains Tax liability on your UK property-related disposals for the tax year so far
 
 
-further-returns.help.link=<a href="{0}">How to calculate the amount needed in this return</a>
+further-returns.help.link=<a href="{0}"" id="guidanceLink">How to calculate the amount needed in this return</a>
 further-returns.help.prompt=If you need help
 further-returns.help.contact=<a href="{0}">Contact HMRC</a>
 
@@ -3014,13 +3014,13 @@ inYearLosses.furtherReturn.personalRep.helpText2=If the person made a loss on th
 inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText2=If the estate made a loss on the disposal you have reported in this return you should also include that amount in this total.
 inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText2=If the estate made a loss on the disposal you have reported in this return you should also include that amount in this total.
 
-inYearLosses.furtherReturn.link=<a href="{0}">How to work out your overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.agent.link=<a href="{0}">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.trust.link=<a href="{0}">How to work out the trust’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.capacitor.link=<a href="{0}">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.personalRep.link=<a href="{0}">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.link=<a href="{0}">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.link=<a href="{0}">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.link=<a href="{0}" id="guidanceLink">How to work out your overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.agent.link=<a href="{0}" id="guidanceLink">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.trust.link=<a href="{0}" id="guidanceLink">How to work out the trust’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.capacitor.link=<a href="{0}" id="guidanceLink">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.personalRep.link=<a href="{0}" id="guidanceLink">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.link=<a href="{0}" id="guidanceLink">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" id="guidanceLink">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
 
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.agent.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
@@ -3931,20 +3931,20 @@ repayment.personalRepInPeriodOfAdmin.helpText=If you select ‘yes’ and the es
 repayment.personalRepInPeriodOfAdmin.agent.helpText=If you select ‘yes’ and the estate is due a repayment of Capital Gains Tax, HMRC will repay the money within 30 days. If the estate is not due a repayment you will not be contacted.
 
 repayment.error.required=Select yes if based on the details in this return you are due a repayment
-repayment.error.agent.required=Select yes if based on the details in this return your client is due a repayment
-repayment.error.trust.required=Select yes if based on the details in this return the trust is due a repayment
-repayment.error.capacitor.required=Select yes if based on the details in this return the person is due a repayment
-repayment.error.personalRep.required=Select yes if based on the details in this return the personal representative is due a repayment
-repayment.error.personalRepInPeriodOfAdmin.required=Select yes if based on the details in this return the estate is due a repayment
-repayment.error.personalRepInPeriodOfAdmin.agent.required=Select yes if based on the details in this return the estate is due a repayment
+repayment.agent.error.required=Select yes if based on the details in this return your client is due a repayment
+repayment.trust.error.required=Select yes if based on the details in this return the trust is due a repayment
+repayment.capacitor.error.required=Select yes if based on the details in this return the person is due a repayment
+repayment.personalRep.error.required=Select yes if based on the details in this return the personal representative is due a repayment
+repayment.personalRepInPeriodOfAdmin.error.required=Select yes if based on the details in this return the estate is due a repayment
+repayment.personalRepInPeriodOfAdmin.agent.error.required=Select yes if based on the details in this return the estate is due a repayment
 
 repayment.error.boolean=Select yes if based on the details in this return you are due a repayment
-repayment.error.agent.boolean=Select yes if based on the details in this return your client is due a repayment
-repayment.error.trust.boolean=Select yes if based on the details in this return the trust is due a repayment
-repayment.error.capacitor.boolean=Select yes if based on the details in this return the person is due a repayment
-repayment.error.personalRep.boolean=Select yes if based on the details in this return the person is due a repayment
-repayment.error.personalRepInPeriodOfAdmin.boolean=Select yes if based on the details in this return the estate is due a repayment
-repayment.error.personalRepInPeriodOfAdmin.agent.boolean=Select yes if based on the details in this return the estate is due a repayment
+repayment.agent.error.boolean=Select yes if based on the details in this return your client is due a repayment
+repayment.trust.error.boolean=Select yes if based on the details in this return the trust is due a repayment
+repayment.capacitor.error.boolean=Select yes if based on the details in this return the person is due a repayment
+repayment.personalRep.error.boolean=Select yes if based on the details in this return the person is due a repayment
+repayment.personalRepInPeriodOfAdmin.error.boolean=Select yes if based on the details in this return the estate is due a repayment
+repayment.personalRepInPeriodOfAdmin.agent.error.boolean=Select yes if based on the details in this return the estate is due a repayment
 
 repayment.cyaChange=whether a repayment is due
 
