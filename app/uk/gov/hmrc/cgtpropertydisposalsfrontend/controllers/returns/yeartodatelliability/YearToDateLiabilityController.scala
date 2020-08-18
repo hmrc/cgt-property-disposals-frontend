@@ -947,7 +947,6 @@ class YearToDateLiabilityController @Inject() (
               .unset(_.expiredEvidence)
               .unset(_.mandatoryEvidence)
               .unset(_.pendingUpscanUpload)
-              .unset(_.taxDue)
               .unset(_.yearToDateLiability)
               .copy(hasEstimatedDetails = Some(hasEstimated))
           else
