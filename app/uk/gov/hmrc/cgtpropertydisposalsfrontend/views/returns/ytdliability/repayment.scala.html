@@ -50,25 +50,25 @@
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
     representativeType match {
-        case Some(PersonalRepresentative) => ".personalRep"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent  => ".personalRepInPeriodOfAdmin.agent"
-        case Some(Capacitor) => ".capacitor"
+        case Some(PersonalRepresentative) => ".personalRep."
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin."
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent  => ".personalRepInPeriodOfAdmin.agent."
+        case Some(Capacitor) => ".capacitor."
         case None =>
-            if (isAgent) ".agent"
-            else if (isATrust) ".trust"
+            if (isAgent) ".agent."
+            else if (isATrust) ".trust."
             else ""
     }
 }
-@helpText = @{messages(s"$key$userKey.helpText")}
-@title = @{messages(s"$key$userKey.title")}
+@helpText = @{messages(s"$key${userKey.stripSuffix(".")}.helpText")}
+@title = @{messages(s"$key${userKey.stripSuffix(".")}.title")}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, customErrorKey = Some(s"$key${userKey.stripSuffix(".")}"))
     }
 
     @caption(messages(s"ytdLiability.furtherReturn.caption"))
@@ -77,7 +77,7 @@
         @yesNo(
             fieldId = key,
             label = pageHeading(title),
-            errorKey = form.error(key).map(e => e.message),
+            errorKey = form.error(key).map(e => s"${userKey.stripPrefix(".")}${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
             helpText = Some(Html(helpText))

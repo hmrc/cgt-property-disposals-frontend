@@ -827,6 +827,12 @@ class CommonTriageQuestionsControllerSpec
                   .html() shouldBe messageFromMessageKey(
                   s"further-returns.help.l2"
                 )
+
+                doc.select("#guidanceLink").attr("href") shouldBe routes.FurtherReturnGuidanceController
+                  .guidance(
+                    FurtherReturnGuidanceController.BackLinkLocations.furtherReturnStart
+                  )
+                  .url
               }
             )
           }

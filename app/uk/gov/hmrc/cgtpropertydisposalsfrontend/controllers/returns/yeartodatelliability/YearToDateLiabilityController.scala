@@ -1848,7 +1848,7 @@ class YearToDateLiabilityController @Inject() (
               )
             )(
               requiredPreviousAnswer = _.fold(_.taxDue, c => Some(c.taxDue)),
-              redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.taxDue()
+              redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
             )
 
           case _                                                                                      =>
@@ -1877,7 +1877,7 @@ class YearToDateLiabilityController @Inject() (
               )
             )(
               requiredPreviousAnswer = _.fold(_.taxDue, c => Some(c.taxDue)),
-              redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.taxDue()
+              redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
             ) { (checkForRepayment, draftReturn) =>
               if (
                 nonCalculatedAnswers
