@@ -1385,6 +1385,7 @@ class YearToDateLiabilityController @Inject() (
                         .unset(_.taxDue)
                         .unset(_.checkForRepayment)
                         .unset(_.mandatoryEvidence)
+                        .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
                     else
                       nonCalculatedAnswers
                         .unset(_.hasEstimatedDetails)
@@ -1478,12 +1479,7 @@ class YearToDateLiabilityController @Inject() (
 
                   case Some(yearToDateLiability) =>
                     handledConfirmFurtherReturnTaxDue(
-                      if (fillingOutReturn.isFurtherReturn.contains(true))
-                        nonCalculatedAnswers
-                          .unset(_.yearToDateLiability)
-                          .unset(_.checkForRepayment)
-                          .unset(_.mandatoryEvidence)
-                      else nonCalculatedAnswers,
+                      nonCalculatedAnswers,
                       previousYtd,
                       yearToDateLiability,
                       fillingOutReturn
