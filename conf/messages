@@ -4622,13 +4622,19 @@ tmpCustomError.p2=We apologise for the inconvenience and thank you for your pati
 
 representeeIsFirstReturn.capacitor.title=Is this the person’s first return for the tax year so far?
 representeeIsFirstReturn.personalRep.title=Is this the person who died’s first return for the tax year so far?
+representeeIsFirstReturn.personalRepInPeriodOfAdmin.title=Is this the estate’s first return in the current tax year for the person represented?
+representeeIsFirstReturn.agent.personalRepInPeriodOfAdmin.title=Is this your client or the estate’s first return in the current tax year for the person represented?
 
 representeeIsFirstReturn.helpText=Only include their Capital Gains Tax on UK property returns.
 
-representeeIsFirstReturn.capacitor.error.required=Select yes if this the person’s first return for the tax year so far
-representeeIsFirstReturn.personalRep.error.required=Select yes if this the person who died’s first return for the tax year so far
-representeeIsFirstReturn.capacitor.error.boolean=Select yes if this the person’s first return for the tax year so far
-representeeIsFirstReturn.personalRep.error.boolean=Select yes if this the person who died’s first return for the tax year so far
+representeeIsFirstReturn.capacitor.error.required=Select yes if this is the person’s first return for the tax year so far
+representeeIsFirstReturn.personalRep.error.required=Select yes if this is the person who died’s first return for the tax year so far
+representeeIsFirstReturn.personalRepInPeriodOfAdmin.error.required=Select yes if this is the estate’s first return for the tax year for the person represented
+representeeIsFirstReturn.agent.personalRepInPeriodOfAdmin.error.required=Select yes if this is your client or the estate’s first return for the tax year for the person represented
+representeeIsFirstReturn.capacitor.error.boolean=Select yes if this is the person’s first return for the tax year so far
+representeeIsFirstReturn.personalRep.error.boolean=Select yes if this is the person who died’s first return for the tax year so far
+representeeIsFirstReturn.personalRepInPeriodOfAdmin.error.boolean=Select yes if this is the estate’s first return for the tax year for the person represented
+representeeIsFirstReturn.agent.personalRepInPeriodOfAdmin.error.boolean=Select yes if this is your client or the estate’s first return for the tax year for the person represented
 representee.cyaChange.isFirstReturn=if this is the first return in this tax year so far
 
 #===================================================

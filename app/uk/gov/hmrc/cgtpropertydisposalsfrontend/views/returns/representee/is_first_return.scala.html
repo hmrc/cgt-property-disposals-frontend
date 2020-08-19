@@ -24,6 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -40,16 +41,17 @@
 @(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean, representativeType: RepresentativeType)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"representeeIsFirstReturn"}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @userKey = @{ representativeType match {
     case Capacitor => "capacitor"
-    case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => "personalRep"
-}
+    case PersonalRepresentative => "personalRep"
+    case PersonalRepresentativeInPeriodOfAdmin =>
+      if(isAgent) "agent.personalRepInPeriodOfAdmin" else "personalRepInPeriodOfAdmin"
+} }
 
-}
 @title = @{messages(s"$key.$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
