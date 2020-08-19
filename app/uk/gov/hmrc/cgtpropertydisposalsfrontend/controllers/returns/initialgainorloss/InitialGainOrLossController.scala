@@ -26,9 +26,10 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.InitialGainOrLossController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
@@ -55,11 +56,12 @@ class InitialGainOrLossController @Inject() (
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
-    with Logging {
+    with Logging
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   def enterInitialGainOrLoss: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (journeyStatus, draftSingleDisposalReturn, answer) =>
+      withFillingOutReturnAndAnswers { (journeyStatus, draftSingleDisposalReturn, answer) =>
         val isATrust           = journeyStatus.subscribedDetails.isATrust
         val representativeType =
           draftSingleDisposalReturn.triageAnswers.representativeType()
@@ -76,7 +78,7 @@ class InitialGainOrLossController @Inject() (
 
   def submitInitialGainOrLoss: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) {
+      withFillingOutReturnAndAnswers {
         case (fillingOutReturn, draftReturn, answers) =>
           val backLink           = getBackLink(answers)
           val isATrust           = fillingOutReturn.subscribedDetails.isATrust
@@ -137,7 +139,7 @@ class InitialGainOrLossController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (journeyStatus, draftSingleDisposalReturn, answers) =>
+      withFillingOutReturnAndAnswers { (journeyStatus, draftSingleDisposalReturn, answers) =>
         val isATrust           = journeyStatus.subscribedDetails.isATrust
         val representativeType =
           draftSingleDisposalReturn.triageAnswers.representativeType()
@@ -161,7 +163,7 @@ class InitialGainOrLossController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (_, _, _) =>
+      withFillingOutReturnAndAnswers { (_, _, _) =>
         Redirect(controllers.returns.routes.TaskListController.taskList())
       }
     }
@@ -172,15 +174,15 @@ class InitialGainOrLossController @Inject() (
     )(_ => routes.InitialGainOrLossController.checkYourAnswers())
 
   private def withFillingOutReturnAndAnswers(
-    request: RequestWithSessionData[_]
-  )(
     processReturnAndAnswersIntoResult: (
       FillingOutReturn,
       DraftSingleDisposalReturn,
       Option[AmountInPence]
     ) => Future[Result]
-  ): Future[Result] =
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(s: StartingToAmendReturn) =>
+        markUnmetDependency(s, sessionStore, errorHandler)
 
       case Some(
             fillingOutReturn @ FillingOutReturn(
@@ -198,7 +200,7 @@ class InitialGainOrLossController @Inject() (
           d.initialGainOrLoss
         )
 
-      case _ => Redirect(controllers.routes.StartController.start())
+      case _                              => Redirect(controllers.routes.StartController.start())
     }
 
 }

@@ -39,7 +39,8 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
     startingToAmendReturn: StartingToAmendReturn,
     sessionStore: SessionStore,
     errorHandler: ErrorHandler,
-    uuidGenerator: UUIDGenerator
+    uuidGenerator: UUIDGenerator,
+    redirectUrlOverride: Option[String] = None
   )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
     val fillingOutReturn = toFillingOutReturn(startingToAmendReturn, uuidGenerator)
 
@@ -54,10 +55,30 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
 
       case Right(_) =>
         logger.info("Converted from StartingToAmend to FillingOutReturn")
-        Redirect(request.uri)
+        Redirect(redirectUrlOverride.getOrElse(request.uri))
     }
 
   }
+
+  def markUnmetDependency(
+    startingToAmendReturn: StartingToAmendReturn,
+    sessionStore: SessionStore,
+    errorHandler: ErrorHandler
+  )(implicit
+    request: RequestWithSessionData[_],
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[Result] =
+    updateSession(sessionStore, request)(
+      _.copy(journeyStatus = Some(startingToAmendReturn.copy(unmetDependencyFieldUrl = Some(request.uri))))
+    ).map {
+      case Left(e)  =>
+        logger.warn("Could not mark unmet dependency", e)
+        errorHandler.errorResult()
+
+      case Right(_) =>
+        Redirect(amend.routes.AmendReturnController.unmetDependency())
+    }
 
   private def toFillingOutReturn(s: StartingToAmendReturn, uuidGenerator: UUIDGenerator): FillingOutReturn = {
     val id          = uuidGenerator.nextId()

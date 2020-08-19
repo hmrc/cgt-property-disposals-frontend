@@ -34,7 +34,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AmountOfMoneyErrorScenarios, AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
@@ -76,7 +76,8 @@ class YearToDateLiabilityControllerSpec
     with SessionSupport
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
 
   import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
 
@@ -476,6 +477,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like markUnmetDependencyBehaviour(controller.estimatedIncome())
+
       behave like noDisposalDateBehaviour(performAction)
 
       behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(
@@ -743,6 +746,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like markUnmetDependencyBehaviour(controller.estimatedIncomeSubmit())
+
       behave like noDisposalDateBehaviour(() => performAction())
 
       behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(() => performAction())
@@ -871,6 +876,8 @@ class YearToDateLiabilityControllerSpec
         controller.personalAllowance()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like markUnmetDependencyBehaviour(controller.personalAllowance())
 
       behave like noDisposalDateBehaviour(performAction)
 
@@ -1048,6 +1055,8 @@ class YearToDateLiabilityControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like markUnmetDependencyBehaviour(controller.personalAllowanceSubmit())
 
       behave like noDisposalDateBehaviour(() => performAction())
 
@@ -1267,6 +1276,8 @@ class YearToDateLiabilityControllerSpec
         controller.hasEstimatedDetails()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like markUnmetDependencyBehaviour(controller.hasEstimatedDetails())
 
       behave like noEstimatedIncomeBehaviour(performAction)
 
@@ -1551,6 +1562,8 @@ class YearToDateLiabilityControllerSpec
         controller.hasEstimatedDetailsSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*)
         )
+
+      behave like markUnmetDependencyBehaviour(controller.hasEstimatedDetailsSubmit())
 
       "handling users on a calculated journey" must {
         behave like redirectToStartBehaviour(() => performAction())
@@ -1961,6 +1974,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like markUnmetDependencyBehaviour(controller.taxDue())
+
       behave like noEstimatedIncomeBehaviour(performAction)
 
       behave like incompleteOtherJourneysBehaviour(performAction)
@@ -2352,6 +2367,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like markUnmetDependencyBehaviour(controller.taxDueSubmit())
+
       behave like noEstimatedIncomeBehaviour(() => performAction())
 
       behave like incompleteOtherJourneysBehaviour(() => performAction())
@@ -2589,6 +2606,8 @@ class YearToDateLiabilityControllerSpec
 
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
+
+      behave like markUnmetDependencyBehaviour(controller.checkYourAnswers())
 
       "the user is on a calculated journey" must {
 
@@ -3284,6 +3303,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like markUnmetDependencyBehaviour(controller.uploadMandatoryEvidence())
+
       behave like commonUploadMandatoryEvidenceBehaviour(performAction)
 
       "show an error page" when {
@@ -3522,6 +3543,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like markUnmetDependencyBehaviour(controller.checkYourAnswersSubmit())
+
       "redirect to the task list page" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -3549,6 +3572,8 @@ class YearToDateLiabilityControllerSpec
         controller.taxableGainOrLoss()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like markUnmetDependencyBehaviour(controller.taxableGainOrLoss())
 
       behave like redirectWhenNotNonCalculatedJourneyBehaviour(performAction)
 
@@ -3922,6 +3947,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like markUnmetDependencyBehaviour(controller.taxableGainOrLossSubmit())
+
       behave like redirectWhenNotNonCalculatedJourneyBehaviour(() => performAction())
 
       {
@@ -4217,6 +4244,8 @@ class YearToDateLiabilityControllerSpec
         controller.nonCalculatedEnterTaxDue()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like markUnmetDependencyBehaviour(controller.nonCalculatedEnterTaxDue())
 
       behave like redirectWhenNotNonCalculatedJourneyBehaviour(performAction)
 
@@ -4556,6 +4585,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like markUnmetDependencyBehaviour(controller.nonCalculatedEnterTaxDueSubmit())
+
       behave like redirectWhenNotNonCalculatedJourneyBehaviour(() => performAction())
 
       behave like noYearToDateLiabilityBehaviour(() => performAction())
@@ -4815,6 +4846,8 @@ class YearToDateLiabilityControllerSpec
         controller.scanningMandatoryEvidence()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like markUnmetDependencyBehaviour(controller.scanningMandatoryEvidence())
 
       behave like noPendingUploadbBehaviour(performAction)
 
@@ -5111,6 +5144,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like markUnmetDependencyBehaviour(controller.uploadMandatoryEvidenceFailure())
+
       behave like noPendingUploadbBehaviour(performAction)
 
       "show an error page" when {
@@ -5303,6 +5338,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like markUnmetDependencyBehaviour(controller.mandatoryEvidenceExpired())
+
       "redirect to the check your answers page" when {
 
         def test(answers: YearToDateLiabilityAnswers): Unit = {
@@ -5426,6 +5463,8 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] = controller.yearToDateLiability()(FakeRequest())
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like markUnmetDependencyBehaviour(controller.yearToDateLiability())
 
       "redirect to the check your answers page" when {
 
@@ -5683,6 +5722,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like markUnmetDependencyBehaviour(controller.yearToDateLiabilitySubmit())
+
       {
         val answers = IncompleteNonCalculatedYTDAnswers.empty.copy(
           taxableGainOrLoss = Some(AmountInPence(101L)),
@@ -5889,6 +5930,8 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] = controller.repayment()(FakeRequest())
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like markUnmetDependencyBehaviour(controller.repayment())
 
       "redirect to the check your answers page" when {
 
@@ -6097,6 +6140,8 @@ class YearToDateLiabilityControllerSpec
         controller.repaymentSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like markUnmetDependencyBehaviour(controller.repaymentSubmit())
 
       {
         val answers = IncompleteNonCalculatedYTDAnswers.empty.copy(

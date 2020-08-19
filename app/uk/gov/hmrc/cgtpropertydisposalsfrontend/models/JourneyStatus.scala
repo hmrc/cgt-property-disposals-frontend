@@ -157,7 +157,8 @@ object JourneyStatus {
     agentReferenceNumber: Option[AgentReferenceNumber],
     originalReturn: CompleteReturnWithSummary,
     isFirstReturn: Boolean,
-    previousSentReturns: Option[PreviousReturnData]
+    previousSentReturns: Option[PreviousReturnData],
+    unmetDependencyFieldUrl: Option[String]
   ) extends JourneyStatus
 
   final case class AlreadySubscribedWithDifferentGGAccount(

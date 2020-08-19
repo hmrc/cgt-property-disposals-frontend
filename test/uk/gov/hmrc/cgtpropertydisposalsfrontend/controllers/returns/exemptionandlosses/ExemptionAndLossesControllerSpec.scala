@@ -29,12 +29,12 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
@@ -60,7 +60,8 @@ class ExemptionAndLossesControllerSpec
     with SessionSupport
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -79,8 +80,8 @@ class ExemptionAndLossesControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case _: FillingOutReturn => true
-        case _                   => false
+        case _: FillingOutReturn | _: StartingToAmendReturn => true
+        case _                                              => false
       }
     )
 
@@ -326,6 +327,8 @@ class ExemptionAndLossesControllerSpec
         controller.inYearLosses()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like markUnmetDependencyBehaviour(controller.inYearLosses())
 
       val key = "inYearLosses"
 
@@ -581,6 +584,8 @@ class ExemptionAndLossesControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like markUnmetDependencyBehaviour(controller.inYearLossesSubmit())
 
       "redirect to the task list page" when {
 
@@ -886,6 +891,8 @@ class ExemptionAndLossesControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like markUnmetDependencyBehaviour(controller.previousYearsLosses())
+
       "redirect to the in year losses page" when {
 
         "that question has not been answered" in {
@@ -1078,6 +1085,8 @@ class ExemptionAndLossesControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like markUnmetDependencyBehaviour(controller.previousYearsLossesSubmit())
 
       "redirect to the in year losses page" when {
 
@@ -1383,6 +1392,8 @@ class ExemptionAndLossesControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like markUnmetDependencyBehaviour(controller.annualExemptAmount())
+
       "redirect to the task list page" when {
 
         "there is no disposal date" in {
@@ -1634,6 +1645,8 @@ class ExemptionAndLossesControllerSpec
       val disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like markUnmetDependencyBehaviour(controller.annualExemptAmountSubmit())
 
       "redirect to the task list page" when {
 
@@ -1931,6 +1944,8 @@ class ExemptionAndLossesControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like markUnmetDependencyBehaviour(controller.checkYourAnswers())
+
       def testIsRedirectWhenMissingAnswer(
         answers: IncompleteExemptionAndLossesAnswers,
         expectedRedirect: Call
@@ -2180,6 +2195,8 @@ class ExemptionAndLossesControllerSpec
         controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like markUnmetDependencyBehaviour(controller.checkYourAnswersSubmit())
 
       "redirect to the task list page" in {
         forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {

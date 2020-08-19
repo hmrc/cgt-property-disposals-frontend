@@ -29,10 +29,10 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -51,14 +51,15 @@ class InitialGainOrLossControllerSpec
     with SessionSupport
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
 
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case _: FillingOutReturn => true
-        case _                   => false
+        case _: FillingOutReturn | _: StartingToAmendReturn => true
+        case _                                              => false
       }
     )
 
@@ -94,6 +95,8 @@ class InitialGainOrLossControllerSpec
         controller.enterInitialGainOrLoss()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like markUnmetDependencyBehaviour(controller.enterInitialGainOrLoss)
 
       "display the page with backlink to tasklist" when {
 
@@ -272,6 +275,8 @@ class InitialGainOrLossControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like markUnmetDependencyBehaviour(controller.submitInitialGainOrLoss)
 
       "show a technical error page" when {
 
@@ -525,6 +530,8 @@ class InitialGainOrLossControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like markUnmetDependencyBehaviour(controller.checkYourAnswers())
+
       "redirect to the initial gain or loss page" when {
 
         "the question has not been answered yet" in {
@@ -630,6 +637,8 @@ class InitialGainOrLossControllerSpec
         controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like markUnmetDependencyBehaviour(controller.checkYourAnswersSubmit())
 
       "redirect to taskList" in {
         inSequence {

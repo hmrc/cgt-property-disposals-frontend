@@ -24,6 +24,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.request.RequestTarget
 import play.api.mvc.{Action, AnyContent}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.routes.{AmendReturnController => amendRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
@@ -37,7 +38,8 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
 
   def amendReturnToFillingOutReturnSpecBehaviour(
     performAction: Action[AnyContent],
-    mockUUIDGenerator: UUIDGenerator
+    mockUUIDGenerator: UUIDGenerator,
+    expectedRedirectToOverride: Option[String] = None
   )(implicit messagesApi: MessagesApi): Unit = {
 
     "redirect to the same endpoint when converting from a start amend journey to a filling out return journey" when {
@@ -46,10 +48,9 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
         completeReturn: CompleteReturn,
         expectedDraftReturn: DraftReturn
       ): Unit = {
-        val startingToAmend = sample[StartingToAmendReturn].copy(originalReturn =
-          sample[CompleteReturnWithSummary].copy(
-            completeReturn = completeReturn
-          )
+        val startingToAmend = sample[StartingToAmendReturn].copy(
+          originalReturn = sample[CompleteReturnWithSummary].copy(completeReturn = completeReturn),
+          unmetDependencyFieldUrl = Some("abc")
         )
 
         val fillingOutReturn = FillingOutReturn(
@@ -71,7 +72,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(Right(()))
         }
 
-        checkIsRedirect(performAction(request), uri)
+        checkIsRedirect(performAction(request), expectedRedirectToOverride.getOrElse(uri))
       }
 
       "given a CompleteMultipleDisposal return" in {
@@ -183,10 +184,9 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           LocalDate.now(Clock.systemUTC())
         )
 
-        val startingToAmend = sample[StartingToAmendReturn].copy(originalReturn =
-          sample[CompleteReturnWithSummary].copy(
-            completeReturn = completeReturn
-          )
+        val startingToAmend = sample[StartingToAmendReturn].copy(
+          originalReturn = sample[CompleteReturnWithSummary].copy(completeReturn = completeReturn),
+          unmetDependencyFieldUrl = Some("abc")
         )
 
         val fillingOutReturn = FillingOutReturn(
@@ -207,6 +207,60 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
 
         checkIsTechnicalErrorPage(performAction(FakeRequest()))
       }
+    }
+
+  }
+
+  def markUnmetDependencyBehaviour(
+    performAction: Action[AnyContent]
+  )(implicit messagesApi: MessagesApi): Unit = {
+
+    val startingToAmend = sample[StartingToAmendReturn]
+    val uri             = "/uri"
+    val request         = FakeRequest().withTarget(RequestTarget(uri, "", Map.empty))
+
+    "redirect to the unmet dependency page" when {
+
+      "the session has been updated successfully" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(startingToAmend)
+            )
+          )
+          mockStoreSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(startingToAmend.copy(unmetDependencyFieldUrl = Some(uri)))
+            )
+          )(Right(()))
+        }
+
+        checkIsRedirect(performAction(request), amendRoutes.unmetDependency())
+      }
+
+    }
+
+    "show an error page" when {
+
+      "there is an error updating the session to mark the unmet dependency" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(startingToAmend)
+            )
+          )
+          mockStoreSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(startingToAmend.copy(unmetDependencyFieldUrl = Some(uri)))
+            )
+          )(Left(Error("")))
+        }
+
+        checkIsTechnicalErrorPage(performAction(request))
+      }
+
     }
 
   }

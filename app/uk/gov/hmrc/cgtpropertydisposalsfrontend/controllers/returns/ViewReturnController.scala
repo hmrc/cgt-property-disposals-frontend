@@ -96,7 +96,8 @@ class ViewReturnController @Inject() (
               viewingReturn.isFirstReturn
             ),
             viewingReturn.isFirstReturn,
-            viewingReturn.previousSentReturns
+            viewingReturn.previousSentReturns,
+            None
           )
 
           updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourneyStatus))).map {
