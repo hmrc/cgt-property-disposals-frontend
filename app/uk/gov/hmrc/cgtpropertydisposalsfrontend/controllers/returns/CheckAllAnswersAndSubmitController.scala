@@ -80,7 +80,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
             completeReturn.representativeType(),
             completeReturn.isIndirectDisposal(),
             fillingOutReturn.agentReferenceNumber,
-            fillingOutReturn.isFurtherReturn,
+            fillingOutReturn.isFurtherOrAmendReturn,
             false
           )
         )
@@ -102,7 +102,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                     completeReturn.representativeType(),
                     completeReturn.isIndirectDisposal(),
                     fillingOutReturn.agentReferenceNumber,
-                    fillingOutReturn.isFurtherReturn,
+                    fillingOutReturn.isFurtherOrAmendReturn,
                     true
                   )(request, explicitEnglishMessage, viewConfig)
                     .toString()
@@ -181,7 +181,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
           fillingOutReturn.draftReturn.id,
           fillingOutReturn.subscribedDetails,
           fillingOutReturn.agentReferenceNumber,
-          fillingOutReturn.isFurtherReturn.contains(true),
+          fillingOutReturn.isFurtherOrAmendReturn.contains(true),
           cyaPageB64Html
         )
       )
@@ -306,6 +306,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                 _,
                 _,
                 draftReturn: DraftSingleDisposalReturn,
+                _,
                 _
               )
             )
@@ -324,6 +325,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                 _,
                 _,
                 draftReturn: DraftMultipleDisposalsReturn,
+                _,
                 _
               )
             )
@@ -342,6 +344,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                 _,
                 _,
                 draftReturn: DraftSingleIndirectDisposalReturn,
+                _,
                 _
               )
             )
@@ -360,6 +363,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                 _,
                 _,
                 draftReturn: DraftMultipleIndirectDisposalsReturn,
+                _,
                 _
               )
             )
@@ -378,6 +382,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                 _,
                 _,
                 draftReturn: DraftSingleMixedUseDisposalReturn,
+                _,
                 _
               )
             )

@@ -102,8 +102,30 @@ object JourneyStatus {
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
     draftReturn: DraftReturn,
-    previousSentReturns: Option[PreviousReturnData]
+    previousSentReturns: Option[PreviousReturnData],
+    originalReturn: Option[CompleteReturnWithSummary]
   ) extends JourneyStatus
+
+  object FillingOutReturn {
+
+    implicit class FillingOutReturnOps(private val f: FillingOutReturn) extends AnyVal {
+
+      def isFurtherOrAmendReturn: Option[Boolean] =
+        if (isAmendReturn) Some(true) else isFurtherReturn
+
+      def isAmendReturn: Boolean = f.originalReturn.isDefined
+
+      def isFurtherReturn: Option[Boolean] =
+        determineIfFurtherReturn(
+          f.subscribedDetails,
+          f.previousSentReturns,
+          f.draftReturn.triageAnswers(),
+          f.draftReturn.representeeAnswers
+        )
+
+    }
+
+  }
 
   final case class JustSubmittedReturn(
     subscribedDetails: SubscribedDetails,
@@ -217,65 +239,46 @@ object JourneyStatus {
   final case object AgentWithoutAgentEnrolment extends JourneyStatus
 
   implicit class StartingNewDraftReturnOps(private val s: StartingNewDraftReturn) extends AnyVal {
-    def isFurtherReturn: Option[Boolean] = {
-      lazy val hasPreviousSentReturns = s.previousSentReturns.exists(_.summaries.nonEmpty)
-      s.subscribedDetails.name match {
-        case Left(_)  =>
-          Some(hasPreviousSentReturns)
 
-        case Right(_) =>
-          val individualUserType = s.newReturnTriageAnswers
-            .fold(
-              _.fold(_.individualUserType, _.individualUserType),
-              _.fold(_.individualUserType, _.individualUserType)
-            )
+    def isFurtherReturn: Option[Boolean] =
+      determineIfFurtherReturn(
+        s.subscribedDetails,
+        s.previousSentReturns,
+        s.newReturnTriageAnswers,
+        s.representeeAnswers
+      )
 
-          individualUserType.flatMap {
-            case _: RepresentativeType =>
-              s.representeeAnswers
-                .flatMap(
-                  _.fold(_.isFirstReturn, complete => Some(complete.isFirstReturn))
-                    .map(!_)
-                )
-            case _                     =>
-              Some(hasPreviousSentReturns)
-          }
-      }
-
-    }
   }
 
-  implicit class FillingOutReturnOps(private val f: FillingOutReturn) extends AnyVal {
+  private def determineIfFurtherReturn(
+    subscribedDetails: SubscribedDetails,
+    previousReturnData: Option[PreviousReturnData],
+    triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
+    representeeAnswers: Option[RepresenteeAnswers]
+  ): Option[Boolean] = {
+    lazy val hasPreviousSentReturns = previousReturnData.exists(_.summaries.nonEmpty)
+    subscribedDetails.name match {
+      case Left(_)  =>
+        Some(hasPreviousSentReturns)
 
-    def isFurtherReturn: Option[Boolean] = {
-      lazy val hasPreviousSentReturns = f.previousSentReturns.exists(_.summaries.nonEmpty)
-      f.subscribedDetails.name match {
-        case Left(_)  =>
-          Some(hasPreviousSentReturns)
+      case Right(_) =>
+        val individualUserType = triageAnswers
+          .fold(
+            _.fold(_.individualUserType, _.individualUserType),
+            _.fold(_.individualUserType, _.individualUserType)
+          )
 
-        case Right(_) =>
-          val individualUserType = f.draftReturn
-            .triageAnswers()
-            .fold(
-              _.fold(_.individualUserType, _.individualUserType),
-              _.fold(_.individualUserType, _.individualUserType)
-            )
-
-          individualUserType.flatMap {
-            case _: RepresentativeType =>
-              f.draftReturn.representeeAnswers
-                .flatMap(
-                  _.fold(_.isFirstReturn, complete => Some(complete.isFirstReturn))
-                    .map(!_)
-                )
-            case _                     =>
-              Some(hasPreviousSentReturns)
-
-          }
-
-      }
+        individualUserType.flatMap {
+          case _: RepresentativeType =>
+            representeeAnswers
+              .flatMap(
+                _.fold(_.isFirstReturn, complete => Some(complete.isFirstReturn))
+                  .map(!_)
+              )
+          case _                     =>
+            Some(hasPreviousSentReturns)
+        }
     }
-
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

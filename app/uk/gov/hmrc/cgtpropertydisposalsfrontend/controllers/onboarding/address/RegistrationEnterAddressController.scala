@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Registratio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.IndividualSupplyingInformationAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -67,7 +67,7 @@ class RegistrationEnterAddressController @Inject() (
   def validJourney(
     request: RequestWithSessionData[_]
   ): Either[
-    Result,
+    Future[Result],
     (SessionData, IndividualSupplyingInformationAddressJourney)
   ] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {

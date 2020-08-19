@@ -29,12 +29,13 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => addressRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{StartingToAmendToFillingOutReturnBehaviour, routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress, addressLineMapping}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, SessionData, TaxYear, TimeUtils}
@@ -57,6 +58,7 @@ class PropertyDetailsController @Inject() (
   val sessionStore: SessionStore,
   val ukAddressLookupService: UKAddressLookupService,
   returnsService: ReturnsService,
+  uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
   val enterPostcodePage: views.html.address.enter_postcode,
@@ -79,7 +81,8 @@ class PropertyDetailsController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
-    with AddressController[FillingOutReturnAddressJourney] {
+    with AddressController[FillingOutReturnAddressJourney]
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   import PropertyDetailsController._
 
@@ -91,8 +94,12 @@ class PropertyDetailsController @Inject() (
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, FillingOutReturnAddressJourney)] =
+  ): Either[Future[Result], (SessionData, FillingOutReturnAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((_, s: StartingToAmendReturn))      =>
+        implicit val r: RequestWithSessionData[_] = request
+        Left(convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator))
+
       case Some((sessionData, r: FillingOutReturn)) =>
         val draftReturn = r.draftReturn.fold(
           m => Some(Left(m)),
@@ -103,7 +110,7 @@ class PropertyDetailsController @Inject() (
         )
 
         draftReturn
-          .fold[Either[Result, (SessionData, FillingOutReturnAddressJourney)]](
+          .fold[Either[Future[Result], (SessionData, FillingOutReturnAddressJourney)]](
             Left(Redirect(controllers.routes.StartController.start()))
           ) { d =>
             Right(
@@ -173,13 +180,10 @@ class PropertyDetailsController @Inject() (
               val updatedDraftReturn = m.copy(
                 examplePropertyDetailsAnswers = Some(answers.unset(_.disposalDate).copy(address = Some(a)))
               )
+              val updatedJourney     = journey.journey.copy(draftReturn = updatedDraftReturn)
               returnsService
-                .storeDraftReturn(
-                  updatedDraftReturn,
-                  journey.journey.subscribedDetails.cgtReference,
-                  journey.journey.agentReferenceNumber
-                )
-                .map(_ => journey.journey.copy(draftReturn = updatedDraftReturn))
+                .storeDraftReturn(updatedJourney)
+                .map(_ => updatedJourney)
             }
 
           case Right(d: DraftSingleDisposalReturn)   =>
@@ -187,13 +191,10 @@ class PropertyDetailsController @Inject() (
               EitherT.pure(journey.journey)
             else {
               val updatedDraftReturn = d.copy(propertyAddress = Some(a))
+              val updatedJourney     = journey.journey.copy(draftReturn = updatedDraftReturn)
               returnsService
-                .storeDraftReturn(
-                  updatedDraftReturn,
-                  journey.journey.subscribedDetails.cgtReference,
-                  journey.journey.agentReferenceNumber
-                )
-                .map(_ => journey.journey.copy(draftReturn = updatedDraftReturn))
+                .storeDraftReturn(updatedJourney)
+                .map(_ => updatedJourney)
             }
         }
 
@@ -521,20 +522,14 @@ class PropertyDetailsController @Inject() (
                               )
                           val updatedDraftReturn =
                             m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
-                          val result             = for {
-                            _ <- returnsService.storeDraftReturn(
-                                   updatedDraftReturn,
-                                   r.journey.subscribedDetails.cgtReference,
-                                   r.journey.agentReferenceNumber
-                                 )
+
+                          val updatedJourney = r.journey.copy(draftReturn = updatedDraftReturn)
+
+                          val result = for {
+                            _ <- returnsService.storeDraftReturn(updatedJourney)
                             _ <- EitherT(
                                    updateSession(sessionStore, request)(
-                                     _.copy(journeyStatus =
-                                       Some(
-                                         r.journey
-                                           .copy(draftReturn = updatedDraftReturn)
-                                       )
-                                     )
+                                     _.copy(journeyStatus = Some(updatedJourney))
                                    )
                                  )
                           } yield ()
@@ -639,19 +634,12 @@ class PropertyDetailsController @Inject() (
                       yearToDateLiabilityAnswers = None,
                       gainOrLossAfterReliefs = None
                     )
+                    val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
                     val result             = for {
-                      _ <- returnsService.storeDraftReturn(
-                             updatedDraftReturn,
-                             r.journey.subscribedDetails.cgtReference,
-                             r.journey.agentReferenceNumber
-                           )
+                      _ <- returnsService.storeDraftReturn(updatedJourney)
                       _ <- EitherT(
                              updateSession(sessionStore, request)(
-                               _.copy(journeyStatus =
-                                 Some(
-                                   r.journey.copy(draftReturn = updatedDraftReturn)
-                                 )
-                               )
+                               _.copy(journeyStatus = Some(updatedJourney))
                              )
                            )
                     } yield ()
@@ -747,19 +735,12 @@ class PropertyDetailsController @Inject() (
                       yearToDateLiabilityAnswers = None,
                       gainOrLossAfterReliefs = None
                     )
+                    val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
                     val result             = for {
-                      _ <- returnsService.storeDraftReturn(
-                             updatedDraftReturn,
-                             r.journey.subscribedDetails.cgtReference,
-                             r.journey.agentReferenceNumber
-                           )
+                      _ <- returnsService.storeDraftReturn(updatedJourney)
                       _ <- EitherT(
                              updateSession(sessionStore, request)(
-                               _.copy(journeyStatus =
-                                 Some(
-                                   r.journey.copy(draftReturn = updatedDraftReturn)
-                                 )
-                               )
+                               _.copy(journeyStatus = Some(updatedJourney))
                              )
                            )
                     } yield ()
@@ -815,19 +796,12 @@ class PropertyDetailsController @Inject() (
                     CompleteExamplePropertyDetailsAnswers(a, dd, dp, ap)
                   val updatedDraftReturn = m
                     .copy(examplePropertyDetailsAnswers = Some(completeAnswers))
+                  val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
                   val result             = for {
-                    _ <- returnsService.storeDraftReturn(
-                           updatedDraftReturn,
-                           r.journey.subscribedDetails.cgtReference,
-                           r.journey.agentReferenceNumber
-                         )
+                    _ <- returnsService.storeDraftReturn(updatedJourney)
                     _ <- EitherT(
                            updateSession(sessionStore, request)(
-                             _.copy(journeyStatus =
-                               Some(
-                                 r.journey.copy(draftReturn = updatedDraftReturn)
-                               )
-                             )
+                             _.copy(journeyStatus = Some(updatedJourney))
                            )
                          )
                   } yield ()

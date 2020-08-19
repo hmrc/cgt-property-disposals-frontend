@@ -29,14 +29,14 @@ import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.SingleDisposalPropertyDetailsControllerSpec.validatePropertyAddressPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftSingleDisposalReturn}
@@ -51,7 +51,10 @@ class SingleDisposalPropertyDetailsControllerSpec
     extends AddressControllerSpec[FillingOutReturnAddressJourney]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
-    with ReturnsServiceSupport {
+    with ReturnsServiceSupport
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
+
+  val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
   val draftReturn: DraftSingleDisposalReturn =
     sample[DraftSingleDisposalReturn].copy(
@@ -66,6 +69,7 @@ class SingleDisposalPropertyDetailsControllerSpec
       sample[GGCredId],
       None,
       draftReturn,
+      None,
       None
     ),
     Right(draftReturn),
@@ -74,7 +78,8 @@ class SingleDisposalPropertyDetailsControllerSpec
 
   override def overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     ) ::: super.overrideBindings
 
   lazy val controller = instanceOf[PropertyDetailsController]
@@ -102,9 +107,7 @@ class SingleDisposalPropertyDetailsControllerSpec
             r: Either[Error, Unit]
           ) =>
         mockStoreDraftReturn(
-          draftReturn.copy(propertyAddress = Some(a)),
-          newDetails.journey.subscribedDetails.cgtReference,
-          newDetails.journey.agentReferenceNumber
+          newDetails.journey.copy(draftReturn = draftReturn.copy(propertyAddress = Some(a)))
         )(r)
 
       case (_, _: NonUkAddress, _) =>
@@ -115,8 +118,9 @@ class SingleDisposalPropertyDetailsControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case _: FillingOutReturn => true
-        case _                   => false
+        case _: FillingOutReturn      => true
+        case _: StartingToAmendReturn => true
+        case _                        => false
       }
     )
 
@@ -129,12 +133,19 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterUkAddress(),
+        mockUUIDGenerator
+      )
+
       behave like displayEnterUkAddressPage(
         UserType.Individual,
         None,
         performAction
       )
+
       behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
+
       behave like displayEnterUkAddressPage(
         UserType.Organisation,
         None,
@@ -151,6 +162,11 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterUkAddressSubmit(),
+        mockUUIDGenerator
+      )
+
       behave like submitEnterUkAddress(
         performAction,
         returnsAddressRoutes.PropertyDetailsController.checkYourAnswers()
@@ -165,8 +181,15 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterPostcode(),
+        mockUUIDGenerator
+      )
+
       behave like enterPostcodePage(UserType.Individual, None, performAction)
+
       behave like enterPostcodePage(UserType.Agent, None, performAction)
+
       behave like enterPostcodePage(UserType.Organisation, None, performAction)
 
     }
@@ -179,6 +202,11 @@ class SingleDisposalPropertyDetailsControllerSpec
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterPostcodeSubmit(),
+        mockUUIDGenerator
+      )
 
       behave like submitEnterPostcode(
         performAction,
@@ -193,6 +221,11 @@ class SingleDisposalPropertyDetailsControllerSpec
         controller.selectAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.selectAddress(),
+        mockUUIDGenerator
+      )
 
       behave like displaySelectAddress(
         UserType.Individual,
@@ -229,6 +262,11 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.selectAddressSubmit(),
+        mockUUIDGenerator
+      )
+
       behave like submitSelectAddress(
         performAction,
         controllers.returns.address.routes.PropertyDetailsController
@@ -264,6 +302,11 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswers(),
+        mockUUIDGenerator
+      )
+
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
       def testIsCheckYourAnswers(
@@ -278,7 +321,7 @@ class SingleDisposalPropertyDetailsControllerSpec
         )
 
       "redirect to the has uk postcode page if there is no address in session and the user " +
-        "hass a non-residential property type" in {
+        "has a non-residential property type" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
@@ -348,6 +391,11 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswersSubmit(),
+        mockUUIDGenerator
+      )
+
       "redirect to the task list" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -366,6 +414,11 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(): Future[Result] =
         controller.singleDisposalHasUkPostcode()(FakeRequest())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.singleDisposalHasUkPostcode(),
+        mockUUIDGenerator
+      )
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
@@ -438,6 +491,11 @@ class SingleDisposalPropertyDetailsControllerSpec
         controller.singleDisposalHasUkPostcodeSubmit()(
           FakeRequest().withFormUrlEncodedBody(formData: _*)
         )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.singleDisposalHasUkPostcodeSubmit(),
+        mockUUIDGenerator
+      )
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
@@ -527,6 +585,11 @@ class SingleDisposalPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.singleDisposalEnterLandUprn()(FakeRequest())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.singleDisposalEnterLandUprn(),
+        mockUUIDGenerator
+      )
+
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
       behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
@@ -606,6 +669,11 @@ class SingleDisposalPropertyDetailsControllerSpec
           "address-county"  -> ukAddress.county,
           "postcode"        -> Some(ukAddress.postcode.value)
         ).collect { case (key, Some(value)) => key -> value }
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.singleDisposalEnterLandUprnSubmit(),
+        mockUUIDGenerator
+      )
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
@@ -751,11 +819,7 @@ class SingleDisposalPropertyDetailsControllerSpec
                 journeyStatus = Some(nonResidentialFillingOutReturn)
               )
             )
-            mockStoreDraftReturn(
-              newDraftReturn,
-              newJourney.subscribedDetails.cgtReference,
-              newJourney.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(newJourney)(Right(()))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus = Some(newJourney))
             )(Right(()))
@@ -790,11 +854,7 @@ class SingleDisposalPropertyDetailsControllerSpec
                 journeyStatus = Some(journey)
               )
             )
-            mockStoreDraftReturn(
-              newDraftReturn,
-              newJourney.subscribedDetails.cgtReference,
-              newJourney.agentReferenceNumber
-            )(Left(Error("")))
+            mockStoreDraftReturn(newJourney)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData(newAddress): _*))
@@ -809,11 +869,7 @@ class SingleDisposalPropertyDetailsControllerSpec
                 journeyStatus = Some(journey)
               )
             )
-            mockStoreDraftReturn(
-              newDraftReturn,
-              newJourney.subscribedDetails.cgtReference,
-              newJourney.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(newJourney)(Right(()))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus = Some(newJourney))
             )(Left(Error("")))

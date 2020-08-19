@@ -30,9 +30,9 @@ import play.api.data.Forms.{mapping, of}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{StartingToAmendToFillingOutReturnBehaviour, representee}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
@@ -48,6 +48,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homePageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Organisation
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -57,6 +58,7 @@ class CommonTriageQuestionsController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
+  uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
   whoAreYouReportingForPage: triagePages.who_are_you_reporting_for,
@@ -70,7 +72,8 @@ class CommonTriageQuestionsController @Inject() (
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
-    with SessionUpdates {
+    with SessionUpdates
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   import CommonTriageQuestionsController._
 
@@ -83,7 +86,7 @@ class CommonTriageQuestionsController @Inject() (
 
   def whoIsIndividualRepresenting(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withState { (_, state) =>
         if (!isIndividual(state))
           Redirect(routes.CommonTriageQuestionsController.howManyProperties())
         else {
@@ -107,9 +110,9 @@ class CommonTriageQuestionsController @Inject() (
 
   def whoIsIndividualRepresentingSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withState { (_, state) =>
         if (!isIndividual(state))
-          if (state.fold(_.isFurtherReturn, _.isFurtherReturn).contains(true))
+          if (state.fold(_.isFurtherReturn, _.isFurtherOrAmendReturn).contains(true))
             Redirect(routes.CommonTriageQuestionsController.furtherReturnHelp())
           else
             Redirect(routes.CommonTriageQuestionsController.howManyProperties())
@@ -139,7 +142,7 @@ class CommonTriageQuestionsController @Inject() (
                 val redirectTo =
                   if (
                     updatedState
-                      .fold(_.isFurtherReturn, _.isFurtherReturn)
+                      .fold(_.isFurtherReturn, _.isFurtherOrAmendReturn)
                       .contains(true)
                   )
                     answers.fold(
@@ -162,13 +165,7 @@ class CommonTriageQuestionsController @Inject() (
                     for {
                       _ <- updatedState.fold(
                              _ => EitherT.pure[Future, Error](()),
-                             fillingOutReturn =>
-                               returnsService
-                                 .storeDraftReturn(
-                                   fillingOutReturn.draftReturn,
-                                   fillingOutReturn.subscribedDetails.cgtReference,
-                                   fillingOutReturn.agentReferenceNumber
-                                 )
+                             returnsService.storeDraftReturn(_)
                            )
                       _ <- EitherT(
                              updateSession(sessionStore, request)(
@@ -192,7 +189,7 @@ class CommonTriageQuestionsController @Inject() (
 
   def furtherReturnHelp(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withState { (_, state) =>
         val individualUserType = getIndividualUserType(state)
         val backLink           = individualUserType match {
           case _ if request.userType.contains(Organisation) => homePageRoutes.HomePageController.homepage()
@@ -212,7 +209,7 @@ class CommonTriageQuestionsController @Inject() (
 
   def furtherReturnHelpSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withState { (_, state) =>
         getIndividualUserType(state) match {
           case Some(_: RepresentativeType) => Redirect(representeeRoutes.RepresenteeController.enterName())
           case _                           => Redirect(routes.CommonTriageQuestionsController.howManyProperties())
@@ -222,7 +219,7 @@ class CommonTriageQuestionsController @Inject() (
 
   def howManyProperties(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withState { (_, state) =>
         val form =
           getNumberOfProperties(state).fold(numberOfPropertiesForm)(
             numberOfPropertiesForm.fill
@@ -254,7 +251,7 @@ class CommonTriageQuestionsController @Inject() (
 
   def howManyPropertiesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withState { (_, state) =>
         numberOfPropertiesForm
           .bindFromRequest()
           .fold(
@@ -282,13 +279,7 @@ class CommonTriageQuestionsController @Inject() (
                   for {
                     _ <- updatedState.fold(
                            _ => EitherT.pure[Future, Error](()),
-                           fillingOutReturn =>
-                             returnsService
-                               .storeDraftReturn(
-                                 fillingOutReturn.draftReturn,
-                                 fillingOutReturn.subscribedDetails.cgtReference,
-                                 fillingOutReturn.agentReferenceNumber
-                               )
+                           returnsService.storeDraftReturn(_)
                          )
                     _ <- EitherT(
                            updateSession(sessionStore, request)(
@@ -311,7 +302,7 @@ class CommonTriageQuestionsController @Inject() (
 
   def ukResidentCanOnlyDisposeResidential(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withState { (_, state) =>
         val triageAnswers                      = triageAnswersFomState(state)
         val isAssetTypeNonResidential: Boolean = triageAnswers.fold(
           _.fold(
@@ -352,7 +343,7 @@ class CommonTriageQuestionsController @Inject() (
 
   def disposalDateTooEarly(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withState { (_, state) =>
         val triageAnswers = triageAnswersFomState(state)
         lazy val backLink = triageAnswers.fold(
           _ =>
@@ -375,7 +366,7 @@ class CommonTriageQuestionsController @Inject() (
 
   def disposalsOfSharesTooEarly(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withState { (_, state) =>
         val triageAnswers = triageAnswersFomState(state)
         lazy val backLink = triageAnswers.fold(
           _ => routes.MultipleDisposalsTriageController.disposalDateOfShares(),
@@ -387,7 +378,7 @@ class CommonTriageQuestionsController @Inject() (
 
   def previousReturnExistsWithSameCompletionDate(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
+      withState { (_, state) =>
         val backLink =
           if (triageAnswersFomState(state).isLeft) routes.MultipleDisposalsTriageController.completionDate()
           else routes.SingleDisposalsTriageController.whenWasCompletionDate()
@@ -691,13 +682,16 @@ class CommonTriageQuestionsController @Inject() (
       )
       .merge
 
-  private def withState(request: RequestWithSessionData[_])(
+  private def withState(
     f: (
       SessionData,
       Either[StartingNewDraftReturn, FillingOutReturn]
     ) => Future[Result]
-  ): Future[Result] =
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((_, s: StartingToAmendReturn))        =>
+        convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
+
       case Some((session, s: StartingNewDraftReturn)) =>
         f(session, Left(s))
 

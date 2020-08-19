@@ -29,6 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
@@ -41,7 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -120,8 +121,9 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
     "handling requests to store draft returns" must {
 
-      val draftReturn  = sample[DraftSingleDisposalReturn]
-      val cgtReference = sample[CgtReference]
+      val fillingOutReturn = sample[FillingOutReturn].copy(originalReturn = None)
+      val draftReturn      = fillingOutReturn.draftReturn
+      val cgtReference     = fillingOutReturn.subscribedDetails.cgtReference
 
       "return an error" when {
 
@@ -129,7 +131,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
           mockStoreDraftReturn(draftReturn, cgtReference)(Left(Error("")))
 
           await(
-            service.storeDraftReturn(draftReturn, cgtReference, None).value
+            service.storeDraftReturn(fillingOutReturn).value
           ).isLeft shouldBe true
         }
 
@@ -139,7 +141,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
           )
 
           await(
-            service.storeDraftReturn(draftReturn, cgtReference, None).value
+            service.storeDraftReturn(fillingOutReturn).value
           ).isLeft shouldBe true
         }
 
@@ -153,12 +155,22 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
           )
 
           await(
-            service.storeDraftReturn(draftReturn, cgtReference, None).value
+            service.storeDraftReturn(fillingOutReturn).value
           ) shouldBe Right(())
         }
 
       }
 
+      "immediately return successfully without doing anything" when {
+
+        "the return is an amend return" in {
+          val result = service.storeDraftReturn(
+            sample[FillingOutReturn].copy(originalReturn = Some(sample[CompleteReturnWithSummary]))
+          )
+          await(result.value) shouldBe Right(())
+        }
+
+      }
     }
 
     "handling requests to get draft returns" must {

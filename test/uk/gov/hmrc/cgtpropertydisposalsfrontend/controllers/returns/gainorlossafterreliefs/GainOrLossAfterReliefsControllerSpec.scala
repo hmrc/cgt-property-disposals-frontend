@@ -30,12 +30,13 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
@@ -55,13 +56,18 @@ class GainOrLossAfterReliefsControllerSpec
     with SessionSupport
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
+
+  val mockUUIDGenerator = mock[UUIDGenerator]
+
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case f: FillingOutReturn if f.isFurtherReturn.contains(true) => true
-        case _                                                       => false
+        case f: FillingOutReturn if f.isFurtherOrAmendReturn.contains(true) => true
+        case _: StartingToAmendReturn                                       => true
+        case _                                                              => false
       }
     )
 
@@ -69,11 +75,13 @@ class GainOrLossAfterReliefsControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  override val overrideBindings        = List[GuiceableModule](
+  override val overrideBindings = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
     bind[SessionStore].toInstance(mockSessionStore),
-    bind[ReturnsService].toInstance(mockReturnsService)
+    bind[ReturnsService].toInstance(mockReturnsService),
+    bind[UUIDGenerator].toInstance(mockUUIDGenerator)
   )
+
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   def sessionWithSingleDisposalState(
@@ -207,6 +215,11 @@ class GainOrLossAfterReliefsControllerSpec
         controller.enterGainOrLossAfterReliefs()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterGainOrLossAfterReliefs(),
+        mockUUIDGenerator
+      )
 
       "display the page" when {
 
@@ -438,6 +451,11 @@ class GainOrLossAfterReliefsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.enterGainOrLossAfterReliefsSubmit(),
+        mockUUIDGenerator
+      )
+
       "show a form error" when {
 
         def testFormError(
@@ -551,15 +569,13 @@ class GainOrLossAfterReliefsControllerSpec
         "there is an error updating the draft return in return service " in {
           val (session, journey, draftReturn) = sessionWithSingleDisposalState(Some(AmountInPence(1L)))
           val updatedDraftReturn              = updateDraftReturn(draftReturn, AmountInPence(0L))
+            .copy(exemptionAndLossesAnswers = None, yearToDateLiabilityAnswers = None)
+          val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn.copy(exemptionAndLossesAnswers = None, yearToDateLiabilityAnswers = None),
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Left(Error("")))
+            mockStoreDraftReturn(updatedJourney)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("gainOrLossAfterReliefs" -> "2"))
@@ -574,11 +590,7 @@ class GainOrLossAfterReliefsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(updatedJourney))
             )(Left(Error("")))
@@ -602,11 +614,7 @@ class GainOrLossAfterReliefsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              newDraftReturn,
-              updatedJourney.subscribedDetails.cgtReference,
-              updatedJourney.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(updatedJourney))
             )(Right(()))
@@ -669,6 +677,11 @@ class GainOrLossAfterReliefsControllerSpec
         controller.checkYourAnswers()(FakeRequest())
 
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswers(),
+        mockUUIDGenerator
+      )
 
       "redirect to the gain or loss after reliefs page" when {
 
@@ -807,6 +820,11 @@ class GainOrLossAfterReliefsControllerSpec
         controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkYourAnswersSubmit(),
+        mockUUIDGenerator
+      )
 
       "redirect to taskList" in {
         inSequence {

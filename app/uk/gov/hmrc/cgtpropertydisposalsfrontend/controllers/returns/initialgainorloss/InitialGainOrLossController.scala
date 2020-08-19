@@ -109,20 +109,13 @@ class InitialGainOrLossController @Inject() (
                         .flatMap(_.unsetAllButIncomeDetails())
                     )
 
+                  val updatedJourney = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
+
                   val result = for {
-                    _ <- returnsService.storeDraftReturn(
-                           updatedDraftReturn,
-                           fillingOutReturn.subscribedDetails.cgtReference,
-                           fillingOutReturn.agentReferenceNumber
-                         )
+                    _ <- returnsService.storeDraftReturn(updatedJourney)
                     _ <- EitherT(
                            updateSession(sessionStore, request)(
-                             _.copy(journeyStatus =
-                               Some(
-                                 fillingOutReturn
-                                   .copy(draftReturn = updatedDraftReturn)
-                               )
-                             )
+                             _.copy(journeyStatus = Some(updatedJourney))
                            )
                          )
                   } yield ()
@@ -195,6 +188,7 @@ class InitialGainOrLossController @Inject() (
               _,
               _,
               d: DraftSingleDisposalReturn,
+              _,
               _
             )
           ) =>

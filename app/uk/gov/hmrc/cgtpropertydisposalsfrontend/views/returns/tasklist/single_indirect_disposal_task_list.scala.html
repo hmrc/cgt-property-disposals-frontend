@@ -31,7 +31,7 @@
         warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(draftReturn: DraftSingleIndirectDisposalReturn, isFurtherReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftSingleIndirectDisposalReturn, isFurtherOrAmendReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("service.title")}
 
@@ -55,7 +55,7 @@
 @acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
 
 @gainOrLossAfterReliefsState = @{
-    if(isFurtherReturn.contains(true)){
+    if(isFurtherOrAmendReturn.contains(true)){
         (companyDetailsState, disposalDetailsState, acquistionDetailsState) match {
             case (Complete, Complete, Complete)  =>
                 Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))

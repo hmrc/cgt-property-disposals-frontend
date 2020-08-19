@@ -33,12 +33,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReliefDetailsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -57,6 +59,7 @@ class ReliefDetailsController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
+  uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
   privateResidentsReliefPage: pages.private_residents_relief,
@@ -67,21 +70,23 @@ class ReliefDetailsController @Inject() (
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
-    with SessionUpdates {
+    with SessionUpdates
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   private def withFillingOutReturnAndReliefDetailsAnswers(
-    request: RequestWithSessionData[_]
-  )(
     f: (
       SessionData,
       FillingOutReturn,
       DraftSingleDisposalReturn,
       ReliefDetailsAnswers
     ) => Future[Result]
-  ): Future[Result] =
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((_, s: StartingToAmendReturn)) =>
+        convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
+
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
           ) if d.triageAnswers.isPeriodOfAdmin() =>
         d.reliefDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)
@@ -98,13 +103,13 @@ class ReliefDetailsController @Inject() (
         )
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
           ) =>
         d.reliefDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)
         )(f(s, r, d, _))
 
-      case _ => Redirect(controllers.routes.StartController.start())
+      case _                                   => Redirect(controllers.routes.StartController.start())
     }
 
   private def commonDisplayBehaviour[A, P : Writeable, R](
@@ -154,23 +159,15 @@ class ReliefDetailsController @Inject() (
           formWithErrors => BadRequest(page(formWithErrors, backLink)),
           { value =>
             val newDraftReturn = updateDraftReturn(value, currentDraftReturn)
+            val newJourney     = currentFillingOutReturn.copy(draftReturn = newDraftReturn)
 
             val result = for {
               _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
                    else
-                     returnsService.storeDraftReturn(
-                       newDraftReturn,
-                       currentFillingOutReturn.subscribedDetails.cgtReference,
-                       currentFillingOutReturn.agentReferenceNumber
-                     )
+                     returnsService.storeDraftReturn(newJourney)
               _ <- EitherT(
                      updateSession(sessionStore, request)(
-                       _.copy(journeyStatus =
-                         Some(
-                           currentFillingOutReturn
-                             .copy(draftReturn = newDraftReturn)
-                         )
-                       )
+                       _.copy(journeyStatus = Some(newJourney))
                      )
                    )
             } yield ()
@@ -189,7 +186,7 @@ class ReliefDetailsController @Inject() (
 
   def privateResidentsRelief(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndReliefDetailsAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.privateResidentsRelief.fold(privateResidentsReliefForm)(a =>
@@ -216,7 +213,7 @@ class ReliefDetailsController @Inject() (
 
   def privateResidentsReliefSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndReliefDetailsAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = privateResidentsReliefForm
         )(
@@ -270,7 +267,7 @@ class ReliefDetailsController @Inject() (
 
   def lettingsRelief(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndReliefDetailsAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withTaxYear(draftReturn) { taxYear =>
           commonDisplayBehaviour(answers)(
             form = _.fold(
@@ -301,7 +298,7 @@ class ReliefDetailsController @Inject() (
 
   def lettingsReliefSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndReliefDetailsAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withTaxYear(draftReturn) { taxYear =>
           commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
             form = lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount)
@@ -359,7 +356,7 @@ class ReliefDetailsController @Inject() (
 
   def otherReliefs(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndReliefDetailsAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.otherReliefs.fold(otherReliefsForm)(
@@ -398,7 +395,7 @@ class ReliefDetailsController @Inject() (
 
   def otherReliefsSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndReliefDetailsAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = otherReliefsForm
         )(page =
@@ -490,7 +487,7 @@ class ReliefDetailsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndReliefDetailsAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         answers match {
           case c: CompleteReliefDetailsAnswers                                                =>
             Ok(
@@ -541,19 +538,13 @@ class ReliefDetailsController @Inject() (
     or: Option[OtherReliefsOption]
   )(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val completeAnswers = CompleteReliefDetailsAnswers(prr, lr, or)
-    val newDraftReturn  =
-      draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
+    val newDraftReturn  = draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
+    val newJourney      = fillingOutReturn.copy(draftReturn = newDraftReturn)
 
     val result = for {
-      _ <- returnsService.storeDraftReturn(
-             newDraftReturn,
-             fillingOutReturn.subscribedDetails.cgtReference,
-             fillingOutReturn.agentReferenceNumber
-           )
+      _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
-             updateSession(sessionStore, request)(
-               _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-             )
+             updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourney)))
            )
     } yield ()
 
@@ -575,7 +566,7 @@ class ReliefDetailsController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, _, _, _) =>
+      withFillingOutReturnAndReliefDetailsAnswers { (_, _, _, _) =>
         Redirect(controllers.returns.routes.TaskListController.taskList())
       }
     }

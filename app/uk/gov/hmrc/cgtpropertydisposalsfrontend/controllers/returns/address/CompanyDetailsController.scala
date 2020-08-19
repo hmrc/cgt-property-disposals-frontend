@@ -25,8 +25,9 @@ import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Req
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
@@ -43,6 +44,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -52,6 +54,7 @@ class CompanyDetailsController @Inject() (
   val sessionStore: SessionStore,
   val auditService: AuditService,
   returnsService: ReturnsService,
+  uuidGenerator: UUIDGenerator,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
@@ -71,7 +74,8 @@ class CompanyDetailsController @Inject() (
     with Logging
     with WithAuthAndSessionDataAction
     with SessionUpdates
-    with AddressController[EnteringCompanyDetails] {
+    with AddressController[EnteringCompanyDetails]
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   override val toJourneyStatus: EnteringCompanyDetails => JourneyStatus =
     _.journey
@@ -81,8 +85,12 @@ class CompanyDetailsController @Inject() (
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, EnteringCompanyDetails)] =
+  ): Either[Future[Result], (SessionData, EnteringCompanyDetails)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((_, s: StartingToAmendReturn)) =>
+        implicit val r: RequestWithSessionData[_] = request
+        Left(convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator))
+
       case Some(
             (
               sessionData,
@@ -91,6 +99,7 @@ class CompanyDetailsController @Inject() (
                 _,
                 _,
                 i: DraftSingleIndirectDisposalReturn,
+                _,
                 _
               )
             )
@@ -112,6 +121,7 @@ class CompanyDetailsController @Inject() (
                 _,
                 _,
                 i: DraftMultipleIndirectDisposalsReturn,
+                _,
                 _
               )
             )
@@ -125,7 +135,7 @@ class CompanyDetailsController @Inject() (
           )
         )
 
-      case _ => Left(Redirect(controllers.routes.StartController.start()))
+      case _                                   => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(
@@ -154,11 +164,7 @@ class CompanyDetailsController @Inject() (
     )
 
     returnsService
-      .storeDraftReturn(
-        newJourney.draftReturn,
-        newJourney.subscribedDetails.cgtReference,
-        newJourney.agentReferenceNumber
-      )
+      .storeDraftReturn(newJourney)
       .map(_ => newJourney)
   }
 
@@ -297,19 +303,12 @@ class CompanyDetailsController @Inject() (
                       yearToDateLiabilityAnswers = None,
                       gainOrLossAfterReliefs = None
                     )
+                    val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
                     val result             = for {
-                      _ <- returnsService.storeDraftReturn(
-                             updatedDraftReturn,
-                             r.journey.subscribedDetails.cgtReference,
-                             r.journey.agentReferenceNumber
-                           )
+                      _ <- returnsService.storeDraftReturn(updatedJourney)
                       _ <- EitherT(
                              updateSession(sessionStore, request)(
-                               _.copy(journeyStatus =
-                                 Some(
-                                   r.journey.copy(draftReturn = updatedDraftReturn)
-                                 )
-                               )
+                               _.copy(journeyStatus = Some(updatedJourney))
                              )
                            )
                     } yield ()
@@ -406,19 +405,12 @@ class CompanyDetailsController @Inject() (
                       yearToDateLiabilityAnswers = None,
                       gainOrLossAfterReliefs = None
                     )
+                    val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
                     val result             = for {
-                      _ <- returnsService.storeDraftReturn(
-                             updatedDraftReturn,
-                             r.journey.subscribedDetails.cgtReference,
-                             r.journey.agentReferenceNumber
-                           )
+                      _ <- returnsService.storeDraftReturn(updatedJourney)
                       _ <- EitherT(
                              updateSession(sessionStore, request)(
-                               _.copy(journeyStatus =
-                                 Some(
-                                   r.journey.copy(draftReturn = updatedDraftReturn)
-                                 )
-                               )
+                               _.copy(journeyStatus = Some(updatedJourney))
                              )
                            )
                     } yield ()
@@ -475,24 +467,13 @@ class CompanyDetailsController @Inject() (
                   val updatedDraftReturn = multipleIndirect.copy(
                     exampleCompanyDetailsAnswers = Some(completeAnswers)
                   )
+                  val updatedJourney     = journey.journey.copy(
+                    draftReturn = updatedDraftReturn
+                  )
 
                   val result = for {
-                    _ <- returnsService.storeDraftReturn(
-                           updatedDraftReturn,
-                           journey.journey.subscribedDetails.cgtReference,
-                           journey.journey.agentReferenceNumber
-                         )
-                    _ <- EitherT(
-                           updateSession(sessionStore, request)(
-                             _.copy(journeyStatus =
-                               Some(
-                                 journey.journey.copy(
-                                   draftReturn = updatedDraftReturn
-                                 )
-                               )
-                             )
-                           )
-                         )
+                    _ <- returnsService.storeDraftReturn(updatedJourney)
+                    _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
                   } yield ()
 
                   result.fold(

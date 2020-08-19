@@ -66,17 +66,15 @@ class ExemptionAndLossesController @Inject() (
     with SessionUpdates {
 
   private def withFillingOutReturnAndAnswers(
-    request: RequestWithSessionData[_]
-  )(
     f: (
       SessionData,
       FillingOutReturn,
       DraftReturn,
       ExemptionAndLossesAnswers
     ) => Future[Result]
-  ): Future[Result] =
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, d, _))) if r.isFurtherReturn.contains(true) =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) if r.isFurtherOrAmendReturn.contains(true) =>
         val answers = d
           .fold(
             _.exemptionAndLossesAnswers,
@@ -92,7 +90,7 @@ class ExemptionAndLossesController @Inject() (
           )
         f(s, r, d, answers)
 
-      case Some((s, r @ FillingOutReturn(_, _, _, d, _)))                                     =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _)))                                            =>
         val answers = d
           .fold(
             _.exemptionAndLossesAnswers,
@@ -104,7 +102,7 @@ class ExemptionAndLossesController @Inject() (
           .getOrElse(IncompleteExemptionAndLossesAnswers.empty)
         f(s, r, d, answers)
 
-      case _                                                                                  =>
+      case _                                                                                            =>
         Redirect(controllers.routes.StartController.start())
     }
 
@@ -241,20 +239,14 @@ class ExemptionAndLossesController @Inject() (
                   )
               )
 
+              val updatedJourney = currentFillingOutReturn
+                .copy(draftReturn = newDraftReturn)
+
               val result = for {
-                _ <- returnsService.storeDraftReturn(
-                       newDraftReturn,
-                       currentFillingOutReturn.subscribedDetails.cgtReference,
-                       currentFillingOutReturn.agentReferenceNumber
-                     )
+                _ <- returnsService.storeDraftReturn(updatedJourney)
                 _ <- EitherT(
                        updateSession(sessionStore, request)(
-                         _.copy(journeyStatus =
-                           Some(
-                             currentFillingOutReturn
-                               .copy(draftReturn = newDraftReturn)
-                           )
-                         )
+                         _.copy(journeyStatus = Some(updatedJourney))
                        )
                      )
               } yield ()
@@ -277,7 +269,7 @@ class ExemptionAndLossesController @Inject() (
 
   def inYearLosses(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
           withWasAUkResident(draftReturn) { _ =>
             commonDisplayBehaviour(
@@ -289,13 +281,12 @@ class ExemptionAndLossesController @Inject() (
               )
             )(
               page =
-                if (fillingOutReturn.isFurtherReturn.contains(true))
+                if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
                   furtherReturnInYearLossesPage(
                     _,
                     _,
                     fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType(),
-                    fillingOutReturn.isFurtherReturn
+                    draftReturn.representativeType()
                   )
                 else
                   inYearLossesPage(
@@ -316,7 +307,7 @@ class ExemptionAndLossesController @Inject() (
 
   def inYearLossesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
           withWasAUkResident(draftReturn) { _ =>
             commonSubmitBehaviour(
@@ -325,13 +316,12 @@ class ExemptionAndLossesController @Inject() (
               answers
             )(form = inYearLossesForm)(
               page =
-                if (fillingOutReturn.isFurtherReturn.contains(true))
+                if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
                   furtherReturnInYearLossesPage(
                     _,
                     _,
                     fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType(),
-                    fillingOutReturn.isFurtherReturn
+                    draftReturn.representativeType()
                   )
                 else
                   inYearLossesPage(
@@ -358,7 +348,7 @@ class ExemptionAndLossesController @Inject() (
 
   def previousYearsLosses(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withWasAUkResident(draftReturn) { wasAUkResident =>
           commonDisplayBehaviour(
             answers
@@ -369,13 +359,12 @@ class ExemptionAndLossesController @Inject() (
             )
           )(
             page =
-              if (fillingOutReturn.isFurtherReturn.contains(true))
+              if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
                 furtherReturnPreviousYearsLossesPage(
                   _,
                   _,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType(),
-                  fillingOutReturn.isFurtherReturn
+                  draftReturn.representativeType()
                 )
               else
                 previousYearsLossesPage(
@@ -398,7 +387,7 @@ class ExemptionAndLossesController @Inject() (
 
   def previousYearsLossesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withWasAUkResident(draftReturn) { wasAUkResident =>
           commonSubmitBehaviour(
             fillingOutReturn,
@@ -406,13 +395,12 @@ class ExemptionAndLossesController @Inject() (
             answers
           )(form = previousYearsLossesForm)(
             page =
-              if (fillingOutReturn.isFurtherReturn.contains(true))
+              if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
                 furtherReturnPreviousYearsLossesPage(
                   _,
                   _,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType(),
-                  fillingOutReturn.isFurtherReturn
+                  draftReturn.representativeType()
                 )
               else
                 previousYearsLossesPage(
@@ -440,7 +428,7 @@ class ExemptionAndLossesController @Inject() (
 
   def annualExemptAmount(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
           commonDisplayBehaviour(
             answers
@@ -473,7 +461,7 @@ class ExemptionAndLossesController @Inject() (
 
   def annualExemptAmountSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
           commonSubmitBehaviour(
             fillingOutReturn,
@@ -524,7 +512,7 @@ class ExemptionAndLossesController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
           answers match {
             case c: CompleteExemptionAndLossesAnswers            =>
@@ -534,7 +522,7 @@ class ExemptionAndLossesController @Inject() (
                   disposalDate,
                   fillingOutReturn.subscribedDetails.isATrust,
                   draftReturn.representativeType,
-                  fillingOutReturn.isFurtherReturn
+                  fillingOutReturn.isFurtherOrAmendReturn
                 )
               )
 
@@ -566,19 +554,13 @@ class ExemptionAndLossesController @Inject() (
                   _.copy(exemptionAndLossesAnswers = Some(completeAnswers))
                 )
 
+              val newJourney = fillingOutReturn.copy(draftReturn = newDraftReturn)
+
               val result = for {
-                _ <- returnsService.storeDraftReturn(
-                       newDraftReturn,
-                       fillingOutReturn.subscribedDetails.cgtReference,
-                       fillingOutReturn.agentReferenceNumber
-                     )
+                _ <- returnsService.storeDraftReturn(newJourney)
                 _ <- EitherT(
                        updateSession(sessionStore, request)(
-                         _.copy(journeyStatus =
-                           Some(
-                             fillingOutReturn.copy(draftReturn = newDraftReturn)
-                           )
-                         )
+                         _.copy(journeyStatus = Some(newJourney))
                        )
                      )
               } yield ()
@@ -595,7 +577,7 @@ class ExemptionAndLossesController @Inject() (
                       disposalDate,
                       fillingOutReturn.subscribedDetails.isATrust,
                       draftReturn.representativeType,
-                      fillingOutReturn.isFurtherReturn
+                      fillingOutReturn.isFurtherOrAmendReturn
                     )
                   )
               )
@@ -607,7 +589,7 @@ class ExemptionAndLossesController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers(request) {
+      withFillingOutReturnAndAnswers {
         case _ =>
           Redirect(controllers.returns.routes.TaskListController.taskList())
       }

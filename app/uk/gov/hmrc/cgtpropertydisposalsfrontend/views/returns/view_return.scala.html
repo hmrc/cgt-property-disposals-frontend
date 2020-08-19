@@ -51,7 +51,7 @@
     subscribedDetails: SubscribedDetails,
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
-    isFurtherReturn: Option[Boolean]
+    isFurtherOrAmendedReturn: Option[Boolean]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("viewReturn.title")}
@@ -139,7 +139,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         subscribedDetails,
         representativeType,
         isIndirectDisposal,
-        isFurtherReturn,
+        isFurtherOrAmendedReturn,
         returnSummaryClass = Some("return-summary")
     )
 

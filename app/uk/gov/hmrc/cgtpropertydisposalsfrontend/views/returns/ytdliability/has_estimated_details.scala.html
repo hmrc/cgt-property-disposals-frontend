@@ -43,7 +43,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
   backLink: Call,
   isATrust: Boolean,
   representativeType: Option[RepresentativeType],
-  isFurtherReturn: Option[Boolean]
+  isFurtherOrAmendReturn: Option[Boolean]
 )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"hasEstimatedDetails"}
@@ -71,7 +71,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
         @errorSummary(form)
     }
 
-    @caption(messages(s"ytdLiability${if(isFurtherReturn.contains(true)) ".furtherReturn" else ""}.caption"))
+    @caption(messages(s"ytdLiability${if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}.caption"))
 
     @formWrapper(routes.YearToDateLiabilityController.hasEstimatedDetailsSubmit(), 'novalidate -> "novalidate") {
         @yesNo(

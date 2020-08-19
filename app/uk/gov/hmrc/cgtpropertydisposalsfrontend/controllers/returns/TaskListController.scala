@@ -74,22 +74,22 @@ class TaskListController @Inject() (
   def taskList(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
-        case Some(f @ FillingOutReturn(_, _, _, draftReturn, _)) =>
+        case Some(f @ FillingOutReturn(_, _, _, draftReturn, _, _)) =>
           handleExpiredFiles(draftReturn, f).fold(
             { e =>
               logger.warn("Could not handle expired files", e)
               errorHandler.errorResult()
             },
             _.fold(
-              m => Ok(multipleDisposalsTaskListPage(m, f.isFurtherReturn)),
-              s => Ok(singleDisposalTaskListPage(s, f.isFurtherReturn)),
-              si => Ok(singleIndirectDisposalTaskListPage(si, f.isFurtherReturn)),
-              mi => Ok(multipleIndirectDisposalTaskListPage(mi, f.isFurtherReturn)),
-              sm => Ok(singleMixedUseDisposalTaskListPage(sm, f.isFurtherReturn))
+              m => Ok(multipleDisposalsTaskListPage(m, f.isFurtherOrAmendReturn)),
+              s => Ok(singleDisposalTaskListPage(s, f.isFurtherOrAmendReturn)),
+              si => Ok(singleIndirectDisposalTaskListPage(si, f.isFurtherOrAmendReturn)),
+              mi => Ok(multipleIndirectDisposalTaskListPage(mi, f.isFurtherOrAmendReturn)),
+              sm => Ok(singleMixedUseDisposalTaskListPage(sm, f.isFurtherOrAmendReturn))
             )
           )
 
-        case _                                                   =>
+        case _                                                      =>
           Redirect(baseRoutes.StartController.start())
 
       }
@@ -187,11 +187,7 @@ class TaskListController @Inject() (
       )
 
       for {
-        _ <- returnsService.storeDraftReturn(
-               updatedDraftReturn,
-               journey.subscribedDetails.cgtReference,
-               journey.agentReferenceNumber
-             )
+        _ <- returnsService.storeDraftReturn(journey)
         _ <- EitherT(
                updateSession(sessionStore, request)(
                  _.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))

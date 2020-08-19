@@ -49,7 +49,7 @@
         subscribedDetails: SubscribedDetails,
         representativeType: Option[RepresentativeType],
         isIndirectDisposal: Boolean,
-        isFurtherReturn: Option[Boolean],
+        isFurtherOrAmendReturn: Option[Boolean],
         returnSummaryClass: Option[String] = None
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
@@ -88,14 +88,14 @@
         @reliefDetailsSummary(s.reliefDetails, subscribedDetails.isATrust, representativeType)
 
         @s.gainOrLossAfterReliefs.map{ glar =>
-            @if(isFurtherReturn.contains(true)){
+            @if(isFurtherOrAmendReturn.contains(true)){
                 <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
                 @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
             }
         }
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-        @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
+        @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherOrAmendReturn)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
         @s.yearToDateLiabilityAnswers.fold(
@@ -117,10 +117,10 @@
         @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), subscribedDetails.isATrust, representativeType, m.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-        @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
+        @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherOrAmendReturn)
 
         @m.gainOrLossAfterReliefs.map{ glar =>
-            @if(isFurtherReturn.contains(true)){
+            @if(isFurtherOrAmendReturn.contains(true)){
                 <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
                 @glarSummary(glar, subscribedDetails.isATrust, representativeType, true)
             }
@@ -162,10 +162,10 @@
         )
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-        @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
+        @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherOrAmendReturn)
 
         @s.gainOrLossAfterReliefs.map{ glar =>
-            @if(isFurtherReturn.contains(true)){
+            @if(isFurtherOrAmendReturn.contains(true)){
                 <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
                 @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
             }
@@ -194,11 +194,11 @@
             DisposalDate(multipleIndirect.triageAnswers.completionDate.value, multipleIndirect.triageAnswers.taxYear),
             subscribedDetails.isATrust,
             representativeType,
-            isFurtherReturn
+            isFurtherOrAmendReturn
         )
 
         @multipleIndirect.gainOrLossAfterReliefs.map{ glar =>
-            @if(isFurtherReturn.contains(true)){
+            @if(isFurtherOrAmendReturn.contains(true)){
                 <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
                 @glarSummary(glar, subscribedDetails.isATrust, representativeType, true)
             }
@@ -221,10 +221,10 @@
         @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers, representativeType, singleMixedUse.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-        @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
+        @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherOrAmendReturn)
 
         @singleMixedUse.gainOrLossAfterReliefs.map{ glar =>
-            @if(isFurtherReturn.contains(true)){
+            @if(isFurtherOrAmendReturn.contains(true)){
                 <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
                 @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
             }

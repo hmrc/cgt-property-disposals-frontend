@@ -96,23 +96,20 @@ class YearToDateLiabilityController @Inject() (
     with SessionUpdates {
 
   private def withFillingOutReturnAndYTDLiabilityAnswers(
-    request: RequestWithSessionData[_]
-  )(
     f: (
       SessionData,
       FillingOutReturn,
       YearToDateLiabilityAnswers
     ) => Future[Result]
-  ): Future[Result] =
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-
-      case Some((s, r: FillingOutReturn)) if r.isFurtherReturn.contains(true) =>
+      case Some((s, r: FillingOutReturn)) if r.isFurtherOrAmendReturn.contains(true) =>
         r.draftReturn.yearToDateLiabilityAnswers.fold(
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
         )(y => f(s, r, y))
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
           ) =>
         d.yearToDateLiabilityAnswers match {
           case Some(y) => f(s, r, y)
@@ -139,7 +136,7 @@ class YearToDateLiabilityController @Inject() (
         }
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftMultipleDisposalsReturn, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftMultipleDisposalsReturn, _, _))
           ) =>
         d.yearToDateLiabilityAnswers.fold[Future[Result]](
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
@@ -153,6 +150,7 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 d: DraftSingleIndirectDisposalReturn,
+                _,
                 _
               )
             )
@@ -169,6 +167,7 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 d: DraftMultipleIndirectDisposalsReturn,
+                _,
                 _
               )
             )
@@ -185,6 +184,7 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 d: DraftSingleMixedUseDisposalReturn,
+                _,
                 _
               )
             )
@@ -193,7 +193,7 @@ class YearToDateLiabilityController @Inject() (
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
         )(f(s, r, _))
 
-      case _                                                                  => Redirect(controllers.routes.StartController.start())
+      case _                                                                         => Redirect(controllers.routes.StartController.start())
     }
 
   private def withCalculatedTaxDue(
@@ -450,24 +450,16 @@ class YearToDateLiabilityController @Inject() (
           formWithErrors => BadRequest(page(formWithErrors, backLink)),
           { value =>
             val newDraftReturn = updateAnswers(value, currentDraftReturn)
+            val newJourney     = currentFillingOutReturn.copy(draftReturn = newDraftReturn)
 
             val result = for {
               _ <- if (newDraftReturn === currentDraftReturn)
                      EitherT.pure[Future, Error](())
                    else
-                     returnsService.storeDraftReturn(
-                       newDraftReturn,
-                       currentFillingOutReturn.subscribedDetails.cgtReference,
-                       currentFillingOutReturn.agentReferenceNumber
-                     )
+                     returnsService.storeDraftReturn(newJourney)
               _ <- EitherT(
                      updateSession(sessionStore, request)(
-                       _.copy(journeyStatus =
-                         Some(
-                           currentFillingOutReturn
-                             .copy(draftReturn = newDraftReturn)
-                         )
-                       )
+                       _.copy(journeyStatus = Some(newJourney))
                      )
                    )
             } yield ()
@@ -489,7 +481,7 @@ class YearToDateLiabilityController @Inject() (
 
   def estimatedIncome(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (_, _) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -527,7 +519,7 @@ class YearToDateLiabilityController @Inject() (
 
   def estimatedIncomeSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (_, _) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -596,7 +588,7 @@ class YearToDateLiabilityController @Inject() (
 
   def personalAllowance(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (_, _) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -647,7 +639,7 @@ class YearToDateLiabilityController @Inject() (
 
   def personalAllowanceSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (_, _) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -718,7 +710,7 @@ class YearToDateLiabilityController @Inject() (
 
   def hasEstimatedDetails(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (
                 nonCalculatedAnswers: NonCalculatedYTDAnswers,
@@ -737,7 +729,7 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 isATrust(fillingOutReturn),
                 fillingOutReturn.draftReturn.representativeType(),
-                fillingOutReturn.isFurtherReturn
+                fillingOutReturn.isFurtherOrAmendReturn
               )
             )(
               requiredPreviousAnswer = answers =>
@@ -794,7 +786,7 @@ class YearToDateLiabilityController @Inject() (
         _,
         isATrust(fillingOutReturn),
         fillingOutReturn.draftReturn.representativeType(),
-        fillingOutReturn.isFurtherReturn
+        fillingOutReturn.isFurtherOrAmendReturn
       )
     )(
       requiredPreviousAnswer = { a =>
@@ -815,7 +807,7 @@ class YearToDateLiabilityController @Inject() (
 
   def hasEstimatedDetailsSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (
                 nonCalculatedAnswers: NonCalculatedYTDAnswers,
@@ -879,7 +871,7 @@ class YearToDateLiabilityController @Inject() (
         _,
         isATrust(fillingOutReturn),
         draftReturn.representativeType(),
-        fillingOutReturn.isFurtherReturn
+        fillingOutReturn.isFurtherOrAmendReturn
       )
     )(
       requiredPreviousAnswer = { a =>
@@ -927,7 +919,7 @@ class YearToDateLiabilityController @Inject() (
         _,
         isATrust(fillingOutReturn),
         draftReturn.representativeType(),
-        fillingOutReturn.isFurtherReturn
+        fillingOutReturn.isFurtherOrAmendReturn
       )
     )(
       requiredPreviousAnswer = answers => answers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
@@ -963,7 +955,7 @@ class YearToDateLiabilityController @Inject() (
 
   def taxDue(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (
                 calculatedAnswers: CalculatedYTDAnswers,
@@ -1061,7 +1053,7 @@ class YearToDateLiabilityController @Inject() (
 
   def taxDueSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (
                 calculatedAnswers: CalculatedYTDAnswers,
@@ -1177,7 +1169,7 @@ class YearToDateLiabilityController @Inject() (
 
   def uploadMandatoryEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         def commonDisposalMandatoryEvidence(
           backLink: Call
         ): Future[Result] = {
@@ -1202,7 +1194,7 @@ class YearToDateLiabilityController @Inject() (
               logger.warn("Could not initiate upscan", e)
               errorHandler.errorResult()
             },
-            upscanUpload => Ok(mandatoryEvidencePage(upscanUpload, backLink, fillingOutReturn.isFurtherReturn))
+            upscanUpload => Ok(mandatoryEvidencePage(upscanUpload, backLink, fillingOutReturn.isFurtherOrAmendReturn))
           )
         }
 
@@ -1228,7 +1220,7 @@ class YearToDateLiabilityController @Inject() (
           case (nonCalculatedYTDAnswers: NonCalculatedYTDAnswers, _) =>
             val backLink = nonCalculatedYTDAnswers.fold(
               _ =>
-                if (fillingOutReturn.isFurtherReturn.contains(true))
+                if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
                   routes.YearToDateLiabilityController.repayment()
                 else
                   routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
@@ -1262,24 +1254,19 @@ class YearToDateLiabilityController @Inject() (
     }
 
     val newDraftReturn = updateDraftReturn(newAnswers, currentJourney.draftReturn)
+    val newJourney     = currentJourney.copy(draftReturn = newDraftReturn)
 
     for {
-      _ <- returnsService.storeDraftReturn(
-             newDraftReturn,
-             currentJourney.subscribedDetails.cgtReference,
-             currentJourney.agentReferenceNumber
-           )
+      _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
-             updateSession(sessionStore, request)(
-               _.copy(journeyStatus = Some(currentJourney.copy(draftReturn = newDraftReturn)))
-             )
+             updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourney)))
            )
     } yield ()
   }
 
   def taxableGainOrLoss(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         answers match {
           case (_: CalculatedYTDAnswers)                       =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1295,7 +1282,7 @@ class YearToDateLiabilityController @Inject() (
                 )
               )(
                 page =
-                  if (fillingOutReturn.isFurtherReturn.contains(true))
+                  if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
                     furtherReturnsTaxableGainOrLossPage(
                       _,
                       _,
@@ -1328,7 +1315,7 @@ class YearToDateLiabilityController @Inject() (
 
   def taxableGainOrLossSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         answers match {
           case _: CalculatedYTDAnswers                       =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1341,7 +1328,7 @@ class YearToDateLiabilityController @Inject() (
                 nonCalculatedAnswers
               )(form = taxableGainOrLossForm)(
                 page =
-                  if (fillingOutReturn.isFurtherReturn.contains(true))
+                  if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
                     furtherReturnsTaxableGainOrLossPage(
                       _,
                       _,
@@ -1403,8 +1390,8 @@ class YearToDateLiabilityController @Inject() (
 
   def nonCalculatedEnterTaxDue(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-        val isFurtherReturn = fillingOutReturn.isFurtherReturn.contains(true)
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
+        val isFurtherReturnorAmendReturn = fillingOutReturn.isFurtherReturn.contains(true)
         answers match {
           case _: CalculatedYTDAnswers                       =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1441,7 +1428,7 @@ class YearToDateLiabilityController @Inject() (
                     )
                   )(
                     page =
-                      if (isFurtherReturn)
+                      if (isFurtherReturnorAmendReturn)
                         furtherReturnEnterTaxDuePage(
                           _,
                           _,
@@ -1453,11 +1440,12 @@ class YearToDateLiabilityController @Inject() (
                         nonCalculatedEnterTaxDuePage(_, _)
                   )(
                     requiredPreviousAnswer = { answers =>
-                      if (isFurtherReturn) answers.fold(_.yearToDateLiability, _.yearToDateLiability).map(_ => ())
+                      if (isFurtherReturnorAmendReturn)
+                        answers.fold(_.yearToDateLiability, _.yearToDateLiability).map(_ => ())
                       else answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).map(_ => ())
                     },
                     redirectToIfNoRequiredPreviousAnswer =
-                      if (isFurtherReturn) routes.YearToDateLiabilityController.yearToDateLiability()
+                      if (isFurtherReturnorAmendReturn) routes.YearToDateLiabilityController.yearToDateLiability()
                       else routes.YearToDateLiabilityController.hasEstimatedDetails()
                   )
                 }
@@ -1469,8 +1457,8 @@ class YearToDateLiabilityController @Inject() (
 
   def nonCalculatedEnterTaxDueSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-        val isFurtherReturn = fillingOutReturn.isFurtherReturn.contains(true)
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
+        val isFurtherReturnorAmendReturn = fillingOutReturn.isFurtherOrAmendReturn.contains(true)
 
         answers match {
           case _: CalculatedYTDAnswers                       =>
@@ -1500,7 +1488,7 @@ class YearToDateLiabilityController @Inject() (
                     nonCalculatedAnswers
                   )(form = nonCalculatedTaxDueForm)(
                     page =
-                      if (isFurtherReturn)
+                      if (isFurtherReturnorAmendReturn)
                         furtherReturnEnterTaxDuePage(
                           _,
                           _,
@@ -1512,11 +1500,12 @@ class YearToDateLiabilityController @Inject() (
                         nonCalculatedEnterTaxDuePage(_, _)
                   )(
                     requiredPreviousAnswer = { answers =>
-                      if (isFurtherReturn) answers.fold(_.yearToDateLiability, _.yearToDateLiability).map(_ => ())
+                      if (isFurtherReturnorAmendReturn)
+                        answers.fold(_.yearToDateLiability, _.yearToDateLiability).map(_ => ())
                       else answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).map(_ => ())
                     },
                     redirectToIfNoRequiredPreviousAnswer =
-                      if (isFurtherReturn) routes.YearToDateLiabilityController.yearToDateLiability()
+                      if (isFurtherReturnorAmendReturn) routes.YearToDateLiabilityController.yearToDateLiability()
                       else routes.YearToDateLiabilityController.hasEstimatedDetails()
                   ) { (amount, draftReturn) =>
                     val taxDue = AmountInPence.fromPounds(amount)
@@ -1573,15 +1562,13 @@ class YearToDateLiabilityController @Inject() (
         }
 
         val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
-        val result         = for {
-          _ <- returnsService.storeDraftReturn(
-                 newDraftReturn,
-                 fillingOutReturn.subscribedDetails.cgtReference,
-                 fillingOutReturn.agentReferenceNumber
-               )
+        val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
+
+        val result = for {
+          _ <- returnsService.storeDraftReturn(newJourney)
           _ <- EitherT(
                  updateSession(sessionStore, request)(
-                   _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                   _.copy(journeyStatus = Some(newJourney))
                  )
                )
         } yield ()
@@ -1599,7 +1586,7 @@ class YearToDateLiabilityController @Inject() (
 
   def mandatoryEvidenceExpired(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         answers match {
           case IncompleteNonCalculatedYTDAnswers(
                 _,
@@ -1611,7 +1598,7 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _
               ) =>
-            Ok(expiredMandatoryEvidencePage(expired, fillingOutReturn.isFurtherReturn))
+            Ok(expiredMandatoryEvidencePage(expired, fillingOutReturn.isFurtherOrAmendReturn))
 
           case IncompleteCalculatedYTDAnswers(
                 _,
@@ -1623,7 +1610,7 @@ class YearToDateLiabilityController @Inject() (
                 Some(expired),
                 _
               ) =>
-            Ok(expiredMandatoryEvidencePage(expired, fillingOutReturn.isFurtherReturn))
+            Ok(expiredMandatoryEvidencePage(expired, fillingOutReturn.isFurtherOrAmendReturn))
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1633,7 +1620,7 @@ class YearToDateLiabilityController @Inject() (
 
   def scanningMandatoryEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         def checkAndHandleUpscanStatus(
           pendingUpscanUpload: UpscanUpload,
           answers: Either[
@@ -1673,7 +1660,7 @@ class YearToDateLiabilityController @Inject() (
           upscanCallBack: Option[UpscanCallBack]
         ): Result =
           upscanCallBack match {
-            case None                   => Ok(mandatoryEvidenceScanProgressPage(fillingOutReturn.isFurtherReturn))
+            case None                   => Ok(mandatoryEvidenceScanProgressPage(fillingOutReturn.isFurtherOrAmendReturn))
             case Some(_: UpscanFailure) => Ok(mandatoryEvidenceScanFailedPage())
             case Some(_: UpscanSuccess) =>
               Redirect(
@@ -1729,7 +1716,7 @@ class YearToDateLiabilityController @Inject() (
 
   def uploadMandatoryEvidenceFailure(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         def handlePendingUpscanUpload(
           answers: Either[
             IncompleteNonCalculatedYTDAnswers,
@@ -1757,9 +1744,9 @@ class YearToDateLiabilityController @Inject() (
 
   def yearToDateLiability(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (fillingOutReturn, answers) match {
-          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherReturn.contains(true) =>
+          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherOrAmendReturn.contains(true) =>
             withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
               commonDisplayBehaviour(
                 nonCalculatedAnswers
@@ -1780,7 +1767,7 @@ class YearToDateLiabilityController @Inject() (
               )
             }
 
-          case _                                                                                      =>
+          case _                                                                                             =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
         }
@@ -1790,9 +1777,9 @@ class YearToDateLiabilityController @Inject() (
 
   def yearToDateLiabilitySubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (fillingOutReturn, answers) match {
-          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherReturn.contains(true) =>
+          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherOrAmendReturn.contains(true) =>
             withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
               commonSubmitBehaviour(
                 fillingOutReturn,
@@ -1828,7 +1815,7 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-          case _                                                                                      =>
+          case _                                                                                             =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -1836,9 +1823,9 @@ class YearToDateLiabilityController @Inject() (
 
   def repayment(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (fillingOutReturn, answers) match {
-          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherReturn.contains(true) =>
+          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherOrAmendReturn.contains(true) =>
             commonDisplayBehaviour(
               nonCalculatedAnswers
             )(form =
@@ -1856,7 +1843,7 @@ class YearToDateLiabilityController @Inject() (
               redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
             )
 
-          case _                                                                                      =>
+          case _                                                                                             =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
         }
@@ -1866,9 +1853,9 @@ class YearToDateLiabilityController @Inject() (
 
   def repaymentSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (fillingOutReturn, answers) match {
-          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherReturn.contains(true) =>
+          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherOrAmendReturn.contains(true) =>
             commonSubmitBehaviour(
               fillingOutReturn,
               fillingOutReturn.draftReturn,
@@ -1899,7 +1886,7 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-          case _                                                                                      =>
+          case _                                                                                             =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -1919,16 +1906,13 @@ class YearToDateLiabilityController @Inject() (
       _.copy(pendingUpscanUpload = None)
     )
     val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
+    val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
 
     for {
-      _ <- returnsService.storeDraftReturn(
-             newDraftReturn,
-             fillingOutReturn.subscribedDetails.cgtReference,
-             fillingOutReturn.agentReferenceNumber
-           )
+      _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
              updateSession(sessionStore, request)(
-               _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+               _.copy(journeyStatus = Some(newJourney))
              )
            )
     } yield ()
@@ -1973,20 +1957,12 @@ class YearToDateLiabilityController @Inject() (
       }
 
     val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
-
+    val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
     for {
-      _ <- returnsService.storeDraftReturn(
-             newDraftReturn,
-             fillingOutReturn.subscribedDetails.cgtReference,
-             fillingOutReturn.agentReferenceNumber
-           )
+      _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
              updateSession(sessionStore, request)(
-               _.copy(journeyStatus =
-                 Some(
-                   fillingOutReturn.copy(draftReturn = newDraftReturn)
-                 )
-               )
+               _.copy(journeyStatus = Some(newJourney))
              )
            )
     } yield ()
@@ -1994,7 +1970,7 @@ class YearToDateLiabilityController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (c: CalculatedYTDAnswers, s: DraftSingleDisposalReturn)         =>
             withAssetTypeAndResidentialStatus(s)((_, wasUkResident) =>
@@ -2095,7 +2071,7 @@ class YearToDateLiabilityController @Inject() (
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
       case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, _, None, _)
-          if fillingOutReturn.isFurtherReturn.contains(true) =>
+          if fillingOutReturn.isFurtherOrAmendReturn.contains(true) =>
         Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
 
       case IncompleteNonCalculatedYTDAnswers(_, _, None, _, _, _, _, _) =>
@@ -2104,7 +2080,7 @@ class YearToDateLiabilityController @Inject() (
         )
 
       case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, _, _, None)
-          if fillingOutReturn.isFurtherReturn.contains(true) =>
+          if fillingOutReturn.isFurtherOrAmendReturn.contains(true) =>
         Redirect(
           routes.YearToDateLiabilityController.repayment()
         )
@@ -2132,12 +2108,9 @@ class YearToDateLiabilityController @Inject() (
         )
         val updatedJourney     =
           fillingOutReturn.copy(draftReturn = updatedDraftReturn)
-        val result             = for {
-          _ <- returnsService.storeDraftReturn(
-                 updatedDraftReturn,
-                 fillingOutReturn.subscribedDetails.cgtReference,
-                 fillingOutReturn.agentReferenceNumber
-               )
+
+        val result = for {
+          _ <- returnsService.storeDraftReturn(updatedJourney)
           _ <- EitherT(
                  updateSession(sessionStore, request)(
                    _.copy(journeyStatus = Some(updatedJourney))
@@ -2164,7 +2137,7 @@ class YearToDateLiabilityController @Inject() (
                 },
                 fillingOutReturn.subscribedDetails.isATrust,
                 draftReturn.representativeType,
-                fillingOutReturn.isFurtherReturn,
+                fillingOutReturn.isFurtherOrAmendReturn,
                 taxYear
               )
             )
@@ -2183,7 +2156,7 @@ class YearToDateLiabilityController @Inject() (
             },
             fillingOutReturn.subscribedDetails.isATrust,
             draftReturn.representativeType,
-            fillingOutReturn.isFurtherReturn,
+            fillingOutReturn.isFurtherOrAmendReturn,
             taxYear
           )
         )
@@ -2340,16 +2313,13 @@ class YearToDateLiabilityController @Inject() (
     val completeAnswers = CompleteCalculatedYTDAnswers(e, p, h, c, t, m)
     val newDraftReturn  =
       draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
+    val newJourney      = fillingOutReturn.copy(draftReturn = newDraftReturn)
 
     val result = for {
-      _ <- returnsService.storeDraftReturn(
-             newDraftReturn,
-             fillingOutReturn.subscribedDetails.cgtReference,
-             fillingOutReturn.agentReferenceNumber
-           )
+      _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
              updateSession(sessionStore, request)(
-               _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+               _.copy(journeyStatus = Some(newJourney))
              )
            )
     } yield ()
@@ -2374,7 +2344,7 @@ class YearToDateLiabilityController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) {
+      withFillingOutReturnAndYTDLiabilityAnswers {
         case _ =>
           Redirect(controllers.returns.routes.TaskListController.taskList())
       }

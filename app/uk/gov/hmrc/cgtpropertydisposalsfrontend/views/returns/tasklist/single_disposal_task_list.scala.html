@@ -41,7 +41,7 @@
         taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
 )
 
-@(draftReturn: DraftSingleDisposalReturn, isFurtherReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftSingleDisposalReturn, isFurtherOrAmendReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers
@@ -81,9 +81,9 @@
 
     (draftReturn.triageAnswers) match {
         case IncompleteSingleDisposalTriageAnswers(individualUserType, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) =>
-            isFurtherReturn.contains(false) && shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
+            isFurtherOrAmendReturn.contains(false) && shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
         case CompleteSingleDisposalTriageAnswers(individualUserType, _, countryOfResidence, assetType, _, _) =>
-            isFurtherReturn.contains(false) && shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
+            isFurtherOrAmendReturn.contains(false) && shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
         case _ =>
             false
     }
@@ -107,7 +107,7 @@
 }
 
 @gainOrLossAfterReliefsState = @{
-    if(isFurtherReturn.contains(true)){
+    if(isFurtherOrAmendReturn.contains(true)){
         (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState) match {
             case (Complete, Complete, Complete, Complete)  =>
                 Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))

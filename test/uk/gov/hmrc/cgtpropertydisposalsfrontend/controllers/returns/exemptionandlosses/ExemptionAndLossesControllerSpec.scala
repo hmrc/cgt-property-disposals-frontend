@@ -169,7 +169,8 @@ class ExemptionAndLossesControllerSpec
     )
 
     val journey = sampleFillingOutReturn(draftReturn, userType).copy(
-      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None
+      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None,
+      originalReturn = None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -217,7 +218,8 @@ class ExemptionAndLossesControllerSpec
     )
 
     val journey = sampleFillingOutReturn(draftReturn, userType).copy(
-      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None
+      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None,
+      originalReturn = None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -261,7 +263,8 @@ class ExemptionAndLossesControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
       agentReferenceNumber = setAgentReferenceNumber(userType),
-      previousSentReturns = if (isFurtherReturn) Some(sample[PreviousReturnData]) else None
+      previousSentReturns = if (isFurtherReturn) Some(sample[PreviousReturnData]) else None,
+      originalReturn = None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -292,7 +295,8 @@ class ExemptionAndLossesControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
       agentReferenceNumber = setAgentReferenceNumber(userType),
-      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None
+      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None,
+      originalReturn = None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -717,9 +721,7 @@ class ExemptionAndLossesControllerSpec
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
                 mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
+                  journey.copy(draftReturn = updatedDraftReturn)
                 )(Left(Error("")))
               }
 
@@ -743,19 +745,13 @@ class ExemptionAndLossesControllerSpec
                   individualUserType
                 )
 
+              val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Right(()))
-                mockStoreSession(
-                  session.copy(
-                    journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
-                  )
-                )(Left(Error("")))
+                mockStoreDraftReturn(updatedJourney)(Right(()))
+                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(
@@ -1214,15 +1210,12 @@ class ExemptionAndLossesControllerSpec
                   newAmount,
                   individualUserType
                 )
+              val updatedJourney                         = journey.copy(draftReturn = updatedDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Left(Error("")))
+                mockStoreDraftReturn(updatedJourney)(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(
@@ -1245,20 +1238,13 @@ class ExemptionAndLossesControllerSpec
                   newAmount,
                   individualUserType
                 )
+              val updatedJourney                         = journey.copy(draftReturn = updatedDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Right(()))
-                mockStoreSession(
-                  session.copy(
-                    journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
-                  )
-                )(Left(Error("")))
+                mockStoreDraftReturn(updatedJourney)(Right(()))
+                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(
@@ -1790,15 +1776,12 @@ class ExemptionAndLossesControllerSpec
                   newAmount,
                   individualUserType
                 )
+              val updatedJourney                         = journey.copy(draftReturn = updatedDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Left(Error("")))
+                mockStoreDraftReturn(updatedJourney)(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(
@@ -1817,20 +1800,13 @@ class ExemptionAndLossesControllerSpec
                   newAmount,
                   individualUserType
                 )
+              val updatedJourney                         = journey.copy(draftReturn = updatedDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(
-                  updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
-                )(Right(()))
-                mockStoreSession(
-                  session.copy(
-                    journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
-                  )
-                )(Left(Error("")))
+                mockStoreDraftReturn(updatedJourney)(Right(()))
+                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(
@@ -2042,15 +2018,12 @@ class ExemptionAndLossesControllerSpec
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val (session, _, journey, updatedDraftReturn) =
                   getSessionJourneyAndDraftReturn(userType, individualUserType)
+                val updatedJourney                            = journey.copy(draftReturn = updatedDraftReturn)
 
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(
-                    updatedDraftReturn,
-                    journey.subscribedDetails.cgtReference,
-                    journey.agentReferenceNumber
-                  )(Left(Error("")))
+                  mockStoreDraftReturn(updatedJourney)(Left(Error("")))
                 }
 
                 checkIsTechnicalErrorPage(performAction())
@@ -2062,15 +2035,12 @@ class ExemptionAndLossesControllerSpec
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val (session, updatedSession, journey, updatedDraftReturn) =
                   getSessionJourneyAndDraftReturn(userType, individualUserType)
+                val updatedJourney                                         = journey.copy(draftReturn = updatedDraftReturn)
 
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(
-                    updatedDraftReturn,
-                    journey.subscribedDetails.cgtReference,
-                    journey.agentReferenceNumber
-                  )(Right(()))
+                  mockStoreDraftReturn(updatedJourney)(Right(()))
                   mockStoreSession(updatedSession)(Left(Error("")))
                 }
 
@@ -2139,14 +2109,12 @@ class ExemptionAndLossesControllerSpec
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val (session, updatedSession, journey, updatedDraftReturn) =
                   getSessionJourneyAndDraftReturn(userType, individualUserType)
+                val updatedJourney                                         = journey.copy(draftReturn = updatedDraftReturn)
+
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(
-                    updatedDraftReturn,
-                    journey.subscribedDetails.cgtReference,
-                    journey.agentReferenceNumber
-                  )(Right(()))
+                  mockStoreDraftReturn(updatedJourney)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -2333,20 +2301,14 @@ class ExemptionAndLossesControllerSpec
                   .flatMap(_.unsetAllButIncomeDetails())
               )
           )
+          val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(
-              Right(())
-            )
+            mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(
-              session.copy(
-                journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
-              )
+              session.copy(journeyStatus = Some(updatedJourney))
             )(Right(()))
           }
 

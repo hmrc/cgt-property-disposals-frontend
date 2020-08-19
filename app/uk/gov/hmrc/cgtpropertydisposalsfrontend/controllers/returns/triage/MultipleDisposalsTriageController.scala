@@ -32,12 +32,12 @@ import play.api.data.{Form, FormError, Forms}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{StartingToAmendToFillingOutReturnBehaviour, representee}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.FormUtils.readValue
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
@@ -82,7 +82,8 @@ class MultipleDisposalsTriageController @Inject() (
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
-    with SessionUpdates {
+    with SessionUpdates
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   type JourneyState = Either[
     StartingNewDraftReturn,
@@ -91,7 +92,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def guidance(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val backLink = answers.fold(
           _ => routes.CommonTriageQuestionsController.howManyProperties(),
           _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
@@ -113,7 +114,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def guidanceSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, _, answers) =>
+      withMultipleDisposalTriageAnswers { (_, _, answers) =>
         answers.fold(
           _ =>
             Redirect(
@@ -129,7 +130,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def howManyDisposals(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val numberOfDisposals =
           answers.fold(_.numberOfProperties, c => Some(c.numberOfProperties))
         val form              = numberOfDisposals.fold(numberOfPropertiesForm)(
@@ -145,7 +146,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def howManyDisposalsSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         numberOfPropertiesForm
           .bindFromRequest()
           .fold(
@@ -236,7 +237,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def wereYouAUKResident(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val wereYouUKResident =
           answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
         val form              =
@@ -263,7 +264,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def wereYouAUKResidentSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         wasAUkResidentForm
           .bindFromRequest()
           .fold(
@@ -347,7 +348,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def wereAllPropertiesResidential(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val werePropertiesResidential =
           answers.fold(
             _.wereAllPropertiesResidential,
@@ -367,7 +368,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def wereAllPropertiesResidentialSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         wereAllPropertiesResidentialForm
           .bindFromRequest()
           .fold(
@@ -422,7 +423,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def countryOfResidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val wasUkResident =
           answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
 
@@ -458,7 +459,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def countryOfResidenceSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         countryOfResidenceForm
           .bindFromRequest()
           .fold(
@@ -534,7 +535,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def whenWereContractsExchanged(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val taxYearExchanged =
           answers.fold(_.taxYearAfter6April2020, _ => Some(true))
         val form             =
@@ -555,7 +556,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def whenWereContractsExchangedSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         taxYearExchangedForm
           .bindFromRequest()
           .fold(
@@ -613,12 +614,7 @@ class MultipleDisposalsTriageController @Inject() (
                                       )
                     _              <- newState.fold(
                                         _ => EitherT.pure[Future, Error](()),
-                                        r =>
-                                          returnsService.storeDraftReturn(
-                                            r.draftReturn,
-                                            r.subscribedDetails.cgtReference,
-                                            r.agentReferenceNumber
-                                          )
+                                        returnsService.storeDraftReturn(_)
                                       )
                     _              <- EitherT(
                                         updateSession(sessionStore, request)(
@@ -646,7 +642,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def assetTypeForNonUkResidents(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val assetType = answers.fold(_.assetTypes, c => Some(c.assetTypes))
         val form      = assetType.fold(assetTypeForNonUkResidentsForm)(
           assetTypeForNonUkResidentsForm.fill
@@ -672,7 +668,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def assetTypeForNonUkResidentsSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         assetTypeForNonUkResidentsForm
           .bindFromRequest()
           .fold(
@@ -768,7 +764,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def completionDate(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val completionDate =
           answers.fold(_.completionDate, c => Some(c.completionDate))
         val today          = TimeUtils.today()
@@ -787,7 +783,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def completionDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         completionDateForm(TimeUtils.today())
           .bindFromRequest()
           .fold(
@@ -873,7 +869,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def disposalDateOfShares(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           val backLink = answers.fold(
             _ =>
@@ -902,7 +898,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def disposalDateOfSharesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      withMultipleDisposalTriageAnswers { (_, state, answers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           sharesDisposalDateForm(personalRepDetails)
             .bindFromRequest()
@@ -971,12 +967,7 @@ class MultipleDisposalsTriageController @Inject() (
                                         )
                       _              <- newState.fold(
                                           _ => EitherT.pure[Future, Error](()),
-                                          r =>
-                                            returnsService.storeDraftReturn(
-                                              r.draftReturn,
-                                              r.subscribedDetails.cgtReference,
-                                              r.agentReferenceNumber
-                                            )
+                                          returnsService.storeDraftReturn(_)
                                         )
                       _              <- EitherT(
                                           updateSession(sessionStore, request)(
@@ -1000,7 +991,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      withMultipleDisposalTriageAnswers { (_, state, triageAnswers) =>
         val isIndividual = state
           .fold(_.subscribedDetails, _._1.subscribedDetails)
           .userType()
@@ -1305,7 +1296,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withMultipleDisposalTriageAnswers(request) { (_, journey, answers) =>
+      withMultipleDisposalTriageAnswers { (_, journey, answers) =>
         journey match {
           case Right(_)                     =>
             Redirect(controllers.returns.routes.TaskListController.taskList())
@@ -1337,7 +1328,8 @@ class MultipleDisposalsTriageController @Inject() (
                   startingNewDraftReturn.ggCredId,
                   startingNewDraftReturn.agentReferenceNumber,
                   newDraftReturn,
-                  startingNewDraftReturn.previousSentReturns
+                  startingNewDraftReturn.previousSentReturns,
+                  None
                 )
 
                 updateStateAndThen(
@@ -1369,18 +1361,19 @@ class MultipleDisposalsTriageController @Inject() (
     else List(AssetType.NonResidential)
 
   private def withMultipleDisposalTriageAnswers(
-    request: RequestWithSessionData[_]
-  )(
     f: (SessionData, JourneyState, MultipleDisposalsTriageAnswers) => Future[Result]
-  ): Future[Result] =
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((_, s: StartingToAmendReturn))                                 =>
+        convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
+
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t), _, _))) =>
         f(session, Left(s), t)
 
       case Some(
             (
               session,
-              r @ FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn, _)
+              r @ FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn, _, _)
             )
           ) =>
         f(session, Right(r -> Right(m)), m.triageAnswers)
@@ -1388,7 +1381,7 @@ class MultipleDisposalsTriageController @Inject() (
       case Some(
             (
               session,
-              r @ FillingOutReturn(_, _, _, mi: DraftMultipleIndirectDisposalsReturn, _)
+              r @ FillingOutReturn(_, _, _, mi: DraftMultipleIndirectDisposalsReturn, _, _)
             )
           ) =>
         f(session, Right(r -> Left(mi)), mi.triageAnswers)
@@ -1410,13 +1403,8 @@ class MultipleDisposalsTriageController @Inject() (
     val result = for {
       _ <- updatedState.fold(
              _ => EitherT.pure[Future, Error](()),
-             r =>
-               returnsService
-                 .storeDraftReturn(
-                   r.draftReturn,
-                   r.subscribedDetails.cgtReference,
-                   r.agentReferenceNumber
-                 )
+             returnsService
+               .storeDraftReturn(_)
            )
       _ <- EitherT(
              updateSession(sessionStore, request)(

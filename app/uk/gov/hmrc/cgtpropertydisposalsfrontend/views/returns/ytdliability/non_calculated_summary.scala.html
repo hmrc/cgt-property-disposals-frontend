@@ -39,7 +39,7 @@
     isMultiple: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isFurtherReturn: Option[Boolean],
+    isFurtherOrAmendReturn: Option[Boolean],
     taxYear: TaxYear
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
@@ -64,7 +64,7 @@
 }
 
 @multipleKey = @{if(isMultiple) ".multiple" else ""}
-@furtherReturnKey = @{if(isFurtherReturn.contains(true)) ".furtherReturn" else "" }
+@furtherReturnKey = @{if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else "" }
 
 @taxableGainOrLossLabelWithAmount = @{
     if(answers.taxableGainOrLoss > AmountInPence.zero)
@@ -81,7 +81,7 @@
 @cyaSection() {
 
     @cyaRow(
-        if(isFurtherReturn.contains(true))
+        if(isFurtherOrAmendReturn.contains(true))
             messages(s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin.furtherReturn.h2", taxYearStart, taxYearEnd)
         else
             messages(s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin$multipleKey.title"),
@@ -106,7 +106,7 @@
         "hasEstimatedDetails-value"
     )
 
-    @if(isFurtherReturn.contains(true)) {
+    @if(isFurtherOrAmendReturn.contains(true)) {
         @answers.yearToDateLiability.map { y =>
             @cyaRow(
                 messages(s"yearToDateLiability$userKeyWithSeparatePeriodOfAdmin.h2", taxYearStart, taxYearEnd),
@@ -124,7 +124,7 @@
         "nonCalculatedTaxDue-value"
     )
 
-    @if(isFurtherReturn.contains(true)) {
+    @if(isFurtherOrAmendReturn.contains(true)) {
         @answers.checkForRepayment.map { checkForRepayment =>
             @cyaRow(
                 messages(s"repayment$userKeyWithSeparatePeriodOfAdmin.title"),

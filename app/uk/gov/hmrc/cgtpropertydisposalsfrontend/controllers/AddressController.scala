@@ -58,7 +58,7 @@ trait AddressController[A <: AddressJourneyType] {
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, A)]
+  ): Either[Future[Result], (SessionData, A)]
 
   def isATrust(journey: A): Boolean
 
@@ -92,7 +92,7 @@ trait AddressController[A <: AddressJourneyType] {
   protected def withValidJourney(request: RequestWithSessionData[_])(
     f: (SessionData, A) => Future[Result]
   ): Future[Result] =
-    validJourney(request).fold[Future[Result]](toFuture, f.tupled)
+    validJourney(request).map[Future[Result]](f.tupled).merge
 
   def showExitPage() =
     authenticatedActionWithSessionData.async { implicit request =>

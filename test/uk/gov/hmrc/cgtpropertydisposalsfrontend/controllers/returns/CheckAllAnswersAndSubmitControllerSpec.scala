@@ -232,7 +232,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         val completeFillingOutReturn =
-          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn, previousSentReturns = None)
+          sample[FillingOutReturn]
+            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, originalReturn = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -340,7 +341,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             val completeFillingOutReturn = sample[FillingOutReturn].copy(
               draftReturn = completeDraftReturn,
-              previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence])))
+              previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]))),
+              originalReturn = None
             )
 
             test(
@@ -363,7 +365,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(
                 completeFillingOutReturn.copy(
                   agentReferenceNumber = setAgentReferenceNumber(userType),
-                  subscribedDetails = subscribedDetails
+                  subscribedDetails = subscribedDetails,
+                  originalReturn = None
                 ),
                 userType = userType
               ).copy(userType = Some(userType)),
@@ -457,7 +460,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         val completeFillingOutReturn =
-          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn, previousSentReturns = None)
+          sample[FillingOutReturn]
+            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, originalReturn = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -624,7 +628,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         val completeFillingOutReturn =
-          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn, previousSentReturns = None)
+          sample[FillingOutReturn]
+            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, originalReturn = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -797,7 +802,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         val completeFillingOutReturn =
-          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn, previousSentReturns = None)
+          sample[FillingOutReturn]
+            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, originalReturn = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -962,7 +968,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         val completeFillingOutReturn =
-          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn, previousSentReturns = None)
+          sample[FillingOutReturn]
+            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, originalReturn = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -1147,7 +1154,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
       val completeFillingOutReturnWithRepresenteeWithNoReference =
-        sample[FillingOutReturn].copy(draftReturn = completeDraftReturnRepresenteWithNoReference)
+        sample[FillingOutReturn].copy(draftReturn = completeDraftReturnRepresenteWithNoReference, originalReturn = None)
 
       val completeFillingOutReturnNoRepresentee =
         completeFillingOutReturnWithRepresenteeWithNoReference.copy(draftReturn = completeDraftReturnNoRepresentee)
@@ -1182,7 +1189,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             completeReturn.representativeType(),
             completeReturn.isIndirectDisposal(),
             completeFillingOutReturnNoRepresentee.agentReferenceNumber,
-            completeFillingOutReturnNoRepresentee.isFurtherReturn,
+            completeFillingOutReturnNoRepresentee.isFurtherOrAmendReturn,
             true
           ).toString
 
@@ -1191,7 +1198,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           completeFillingOutReturnNoRepresentee.draftReturn.id,
           completeFillingOutReturnNoRepresentee.subscribedDetails,
           completeFillingOutReturnNoRepresentee.agentReferenceNumber,
-          completeFillingOutReturnNoRepresentee.isFurtherReturn.contains(true),
+          completeFillingOutReturnNoRepresentee.isFurtherOrAmendReturn.contains(true),
           B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes())))
         )
       }
@@ -1225,7 +1232,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockedCompleteReturn.representativeType(),
             mockedCompleteReturn.isIndirectDisposal(),
             completeFillingOutReturnWithRepresenteeWithNoReference.agentReferenceNumber,
-            completeFillingOutReturnWithRepresenteeWithNoReference.isFurtherReturn,
+            completeFillingOutReturnWithRepresenteeWithNoReference.isFurtherOrAmendReturn,
             true
           ).toString
 
@@ -1234,7 +1241,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           completeFillingOutReturnWithRepresenteeWithNoReference.draftReturn.id,
           completeFillingOutReturnWithRepresenteeWithNoReference.subscribedDetails,
           completeFillingOutReturnWithRepresenteeWithNoReference.agentReferenceNumber,
-          completeFillingOutReturnWithRepresenteeWithNoReference.isFurtherReturn.contains(true),
+          completeFillingOutReturnWithRepresenteeWithNoReference.isFurtherOrAmendReturn.contains(true),
           B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes())))
         )
       }
@@ -2217,7 +2224,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockGetSession(
               sessionWithJourney(
                 sample[FillingOutReturn].copy(
-                  draftReturn = makeIncomplete(completeDraftReturn)
+                  draftReturn = makeIncomplete(completeDraftReturn),
+                  originalReturn = None
                 )
               )
             )
@@ -2256,7 +2264,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockGetSession(
               sessionWithJourney(
                 sample[FillingOutReturn].copy(
-                  draftReturn = makeIncomplete(completeDraftReturn)
+                  draftReturn = makeIncomplete(completeDraftReturn),
+                  originalReturn = None
                 )
               )
             )
@@ -2298,7 +2307,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockGetSession(
               sessionWithJourney(
                 sample[FillingOutReturn].copy(
-                  draftReturn = makeIncomplete(completeDraftReturn)
+                  draftReturn = makeIncomplete(completeDraftReturn),
+                  originalReturn = None
                 )
               )
             )
@@ -2316,7 +2326,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             sessionWithJourney(
               sample[FillingOutReturn].copy(
                 draftReturn =
-                  completeDraftReturn.copy(yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]))
+                  completeDraftReturn.copy(yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers])),
+                originalReturn = None
               )
             )
           )
@@ -2354,7 +2365,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockGetSession(
               sessionWithJourney(
                 sample[FillingOutReturn].copy(
-                  draftReturn = makeIncomplete(completeDraftReturn)
+                  draftReturn = makeIncomplete(completeDraftReturn),
+                  originalReturn = None
                 )
               )
             )
@@ -2393,7 +2405,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockGetSession(
               sessionWithJourney(
                 sample[FillingOutReturn].copy(
-                  draftReturn = makeIncomplete(completeDraftReturn)
+                  draftReturn = makeIncomplete(completeDraftReturn),
+                  originalReturn = None
                 )
               )
             )

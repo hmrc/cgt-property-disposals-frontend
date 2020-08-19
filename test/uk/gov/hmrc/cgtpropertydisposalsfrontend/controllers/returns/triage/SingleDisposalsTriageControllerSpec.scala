@@ -34,10 +34,10 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.{DateErrorScenario, dateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, representee, routes => returnsRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour, representee, routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -62,7 +62,8 @@ class SingleDisposalsTriageControllerSpec
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
-    with ReturnsServiceSupport {
+    with ReturnsServiceSupport
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
 
   val mockTaxYearService = mock[TaxYearService]
 
@@ -87,6 +88,7 @@ class SingleDisposalsTriageControllerSpec
     journeyStatus match {
       case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isRight => true
       case _: FillingOutReturn                                           => true
+      case _: StartingToAmendReturn                                      => true
       case _                                                             => false
     }
 
@@ -179,6 +181,11 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.howDidYouDisposeOfProperty(),
+        mockUUIDGenerator
       )
 
       behave like redirectWhenNoPreviousAnswerBehaviour[NumberOfProperties](
@@ -385,6 +392,11 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.howDidYouDisposeOfPropertySubmit(),
+        mockUUIDGenerator
       )
 
       behave like redirectWhenNoPreviousAnswerBehaviour[NumberOfProperties](() => performAction())(
@@ -616,6 +628,11 @@ class SingleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.wereYouAUKResident(),
+        mockUUIDGenerator
+      )
+
       behave like redirectWhenNoPreviousAnswerBehaviour[DisposalMethod](
         performAction
       )(
@@ -830,6 +847,11 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.wereYouAUKResidentSubmit(),
+        mockUUIDGenerator
       )
 
       behave like redirectWhenNoPreviousAnswerBehaviour[DisposalMethod](() => performAction())(
@@ -1127,6 +1149,11 @@ class SingleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.didYouDisposeOfAResidentialProperty(),
+        mockUUIDGenerator
+      )
+
       behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](
         performAction
       )(
@@ -1319,6 +1346,11 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.didYouDisposeOfAResidentialPropertySubmit(),
+        mockUUIDGenerator
       )
 
       behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](() => performAction())(
@@ -1569,6 +1601,11 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whenWasDisposalDate(),
+        mockUUIDGenerator
       )
 
       behave like noDateOfDeathForPersonalRepBehaviour(performAction)
@@ -1970,6 +2007,11 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whenWasDisposalDateSubmit(),
+        mockUUIDGenerator
       )
 
       behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](() => performAction())(
@@ -2387,6 +2429,11 @@ class SingleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whenWasCompletionDate(),
+        mockUUIDGenerator
+      )
+
       behave like redirectWhenNoPreviousAnswerBehaviour[DisposalDate](
         performAction
       )(
@@ -2637,6 +2684,11 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.whenWasCompletionDateSubmit(),
+        mockUUIDGenerator
       )
 
       behave like redirectWhenNoPreviousAnswerBehaviour[DisposalDate](() => performAction())(
@@ -2951,6 +3003,11 @@ class SingleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.countryOfResidence(),
+        mockUUIDGenerator
+      )
+
       behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](
         performAction
       )(
@@ -3154,6 +3211,11 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.countryOfResidenceSubmit(),
+        mockUUIDGenerator
       )
 
       behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](() => performAction())(
@@ -3398,6 +3460,11 @@ class SingleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.assetTypeForNonUkResidents(),
+        mockUUIDGenerator
+      )
+
       behave like redirectWhenNoPreviousAnswerBehaviour[Country](
         performAction
       )(
@@ -3622,6 +3689,11 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.assetTypeForNonUkResidentsSubmit(),
+        mockUUIDGenerator
       )
 
       behave like redirectWhenNoPreviousAnswerBehaviour[Country](() => performAction())(
@@ -4160,6 +4232,11 @@ class SingleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.disposalDateOfShares()(FakeRequest())
 
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalDateOfShares(),
+        mockUUIDGenerator
+      )
+
       behave like noDateOfDeathForPersonalRepBehaviour(performAction)
 
       "Page is displayed correctly" in {
@@ -4254,6 +4331,11 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalDateOfSharesSubmit(),
+        mockUUIDGenerator
       )
 
       behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](() => performAction())(
@@ -5067,7 +5149,8 @@ class SingleDisposalsTriageControllerSpec
           None,
           TimeUtils.today()
         ),
-        startingNewDraftReturn.previousSentReturns
+        startingNewDraftReturn.previousSentReturns,
+        None
       )
 
       val sessionDataWithFillingOutDraftReturn =
@@ -5103,11 +5186,7 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(
-              fillingOutReturn.draftReturn,
-              fillingOutReturn.subscribedDetails.cgtReference,
-              fillingOutReturn.agentReferenceNumber
-            )(Left(Error("")))
+            mockStoreDraftReturn(fillingOutReturn)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -5118,11 +5197,7 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(
-              fillingOutReturn.draftReturn,
-              fillingOutReturn.subscribedDetails.cgtReference,
-              fillingOutReturn.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(fillingOutReturn)(Right(()))
             mockStoreSession(sessionDataWithFillingOutDraftReturn)(
               Left(Error(""))
             )
@@ -5142,11 +5217,7 @@ class SingleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithCompleteStartingNewDraftReturn)
               mockGetNextUUID(uuid)
-              mockStoreDraftReturn(
-                fillingOutReturn.draftReturn,
-                fillingOutReturn.subscribedDetails.cgtReference,
-                fillingOutReturn.agentReferenceNumber
-              )(Right(()))
+              mockStoreDraftReturn(fillingOutReturn)(Right(()))
               mockStoreSession(sessionDataWithFillingOutDraftReturn)(Right(()))
             }
 
@@ -5179,7 +5250,8 @@ class SingleDisposalsTriageControllerSpec
                 None,
                 TimeUtils.today()
               ),
-              startingNewDraftReturn.previousSentReturns
+              startingNewDraftReturn.previousSentReturns,
+              None
             )
             val sessionDataWithFillingOutDraftReturn =
               SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
@@ -5188,11 +5260,7 @@ class SingleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithCompleteStartingNewDraftReturn)
               mockGetNextUUID(uuid)
-              mockStoreDraftReturn(
-                fillingOutReturn.draftReturn,
-                fillingOutReturn.subscribedDetails.cgtReference,
-                fillingOutReturn.agentReferenceNumber
-              )(Right(()))
+              mockStoreDraftReturn(fillingOutReturn)(Right(()))
               mockStoreSession(sessionDataWithFillingOutDraftReturn)(Right(()))
             }
 
@@ -5223,7 +5291,8 @@ class SingleDisposalsTriageControllerSpec
                 None,
                 TimeUtils.today()
               ),
-              startingNewDraftReturn.previousSentReturns
+              startingNewDraftReturn.previousSentReturns,
+              None
             )
             val sessionDataWithFillingOutDraftReturn =
               SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
@@ -5232,11 +5301,7 @@ class SingleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithCompleteStartingNewDraftReturn)
               mockGetNextUUID(uuid)
-              mockStoreDraftReturn(
-                fillingOutReturn.draftReturn,
-                fillingOutReturn.subscribedDetails.cgtReference,
-                fillingOutReturn.agentReferenceNumber
-              )(Right(()))
+              mockStoreDraftReturn(fillingOutReturn)(Right(()))
               mockStoreSession(sessionDataWithFillingOutDraftReturn)(Right(()))
             }
 
@@ -5568,11 +5633,7 @@ class SingleDisposalsTriageControllerSpec
               SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
             )
             extraMockActions()
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              fillingOutReturn.subscribedDetails.cgtReference,
-              fillingOutReturn.agentReferenceNumber
-            )(Left(Error("")))
+            mockStoreDraftReturn(updatedFillingOutReturn)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData))
@@ -5585,11 +5646,7 @@ class SingleDisposalsTriageControllerSpec
               SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
             )
             extraMockActions()
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              fillingOutReturn.subscribedDetails.cgtReference,
-              fillingOutReturn.agentReferenceNumber
-            )(Right(()))
+            mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus = Some(updatedFillingOutReturn))
@@ -5655,11 +5712,7 @@ class SingleDisposalsTriageControllerSpec
         SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
       )
       extraMockActions()
-      mockStoreDraftReturn(
-        updatedDraftReturn,
-        fillingOutReturn.subscribedDetails.cgtReference,
-        fillingOutReturn.agentReferenceNumber
-      )(Right(()))
+      mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
       mockStoreSession(
         SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn))
       )(Right(()))
@@ -5688,11 +5741,7 @@ class SingleDisposalsTriageControllerSpec
       mockGetSession(
         SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
       )
-      mockStoreDraftReturn(
-        updatedDraftReturn,
-        fillingOutReturn.subscribedDetails.cgtReference,
-        fillingOutReturn.agentReferenceNumber
-      )(Right(()))
+      mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
       mockStoreSession(
         SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn))
       )(Right(()))

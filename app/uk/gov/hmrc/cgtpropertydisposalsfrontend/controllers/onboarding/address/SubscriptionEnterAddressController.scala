@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{AuditAd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.SubscriptionEnterAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -65,7 +65,7 @@ class SubscriptionEnterAddressController @Inject() (
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, SubscriptionEnterAddressJourney)] =
+  ): Either[Future[Result], (SessionData, SubscriptionEnterAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: SubscriptionMissingData)) => Right(sessionData -> SubscriptionEnterAddressJourney(s))
       case _                                               => Left(Redirect(controllers.routes.StartController.start()))
