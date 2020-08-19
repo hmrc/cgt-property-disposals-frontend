@@ -913,14 +913,16 @@ class AcquisitionDetailsController @Inject() (
 
   def shouldUseRebase(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, _, state, _) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, _, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasAUkResident) =>
           if (wasAUkResident)
             Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
           else
             Ok(
               shouldUseRebasePage(
-                shouldUseRebaseForm,
+                answers
+                  .fold(_.shouldUseRebase, c => Some(c.shouldUseRebase))
+                  .fold(shouldUseRebaseForm)(shouldUseRebaseForm.fill),
                 routes.AcquisitionDetailsController
                   .rebasedAcquisitionPrice(),
                 rebasingEligibilityUtil
