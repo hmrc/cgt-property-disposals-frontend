@@ -265,7 +265,8 @@ class PropertyDetailsController @Inject() (
             hasValidPostcodePage(
               hasValidPostcodeForm,
               hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
-              isSingleDisposal
+              isSingleDisposal,
+              fillingOutReturn.journey.isAmendReturn
             )
           )
         } else
@@ -295,7 +296,8 @@ class PropertyDetailsController @Inject() (
                   hasValidPostcodePage(
                     formWithErrors,
                     hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
-                    isSingleDisposal
+                    isSingleDisposal,
+                    fillingOutReturn.journey.isAmendReturn
                   )
                 ),
               hasValidPostcode =>
@@ -333,7 +335,8 @@ class PropertyDetailsController @Inject() (
             enterUPRNPage(
               enterUPRNForm,
               routes.PropertyDetailsController.singleDisposalHasUkPostcode(),
-              isSingleDisposal
+              isSingleDisposal,
+              fillingOutReturn.journey.isAmendReturn
             )
           )
         } else
@@ -365,7 +368,8 @@ class PropertyDetailsController @Inject() (
                     formWithErrors,
                     routes.PropertyDetailsController
                       .singleDisposalHasUkPostcode(),
-                    isSingleDisposal
+                    isSingleDisposal,
+                    fillingOutReturn.journey.isAmendReturn
                   )
                 ),
               storeAddress(
@@ -455,7 +459,8 @@ class PropertyDetailsController @Inject() (
                   Ok(
                     multipleDisposalsDisposalDatePage(
                       form,
-                      r.journey.subscribedDetails.isATrust
+                      r.journey.subscribedDetails.isATrust,
+                      r.journey.isAmendReturn
                     )
                   )
                 }
@@ -498,7 +503,8 @@ class PropertyDetailsController @Inject() (
                         BadRequest(
                           multipleDisposalsDisposalDatePage(
                             formWithErrors.copy(errors = updatedFormWithErrors),
-                            r.journey.subscribedDetails.isATrust
+                            r.journey.subscribedDetails.isATrust,
+                            r.journey.isAmendReturn
                           )
                         )
                       },
@@ -583,7 +589,8 @@ class PropertyDetailsController @Inject() (
                 form,
                 backLink,
                 r.journey.subscribedDetails.isATrust,
-                extractIndividualUserType(r)
+                extractIndividualUserType(r),
+                r.journey.isAmendReturn
               )
             )
         }
@@ -610,7 +617,8 @@ class PropertyDetailsController @Inject() (
                       formWithErrors,
                       backLink,
                       r.journey.subscribedDetails.isATrust,
-                      extractIndividualUserType(r)
+                      extractIndividualUserType(r),
+                      r.journey.isAmendReturn
                     )
                   ),
                 disposalPrice =>
@@ -683,7 +691,8 @@ class PropertyDetailsController @Inject() (
                 backLink,
                 r.journey.subscribedDetails.isATrust,
                 extractIndividualUserType(r),
-                extractDateOfDeath(r)
+                extractDateOfDeath(r),
+                r.journey.isAmendReturn
               )
             )
         }
@@ -711,7 +720,8 @@ class PropertyDetailsController @Inject() (
                       backLink,
                       r.journey.subscribedDetails.isATrust,
                       extractIndividualUserType(r),
-                      extractDateOfDeath(r)
+                      extractDateOfDeath(r),
+                      r.journey.isAmendReturn
                     )
                   ),
                 acquisitionPrice =>

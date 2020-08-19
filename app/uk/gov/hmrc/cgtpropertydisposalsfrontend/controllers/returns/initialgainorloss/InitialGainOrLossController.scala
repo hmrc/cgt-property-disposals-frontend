@@ -68,7 +68,8 @@ class InitialGainOrLossController @Inject() (
             answer.fold(initialGainOrLossForm)(value => initialGainOrLossForm.fill(value.inPounds())),
             getBackLink(answer),
             isATrust,
-            representativeType
+            representativeType,
+            journeyStatus.isAmendReturn
           )
         )
       }
@@ -91,7 +92,8 @@ class InitialGainOrLossController @Inject() (
                     formWithErrors,
                     backLink,
                     isATrust,
-                    representativeType
+                    representativeType,
+                    fillingOutReturn.isAmendReturn
                   )
                 ),
               value =>

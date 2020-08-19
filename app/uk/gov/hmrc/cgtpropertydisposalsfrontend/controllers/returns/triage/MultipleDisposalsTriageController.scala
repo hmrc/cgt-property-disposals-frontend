@@ -889,7 +889,8 @@ class MultipleDisposalsTriageController @Inject() (
               backLink,
               state.isRight,
               routes.MultipleDisposalsTriageController
-                .disposalDateOfSharesSubmit()
+                .disposalDateOfSharesSubmit(),
+              state.fold(_ => false, _._1.isAmendReturn)
             )
           )
         }
@@ -916,7 +917,8 @@ class MultipleDisposalsTriageController @Inject() (
                     backLink,
                     state.isRight,
                     routes.MultipleDisposalsTriageController
-                      .disposalDateOfSharesSubmit()
+                      .disposalDateOfSharesSubmit(),
+                    state.fold(_ => false, _._1.isAmendReturn)
                   )
                 )
               },

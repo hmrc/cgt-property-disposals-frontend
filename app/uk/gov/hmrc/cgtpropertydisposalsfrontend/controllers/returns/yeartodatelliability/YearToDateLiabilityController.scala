@@ -502,7 +502,8 @@ class YearToDateLiabilityController @Inject() (
                     _,
                     taxYear,
                     wasUkResident,
-                    draftReturn.representativeType()
+                    draftReturn.representativeType(),
+                    fillingOutReturn.isAmendReturn
                   )
                 )(
                   requiredPreviousAnswer = _ => Some(()),
@@ -542,7 +543,8 @@ class YearToDateLiabilityController @Inject() (
                       backLink,
                       taxYear,
                       wasUkResident,
-                      draftReturn.representativeType()
+                      draftReturn.representativeType(),
+                      fillingOutReturn.isAmendReturn
                     )
                   }
                 )(
@@ -614,7 +616,8 @@ class YearToDateLiabilityController @Inject() (
                         _,
                         taxYear,
                         wasUkResident,
-                        draftReturn.representativeType()
+                        draftReturn.representativeType(),
+                        fillingOutReturn.isAmendReturn
                       )
                     )(
                       requiredPreviousAnswer = _.fold(
@@ -664,7 +667,8 @@ class YearToDateLiabilityController @Inject() (
                           backLink,
                           taxYear,
                           wasUkResident,
-                          draftReturn.representativeType()
+                          draftReturn.representativeType(),
+                          fillingOutReturn.isAmendReturn
                         )
                     )(
                       requiredPreviousAnswer = _.fold(
@@ -729,7 +733,8 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 isATrust(fillingOutReturn),
                 fillingOutReturn.draftReturn.representativeType(),
-                fillingOutReturn.isFurtherOrAmendReturn
+                fillingOutReturn.isFurtherOrAmendReturn,
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = answers =>
@@ -786,7 +791,8 @@ class YearToDateLiabilityController @Inject() (
         _,
         isATrust(fillingOutReturn),
         fillingOutReturn.draftReturn.representativeType(),
-        fillingOutReturn.isFurtherOrAmendReturn
+        fillingOutReturn.isFurtherOrAmendReturn,
+        fillingOutReturn.isAmendReturn
       )
     )(
       requiredPreviousAnswer = { a =>
@@ -871,7 +877,8 @@ class YearToDateLiabilityController @Inject() (
         _,
         isATrust(fillingOutReturn),
         draftReturn.representativeType(),
-        fillingOutReturn.isFurtherOrAmendReturn
+        fillingOutReturn.isFurtherOrAmendReturn,
+        fillingOutReturn.isAmendReturn
       )
     )(
       requiredPreviousAnswer = { a =>
@@ -919,7 +926,8 @@ class YearToDateLiabilityController @Inject() (
         _,
         isATrust(fillingOutReturn),
         draftReturn.representativeType(),
-        fillingOutReturn.isFurtherOrAmendReturn
+        fillingOutReturn.isFurtherOrAmendReturn,
+        fillingOutReturn.isAmendReturn
       )
     )(
       requiredPreviousAnswer = answers => answers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
@@ -1038,7 +1046,8 @@ class YearToDateLiabilityController @Inject() (
                 personalAllowance,
                 calculatedTaxDue,
                 fillingOutReturn.subscribedDetails.isATrust,
-                draftReturn.representativeType()
+                draftReturn.representativeType(),
+                fillingOutReturn.isAmendReturn
               )
             )(
               _.fold(
@@ -1137,7 +1146,8 @@ class YearToDateLiabilityController @Inject() (
                 personalAllowance,
                 calculatedTaxDue,
                 fillingOutReturn.subscribedDetails.isATrust,
-                draftReturn.representativeType()
+                draftReturn.representativeType(),
+                fillingOutReturn.isAmendReturn
               )
             )(
               _.fold(
@@ -1194,7 +1204,15 @@ class YearToDateLiabilityController @Inject() (
               logger.warn("Could not initiate upscan", e)
               errorHandler.errorResult()
             },
-            upscanUpload => Ok(mandatoryEvidencePage(upscanUpload, backLink, fillingOutReturn.isFurtherOrAmendReturn))
+            upscanUpload =>
+              Ok(
+                mandatoryEvidencePage(
+                  upscanUpload,
+                  backLink,
+                  fillingOutReturn.isFurtherOrAmendReturn,
+                  fillingOutReturn.isAmendReturn
+                )
+              )
           )
         }
 
@@ -1288,7 +1306,8 @@ class YearToDateLiabilityController @Inject() (
                       _,
                       fillingOutReturn.subscribedDetails.isATrust,
                       fillingOutReturn.draftReturn.representativeType(),
-                      taxYear
+                      taxYear,
+                      fillingOutReturn.isAmendReturn
                     )
                   else
                     taxableGainOrLossPage(
@@ -1302,7 +1321,8 @@ class YearToDateLiabilityController @Inject() (
                         case _: DraftMultipleIndirectDisposalsReturn => true
                         case _: DraftSingleMixedUseDisposalReturn    => false
                       },
-                      fillingOutReturn.draftReturn.representativeType()
+                      fillingOutReturn.draftReturn.representativeType(),
+                      fillingOutReturn.isAmendReturn
                     )
               )(
                 requiredPreviousAnswer = _ => Some(()),
@@ -1334,7 +1354,8 @@ class YearToDateLiabilityController @Inject() (
                       _,
                       fillingOutReturn.subscribedDetails.isATrust,
                       fillingOutReturn.draftReturn.representativeType(),
-                      taxYear
+                      taxYear,
+                      fillingOutReturn.isAmendReturn
                     )
                   else
                     taxableGainOrLossPage(
@@ -1348,7 +1369,8 @@ class YearToDateLiabilityController @Inject() (
                         case _: DraftMultipleIndirectDisposalsReturn => true
                         case _: DraftSingleMixedUseDisposalReturn    => false
                       },
-                      fillingOutReturn.draftReturn.representativeType()
+                      fillingOutReturn.draftReturn.representativeType(),
+                      fillingOutReturn.isAmendReturn
                     )
               )(
                 requiredPreviousAnswer = _ => Some(()),
@@ -1434,10 +1456,11 @@ class YearToDateLiabilityController @Inject() (
                           _,
                           taxYear,
                           fillingOutReturn.subscribedDetails.isATrust,
-                          fillingOutReturn.draftReturn.representativeType
+                          fillingOutReturn.draftReturn.representativeType,
+                          fillingOutReturn.isAmendReturn
                         )
                       else
-                        nonCalculatedEnterTaxDuePage(_, _)
+                        nonCalculatedEnterTaxDuePage(_, _, fillingOutReturn.isAmendReturn)
                   )(
                     requiredPreviousAnswer = { answers =>
                       if (isFurtherReturnorAmendReturn)
@@ -1494,10 +1517,11 @@ class YearToDateLiabilityController @Inject() (
                           _,
                           taxYear,
                           fillingOutReturn.subscribedDetails.isATrust,
-                          fillingOutReturn.draftReturn.representativeType
+                          fillingOutReturn.draftReturn.representativeType,
+                          fillingOutReturn.isAmendReturn
                         )
                       else
-                        nonCalculatedEnterTaxDuePage(_, _)
+                        nonCalculatedEnterTaxDuePage(_, _, fillingOutReturn.isAmendReturn)
                   )(
                     requiredPreviousAnswer = { answers =>
                       if (isFurtherReturnorAmendReturn)
@@ -1759,7 +1783,8 @@ class YearToDateLiabilityController @Inject() (
                   _,
                   taxYear,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  fillingOutReturn.draftReturn.representativeType()
+                  fillingOutReturn.draftReturn.representativeType(),
+                  fillingOutReturn.isAmendReturn
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
@@ -1791,7 +1816,8 @@ class YearToDateLiabilityController @Inject() (
                   _,
                   taxYear,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  fillingOutReturn.draftReturn.representativeType()
+                  fillingOutReturn.draftReturn.representativeType(),
+                  fillingOutReturn.isAmendReturn
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
@@ -1836,7 +1862,8 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 fillingOutReturn.subscribedDetails.isATrust,
-                fillingOutReturn.draftReturn.representativeType()
+                fillingOutReturn.draftReturn.representativeType(),
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = _.fold(_.taxDue, c => Some(c.taxDue)),
@@ -1865,7 +1892,8 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 fillingOutReturn.subscribedDetails.isATrust,
-                fillingOutReturn.draftReturn.representativeType()
+                fillingOutReturn.draftReturn.representativeType(),
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = _.fold(_.taxDue, c => Some(c.taxDue)),

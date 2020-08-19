@@ -202,7 +202,8 @@ class ReliefDetailsController @Inject() (
             _,
             _,
             fillingOutReturn.subscribedDetails.isATrust,
-            draftReturn.representativeType()
+            draftReturn.representativeType(),
+            fillingOutReturn.isAmendReturn
           )
         )(
           hasRequiredPreviousAnswer = _ => true,
@@ -222,7 +223,8 @@ class ReliefDetailsController @Inject() (
               form,
               backLink,
               fillingOutReturn.subscribedDetails.isATrust,
-              draftReturn.representativeType()
+              draftReturn.representativeType(),
+              fillingOutReturn.isAmendReturn
             )
           }
         )(
@@ -286,7 +288,8 @@ class ReliefDetailsController @Inject() (
               _,
               _,
               fillingOutReturn.subscribedDetails.isATrust,
-              draftReturn.representativeType()
+              draftReturn.representativeType(),
+              fillingOutReturn.isAmendReturn
             )
           )(
             hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForLettingsReliefs,
@@ -307,7 +310,8 @@ class ReliefDetailsController @Inject() (
               _,
               _,
               fillingOutReturn.subscribedDetails.isATrust,
-              draftReturn.representativeType()
+              draftReturn.representativeType(),
+              fillingOutReturn.isAmendReturn
             )
           )(
             hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForLettingsReliefs,
@@ -384,7 +388,8 @@ class ReliefDetailsController @Inject() (
             _,
             _,
             fillingOutReturn.subscribedDetails.isATrust,
-            draftReturn.representativeType()
+            draftReturn.representativeType(),
+            fillingOutReturn.isAmendReturn
           )
         )(
           hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForOtherReliefs,
@@ -403,7 +408,8 @@ class ReliefDetailsController @Inject() (
             _,
             _,
             fillingOutReturn.subscribedDetails.isATrust,
-            draftReturn.representativeType()
+            draftReturn.representativeType(),
+            fillingOutReturn.isAmendReturn
           )
         )(
           hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForOtherReliefs,

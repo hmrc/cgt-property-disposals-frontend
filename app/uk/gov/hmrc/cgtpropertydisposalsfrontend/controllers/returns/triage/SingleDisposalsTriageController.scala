@@ -118,7 +118,8 @@ class SingleDisposalsTriageController @Inject() (
               ),
               isDraftReturn,
               isATrust,
-              currentAnswers.representativeType()
+              currentAnswers.representativeType(),
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           }
         )
@@ -146,7 +147,8 @@ class SingleDisposalsTriageController @Inject() (
               ),
               isDraftReturn,
               isATrust,
-              currentAnswers.representativeType()
+              currentAnswers.representativeType(),
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           },
           updateState = { (disposalMethod, state, answers) =>
@@ -240,7 +242,8 @@ class SingleDisposalsTriageController @Inject() (
               ),
               isDraftReturn,
               isATrust,
-              currentAnswers.representativeType()
+              currentAnswers.representativeType(),
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           }
         )
@@ -266,7 +269,8 @@ class SingleDisposalsTriageController @Inject() (
               ),
               isDraftReturn,
               isATrust,
-              currentAnswers.representativeType()
+              currentAnswers.representativeType(),
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           },
           updateState = { (wasAUKResident, state, answers) =>
@@ -455,7 +459,8 @@ class SingleDisposalsTriageController @Inject() (
                 disposalDateBackLink(currentAnswers),
                 isDraftReturn,
                 isATrust,
-                currentAnswers.representativeType()
+                currentAnswers.representativeType(),
+                state.fold(_ => false, _._2.isAmendReturn)
               )
             }
           )
@@ -485,7 +490,8 @@ class SingleDisposalsTriageController @Inject() (
                         disposalDateBackLink(triageAnswers),
                         state.isRight,
                         isATrust,
-                        triageAnswers.representativeType()
+                        triageAnswers.representativeType(),
+                        state.fold(_ => false, _._2.isAmendReturn)
                       )
                     ),
                   { date =>
@@ -648,7 +654,8 @@ class SingleDisposalsTriageController @Inject() (
               ),
               isDraftReturn,
               isATrust,
-              currentAnswers.representativeType()
+              currentAnswers.representativeType(),
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           }
         )
@@ -673,7 +680,8 @@ class SingleDisposalsTriageController @Inject() (
               ),
               isDraftReturn,
               isATrust,
-              currentAnswers.representativeType()
+              currentAnswers.representativeType(),
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           },
           updateState = { (date, state, answers) =>
@@ -761,7 +769,8 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              representeeAnswers
+              representeeAnswers,
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           }
         )
@@ -795,7 +804,8 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              representeeAnswers
+              representeeAnswers,
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           },
           updateState = { (country, state, answers) =>
@@ -889,7 +899,8 @@ class SingleDisposalsTriageController @Inject() (
               ),
               isDraftReturn,
               isATrust,
-              currentAnswers.representativeType()
+              currentAnswers.representativeType(),
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           }
         )
@@ -917,7 +928,8 @@ class SingleDisposalsTriageController @Inject() (
               ),
               isDraftReturn,
               isATrust,
-              currentAnswers.representativeType()
+              currentAnswers.representativeType(),
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           },
           updateState = { (assetType, state, answers) =>
@@ -1051,7 +1063,8 @@ class SingleDisposalsTriageController @Inject() (
                     .assetTypeForNonUkResidents()
                 ),
                 isDraftReturn,
-                routes.SingleDisposalsTriageController.disposalDateOfSharesSubmit()
+                routes.SingleDisposalsTriageController.disposalDateOfSharesSubmit(),
+                state.fold(_ => false, _._2.isAmendReturn)
               )
           )
         }
@@ -1078,7 +1091,8 @@ class SingleDisposalsTriageController @Inject() (
                         ),
                         state.isRight,
                         routes.SingleDisposalsTriageController
-                          .disposalDateOfSharesSubmit()
+                          .disposalDateOfSharesSubmit(),
+                        state.fold(_ => false, _._2.isAmendReturn)
                       )
                     ),
                   { date =>

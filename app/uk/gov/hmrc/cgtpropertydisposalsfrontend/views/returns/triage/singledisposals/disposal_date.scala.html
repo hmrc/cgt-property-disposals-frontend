@@ -44,7 +44,8 @@
   backLink: Call,
   displayReturnToSummaryLink: Boolean,
   isATrust: Boolean,
-  representativeType: Option[RepresentativeType]
+  representativeType: Option[RepresentativeType],
+  isAmmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"disposalDate"}
@@ -86,7 +87,7 @@
   )
 
   <p>@Html(messages("disposalDate.link", viewConfig.tranferringOwnershipHelp))</p>
-  @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+  @submitButton(messages(if (isAmmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
  }
 
  @returnToSummaryLink(displayReturnToSummaryLink)
