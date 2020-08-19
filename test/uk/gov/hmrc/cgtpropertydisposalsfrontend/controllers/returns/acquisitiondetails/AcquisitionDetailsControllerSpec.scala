@@ -4185,7 +4185,8 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      improvementCosts = Some(sample[AmountInPence])
+                      improvementCosts = Some(sample[AmountInPence]),
+                      shouldUseRebase = Some(true)
                     ),
                     AssetType.NonResidential,
                     false,
@@ -4202,7 +4203,8 @@ class AcquisitionDetailsControllerSpec
                   TimeUtils.govDisplayFormat(
                     nonUkResidentsNonResidentialProperty.minusDays(1)
                   )
-                )
+                ),
+                doc => doc.select("#shouldUseRebase-true").attr("checked") shouldBe "checked"
               )
           }
         }
