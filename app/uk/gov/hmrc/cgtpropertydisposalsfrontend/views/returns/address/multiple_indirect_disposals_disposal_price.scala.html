@@ -37,7 +37,8 @@
 
 @(
     form: Form[BigDecimal],
-    backLink: Call
+    backLink: Call,
+    isAmmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "multipleIndirectDisposalsDisposalPrice" }
@@ -71,7 +72,7 @@
         assistiveText = messages("unit-input.assistive.pounds")
       )
 
-      @submitButton(messages("button.saveAndContinue"))
+      @submitButton(messages(if(isAmmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

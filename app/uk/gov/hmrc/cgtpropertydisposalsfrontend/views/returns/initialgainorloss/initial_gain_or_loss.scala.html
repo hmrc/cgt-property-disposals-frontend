@@ -46,7 +46,8 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     form: Form[BigDecimal],
     backLink: Call,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    isAmmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{ "initialGainOrLoss" }
@@ -171,7 +172,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
         )
     )
 
-    @submitButton(messages("button.saveAndContinue"))
+    @submitButton(messages(if(isAmmend) "button.continue" else "button.saveAndContinue"))
     }
 
 }

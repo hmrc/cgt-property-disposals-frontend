@@ -73,7 +73,8 @@ class GainOrLossAfterReliefsController @Inject() (
             ),
             fillingOutReturn.subscribedDetails.isATrust,
             draftReturn.representativeType(),
-            draftReturn.triageAnswers().isLeft
+            draftReturn.triageAnswers().isLeft,
+            fillingOutReturn.isAmendReturn
           )
         )
       }
@@ -95,7 +96,8 @@ class GainOrLossAfterReliefsController @Inject() (
                     ),
                     fillingOutReturn.subscribedDetails.isATrust,
                     draftReturn.representativeType(),
-                    draftReturn.triageAnswers().isLeft
+                    draftReturn.triageAnswers().isLeft,
+                    fillingOutReturn.isAmendReturn
                   )
                 ),
               value =>

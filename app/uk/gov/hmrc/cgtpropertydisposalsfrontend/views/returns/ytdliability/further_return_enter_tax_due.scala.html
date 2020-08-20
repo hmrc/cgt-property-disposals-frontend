@@ -43,7 +43,8 @@
     backLink: Call,
     taxYear: TaxYear,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    isAmmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "nonCalculatedTaxDue" }
@@ -104,7 +105,7 @@
             unit = "£",
             assistiveText = messages("unit-input.assistive.pounds")
         )
-        @submitButton(messages("button.saveAndContinue"))
+        @submitButton(messages(if(isAmmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

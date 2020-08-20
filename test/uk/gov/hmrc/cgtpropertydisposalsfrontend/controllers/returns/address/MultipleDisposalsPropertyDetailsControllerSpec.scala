@@ -49,7 +49,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 
@@ -170,6 +170,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
   val disposalDate =
     DisposalDate(value = LocalDate.of(2020, 3, 10), taxYear = taxYear)
+
+  def expectedSubmitText(isAmend: Boolean) =
+    messageFromMessageKey(if (isAmend) "button.continue" else "button.saveAndContinue")
 
   "AddressController" when {
 
@@ -2283,6 +2286,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           userType: UserType
         ): Unit = {
           val dateOfDeath = LocalDate.of(2020, 1, 1)
+          val isAmend     = sample[Boolean]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -2301,7 +2305,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     ),
                     agentReferenceNumber =
                       if (userType === Agent) Some(sample[AgentReferenceNumber])
-                      else None
+                      else None,
+                    originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
                   )
                 )
               )
@@ -2328,6 +2333,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 .text()                        shouldBe messageFromMessageKey(
                 s"multipleDisposalsAcquisitionPrice${messageKey(userType, individualUserType)}.helpText"
               )
+              doc
+                .select("#submitButton")
+                .text()                        shouldBe expectedSubmitText(isAmend)
             }
           )
         }

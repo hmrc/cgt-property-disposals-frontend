@@ -176,7 +176,13 @@ class RepresenteeController @Inject() (
               .fold(nameForm)(nameForm.fill)
 
             Ok(
-              enterNamePage(form, backLink, representativeType, journey.isRight)
+              enterNamePage(
+                form,
+                backLink,
+                representativeType,
+                journey.isRight,
+                journey.fold(_ => false, _.isAmendReturn)
+              )
             )
           }
         }
@@ -208,7 +214,8 @@ class RepresenteeController @Inject() (
                       formWithErrors,
                       backLink,
                       representativeType,
-                      journey.isRight
+                      journey.isRight,
+                      journey.fold(_ => false, _.isAmendReturn)
                     )
                   ),
                 { name =>
@@ -248,7 +255,8 @@ class RepresenteeController @Inject() (
                 name,
                 journey.isRight,
                 confirmPersonForm,
-                routes.RepresenteeController.enterId()
+                routes.RepresenteeController.enterId(),
+                journey.fold(_ => false, _.isAmendReturn)
               )
             )
 
@@ -281,7 +289,8 @@ class RepresenteeController @Inject() (
                         name,
                         journey.isRight,
                         formWithErrors,
-                        routes.RepresenteeController.enterId()
+                        routes.RepresenteeController.enterId(),
+                        journey.fold(_ => false, _.isAmendReturn)
                       )
                     ),
                   { isYes =>
@@ -332,7 +341,8 @@ class RepresenteeController @Inject() (
             form,
             backLink,
             journey.isRight,
-            representativeType
+            representativeType,
+            journey.fold(_ => false, _.isAmendReturn)
           )
         )
 
@@ -358,7 +368,8 @@ class RepresenteeController @Inject() (
                   formWithErrors,
                   backLink,
                   journey.isRight,
-                  representativeType
+                  representativeType,
+                  journey.fold(_ => false, _.isAmendReturn)
                 )
               )
             },
@@ -404,7 +415,7 @@ class RepresenteeController @Inject() (
             val form     =
               answers.fold(_.id, c => Some(c.id)).fold(idForm)(idForm.fill)
 
-            Ok(enterIdPage(form, backLink, journey.isRight))
+            Ok(enterIdPage(form, backLink, journey.isRight, journey.fold(_ => false, _.isAmendReturn)))
           }
         }
       }
@@ -466,7 +477,12 @@ class RepresenteeController @Inject() (
                   {
                     case ValidationError(formWithErrors) =>
                       BadRequest(
-                        enterIdPage(formWithErrors, backLink, journey.isRight)
+                        enterIdPage(
+                          formWithErrors,
+                          backLink,
+                          journey.isRight,
+                          journey.fold(_ => false, _.isAmendReturn)
+                        )
                       )
                     case ServiceError(e)                 =>
                       handleNameMatchServiceError(e)
@@ -502,7 +518,7 @@ class RepresenteeController @Inject() (
                 _ => routes.RepresenteeController.enterName(),
                 _ => routes.RepresenteeController.checkYourAnswers()
               )
-              Ok(enterDateOfDeathPage(form, backLink, journey.isRight))
+              Ok(enterDateOfDeathPage(form, backLink, journey.isRight, journey.fold(_ => false, _.isAmendReturn)))
           }
         }
       }
@@ -528,7 +544,8 @@ class RepresenteeController @Inject() (
                       enterDateOfDeathPage(
                         formWithErrors,
                         backLink,
-                        journey.isRight
+                        journey.isRight,
+                        journey.fold(_ => false, _.isAmendReturn)
                       )
                     ),
                   dateOfDeath =>
@@ -579,7 +596,8 @@ class RepresenteeController @Inject() (
               changeContactNamePage(
                 ContactName.form,
                 backLink,
-                journey.isRight
+                journey.isRight,
+                journey.fold(_ => false, _.isAmendReturn)
               )
             )
         }
@@ -601,7 +619,8 @@ class RepresenteeController @Inject() (
                 changeContactNamePage(
                   formWithErrors,
                   backLink,
-                  journey.isRight
+                  journey.isRight,
+                  journey.fold(_ => false, _.isAmendReturn)
                 )
               ),
             contactName =>
