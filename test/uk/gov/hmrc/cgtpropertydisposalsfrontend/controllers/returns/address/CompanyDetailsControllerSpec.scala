@@ -32,7 +32,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
@@ -45,7 +55,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDet
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftMultipleIndirectDisposalsReturn, DraftReturn, DraftSingleIndirectDisposalReturn, IndividualUserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, AssetType, DraftMultipleIndirectDisposalsReturn, DraftReturn, DraftSingleIndirectDisposalReturn, IndividualUserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -2220,16 +2230,24 @@ class CompanyDetailsControllerSpec
         def test(
           result: => Future[Result],
           oldDraftReturn: DraftReturn,
-          updatedDraftReturn: DraftReturn
+          updatedDraftReturn: DraftReturn,
+          isAmend: Boolean
         ): Unit = {
+          val amendReturnData = sample[AmendReturnData]
 
           val journey        = sample[FillingOutReturn].copy(
-            draftReturn = oldDraftReturn
+            draftReturn = oldDraftReturn,
+            amendReturnData =
+              if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false)) else None
           )
           val session        = SessionData.empty.copy(
             journeyStatus = Some(journey)
           )
-          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+          val updatedJourney = journey.copy(
+            draftReturn = updatedDraftReturn,
+            amendReturnData =
+              if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true)) else None
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2271,7 +2289,8 @@ class CompanyDetailsControllerSpec
           test(
             performAction(key -> "10"),
             oldDraftReturn,
-            updatedDraftReturn
+            updatedDraftReturn,
+            isAmend = true
           )
         }
 
@@ -2300,7 +2319,8 @@ class CompanyDetailsControllerSpec
           test(
             performAction(key -> "10"),
             oldDraftReturn,
-            updatedDraftReturn
+            updatedDraftReturn,
+            isAmend = false
           )
         }
 
@@ -2694,12 +2714,22 @@ class CompanyDetailsControllerSpec
         def test(
           result: => Future[Result],
           oldDraftReturn: DraftReturn,
-          updatedDraftReturn: DraftReturn
+          updatedDraftReturn: DraftReturn,
+          isAmend: Boolean
         ): Unit = {
-          val journey        =
-            sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
-          val session        = SessionData.empty.copy(journeyStatus = Some(journey))
-          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+          val amendReturnData = sample[AmendReturnData]
+          val journey         =
+            sample[FillingOutReturn].copy(
+              draftReturn = oldDraftReturn,
+              amendReturnData =
+                if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false)) else None
+            )
+          val session         = SessionData.empty.copy(journeyStatus = Some(journey))
+          val updatedJourney  = journey.copy(
+            draftReturn = updatedDraftReturn,
+            amendReturnData =
+              if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true)) else None
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2738,7 +2768,8 @@ class CompanyDetailsControllerSpec
           test(
             performAction(key -> "100"),
             oldDraftReturn,
-            newDraftReturn
+            newDraftReturn,
+            isAmend = false
           )
         }
 
@@ -2766,7 +2797,8 @@ class CompanyDetailsControllerSpec
           test(
             performAction(key -> "100"),
             oldDraftReturn,
-            newDraftReturn
+            newDraftReturn,
+            isAmend = true
           )
         }
 

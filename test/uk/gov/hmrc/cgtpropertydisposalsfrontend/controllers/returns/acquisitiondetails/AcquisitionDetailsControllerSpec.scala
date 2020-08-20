@@ -38,7 +38,19 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
@@ -271,7 +283,7 @@ class AcquisitionDetailsControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(
         name = setNameForUserType(userType)
       ),
-      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -307,7 +319,8 @@ class AcquisitionDetailsControllerSpec
       agentReferenceNumber = setAgentReferenceNumber(userType),
       subscribedDetails = sample[SubscribedDetails].copy(
         name = setNameForUserType(userType)
-      )
+      ),
+      amendReturnData = None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -606,7 +619,8 @@ class AcquisitionDetailsControllerSpec
         def getSessionDataJourneyAndDraftReturn(
           userType: UserType,
           individualUserType: IndividualUserType,
-          assetType: AssetType
+          assetType: AssetType,
+          isAmend: Boolean
         ): (SessionData, FillingOutReturn, DraftReturn) = {
           val (session, journey, draftReturn) = sessionWithState(
             None,
@@ -618,7 +632,7 @@ class AcquisitionDetailsControllerSpec
             Some(
               sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
             ),
-            false
+            isAmend
           )
           val updatedDraftReturn              = commonUpdateDraftReturn(
             draftReturn,
@@ -636,12 +650,15 @@ class AcquisitionDetailsControllerSpec
                 getSessionDataJourneyAndDraftReturn(
                   userType,
                   individualUserType,
-                  assetType
+                  assetType,
+                  isAmend = true
                 )
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreDraftReturn(journey.copy(draftReturn = updatedDraftReturn))(Left(Error("")))
+                mockStoreDraftReturn(
+                  journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
+                )(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(
@@ -657,7 +674,8 @@ class AcquisitionDetailsControllerSpec
                 getSessionDataJourneyAndDraftReturn(
                   userType,
                   individualUserType,
-                  assetType
+                  assetType,
+                  isAmend = false
                 )
 
               val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
@@ -696,14 +714,15 @@ class AcquisitionDetailsControllerSpec
               individualUserType,
               None,
               Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))),
-              false
+              isAmend = false
             )
             val updatedDraftReturn              = commonUpdateDraftReturn(
               draftReturn,
               IncompleteAcquisitionDetailsAnswers.empty
                 .copy(acquisitionMethod = Some(method))
             )
-            val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+            val updatedJourney                  =
+              journey.copy(draftReturn = updatedDraftReturn)
             val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
             inSequence {
@@ -775,7 +794,8 @@ class AcquisitionDetailsControllerSpec
               IncompleteAcquisitionDetailsAnswers.empty
                 .copy(acquisitionMethod = Some(AcquisitionMethod.Gifted), improvementCosts = Some(AmountInPence.zero))
             )
-            val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+            val updatedJourney                  =
+              journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
             val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
             inSequence {
@@ -1331,7 +1351,8 @@ class AcquisitionDetailsControllerSpec
           oldAnswers: AcquisitionDetailsAnswers,
           newAnswers: AcquisitionDetailsAnswers,
           userType: UserType,
-          individualUserType: IndividualUserType
+          individualUserType: IndividualUserType,
+          isAmend: Boolean
         ): Unit = {
           val (session, journey, draftReturn) = sessionWithState(
             oldAnswers,
@@ -1339,7 +1360,8 @@ class AcquisitionDetailsControllerSpec
             wasUkResident,
             userType,
             individualUserType,
-            disposalDate
+            disposalDate,
+            isAmend = isAmend
           )
           val updatedNewAnswers               =
             if (assetType === IndirectDisposal)
@@ -1353,7 +1375,8 @@ class AcquisitionDetailsControllerSpec
 
           val updatedDraftReturn =
             commonUpdateDraftReturn(draftReturn, updatedNewAnswers)
-          val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+          val updatedJourney     =
+            journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
           val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
@@ -1384,7 +1407,8 @@ class AcquisitionDetailsControllerSpec
                 oldAnswers,
                 oldAnswers.copy(acquisitionDate = Some(AcquisitionDate(date))),
                 userType,
-                individualUserType
+                individualUserType,
+                isAmend = true
               )
           }
         }
@@ -1413,7 +1437,8 @@ class AcquisitionDetailsControllerSpec
                 oldAnswers,
                 newAnswers,
                 userType,
-                individualUserType
+                individualUserType,
+                isAmend = true
               )
           }
         }
@@ -1732,7 +1757,7 @@ class AcquisitionDetailsControllerSpec
                   PersonalRepresentativeInPeriodOfAdmin,
                   Some(sample[DisposalDate]),
                   Some(representeeAnswers),
-                  false
+                  isAmend = true
                 )
                 val updatedDraftReturn              = commonUpdateDraftReturn(
                   draftReturn,
@@ -1743,7 +1768,8 @@ class AcquisitionDetailsControllerSpec
                   )
                 )
 
-                val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+                val updatedJourney =
+                  journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
                 val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
 
                 inSequence {
@@ -2159,7 +2185,8 @@ class AcquisitionDetailsControllerSpec
                   sample[AssetType],
                   sample[Boolean],
                   userType,
-                  individualUserType
+                  individualUserType,
+                  isAmend = true
                 )
 
               val updatedDraftReturn = commonUpdateDraftReturn(
@@ -2167,7 +2194,8 @@ class AcquisitionDetailsControllerSpec
                 answers.copy(acquisitionPrice = Some(AmountInPence(123400L)))
               )
 
-              val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+              val updatedJourney =
+                journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
               val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
 
               inSequence {
@@ -2857,7 +2885,8 @@ class AcquisitionDetailsControllerSpec
                       AssetType.Residential,
                       true,
                       UserType.Individual,
-                      individualUserType
+                      individualUserType,
+                      isAmend = true
                     )
                     val updatedDraftReturn              = commonUpdateDraftReturn(
                       draftReturn,
@@ -2867,7 +2896,8 @@ class AcquisitionDetailsControllerSpec
                         shouldUseRebase = true
                       )
                     )
-                    val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+                    val updatedJourney                  =
+                      journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
                     val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
                     inSequence {
@@ -3522,13 +3552,15 @@ class AcquisitionDetailsControllerSpec
                       AssetType.Residential,
                       true,
                       userType,
-                      individualUserType
+                      individualUserType,
+                      isAmend = true
                     )
                     val updatedDraftReturn              = commonUpdateDraftReturn(
                       draftReturn,
                       answers.copy(improvementCosts = expectedAmountInPence)
                     )
-                    val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+                    val updatedJourney                  =
+                      journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
                     val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
                     inSequence {
@@ -4134,14 +4166,16 @@ class AcquisitionDetailsControllerSpec
                       sample[AssetType],
                       sample[Boolean],
                       userType,
-                      individualUserType
+                      individualUserType,
+                      isAmend = true
                     )
                     val updatedDraftReturn              = commonUpdateDraftReturn(
                       draftReturn,
                       answers.copy(acquisitionFees = Some(expectedAmountInPence))
                     )
 
-                    val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+                    val updatedJourney =
+                      journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
                     val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
 
                     inSequence {

@@ -381,8 +381,7 @@ class RepresenteeController @Inject() (
 
                 updateDraftReturnAndSession(
                   newAnswers,
-                  journey,
-                  clearDraftReturn = false
+                  journey
                 ).fold(
                   { e =>
                     logger.warn("Could not update session or draft return", e)
@@ -778,7 +777,10 @@ class RepresenteeController @Inject() (
                 _.copy(representeeAnswers = Some(newAnswers))
               )
 
-          fillingOutReturn.copy(draftReturn = newDraftReturn)
+          val newFillingOutReturn = fillingOutReturn.copy(draftReturn = newDraftReturn)
+
+          if (clearDraftReturn) newFillingOutReturn.withForceDisplayGainOrLossAfterReliefsForAmends
+          else newFillingOutReturn
         }
       )
     for {

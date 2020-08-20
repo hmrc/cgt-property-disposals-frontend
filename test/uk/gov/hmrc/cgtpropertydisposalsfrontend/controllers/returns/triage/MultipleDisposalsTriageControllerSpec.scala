@@ -37,7 +37,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.{SelectorAndValue, TagAttributePairAndValue, UserTypeDisplay}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour, representee, triage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
@@ -171,7 +181,8 @@ class MultipleDisposalsTriageControllerSpec
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
     representeeAnswers: Option[RepresenteeAnswers] = None,
-    previousSentReturns: Option[List[ReturnSummary]] = None
+    previousSentReturns: Option[List[ReturnSummary]] = None,
+    amendReturnData: Option[AmendReturnData] = None
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val individualUserType = multipleDisposalsAnswers.fold(_.individualUserType, _.individualUserType)
     val draftReturn        = sample[DraftMultipleDisposalsReturn].copy(
@@ -197,7 +208,7 @@ class MultipleDisposalsTriageControllerSpec
         if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
         else None,
       previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None)),
-      originalReturn = None
+      amendReturnData = amendReturnData
     )
     val session            = SessionData.empty.copy(
       userType = Some(userType),
@@ -646,12 +657,16 @@ class MultipleDisposalsTriageControllerSpec
 
           "they have not completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
+            val amendReturnData                 = sample[AmendReturnData]
             val answers                         = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(Self),
               numberOfProperties = Some(2)
             )
             val (session, journey, draftReturn) =
-              sessionDataWithFillingOutReturn(answers)
+              sessionDataWithFillingOutReturn(
+                answers,
+                amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false))
+              )
 
             val updatedDraftReturn = draftReturn.copy(
               triageAnswers = answers.copy(numberOfProperties = Some(5)),
@@ -662,7 +677,10 @@ class MultipleDisposalsTriageControllerSpec
               gainOrLossAfterReliefs = None,
               lastUpdatedDate = TimeUtils.today()
             )
-            val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+            val updatedJourney     = journey.copy(
+              draftReturn = updatedDraftReturn,
+              amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true))
+            )
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1828,9 +1846,13 @@ class MultipleDisposalsTriageControllerSpec
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+              val amendReturnData                 = sample[AmendReturnData]
               val answers                         = c.copy(taxYear = taxYear)
               val (session, journey, draftReturn) =
-                sessionDataWithFillingOutReturn(answers)
+                sessionDataWithFillingOutReturn(
+                  answers,
+                  amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false))
+                )
 
               val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers
                 .fromCompleteAnswers(answers)
@@ -1846,7 +1868,10 @@ class MultipleDisposalsTriageControllerSpec
                 )
               )
               val updatedJourney     =
-                journey.copy(draftReturn = updatedDraftReturn)
+                journey.copy(
+                  draftReturn = updatedDraftReturn,
+                  amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true))
+                )
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -2823,12 +2848,16 @@ class MultipleDisposalsTriageControllerSpec
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+              val amendReturnData                 = sample[AmendReturnData]
               val answers                         = c.copy(
                 countryOfResidence = sample[Country],
                 assetTypes = List(AssetType.Residential)
               )
               val (session, journey, draftReturn) =
-                sessionDataWithFillingOutReturn(answers)
+                sessionDataWithFillingOutReturn(
+                  answers,
+                  amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false))
+                )
 
               val updatedAnswers     =
                 IncompleteMultipleDisposalsTriageAnswers(
@@ -2845,7 +2874,10 @@ class MultipleDisposalsTriageControllerSpec
               val updatedDraftReturn =
                 updateDraftReturn(draftReturn, updatedAnswers, journey.isFurtherReturn.contains(true))
               val updatedJourney     =
-                journey.copy(draftReturn = updatedDraftReturn)
+                journey.copy(
+                  draftReturn = updatedDraftReturn,
+                  amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true))
+                )
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -3329,20 +3361,28 @@ class MultipleDisposalsTriageControllerSpec
 
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
-            val currentAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+            val currentAnswers  = sample[CompleteMultipleDisposalsTriageAnswers].copy(
               individualUserType = Some(Self),
               completionDate = CompletionDate(today.minusDays(1L))
             )
-            val submittedDate  = today
+            val submittedDate   = today
+            val amendReturnData = sample[AmendReturnData]
 
             val (session, journey, draftReturn) =
-              sessionDataWithFillingOutReturn(currentAnswers, representeeAnswers = None)
+              sessionDataWithFillingOutReturn(
+                currentAnswers,
+                representeeAnswers = None,
+                amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false))
+              )
 
             val updatedAnswers     =
               currentAnswers.unset(_.completionDate).copy(completionDate = Some(CompletionDate(submittedDate)))
             val updatedDraftReturn =
               updateDraftReturn(draftReturn, updatedAnswers)
-            val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+            val updatedJourney     = journey.copy(
+              draftReturn = updatedDraftReturn,
+              amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true))
+            )
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -3617,8 +3657,13 @@ class MultipleDisposalsTriageControllerSpec
           submittedDate: LocalDate,
           taxYear: Option[TaxYear]
         ) = {
+          val amendReturnData                 = sample[AmendReturnData]
           val (session, journey, draftReturn) =
-            sessionDataWithFillingOutReturn(currentAnswers, representeeAnswers = representeeAnswers)
+            sessionDataWithFillingOutReturn(
+              currentAnswers,
+              representeeAnswers = representeeAnswers,
+              amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false))
+            )
 
           val updatedAnswers     = currentAnswers.copy(
             completionDate = Some(CompletionDate(submittedDate)),
@@ -3627,7 +3672,10 @@ class MultipleDisposalsTriageControllerSpec
           )
           val updatedDraftReturn =
             updateDraftReturn(draftReturn, updatedAnswers)
-          val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+          val updatedJourney     = journey.copy(
+            draftReturn = updatedDraftReturn,
+            amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true))
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()

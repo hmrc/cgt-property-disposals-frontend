@@ -36,7 +36,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour, representee, routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, booleanGen, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
@@ -48,7 +58,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -127,7 +137,7 @@ class SingleDisposalsTriageControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None)),
-      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -554,14 +564,20 @@ class SingleDisposalsTriageControllerSpec
                 performAction,
                 completeAnswers.copy(disposalMethod = DisposalMethod.Sold),
                 List("disposalMethod" -> "1"),
-                updateDraftReturn(
-                  _,
-                  completeAnswers.copy(disposalMethod = DisposalMethod.Gifted)
-                ),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn
+                    .copy(draftReturn =
+                      updateDraftReturn(
+                        draftReturn,
+                        completeAnswers.copy(disposalMethod = DisposalMethod.Gifted)
+                      )
+                    )
+                    .withForceDisplayGainOrLossAfterReliefsForAmends,
                 checkIsRedirect(
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
-                )
+                ),
+                isAmend = true
               )
             }
           }
@@ -571,20 +587,22 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               List("disposalMethod" -> "0"),
-              d =>
-                d.copy(
-                  triageAnswers = requiredPreviousAnswers
-                    .copy(disposalMethod = Some(DisposalMethod.Sold)),
-                  disposalDetailsAnswers = d.disposalDetailsAnswers.map(
-                    _.unset(_.disposalPrice)
-                      .unset(_.disposalFees)
-                  ),
-                  initialGainOrLoss = None,
-                  reliefDetailsAnswers = None,
-                  exemptionAndLossesAnswers = None,
-                  yearToDateLiabilityAnswers = None,
-                  supportingEvidenceAnswers = None,
-                  gainOrLossAfterReliefs = None
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  draftReturn.copy(
+                    triageAnswers = requiredPreviousAnswers
+                      .copy(disposalMethod = Some(DisposalMethod.Sold)),
+                    disposalDetailsAnswers = draftReturn.disposalDetailsAnswers.map(
+                      _.unset(_.disposalPrice)
+                        .unset(_.disposalFees)
+                    ),
+                    initialGainOrLoss = None,
+                    reliefDetailsAnswers = None,
+                    exemptionAndLossesAnswers = None,
+                    yearToDateLiabilityAnswers = None,
+                    supportingEvidenceAnswers = None,
+                    gainOrLossAfterReliefs = None
+                  )
                 ),
               checkIsRedirect(
                 _,
@@ -1078,7 +1096,8 @@ class SingleDisposalsTriageControllerSpec
                   disposalMethod = DisposalMethod.Sold
                 ),
                 List("wereYouAUKResident" -> "true"),
-                updateDraftReturn(_, newAnswers),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn.copy(draftReturn = updateDraftReturn(draftReturn, newAnswers)),
                 checkIsRedirect(
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -1099,14 +1118,17 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               answers,
               List("wereYouAUKResident" -> "false"),
-              updateDraftReturn(
-                _,
-                requiredPreviousAnswers.copy(
-                  wasAUKResident = Some(false),
-                  countryOfResidence = None,
-                  assetType = None
-                )
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  updateDraftReturn(
+                    draftReturn,
+                    requiredPreviousAnswers.copy(
+                      wasAUKResident = Some(false),
+                      countryOfResidence = None,
+                      assetType = None
+                    )
+                  )
+                ),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -1525,10 +1547,13 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               List("didYouDisposeOfResidentialProperty" -> "true"),
-              _.copy(triageAnswers =
-                requiredPreviousAnswers
-                  .copy(assetType = Some(AssetType.Residential))
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  draftReturn.copy(triageAnswers =
+                    requiredPreviousAnswers
+                      .copy(assetType = Some(AssetType.Residential))
+                  )
+                ),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -1545,14 +1570,17 @@ class SingleDisposalsTriageControllerSpec
                   disposalMethod = DisposalMethod.Sold
                 ),
                 List("didYouDisposeOfResidentialProperty" -> "false"),
-                _.copy(triageAnswers =
-                  IncompleteSingleDisposalTriageAnswers
-                    .fromCompleteAnswers(completeAnswers)
-                    .copy(
-                      assetType = Some(NonResidential),
-                      disposalMethod = Some(DisposalMethod.Sold)
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn.copy(draftReturn =
+                    draftReturn.copy(triageAnswers =
+                      IncompleteSingleDisposalTriageAnswers
+                        .fromCompleteAnswers(completeAnswers)
+                        .copy(
+                          assetType = Some(NonResidential),
+                          disposalMethod = Some(DisposalMethod.Sold)
+                        )
                     )
-                ),
+                  ),
                 checkIsRedirect(
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -2273,16 +2301,22 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               formData(today),
-              updateDraftReturn(
-                _,
-                requiredPreviousAnswers
-                  .copy(disposalDate = Some(DisposalDate(today, taxYear)))
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      requiredPreviousAnswers
+                        .copy(disposalDate = Some(DisposalDate(today, taxYear)))
+                    )
+                  )
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
               ),
-              () => mockGetTaxYear(today)(Right(Some(taxYear)))
+              () => mockGetTaxYear(today)(Right(Some(taxYear))),
+              isAmend = true
             )
 
           }
@@ -2313,7 +2347,8 @@ class SingleDisposalsTriageControllerSpec
                 performAction,
                 completeJourney,
                 formData(date),
-                updateDraftReturn(_, newAnswers),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn.copy(draftReturn = updateDraftReturn(draftReturn, newAnswers)),
                 checkIsRedirect(
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -2330,10 +2365,13 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               answers,
               formData(today),
-              updateDraftReturn(
-                _,
-                answers.copy(disposalDate = Some(DisposalDate(today, taxYear)))
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  updateDraftReturn(
+                    draftReturn,
+                    answers.copy(disposalDate = Some(DisposalDate(today, taxYear)))
+                  )
+                ),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -2352,10 +2390,13 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               answers,
               formData(newDisposalDate.value),
-              updateDraftReturn(
-                _,
-                answers.copy(disposalDate = Some(newDisposalDate))
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  updateDraftReturn(
+                    draftReturn,
+                    answers.copy(disposalDate = Some(newDisposalDate))
+                  )
+                ),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -2373,10 +2414,13 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               answers,
               formData(newDisposalDate.value),
-              updateDraftReturn(
-                _,
-                answers.copy(disposalDate = Some(newDisposalDate), disposalMethod = Some(DisposalMethod.Sold))
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  updateDraftReturn(
+                    draftReturn,
+                    answers.copy(disposalDate = Some(newDisposalDate), disposalMethod = Some(DisposalMethod.Sold))
+                  )
+                ),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -2922,11 +2966,14 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               formData(completionDate.value),
-              updateDraftReturn(
-                _,
-                requiredPreviousAnswers
-                  .copy(completionDate = Some(completionDate))
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  updateDraftReturn(
+                    draftReturn,
+                    requiredPreviousAnswers
+                      .copy(completionDate = Some(completionDate))
+                  )
+                ),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -2948,16 +2995,22 @@ class SingleDisposalsTriageControllerSpec
                 performAction,
                 completeAnswers,
                 formData(completionDate.value),
-                updateDraftReturn(
-                  _,
-                  IncompleteSingleDisposalTriageAnswers
-                    .fromCompleteAnswers(completeAnswers)
-                    .copy(completionDate = Some(completionDate))
-                ),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn
+                    .copy(draftReturn =
+                      updateDraftReturn(
+                        draftReturn,
+                        IncompleteSingleDisposalTriageAnswers
+                          .fromCompleteAnswers(completeAnswers)
+                          .copy(completionDate = Some(completionDate))
+                      )
+                    )
+                    .withForceDisplayGainOrLossAfterReliefsForAmends,
                 checkIsRedirect(
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
-                )
+                ),
+                isAmend = true
               )
             }
           }
@@ -3387,10 +3440,13 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               List("countryCode" -> country.code),
-              updateDraftReturn(
-                _,
-                requiredPreviousAnswers.copy(countryOfResidence = Some(country))
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  updateDraftReturn(
+                    draftReturn,
+                    requiredPreviousAnswers.copy(countryOfResidence = Some(country))
+                  )
+                ),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -3408,10 +3464,13 @@ class SingleDisposalsTriageControllerSpec
                 performAction,
                 completeAnswers,
                 List("countryCode" -> country.code),
-                updateDraftReturn(
-                  _,
-                  completeAnswers.copy(countryOfResidence = country)
-                ),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn.copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      completeAnswers.copy(countryOfResidence = country)
+                    )
+                  ),
                 checkIsRedirect(
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -3980,13 +4039,16 @@ class SingleDisposalsTriageControllerSpec
                   assetType = AssetType.Residential
                 ),
                 List("assetTypeForNonUkResidents" -> "1"),
-                updateDraftReturn(
-                  _,
-                  completeAnswers.copy(
-                    disposalMethod = DisposalMethod.Sold,
-                    assetType = AssetType.NonResidential
-                  )
-                ),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn.copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      completeAnswers.copy(
+                        disposalMethod = DisposalMethod.Sold,
+                        assetType = AssetType.NonResidential
+                      )
+                    )
+                  ),
                 checkIsRedirect(
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -4000,15 +4062,21 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               List("assetTypeForNonUkResidents" -> "1"),
-              updateDraftReturn(
-                _,
-                requiredPreviousAnswers
-                  .copy(assetType = Some(AssetType.NonResidential))
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      requiredPreviousAnswers
+                        .copy(assetType = Some(AssetType.NonResidential))
+                    )
+                  )
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
-              )
+              ),
+              isAmend = true
             )
           }
 
@@ -4542,19 +4610,25 @@ class SingleDisposalsTriageControllerSpec
                 disposalMethod = Some(DisposalMethod.Sold)
               ),
               formData(today),
-              updateDraftReturn(
-                _,
-                requiredPreviousAnswers.copy(
-                  disposalDate = Some(DisposalDate(today, taxYear)),
-                  completionDate = Some(CompletionDate(today)),
-                  disposalMethod = Some(DisposalMethod.Sold)
-                )
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      requiredPreviousAnswers.copy(
+                        disposalDate = Some(DisposalDate(today, taxYear)),
+                        completionDate = Some(CompletionDate(today)),
+                        disposalMethod = Some(DisposalMethod.Sold)
+                      )
+                    )
+                  )
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
               ),
-              () => mockGetTaxYear(today)(Right(Some(taxYear)))
+              () => mockGetTaxYear(today)(Right(Some(taxYear))),
+              isAmend = true
             )
 
           }
@@ -4587,7 +4661,8 @@ class SingleDisposalsTriageControllerSpec
                 performAction,
                 completeJourney,
                 formData(date),
-                updateDraftReturn(_, newAnswers),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn.copy(draftReturn = updateDraftReturn(draftReturn, newAnswers)),
                 checkIsRedirect(
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -4604,13 +4679,16 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               answers,
               formData(today),
-              updateDraftReturn(
-                _,
-                answers.copy(
-                  disposalDate = Some(DisposalDate(today, taxYear)),
-                  completionDate = Some(CompletionDate(today))
-                )
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  updateDraftReturn(
+                    draftReturn,
+                    answers.copy(
+                      disposalDate = Some(DisposalDate(today, taxYear)),
+                      completionDate = Some(CompletionDate(today))
+                    )
+                  )
+                ),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -4629,13 +4707,16 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               answers,
               formData(newDisposalDate.value),
-              updateDraftReturn(
-                _,
-                answers.copy(
-                  disposalDate = Some(newDisposalDate),
-                  completionDate = Some(CompletionDate(newDisposalDate.value))
-                )
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  updateDraftReturn(
+                    draftReturn,
+                    answers.copy(
+                      disposalDate = Some(newDisposalDate),
+                      completionDate = Some(CompletionDate(newDisposalDate.value))
+                    )
+                  )
+                ),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -4653,14 +4734,17 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               answers,
               formData(newDisposalDate.value),
-              updateDraftReturn(
-                _,
-                answers.copy(
-                  disposalDate = Some(newDisposalDate),
-                  completionDate = Some(CompletionDate(newDisposalDate.value)),
-                  disposalMethod = Some(DisposalMethod.Sold)
-                )
-              ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  updateDraftReturn(
+                    draftReturn,
+                    answers.copy(
+                      disposalDate = Some(newDisposalDate),
+                      completionDate = Some(CompletionDate(newDisposalDate.value)),
+                      disposalMethod = Some(DisposalMethod.Sold)
+                    )
+                  )
+                ),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -5635,7 +5719,7 @@ class SingleDisposalsTriageControllerSpec
             .copy(triageAnswers = currentAnswers, gainOrLossAfterReliefs = None, yearToDateLiabilityAnswers = None)
         val updatedDraftReturn      = updateDraftReturn(draftReturn, updatedAnswers)
         val fillingOutReturn        =
-          sample[FillingOutReturn].copy(draftReturn = draftReturn)
+          sample[FillingOutReturn].copy(draftReturn = draftReturn, amendReturnData = None)
         val updatedFillingOutReturn =
           fillingOutReturn.copy(draftReturn = updatedDraftReturn)
 
@@ -5704,20 +5788,24 @@ class SingleDisposalsTriageControllerSpec
     performAction: Seq[(String, String)] => Future[Result],
     currentAnswers: SingleDisposalTriageAnswers,
     formData: Seq[(String, String)],
-    updateDraftReturn: DraftSingleDisposalReturn => DraftSingleDisposalReturn,
+    updateJourney: (FillingOutReturn, DraftSingleDisposalReturn) => FillingOutReturn,
     checkNextResult: Future[Result] => Unit,
     extraMockActions: () => Unit = () => (),
-    representeeAnswers: Option[RepresenteeAnswers] = None
+    representeeAnswers: Option[RepresenteeAnswers] = None,
+    isAmend: Boolean = false
   ): Unit = {
-    val draftReturn        =
+    val draftReturn =
       sample[DraftSingleDisposalReturn]
         .copy(triageAnswers = currentAnswers, representeeAnswers = representeeAnswers, gainOrLossAfterReliefs = None)
-    val updatedDraftReturn = updateDraftReturn(draftReturn)
 
-    val fillingOutReturn        =
-      sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    val fillingOutReturn =
+      sample[FillingOutReturn].copy(
+        draftReturn = draftReturn,
+        amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
+      )
+
     val updatedFillingOutReturn =
-      fillingOutReturn.copy(draftReturn = updatedDraftReturn)
+      updateJourney(fillingOutReturn, draftReturn)
 
     inSequence {
       mockAuthWithNoRetrievals()
@@ -5745,7 +5833,7 @@ class SingleDisposalsTriageControllerSpec
     val updatedDraftReturn = updateDraftReturn(currentDraftReturn)
 
     val fillingOutReturn        =
-      sample[FillingOutReturn].copy(draftReturn = currentDraftReturn)
+      sample[FillingOutReturn].copy(draftReturn = currentDraftReturn, amendReturnData = None)
     val updatedFillingOutReturn =
       fillingOutReturn.copy(draftReturn = updatedDraftReturn)
 

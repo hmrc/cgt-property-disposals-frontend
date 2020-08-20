@@ -40,6 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 
 sealed trait CompleteReturn extends Product with Serializable {
   val representeeAnswers: Option[CompleteRepresenteeAnswers]
+  val gainOrLossAfterReliefs: Option[AmountInPence]
 }
 
 object CompleteReturn {

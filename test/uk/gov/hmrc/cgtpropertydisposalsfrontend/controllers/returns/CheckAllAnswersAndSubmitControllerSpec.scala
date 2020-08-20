@@ -45,7 +45,26 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.Multi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec.{validateCalculatedYearToDateLiabilityPage, validateNonCalculatedYearToDateLiabilityPage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SingleMixedUseDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
@@ -236,7 +255,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeFillingOutReturn =
           sample[FillingOutReturn]
-            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, originalReturn = None)
+            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, amendReturnData = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -345,7 +364,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             val completeFillingOutReturn = sample[FillingOutReturn].copy(
               draftReturn = completeDraftReturn,
               previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]))),
-              originalReturn = None
+              amendReturnData = None
             )
 
             test(
@@ -369,7 +388,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 completeFillingOutReturn.copy(
                   agentReferenceNumber = setAgentReferenceNumber(userType),
                   subscribedDetails = subscribedDetails,
-                  originalReturn = None
+                  amendReturnData = None
                 ),
                 userType = userType
               ).copy(userType = Some(userType)),
@@ -464,7 +483,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeFillingOutReturn =
           sample[FillingOutReturn]
-            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, originalReturn = None)
+            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, amendReturnData = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -632,7 +651,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeFillingOutReturn =
           sample[FillingOutReturn]
-            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, originalReturn = None)
+            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, amendReturnData = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -806,7 +825,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeFillingOutReturn =
           sample[FillingOutReturn]
-            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, originalReturn = None)
+            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, amendReturnData = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -972,7 +991,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeFillingOutReturn =
           sample[FillingOutReturn]
-            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, originalReturn = None)
+            .copy(draftReturn = completeDraftReturn, previousSentReturns = None, amendReturnData = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -1157,7 +1176,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
       val completeFillingOutReturnWithRepresenteeWithNoReference =
-        sample[FillingOutReturn].copy(draftReturn = completeDraftReturnRepresenteWithNoReference, originalReturn = None)
+        sample[FillingOutReturn]
+          .copy(draftReturn = completeDraftReturnRepresenteWithNoReference, amendReturnData = None)
 
       val completeFillingOutReturnNoRepresentee =
         completeFillingOutReturnWithRepresenteeWithNoReference.copy(draftReturn = completeDraftReturnNoRepresentee)
@@ -2228,7 +2248,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(
                 sample[FillingOutReturn].copy(
                   draftReturn = makeIncomplete(completeDraftReturn),
-                  originalReturn = None
+                  amendReturnData = None
                 )
               )
             )
@@ -2268,7 +2288,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(
                 sample[FillingOutReturn].copy(
                   draftReturn = makeIncomplete(completeDraftReturn),
-                  originalReturn = None
+                  amendReturnData = None
                 )
               )
             )
@@ -2311,7 +2331,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(
                 sample[FillingOutReturn].copy(
                   draftReturn = makeIncomplete(completeDraftReturn),
-                  originalReturn = None
+                  amendReturnData = None
                 )
               )
             )
@@ -2330,7 +2350,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               sample[FillingOutReturn].copy(
                 draftReturn =
                   completeDraftReturn.copy(yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers])),
-                originalReturn = None
+                amendReturnData = None
               )
             )
           )
@@ -2369,7 +2389,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(
                 sample[FillingOutReturn].copy(
                   draftReturn = makeIncomplete(completeDraftReturn),
-                  originalReturn = None
+                  amendReturnData = None
                 )
               )
             )
@@ -2409,7 +2429,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(
                 sample[FillingOutReturn].copy(
                   draftReturn = makeIncomplete(completeDraftReturn),
-                  originalReturn = None
+                  amendReturnData = None
                 )
               )
             )

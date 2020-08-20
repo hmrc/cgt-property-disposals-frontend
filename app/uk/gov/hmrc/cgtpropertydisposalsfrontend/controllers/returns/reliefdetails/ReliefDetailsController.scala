@@ -159,7 +159,8 @@ class ReliefDetailsController @Inject() (
           formWithErrors => BadRequest(page(formWithErrors, backLink)),
           { value =>
             val newDraftReturn = updateDraftReturn(value, currentDraftReturn)
-            val newJourney     = currentFillingOutReturn.copy(draftReturn = newDraftReturn)
+            val newJourney     =
+              currentFillingOutReturn.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
             val result = for {
               _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())

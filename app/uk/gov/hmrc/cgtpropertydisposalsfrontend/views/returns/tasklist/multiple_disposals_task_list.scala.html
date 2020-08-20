@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftMultipleDisposalsReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
@@ -62,7 +63,11 @@
 }
 
 @gainOrLossAfterReliefsState = @{
-  if(fillingOutReturn.isFurtherOrAmendReturn.contains(true)){
+  val showGainOrLossAfterReliefs =
+      fillingOutReturn.amendReturnData.exists(_.shouldDisplayGainOrLossAfterReliefs) ||
+              fillingOutReturn.isFurtherReturn.contains(true)
+
+  if(showGainOrLossAfterReliefs){
     examplePropertyDetailsState match {
         case Complete =>
             Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))
