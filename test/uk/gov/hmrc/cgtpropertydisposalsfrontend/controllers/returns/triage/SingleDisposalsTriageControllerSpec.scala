@@ -3200,6 +3200,7 @@ class SingleDisposalsTriageControllerSpec
                     _.hasEstimatedDetails
                   )
                   .unset(_.mandatoryEvidence)
+                  .unset(_.yearToDateLiability)
               )
           },
           gainOrLossAfterReliefs = None
