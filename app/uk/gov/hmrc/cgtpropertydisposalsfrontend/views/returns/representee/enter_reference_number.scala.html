@@ -131,7 +131,7 @@
             helpText = Some(Html(messages(s"$key.helpText")))
         )
 
-        @submitButton(messages(if(isAmmend) "button.continue" else "button.saveAndContinue"))
+        @submitButton(messages(if(isAmmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
 
