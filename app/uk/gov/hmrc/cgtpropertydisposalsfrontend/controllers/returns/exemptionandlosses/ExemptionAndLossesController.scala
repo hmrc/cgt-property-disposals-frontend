@@ -29,8 +29,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
@@ -63,7 +64,8 @@ class ExemptionAndLossesController @Inject() (
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
-    with SessionUpdates {
+    with SessionUpdates
+    with StartingToAmendToFillingOutReturnBehaviour {
 
   private def withFillingOutReturnAndAnswers(
     f: (
@@ -74,6 +76,10 @@ class ExemptionAndLossesController @Inject() (
     ) => Future[Result]
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+
+      case Some((_, s: StartingToAmendReturn))                                                          =>
+        markUnmetDependency(s, sessionStore, errorHandler)
+
       case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) if r.isFurtherOrAmendReturn.contains(true) =>
         val answers = d
           .fold(
@@ -286,7 +292,8 @@ class ExemptionAndLossesController @Inject() (
                     _,
                     _,
                     fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType()
+                    draftReturn.representativeType(),
+                    fillingOutReturn.isAmendReturn
                   )
                 else
                   inYearLossesPage(
@@ -294,7 +301,8 @@ class ExemptionAndLossesController @Inject() (
                     _,
                     disposalDate,
                     fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType()
+                    draftReturn.representativeType(),
+                    fillingOutReturn.isAmendReturn
                   )
             )(
               _ => Some(()),
@@ -321,7 +329,8 @@ class ExemptionAndLossesController @Inject() (
                     _,
                     _,
                     fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType()
+                    draftReturn.representativeType(),
+                    fillingOutReturn.isAmendReturn
                   )
                 else
                   inYearLossesPage(
@@ -329,7 +338,8 @@ class ExemptionAndLossesController @Inject() (
                     _,
                     disposalDate,
                     fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType()
+                    draftReturn.representativeType(),
+                    fillingOutReturn.isAmendReturn
                   )
             )(
               _ => Some(()),
@@ -364,7 +374,8 @@ class ExemptionAndLossesController @Inject() (
                   _,
                   _,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType()
+                  draftReturn.representativeType(),
+                  fillingOutReturn.isAmendReturn
                 )
               else
                 previousYearsLossesPage(
@@ -372,7 +383,8 @@ class ExemptionAndLossesController @Inject() (
                   _,
                   wasAUkResident,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType()
+                  draftReturn.representativeType(),
+                  fillingOutReturn.isAmendReturn
                 )
           )(
             requiredPreviousAnswer = _.fold(
@@ -400,7 +412,8 @@ class ExemptionAndLossesController @Inject() (
                   _,
                   _,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType()
+                  draftReturn.representativeType(),
+                  fillingOutReturn.isAmendReturn
                 )
               else
                 previousYearsLossesPage(
@@ -408,7 +421,8 @@ class ExemptionAndLossesController @Inject() (
                   _,
                   wasAUkResident,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType()
+                  draftReturn.representativeType(),
+                  fillingOutReturn.isAmendReturn
                 )
           )(
             requiredPreviousAnswer = _.fold(
@@ -446,7 +460,8 @@ class ExemptionAndLossesController @Inject() (
               _,
               disposalDate,
               fillingOutReturn.subscribedDetails.isATrust,
-              draftReturn.representativeType()
+              draftReturn.representativeType(),
+              fillingOutReturn.isAmendReturn
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -491,7 +506,8 @@ class ExemptionAndLossesController @Inject() (
                 backlink,
                 disposalDate,
                 fillingOutReturn.subscribedDetails.isATrust,
-                draftReturn.representativeType()
+                draftReturn.representativeType(),
+                fillingOutReturn.isAmendReturn
               )
             }
           )(

@@ -4622,13 +4622,19 @@ tmpCustomError.p2=We apologise for the inconvenience and thank you for your pati
 
 representeeIsFirstReturn.capacitor.title=Is this the person’s first return for the tax year so far?
 representeeIsFirstReturn.personalRep.title=Is this the person who died’s first return for the tax year so far?
+representeeIsFirstReturn.personalRepInPeriodOfAdmin.title=Is this the estate’s first return in the current tax year for the person represented?
+representeeIsFirstReturn.agent.personalRepInPeriodOfAdmin.title=Is this your client or the estate’s first return in the current tax year for the person represented?
 
 representeeIsFirstReturn.helpText=Only include their Capital Gains Tax on UK property returns.
 
-representeeIsFirstReturn.capacitor.error.required=Select yes if this the person’s first return for the tax year so far
-representeeIsFirstReturn.personalRep.error.required=Select yes if this the person who died’s first return for the tax year so far
-representeeIsFirstReturn.capacitor.error.boolean=Select yes if this the person’s first return for the tax year so far
-representeeIsFirstReturn.personalRep.error.boolean=Select yes if this the person who died’s first return for the tax year so far
+representeeIsFirstReturn.capacitor.error.required=Select yes if this is the person’s first return for the tax year so far
+representeeIsFirstReturn.personalRep.error.required=Select yes if this is the person who died’s first return for the tax year so far
+representeeIsFirstReturn.personalRepInPeriodOfAdmin.error.required=Select yes if this is the estate’s first return for the tax year for the person represented
+representeeIsFirstReturn.agent.personalRepInPeriodOfAdmin.error.required=Select yes if this is your client or the estate’s first return for the tax year for the person represented
+representeeIsFirstReturn.capacitor.error.boolean=Select yes if this is the person’s first return for the tax year so far
+representeeIsFirstReturn.personalRep.error.boolean=Select yes if this is the person who died’s first return for the tax year so far
+representeeIsFirstReturn.personalRepInPeriodOfAdmin.error.boolean=Select yes if this is the estate’s first return for the tax year for the person represented
+representeeIsFirstReturn.agent.personalRepInPeriodOfAdmin.error.boolean=Select yes if this is your client or the estate’s first return for the tax year for the person represented
 representee.cyaChange.isFirstReturn=if this is the first return in this tax year so far
 
 #===================================================
@@ -5013,6 +5019,23 @@ amendCya.title=Change your return
 amendCya.agent.title=Change your client’s return
 amendCya.p1=Once all questions have been answered you will be able to submit your return.
 amendCya.printLink=Print or save this page as a PDF
+
+unmetDependency.title.inYearLosses=You want to change the amount of allowable in-year losses
+unmetDependency.title.previousYearLosses=You want to change the amount of allowable losses made in previous tax years
+unmetDependency.title.annualExemptAmount=You want to change the Annual Exempt Amount used
+unmetDependency.title.income=You want to change the gross income amount
+unmetDependency.title.personalAllowance=You want to change the Personal Allowance amount used
+unmetDependency.title.taxableGainOrLoss=You want to change the net gain or loss amount
+unmetDependency.title.yearToDateLiability=You want to change the overall liability amount
+unmetDependency.title.taxOwed=You want to change the amount of Capital Gains Tax due
+unmetDependency.title.repayment=You want to change details on whether a repayment is due
+unmetDependency.title.hasEstimated=You want to change details about whether estimates were used
+unmetDependency.title.initialGainOrLoss=You want to change the initial gain or loss amount
+
+unmetDependency.p1=To do this, you’ll ned to:
+unmetDependency.li1=answer questions about revised year-to-date gains, losses and liability resulting from changes on the return
+unmetDependency.li2=work out the new amount of tax due as a result of the change
+unmetDependency.li3=upload a document showing how you worked out the new amount of tax due
 
 disposalDateExitPage.title=You cannot change this return online
 disposalDateExitPage.p1=Your disposal date falls into another tax year and affects your overall year to date liability.

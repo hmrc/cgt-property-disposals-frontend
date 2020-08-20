@@ -51,7 +51,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NameMatchServiceError, SessionData, TimeUtils, UnsuccessfulNameMatchAttempts}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NameMatchServiceError, SessionData, TimeUtils, UnsuccessfulNameMatchAttempts, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.NameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -3052,7 +3052,24 @@ class RepresenteeControllerSpec
               PersonalRepresentativeInPeriodOfAdmin
             )._1
           )(
-            "representeeIsFirstReturn.personalRep.title",
+            "representeeIsFirstReturn.personalRepInPeriodOfAdmin.title",
+            routes.RepresenteeController.checkYourAnswers(),
+            Some(false)
+          )
+
+        }
+
+        "the user is an agent of a personal rep in period of admin" in {
+          test(
+            sessionWithStartingNewDraftReturn(
+              sample[CompleteRepresenteeAnswers].copy(
+                isFirstReturn = false
+              ),
+              PersonalRepresentativeInPeriodOfAdmin
+            )._1
+              .copy(userType = Some(UserType.Agent))
+          )(
+            "representeeIsFirstReturn.agent.personalRepInPeriodOfAdmin.title",
             routes.RepresenteeController.checkYourAnswers(),
             Some(false)
           )
@@ -3085,7 +3102,7 @@ class RepresenteeControllerSpec
           isFirstReturn = None
         )
 
-        "nothing is submitted" in {
+        "nothing is submitted for capacitor" in {
           testFormError(
             performAction,
             s"$key.capacitor.title",
@@ -3099,17 +3116,89 @@ class RepresenteeControllerSpec
           )
         }
 
-        "the answer submitted is invalid" in {
+        "nothing is submitted for personal rep" in {
           testFormError(
             performAction,
             s"$key.personalRep.title",
+            sessionWithStartingNewDraftReturn(
+              answers,
+              PersonalRepresentative
+            )._1
+          )(
+            Seq.empty,
+            s"$key.personalRep.error.required"
+          )
+        }
+
+        "nothing is submitted for personal rep in period of admin" in {
+          testFormError(
+            performAction,
+            s"$key.personalRepInPeriodOfAdmin.title",
+            sessionWithStartingNewDraftReturn(
+              answers,
+              PersonalRepresentativeInPeriodOfAdmin
+            )._1
+          )(
+            Seq.empty,
+            s"$key.personalRepInPeriodOfAdmin.error.required"
+          )
+        }
+
+        "nothing is submitted for agent of personal rep in period of admin" in {
+          testFormError(
+            performAction,
+            s"$key.agent.personalRepInPeriodOfAdmin.title",
+            sessionWithStartingNewDraftReturn(
+              answers,
+              PersonalRepresentativeInPeriodOfAdmin
+            )._1
+              .copy(userType = Some(UserType.Agent))
+          )(
+            Seq.empty,
+            s"$key.agent.personalRepInPeriodOfAdmin.error.required"
+          )
+        }
+
+        "the answer submitted is invalid for personal rep" in {
+          testFormError(
+            performAction,
+            s"$key.personalRep.title",
+            sessionWithFillingOutReturn(
+              answers,
+              PersonalRepresentative
+            )._1
+          )(
+            Seq(key -> "123"),
+            s"$key.personalRep.error.boolean"
+          )
+        }
+
+        "the answer submitted is invalid for personal rep in period of admin" in {
+          testFormError(
+            performAction,
+            s"$key.personalRepInPeriodOfAdmin.title",
             sessionWithFillingOutReturn(
               answers,
               PersonalRepresentativeInPeriodOfAdmin
             )._1
           )(
             Seq(key -> "123"),
-            s"$key.personalRep.error.boolean"
+            s"$key.personalRepInPeriodOfAdmin.error.boolean"
+          )
+        }
+
+        "the answer submitted is invalid for agent of personal rep in period of admin" in {
+          testFormError(
+            performAction,
+            s"$key.agent.personalRepInPeriodOfAdmin.title",
+            sessionWithFillingOutReturn(
+              answers,
+              PersonalRepresentativeInPeriodOfAdmin
+            )._1
+              .copy(userType = Some(UserType.Agent))
+          )(
+            Seq(key -> "123"),
+            s"$key.agent.personalRepInPeriodOfAdmin.error.boolean"
           )
         }
 

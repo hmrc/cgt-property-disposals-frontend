@@ -103,7 +103,8 @@ class CommonTriageQuestionsController @Inject() (
             whoAreYouReportingForPage(
               form,
               None,
-              state.isRight
+              state.isRight,
+              state.fold(_ => false, _.isAmendReturn)
             )
           )
         }
@@ -127,7 +128,8 @@ class CommonTriageQuestionsController @Inject() (
                   whoAreYouReportingForPage(
                     formWithErrors,
                     None,
-                    state.isRight
+                    state.isRight,
+                    state.fold(_ => false, _.isAmendReturn)
                   )
                 ),
               { individualUserType =>
@@ -233,7 +235,8 @@ class CommonTriageQuestionsController @Inject() (
             state.isRight,
             state
               .fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust),
-            getRepresentativeType(state)
+            getRepresentativeType(state),
+            state.fold(_ => false, _.isAmendReturn)
           )
         )
       }
@@ -267,7 +270,8 @@ class CommonTriageQuestionsController @Inject() (
                     _.subscribedDetails.isATrust,
                     _.subscribedDetails.isATrust
                   ),
-                  getRepresentativeType(state)
+                  getRepresentativeType(state),
+                  state.fold(_ => false, _.isAmendReturn)
                 )
               ),
             numberOfProperties =>

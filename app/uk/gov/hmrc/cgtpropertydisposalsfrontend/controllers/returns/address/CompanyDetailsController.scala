@@ -258,7 +258,7 @@ class CompanyDetailsController @Inject() (
               multipleIndirectDisposalPriceForm.fill(c.inPounds)
             )
 
-            Ok(multipleIndirectDisposalPricePage(form, backLink))
+            Ok(multipleIndirectDisposalPricePage(form, backLink, r.journey.isAmendReturn))
         }
       }
     }
@@ -280,7 +280,7 @@ class CompanyDetailsController @Inject() (
               .fold(
                 formWithErrors =>
                   BadRequest(
-                    multipleIndirectDisposalPricePage(formWithErrors, backLink)
+                    multipleIndirectDisposalPricePage(formWithErrors, backLink, r.journey.isAmendReturn)
                   ),
                 disposalPrice =>
                   if (
@@ -357,7 +357,7 @@ class CompanyDetailsController @Inject() (
               multipleIndirectAcquisitionPriceForm.fill(c.inPounds)
             )
 
-            Ok(multipleIndirectAcquisitionPricePage(form, backLink))
+            Ok(multipleIndirectAcquisitionPricePage(form, backLink, r.journey.isAmendReturn))
         }
       }
     }
@@ -381,7 +381,8 @@ class CompanyDetailsController @Inject() (
                   BadRequest(
                     multipleIndirectAcquisitionPricePage(
                       formWithErrors,
-                      backLink
+                      backLink,
+                      r.journey.isAmendReturn
                     )
                   ),
                 acquisitionPrice =>

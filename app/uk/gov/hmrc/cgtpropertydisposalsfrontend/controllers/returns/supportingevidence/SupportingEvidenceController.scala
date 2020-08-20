@@ -134,7 +134,7 @@ class SupportingEvidenceController @Inject() (
 
   def doYouWantToUploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withUploadSupportingEvidenceAnswers { (_, _, answers) =>
+      withUploadSupportingEvidenceAnswers { (_, f, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.doYouWantToUploadSupportingEvidence
@@ -142,7 +142,7 @@ class SupportingEvidenceController @Inject() (
             c => doYouWantToUploadForm.fill(c.doYouWantToUploadSupportingEvidence)
           )
         )(
-          page = doYouWantToUploadPage(_, _)
+          page = doYouWantToUploadPage(_, _, f.isAmendReturn)
         )(
           requiredPreviousAnswer = { _ => Some(()) },
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -158,7 +158,8 @@ class SupportingEvidenceController @Inject() (
             BadRequest(
               doYouWantToUploadPage(
                 errors,
-                controllers.returns.routes.TaskListController.taskList()
+                controllers.returns.routes.TaskListController.taskList(),
+                fillingOutReturn.isAmendReturn
               )
             ),
           newDoYouWantToUploadSupportingEvidenceAnswer =>
@@ -261,7 +262,7 @@ class SupportingEvidenceController @Inject() (
 
   def uploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withUploadSupportingEvidenceAnswers { (_, _, answers) =>
+      withUploadSupportingEvidenceAnswers { (_, f, answers) =>
         if (answers.fold(_.evidences, _.evidences).length >= maxUploads)
           Redirect(routes.SupportingEvidenceController.checkYourAnswers())
         else
@@ -281,7 +282,8 @@ class SupportingEvidenceController @Inject() (
                   uploadPage(
                     uploadUpscan,
                     routes.SupportingEvidenceController
-                      .doYouWantToUploadSupportingEvidence()
+                      .doYouWantToUploadSupportingEvidence(),
+                    f.isAmendReturn
                   )
                 )
             )

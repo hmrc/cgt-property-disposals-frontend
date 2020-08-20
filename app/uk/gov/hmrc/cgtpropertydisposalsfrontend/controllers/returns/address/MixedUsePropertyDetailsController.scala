@@ -196,7 +196,8 @@ class MixedUsePropertyDetailsController @Inject() (
             form,
             backLink,
             r.journey.subscribedDetails.isATrust,
-            r.representativeType
+            r.representativeType,
+            r.journey.isAmendReturn
           )
         )
       }
@@ -219,7 +220,8 @@ class MixedUsePropertyDetailsController @Inject() (
                   formWithErrors,
                   backLink,
                   r.journey.subscribedDetails.isATrust,
-                  r.representativeType
+                  r.representativeType,
+                  r.journey.isAmendReturn
                 )
               ),
             disposalPrice =>
@@ -297,7 +299,8 @@ class MixedUsePropertyDetailsController @Inject() (
             backLink,
             r.journey.subscribedDetails.isATrust,
             r.representativeType,
-            extractDateOfDeath(r)
+            extractDateOfDeath(r),
+            r.journey.isAmendReturn
           )
         )
       }
@@ -319,7 +322,8 @@ class MixedUsePropertyDetailsController @Inject() (
                   backLink,
                   r.journey.subscribedDetails.isATrust,
                   r.representativeType,
-                  extractDateOfDeath(r)
+                  extractDateOfDeath(r),
+                  r.journey.isAmendReturn
                 )
               ),
             acquisitionPrice =>

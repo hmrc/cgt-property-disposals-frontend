@@ -244,7 +244,8 @@ class DisposalDetailsController @Inject() (
               _,
               _,
               fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(state)
+              representativeType(state),
+              fillingOutReturn.isAmendReturn
             )
           )(
             requiredPreviousAnswer = _ => Some(()),
@@ -264,7 +265,8 @@ class DisposalDetailsController @Inject() (
               _,
               _,
               fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(state)
+              representativeType(state),
+              fillingOutReturn.isAmendReturn
             )
           )(
             requiredPreviousAnswer = _ => Some(()),
@@ -339,7 +341,8 @@ class DisposalDetailsController @Inject() (
                   disposalMethod,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
-                  isIndirectDisposal(state)
+                  isIndirectDisposal(state),
+                  fillingOutReturn.isAmendReturn
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
@@ -364,7 +367,8 @@ class DisposalDetailsController @Inject() (
                   disposalMethod,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
-                  isIndirectDisposal(state)
+                  isIndirectDisposal(state),
+                  fillingOutReturn.isAmendReturn
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
@@ -425,7 +429,8 @@ class DisposalDetailsController @Inject() (
                   _,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
-                  isIndirectDisposal(state)
+                  isIndirectDisposal(state),
+                  fillingOutReturn.isAmendReturn
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
@@ -451,7 +456,8 @@ class DisposalDetailsController @Inject() (
                   _,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
-                  isIndirectDisposal(state)
+                  isIndirectDisposal(state),
+                  fillingOutReturn.isAmendReturn
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),

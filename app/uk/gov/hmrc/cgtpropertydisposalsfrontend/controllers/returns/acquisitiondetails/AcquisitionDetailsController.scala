@@ -334,7 +334,8 @@ class AcquisitionDetailsController @Inject() (
                 _,
                 fillingOutReturn.subscribedDetails.isATrust,
                 representativeType(state),
-                assetType
+                assetType,
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = _ => true,
@@ -361,7 +362,8 @@ class AcquisitionDetailsController @Inject() (
                 _,
                 fillingOutReturn.subscribedDetails.isATrust,
                 representativeType(state),
-                assetType
+                assetType,
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = _ => noAnswersRequired,
@@ -410,7 +412,8 @@ class AcquisitionDetailsController @Inject() (
                     _,
                     fillingOutReturn.subscribedDetails.isATrust,
                     representativeType(state),
-                    assetType
+                    assetType,
+                    fillingOutReturn.isAmendReturn
                   )
                 )(
                   requiredPreviousAnswer = _.fold(
@@ -443,7 +446,8 @@ class AcquisitionDetailsController @Inject() (
                     _,
                     fillingOutReturn.subscribedDetails.isATrust,
                     representativeType(state),
-                    assetType
+                    assetType,
+                    fillingOutReturn.isAmendReturn
                   )
                 )(
                   requiredPreviousAnswer = _.fold(
@@ -500,7 +504,8 @@ class AcquisitionDetailsController @Inject() (
                   acquisitionDate,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
-                  assetType
+                  assetType,
+                  fillingOutReturn.isAmendReturn
                 )
               )(
                 requiredPreviousAnswer = _.fold(
@@ -535,7 +540,8 @@ class AcquisitionDetailsController @Inject() (
                   acquisitionDate,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
-                  assetType
+                  assetType,
+                  fillingOutReturn.isAmendReturn
                 )
               )(
                 requiredPreviousAnswer = _.fold(
@@ -569,7 +575,7 @@ class AcquisitionDetailsController @Inject() (
 
   def periodOfAdminMarketValue(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, _, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withPeriodOfAdmin(state) { dateOfDeath =>
           withAssetType(state) { assetType =>
             commonDisplayBehaviour(answers)(
@@ -585,7 +591,8 @@ class AcquisitionDetailsController @Inject() (
                 _,
                 dateOfDeath,
                 assetType,
-                state.fold(_.representativeType(), _.representativeType())
+                state.fold(_.representativeType(), _.representativeType()),
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = _ => true,
@@ -613,7 +620,8 @@ class AcquisitionDetailsController @Inject() (
                 _,
                 dateOfDeath,
                 assetType,
-                state.fold(_.representativeType(), _.representativeType())
+                state.fold(_.representativeType(), _.representativeType()),
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = _ => true,
@@ -674,7 +682,8 @@ class AcquisitionDetailsController @Inject() (
                     ),
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
-                  assetType
+                  assetType,
+                  fillingOutReturn.isAmendReturn
                 )
               )(
                 requiredPreviousAnswer = answers =>
@@ -725,7 +734,8 @@ class AcquisitionDetailsController @Inject() (
                       rebaseDate,
                       fillingOutReturn.subscribedDetails.isATrust,
                       representativeType(state),
-                      assetType
+                      assetType,
+                      fillingOutReturn.isAmendReturn
                     )
                   }
                 )(
@@ -809,7 +819,8 @@ class AcquisitionDetailsController @Inject() (
                   .fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
                 rebasingEligibilityUtil
                   .getRebasingCutOffDate(assetType, wasUkResident),
-                representativeType(state)
+                representativeType(state),
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = { a =>
@@ -863,7 +874,8 @@ class AcquisitionDetailsController @Inject() (
                   .fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
                 rebasingEligibilityUtil
                   .getRebasingCutOffDate(assetType, wasUkResident),
-                representativeType(state)
+                representativeType(state),
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = { answers =>
@@ -913,19 +925,22 @@ class AcquisitionDetailsController @Inject() (
 
   def shouldUseRebase(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, _, state, _) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasAUkResident) =>
           if (wasAUkResident)
             Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
           else
             Ok(
               shouldUseRebasePage(
-                shouldUseRebaseForm,
+                answers
+                  .fold(_.shouldUseRebase, c => Some(c.shouldUseRebase))
+                  .fold(shouldUseRebaseForm)(shouldUseRebaseForm.fill),
                 routes.AcquisitionDetailsController
                   .rebasedAcquisitionPrice(),
                 rebasingEligibilityUtil
                   .getRebasingCutOffDate(assetType, wasAUkResident),
-                assetType
+                assetType,
+                fillingOutReturn.isAmendReturn
               )
             )
         }
@@ -964,7 +979,8 @@ class AcquisitionDetailsController @Inject() (
                       assetType,
                       wasUkResident
                     ),
-                  assetType
+                  assetType,
+                  fillingOutReturn.isAmendReturn
                 )
               )(
                 requiredPreviousAnswer = _ => noAnswersRequired,
@@ -1015,7 +1031,8 @@ class AcquisitionDetailsController @Inject() (
                   .getRebasingCutOffDate(assetType, wasUkResident),
                 wasUkResident,
                 representativeType(state),
-                assetType
+                assetType,
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = _.fold(
@@ -1056,7 +1073,8 @@ class AcquisitionDetailsController @Inject() (
                   .getRebasingCutOffDate(assetType, wasUkResident),
                 wasUkResident,
                 representativeType(state),
-                assetType
+                assetType,
+                fillingOutReturn.isAmendReturn
               )
             )(
               requiredPreviousAnswer = _.fold(

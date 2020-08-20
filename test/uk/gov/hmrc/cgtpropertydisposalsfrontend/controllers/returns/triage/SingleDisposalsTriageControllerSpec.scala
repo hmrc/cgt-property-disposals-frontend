@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -120,12 +120,14 @@ class SingleDisposalsTriageControllerSpec
   def sessionDataWithFillingOurReturn(
     draftReturn: DraftSingleDisposalReturn,
     name: Either[TrustName, IndividualName],
-    previousSentReturns: Option[List[ReturnSummary]]
+    previousSentReturns: Option[List[ReturnSummary]],
+    isAmend: Boolean = false
   ): (SessionData, FillingOutReturn) = {
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
-      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None))
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None)),
+      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -139,7 +141,8 @@ class SingleDisposalsTriageControllerSpec
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     representeeAnswers: Option[RepresenteeAnswers] = Some(sample[IncompleteRepresenteeAnswers]),
-    previousSentReturns: Option[List[ReturnSummary]] = None
+    previousSentReturns: Option[List[ReturnSummary]] = None,
+    isAmend: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers,
@@ -149,7 +152,8 @@ class SingleDisposalsTriageControllerSpec
     val (session, journey) = sessionDataWithFillingOurReturn(
       draftReturn,
       name,
-      previousSentReturns
+      previousSentReturns,
+      isAmend
     )
     (session, journey, draftReturn)
   }
@@ -164,6 +168,9 @@ class SingleDisposalsTriageControllerSpec
       .taxYear(_: LocalDate)(_: HeaderCarrier))
       .expects(date, *)
       .returning(EitherT.fromEither[Future](response))
+
+  def expectedSubmitText(isAmend: Boolean) =
+    messageFromMessageKey(if (isAmend) "button.continue" else "button.saveAndContinue")
 
   "The SingleDisposalsTriageController" when {
 
@@ -3193,6 +3200,7 @@ class SingleDisposalsTriageControllerSpec
                     _.hasEstimatedDetails
                   )
                   .unset(_.mandatoryEvidence)
+                  .unset(_.yearToDateLiability)
               )
           },
           gainOrLossAfterReliefs = None
@@ -4240,13 +4248,15 @@ class SingleDisposalsTriageControllerSpec
       behave like noDateOfDeathForPersonalRepBehaviour(performAction)
 
       "Page is displayed correctly" in {
+        val isAmend = sample[Boolean]
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionDataWithFillingOutReturn(
               requiredPreviousAnswers.copy(
                 assetType = Some(AssetType.IndirectDisposal)
-              )
+              ),
+              isAmend = isAmend
             )._1
           )
         }
@@ -4269,6 +4279,9 @@ class SingleDisposalsTriageControllerSpec
               .attr("action") shouldBe routes.SingleDisposalsTriageController
               .disposalDateOfSharesSubmit()
               .url
+            doc
+              .select("#submitButton")
+              .text()         shouldBe expectedSubmitText(isAmend)
           }
         )
 
