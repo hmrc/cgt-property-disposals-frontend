@@ -14,9 +14,12 @@
  * limitations under the License.
  *@
 
+@import play.twirl.api.Html
+
 @this()
 
-@(label: String)
+@(label: String, otherHtml: Option[Html] = None)
 <div class="form-group">
   <button class="button" type="submit" id="submitButton">@label</button>
+  @otherHtml
 </div>

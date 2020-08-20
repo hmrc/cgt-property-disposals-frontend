@@ -2842,6 +2842,7 @@ class StartControllerSpec
                     None,
                     sample[CompleteReturnWithSummary],
                     false,
+                    None,
                     None
                   )
                 )

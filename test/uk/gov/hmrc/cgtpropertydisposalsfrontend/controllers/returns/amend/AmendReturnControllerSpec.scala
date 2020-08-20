@@ -25,10 +25,15 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes.{ExemptionAndLossesController => exemptionsAndLossesRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes.{InitialGainOrLossController => initialGainorLossRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes.{YearToDateLiabilityController => ytdRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnSpecBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingToAmendReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
@@ -39,12 +44,16 @@ class AmendReturnControllerSpec
     with AuthSupport
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
+
+  val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     )
 
   lazy val controller = instanceOf[AmendReturnController]
@@ -146,6 +155,13 @@ class AmendReturnControllerSpec
           test(
             AmendReturnController.ConfirmCancelBackLocations.checkAnswers,
             routes.AmendReturnController.checkYourAnswers()
+          )
+        }
+
+        "the user came from the unmet dependency page" in {
+          test(
+            AmendReturnController.ConfirmCancelBackLocations.unmetDependency,
+            routes.AmendReturnController.unmetDependency()
           )
         }
 
@@ -298,6 +314,153 @@ class AmendReturnControllerSpec
             ),
             "amendCya.agent.title"
           )
+        }
+
+      }
+
+    }
+
+    "handling requests to display the unmet dependency page" must {
+
+      def performAction(): Future[Result] = controller.unmetDependency()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "redirect to the amend cya page" when {
+
+        "there is no unmet dependency field url in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[StartingToAmendReturn].copy(
+                    unmetDependencyFieldUrl = None
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.AmendReturnController.checkYourAnswers())
+        }
+
+      }
+
+      "show an error page" when {
+
+        "the unmet dependency field url in session is not understood" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[StartingToAmendReturn].copy(
+                    unmetDependencyFieldUrl = Some("abc")
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "display the page" when {
+
+        def test(
+          unmetDependencyFieldUrl: String,
+          expectedTitleKey: String
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[StartingToAmendReturn].copy(
+                    unmetDependencyFieldUrl = Some(unmetDependencyFieldUrl)
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(expectedTitleKey),
+            { doc =>
+              doc.select("#back").attr("href")         shouldBe routes.AmendReturnController.checkYourAnswers().url
+              doc
+                .select("#content > article > form")
+                .attr("action")                        shouldBe routes.AmendReturnController.unmetDependencySubmit().url
+              doc.select("#cancelButton").attr("href") shouldBe routes.AmendReturnController
+                .confirmCancelSubmit(AmendReturnController.ConfirmCancelBackLocations.unmetDependency)
+                .url
+            }
+          )
+        }
+
+        "the unmet dependency field url in session is understood" in {
+          val testCases = List(
+            exemptionsAndLossesRoutes.inYearLosses().url         -> "inYearLosses",
+            exemptionsAndLossesRoutes.previousYearsLosses().url  -> "previousYearLosses",
+            exemptionsAndLossesRoutes.annualExemptAmount().url   -> "annualExemptAmount",
+            ytdRoutes.estimatedIncome().url                      -> "income",
+            ytdRoutes.personalAllowance().url                    -> "personalAllowance",
+            ytdRoutes.taxableGainOrLoss().url                    -> "taxableGainOrLoss",
+            ytdRoutes.yearToDateLiability().url                  -> "yearToDateLiability",
+            ytdRoutes.taxDue().url                               -> "taxOwed",
+            ytdRoutes.nonCalculatedEnterTaxDue().url             -> "taxOwed",
+            ytdRoutes.repayment().url                            -> "repayment",
+            ytdRoutes.hasEstimatedDetails().url                  -> "hasEstimated",
+            initialGainorLossRoutes.enterInitialGainOrLoss().url -> "initialGainOrLoss"
+          )
+
+          testCases.foreach {
+            case (unmetDependencyFieldUrl, titleKey) =>
+              withClue(s"For '$unmetDependencyFieldUrl' and '$titleKey': ") {
+                test(unmetDependencyFieldUrl, s"unmetDependency.title.$titleKey")
+              }
+
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling submits on the unmet dependency page" must {
+
+      def performAction(): Future[Result] = controller.unmetDependencySubmit()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.unmetDependencySubmit(),
+        mockUUIDGenerator,
+        Some(controllers.returns.routes.TaskListController.taskList().url)
+      )
+
+      "redirect to the amend cya page" when {
+
+        "there is no unmet dependency field url in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[StartingToAmendReturn].copy(
+                    unmetDependencyFieldUrl = None
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.AmendReturnController.checkYourAnswers())
         }
 
       }
