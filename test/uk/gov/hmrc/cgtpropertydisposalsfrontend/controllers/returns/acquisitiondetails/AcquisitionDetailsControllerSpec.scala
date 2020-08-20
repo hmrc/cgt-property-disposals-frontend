@@ -102,11 +102,11 @@ class AcquisitionDetailsControllerSpec
   def assetTypeMessageKey(assetType: AssetType): String =
     if (assetType === IndirectDisposal) ".indirect" else ""
 
-  def expectedSubmitText(isAmend: Boolean) = if(isAmend) "Continue" else "Save and continue"
-
+  def expectedSubmitText(isAmend: Boolean) =
+    messageFromMessageKey(if (isAmend) "button.continue" else "button.saveAndContinue")
   def setAgentReferenceNumber(
     userType: UserType
-  ): Option[AgentReferenceNumber] =
+  ): Option[AgentReferenceNumber]          =
     userType match {
       case UserType.Agent => Some(sample[AgentReferenceNumber])
       case _              => None
@@ -221,16 +221,16 @@ class AcquisitionDetailsControllerSpec
   }
 
   def sessionWithState(
-                        answers: AcquisitionDetailsAnswers,
-                        assetType: AssetType,
-                        wasUkResident: Boolean,
-                        userType: UserType,
-                        individualUserType: IndividualUserType,
-                        disposalDate: DisposalDate = sample[DisposalDate],
-                        representeeAnswers: Option[RepresenteeAnswers] = Some(
-                          sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
-                        ),
-                        isAmend: Boolean = false
+    answers: AcquisitionDetailsAnswers,
+    assetType: AssetType,
+    wasUkResident: Boolean,
+    userType: UserType,
+    individualUserType: IndividualUserType,
+    disposalDate: DisposalDate = sample[DisposalDate],
+    representeeAnswers: Option[RepresenteeAnswers] = Some(
+      sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
+    ),
+    isAmend: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithState(
       Some(answers),
@@ -244,14 +244,14 @@ class AcquisitionDetailsControllerSpec
     )
 
   def sessionWithState(
-                        answers: Option[AcquisitionDetailsAnswers],
-                        assetType: Option[AssetType],
-                        wasUkResident: Option[Boolean],
-                        userType: UserType,
-                        individualUserType: IndividualUserType,
-                        disposalDate: Option[DisposalDate],
-                        representeeAnswers: Option[RepresenteeAnswers],
-                        isAmend: Boolean
+    answers: Option[AcquisitionDetailsAnswers],
+    assetType: Option[AssetType],
+    wasUkResident: Option[Boolean],
+    userType: UserType,
+    individualUserType: IndividualUserType,
+    disposalDate: Option[DisposalDate],
+    representeeAnswers: Option[RepresenteeAnswers],
+    isAmend: Boolean
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
@@ -271,7 +271,7 @@ class AcquisitionDetailsControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(
         name = setNameForUserType(userType)
       ),
-      originalReturn = if(isAmend) Some(sample[CompleteReturnWithSummary]) else None
+      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -431,7 +431,7 @@ class AcquisitionDetailsControllerSpec
               List(Some(IncompleteAcquisitionDetailsAnswers.empty), None)
                 .foreach { answers =>
                   val assetType = sample[AssetType]
-                  val isAmend = sample[Boolean]
+                  val isAmend   = sample[Boolean]
                   withClue(s"For answers $answers: ") {
                     inSequence {
                       mockAuthWithNoRetrievals()
@@ -458,14 +458,14 @@ class AcquisitionDetailsControllerSpec
                           .select("#back")
                           .attr(
                             "href"
-                          ) shouldBe routes.AcquisitionDetailsController
+                          )                                shouldBe routes.AcquisitionDetailsController
                           .checkYourAnswers()
                           .url
                         doc
                           .select("#content > article > form")
                           .attr(
                             "action"
-                          ) shouldBe routes.AcquisitionDetailsController
+                          )                                shouldBe routes.AcquisitionDetailsController
                           .acquisitionMethodSubmit()
                           .url
                         doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -1020,7 +1020,8 @@ class AcquisitionDetailsControllerSpec
                     assetType,
                     sample[Boolean],
                     userType,
-                    individualUserType
+                    individualUserType,
+                    isAmend = isAmend
                   )._1
                 )
               }
@@ -1034,12 +1035,12 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#back")
-                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .acquisitionMethod()
                     .url
                   doc
                     .select("#content > article > form")
-                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionDateSubmit()
                     .url
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -1075,12 +1076,12 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#back")
-                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswers()
                     .url
                   doc
                     .select("#content > article > form")
-                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionDateSubmit()
                     .url
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -1488,7 +1489,7 @@ class AcquisitionDetailsControllerSpec
                 if (isAgent) UserType.Agent else UserType.Individual,
                 PersonalRepresentativeInPeriodOfAdmin,
                 representeeAnswers = Some(representeeAnswers),
-                isAmend = false
+                isAmend = isAmend
               )._1
             )
           }
@@ -1517,7 +1518,7 @@ class AcquisitionDetailsControllerSpec
 
               doc
                 .select("#periodOfAdminMarketValue-form-hint")
-                .text() shouldBe messageFromMessageKey(expectedHelpTextKey)
+                .text()                          shouldBe messageFromMessageKey(expectedHelpTextKey)
               doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
 
             }
@@ -1832,7 +1833,7 @@ class AcquisitionDetailsControllerSpec
           userKey: String
         ): Unit =
           forAll { acquisitionMethod: AcquisitionMethod =>
-            val isAmend = sample[Boolean]
+            val isAmend         = sample[Boolean]
             val acquisitionDate = sample[AcquisitionDate]
             val answers         = sample[IncompleteAcquisitionDetailsAnswers].copy(
               acquisitionMethod = Some(acquisitionMethod),
@@ -1869,12 +1870,12 @@ class AcquisitionDetailsControllerSpec
               { doc =>
                 doc
                   .select("#back")
-                  .attr("href")   shouldBe routes.AcquisitionDetailsController
+                  .attr("href")                    shouldBe routes.AcquisitionDetailsController
                   .acquisitionDate()
                   .url
                 doc
                   .select("#content > article > form")
-                  .attr("action") shouldBe routes.AcquisitionDetailsController
+                  .attr("action")                  shouldBe routes.AcquisitionDetailsController
                   .acquisitionPriceSubmit()
                   .url
                 doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -1929,12 +1930,12 @@ class AcquisitionDetailsControllerSpec
             { doc =>
               doc
                 .select("#back")
-                .attr("href")   shouldBe routes.AcquisitionDetailsController
+                .attr("href")                    shouldBe routes.AcquisitionDetailsController
                 .checkYourAnswers()
                 .url
               doc
                 .select("#content > article > form")
-                .attr("action") shouldBe routes.AcquisitionDetailsController
+                .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .acquisitionPriceSubmit()
                 .url
               doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -2402,18 +2403,18 @@ class AcquisitionDetailsControllerSpec
             { doc =>
               doc
                 .select("#back")
-                .attr("href")   shouldBe routes.AcquisitionDetailsController
+                .attr("href")                    shouldBe routes.AcquisitionDetailsController
                 .acquisitionDate()
                 .url
               doc
                 .select("#content > article > form")
-                .attr("action") shouldBe routes.AcquisitionDetailsController
+                .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
               if (displayHelpText)
                 doc
                   .select("#rebaseAcquisitionPrice-form-hint")
-                  .text()       shouldBe messageFromMessageKey(
+                  .text()                        shouldBe messageFromMessageKey(
                   s"rebaseAcquisitionPrice$userKey.helpText"
                 )
               doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -2470,17 +2471,17 @@ class AcquisitionDetailsControllerSpec
             { doc =>
               doc
                 .select("#back")
-                .attr("href")   shouldBe routes.AcquisitionDetailsController
+                .attr("href")                    shouldBe routes.AcquisitionDetailsController
                 .acquisitionPrice()
                 .url
               doc
                 .select("#content > article > form")
-                .attr("action") shouldBe routes.AcquisitionDetailsController
+                .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
               doc
                 .select("#rebaseAcquisitionPrice-form-hint")
-                .text()         shouldBe messageFromMessageKey(
+                .text()                          shouldBe messageFromMessageKey(
                 s"rebaseAcquisitionPrice$userKey.helpText"
               )
               doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -2529,12 +2530,12 @@ class AcquisitionDetailsControllerSpec
             { doc =>
               doc
                 .select("#back")
-                .attr("href")   shouldBe routes.AcquisitionDetailsController
+                .attr("href")                    shouldBe routes.AcquisitionDetailsController
                 .checkYourAnswers()
                 .url
               doc
                 .select("#content > article > form")
-                .attr("action") shouldBe routes.AcquisitionDetailsController
+                .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
               doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -2998,12 +2999,12 @@ class AcquisitionDetailsControllerSpec
             { doc =>
               doc
                 .select("#back")
-                .attr("href")   shouldBe routes.AcquisitionDetailsController
+                .attr("href")                    shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPrice()
                 .url
               doc
                 .select("#content > article > form")
-                .attr("action") shouldBe routes.AcquisitionDetailsController
+                .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .improvementCostsSubmit()
                 .url
               doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -3047,12 +3048,12 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#back")
-                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .acquisitionPrice()
                     .url
                   doc
                     .select("#content > article > form")
-                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .improvementCostsSubmit()
                     .url
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -3090,12 +3091,12 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#back")
-                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswers()
                     .url
                   doc
                     .select("#content > article > form")
-                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .improvementCostsSubmit()
                     .url
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -3133,12 +3134,12 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#back")
-                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswers()
                     .url
                   doc
                     .select("#content > article > form")
-                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .improvementCostsSubmit()
                     .url
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -3214,10 +3215,10 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#improvementCosts-0")
-                    .attr("checked") shouldBe "checked"
+                    .attr("checked")                 shouldBe "checked"
                   doc
                     .select("#improvementCostsValue")
-                    .attr("value")   shouldBe "0.02"
+                    .attr("value")                   shouldBe "0.02"
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
                 }
               )
@@ -3630,17 +3631,17 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#back")
-                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .improvementCosts()
                     .url
                   doc
                     .select("#content > article > form")
-                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
                   doc
                     .select("#acquisitionFees-form-hint")
-                    .text()         shouldBe messageFromMessageKey(s"$key$userKey.helpText")
+                    .text()                          shouldBe messageFromMessageKey(s"$key$userKey.helpText")
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
                 }
               )
@@ -3677,12 +3678,12 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#back")
-                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .improvementCosts()
                     .url
                   doc
                     .select("#content > article > form")
-                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -3708,7 +3709,8 @@ class AcquisitionDetailsControllerSpec
                     AssetType.Residential,
                     sample[Boolean],
                     userType,
-                    individualUserType
+                    individualUserType,
+                    isAmend = isAmend
                   )._1
                 )
               }
@@ -3721,12 +3723,12 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#back")
-                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswers()
                     .url
                   doc
                     .select("#content > article > form")
-                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -3738,7 +3740,7 @@ class AcquisitionDetailsControllerSpec
         "the acquisition details section has been completed with rebasing" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-            val isAmend = sample[Boolean]
+              val isAmend = sample[Boolean]
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -3764,12 +3766,12 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#back")
-                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswers()
                     .url
                   doc
                     .select("#content > article > form")
-                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
@@ -3849,10 +3851,10 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#acquisitionFees-0")
-                    .attr("checked") shouldBe "checked"
+                    .attr("checked")                 shouldBe "checked"
                   doc
                     .select("#acquisitionFeesValue")
-                    .attr("value")   shouldBe "0.03"
+                    .attr("value")                   shouldBe "0.03"
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
                 }
               )
@@ -3891,17 +3893,17 @@ class AcquisitionDetailsControllerSpec
                 { doc =>
                   doc
                     .select("#back")
-                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .improvementCosts()
                     .url
                   doc
                     .select("#content > article > form")
-                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
                   doc
                     .select("#acquisitionFees-form-hint")
-                    .text()         shouldBe messageFromMessageKey("acquisitionFees.personalRepInPeriodOfAdmin.helpText")
+                    .text()                          shouldBe messageFromMessageKey("acquisitionFees.personalRepInPeriodOfAdmin.helpText")
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
                 }
               )

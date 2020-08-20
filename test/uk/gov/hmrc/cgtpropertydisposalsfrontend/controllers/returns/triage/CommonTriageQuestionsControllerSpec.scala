@@ -244,24 +244,25 @@ class CommonTriageQuestionsControllerSpec
 
                 doc
                   .select("#individualUserType > div:nth-child(2) > label")
-                  .text() shouldBe messageFromMessageKey(
+                  .text()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.Self}"
                 )
                 doc
                   .select("#individualUserType > div:nth-child(3) > label")
-                  .html() shouldBe messageFromMessageKey(
+                  .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.Capacitor}"
                 )
                 doc
                   .select("#individualUserType > div:nth-child(4) > label")
-                  .html() shouldBe messageFromMessageKey(
+                  .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.PersonalRepresentative}"
                 )
                 doc
                   .select("#individualUserType > div:nth-child(5) > label")
-                  .html() shouldBe messageFromMessageKey(
+                  .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.PersonalRepresentativeInPeriodOfAdmin}"
                 )
+                doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.saveAndContinue")
               }
             )
           }
@@ -319,12 +320,13 @@ class CommonTriageQuestionsControllerSpec
                   .select("#content > article > form")
                   .attr(
                     "action"
-                  )                shouldBe routes.CommonTriageQuestionsController
+                  )                                shouldBe routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresentingSubmit()
                   .url
                 doc
                   .select("#individualUserType-1")
-                  .attr("checked") shouldBe "checked"
+                  .attr("checked")                 shouldBe "checked"
+                doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.saveAndContinue")
               }
             )
           }
@@ -376,15 +378,15 @@ class CommonTriageQuestionsControllerSpec
 
                     doc
                       .select(s"#individualUserType-$index")
-                      .attr("checked") shouldBe "checked"
+                      .attr("checked")                 shouldBe "checked"
                     doc
                       .select("#individualUserType > div:nth-child(2) > label")
-                      .text()          shouldBe messageFromMessageKey(
+                      .text()                          shouldBe messageFromMessageKey(
                       s"individualUserType.agent.${IndividualUserType.Self}"
                     )
                     doc
                       .select("#individualUserType > div:nth-child(3) > label")
-                      .html()          shouldBe messageFromMessageKey(
+                      .html()                          shouldBe messageFromMessageKey(
                       s"individualUserType.agent.${IndividualUserType.PersonalRepresentative}"
                     )
                     doc.body().text() shouldNot include(
@@ -392,6 +394,7 @@ class CommonTriageQuestionsControllerSpec
                         s"individualUserType.${IndividualUserType.Capacitor}"
                       )
                     )
+                    doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.saveAndContinue")
                   }
                 )
             }
@@ -466,8 +469,9 @@ class CommonTriageQuestionsControllerSpec
             { doc =>
               doc
                 .select("#error-summary-display > ul > li > a")
-                .text() shouldBe messageFromMessageKey(expectedErrorKey)
-              doc.title() should startWith("Error:")
+                .text()                          shouldBe messageFromMessageKey(expectedErrorKey)
+              doc.title()                          should startWith("Error:")
+              doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.saveAndContinue")
             },
             BAD_REQUEST
           )
@@ -846,6 +850,7 @@ class CommonTriageQuestionsControllerSpec
                     FurtherReturnGuidanceController.BackLinkLocations.furtherReturnStart
                   )
                   .url
+                doc.select("#submitButton").text()       shouldBe messageFromMessageKey("button.saveAndContinue")
               }
             )
           }
@@ -879,24 +884,25 @@ class CommonTriageQuestionsControllerSpec
 
                 doc
                   .select("#warning")
-                  .text() shouldBe messageFromMessageKey(
+                  .text()                          shouldBe messageFromMessageKey(
                   "further-returns.help.warning"
                 )
                 doc
                   .select("#content > article > p:nth-child(4)")
-                  .html() shouldBe messageFromMessageKey(
+                  .html()                          shouldBe messageFromMessageKey(
                   "further-returns.help.listHeading"
                 )
                 doc
                   .select("#content > article > ul > li:nth-child(1)")
-                  .html() shouldBe messageFromMessageKey(
+                  .html()                          shouldBe messageFromMessageKey(
                   "further-returns.capacitor.help.l1"
                 )
                 doc
                   .select("#content > article > ul > li:nth-child(2)")
-                  .html() shouldBe messageFromMessageKey(
+                  .html()                          shouldBe messageFromMessageKey(
                   "further-returns.help.l2"
                 )
+                doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.saveAndContinue")
               }
             )
           }
@@ -948,24 +954,25 @@ class CommonTriageQuestionsControllerSpec
 
                     doc
                       .select("#warning")
-                      .text() shouldBe messageFromMessageKey(
+                      .text()                          shouldBe messageFromMessageKey(
                       "further-returns.help.warning"
                     )
                     doc
                       .select("#content > article > p:nth-child(4)")
-                      .html() shouldBe messageFromMessageKey(
+                      .html()                          shouldBe messageFromMessageKey(
                       "further-returns.help.listHeading"
                     )
                     doc
                       .select("#content > article > ul > li:nth-child(1)")
-                      .html() shouldBe messageFromMessageKey(
+                      .html()                          shouldBe messageFromMessageKey(
                       s"further-returns.${value._2}.help.l1"
                     )
                     doc
                       .select("#content > article > ul > li:nth-child(2)")
-                      .html() shouldBe messageFromMessageKey(
+                      .html()                          shouldBe messageFromMessageKey(
                       "further-returns.help.l2"
                     )
+                    doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.saveAndContinue")
                   }
                 )
             }
