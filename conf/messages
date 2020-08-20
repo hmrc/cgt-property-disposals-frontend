@@ -5014,6 +5014,11 @@ amendCya.agent.title=Change your client’s return
 amendCya.p1=Once all questions have been answered you will be able to submit your return.
 amendCya.printLink=Print or save this page as a PDF
 
+disposalDateExitPage.title=You cannot change this return online
+disposalDateExitPage.p1=Your disposal date falls into another tax year and affects your overall year to date liability.
+disposalDateExitPage.h2=What you will need to do next
+disposalDateExitPage.p2=You will need to <a href="{0}">Contact HMRC</a> to change your disposal date.
+
 #===================================================
 #  AMEND RETURNS - END
 #===================================================

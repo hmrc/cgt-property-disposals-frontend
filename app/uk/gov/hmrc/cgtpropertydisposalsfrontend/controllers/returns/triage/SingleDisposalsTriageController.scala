@@ -489,11 +489,15 @@ class SingleDisposalsTriageController @Inject() (
                       )
                     ),
                   { date =>
-                    val result = triageAnswers
-                      .fold(_.disposalDate, c => Some(c.disposalDate)) match {
-                      case Some(existingDisposalDate) if existingDisposalDate.value === date =>
-                        EitherT.pure(Some(existingDisposalDate.taxYear))
-                      case _                                                                 =>
+                    val existingDisposalDate = triageAnswers.fold(
+                      _.disposalDate,
+                      c => Some(c.disposalDate)
+                    )
+
+                    val result = existingDisposalDate match {
+                      case Some(existingDate) if existingDate.value === date =>
+                        EitherT.pure(Some(existingDate.taxYear))
+                      case _                                                 =>
                         for {
                           taxYear       <- taxYearService.taxYear(date)
                           updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers)
@@ -529,13 +533,15 @@ class SingleDisposalsTriageController @Inject() (
                       taxYear =>
                         if (taxYear.isEmpty)
                           Redirect(
-                            routes.CommonTriageQuestionsController
-                              .disposalDateTooEarly()
+                            routes.CommonTriageQuestionsController.disposalDateTooEarly()
+                          )
+                        else if (!isValidTaxYear(taxYear, existingDisposalDate))
+                          Redirect(
+                            routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                           )
                         else
                           Redirect(
-                            routes.SingleDisposalsTriageController
-                              .checkYourAnswers()
+                            routes.SingleDisposalsTriageController.checkYourAnswers()
                           )
                     )
                   }
@@ -543,6 +549,13 @@ class SingleDisposalsTriageController @Inject() (
           }
         }
       }
+    }
+
+  private def isValidTaxYear(taxYear: Option[TaxYear], disposalDate: Option[DisposalDate]): Boolean =
+    (taxYear, disposalDate) match {
+      case (Some(t), Some(d)) =>
+        d.value.isAfter(t.startDateInclusive) && d.value.isBefore(t.endDateExclusive)
+      case _                  => false
     }
 
   private def updateDraftReturnForDisposalDate(
@@ -1082,11 +1095,11 @@ class SingleDisposalsTriageController @Inject() (
                       )
                     ),
                   { date =>
-                    val result = triageAnswers
-                      .fold(_.disposalDate, c => Some(c.disposalDate)) match {
-                      case Some(existingDisposalDate) if existingDisposalDate.value === date.value =>
-                        EitherT.pure(Some(existingDisposalDate.taxYear))
-                      case _                                                                       =>
+                    val existingDisposalDate = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate))
+                    val result               = existingDisposalDate match {
+                      case Some(existingDate) if existingDate.value === date.value =>
+                        EitherT.pure(Some(existingDate.taxYear))
+                      case _                                                       =>
                         for {
                           taxYear                         <- taxYearService.taxYear(date.value)
                           updatedDisposalDate              = updateDisposalDate(date.value, taxYear, triageAnswers)
@@ -1126,6 +1139,10 @@ class SingleDisposalsTriageController @Inject() (
                           Redirect(
                             routes.CommonTriageQuestionsController
                               .disposalsOfSharesTooEarly()
+                          )
+                        else if (!isValidTaxYear(taxYear, existingDisposalDate))
+                          Redirect(
+                            routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                           )
                         else
                           Redirect(

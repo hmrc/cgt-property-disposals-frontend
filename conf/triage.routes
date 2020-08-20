@@ -75,3 +75,5 @@ POST /further-return/help                                   uk.gov.hmrc.cgtprope
 GET  /how-work-out-capital-gains-tax-liability              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.guidance(back: String)
 GET  /how-work-out-overall-gain                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.taxableGainGuidance()
 GET  /how-work-out-overall-liability                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.overallGainGuidance()
+
+GET  /exit/different-tax-year                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()

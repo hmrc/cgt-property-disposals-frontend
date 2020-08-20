@@ -920,15 +920,11 @@ class MultipleDisposalsTriageController @Inject() (
                   )
                 )
               },
-              shareDisposalDate =>
-                if (
-                  answers
-                    .fold(_.completionDate, c => Some(c.completionDate))
-                    .contains(CompletionDate(shareDisposalDate.value))
-                )
-                  Redirect(
-                    routes.MultipleDisposalsTriageController.checkYourAnswers()
-                  )
+              { shareDisposalDate =>
+                val existingDisposalDate = answers.fold(_.completionDate, c => Some(c.completionDate))
+
+                if (existingDisposalDate.contains(CompletionDate(shareDisposalDate.value)))
+                  Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
                 else {
                   val result =
                     for {
@@ -981,17 +977,32 @@ class MultipleDisposalsTriageController @Inject() (
                       logger.warn("Could not find tax year or update session", e)
                       errorHandler.errorResult()
                     },
-                    _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                    taxYear =>
+                      if (!isValidTaxYear(taxYear, existingDisposalDate))
+                        Redirect(routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear())
+                      else
+                        Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
                   )
                 }
+              }
             )
         }
       }
     }
 
+  private def isValidTaxYear(taxYear: Option[TaxYear], disposalDate: Option[CompletionDate]): Boolean =
+    (taxYear, disposalDate) match {
+      case (Some(t), Some(d)) =>
+        d.value.isAfter(t.startDateInclusive) && d.value.isBefore(t.endDateExclusive)
+      case _                  => false
+    }
+
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, triageAnswers) =>
+        val isAmendReturn = state
+          .fold(_ => false, _._1.isAmendReturn)
+
         val isIndividual = state
           .fold(_.subscribedDetails, _._1.subscribedDetails)
           .userType()
@@ -1176,11 +1187,15 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _
               ) =>
-            Redirect(
-              if (assetTypes.contains(List(IndirectDisposal)))
+            val redirectPage =
+              if (isAmendReturn)
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+              else if (assetTypes.contains(List(IndirectDisposal)))
                 routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
-              else routes.CommonTriageQuestionsController.disposalDateTooEarly()
-            )
+              else
+                routes.CommonTriageQuestionsController.disposalDateTooEarly()
+
+            Redirect(redirectPage)
 
           case IncompleteMultipleDisposalsTriageAnswers(
                 _,
