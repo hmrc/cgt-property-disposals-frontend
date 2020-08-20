@@ -123,7 +123,7 @@
               messages(s"periodOfAdminMarketValue$assetTypeKey.title", acquisitionDate),
               Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
               Some(cyaChange(
-                  messages("periodOfAdminMarketValue", acquisitionDate),
+                  messages("periodOfAdminMarketValue.cyaChange", acquisitionDate),
                   routes.AcquisitionDetailsController.periodOfAdminMarketValue().url
               )),
               "periodOfAdminMarketValue"
