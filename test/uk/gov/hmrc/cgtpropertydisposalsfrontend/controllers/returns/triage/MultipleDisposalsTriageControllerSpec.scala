@@ -196,7 +196,8 @@ class MultipleDisposalsTriageControllerSpec
       agentReferenceNumber =
         if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
         else None,
-      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None))
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None)),
+      originalReturn = None
     )
     val session            = SessionData.empty.copy(
       userType = Some(userType),
