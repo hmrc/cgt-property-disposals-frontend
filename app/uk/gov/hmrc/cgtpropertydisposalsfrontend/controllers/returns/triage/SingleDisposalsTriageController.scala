@@ -119,7 +119,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           }
         )
@@ -148,7 +148,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           },
           updateState = { (disposalMethod, state, answers) =>
@@ -243,7 +243,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           }
         )
@@ -270,7 +270,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           },
           updateState = { (wasAUKResident, state, answers) =>
@@ -460,7 +460,7 @@ class SingleDisposalsTriageController @Inject() (
                 isDraftReturn,
                 isATrust,
                 currentAnswers.representativeType(),
-                state.fold(_ => false, _._2.isAmendReturn)
+                isAmendReturn(state)
               )
             }
           )
@@ -491,7 +491,7 @@ class SingleDisposalsTriageController @Inject() (
                         state.isRight,
                         isATrust,
                         triageAnswers.representativeType(),
-                        state.fold(_ => false, _._2.isAmendReturn)
+                        isAmendReturn(state)
                       )
                     ),
                   { date =>
@@ -541,7 +541,7 @@ class SingleDisposalsTriageController @Inject() (
                           Redirect(
                             routes.CommonTriageQuestionsController.disposalDateTooEarly()
                           )
-                        else if (!isValidTaxYear(taxYear, existingDisposalDate))
+                        else if (isAmendReturn(state) && !isValidTaxYear(taxYear, existingDisposalDate))
                           Redirect(
                             routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                           )
@@ -668,7 +668,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           }
         )
@@ -694,7 +694,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           },
           updateState = { (date, state, answers) =>
@@ -783,7 +783,7 @@ class SingleDisposalsTriageController @Inject() (
               isATrust,
               currentAnswers.representativeType(),
               representeeAnswers,
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           }
         )
@@ -818,7 +818,7 @@ class SingleDisposalsTriageController @Inject() (
               isATrust,
               currentAnswers.representativeType(),
               representeeAnswers,
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           },
           updateState = { (country, state, answers) =>
@@ -913,7 +913,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           }
         )
@@ -942,7 +942,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           },
           updateState = { (assetType, state, answers) =>
@@ -1077,7 +1077,7 @@ class SingleDisposalsTriageController @Inject() (
                 ),
                 isDraftReturn,
                 routes.SingleDisposalsTriageController.disposalDateOfSharesSubmit(),
-                state.fold(_ => false, _._2.isAmendReturn)
+                isAmendReturn(state)
               )
           )
         }
@@ -1105,7 +1105,7 @@ class SingleDisposalsTriageController @Inject() (
                         state.isRight,
                         routes.SingleDisposalsTriageController
                           .disposalDateOfSharesSubmit(),
-                        state.fold(_ => false, _._2.isAmendReturn)
+                        isAmendReturn(state)
                       )
                     ),
                   { date =>
@@ -1151,17 +1151,15 @@ class SingleDisposalsTriageController @Inject() (
                       taxYear =>
                         if (taxYear.isEmpty)
                           Redirect(
-                            routes.CommonTriageQuestionsController
-                              .disposalsOfSharesTooEarly()
+                            routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
                           )
-                        else if (!isValidTaxYear(taxYear, existingDisposalDate))
+                        else if (isAmendReturn(state) && !isValidTaxYear(taxYear, existingDisposalDate))
                           Redirect(
                             routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                           )
                         else
                           Redirect(
-                            routes.SingleDisposalsTriageController
-                              .checkYourAnswers()
+                            routes.SingleDisposalsTriageController.checkYourAnswers()
                           )
                     )
                   }
@@ -1171,6 +1169,9 @@ class SingleDisposalsTriageController @Inject() (
         }
       }
     }
+
+  private def isAmendReturn(state: JourneyState): Boolean =
+    state.fold(_ => false, _._2.isAmendReturn)
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>

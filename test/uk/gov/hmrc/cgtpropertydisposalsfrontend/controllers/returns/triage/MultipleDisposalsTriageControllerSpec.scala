@@ -50,7 +50,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -171,7 +171,8 @@ class MultipleDisposalsTriageControllerSpec
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
     representeeAnswers: Option[RepresenteeAnswers] = None,
-    previousSentReturns: Option[List[ReturnSummary]] = None
+    previousSentReturns: Option[List[ReturnSummary]] = None,
+    isAmend: Boolean = false
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val individualUserType = multipleDisposalsAnswers.fold(_.individualUserType, _.individualUserType)
     val draftReturn        = sample[DraftMultipleDisposalsReturn].copy(
@@ -196,7 +197,8 @@ class MultipleDisposalsTriageControllerSpec
       agentReferenceNumber =
         if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
         else None,
-      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None))
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None)),
+      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
     )
     val session            = SessionData.empty.copy(
       userType = Some(userType),
@@ -3608,7 +3610,7 @@ class MultipleDisposalsTriageControllerSpec
 
       }
 
-      "redirect to the check your answers page" when {
+      "redirect to the amend return disposaldate different taxyear page" when {
 
         def test(
           currentAnswers: IncompleteMultipleDisposalsTriageAnswers,
@@ -3616,8 +3618,11 @@ class MultipleDisposalsTriageControllerSpec
           submittedDate: LocalDate,
           taxYear: Option[TaxYear]
         ) = {
-          val (session, journey, draftReturn) =
-            sessionDataWithFillingOutReturn(currentAnswers, representeeAnswers = representeeAnswers)
+          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(
+            currentAnswers,
+            representeeAnswers = representeeAnswers,
+            isAmend = true
+          )
 
           val updatedAnswers     = currentAnswers.copy(
             completionDate = Some(CompletionDate(submittedDate)),
@@ -3642,7 +3647,7 @@ class MultipleDisposalsTriageControllerSpec
             performAction(
               formData(submittedDate): _*
             ),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
+            routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
           )
         }
 
@@ -3675,11 +3680,17 @@ class MultipleDisposalsTriageControllerSpec
 
         "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
           test(
-            sample[IncompleteMultipleDisposalsTriageAnswers]
-              .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+            ),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
             today,
-            Some(sample[TaxYear])
+            Some(
+              sample[TaxYear].copy(
+                startDateInclusive = LocalDate.of(today.getYear, 4, 6),
+                endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+              )
+            )
           )
         }
 
@@ -3709,6 +3720,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
       }
+
     }
 
     "handling requests to display the check your answers page" must {

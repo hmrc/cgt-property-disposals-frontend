@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import java.time.{Clock, LocalDate}
+
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -37,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
@@ -132,7 +134,8 @@ class CommonTriageQuestionsControllerSpec
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
-    previousReturns: Option[PreviousReturnData] = None
+    previousReturns: Option[PreviousReturnData] = None,
+    isAmend: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn      = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers,
@@ -145,36 +148,37 @@ class CommonTriageQuestionsControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       previousSentReturns = previousReturns,
-      originalReturn = None
+      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
     )
 
-    (
-      SessionData.empty.copy(
-        journeyStatus = Some(fillingOutReturn),
-        userType = Some(userType)
-      ),
-      fillingOutReturn,
-      draftReturn
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(fillingOutReturn),
+      userType = Some(userType)
     )
+
+    (sessionData, fillingOutReturn, draftReturn)
   }
 
-  def sessionDataWithFillingOutReturn(
-    multipleDisposalsTriageAnswers: MultipleDisposalsTriageAnswers
+  def sessionDataWithFillingOutReturnForMultpleDisposals(
+    multipleDisposalsTriageAnswers: MultipleDisposalsTriageAnswers,
+    isAmend: Boolean = false
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn      = sample[DraftMultipleDisposalsReturn].copy(
       triageAnswers = multipleDisposalsTriageAnswers
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
-      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
-      originalReturn = None
+      subscribedDetails = sample[SubscribedDetails].copy(
+        name = Right(sample[IndividualName])
+      ),
+      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
     )
 
-    (
-      SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)),
-      fillingOutReturn,
-      draftReturn
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(fillingOutReturn)
     )
+
+    (sessionData, fillingOutReturn, draftReturn)
   }
 
   "CommonTriageQuestionsController" when {
@@ -1362,7 +1366,7 @@ class CommonTriageQuestionsControllerSpec
 
         "there is an error updating a draft return" in {
           val formData                        = "numberOfProperties" -> "0"
-          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(
+          val (session, journey, draftReturn) = sessionDataWithFillingOutReturnForMultpleDisposals(
             IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(IndividualUserType.Self)
             )
@@ -2248,6 +2252,79 @@ class CommonTriageQuestionsControllerSpec
 
     }
 
+    "handling requests to display the amend return disposaldate different taxyear page" must {
+
+      def performAction(): Future[Result] =
+        controller.amendReturnDisposalDateDifferentTaxYear()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.ukResidentCanOnlyDisposeResidential(),
+        mockUUIDGenerator
+      )
+
+      "display the page" when {
+
+        "the user enters disposaldate in different taxyear and" when {
+
+          def test(expectedBackLink: Call): Unit =
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("disposalDateInDifferentTaxYear.title"),
+              doc => doc.select("#back").attr("href") shouldBe expectedBackLink.url
+            )
+
+          "the user is on a single disposal journey" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  sample[CompleteSingleDisposalTriageAnswers].copy(
+                    disposalDate = sample[DisposalDate]
+                  ),
+                  isAmend = true
+                )._1
+              )
+
+              test(
+                routes.SingleDisposalsTriageController.whenWasDisposalDate()
+              )
+            }
+          }
+
+          "the user is on a multiple disposals journey" in {
+            val today   = LocalDate.now(Clock.systemUTC())
+            val taxYear = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(today.getYear, 4, 6),
+              endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+            )
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturnForMultpleDisposals(
+                  sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                    taxYear = taxYear
+                  ),
+                  isAmend = true
+                )._1
+              )
+
+              test(
+                routes.MultipleDisposalsTriageController.whenWereContractsExchanged()
+              )
+            }
+          }
+
+        }
+
+      }
+
+    }
+
   }
 
   def testSuccessfulUpdateStartingNewDraftReturn(
@@ -2317,7 +2394,7 @@ class CommonTriageQuestionsControllerSpec
     updatedDraftReturn: DraftMultipleDisposalsReturn => DraftReturn,
     expectedRedirect: Call
   ): Unit = {
-    val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(
+    val (session, journey, draftReturn) = sessionDataWithFillingOutReturnForMultpleDisposals(
       answers
     )
     val updatedJourney                  =

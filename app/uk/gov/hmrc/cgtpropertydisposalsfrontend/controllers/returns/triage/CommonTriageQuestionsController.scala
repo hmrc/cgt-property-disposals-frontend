@@ -69,7 +69,7 @@ class CommonTriageQuestionsController @Inject() (
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
   previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date,
   furtherReturnsHelpPage: triagePages.further_retuns_help,
-  disposalDateExitPage: triagePages.disposal_date_exit_page
+  disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -413,7 +413,7 @@ class CommonTriageQuestionsController @Inject() (
   def amendReturnDisposalDateDifferentTaxYear(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
-        Ok(disposalDateExitPage(amendReturnDisposalDateBackLink(state)))
+        Ok(disposalDateInDifferentTaxYearPage(amendReturnDisposalDateBackLink(state)))
       }
     }
 
