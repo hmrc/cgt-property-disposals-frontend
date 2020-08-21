@@ -23,15 +23,18 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
-        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
+        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
 )
 
-@(draftReturn: DraftMultipleIndirectDisposalsReturn, isFurtherOrAmendReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftMultipleIndirectDisposalsReturn, fillingOutReturn: FillingOutReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("service.title")}
 @representeeState = @{
@@ -52,7 +55,7 @@
 }
 
 @gainOrLossAfterReliefsState = @{
-    if(isFurtherOrAmendReturn.contains(true)){
+    if(fillingOutReturn.isFurtherOrAmendReturn.contains(true)){
         exampleCompanyDetailsState match {
             case Complete =>
                 Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))
@@ -191,6 +194,16 @@
     }
 
     </ol>
+
+    @{{if(fillingOutReturn.isAmendReturn)
+        cancelOrContinue(
+            messages("button.cancel"),
+            returns.amend.routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.checkAnswers).url,
+            None,
+            None
+        )
+    }}
+
 
     <p><a id="saveAndComeBackLater" href="@{
         returns.routes.DraftReturnSavedController.draftReturnSaved()

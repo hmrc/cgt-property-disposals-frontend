@@ -32,19 +32,22 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
 @import cats.syntax.eq._
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-        taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
+        taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
+        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
 )
 
-@(draftReturn: DraftSingleDisposalReturn, isFurtherOrAmendReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftSingleDisposalReturn, fillingOutReturn: FillingOutReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers
 @title = @{messages("service.title")}
     
 @representeeState = @{
@@ -61,6 +64,7 @@
 @disposalDetailsState = @{draftReturn.disposalDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
 @acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
 @uploadSupportingDocsState = @{draftReturn.supportingEvidenceAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
+@isFurtherOrAmendReturn = @{fillingOutReturn.isFurtherOrAmendReturn}
 
 @canSeeInitialGainOrLoss = @{
 
@@ -263,7 +267,17 @@
     }
     }
 
+
 </ol>
+
+    @{{if(fillingOutReturn.isAmendReturn)
+        cancelOrContinue(
+            messages("button.cancel"),
+            returns.amend.routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.checkAnswers).url,
+            None,
+            None
+        )
+    }}
 
 <p><a id="saveAndComeBackLater" href="@{
         returns.routes.DraftReturnSavedController.draftReturnSaved()

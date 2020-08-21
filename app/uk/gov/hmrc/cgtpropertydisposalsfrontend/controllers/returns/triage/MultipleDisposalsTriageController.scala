@@ -1053,17 +1053,7 @@ class MultipleDisposalsTriageController @Inject() (
                 .checkYourAnswers()
             )
 
-          case IncompleteMultipleDisposalsTriageAnswers(
-                _,
-                None,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _
-              ) =>
+          case IncompleteMultipleDisposalsTriageAnswers(_, None, _, _, _, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.guidance())
 
           case IncompleteMultipleDisposalsTriageAnswers(
@@ -1291,7 +1281,7 @@ class MultipleDisposalsTriageController @Inject() (
               )
             )
 
-          case c: CompleteMultipleDisposalsTriageAnswers =>
+          case c: CompleteMultipleDisposalsTriageAnswers                              =>
             Ok(
               checkYourAnswersPage(
                 c,
