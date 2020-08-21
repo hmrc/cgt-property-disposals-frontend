@@ -36,7 +36,7 @@
         details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[Boolean], backLink: Call, hasCreatedDraftReturn: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, hasCreatedDraftReturn: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsTaxYear"}
 @title = @{messages(s"$key.title")}
@@ -87,7 +87,7 @@
             )
         )
 
-        @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
+        @submitButton(messages(if(isAmend) "button.continue" else if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(hasCreatedDraftReturn)
