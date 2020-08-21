@@ -140,7 +140,7 @@ class MultipleDisposalsTriageController @Inject() (
           _ => routes.MultipleDisposalsTriageController.guidance(),
           _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
-        Ok(howManyPropertiesPage(form, backLink, state.isRight))
+        Ok(howManyPropertiesPage(form, backLink, state.isRight, state.fold(_ => false, _._1.isAmendReturn)))
       }
     }
 
@@ -156,7 +156,12 @@ class MultipleDisposalsTriageController @Inject() (
                 _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
               BadRequest(
-                howManyPropertiesPage(formWithErrors, backLink, state.isRight)
+                howManyPropertiesPage(
+                  formWithErrors,
+                  backLink,
+                  state.isRight,
+                  state.fold(_ => false, _._1.isAmendReturn)
+                )
               )
             },
             numberOfProperties =>
@@ -256,7 +261,8 @@ class MultipleDisposalsTriageController @Inject() (
               _.subscribedDetails.isATrust,
               _._1.subscribedDetails.isATrust
             ),
-            answers.representativeType()
+            answers.representativeType(),
+            state.fold(_ => false, _._1.isAmendReturn)
           )
         )
       }
@@ -283,7 +289,8 @@ class MultipleDisposalsTriageController @Inject() (
                     _.subscribedDetails.isATrust,
                     _._1.subscribedDetails.isATrust
                   ),
-                  answers.representativeType()
+                  answers.representativeType(),
+                  state.fold(_ => false, _._1.isAmendReturn)
                 )
               )
             },
@@ -450,7 +457,8 @@ class MultipleDisposalsTriageController @Inject() (
                 _._1.subscribedDetails.isATrust
               ),
               answers.representativeType(),
-              state.fold(_.representeeAnswers, _._2.fold(_.representeeAnswers, _.representeeAnswers))
+              state.fold(_.representeeAnswers, _._2.fold(_.representeeAnswers, _.representeeAnswers)),
+              state.fold(_ => false, _._1.isAmendReturn)
             )
           )
         }
@@ -479,7 +487,8 @@ class MultipleDisposalsTriageController @Inject() (
                     _._1.subscribedDetails.isATrust
                   ),
                   answers.representativeType(),
-                  state.fold(_.representeeAnswers, _._2.fold(_.representeeAnswers, _.representeeAnswers))
+                  state.fold(_.representeeAnswers, _._2.fold(_.representeeAnswers, _.representeeAnswers)),
+                  state.fold(_ => false, _._1.isAmendReturn)
                 )
               )
             },
@@ -660,7 +669,8 @@ class MultipleDisposalsTriageController @Inject() (
               _.subscribedDetails.isATrust,
               _._1.subscribedDetails.isATrust
             ),
-            answers.representativeType()
+            answers.representativeType(),
+            state.fold(_ => false, _._1.isAmendReturn)
           )
         )
       }
@@ -686,7 +696,8 @@ class MultipleDisposalsTriageController @Inject() (
                     _.subscribedDetails.isATrust,
                     _._1.subscribedDetails.isATrust
                   ),
-                  answers.representativeType()
+                  answers.representativeType(),
+                  state.fold(_ => false, _._1.isAmendReturn)
                 )
               )
             },

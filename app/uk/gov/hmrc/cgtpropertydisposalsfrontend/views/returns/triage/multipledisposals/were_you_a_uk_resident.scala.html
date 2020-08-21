@@ -43,7 +43,8 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
         backLink: Call,
         hasCreatedDraftReturn: Boolean,
         isATrust: Boolean,
-        representativeType: Option[RepresentativeType]
+        representativeType: Option[RepresentativeType],
+        isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsWereYouAUKResident"}
@@ -95,7 +96,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
         )
         <p>@Html(messages(s"$key$userKey.link", viewConfig.workOurYouResidenceStatusUrl))</p>
 
-        @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
+        @submitButton(messages(if(isAmend) "button.continue" else if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(hasCreatedDraftReturn)

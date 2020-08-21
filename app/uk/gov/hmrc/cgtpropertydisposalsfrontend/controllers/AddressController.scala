@@ -170,7 +170,8 @@ trait AddressController[A <: AddressJourneyType] {
               enterPostcodeCall,
               journey,
               isATrust(journey),
-              extractRepresentativeType(journey)
+              extractRepresentativeType(journey),
+              extractIsAmmend(journey)
             )
           )
       }
@@ -192,7 +193,8 @@ trait AddressController[A <: AddressJourneyType] {
                     enterPostcodeCall,
                     journey,
                     isATrust(journey),
-                    extractRepresentativeType(journey)
+                    extractRepresentativeType(journey),
+                    extractIsAmmend(journey)
                   )
                 ),
               storeAddress(continueCall, journey, true)
@@ -352,7 +354,8 @@ trait AddressController[A <: AddressJourneyType] {
                   enterUkAddressCall,
                   journey,
                   isATrust(journey),
-                  extractRepresentativeType(journey)
+                  extractRepresentativeType(journey),
+                  extractIsAmmend(journey)
                 )
               )
           }
@@ -382,7 +385,8 @@ trait AddressController[A <: AddressJourneyType] {
                         enterUkAddressCall,
                         journey,
                         isATrust(journey),
-                        extractRepresentativeType(journey)
+                        extractRepresentativeType(journey),
+                        extractIsAmmend(journey)
                       )
                     ),
                   storeAddress(continueCall, journey, false)
@@ -419,6 +423,19 @@ trait AddressController[A <: AddressJourneyType] {
     )
 
   }
+
+  private def extractIsAmmend(
+    journey: AddressJourneyType
+  ): Boolean =
+    journey match {
+      case j: FillingOutReturnAddressJourney => j.journey.isAmendReturn
+
+      case c: EnteringCompanyDetails => c.journey.isAmendReturn
+
+      case m: EnteringSingleMixedUsePropertyDetails => m.journey.isAmendReturn
+
+      case _ => false
+    }
 
   private def extractRepresentativeType(
     journey: AddressJourneyType

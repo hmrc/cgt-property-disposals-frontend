@@ -40,7 +40,7 @@
   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType, isATrust: Boolean, representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType, isATrust: Boolean, representativeType: Option[RepresentativeType], isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"address"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -188,7 +188,7 @@
       <p><a href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
     }
 
-    @submitButton(messages(if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+    @submitButton(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
   }
 
   @returnToSummaryLink(addressJourneyType.showReturnToSummaryLink())
