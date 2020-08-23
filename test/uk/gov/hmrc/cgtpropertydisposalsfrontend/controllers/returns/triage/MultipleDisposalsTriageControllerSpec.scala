@@ -3610,7 +3610,7 @@ class MultipleDisposalsTriageControllerSpec
 
       }
 
-      "redirect to the amend return disposaldate different taxyear page" when {
+      "redirect to the check your answers page" when {
 
         def test(
           currentAnswers: IncompleteMultipleDisposalsTriageAnswers,
@@ -3618,11 +3618,8 @@ class MultipleDisposalsTriageControllerSpec
           submittedDate: LocalDate,
           taxYear: Option[TaxYear]
         ) = {
-          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(
-            currentAnswers,
-            representeeAnswers = representeeAnswers,
-            isAmend = true
-          )
+          val (session, journey, draftReturn) =
+            sessionDataWithFillingOutReturn(currentAnswers, representeeAnswers = representeeAnswers)
 
           val updatedAnswers     = currentAnswers.copy(
             completionDate = Some(CompletionDate(submittedDate)),
@@ -3647,7 +3644,7 @@ class MultipleDisposalsTriageControllerSpec
             performAction(
               formData(submittedDate): _*
             ),
-            routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
 
@@ -3680,17 +3677,11 @@ class MultipleDisposalsTriageControllerSpec
 
         "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
           test(
-            sample[IncompleteMultipleDisposalsTriageAnswers].copy(
-              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
-            ),
+            sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
             today,
-            Some(
-              sample[TaxYear].copy(
-                startDateInclusive = LocalDate.of(today.getYear, 4, 6),
-                endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
-              )
-            )
+            Some(sample[TaxYear])
           )
         }
 

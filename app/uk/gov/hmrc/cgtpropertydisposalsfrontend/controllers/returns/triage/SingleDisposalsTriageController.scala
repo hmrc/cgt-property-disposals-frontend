@@ -503,6 +503,30 @@ class SingleDisposalsTriageController @Inject() (
                     val result = existingDisposalDate match {
                       case Some(existingDate) if existingDate.value === date =>
                         EitherT.pure(Some(existingDate.taxYear))
+
+                      case Some(existingDate) if isAmendReturn(state)        =>
+                        for {
+                          taxYear       <- taxYearService.taxYear(existingDate.value)
+                          updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers)
+                          newState       = state.bimap(
+                                             _.copy(newReturnTriageAnswers = Right(updatedAnswers)),
+                                             {
+                                               case (d, r) =>
+                                                 r.copy(draftReturn =
+                                                   updateDraftReturnForDisposalDate(
+                                                     d,
+                                                     updatedAnswers
+                                                   )
+                                                 )
+                                             }
+                                           )
+                          _             <- EitherT(
+                                             updateSession(sessionStore, request)(
+                                               _.copy(journeyStatus = Some(newState.merge))
+                                             )
+                                           )
+                        } yield taxYear
+
                       case _                                                 =>
                         for {
                           taxYear       <- taxYearService.taxYear(date)
@@ -541,7 +565,7 @@ class SingleDisposalsTriageController @Inject() (
                           Redirect(
                             routes.CommonTriageQuestionsController.disposalDateTooEarly()
                           )
-                        else if (isAmendReturn(state) && !isValidTaxYear(taxYear, existingDisposalDate))
+                        else if (!isValidTaxYear(taxYear, date))
                           Redirect(
                             routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                           )
@@ -557,11 +581,11 @@ class SingleDisposalsTriageController @Inject() (
       }
     }
 
-  private def isValidTaxYear(taxYear: Option[TaxYear], disposalDate: Option[DisposalDate]): Boolean =
-    (taxYear, disposalDate) match {
-      case (Some(t), Some(d)) =>
-        d.value.isAfter(t.startDateInclusive) && d.value.isBefore(t.endDateExclusive)
-      case _                  => false
+  private def isValidTaxYear(taxYear: Option[TaxYear], disposalDate: LocalDate): Boolean =
+    taxYear match {
+      case Some(t) =>
+        disposalDate.isAfter(t.startDateInclusive) && disposalDate.isBefore(t.endDateExclusive)
+      case _       => false
     }
 
   private def updateDraftReturnForDisposalDate(
@@ -1113,12 +1137,40 @@ class SingleDisposalsTriageController @Inject() (
                     val result               = existingDisposalDate match {
                       case Some(existingDate) if existingDate.value === date.value =>
                         EitherT.pure(Some(existingDate.taxYear))
+                      case Some(existingDate) if isAmendReturn(state)              =>
+                        for {
+                          taxYear                         <- taxYearService.taxYear(existingDate.value)
+                          updatedDisposalDate              = updateDisposalDate(date.value, taxYear, triageAnswers)
+                          updatedDisposalAndCompletionDate = updatedDisposalDate.copy(
+                                                               completionDate = Some(CompletionDate(date.value))
+                                                             )
+                          newState                         = state.bimap(
+                                                               _.copy(
+                                                                 newReturnTriageAnswers = Right(updatedDisposalAndCompletionDate)
+                                                               ),
+                                                               {
+                                                                 case (d, r) =>
+                                                                   r.copy(draftReturn =
+                                                                     updateDraftReturnForDisposalDate(
+                                                                       d,
+                                                                       updatedDisposalAndCompletionDate
+                                                                     )
+                                                                   )
+                                                               }
+                                                             )
+                          _                               <- EitherT(
+                                                               updateSession(sessionStore, request)(
+                                                                 _.copy(journeyStatus = Some(newState.merge))
+                                                               )
+                                                             )
+                        } yield taxYear
                       case _                                                       =>
                         for {
                           taxYear                         <- taxYearService.taxYear(date.value)
                           updatedDisposalDate              = updateDisposalDate(date.value, taxYear, triageAnswers)
-                          updatedDisposalAndCompletionDate = updatedDisposalDate
-                                                               .copy(completionDate = Some(CompletionDate(date.value)))
+                          updatedDisposalAndCompletionDate = updatedDisposalDate.copy(
+                                                               completionDate = Some(CompletionDate(date.value))
+                                                             )
                           newState                         = state.bimap(
                                                                _.copy(newReturnTriageAnswers = Right(updatedDisposalAndCompletionDate)),
                                                                {
@@ -1153,7 +1205,7 @@ class SingleDisposalsTriageController @Inject() (
                           Redirect(
                             routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
                           )
-                        else if (isAmendReturn(state) && !isValidTaxYear(taxYear, existingDisposalDate))
+                        else if (!isValidTaxYear(taxYear, date.value))
                           Redirect(
                             routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                           )

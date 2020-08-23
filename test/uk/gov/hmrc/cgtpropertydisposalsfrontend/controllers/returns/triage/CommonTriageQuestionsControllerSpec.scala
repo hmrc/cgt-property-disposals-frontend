@@ -2319,6 +2319,64 @@ class CommonTriageQuestionsControllerSpec
             }
           }
 
+          "the user is on a single indirect disposal journey" ignore {
+            val disposalDate                                = sample[DisposalDate].copy(
+              value = LocalDate.of(2020, 4, 10)
+            )
+            val completeTriageQuestions                     =
+              CompleteSingleDisposalTriageAnswers(
+                Some(IndividualUserType.Self),
+                DisposalMethod.Sold,
+                Country.uk,
+                assetType = AssetType.Residential,
+                disposalDate,
+                sample[CompletionDate]
+              )
+            val completeTriageQuestionsWithIndirectDisposal = completeTriageQuestions.copy(
+              assetType = AssetType.IndirectDisposal,
+              countryOfResidence = Country("TR"),
+              disposalDate = disposalDate.copy(value = LocalDate.of(2019, 4, 10))
+            )
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  completeTriageQuestionsWithIndirectDisposal,
+                  isAmend = true
+                )._1
+              )
+
+              test(
+                routes.SingleDisposalsTriageController.disposalDateOfShares()
+              )
+            }
+          }
+
+          "the user is on a multiple indirect disposals journey" ignore {
+            val today   = LocalDate.now(Clock.systemUTC())
+            val taxYear = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(today.getYear, 4, 6),
+              endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+            )
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturnForMultpleDisposals(
+                  sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                    countryOfResidence = Country("NZ"),
+                    assetTypes = List(AssetType.IndirectDisposal),
+                    taxYear = taxYear
+                  ),
+                  isAmend = true
+                )._1
+              )
+
+              test(
+                routes.MultipleDisposalsTriageController.disposalDateOfShares()
+              )
+            }
+          }
+
         }
 
       }

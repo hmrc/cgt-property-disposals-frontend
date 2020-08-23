@@ -18,12 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
 
+import cats.syntax.order._
 import cats.data.EitherT
 import cats.instances.boolean._
 import cats.instances.future._
 import cats.instances.list._
 import cats.syntax.either._
-import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
@@ -52,6 +52,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, multipledisposals => triagePages}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -140,7 +141,7 @@ class MultipleDisposalsTriageController @Inject() (
           _ => routes.MultipleDisposalsTriageController.guidance(),
           _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
-        Ok(howManyPropertiesPage(form, backLink, state.isRight, state.fold(_ => false, _._1.isAmendReturn)))
+        Ok(howManyPropertiesPage(form, backLink, state.isRight, isAmendReturn(state)))
       }
     }
 
@@ -160,7 +161,7 @@ class MultipleDisposalsTriageController @Inject() (
                   formWithErrors,
                   backLink,
                   state.isRight,
-                  state.fold(_ => false, _._1.isAmendReturn)
+                  isAmendReturn(state)
                 )
               )
             },
@@ -262,7 +263,7 @@ class MultipleDisposalsTriageController @Inject() (
               _._1.subscribedDetails.isATrust
             ),
             answers.representativeType(),
-            state.fold(_ => false, _._1.isAmendReturn)
+            isAmendReturn(state)
           )
         )
       }
@@ -290,7 +291,7 @@ class MultipleDisposalsTriageController @Inject() (
                     _._1.subscribedDetails.isATrust
                   ),
                   answers.representativeType(),
-                  state.fold(_ => false, _._1.isAmendReturn)
+                  isAmendReturn(state)
                 )
               )
             },
@@ -458,7 +459,7 @@ class MultipleDisposalsTriageController @Inject() (
               ),
               answers.representativeType(),
               state.fold(_.representeeAnswers, _._2.fold(_.representeeAnswers, _.representeeAnswers)),
-              state.fold(_ => false, _._1.isAmendReturn)
+              isAmendReturn(state)
             )
           )
         }
@@ -488,7 +489,7 @@ class MultipleDisposalsTriageController @Inject() (
                   ),
                   answers.representativeType(),
                   state.fold(_.representeeAnswers, _._2.fold(_.representeeAnswers, _.representeeAnswers)),
-                  state.fold(_ => false, _._1.isAmendReturn)
+                  isAmendReturn(state)
                 )
               )
             },
@@ -670,7 +671,7 @@ class MultipleDisposalsTriageController @Inject() (
               _._1.subscribedDetails.isATrust
             ),
             answers.representativeType(),
-            state.fold(_ => false, _._1.isAmendReturn)
+            isAmendReturn(state)
           )
         )
       }
@@ -697,7 +698,7 @@ class MultipleDisposalsTriageController @Inject() (
                     _._1.subscribedDetails.isATrust
                   ),
                   answers.representativeType(),
-                  state.fold(_ => false, _._1.isAmendReturn)
+                  isAmendReturn(state)
                 )
               )
             },
@@ -901,7 +902,7 @@ class MultipleDisposalsTriageController @Inject() (
               state.isRight,
               routes.MultipleDisposalsTriageController
                 .disposalDateOfSharesSubmit(),
-              state.fold(_ => false, _._1.isAmendReturn)
+              isAmendReturn(state)
             )
           )
         }
@@ -927,20 +928,72 @@ class MultipleDisposalsTriageController @Inject() (
                     formWithErrors,
                     backLink,
                     state.isRight,
-                    routes.MultipleDisposalsTriageController
-                      .disposalDateOfSharesSubmit(),
-                    state.fold(_ => false, _._1.isAmendReturn)
+                    routes.MultipleDisposalsTriageController.disposalDateOfSharesSubmit(),
+                    isAmendReturn(state)
                   )
                 )
               },
               { shareDisposalDate =>
                 val existingDisposalDate = answers.fold(_.completionDate, c => Some(c.completionDate))
 
-                if (existingDisposalDate.contains(CompletionDate(shareDisposalDate.value)))
-                  Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-                else {
-                  val result =
-                    for {
+                existingDisposalDate match {
+                  case Some(existingDate) if existingDate.value === shareDisposalDate.value =>
+                    Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+
+                  case Some(existingDate) if isAmendReturn(state)                           =>
+                    val result = for {
+                      existingTaxYear <- taxYearService.taxYear(existingDate.value)
+                      updatedAnswers  <- EitherT.fromEither[Future](
+                                           Right(
+                                             answers
+                                               .unset(_.completionDate)
+                                               .copy(
+                                                 taxYear = existingTaxYear,
+                                                 completionDate = Some(CompletionDate(shareDisposalDate.value)),
+                                                 taxYearAfter6April2020 = Some(existingTaxYear.isDefined)
+                                               )
+                                           )
+                                         )
+                      newState         = updateState(
+                                           state,
+                                           updatedAnswers,
+                                           d =>
+                                             d.bimap(
+                                               multipleIndirect =>
+                                                 multipleIndirect.copy(
+                                                   exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
+                                                   yearToDateLiabilityAnswers = None,
+                                                   gainOrLossAfterReliefs = None
+                                                 ),
+                                               multiple =>
+                                                 multiple.copy(
+                                                   examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers
+                                                     .map(_.unset(_.disposalDate)),
+                                                   yearToDateLiabilityAnswers = None,
+                                                   gainOrLossAfterReliefs = None
+                                                 )
+                                             )
+                                         )
+                      _               <- EitherT(
+                                           updateSession(sessionStore, request)(
+                                             _.copy(journeyStatus = Some(newState.merge))
+                                           )
+                                         )
+                    } yield existingTaxYear
+
+                    result.fold(
+                      { e =>
+                        logger.warn("Could not find tax year or update session", e)
+                        errorHandler.errorResult()
+                      },
+                      existingTaxYear =>
+                        if (!isValidTaxYear(existingTaxYear, shareDisposalDate.value))
+                          Redirect(routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear())
+                        else
+                          Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                    )
+                  case _                                                                    =>
+                    val result = for {
                       taxYear        <- taxYearService.taxYear(shareDisposalDate.value)
                       updatedAnswers <- EitherT
                                           .fromEither[Future](
@@ -985,17 +1038,13 @@ class MultipleDisposalsTriageController @Inject() (
                                         )
                     } yield taxYear
 
-                  result.fold(
-                    { e =>
-                      logger.warn("Could not find tax year or update session", e)
-                      errorHandler.errorResult()
-                    },
-                    taxYear =>
-                      if (!isValidTaxYear(taxYear, existingDisposalDate))
-                        Redirect(routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear())
-                      else
-                        Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-                  )
+                    result.fold(
+                      { e =>
+                        logger.warn("Could not find tax year or update session", e)
+                        errorHandler.errorResult()
+                      },
+                      _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                    )
                 }
               }
             )
@@ -1003,19 +1052,19 @@ class MultipleDisposalsTriageController @Inject() (
       }
     }
 
-  private def isValidTaxYear(taxYear: Option[TaxYear], disposalDate: Option[CompletionDate]): Boolean =
-    (taxYear, disposalDate) match {
-      case (Some(t), Some(d)) =>
-        d.value.isAfter(t.startDateInclusive) && d.value.isBefore(t.endDateExclusive)
-      case _                  => false
+  private def isAmendReturn(state: JourneyState): Boolean =
+    state.fold(_ => false, _._1.isAmendReturn)
+
+  private def isValidTaxYear(taxYear: Option[TaxYear], disposalDate: LocalDate): Boolean =
+    taxYear match {
+      case Some(t) =>
+        disposalDate.isAfter(t.startDateInclusive) && disposalDate.isBefore(t.endDateExclusive)
+      case _       => false
     }
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, triageAnswers) =>
-        val isAmendReturn = state
-          .fold(_ => false, _._1.isAmendReturn)
-
         val isIndividual = state
           .fold(_.subscribedDetails, _._1.subscribedDetails)
           .userType()
@@ -1201,7 +1250,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _
               ) =>
             val redirectPage =
-              if (isAmendReturn)
+              if (isAmendReturn(state))
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               else if (assetTypes.contains(List(IndirectDisposal)))
                 routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
