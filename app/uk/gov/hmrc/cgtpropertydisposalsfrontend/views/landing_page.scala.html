@@ -98,6 +98,18 @@
         <li>@messages("landingPage.howTo.list1.bullet3")</li>
     </ul>
 
+    @if(!appConfig.amendReturnsEnabled){
+        <div class="panel panel-border-wide">
+            <p>
+                @if(appConfig.furtherReturnsEnabled){
+                @Html(messages("landingPage.howTo.furtherReturns", appConfig.contactHmrc))
+                } else{
+                @Html(messages("landingPage.howTo.firstReturnsOnly", appConfig.contactHmrc))
+                }
+            </p>
+        </div>
+    }
+
     <p>@messages("landingPage.howTo.p3")</p>
 
     <ul class="list-bullet">
