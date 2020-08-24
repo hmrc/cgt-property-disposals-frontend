@@ -356,7 +356,8 @@ class SingleDisposalsTriageController @Inject() (
               ),
               isDraftReturn,
               isATrust,
-              currentAnswers.representativeType()
+              currentAnswers.representativeType(),
+              journeyStatus.fold(_ => false, _._2.isAmendReturn)
             )
           }
         )
@@ -381,7 +382,8 @@ class SingleDisposalsTriageController @Inject() (
               ),
               isDraftReturn,
               isATrust,
-              currentAnswers.representativeType()
+              currentAnswers.representativeType(),
+              state.fold(_ => false, _._2.isAmendReturn)
             )
           },
           updateState = { (wasResidentialProperty, state, answers) =>

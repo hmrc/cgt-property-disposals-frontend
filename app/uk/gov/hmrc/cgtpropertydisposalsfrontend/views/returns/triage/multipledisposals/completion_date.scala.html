@@ -37,7 +37,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
 details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[CompletionDate], backLink: Call, hasCreatedDraftReturn: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[CompletionDate], backLink: Call, hasCreatedDraftReturn: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsCompletionDate"}
 @hasErrors = @{form.hasErrors}
@@ -72,7 +72,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     |""".stripMargin
    ))
 
-  @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
+  @submitButton(messages(if(isAmend) "button.continue" else if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
  }
 
  @returnToSummaryLink(hasCreatedDraftReturn)

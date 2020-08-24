@@ -370,7 +370,7 @@ class MultipleDisposalsTriageController @Inject() (
           _ => routes.MultipleDisposalsTriageController.wereYouAUKResident(),
           _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
-        Ok(wereAllPropertiesResidentialPage(form, backLink, state.isRight))
+        Ok(wereAllPropertiesResidentialPage(form, backLink, state.isRight, state.fold(_ => false, _._1.isAmendReturn)))
       }
     }
 
@@ -389,7 +389,8 @@ class MultipleDisposalsTriageController @Inject() (
                 wereAllPropertiesResidentialPage(
                   formWithErrors,
                   backLink,
-                  state.isRight
+                  state.isRight,
+                  state.fold(_ => false, _._1.isAmendReturn)
                 )
               )
             },
@@ -558,7 +559,8 @@ class MultipleDisposalsTriageController @Inject() (
           taxYearExchangedPage(
             form,
             backLink,
-            state.isRight
+            state.isRight,
+            state.fold(_ => false, _._1.isAmendReturn)
           )
         )
       }
@@ -582,7 +584,8 @@ class MultipleDisposalsTriageController @Inject() (
                 taxYearExchangedPage(
                   formWithErrors,
                   backLink,
-                  state.isRight
+                  state.isRight,
+                  state.fold(_ => false, _._1.isAmendReturn)
                 )
               )
             },
@@ -789,7 +792,7 @@ class MultipleDisposalsTriageController @Inject() (
               .whenWereContractsExchanged(),
           _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
-        Ok(completionDatePage(form, backLink, state.isRight))
+        Ok(completionDatePage(form, backLink, state.isRight, state.fold(_ => false, _._1.isAmendReturn)))
       }
     }
 
@@ -810,7 +813,8 @@ class MultipleDisposalsTriageController @Inject() (
                 completionDatePage(
                   formWithErrors,
                   backLink,
-                  state.isRight
+                  state.isRight,
+                  state.fold(_ => false, _._1.isAmendReturn)
                 )
               )
             },
