@@ -30,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.Subm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailToBeVerified}
@@ -144,23 +145,28 @@ trait EmailController[JourneyType <: EmailJourneyType] {
                   }
 
                   val result = for {
-                    _      <- EitherT(
-                                updateSession(sessionStore, request)(
-                                  _.copy(emailToBeVerified = Some(emailToBeVerified))
+                    language <- EitherT.fromOption[Future](
+                                  AcceptLanguage.fromPlayLang(request.messages.lang),
+                                  Error("could not find Play application language")
                                 )
-                              )
-                    result <- emailVerificationService
-                                .verifyEmail(
-                                  email,
-                                  name(journey),
-                                  verifyEmailCall(emailToBeVerified.id)
+                    _        <- EitherT(
+                                  updateSession(sessionStore, request)(
+                                    _.copy(emailToBeVerified = Some(emailToBeVerified))
+                                  )
                                 )
-                    _      <- EitherT.pure[Future, Error](
-                                auditEmailChangeAttempt(
-                                  journey,
-                                  emailToBeVerified.email
+                    result   <- emailVerificationService
+                                  .verifyEmail(
+                                    email,
+                                    name(journey),
+                                    verifyEmailCall(emailToBeVerified.id),
+                                    language
+                                  )
+                    _        <- EitherT.pure[Future, Error](
+                                  auditEmailChangeAttempt(
+                                    journey,
+                                    emailToBeVerified.email
+                                  )
                                 )
-                              )
                   } yield result
 
                   result.fold(

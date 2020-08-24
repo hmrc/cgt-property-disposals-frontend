@@ -24,6 +24,7 @@ import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
@@ -35,7 +36,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[EmailVerificationServiceImpl])
 trait EmailVerificationService {
 
-  def verifyEmail(email: Email, name: ContactName, continueCall: Call)(implicit
+  def verifyEmail(email: Email, name: ContactName, continueCall: Call, language: AcceptLanguage)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, EmailVerificationResponse]
 
@@ -63,12 +64,12 @@ class EmailVerificationServiceImpl @Inject() (
   ec: ExecutionContext
 ) extends EmailVerificationService {
 
-  def verifyEmail(email: Email, name: ContactName, continueCall: Call)(implicit
+  def verifyEmail(email: Email, name: ContactName, continueCall: Call, language: AcceptLanguage)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, EmailVerificationResponse] = {
     val timer = metrics.emailVerificationTimer.time()
 
-    connector.verifyEmail(email, name, continueCall).subflatMap { response =>
+    connector.verifyEmail(email, name, continueCall, language).subflatMap { response =>
       timer.close()
       response.status match {
         case CREATED  =>

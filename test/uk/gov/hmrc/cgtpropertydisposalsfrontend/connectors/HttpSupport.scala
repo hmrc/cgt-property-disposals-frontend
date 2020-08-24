@@ -93,7 +93,7 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
         )(Future.successful)
       )
 
-  def mockPost[A](url: String, headers: Map[String, String], body: A)(
+  def mockPost[A](url: String, headers: Seq[(String, String)], body: A)(
     result: Option[HttpResponse]
   ): Unit =
     (mockHttp

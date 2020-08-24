@@ -92,6 +92,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   val mockPaymentsService = mock[PaymentsService]
 
+  val language = Lang("en")
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
@@ -136,11 +138,12 @@ class CheckAllAnswersAndSubmitControllerSpec
     SessionData.empty.copy(journeyStatus = Some(journeyStatus))
 
   def mockSubmitReturn(
-    submitReturnRequest: SubmitReturnRequest
+    submitReturnRequest: SubmitReturnRequest,
+    lang: Lang
   )(response: Either[Error, SubmitReturnResponse]) =
     (mockReturnsService
-      .submitReturn(_: SubmitReturnRequest)(_: HeaderCarrier))
-      .expects(submitReturnRequest, *)
+      .submitReturn(_: SubmitReturnRequest, _: Lang)(_: HeaderCarrier))
+      .expects(submitReturnRequest, lang, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockStartPaymentJourney(
@@ -1265,7 +1268,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
-            mockSubmitReturn(submitReturnRequest)(Right(submitReturnResponse))
+            mockSubmitReturn(submitReturnRequest, language)(Right(submitReturnResponse))
             mockStoreSession(sessionWithJourney(justSubmittedReturn))(
               Left(Error(""))
             )
@@ -1278,7 +1281,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
-            mockSubmitReturn(submitReturnRequest)(Left(Error("")))
+            mockSubmitReturn(submitReturnRequest, language)(Left(Error("")))
             mockStoreSession(
               sessionWithJourney(
                 SubmitReturnFailed(
@@ -1301,7 +1304,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
-            mockSubmitReturn(submitReturnRequest)(Right(submitReturnResponse))
+            mockSubmitReturn(submitReturnRequest, language)(Right(submitReturnResponse))
             mockStoreSession(sessionWithJourney(justSubmittedReturn))(Right(()))
           }
 
@@ -1330,7 +1333,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnWithRepresenteeWithNoReference))
             mockCgtRegistrationService(Right(mockRepresenteeCgtReference), representeeAnswersNoReferenceId)
-            mockSubmitReturn(submitReturnRequestForOverriddenReferenceId(mockRepresenteeCgtReference))(
+            mockSubmitReturn(submitReturnRequestForOverriddenReferenceId(mockRepresenteeCgtReference), language)(
               Right(submitReturnResponse)
             )
             mockStoreSession(
@@ -1373,7 +1376,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
-            mockSubmitReturn(submitReturnRequest)(Left(Error("")))
+            mockSubmitReturn(submitReturnRequest, language)(Left(Error("")))
             mockStoreSession(
               sessionWithJourney(
                 SubmitReturnFailed(

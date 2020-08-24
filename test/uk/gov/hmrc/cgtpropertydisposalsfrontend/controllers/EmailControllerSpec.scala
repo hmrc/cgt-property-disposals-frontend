@@ -28,6 +28,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailToBeVerified}
@@ -74,11 +75,12 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
   def mockEmailVerification(
     expectedEmail: Email,
     expectedName: ContactName,
-    expectedContinue: Call
+    expectedContinue: Call,
+    expectedLanguage: AcceptLanguage
   )(result: Either[Error, EmailVerificationResponse]) =
     (mockService
-      .verifyEmail(_: Email, _: ContactName, _: Call)(_: HeaderCarrier))
-      .expects(expectedEmail, expectedName, expectedContinue, *)
+      .verifyEmail(_: Email, _: ContactName, _: Call, _: AcceptLanguage)(_: HeaderCarrier))
+      .expects(expectedEmail, expectedName, expectedContinue, expectedLanguage, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockUuidGenerator(uuid: UUID): CallHandler0[UUID] =
@@ -210,7 +212,7 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
           )(
             Right(())
           )
-          mockEmailVerification(email, expectedName, verifyEmailCall(id))(
+          mockEmailVerification(email, expectedName, verifyEmailCall(id), AcceptLanguage.EN)(
             Left(Error(""))
           )
         }
@@ -234,7 +236,7 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
         )(
           Right(())
         )
-        mockEmailVerification(email, expectedName, verifyEmailCall(id))(
+        mockEmailVerification(email, expectedName, verifyEmailCall(id), AcceptLanguage.EN)(
           Right(EmailAlreadyVerified)
         )
       }
@@ -257,7 +259,7 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
         )(
           Right(())
         )
-        mockEmailVerification(email, expectedName, verifyEmailCall(id))(
+        mockEmailVerification(email, expectedName, verifyEmailCall(id), AcceptLanguage.EN)(
           Right(EmailVerificationRequested)
         )
       }
@@ -276,7 +278,7 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
           sessionDataWithValidJourneyStatus
             .copy(emailToBeVerified = Some(emailToBeVerified(false)))
         )
-        mockEmailVerification(email, expectedName, verifyEmailCall(id))(
+        mockEmailVerification(email, expectedName, verifyEmailCall(id), AcceptLanguage.EN)(
           Right(EmailVerificationRequested)
         )
       }
@@ -302,7 +304,8 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
         mockEmailVerification(
           Email(emailWithoutSpaces),
           expectedName,
-          verifyEmailCall(id)
+          verifyEmailCall(id),
+          AcceptLanguage.EN
         )(
           Right(EmailVerificationRequested)
         )
