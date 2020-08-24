@@ -73,11 +73,9 @@
 
     @pageHeading(title)
 
-    @if(viewConfig.amendReturnsEnabled){
-        <div class="panel panel-border-wide">
-            <p>@messages(s"$key.insetText")</p>
-        </div>
-    }
+    <div class="panel panel-border-wide">
+        <p>@messages(s"$key.insetText")</p>
+    </div>
 
     @completeReturnSummary(
         completeReturn,
