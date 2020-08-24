@@ -203,13 +203,15 @@ object AmendReturnController {
     val calculateAmounts: String = "calculateAmounts"
     val checkAnswers: String     = "checkAnswers"
     val unmetDependency: String  = "unmetDependency"
+    val taskList: String         = "taskList"
   }
 
   val confirmCancelBackLinkMappings: Map[String, Call] =
     Map(
       ConfirmCancelBackLocations.calculateAmounts -> routes.AmendReturnController.youNeedToCalculate(),
       ConfirmCancelBackLocations.checkAnswers     -> routes.AmendReturnController.checkYourAnswers(),
-      ConfirmCancelBackLocations.unmetDependency  -> routes.AmendReturnController.unmetDependency()
+      ConfirmCancelBackLocations.unmetDependency  -> routes.AmendReturnController.unmetDependency(),
+      ConfirmCancelBackLocations.taskList         -> controllers.returns.routes.TaskListController.taskList()
     )
 
   val confirmCancelForm: Form[Boolean] =
