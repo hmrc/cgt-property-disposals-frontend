@@ -5002,7 +5002,6 @@ country.ZW=Zimbabwe
 #===================================================
 
 youNeedToCalculate.title=Before changing this return you’ll need to work out the new year-to-date position
-youNeedToCalculate.warning=We do not calculate the amounts you will need to enter. Once you have started you will need to send any changes to HMRC. You will not be able to save and come back later.
 youNeedToCalculate.p1=You will need to:
 youNeedToCalculate.li1=update the liability on UK property-related disposals for the tax year to date
 youNeedToCalculate.li2=upload a document showing the amount that’s now due and how you worked it out
