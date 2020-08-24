@@ -23,6 +23,7 @@ import play.api.Configuration
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Call
 import play.api.test.Helpers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -56,7 +57,74 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
 
   "EmailVerificationConnectorImpl" when {
 
-    "handling requests to verify emails" must {
+    "handling requests to verify emails in English" must {
+
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+      val expectedUrl                =
+        s"$protocol://$host:$port/email-verification/verification-requests"
+      val email                      = Email("email@test.com")
+      val name                       = ContactName("Bob Lob")
+      val trustName                  = ContactName("trust")
+      val continueCall: Call         = Call("GET", s"/url")
+
+      def body(name: ContactName) =
+        Json.parse(
+          s"""
+             |{
+             |"email": "${email.value}",
+             |"templateId": "$templateId",
+             |"templateParameters": { "name" : "${name.value}" },
+             |"linkExpiryDuration" : "PT${linkExpiryTimeMinutes}M",
+             |"continueUrl" : "$selfUrl${continueCall.url}"
+             |}
+             |""".stripMargin
+        )
+
+      "send a request to the email verification service with the correct details " +
+        "and return the response" when {
+
+        "handling individuals" in {
+          List(
+            HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty),
+            HttpResponse(409, emptyJsonBody),
+            HttpResponse(500, emptyJsonBody)
+          ).foreach { response =>
+            mockPost(expectedUrl, Seq.empty, body(name))(
+              Some(response)
+            )
+
+            await(
+              connector.verifyEmail(email, name, continueCall, AcceptLanguage.EN).value
+            ) shouldBe Right(response)
+          }
+        }
+
+        "handling trusts" in {
+          val response = HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty)
+          mockPost(expectedUrl, Seq.empty, body(trustName))(
+            Some(response)
+          )
+
+          await(
+            connector.verifyEmail(email, trustName, continueCall, AcceptLanguage.EN).value
+          ) shouldBe Right(response)
+
+        }
+      }
+
+      "return an error" when {
+        "the future fails" in {
+          mockPost(expectedUrl, Seq.empty, body(name))(None)
+
+          await(
+            connector.verifyEmail(email, name, continueCall, AcceptLanguage.EN).value
+          ).isLeft shouldBe true
+        }
+
+      }
+
+    }
+    "handling requests to verify emails in Welsh" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val expectedUrl                =
@@ -71,7 +139,7 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
           s"""
            |{
            |"email": "${email.value}",
-           |"templateId": "$templateId",
+           |"templateId": "${templateId + "_" + "cy"}",
            |"templateParameters": { "name" : "${name.value}" },
            |"linkExpiryDuration" : "PT${linkExpiryTimeMinutes}M",
            |"continueUrl" : "$selfUrl${continueCall.url}"
@@ -88,43 +156,29 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
             HttpResponse(409, emptyJsonBody),
             HttpResponse(500, emptyJsonBody)
           ).foreach { response =>
-            mockPost(expectedUrl, Map.empty[String, String], body(name))(
+            mockPost(expectedUrl, Seq.empty, body(name))(
               Some(response)
             )
 
             await(
-              connector.verifyEmail(email, name, continueCall).value
+              connector.verifyEmail(email, name, continueCall, AcceptLanguage.CY).value
             ) shouldBe Right(response)
           }
         }
 
         "handling trusts" in {
           val response = HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty)
-          mockPost(expectedUrl, Map.empty[String, String], body(trustName))(
+          mockPost(expectedUrl, Seq.empty, body(trustName))(
             Some(response)
           )
 
           await(
-            connector.verifyEmail(email, trustName, continueCall).value
+            connector.verifyEmail(email, trustName, continueCall, AcceptLanguage.CY).value
           ) shouldBe Right(response)
 
         }
       }
-
-      "return an error" when {
-
-        "the future fails" in {
-          mockPost(expectedUrl, Map.empty[String, String], body(name))(None)
-
-          await(
-            connector.verifyEmail(email, name, continueCall).value
-          ).isLeft shouldBe true
-        }
-
-      }
-
     }
-
   }
 
 }

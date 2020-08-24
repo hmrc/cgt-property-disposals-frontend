@@ -93,7 +93,7 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
       behave like upscanConnectorBehaviour(
         mockPost[UpscanInitiateRequest](
           expectedUrl,
-          Map("User-Agent" -> "cgt-property-disposals-frontend"),
+          Seq("User-Agent" -> "cgt-property-disposals-frontend"),
           payload
         ),
         () => connector.initiate(mockFailiure, mockSuccess, reference)
@@ -110,7 +110,7 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
 
     "saving upscan upload" when {
       behave like upscanConnectorBehaviour(
-        mockPost[UpscanUpload](s"$baseUrl/upscan", Map.empty, upload),
+        mockPost[UpscanUpload](s"$baseUrl/upscan", Seq.empty, upload),
         () => connector.saveUpscanUpload(upload)
       )
     }
