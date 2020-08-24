@@ -28,23 +28,23 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        completeReturnSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.complete_return_summary,
-        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    completeReturnSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.complete_return_summary,
+    cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
 @(
-        completeReturn: CompleteReturn,
-        rebasingEligibilityUtil: RebasingEligibilityUtil,
-        subscribedDetails: SubscribedDetails,
-        representativeType: Option[RepresentativeType],
-        isIndirectDisposal: Boolean,
-        isFurtherReturn: Option[Boolean],
-        backLink: Call
+    completeReturn: CompleteReturn,
+    rebasingEligibilityUtil: RebasingEligibilityUtil,
+    subscribedDetails: SubscribedDetails,
+    representativeType: Option[RepresentativeType],
+    isIndirectDisposal: Boolean,
+    isFurtherReturn: Option[Boolean],
+    backLink: Call
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "amendCya" }
@@ -65,14 +65,17 @@
 
     @caption(
         if(isAgent) {
-        s"${messages("account.agent.prefix")} ${subscribedDetails.makeAccountName}"
-    } else {
-        subscribedDetails.makeAccountName()
-    }
+            s"${messages("account.agent.prefix")} ${subscribedDetails.makeAccountName}"
+        } else {
+            subscribedDetails.makeAccountName()
+        }
     )
 
     @pageHeading(title)
 
+    <div class="panel panel-border-wide">
+        <p>@messages(s"$key.insetText")</p>
+    </div>
 
     @completeReturnSummary(
         completeReturn,
