@@ -40,7 +40,8 @@
         glarSummary : uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary,
         lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
         singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
-        singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary
+        singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
+        initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary
 )
 
 @(
@@ -87,6 +88,11 @@
         <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
         @reliefDetailsSummary(s.reliefDetails, subscribedDetails.isATrust, representativeType)
 
+      @s.initialGainOrLoss.map{ initialGainOrLoss =>
+          <h2 class="heading-medium">@messages("task-list.enter-initial-gain-or-loss.link")</h2>
+      @initialGainOrLossSummary(initialGainOrLoss, subscribedDetails.isATrust, representativeType)
+      }
+
         @s.gainOrLossAfterReliefs.map{ glar =>
             @if(isFurtherOrAmendReturn.contains(true)){
                 <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
@@ -99,7 +105,7 @@
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
         @s.yearToDateLiabilityAnswers.fold(
-            nonCalculatedYearToDateLiabilitySummary(_, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType, None, s.triageAnswers.disposalDate.taxYear),
+            nonCalculatedYearToDateLiabilitySummary(_, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType, isFurtherOrAmendReturn, s.triageAnswers.disposalDate.taxYear),
             calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate.taxYear, showFiles = false, subscribedDetails.isATrust, representativeType, s.triageAnswers.countryOfResidence.isUk())
         )
 
@@ -127,7 +133,7 @@
         }
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType, None, m.triageAnswers.taxYear)
+        @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType, isFurtherOrAmendReturn, m.triageAnswers.taxYear)
 
         @if(m.hasAttachments) {
             <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
@@ -172,7 +178,7 @@
         }
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType, None, s.triageAnswers.disposalDate.taxYear)
+        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType, isFurtherOrAmendReturn, s.triageAnswers.disposalDate.taxYear)
 
         @if(s.hasAttachments) {
             <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
@@ -205,7 +211,7 @@
         }
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @nonCalculatedYearToDateLiabilitySummary(multipleIndirect.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType, None, multipleIndirect.triageAnswers.taxYear)
+        @nonCalculatedYearToDateLiabilitySummary(multipleIndirect.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType, isFurtherOrAmendReturn, multipleIndirect.triageAnswers.taxYear)
 
         @if(multipleIndirect.hasAttachments) {
             <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
@@ -231,7 +237,7 @@
         }
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @nonCalculatedYearToDateLiabilitySummary(singleMixedUse.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType, None, singleMixedUse.triageAnswers.disposalDate.taxYear)
+        @nonCalculatedYearToDateLiabilitySummary(singleMixedUse.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType, isFurtherOrAmendReturn, singleMixedUse.triageAnswers.disposalDate.taxYear)
 
         @if(singleMixedUse.hasAttachments) {
             <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
