@@ -23,6 +23,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import play.api.i18n.Lang
 import play.api.libs.json.{JsNumber, JsString, Json}
 import play.api.mvc.Request
 import play.api.test.FakeRequest
@@ -54,6 +55,8 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val mockConnector = mock[ReturnsConnector]
 
+  val language = Lang("en")
+
   def mockStoreDraftReturn(
     draftReturn: DraftReturn,
     cgtReference: CgtReference
@@ -74,11 +77,12 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       .returning(EitherT.fromEither[Future](response))
 
   def mockSubmitReturn(
-    submitReturnRequest: SubmitReturnRequest
+    submitReturnRequest: SubmitReturnRequest,
+    lang: Lang
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .submitReturn(_: SubmitReturnRequest)(_: HeaderCarrier))
-      .expects(submitReturnRequest, *)
+      .submitReturn(_: SubmitReturnRequest, _: Lang)(_: HeaderCarrier))
+      .expects(submitReturnRequest, lang, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockListReturn(
@@ -630,10 +634,10 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       "return an error" when {
 
         def test(response: Either[Error, HttpResponse]) = {
-          mockSubmitReturn(submitReturnRequest)(response)
+          mockSubmitReturn(submitReturnRequest, Lang("en"))(response)
 
           await(
-            service.submitReturn(submitReturnRequest).value
+            service.submitReturn(submitReturnRequest, language).value
           ).isLeft shouldBe true
         }
 
@@ -671,7 +675,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
               )
             )
 
-          mockSubmitReturn(submitReturnRequest)(
+          mockSubmitReturn(submitReturnRequest, Lang("en"))(
             Right(
               HttpResponse(
                 OK,
@@ -691,7 +695,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             )
           )
 
-          await(service.submitReturn(submitReturnRequest).value) shouldBe Right(
+          await(service.submitReturn(submitReturnRequest, language).value) shouldBe Right(
             response
           )
         }
@@ -704,7 +708,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
               None
             )
 
-          mockSubmitReturn(submitReturnRequest)(
+          mockSubmitReturn(submitReturnRequest, Lang("en"))(
             Right(
               HttpResponse(
                 OK,
@@ -717,7 +721,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             )
           )
 
-          await(service.submitReturn(submitReturnRequest).value) shouldBe Right(
+          await(service.submitReturn(submitReturnRequest, language).value) shouldBe Right(
             response
           )
         }

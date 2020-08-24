@@ -74,7 +74,7 @@ class PaymentsConnectorImplSpec extends WordSpec with Matchers with MockFactory 
       behave like connectorBehaviour(
         mockPost(
           expectedUrl,
-          Map.empty,
+          Seq.empty,
           Json.parse(
             s"""
               |{

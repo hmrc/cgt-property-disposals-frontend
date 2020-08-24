@@ -114,7 +114,12 @@ class CheckAllAnswersAndSubmitController @Inject() (
           val result =
             for {
               response        <- EitherT.liftF(
-                                   submitReturn(updatedCompleteReturn, fillingOutReturn, cyaPageB64Html)
+                                   submitReturn(
+                                     updatedCompleteReturn,
+                                     fillingOutReturn,
+                                     cyaPageB64Html,
+                                     request.authenticatedRequest.request.messages.lang
+                                   )
                                  )
               newJourneyStatus = response match {
                                    case _: SubmitReturnError =>
@@ -170,7 +175,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
   private def submitReturn(
     completeReturn: CompleteReturn,
     fillingOutReturn: FillingOutReturn,
-    cyaPageB64Html: B64Html
+    cyaPageB64Html: B64Html,
+    language: Lang
   )(implicit
     hc: HeaderCarrier
   ): Future[SubmitReturnResult] =
@@ -183,7 +189,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
           fillingOutReturn.agentReferenceNumber,
           fillingOutReturn.isFurtherOrAmendReturn.contains(true),
           cyaPageB64Html
-        )
+        ),
+        language
       )
       .bimap(
         SubmitReturnError,

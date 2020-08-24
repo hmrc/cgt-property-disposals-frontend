@@ -133,7 +133,7 @@ class CGTPropertyDisposalsConnectorImplSpec
       val bprRequest = sample[BusinessPartnerRecordRequest]
 
       behave like connectorBehaviour(
-        mockPost(bprUrl, Map.empty, Json.toJson(bprRequest))(_),
+        mockPost(bprUrl, Seq.empty, Json.toJson(bprRequest))(_),
         () => connector.getBusinessPartnerRecord(bprRequest)
       )
 
@@ -145,7 +145,7 @@ class CGTPropertyDisposalsConnectorImplSpec
       behave like connectorBehaviour(
         mockPost(
           "http://host:123/cgt-property-disposals/subscription",
-          Map.empty,
+          Seq.empty,
           Json.toJson(subscriptionDetails)
         )(_),
         () => connector.subscribe(subscriptionDetails)
@@ -158,7 +158,7 @@ class CGTPropertyDisposalsConnectorImplSpec
       behave like connectorBehaviour(
         mockPost(
           "http://host:123/cgt-property-disposals/register-without-id",
-          Map.empty,
+          Seq.empty,
           Json.toJson(registrationDetails)
         )(_),
         () => connector.registerWithoutId(registrationDetails)
