@@ -165,6 +165,13 @@ class AmendReturnControllerSpec
           )
         }
 
+        "the user came from the task list page" in {
+          test(
+            AmendReturnController.ConfirmCancelBackLocations.taskList,
+            controllers.returns.routes.TaskListController.taskList()
+          )
+        }
+
       }
     }
 
