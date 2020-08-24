@@ -95,13 +95,21 @@
     <ul class="list-bullet">
         <li>@messages("landingPage.howTo.list1.bullet1")</li>
         <li>@messages("landingPage.howTo.list1.bullet2")</li>
-        <li>@messages("landingPage.howTo.list1.bullet3")</li>
+
+        <li>
+            @if(appConfig.amendReturnsEnabled){
+                messages(landingPage.amendReturn.howTo.list1.bullet3")
+            }else{
+                @messages("landingPage.howTo.list1.bullet3")
+            }
+        </li>
     </ul>
 
-    @if(!appConfig.amendReturnsEnabled){
+    @if(appConfig.amendReturnsEnabled){
+    }else{
         <div class="panel panel-border-wide">
             <p>
-                @if(appConfig.furtherReturnsEnabled){
+                @if(appConfig.amendReturnsEnabled){
                 @Html(messages("landingPage.howTo.furtherReturns", appConfig.contactHmrc))
                 } else{
                 @Html(messages("landingPage.howTo.firstReturnsOnly", appConfig.contactHmrc))
