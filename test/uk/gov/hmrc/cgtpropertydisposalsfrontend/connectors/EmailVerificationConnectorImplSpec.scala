@@ -23,6 +23,7 @@ import play.api.Configuration
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Call
 import play.api.test.Helpers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -88,36 +89,35 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
             HttpResponse(409, emptyJsonBody),
             HttpResponse(500, emptyJsonBody)
           ).foreach { response =>
-            mockPost(expectedUrl, Map.empty[String, String], body(name))(
+            mockPost(expectedUrl, Seq.empty, body(name))(
               Some(response)
             )
 
             await(
-              connector.verifyEmail(email, name, continueCall).value
+              connector.verifyEmail(email, name, continueCall, AcceptLanguage.EN).value
             ) shouldBe Right(response)
           }
         }
 
         "handling trusts" in {
           val response = HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty)
-          mockPost(expectedUrl, Map.empty[String, String], body(trustName))(
+          mockPost(expectedUrl, Seq.empty, body(trustName))(
             Some(response)
           )
 
           await(
-            connector.verifyEmail(email, trustName, continueCall).value
+            connector.verifyEmail(email, trustName, continueCall, AcceptLanguage.EN).value
           ) shouldBe Right(response)
 
         }
       }
 
       "return an error" when {
-
         "the future fails" in {
-          mockPost(expectedUrl, Map.empty[String, String], body(name))(None)
+          mockPost(expectedUrl, Seq.empty, body(name))(None)
 
           await(
-            connector.verifyEmail(email, name, continueCall).value
+            connector.verifyEmail(email, name, continueCall, AcceptLanguage.EN).value
           ).isLeft shouldBe true
         }
 
