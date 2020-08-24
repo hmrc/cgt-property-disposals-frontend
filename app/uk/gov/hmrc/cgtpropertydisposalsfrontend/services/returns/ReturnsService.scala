@@ -25,6 +25,7 @@ import cats.syntax.either._
 import cats.syntax.order._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
+import play.api.i18n.Lang
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
@@ -64,7 +65,7 @@ trait ReturnsService {
     hc: HeaderCarrier
   ): EitherT[Future, Error, List[DraftReturn]]
 
-  def submitReturn(submitReturnRequest: SubmitReturnRequest)(implicit
+  def submitReturn(submitReturnRequest: SubmitReturnRequest, lang: Lang)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, SubmitReturnResponse]
 
@@ -288,9 +289,10 @@ class ReturnsServiceImpl @Inject() (
   }
 
   def submitReturn(
-    submitReturnRequest: SubmitReturnRequest
+    submitReturnRequest: SubmitReturnRequest,
+    lang: Lang
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubmitReturnResponse] =
-    connector.submitReturn(submitReturnRequest).subflatMap { httpResponse =>
+    connector.submitReturn(submitReturnRequest, lang).subflatMap { httpResponse =>
       if (httpResponse.status === OK)
         httpResponse
           .parseJSON[SubmitReturnResponse]()

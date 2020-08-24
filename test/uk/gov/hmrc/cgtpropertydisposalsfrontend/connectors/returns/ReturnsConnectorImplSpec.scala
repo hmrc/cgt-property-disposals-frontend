@@ -23,6 +23,7 @@ import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
+import play.api.i18n.Lang
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
@@ -67,7 +68,7 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       val expectedUrl  = s"http://host:123/draft-return/${cgtReference.value}"
 
       behave like connectorBehaviour(
-        mockPost(expectedUrl, Map.empty, draftReturn),
+        mockPost(expectedUrl, Seq.empty, draftReturn),
         () => connector.storeDraftReturn(draftReturn, cgtReference)
       )
     }
@@ -78,7 +79,7 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       val expectedUrl = s"http://host:123/draft-returns/delete"
 
       behave like connectorBehaviour(
-        mockPost(expectedUrl, Map.empty, DeleteDraftReturnsRequest(ids)),
+        mockPost(expectedUrl, Seq.empty, DeleteDraftReturnsRequest(ids)),
         () => connector.deleteDraftReturns(ids)
       )
     }
@@ -97,10 +98,11 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
     "handling request to submit a return" must {
       val submitReturnRequest = sample[SubmitReturnRequest]
       val expectedUrl         = s"http://host:123/return"
+      val language            = Seq("Accept-Language" -> "en")
 
       behave like connectorBehaviour(
-        mockPost(expectedUrl, Map.empty, submitReturnRequest),
-        () => connector.submitReturn(submitReturnRequest)
+        mockPost(expectedUrl, language, submitReturnRequest),
+        () => connector.submitReturn(submitReturnRequest, Lang("en"))
       )
 
     }
@@ -137,7 +139,7 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       val expectedUrl = s"http://host:123/calculate-tax-due"
 
       behave like connectorBehaviour(
-        mockPost(expectedUrl, Map.empty, request),
+        mockPost(expectedUrl, Seq.empty, request),
         () => connector.calculateTaxDue(request)
       )
     }

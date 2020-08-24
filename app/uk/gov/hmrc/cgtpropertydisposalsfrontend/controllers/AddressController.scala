@@ -211,7 +211,8 @@ trait AddressController[A <: AddressJourneyType] {
               Address.nonUkAddressForm,
               isUkCall,
               enterNonUkAddressSubmitCall,
-              journey
+              journey,
+              extractIsAmmend(journey)
             )
           )
       }
@@ -230,7 +231,8 @@ trait AddressController[A <: AddressJourneyType] {
                     formWithErrors,
                     isUkCall,
                     enterNonUkAddressSubmitCall,
-                    journey
+                    journey,
+                    extractIsAmmend(journey)
                   )
                 ),
               storeAddress(continueCall, journey, true)

@@ -25,6 +25,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
@@ -40,13 +41,14 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
   def mockVerifyEmail(
     expectedEmail: Email,
     expectedName: ContactName,
-    expectedContinueCall: Call
+    expectedContinueCall: Call,
+    expectedLanguage: AcceptLanguage
   )(
     result: Either[Error, HttpResponse]
   ) =
     (mockConnector
-      .verifyEmail(_: Email, _: ContactName, _: Call)(_: HeaderCarrier))
-      .expects(expectedEmail, expectedName, expectedContinueCall, *)
+      .verifyEmail(_: Email, _: ContactName, _: Call, _: AcceptLanguage)(_: HeaderCarrier))
+      .expects(expectedEmail, expectedName, expectedContinueCall, expectedLanguage, *)
       .returning(EitherT.fromEither[Future](result))
 
   val service =
@@ -64,20 +66,20 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
       val continueCall               = Call("GET", "/")
 
       "indicate when the email verification request has been requested" in {
-        mockVerifyEmail(email, name, continueCall)(Right(HttpResponse(CREATED, emptyJsonBody)))
+        mockVerifyEmail(email, name, continueCall, AcceptLanguage.EN)(Right(HttpResponse(CREATED, emptyJsonBody)))
 
         await(
-          service.verifyEmail(email, name, continueCall).value
+          service.verifyEmail(email, name, continueCall, AcceptLanguage.EN).value
         ) shouldBe Right(EmailVerificationRequested)
       }
 
       "indicate when the email address has already been verified" in {
-        mockVerifyEmail(email, name, continueCall)(
+        mockVerifyEmail(email, name, continueCall, AcceptLanguage.EN)(
           Right(HttpResponse(CONFLICT, emptyJsonBody))
         )
 
         await(
-          service.verifyEmail(email, name, continueCall).value
+          service.verifyEmail(email, name, continueCall, AcceptLanguage.EN).value
         ) shouldBe Right(EmailAlreadyVerified)
       }
 
@@ -86,10 +88,10 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
           Left(Error(new Exception("uh oh"))),
           Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
         ).foreach { response =>
-          mockVerifyEmail(email, name, continueCall)(response)
+          mockVerifyEmail(email, name, continueCall, AcceptLanguage.EN)(response)
 
           await(
-            service.verifyEmail(email, name, continueCall).value
+            service.verifyEmail(email, name, continueCall, AcceptLanguage.EN).value
           ).isLeft shouldBe true
 
         }

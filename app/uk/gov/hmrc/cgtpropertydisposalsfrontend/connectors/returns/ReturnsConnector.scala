@@ -22,14 +22,17 @@ import java.util.UUID
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.http.HeaderNames.ACCEPT_LANGUAGE
+import play.api.i18n.Lang
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpReads.Implicits._
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -48,7 +51,7 @@ trait ReturnsConnector {
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def submitReturn(submitReturnRequest: SubmitReturnRequest)(implicit
+  def submitReturn(submitReturnRequest: SubmitReturnRequest, lang: Lang)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -135,11 +138,16 @@ class ReturnsConnectorImpl @Inject() (
     )
 
   def submitReturn(
-    submitReturnRequest: SubmitReturnRequest
+    submitReturnRequest: SubmitReturnRequest,
+    lang: Lang
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .POST[SubmitReturnRequest, HttpResponse](submitReturnUrl, submitReturnRequest)
+        .POST[SubmitReturnRequest, HttpResponse](
+          submitReturnUrl,
+          submitReturnRequest,
+          Seq(ACCEPT_LANGUAGE -> lang.language)
+        )
         .map(Right(_))
         .recover {
           case NonFatal(e) => Left(Error(e))
