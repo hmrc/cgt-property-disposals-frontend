@@ -26,11 +26,10 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
 )
 
 @(backLink: Call)(implicit messages:Messages, appConfig: ViewConfig, request: RequestWithSessionData[_])
