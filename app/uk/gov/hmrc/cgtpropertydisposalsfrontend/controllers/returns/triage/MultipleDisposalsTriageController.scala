@@ -944,58 +944,6 @@ class MultipleDisposalsTriageController @Inject() (
                   case Some(existingDate) if existingDate.value === shareDisposalDate.value =>
                     Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
 
-                  case Some(existingDate) if isAmendReturn(state)                           =>
-                    val result = for {
-                      existingTaxYear <- taxYearService.taxYear(existingDate.value)
-                      updatedAnswers  <- EitherT.fromEither[Future](
-                                           Right(
-                                             answers
-                                               .unset(_.completionDate)
-                                               .copy(
-                                                 taxYear = existingTaxYear,
-                                                 completionDate = Some(CompletionDate(shareDisposalDate.value)),
-                                                 taxYearAfter6April2020 = Some(existingTaxYear.isDefined)
-                                               )
-                                           )
-                                         )
-                      newState         = updateState(
-                                           state,
-                                           updatedAnswers,
-                                           d =>
-                                             d.bimap(
-                                               multipleIndirect =>
-                                                 multipleIndirect.copy(
-                                                   exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
-                                                   yearToDateLiabilityAnswers = None,
-                                                   gainOrLossAfterReliefs = None
-                                                 ),
-                                               multiple =>
-                                                 multiple.copy(
-                                                   examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers
-                                                     .map(_.unset(_.disposalDate)),
-                                                   yearToDateLiabilityAnswers = None,
-                                                   gainOrLossAfterReliefs = None
-                                                 )
-                                             )
-                                         )
-                      _               <- EitherT(
-                                           updateSession(sessionStore, request)(
-                                             _.copy(journeyStatus = Some(newState.merge))
-                                           )
-                                         )
-                    } yield existingTaxYear
-
-                    result.fold(
-                      { e =>
-                        logger.warn("Could not find tax year or update session", e)
-                        errorHandler.errorResult()
-                      },
-                      existingTaxYear =>
-                        if (!isValidTaxYear(existingTaxYear, shareDisposalDate.value))
-                          Redirect(routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear())
-                        else
-                          Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-                    )
                   case _                                                                    =>
                     val result = for {
                       taxYear        <- taxYearService.taxYear(shareDisposalDate.value)
@@ -1047,7 +995,19 @@ class MultipleDisposalsTriageController @Inject() (
                         logger.warn("Could not find tax year or update session", e)
                         errorHandler.errorResult()
                       },
-                      _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                      taxYear => {
+                        val amendReturnOriginalTaxYear =
+                          state.map(_._1.originalReturn.map(_.completeReturn.taxYear)).toOption.flatten
+                        taxYear match {
+                          case Some(t)
+                              if amendReturnOriginalTaxYear
+                                .map(_.startDateInclusive)
+                                .exists(_ =!= t.startDateInclusive) =>
+                            Redirect(routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear())
+                          case _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                        }
+
+                      }
                     )
                 }
               }
@@ -1058,13 +1018,6 @@ class MultipleDisposalsTriageController @Inject() (
 
   private def isAmendReturn(state: JourneyState): Boolean =
     state.fold(_ => false, _._1.isAmendReturn)
-
-  private def isValidTaxYear(taxYear: Option[TaxYear], disposalDate: LocalDate): Boolean =
-    taxYear match {
-      case Some(t) =>
-        disposalDate.isAfter(t.startDateInclusive) && disposalDate.isBefore(t.endDateExclusive)
-      case _       => false
-    }
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>

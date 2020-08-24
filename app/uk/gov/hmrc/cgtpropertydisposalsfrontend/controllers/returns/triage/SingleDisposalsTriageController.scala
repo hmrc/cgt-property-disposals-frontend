@@ -1139,33 +1139,6 @@ class SingleDisposalsTriageController @Inject() (
                     val result               = existingDisposalDate match {
                       case Some(existingDate) if existingDate.value === date.value =>
                         EitherT.pure(Some(existingDate.taxYear))
-                      case Some(existingDate) if isAmendReturn(state)              =>
-                        for {
-                          taxYear                         <- taxYearService.taxYear(existingDate.value)
-                          updatedDisposalDate              = updateDisposalDate(date.value, taxYear, triageAnswers)
-                          updatedDisposalAndCompletionDate = updatedDisposalDate.copy(
-                                                               completionDate = Some(CompletionDate(date.value))
-                                                             )
-                          newState                         = state.bimap(
-                                                               _.copy(
-                                                                 newReturnTriageAnswers = Right(updatedDisposalAndCompletionDate)
-                                                               ),
-                                                               {
-                                                                 case (d, r) =>
-                                                                   r.copy(draftReturn =
-                                                                     updateDraftReturnForDisposalDate(
-                                                                       d,
-                                                                       updatedDisposalAndCompletionDate
-                                                                     )
-                                                                   )
-                                                               }
-                                                             )
-                          _                               <- EitherT(
-                                                               updateSession(sessionStore, request)(
-                                                                 _.copy(journeyStatus = Some(newState.merge))
-                                                               )
-                                                             )
-                        } yield taxYear
                       case _                                                       =>
                         for {
                           taxYear                         <- taxYearService.taxYear(date.value)

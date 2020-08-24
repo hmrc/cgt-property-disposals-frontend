@@ -21,6 +21,7 @@ import com.github.ghik.silencer.silent
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
@@ -377,6 +378,16 @@ object CompleteReturn {
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType()
       )
+
+    def taxYear(): TaxYear =
+      c.fold(
+        _.triageAnswers.taxYear,
+        _.triageAnswers.disposalDate.taxYear,
+        _.triageAnswers.disposalDate.taxYear,
+        _.triageAnswers.taxYear,
+        _.triageAnswers.disposalDate.taxYear
+      )
+
   }
 
   private def validRepresenteeAnswers(
