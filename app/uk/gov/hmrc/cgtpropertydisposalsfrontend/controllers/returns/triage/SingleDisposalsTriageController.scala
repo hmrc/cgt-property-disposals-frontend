@@ -506,29 +506,6 @@ class SingleDisposalsTriageController @Inject() (
                       case Some(existingDate) if existingDate.value === date =>
                         EitherT.pure(Some(existingDate.taxYear))
 
-                      case Some(existingDate) if isAmendReturn(state)        =>
-                        for {
-                          taxYear       <- taxYearService.taxYear(existingDate.value)
-                          updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers)
-                          newState       = state.bimap(
-                                             _.copy(newReturnTriageAnswers = Right(updatedAnswers)),
-                                             {
-                                               case (d, r) =>
-                                                 r.copy(draftReturn =
-                                                   updateDraftReturnForDisposalDate(
-                                                     d,
-                                                     updatedAnswers
-                                                   )
-                                                 )
-                                             }
-                                           )
-                          _             <- EitherT(
-                                             updateSession(sessionStore, request)(
-                                               _.copy(journeyStatus = Some(newState.merge))
-                                             )
-                                           )
-                        } yield taxYear
-
                       case _                                                 =>
                         for {
                           taxYear       <- taxYearService.taxYear(date)
@@ -562,32 +539,34 @@ class SingleDisposalsTriageController @Inject() (
                         logger.warn("Could not update session", e)
                         errorHandler.errorResult()
                       },
-                      taxYear =>
-                        if (taxYear.isEmpty)
-                          Redirect(
-                            routes.CommonTriageQuestionsController.disposalDateTooEarly()
-                          )
-                        else if (!isValidTaxYear(taxYear, date))
-                          Redirect(
-                            routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
-                          )
-                        else
-                          Redirect(
-                            routes.SingleDisposalsTriageController.checkYourAnswers()
-                          )
+                      taxYear => {
+                        val amendReturnOriginalTaxYear =
+                          state.map(_._2.originalReturn.map(_.completeReturn.taxYear)).toOption.flatten
+
+                        taxYear match {
+                          case Some(t)
+                              if amendReturnOriginalTaxYear
+                                .map(_.startDateInclusive)
+                                .exists(_ =!= t.startDateInclusive) =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+                            )
+                          case Some(_) =>
+                            Redirect(
+                              routes.SingleDisposalsTriageController.checkYourAnswers()
+                            )
+                          case None    =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.disposalDateTooEarly()
+                            )
+                        }
+                      }
                     )
                   }
                 )
           }
         }
       }
-    }
-
-  private def isValidTaxYear(taxYear: Option[TaxYear], disposalDate: LocalDate): Boolean =
-    taxYear match {
-      case Some(t) =>
-        disposalDate.isAfter(t.startDateInclusive) && disposalDate.isBefore(t.endDateExclusive)
-      case _       => false
     }
 
   private def updateDraftReturnForDisposalDate(
@@ -1175,19 +1154,28 @@ class SingleDisposalsTriageController @Inject() (
                         logger.warn("Could not update session", e)
                         errorHandler.errorResult()
                       },
-                      taxYear =>
-                        if (taxYear.isEmpty)
-                          Redirect(
-                            routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
-                          )
-                        else if (!isValidTaxYear(taxYear, date.value))
-                          Redirect(
-                            routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
-                          )
-                        else
-                          Redirect(
-                            routes.SingleDisposalsTriageController.checkYourAnswers()
-                          )
+                      taxYear => {
+                        val amendReturnOriginalTaxYear =
+                          state.map(_._2.originalReturn.map(_.completeReturn.taxYear)).toOption.flatten
+
+                        taxYear match {
+                          case Some(t)
+                              if amendReturnOriginalTaxYear
+                                .map(_.startDateInclusive)
+                                .exists(_ =!= t.startDateInclusive) =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+                            )
+                          case Some(_) =>
+                            Redirect(
+                              routes.SingleDisposalsTriageController.checkYourAnswers()
+                            )
+                          case None    =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
+                            )
+                        }
+                      }
                     )
                   }
                 )

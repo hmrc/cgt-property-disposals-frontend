@@ -2283,13 +2283,14 @@ class SingleDisposalsTriageControllerSpec
               ),
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
-              () => mockGetTaxYear(today)(Right(Some(taxYear)))
+              () => mockGetTaxYear(today)(Right(Some(taxYear))),
+              isAmend = true
             )
           }
 
-          "the section is complete" ignore {
+          "the section is complete" in {
             forAll { c: CompleteSingleDisposalTriageAnswers =>
               val completeJourney = c.copy(
                 individualUserType = Some(Self),
@@ -2318,9 +2319,10 @@ class SingleDisposalsTriageControllerSpec
                 updateDraftReturn(_, newAnswers),
                 checkIsRedirect(
                   _,
-                  routes.SingleDisposalsTriageController.checkYourAnswers()
+                  routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                 ),
-                () => mockGetTaxYear(date)(Right(Some(taxYear)))
+                () => mockGetTaxYear(date)(Right(Some(taxYear))),
+                isAmend = true
               )
             }
           }
@@ -2338,10 +2340,11 @@ class SingleDisposalsTriageControllerSpec
               ),
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(today)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+              isAmend = true
             )
 
           }
@@ -2360,10 +2363,11 @@ class SingleDisposalsTriageControllerSpec
               ),
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+              isAmend = true
             )
           }
 
@@ -2383,10 +2387,11 @@ class SingleDisposalsTriageControllerSpec
               ),
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L)))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
+              isAmend = true
             )
           }
 
@@ -2411,7 +2416,7 @@ class SingleDisposalsTriageControllerSpec
 
           checkIsRedirect(
             performAction(formData(today): _*),
-            routes.SingleDisposalsTriageController.checkYourAnswers()
+            routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
           )
         }
 
@@ -4561,14 +4566,15 @@ class SingleDisposalsTriageControllerSpec
               ),
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
-              () => mockGetTaxYear(today)(Right(Some(taxYear)))
+              () => mockGetTaxYear(today)(Right(Some(taxYear))),
+              isAmend = true
             )
 
           }
 
-          "the section is complete" ignore {
+          "the section is complete" in {
             forAll { c: CompleteSingleDisposalTriageAnswers =>
               val completeJourney = c.copy(
                 individualUserType = Some(Self),
@@ -4599,9 +4605,10 @@ class SingleDisposalsTriageControllerSpec
                 updateDraftReturn(_, newAnswers),
                 checkIsRedirect(
                   _,
-                  routes.SingleDisposalsTriageController.checkYourAnswers()
+                  routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                 ),
-                () => mockGetTaxYear(date)(Right(Some(taxYear)))
+                () => mockGetTaxYear(date)(Right(Some(taxYear))),
+                isAmend = true
               )
             }
           }
@@ -4622,10 +4629,11 @@ class SingleDisposalsTriageControllerSpec
               ),
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(today)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+              isAmend = true
             )
 
           }
@@ -4647,10 +4655,11 @@ class SingleDisposalsTriageControllerSpec
               ),
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+              isAmend = true
             )
           }
 
@@ -4672,10 +4681,11 @@ class SingleDisposalsTriageControllerSpec
               ),
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L)))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
+              isAmend = true
             )
           }
 
@@ -5714,7 +5724,8 @@ class SingleDisposalsTriageControllerSpec
     updateDraftReturn: DraftSingleDisposalReturn => DraftSingleDisposalReturn,
     checkNextResult: Future[Result] => Unit,
     extraMockActions: () => Unit = () => (),
-    representeeAnswers: Option[RepresenteeAnswers] = None
+    representeeAnswers: Option[RepresenteeAnswers] = None,
+    isAmend: Boolean = false
   ): Unit = {
     val draftReturn        = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = currentAnswers,
@@ -5724,7 +5735,8 @@ class SingleDisposalsTriageControllerSpec
     val updatedDraftReturn = updateDraftReturn(draftReturn)
 
     val fillingOutReturn        = sample[FillingOutReturn].copy(
-      draftReturn = draftReturn
+      draftReturn = draftReturn,
+      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
     )
     val updatedFillingOutReturn = fillingOutReturn.copy(
       draftReturn = updatedDraftReturn
@@ -5755,8 +5767,10 @@ class SingleDisposalsTriageControllerSpec
   ): Unit = {
     val updatedDraftReturn = updateDraftReturn(currentDraftReturn)
 
-    val fillingOutReturn        =
-      sample[FillingOutReturn].copy(draftReturn = currentDraftReturn)
+    val fillingOutReturn        = sample[FillingOutReturn].copy(
+      draftReturn = currentDraftReturn,
+      originalReturn = None
+    )
     val updatedFillingOutReturn =
       fillingOutReturn.copy(draftReturn = updatedDraftReturn)
 

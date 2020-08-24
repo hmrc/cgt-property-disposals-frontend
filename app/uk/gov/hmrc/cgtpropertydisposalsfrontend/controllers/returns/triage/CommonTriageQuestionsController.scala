@@ -406,7 +406,7 @@ class CommonTriageQuestionsController @Inject() (
         _ => routes.SingleDisposalsTriageController.whenWasDisposalDate(),
         _ => routes.SingleDisposalsTriageController.disposalDateOfShares(),
         _ => routes.MultipleDisposalsTriageController.disposalDateOfShares(),
-        _ => controllers.routes.StartController.start()
+        _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
       )
     )
 
