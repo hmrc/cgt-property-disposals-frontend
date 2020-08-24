@@ -44,7 +44,8 @@
     backLink: Call,
     displayReturnToSummaryLink: Boolean,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"didYouDisposeOfResidentialProperty"}
@@ -115,7 +116,7 @@
           )
         )
 
-      @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+      @submitButton(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)
