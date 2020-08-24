@@ -5019,6 +5019,7 @@ amendCya.title=Change your return
 amendCya.agent.title=Change your client’s return
 amendCya.p1=Once all questions have been answered you will be able to submit your return.
 amendCya.printLink=Print or save this page as a PDF
+amendCya.insetText=You will not be able to save and come back later while you’re changing your return.
 
 unmetDependency.title.inYearLosses=You want to change the amount of allowable in-year losses
 unmetDependency.title.previousYearLosses=You want to change the amount of allowable losses made in previous tax years
