@@ -5033,7 +5033,7 @@ unmetDependency.title.repayment=You want to change details on whether a repaymen
 unmetDependency.title.hasEstimated=You want to change details about whether estimates were used
 unmetDependency.title.initialGainOrLoss=You want to change the initial gain or loss amount
 
-unmetDependency.p1=To do this, you’ll ned to:
+unmetDependency.p1=To do this, you’ll need to:
 unmetDependency.li1=answer questions about revised year-to-date gains, losses and liability resulting from changes on the return
 unmetDependency.li2=work out the new amount of tax due as a result of the change
 unmetDependency.li3=upload a document showing how you worked out the new amount of tax due
