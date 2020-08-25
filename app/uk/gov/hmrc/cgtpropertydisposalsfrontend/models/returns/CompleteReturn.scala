@@ -389,6 +389,15 @@ object CompleteReturn {
         _.triageAnswers.disposalDate.taxYear
       )
 
+    def hasEstimatedDetails: Boolean =
+      fold(
+        _.yearToDateLiabilityAnswers.hasEstimatedDetails,
+        _.yearToDateLiabilityAnswers.fold(_.hasEstimatedDetails, _.hasEstimatedDetails),
+        _.yearToDateLiabilityAnswers.hasEstimatedDetails,
+        _.yearToDateLiabilityAnswers.hasEstimatedDetails,
+        _.yearToDateLiabilityAnswers.hasEstimatedDetails
+      )
+
   }
 
   private def validRepresenteeAnswers(

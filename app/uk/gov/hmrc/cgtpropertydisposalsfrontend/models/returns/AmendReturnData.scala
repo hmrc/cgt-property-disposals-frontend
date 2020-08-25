@@ -26,6 +26,13 @@ final case class AmendReturnData(
 
 object AmendReturnData {
 
+  implicit class AmendReturnDataOps(private val a: AmendReturnData) extends AnyVal {
+
+    def preserveEstimatesAnswer: Boolean =
+      !a.originalReturn.completeReturn.hasEstimatedDetails
+
+  }
+
   implicit val format: OFormat[AmendReturnData] = Json.format
 
 }

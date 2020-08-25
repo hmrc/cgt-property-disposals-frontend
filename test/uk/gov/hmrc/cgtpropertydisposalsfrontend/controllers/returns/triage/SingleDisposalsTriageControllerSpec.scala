@@ -38,6 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServ
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, booleanGen, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
@@ -47,18 +48,21 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleIndirectDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -577,7 +581,7 @@ class SingleDisposalsTriageControllerSpec
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
                 ),
-                isAmend = true
+                amendReturnData = Some(sample[AmendReturnData])
               )
             }
           }
@@ -2319,7 +2323,7 @@ class SingleDisposalsTriageControllerSpec
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(today)(Right(Some(taxYear))),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )
           }
 
@@ -2360,7 +2364,7 @@ class SingleDisposalsTriageControllerSpec
                   routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                 ),
                 () => mockGetTaxYear(date)(Right(Some(taxYear))),
-                isAmend = true
+                amendReturnData = Some(sample[AmendReturnData])
               )
             }
           }
@@ -2387,7 +2391,7 @@ class SingleDisposalsTriageControllerSpec
               ),
               () => mockGetTaxYear(today)(Right(Some(taxYear))),
               Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )
 
           }
@@ -2415,7 +2419,7 @@ class SingleDisposalsTriageControllerSpec
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
               Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )
           }
 
@@ -2444,7 +2448,7 @@ class SingleDisposalsTriageControllerSpec
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
               Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )
           }
 
@@ -3029,7 +3033,7 @@ class SingleDisposalsTriageControllerSpec
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
                 ),
-                isAmend = true
+                amendReturnData = Some(sample[AmendReturnData])
               )
             }
           }
@@ -3260,20 +3264,25 @@ class SingleDisposalsTriageControllerSpec
 
       def updateDraftReturn(
         d: DraftSingleDisposalReturn,
-        newAnswers: SingleDisposalTriageAnswers
+        newAnswers: SingleDisposalTriageAnswers,
+        preserveEstimatesAnswer: Boolean = false
       ) =
         d.copy(
           triageAnswers = newAnswers,
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
             case _: CalculatedYTDAnswers    => None
             case n: NonCalculatedYTDAnswers =>
-              Some(
-                n.unset(
-                    _.hasEstimatedDetails
-                  )
-                  .unset(_.mandatoryEvidence)
-                  .unset(_.yearToDateLiability)
-              )
+              if (preserveEstimatesAnswer)
+                Some(
+                  n.unset(_.mandatoryEvidence)
+                    .unset(_.yearToDateLiability)
+                )
+              else
+                Some(
+                  n.unset(_.hasEstimatedDetails)
+                    .unset(_.mandatoryEvidence)
+                    .unset(_.yearToDateLiability)
+                )
           },
           gainOrLossAfterReliefs = None
         )
@@ -3413,7 +3422,7 @@ class SingleDisposalsTriageControllerSpec
         requiredPreviousAnswers,
         List("countryCode" -> country.code),
         requiredPreviousAnswers.copy(countryOfResidence = Some(country)),
-        updateDraftReturn
+        updateDraftReturn(_, _, false)
       )
 
       "handle successful updates" when {
@@ -3493,6 +3502,43 @@ class SingleDisposalsTriageControllerSpec
                 checkIsRedirect(
                   _,
                   routes.SingleDisposalsTriageController.checkYourAnswers()
+                )
+              )
+            }
+          }
+
+          "the user is on an amend journey where the estimates answer should be preserved" in {
+            forAll { c: CompleteSingleDisposalTriageAnswers =>
+              val completeAnswers = c.copy(
+                countryOfResidence = Country("CC"),
+                disposalMethod = DisposalMethod.Sold
+              )
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeAnswers,
+                List("countryCode" -> country.code),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn.copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      completeAnswers.copy(countryOfResidence = country),
+                      preserveEstimatesAnswer = true
+                    )
+                  ),
+                checkIsRedirect(
+                  _,
+                  routes.SingleDisposalsTriageController.checkYourAnswers()
+                ),
+                amendReturnData = Some(
+                  sample[AmendReturnData].copy(
+                    originalReturn = sample[CompleteReturnWithSummary].copy(
+                      completeReturn = sample[CompleteSingleIndirectDisposalReturn].copy(
+                        yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+                          hasEstimatedDetails = false
+                        )
+                      )
+                    )
+                  )
                 )
               )
             }
@@ -4095,7 +4141,7 @@ class SingleDisposalsTriageControllerSpec
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
               ),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )
           }
 
@@ -4651,7 +4697,7 @@ class SingleDisposalsTriageControllerSpec
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(today)(Right(Some(taxYear))),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )
 
           }
@@ -4695,7 +4741,7 @@ class SingleDisposalsTriageControllerSpec
                   routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                 ),
                 () => mockGetTaxYear(date)(Right(Some(taxYear))),
-                isAmend = true
+                amendReturnData = Some(sample[AmendReturnData])
               )
             }
           }
@@ -4725,7 +4771,7 @@ class SingleDisposalsTriageControllerSpec
               ),
               () => mockGetTaxYear(today)(Right(Some(taxYear))),
               Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )
 
           }
@@ -4756,7 +4802,7 @@ class SingleDisposalsTriageControllerSpec
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
               Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )
           }
 
@@ -4787,7 +4833,7 @@ class SingleDisposalsTriageControllerSpec
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
               Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )
           }
 
@@ -5827,7 +5873,7 @@ class SingleDisposalsTriageControllerSpec
     checkNextResult: Future[Result] => Unit,
     extraMockActions: () => Unit = () => (),
     representeeAnswers: Option[RepresenteeAnswers] = None,
-    isAmend: Boolean = false
+    amendReturnData: Option[AmendReturnData] = None
   ): Unit = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = currentAnswers,
@@ -5837,10 +5883,7 @@ class SingleDisposalsTriageControllerSpec
 
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
-      amendReturnData =
-        if (isAmend)
-          Some(sample[AmendReturnData])
-        else None
+      amendReturnData = amendReturnData
     )
 
     val updatedFillingOutReturn =

@@ -522,7 +522,8 @@ class MultipleDisposalsTriageController @Inject() (
                           yearToDateLiabilityAnswers = multipleIndirect.yearToDateLiabilityAnswers.flatMap {
                             case _: CalculatedYTDAnswers    => None
                             case n: NonCalculatedYTDAnswers =>
-                              Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
+                              if (preserveEstimatesAnswer(state)) Some(n.unset(_.taxDue))
+                              else Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
                           }
                         ),
                       multiple =>
@@ -530,7 +531,8 @@ class MultipleDisposalsTriageController @Inject() (
                           yearToDateLiabilityAnswers = multiple.yearToDateLiabilityAnswers.flatMap {
                             case _: CalculatedYTDAnswers    => None
                             case n: NonCalculatedYTDAnswers =>
-                              Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
+                              if (preserveEstimatesAnswer(state)) Some(n.unset(_.taxDue))
+                              else Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
                           }
                         )
                     ),
@@ -1514,6 +1516,9 @@ class MultipleDisposalsTriageController @Inject() (
       f
     )
   }
+
+  private def preserveEstimatesAnswer(state: JourneyState): Boolean =
+    state.exists(_._1.amendReturnData.exists(_.preserveEstimatesAnswer))
 
 }
 

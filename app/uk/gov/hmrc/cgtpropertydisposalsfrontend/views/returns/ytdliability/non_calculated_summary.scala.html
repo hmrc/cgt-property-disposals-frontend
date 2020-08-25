@@ -40,7 +40,8 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isFurtherOrAmendReturn: Option[Boolean],
-    taxYear: TaxYear
+    taxYear: TaxYear,
+    hideEstimatesQuestion: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -99,12 +100,14 @@
         )
     }
 
-    @cyaRow(
-        messages("hasEstimatedDetails.title"),
-        Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
-        Some(cyaChange(messages("hasEstimatedDetails.cyaChange"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
-        "hasEstimatedDetails-value"
-    )
+   @if(!hideEstimatesQuestion) {
+       @cyaRow(
+           messages("hasEstimatedDetails.title"),
+           Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
+           Some(cyaChange(messages("hasEstimatedDetails.cyaChange"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
+           "hasEstimatedDetails-value"
+       )
+   }
 
     @if(isFurtherOrAmendReturn.contains(true)) {
         @answers.yearToDateLiability.map { y =>

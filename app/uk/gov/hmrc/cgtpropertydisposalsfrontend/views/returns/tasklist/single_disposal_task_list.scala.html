@@ -113,7 +113,7 @@
 @gainOrLossAfterReliefsState = @{
     val showGainOrLossAfterReliefs =
         fillingOutReturn.amendReturnData.exists(_.shouldDisplayGainOrLossAfterReliefs) ||
-                fillingOutReturn.isFurtherReturn.contains(true)
+                fillingOutReturn.isFurtherOrAmendReturn.contains(true)
 
     if(showGainOrLossAfterReliefs){
         (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState) match {
