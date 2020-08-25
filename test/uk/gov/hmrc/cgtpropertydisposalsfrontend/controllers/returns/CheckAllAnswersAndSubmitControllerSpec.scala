@@ -2500,7 +2500,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
 
       completeReturn.initialGainOrLoss.foreach { initialGainOrLoss =>
         doc.select("#initialGainOrLoss-answer").text() should endWith(
-          MoneyUtils.formatAmountOfMoneyWithPoundSign(initialGainOrLoss.inPounds())
+          MoneyUtils.formatAmountOfMoneyWithPoundSign(initialGainOrLoss.inPounds().abs)
         )
       }
 
