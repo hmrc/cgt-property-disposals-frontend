@@ -157,7 +157,48 @@ class CommonTriageQuestionsControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       previousSentReturns = previousReturns,
-      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
+      amendReturnData =
+        if (isAmend)
+          Some(
+            sample[AmendReturnData].copy(
+              shouldDisplayGainOrLossAfterReliefs = true
+            )
+          )
+        else None
+    )
+
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(fillingOutReturn),
+      userType = Some(userType)
+    )
+
+    (sessionData, fillingOutReturn, draftReturn)
+  }
+
+  def sessionDataWithFillingOutReturnForSingleIndirectDisposal(
+    singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+    userType: UserType = UserType.Individual,
+    previousReturns: Option[PreviousReturnData] = None,
+    isAmend: Boolean = false
+  ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+    val draftReturn      = sample[DraftSingleIndirectDisposalReturn].copy(
+      triageAnswers = singleDisposalTriageAnswers,
+      gainOrLossAfterReliefs = None,
+      exemptionAndLossesAnswers = None
+    )
+    val fillingOutReturn = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = sample[SubscribedDetails].copy(name = name),
+      previousSentReturns = previousReturns,
+      amendReturnData =
+        if (isAmend)
+          Some(
+            sample[AmendReturnData].copy(
+              shouldDisplayGainOrLossAfterReliefs = true
+            )
+          )
+        else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -178,7 +219,41 @@ class CommonTriageQuestionsControllerSpec
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
-      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
+      amendReturnData =
+        if (isAmend)
+          Some(
+            sample[AmendReturnData].copy(
+              shouldDisplayGainOrLossAfterReliefs = true
+            )
+          )
+        else None
+    )
+
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(fillingOutReturn)
+    )
+
+    (sessionData, fillingOutReturn, draftReturn)
+  }
+
+  def sessionDataWithFillingOutReturnForMultpleIndirectDisposals(
+    multipleDisposalsTriageAnswers: MultipleDisposalsTriageAnswers,
+    isAmend: Boolean = false
+  ): (SessionData, FillingOutReturn, DraftMultipleIndirectDisposalsReturn) = {
+    val draftReturn      = sample[DraftMultipleIndirectDisposalsReturn].copy(
+      triageAnswers = multipleDisposalsTriageAnswers
+    )
+    val fillingOutReturn = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+      amendReturnData =
+        if (isAmend)
+          Some(
+            sample[AmendReturnData].copy(
+              shouldDisplayGainOrLossAfterReliefs = true
+            )
+          )
+        else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -2339,7 +2414,7 @@ class CommonTriageQuestionsControllerSpec
             }
           }
 
-          "the user is on a single indirect disposal journey" ignore {
+          "the user is on a single indirect disposal journey" in {
             val disposalDate                                = sample[DisposalDate].copy(
               value = LocalDate.of(2020, 4, 10)
             )
@@ -2355,12 +2430,14 @@ class CommonTriageQuestionsControllerSpec
             val completeTriageQuestionsWithIndirectDisposal = completeTriageQuestions.copy(
               assetType = AssetType.IndirectDisposal,
               countryOfResidence = Country("TR"),
-              disposalDate = disposalDate.copy(value = LocalDate.of(2019, 4, 10))
+              disposalDate = disposalDate.copy(
+                value = LocalDate.of(2019, 4, 10)
+              )
             )
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                sessionDataWithFillingOutReturn(
+                sessionDataWithFillingOutReturnForSingleIndirectDisposal(
                   completeTriageQuestionsWithIndirectDisposal,
                   isAmend = true
                 )._1
@@ -2372,7 +2449,7 @@ class CommonTriageQuestionsControllerSpec
             }
           }
 
-          "the user is on a multiple indirect disposals journey" ignore {
+          "the user is on a multiple indirect disposals journey" in {
             val today   = LocalDate.now(Clock.systemUTC())
             val taxYear = sample[TaxYear].copy(
               startDateInclusive = LocalDate.of(today.getYear, 4, 6),
@@ -2381,7 +2458,7 @@ class CommonTriageQuestionsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                sessionDataWithFillingOutReturnForMultpleDisposals(
+                sessionDataWithFillingOutReturnForMultpleIndirectDisposals(
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(
                     countryOfResidence = Country("NZ"),
                     assetTypes = List(AssetType.IndirectDisposal),
