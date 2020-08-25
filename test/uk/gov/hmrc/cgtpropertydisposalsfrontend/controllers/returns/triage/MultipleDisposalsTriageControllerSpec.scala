@@ -3739,6 +3739,11 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the amend return disposaldate different taxyear page" when {
 
+        val taxYear = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(today.getYear, 4, 6),
+          endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+        )
+
         def test(
           currentAnswers: IncompleteMultipleDisposalsTriageAnswers,
           representeeAnswers: Option[RepresenteeAnswers],
@@ -3785,12 +3790,10 @@ class MultipleDisposalsTriageControllerSpec
 
         "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
           test(
-            sample[IncompleteMultipleDisposalsTriageAnswers].copy(
-              individualUserType = Some(PersonalRepresentative)
-            ),
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
             today,
-            Some(sample[TaxYear])
+            Some(taxYear)
           )
         }
 
@@ -3799,7 +3802,7 @@ class MultipleDisposalsTriageControllerSpec
             sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
             today.minusDays(1L),
-            Some(sample[TaxYear])
+            Some(taxYear)
           )
         }
 
@@ -3809,7 +3812,7 @@ class MultipleDisposalsTriageControllerSpec
               .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
             today,
-            Some(sample[TaxYear])
+            Some(taxYear)
           )
         }
 
