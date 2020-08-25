@@ -49,7 +49,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -2477,6 +2477,13 @@ object CheckAllAnswersAndSubmitControllerSpec {
         completeReturn.triageAnswers.individualUserType,
         isMultipleDisposal = false
       )
+
+      completeReturn.initialGainOrLoss.foreach { initialGainOrLoss =>
+        doc.select("#initialGainOrLoss-answer").text() should endWith(
+          MoneyUtils.formatAmountOfMoneyWithPoundSign(initialGainOrLoss.inPounds())
+        )
+      }
+
     }
 
     completeReturn.triageAnswers.individualUserType.foreach { individualUserType =>
