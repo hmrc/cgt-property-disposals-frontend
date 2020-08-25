@@ -169,45 +169,49 @@ class SingleDisposalsTriageController @Inject() (
                 {
                   case (Right(d), r)       =>
                     r.copy(
-                      draftReturn = d.copy(
-                        triageAnswers = newAnswers,
-                        disposalDetailsAnswers = d.disposalDetailsAnswers.map(
-                          _.unset(_.disposalPrice)
-                            .unset(_.disposalFees)
-                        ),
-                        initialGainOrLoss = None,
-                        reliefDetailsAnswers = None,
-                        exemptionAndLossesAnswers = None,
-                        yearToDateLiabilityAnswers = None,
-                        supportingEvidenceAnswers = None,
-                        gainOrLossAfterReliefs = None
+                        draftReturn = d.copy(
+                          triageAnswers = newAnswers,
+                          disposalDetailsAnswers = d.disposalDetailsAnswers.map(
+                            _.unset(_.disposalPrice)
+                              .unset(_.disposalFees)
+                          ),
+                          initialGainOrLoss = None,
+                          reliefDetailsAnswers = None,
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None,
+                          supportingEvidenceAnswers = None,
+                          gainOrLossAfterReliefs = None
+                        )
                       )
-                    )
+                      .withForceDisplayGainOrLossAfterReliefsForAmends
                   case (Left(Right(d)), r) =>
                     r.copy(
-                      draftReturn = d.copy(
-                        triageAnswers = newAnswers,
-                        disposalDetailsAnswers = d.disposalDetailsAnswers.map(
-                          _.unset(_.disposalPrice)
-                            .unset(_.disposalFees)
-                        ),
-                        exemptionAndLossesAnswers = None,
-                        yearToDateLiabilityAnswers = None,
-                        supportingEvidenceAnswers = None,
-                        gainOrLossAfterReliefs = None
+                        draftReturn = d.copy(
+                          triageAnswers = newAnswers,
+                          disposalDetailsAnswers = d.disposalDetailsAnswers.map(
+                            _.unset(_.disposalPrice)
+                              .unset(_.disposalFees)
+                          ),
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None,
+                          supportingEvidenceAnswers = None,
+                          gainOrLossAfterReliefs = None
+                        )
                       )
-                    )
+                      .withForceDisplayGainOrLossAfterReliefsForAmends
                   case (Left(Left(d)), r)  =>
                     r.copy(
-                      draftReturn = d.copy(
-                        triageAnswers = newAnswers,
-                        mixedUsePropertyDetailsAnswers = d.mixedUsePropertyDetailsAnswers.map(_.unset(_.disposalPrice)),
-                        exemptionAndLossesAnswers = None,
-                        yearToDateLiabilityAnswers = None,
-                        supportingEvidenceAnswers = None,
-                        gainOrLossAfterReliefs = None
+                        draftReturn = d.copy(
+                          triageAnswers = newAnswers,
+                          mixedUsePropertyDetailsAnswers =
+                            d.mixedUsePropertyDetailsAnswers.map(_.unset(_.disposalPrice)),
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None,
+                          supportingEvidenceAnswers = None,
+                          gainOrLossAfterReliefs = None
+                        )
                       )
-                    )
+                      .withForceDisplayGainOrLossAfterReliefsForAmends
                 }
               )
             }
@@ -291,41 +295,44 @@ class SingleDisposalsTriageController @Inject() (
                 {
                   case (Right(d), r)                         =>
                     r.copy(draftReturn =
-                      d.copy(
-                        triageAnswers = newAnswers,
-                        propertyAddress = None,
-                        disposalDetailsAnswers = None,
-                        acquisitionDetailsAnswers = None,
-                        initialGainOrLoss = None,
-                        reliefDetailsAnswers = d.reliefDetailsAnswers
-                          .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
-                        exemptionAndLossesAnswers = None,
-                        yearToDateLiabilityAnswers = None,
-                        supportingEvidenceAnswers = None
+                        d.copy(
+                          triageAnswers = newAnswers,
+                          propertyAddress = None,
+                          disposalDetailsAnswers = None,
+                          acquisitionDetailsAnswers = None,
+                          initialGainOrLoss = None,
+                          reliefDetailsAnswers = d.reliefDetailsAnswers
+                            .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None,
+                          supportingEvidenceAnswers = None
+                        )
                       )
-                    )
+                      .withForceDisplayGainOrLossAfterReliefsForAmends
                   case (Left(Right(indirectDraftReturn)), r) =>
                     r.copy(draftReturn =
-                      indirectDraftReturn.copy(
-                        triageAnswers = newAnswers,
-                        companyAddress = None,
-                        disposalDetailsAnswers = None,
-                        acquisitionDetailsAnswers = None,
-                        exemptionAndLossesAnswers = None,
-                        yearToDateLiabilityAnswers = None,
-                        supportingEvidenceAnswers = None
+                        indirectDraftReturn.copy(
+                          triageAnswers = newAnswers,
+                          companyAddress = None,
+                          disposalDetailsAnswers = None,
+                          acquisitionDetailsAnswers = None,
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None,
+                          supportingEvidenceAnswers = None
+                        )
                       )
-                    )
+                      .withForceDisplayGainOrLossAfterReliefsForAmends
                   case (Left(Left(mixedUseDraftReturn)), r)  =>
                     r.copy(draftReturn =
-                      mixedUseDraftReturn.copy(
-                        triageAnswers = newAnswers,
-                        mixedUsePropertyDetailsAnswers = None,
-                        exemptionAndLossesAnswers = None,
-                        yearToDateLiabilityAnswers = None,
-                        supportingEvidenceAnswers = None
+                        mixedUseDraftReturn.copy(
+                          triageAnswers = newAnswers,
+                          mixedUsePropertyDetailsAnswers = None,
+                          exemptionAndLossesAnswers = None,
+                          yearToDateLiabilityAnswers = None,
+                          supportingEvidenceAnswers = None
+                        )
                       )
-                    )
+                      .withForceDisplayGainOrLossAfterReliefsForAmends
                 }
               )
             }
@@ -515,11 +522,12 @@ class SingleDisposalsTriageController @Inject() (
                                              {
                                                case (d, r) =>
                                                  r.copy(draftReturn =
-                                                   updateDraftReturnForDisposalDate(
-                                                     d,
-                                                     updatedAnswers
+                                                     updateDraftReturnForDisposalDate(
+                                                       d,
+                                                       updatedAnswers
+                                                     )
                                                    )
-                                                 )
+                                                   .withForceDisplayGainOrLossAfterReliefsForAmends
                                              }
                                            )
                           _             <- newState.fold(
@@ -541,7 +549,7 @@ class SingleDisposalsTriageController @Inject() (
                       },
                       taxYear => {
                         val amendReturnOriginalTaxYear =
-                          state.map(_._2.originalReturn.map(_.completeReturn.taxYear)).toOption.flatten
+                          state.map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
 
                         taxYear match {
                           case Some(t)
@@ -717,36 +725,38 @@ class SingleDisposalsTriageController @Inject() (
                 {
                   case (Right(d), r)                        =>
                     r.copy(
-                      draftReturn = d.copy(
-                        triageAnswers = newAnswers,
-                        acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map { a =>
-                          if (d.triageAnswers.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin))
-                            a.unset(_.acquisitionPrice)
-                          else
-                            a.unset(_.acquisitionDate)
-                              .unset(_.acquisitionPrice)
-                              .unset(_.rebasedAcquisitionPrice)
-                              .unset(_.shouldUseRebase)
-                        },
-                        initialGainOrLoss = None,
-                        reliefDetailsAnswers = d.reliefDetailsAnswers
-                          .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
-                        yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers
-                          .flatMap(_.unsetAllButIncomeDetails())
+                        draftReturn = d.copy(
+                          triageAnswers = newAnswers,
+                          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map { a =>
+                            if (d.triageAnswers.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin))
+                              a.unset(_.acquisitionPrice)
+                            else
+                              a.unset(_.acquisitionDate)
+                                .unset(_.acquisitionPrice)
+                                .unset(_.rebasedAcquisitionPrice)
+                                .unset(_.shouldUseRebase)
+                          },
+                          initialGainOrLoss = None,
+                          reliefDetailsAnswers = d.reliefDetailsAnswers
+                            .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
+                          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers
+                            .flatMap(_.unsetAllButIncomeDetails())
+                        )
                       )
-                    )
+                      .withForceDisplayGainOrLossAfterReliefsForAmends
 
                   case (Left(Left(mixedUseDraftReturn)), r) =>
                     r.copy(
-                      draftReturn = mixedUseDraftReturn.copy(
-                        triageAnswers = newAnswers,
-                        mixedUsePropertyDetailsAnswers = mixedUseDraftReturn.mixedUsePropertyDetailsAnswers.map(
-                          _.unset(_.acquisitionPrice)
-                        ),
-                        yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers
-                          .flatMap(_.unsetAllButIncomeDetails())
+                        draftReturn = mixedUseDraftReturn.copy(
+                          triageAnswers = newAnswers,
+                          mixedUsePropertyDetailsAnswers = mixedUseDraftReturn.mixedUsePropertyDetailsAnswers.map(
+                            _.unset(_.acquisitionPrice)
+                          ),
+                          yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers
+                            .flatMap(_.unsetAllButIncomeDetails())
+                        )
                       )
-                    )
+                      .withForceDisplayGainOrLossAfterReliefsForAmends
                   case (Left(Right(_)), _)                  =>
                     sys.error(
                       "completion date page not handled for indirect disposals"
@@ -844,25 +854,39 @@ class SingleDisposalsTriageController @Inject() (
                 {
                   case (d, r) =>
                     r.copy(
-                      draftReturn = d.fold(
-                        _.fold(
-                          mixedUseDraftReturn =>
-                            mixedUseDraftReturn.copy(
+                        draftReturn = d.fold(
+                          _.fold(
+                            mixedUseDraftReturn =>
+                              mixedUseDraftReturn.copy(
+                                triageAnswers = newAnswers,
+                                yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers.flatMap {
+                                  case _: CalculatedYTDAnswers    => None
+                                  case n: NonCalculatedYTDAnswers =>
+                                    Some(
+                                      n.unset(_.hasEstimatedDetails)
+                                        .unset(_.yearToDateLiability)
+                                        .unset(_.mandatoryEvidence)
+                                    )
+                                }
+                              ),
+                            indirectDraftReturn =>
+                              indirectDraftReturn.copy(
+                                triageAnswers = newAnswers,
+                                yearToDateLiabilityAnswers = indirectDraftReturn.yearToDateLiabilityAnswers.flatMap {
+                                  case _: CalculatedYTDAnswers    => None
+                                  case n: NonCalculatedYTDAnswers =>
+                                    Some(
+                                      n.unset(_.hasEstimatedDetails)
+                                        .unset(_.yearToDateLiability)
+                                        .unset(_.mandatoryEvidence)
+                                    )
+                                }
+                              )
+                          ),
+                          s =>
+                            s.copy(
                               triageAnswers = newAnswers,
-                              yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers.flatMap {
-                                case _: CalculatedYTDAnswers    => None
-                                case n: NonCalculatedYTDAnswers =>
-                                  Some(
-                                    n.unset(_.hasEstimatedDetails)
-                                      .unset(_.yearToDateLiability)
-                                      .unset(_.mandatoryEvidence)
-                                  )
-                              }
-                            ),
-                          indirectDraftReturn =>
-                            indirectDraftReturn.copy(
-                              triageAnswers = newAnswers,
-                              yearToDateLiabilityAnswers = indirectDraftReturn.yearToDateLiabilityAnswers.flatMap {
+                              yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap {
                                 case _: CalculatedYTDAnswers    => None
                                 case n: NonCalculatedYTDAnswers =>
                                   Some(
@@ -872,20 +896,9 @@ class SingleDisposalsTriageController @Inject() (
                                   )
                               }
                             )
-                        ),
-                        s =>
-                          s.copy(
-                            triageAnswers = newAnswers,
-                            yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap {
-                              case _: CalculatedYTDAnswers    => None
-                              case n: NonCalculatedYTDAnswers =>
-                                Some(
-                                  n.unset(_.hasEstimatedDetails).unset(_.yearToDateLiability).unset(_.mandatoryEvidence)
-                                )
-                            }
-                          )
+                        )
                       )
-                    )
+                      .withForceDisplayGainOrLossAfterReliefsForAmends
                 }
               )
             }
@@ -983,72 +996,79 @@ class SingleDisposalsTriageController @Inject() (
                   case (Right(d), r)                         =>
                     if (isNowIndirectDisposal)
                       r.copy(
-                        draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
-                          d.id,
-                          newAnswers,
-                          d.representeeAnswers
+                          draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
+                            d.id,
+                            newAnswers,
+                            d.representeeAnswers
+                          )
                         )
-                      )
+                        .withForceDisplayGainOrLossAfterReliefsForAmends
                     else if (isNowMixedUse)
                       r.copy(
-                        draftReturn = DraftSingleMixedUseDisposalReturn.newDraftReturn(
-                          d.id,
-                          newAnswers,
-                          d.representeeAnswers
+                          draftReturn = DraftSingleMixedUseDisposalReturn.newDraftReturn(
+                            d.id,
+                            newAnswers,
+                            d.representeeAnswers
+                          )
                         )
-                      )
+                        .withForceDisplayGainOrLossAfterReliefsForAmends
                     else
                       r.copy(
-                        draftReturn = d.copy(
-                          triageAnswers = newAnswers,
-                          propertyAddress = None,
-                          disposalDetailsAnswers = None,
-                          acquisitionDetailsAnswers = None,
-                          initialGainOrLoss = None,
-                          reliefDetailsAnswers = d.reliefDetailsAnswers
-                            .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
-                          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers
-                            .flatMap(_.unsetAllButIncomeDetails()),
-                          supportingEvidenceAnswers = None,
-                          gainOrLossAfterReliefs = None
+                          draftReturn = d.copy(
+                            triageAnswers = newAnswers,
+                            propertyAddress = None,
+                            disposalDetailsAnswers = None,
+                            acquisitionDetailsAnswers = None,
+                            initialGainOrLoss = None,
+                            reliefDetailsAnswers = d.reliefDetailsAnswers
+                              .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
+                            yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers
+                              .flatMap(_.unsetAllButIncomeDetails()),
+                            supportingEvidenceAnswers = None,
+                            gainOrLossAfterReliefs = None
+                          )
                         )
-                      )
+                        .withForceDisplayGainOrLossAfterReliefsForAmends
 
                   case (Left(Right(indirectDraftReturn)), r) =>
                     if (isNowMixedUse)
                       r.copy(
-                        draftReturn = DraftSingleMixedUseDisposalReturn.newDraftReturn(
-                          indirectDraftReturn.id,
-                          newAnswers,
-                          indirectDraftReturn.representeeAnswers
+                          draftReturn = DraftSingleMixedUseDisposalReturn.newDraftReturn(
+                            indirectDraftReturn.id,
+                            newAnswers,
+                            indirectDraftReturn.representeeAnswers
+                          )
                         )
-                      )
+                        .withForceDisplayGainOrLossAfterReliefsForAmends
                     else
                       r.copy(
-                        draftReturn = DraftSingleDisposalReturn.newDraftReturn(
-                          indirectDraftReturn.id,
-                          newAnswers,
-                          indirectDraftReturn.representeeAnswers
+                          draftReturn = DraftSingleDisposalReturn.newDraftReturn(
+                            indirectDraftReturn.id,
+                            newAnswers,
+                            indirectDraftReturn.representeeAnswers
+                          )
                         )
-                      )
+                        .withForceDisplayGainOrLossAfterReliefsForAmends
 
                   case (Left(Left(mixedUseDraftReturn)), r)  =>
                     if (isNowIndirectDisposal)
                       r.copy(
-                        draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
-                          mixedUseDraftReturn.id,
-                          newAnswers,
-                          mixedUseDraftReturn.representeeAnswers
+                          draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
+                            mixedUseDraftReturn.id,
+                            newAnswers,
+                            mixedUseDraftReturn.representeeAnswers
+                          )
                         )
-                      )
+                        .withForceDisplayGainOrLossAfterReliefsForAmends
                     else
                       r.copy(
-                        draftReturn = DraftSingleDisposalReturn.newDraftReturn(
-                          mixedUseDraftReturn.id,
-                          newAnswers,
-                          mixedUseDraftReturn.representeeAnswers
+                          draftReturn = DraftSingleDisposalReturn.newDraftReturn(
+                            mixedUseDraftReturn.id,
+                            newAnswers,
+                            mixedUseDraftReturn.representeeAnswers
+                          )
                         )
-                      )
+                        .withForceDisplayGainOrLossAfterReliefsForAmends
                 }
               )
             }
@@ -1130,11 +1150,12 @@ class SingleDisposalsTriageController @Inject() (
                                                                {
                                                                  case (d, r) =>
                                                                    r.copy(draftReturn =
-                                                                     updateDraftReturnForDisposalDate(
-                                                                       d,
-                                                                       updatedDisposalAndCompletionDate
+                                                                       updateDraftReturnForDisposalDate(
+                                                                         d,
+                                                                         updatedDisposalAndCompletionDate
+                                                                       )
                                                                      )
-                                                                   )
+                                                                     .withForceDisplayGainOrLossAfterReliefsForAmends
                                                                }
                                                              )
                           _                               <- newState.fold(
@@ -1156,7 +1177,7 @@ class SingleDisposalsTriageController @Inject() (
                       },
                       taxYear => {
                         val amendReturnOriginalTaxYear =
-                          state.map(_._2.originalReturn.map(_.completeReturn.taxYear)).toOption.flatten
+                          state.map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
 
                         taxYear match {
                           case Some(t)

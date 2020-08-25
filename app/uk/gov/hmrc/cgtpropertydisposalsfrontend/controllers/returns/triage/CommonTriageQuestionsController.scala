@@ -146,7 +146,7 @@ class CommonTriageQuestionsController @Inject() (
                 val redirectTo =
                   if (
                     updatedState
-                      .fold(_.isFurtherReturn, _.isFurtherOrAmendReturn)
+                      .fold(_.isFurtherReturn, _.isFurtherReturn)
                       .contains(true)
                   )
                     answers.fold(
@@ -528,13 +528,15 @@ class CommonTriageQuestionsController @Inject() (
         state.bimap(
           _.copy(newReturnTriageAnswers = Left(newTriageAnswers)),
           fillingOutReturn =>
-            fillingOutReturn.copy(
-              draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
-                fillingOutReturn.draftReturn.id,
-                newTriageAnswers,
-                fillingOutReturn.draftReturn.representeeAnswers
+            fillingOutReturn
+              .copy(
+                draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
+                  fillingOutReturn.draftReturn.id,
+                  newTriageAnswers,
+                  fillingOutReturn.draftReturn.representeeAnswers
+                )
               )
-            )
+              .withForceDisplayGainOrLossAfterReliefsForAmends
         )
     }
   }
@@ -580,78 +582,80 @@ class CommonTriageQuestionsController @Inject() (
       ),
       r =>
         r.copy(
-          draftReturn = r.draftReturn.fold[DraftReturn](
-            multiple =>
-              multiple.copy(
-                triageAnswers = updateMultipleDisposalAnswers(multiple.triageAnswers),
-                representeeAnswers = None,
-                examplePropertyDetailsAnswers = None,
-                yearToDateLiabilityAnswers = None,
-                supportingEvidenceAnswers = None,
-                exemptionAndLossesAnswers = None,
-                gainOrLossAfterReliefs = None
-              ),
-            single =>
-              single.copy(
-                triageAnswers = updateSingleDisposalAnswers(single.triageAnswers),
-                representeeAnswers = None,
-                propertyAddress = None,
-                disposalDetailsAnswers = None,
-                acquisitionDetailsAnswers = None,
-                reliefDetailsAnswers = single.reliefDetailsAnswers
-                  .map(_.unsetPrrAndLettingRelief(answers.fold(_.isPeriodOfAdmin(), _.isPeriodOfAdmin()))),
-                yearToDateLiabilityAnswers = None,
-                initialGainOrLoss = None,
-                supportingEvidenceAnswers = None,
-                exemptionAndLossesAnswers =
-                  if (furtherReturn)
-                    single.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                  else None,
-                gainOrLossAfterReliefs = None
-              ),
-            singleIndirect =>
-              singleIndirect.copy(
-                triageAnswers = updateSingleDisposalAnswers(singleIndirect.triageAnswers),
-                representeeAnswers = None,
-                companyAddress = None,
-                disposalDetailsAnswers = None,
-                acquisitionDetailsAnswers = None,
-                yearToDateLiabilityAnswers = None,
-                supportingEvidenceAnswers = None,
-                exemptionAndLossesAnswers =
-                  if (furtherReturn)
-                    singleIndirect.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                  else None,
-                gainOrLossAfterReliefs = None
-              ),
-            multipleIndirect =>
-              multipleIndirect.copy(
-                triageAnswers = updateMultipleDisposalAnswers(multipleIndirect.triageAnswers),
-                representeeAnswers = None,
-                exampleCompanyDetailsAnswers = None,
-                yearToDateLiabilityAnswers = None,
-                supportingEvidenceAnswers = None,
-                exemptionAndLossesAnswers =
-                  if (furtherReturn)
-                    multipleIndirect.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                  else None,
-                gainOrLossAfterReliefs = None
-              ),
-            singleMixedUse =>
-              singleMixedUse.copy(
-                triageAnswers = updateSingleDisposalAnswers(singleMixedUse.triageAnswers),
-                representeeAnswers = None,
-                mixedUsePropertyDetailsAnswers = None,
-                yearToDateLiabilityAnswers = None,
-                supportingEvidenceAnswers = None,
-                exemptionAndLossesAnswers =
-                  if (furtherReturn)
-                    singleMixedUse.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                  else None,
-                gainOrLossAfterReliefs = None
-              )
+            draftReturn = r.draftReturn.fold[DraftReturn](
+              multiple =>
+                multiple.copy(
+                  triageAnswers = updateMultipleDisposalAnswers(multiple.triageAnswers),
+                  representeeAnswers = None,
+                  examplePropertyDetailsAnswers = None,
+                  yearToDateLiabilityAnswers = None,
+                  supportingEvidenceAnswers = None,
+                  exemptionAndLossesAnswers = None,
+                  gainOrLossAfterReliefs = None
+                ),
+              single =>
+                single.copy(
+                  triageAnswers = updateSingleDisposalAnswers(single.triageAnswers),
+                  representeeAnswers = None,
+                  propertyAddress = None,
+                  disposalDetailsAnswers = None,
+                  acquisitionDetailsAnswers = None,
+                  reliefDetailsAnswers = single.reliefDetailsAnswers
+                    .map(_.unsetPrrAndLettingRelief(answers.fold(_.isPeriodOfAdmin(), _.isPeriodOfAdmin()))),
+                  yearToDateLiabilityAnswers = None,
+                  initialGainOrLoss = None,
+                  supportingEvidenceAnswers = None,
+                  exemptionAndLossesAnswers =
+                    if (furtherReturn)
+                      single.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                    else None,
+                  gainOrLossAfterReliefs = None
+                ),
+              singleIndirect =>
+                singleIndirect.copy(
+                  triageAnswers = updateSingleDisposalAnswers(singleIndirect.triageAnswers),
+                  representeeAnswers = None,
+                  companyAddress = None,
+                  disposalDetailsAnswers = None,
+                  acquisitionDetailsAnswers = None,
+                  yearToDateLiabilityAnswers = None,
+                  supportingEvidenceAnswers = None,
+                  exemptionAndLossesAnswers =
+                    if (furtherReturn)
+                      singleIndirect.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                    else None,
+                  gainOrLossAfterReliefs = None
+                ),
+              multipleIndirect =>
+                multipleIndirect.copy(
+                  triageAnswers = updateMultipleDisposalAnswers(multipleIndirect.triageAnswers),
+                  representeeAnswers = None,
+                  exampleCompanyDetailsAnswers = None,
+                  yearToDateLiabilityAnswers = None,
+                  supportingEvidenceAnswers = None,
+                  exemptionAndLossesAnswers =
+                    if (furtherReturn)
+                      multipleIndirect.exemptionAndLossesAnswers
+                        .map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                    else None,
+                  gainOrLossAfterReliefs = None
+                ),
+              singleMixedUse =>
+                singleMixedUse.copy(
+                  triageAnswers = updateSingleDisposalAnswers(singleMixedUse.triageAnswers),
+                  representeeAnswers = None,
+                  mixedUsePropertyDetailsAnswers = None,
+                  yearToDateLiabilityAnswers = None,
+                  supportingEvidenceAnswers = None,
+                  exemptionAndLossesAnswers =
+                    if (furtherReturn)
+                      singleMixedUse.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                    else None,
+                  gainOrLossAfterReliefs = None
+                )
+            )
           )
-        )
+          .withForceDisplayGainOrLossAfterReliefsForAmends
     )
   }
 

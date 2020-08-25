@@ -103,7 +103,7 @@ object JourneyStatus {
     agentReferenceNumber: Option[AgentReferenceNumber],
     draftReturn: DraftReturn,
     previousSentReturns: Option[PreviousReturnData],
-    originalReturn: Option[CompleteReturnWithSummary]
+    amendReturnData: Option[AmendReturnData]
   ) extends JourneyStatus
 
   object FillingOutReturn {
@@ -113,7 +113,7 @@ object JourneyStatus {
       def isFurtherOrAmendReturn: Option[Boolean] =
         if (isAmendReturn) Some(true) else isFurtherReturn
 
-      def isAmendReturn: Boolean = f.originalReturn.isDefined
+      def isAmendReturn: Boolean = f.amendReturnData.isDefined
 
       def isFurtherReturn: Option[Boolean] =
         determineIfFurtherReturn(
@@ -121,6 +121,11 @@ object JourneyStatus {
           f.previousSentReturns,
           f.draftReturn.triageAnswers(),
           f.draftReturn.representeeAnswers
+        )
+
+      def withForceDisplayGainOrLossAfterReliefsForAmends: FillingOutReturn =
+        f.copy(
+          amendReturnData = f.amendReturnData.map(_.copy(shouldDisplayGainOrLossAfterReliefs = true))
         )
 
     }

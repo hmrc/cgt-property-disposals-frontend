@@ -529,7 +529,9 @@ class PropertyDetailsController @Inject() (
                           val updatedDraftReturn =
                             m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
 
-                          val updatedJourney = r.journey.copy(draftReturn = updatedDraftReturn)
+                          val updatedJourney = r.journey
+                            .copy(draftReturn = updatedDraftReturn)
+                            .withForceDisplayGainOrLossAfterReliefsForAmends
 
                           val result = for {
                             _ <- returnsService.storeDraftReturn(updatedJourney)
@@ -642,7 +644,8 @@ class PropertyDetailsController @Inject() (
                       yearToDateLiabilityAnswers = None,
                       gainOrLossAfterReliefs = None
                     )
-                    val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
+                    val updatedJourney     =
+                      r.journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
                     val result             = for {
                       _ <- returnsService.storeDraftReturn(updatedJourney)
                       _ <- EitherT(
@@ -745,7 +748,8 @@ class PropertyDetailsController @Inject() (
                       yearToDateLiabilityAnswers = None,
                       gainOrLossAfterReliefs = None
                     )
-                    val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
+                    val updatedJourney     =
+                      r.journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
                     val result             = for {
                       _ <- returnsService.storeDraftReturn(updatedJourney)
                       _ <- EitherT(

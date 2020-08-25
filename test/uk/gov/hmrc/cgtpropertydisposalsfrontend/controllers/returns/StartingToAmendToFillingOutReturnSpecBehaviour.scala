@@ -27,11 +27,14 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.routes.{AmendReturnController => amendRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, SessionData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftMultipleDisposalsReturn, DraftMultipleIndirectDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, DraftSingleMixedUseDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, CompleteReturn, DraftMultipleDisposalsReturn, DraftMultipleIndirectDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, DraftSingleMixedUseDisposalReturn}
 
 trait StartingToAmendToFillingOutReturnSpecBehaviour {
   this: ControllerSpec with SessionSupport with AuthSupport with MockFactory =>
@@ -59,7 +62,12 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           startingToAmend.agentReferenceNumber,
           expectedDraftReturn,
           startingToAmend.previousSentReturns,
-          Some(startingToAmend.originalReturn)
+          Some(
+            AmendReturnData(
+              startingToAmend.originalReturn,
+              startingToAmend.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
+            )
+          )
         )
 
         val uri     = "/uri"
@@ -195,7 +203,12 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           startingToAmend.agentReferenceNumber,
           draftReturn,
           startingToAmend.previousSentReturns,
-          Some(startingToAmend.originalReturn)
+          Some(
+            AmendReturnData(
+              startingToAmend.originalReturn,
+              startingToAmend.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
+            )
+          )
         )
 
         inSequence {

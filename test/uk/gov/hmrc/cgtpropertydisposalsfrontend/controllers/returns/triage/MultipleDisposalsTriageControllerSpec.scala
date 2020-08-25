@@ -37,7 +37,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.{SelectorAndValue, TagAttributePairAndValue, UserTypeDisplay}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour, representee, triage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
@@ -50,7 +60,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -172,7 +182,7 @@ class MultipleDisposalsTriageControllerSpec
     userType: UserType = UserType.Individual,
     representeeAnswers: Option[RepresenteeAnswers] = None,
     previousSentReturns: Option[List[ReturnSummary]] = None,
-    isAmend: Boolean = false
+    amendReturnData: Option[AmendReturnData] = None
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val individualUserType = multipleDisposalsAnswers.fold(_.individualUserType, _.individualUserType)
     val draftReturn        = sample[DraftMultipleDisposalsReturn].copy(
@@ -198,7 +208,7 @@ class MultipleDisposalsTriageControllerSpec
         if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
         else None,
       previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None)),
-      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
+      amendReturnData = amendReturnData
     )
     val session            = SessionData.empty.copy(
       userType = Some(userType),
@@ -647,12 +657,16 @@ class MultipleDisposalsTriageControllerSpec
 
           "they have not completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
+            val amendReturnData                 = sample[AmendReturnData]
             val answers                         = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(Self),
               numberOfProperties = Some(2)
             )
             val (session, journey, draftReturn) =
-              sessionDataWithFillingOutReturn(answers)
+              sessionDataWithFillingOutReturn(
+                answers,
+                amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false))
+              )
 
             val updatedDraftReturn = draftReturn.copy(
               triageAnswers = answers.copy(numberOfProperties = Some(5)),
@@ -663,7 +677,10 @@ class MultipleDisposalsTriageControllerSpec
               gainOrLossAfterReliefs = None,
               lastUpdatedDate = TimeUtils.today()
             )
-            val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+            val updatedJourney     = journey.copy(
+              draftReturn = updatedDraftReturn,
+              amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true))
+            )
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1829,9 +1846,13 @@ class MultipleDisposalsTriageControllerSpec
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+              val amendReturnData                 = sample[AmendReturnData]
               val answers                         = c.copy(taxYear = taxYear)
               val (session, journey, draftReturn) =
-                sessionDataWithFillingOutReturn(answers)
+                sessionDataWithFillingOutReturn(
+                  answers,
+                  amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false))
+                )
 
               val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers
                 .fromCompleteAnswers(answers)
@@ -1847,7 +1868,10 @@ class MultipleDisposalsTriageControllerSpec
                 )
               )
               val updatedJourney     =
-                journey.copy(draftReturn = updatedDraftReturn)
+                journey.copy(
+                  draftReturn = updatedDraftReturn,
+                  amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true))
+                )
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -2824,12 +2848,16 @@ class MultipleDisposalsTriageControllerSpec
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+              val amendReturnData                 = sample[AmendReturnData]
               val answers                         = c.copy(
                 countryOfResidence = sample[Country],
                 assetTypes = List(AssetType.Residential)
               )
               val (session, journey, draftReturn) =
-                sessionDataWithFillingOutReturn(answers)
+                sessionDataWithFillingOutReturn(
+                  answers,
+                  amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false))
+                )
 
               val updatedAnswers     =
                 IncompleteMultipleDisposalsTriageAnswers(
@@ -2846,7 +2874,10 @@ class MultipleDisposalsTriageControllerSpec
               val updatedDraftReturn =
                 updateDraftReturn(draftReturn, updatedAnswers, journey.isFurtherReturn.contains(true))
               val updatedJourney     =
-                journey.copy(draftReturn = updatedDraftReturn)
+                journey.copy(
+                  draftReturn = updatedDraftReturn,
+                  amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true))
+                )
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -3330,20 +3361,28 @@ class MultipleDisposalsTriageControllerSpec
 
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
-            val currentAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+            val currentAnswers  = sample[CompleteMultipleDisposalsTriageAnswers].copy(
               individualUserType = Some(Self),
               completionDate = CompletionDate(today.minusDays(1L))
             )
-            val submittedDate  = today
+            val submittedDate   = today
+            val amendReturnData = sample[AmendReturnData]
 
             val (session, journey, draftReturn) =
-              sessionDataWithFillingOutReturn(currentAnswers, representeeAnswers = None)
+              sessionDataWithFillingOutReturn(
+                currentAnswers,
+                representeeAnswers = None,
+                amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false))
+              )
 
             val updatedAnswers     =
               currentAnswers.unset(_.completionDate).copy(completionDate = Some(CompletionDate(submittedDate)))
             val updatedDraftReturn =
               updateDraftReturn(draftReturn, updatedAnswers)
-            val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+            val updatedJourney     = journey.copy(
+              draftReturn = updatedDraftReturn,
+              amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true))
+            )
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -3612,14 +3651,23 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the check your answers page" when {
 
+        val taxYear = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(today.getYear, 4, 6),
+          endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+        )
+
         def test(
           currentAnswers: IncompleteMultipleDisposalsTriageAnswers,
           representeeAnswers: Option[RepresenteeAnswers],
           submittedDate: LocalDate,
           taxYear: Option[TaxYear]
         ) = {
+
           val (session, journey, draftReturn) =
-            sessionDataWithFillingOutReturn(currentAnswers, representeeAnswers = representeeAnswers)
+            sessionDataWithFillingOutReturn(
+              currentAnswers,
+              representeeAnswers = representeeAnswers
+            )
 
           val updatedAnswers     = currentAnswers.copy(
             completionDate = Some(CompletionDate(submittedDate)),
@@ -3628,7 +3676,9 @@ class MultipleDisposalsTriageControllerSpec
           )
           val updatedDraftReturn =
             updateDraftReturn(draftReturn, updatedAnswers)
-          val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+          val updatedJourney     = journey.copy(
+            draftReturn = updatedDraftReturn
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -3660,6 +3710,84 @@ class MultipleDisposalsTriageControllerSpec
         "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
           test(
             sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+            today,
+            Some(taxYear)
+          )
+        }
+
+        "the disposal date is strictly before the date of death when the user is a non-period of admin personal rep" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+            today.minusDays(1L),
+            Some(taxYear)
+          )
+        }
+
+        "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
+            today,
+            Some(taxYear)
+          )
+        }
+
+      }
+
+      "redirect to the amend return disposaldate different taxyear page" when {
+
+        def test(
+          currentAnswers: IncompleteMultipleDisposalsTriageAnswers,
+          representeeAnswers: Option[RepresenteeAnswers],
+          submittedDate: LocalDate,
+          taxYear: Option[TaxYear]
+        ) = {
+          val amendReturnData                 = sample[AmendReturnData]
+          val (session, journey, draftReturn) =
+            sessionDataWithFillingOutReturn(
+              currentAnswers,
+              representeeAnswers = representeeAnswers,
+              amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false))
+            )
+
+          val updatedAnswers     = currentAnswers.copy(
+            completionDate = Some(CompletionDate(submittedDate)),
+            taxYear = taxYear,
+            taxYearAfter6April2020 = Some(taxYear.isDefined)
+          )
+          val updatedDraftReturn =
+            updateDraftReturn(draftReturn, updatedAnswers)
+          val updatedJourney     = journey.copy(
+            draftReturn = updatedDraftReturn,
+            amendReturnData = Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true))
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetTaxYear(submittedDate)(Right(taxYear))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(
+              formData(submittedDate): _*
+            ),
+            routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+          )
+        }
+
+        "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(
+              individualUserType = Some(PersonalRepresentative)
+            ),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
             today,
             Some(sample[TaxYear])

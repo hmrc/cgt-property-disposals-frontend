@@ -265,7 +265,9 @@ class AcquisitionDetailsController @Inject() (
           formWithErrors => BadRequest(page(formWithErrors, backLink)),
           { value =>
             val newDraftReturn = updateState(value, currentAnswers, currentState)
-            val newJourney     = currentFillingOutReturn.copy(draftReturn = newDraftReturn.merge)
+            val newJourney     = currentFillingOutReturn
+              .copy(draftReturn = newDraftReturn.merge)
+              .withForceDisplayGainOrLossAfterReliefsForAmends
 
             val result = for {
               _ <- if (newDraftReturn.merge === currentState.merge)

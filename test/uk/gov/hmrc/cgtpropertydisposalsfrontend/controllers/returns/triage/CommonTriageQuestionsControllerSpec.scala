@@ -29,7 +29,16 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
@@ -39,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
@@ -148,7 +157,7 @@ class CommonTriageQuestionsControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       previousSentReturns = previousReturns,
-      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -168,10 +177,8 @@ class CommonTriageQuestionsControllerSpec
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
-      subscribedDetails = sample[SubscribedDetails].copy(
-        name = Right(sample[IndividualName])
-      ),
-      originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
+      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -661,21 +668,26 @@ class CommonTriageQuestionsControllerSpec
             testSuccessfulUpdateFillingOutReturn(
               performAction("individualUserType" -> "1"),
               IncompleteSingleDisposalTriageAnswers.empty
-                .copy(individualUserType = Some(IndividualUserType.Self))
+                .copy(individualUserType = Some(IndividualUserType.Self)),
+              isAmend = true
             )(
-              d =>
-                d.copy(
-                  triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
-                    .copy(individualUserType = Some(IndividualUserType.Capacitor)),
-                  representeeAnswers = None,
-                  propertyAddress = None,
-                  disposalDetailsAnswers = None,
-                  acquisitionDetailsAnswers = None,
-                  reliefDetailsAnswers = None,
-                  yearToDateLiabilityAnswers = None,
-                  initialGainOrLoss = None,
-                  supportingEvidenceAnswers = None
-                ),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn
+                  .copy(draftReturn =
+                    draftReturn.copy(
+                      triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
+                        .copy(individualUserType = Some(IndividualUserType.Capacitor)),
+                      representeeAnswers = None,
+                      propertyAddress = None,
+                      disposalDetailsAnswers = None,
+                      acquisitionDetailsAnswers = None,
+                      reliefDetailsAnswers = None,
+                      yearToDateLiabilityAnswers = None,
+                      initialGainOrLoss = None,
+                      supportingEvidenceAnswers = None
+                    )
+                  )
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               routes.SingleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -700,19 +712,22 @@ class CommonTriageQuestionsControllerSpec
 
             testSuccessfulUpdateFillingOutReturn(
               performAction("individualUserType" -> "2"),
-              answers
+              answers,
+              isAmend = false
             )(
-              d =>
-                d.copy(
-                  triageAnswers = newAnswers,
-                  representeeAnswers = None,
-                  propertyAddress = None,
-                  disposalDetailsAnswers = None,
-                  acquisitionDetailsAnswers = None,
-                  reliefDetailsAnswers = None,
-                  yearToDateLiabilityAnswers = None,
-                  initialGainOrLoss = None,
-                  supportingEvidenceAnswers = None
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn.copy(draftReturn =
+                  draftReturn.copy(
+                    triageAnswers = newAnswers,
+                    representeeAnswers = None,
+                    propertyAddress = None,
+                    disposalDetailsAnswers = None,
+                    acquisitionDetailsAnswers = None,
+                    reliefDetailsAnswers = None,
+                    yearToDateLiabilityAnswers = None,
+                    initialGainOrLoss = None,
+                    supportingEvidenceAnswers = None
+                  )
                 ),
               routes.SingleDisposalsTriageController.checkYourAnswers()
             )
@@ -1537,16 +1552,21 @@ class CommonTriageQuestionsControllerSpec
 
               testSuccessfulUpdateFillingOutReturn(
                 performAction("numberOfProperties" -> "1"),
-                answers
+                answers,
+                isAmend = true
               )(
-                d =>
-                  DraftMultipleDisposalsReturn.newDraftReturn(
-                    d.id,
-                    IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-                      individualUserType = Some(IndividualUserType.Self)
-                    ),
-                    d.representeeAnswers
-                  ),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn
+                    .copy(
+                      draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
+                        draftReturn.id,
+                        IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                          individualUserType = Some(IndividualUserType.Self)
+                        ),
+                        draftReturn.representeeAnswers
+                      )
+                    )
+                    .withForceDisplayGainOrLossAfterReliefsForAmends,
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
@@ -2422,16 +2442,18 @@ class CommonTriageQuestionsControllerSpec
 
   def testSuccessfulUpdateFillingOutReturn(
     performAction: => Future[Result],
-    answers: SingleDisposalTriageAnswers
+    answers: SingleDisposalTriageAnswers,
+    isAmend: Boolean
   )(
-    updatedDraftReturn: DraftSingleDisposalReturn => DraftReturn,
+    updateJourney: (FillingOutReturn, DraftSingleDisposalReturn) => FillingOutReturn,
     expectedRedirect: Call
   ): Unit = {
     val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(
-      answers
+      answers,
+      isAmend = isAmend
     )
     val updatedJourney                  =
-      journey.copy(draftReturn = updatedDraftReturn(draftReturn))
+      updateJourney(journey, draftReturn)
 
     inSequence {
       mockAuthWithNoRetrievals()

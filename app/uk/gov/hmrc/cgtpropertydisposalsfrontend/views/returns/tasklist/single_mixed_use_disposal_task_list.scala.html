@@ -55,7 +55,11 @@
 }
 
 @gainOrLossAfterReliefsState = @{
-    if(fillingOutReturn.isFurtherOrAmendReturn.contains(true)){
+    val showGainOrLossAfterReliefs =
+        fillingOutReturn.amendReturnData.exists(_.shouldDisplayGainOrLossAfterReliefs) ||
+                fillingOutReturn.isFurtherReturn.contains(true)
+
+    if(showGainOrLossAfterReliefs){
         propertyDetailsState match {
             case Complete  =>
                 Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))

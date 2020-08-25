@@ -225,7 +225,7 @@ class MultipleDisposalsTriageController @Inject() (
               .newDraftReturn(d.id, _, d.representeeAnswers)
           )
 
-          r.copy(draftReturn = newDraftReturn.merge)
+          r.copy(draftReturn = newDraftReturn.merge).withForceDisplayGainOrLossAfterReliefsForAmends
         case (r, Left(d))  =>
           val newDraftReturn = newAnswersWithRedirectTo._1.bimap(
             DraftMultipleIndirectDisposalsReturn
@@ -234,7 +234,7 @@ class MultipleDisposalsTriageController @Inject() (
               .newDraftReturn(d.id, _, d.representeeAnswers)
           )
 
-          r.copy(draftReturn = newDraftReturn.merge)
+          r.copy(draftReturn = newDraftReturn.merge).withForceDisplayGainOrLossAfterReliefsForAmends
 
       }
     )
@@ -341,7 +341,8 @@ class MultipleDisposalsTriageController @Inject() (
                           supportingEvidenceAnswers = None,
                           gainOrLossAfterReliefs = None
                         )
-                    )
+                    ),
+                  forceDisplayGainOrLossAfterReliefsForAmends = true
                 )
                 updateStateAndThen(
                   newState,
@@ -418,7 +419,8 @@ class MultipleDisposalsTriageController @Inject() (
                       assetTypes = Some(assetType(wereAllPropertiesResidential))
                     )
 
-                val newState = updateState(state, updatedAnswers, identity)
+                val newState =
+                  updateState(state, updatedAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = false)
                 updateStateAndThen(
                   newState,
                   Redirect(
@@ -531,7 +533,8 @@ class MultipleDisposalsTriageController @Inject() (
                               Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
                           }
                         )
-                    )
+                    ),
+                  forceDisplayGainOrLossAfterReliefsForAmends = false
                 )
                 updateStateAndThen(
                   newState,
@@ -623,7 +626,8 @@ class MultipleDisposalsTriageController @Inject() (
                                                 m.examplePropertyDetailsAnswers
                                                   .map(_.unset(_.disposalDate))
                                               )
-                                          )
+                                          ),
+                                        forceDisplayGainOrLossAfterReliefsForAmends = true
                                       )
                     _              <- newState.fold(
                                         _ => EitherT.pure[Future, Error](()),
@@ -763,7 +767,8 @@ class MultipleDisposalsTriageController @Inject() (
                             supportingEvidenceAnswers = None
                           )
                         )
-                  }
+                  },
+                  forceDisplayGainOrLossAfterReliefsForAmends = true
                 )
 
                 updateStateAndThen(
@@ -850,7 +855,8 @@ class MultipleDisposalsTriageController @Inject() (
                           yearToDateLiabilityAnswers = None,
                           gainOrLossAfterReliefs = None
                         )
-                    )
+                    ),
+                  forceDisplayGainOrLossAfterReliefsForAmends = true
                 )
                 updateStateAndThen(
                   newState,
@@ -977,7 +983,8 @@ class MultipleDisposalsTriageController @Inject() (
                                                   yearToDateLiabilityAnswers = None,
                                                   gainOrLossAfterReliefs = None
                                                 )
-                                            )
+                                            ),
+                                          forceDisplayGainOrLossAfterReliefsForAmends = true
                                         )
                       _              <- newState.fold(
                                           _ => EitherT.pure[Future, Error](()),
@@ -997,7 +1004,7 @@ class MultipleDisposalsTriageController @Inject() (
                       },
                       taxYear => {
                         val amendReturnOriginalTaxYear =
-                          state.map(_._1.originalReturn.map(_.completeReturn.taxYear)).toOption.flatten
+                          state.map(_._1.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
                         taxYear match {
                           case Some(t)
                               if amendReturnOriginalTaxYear
@@ -1260,7 +1267,7 @@ class MultipleDisposalsTriageController @Inject() (
             val completeAnswers =
               CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, t, d)
             updateStateAndThen(
-              updateState(state, completeAnswers, identity),
+              updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = true),
               Ok(
                 checkYourAnswersPage(
                   completeAnswers,
@@ -1288,7 +1295,7 @@ class MultipleDisposalsTriageController @Inject() (
             val completeAnswers =
               CompleteMultipleDisposalsTriageAnswers(i, n, c, a, t, d)
             updateStateAndThen(
-              updateState(state, completeAnswers, identity),
+              updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = false),
               Ok(
                 checkYourAnswersPage(
                   completeAnswers,
@@ -1452,18 +1459,23 @@ class MultipleDisposalsTriageController @Inject() (
     modifyDraftReturn: Either[DraftMultipleIndirectDisposalsReturn, DraftMultipleDisposalsReturn] => Either[
       DraftMultipleIndirectDisposalsReturn,
       DraftMultipleDisposalsReturn
-    ]
+    ],
+    forceDisplayGainOrLossAfterReliefsForAmends: Boolean
   ): Either[StartingNewDraftReturn, FillingOutReturn] =
     currentState.bimap(
       _.copy(newReturnTriageAnswers = Left(newAnswers)),
       {
         case (r, d) =>
-          r.copy(draftReturn =
+          val newFillingOutReturn = r.copy(draftReturn =
             modifyDraftReturn(d).fold(
               _.copy(triageAnswers = newAnswers),
               _.copy(triageAnswers = newAnswers)
             )
           )
+
+          if (forceDisplayGainOrLossAfterReliefsForAmends)
+            newFillingOutReturn.withForceDisplayGainOrLossAfterReliefsForAmends
+          else newFillingOutReturn
       }
     )
 

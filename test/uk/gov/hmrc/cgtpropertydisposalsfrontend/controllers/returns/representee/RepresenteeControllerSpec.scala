@@ -37,7 +37,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, BusinessPartnerRecordServiceSupport, ContactNameFormValidationTests, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -118,7 +125,8 @@ class RepresenteeControllerSpec
   def sessionWithFillingOutReturn(
     answers: Option[RepresenteeAnswers],
     individualUserType: Option[IndividualUserType],
-    subscribedDetails: SubscribedDetails
+    subscribedDetails: SubscribedDetails,
+    isAmend: Boolean
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
       representeeAnswers = answers,
@@ -126,7 +134,11 @@ class RepresenteeControllerSpec
         .copy(individualUserType = individualUserType)
     )
     val journey     = sample[FillingOutReturn]
-      .copy(draftReturn = draftReturn, subscribedDetails = subscribedDetails)
+      .copy(
+        draftReturn = draftReturn,
+        subscribedDetails = subscribedDetails,
+        amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
+      )
 
     val session = SessionData.empty.copy(journeyStatus = Some(journey))
     (session, journey, draftReturn)
@@ -135,12 +147,14 @@ class RepresenteeControllerSpec
   def sessionWithFillingOutReturn(
     answers: RepresenteeAnswers,
     representativeType: RepresentativeType,
-    subscribedDetails: SubscribedDetails = sample[SubscribedDetails]
+    subscribedDetails: SubscribedDetails = sample[SubscribedDetails],
+    isAmend: Boolean = false
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) =
     sessionWithFillingOutReturn(
       Some(answers),
       Some(representativeType),
-      subscribedDetails
+      subscribedDetails,
+      isAmend
     )
 
   def mockGetPreviousNameMatchAttempts(ggCredId: GGCredId)(
@@ -780,7 +794,8 @@ class RepresenteeControllerSpec
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(
                 answers,
-                Capacitor
+                Capacitor,
+                isAmend = true
               )
 
             val newDraftReturn =
@@ -796,7 +811,7 @@ class RepresenteeControllerSpec
                 )
               )
 
-            val newJourney = journey.copy(draftReturn = newDraftReturn)
+            val newJourney = journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1152,7 +1167,8 @@ class RepresenteeControllerSpec
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(
                 IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(false)),
-                PersonalRepresentative
+                PersonalRepresentative,
+                isAmend = true
               )
 
             val newDraftReturn =
@@ -1169,7 +1185,7 @@ class RepresenteeControllerSpec
                 )
               )
 
-            val newJourney = journey.copy(draftReturn = newDraftReturn)
+            val newJourney = journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1689,13 +1705,17 @@ class RepresenteeControllerSpec
             Some(false)
           )
 
-          val (session, sndr) = sessionWithStartingNewDraftReturn(
+          val (session, fillingOutReturn, draftReturn) = sessionWithFillingOutReturn(
             requiredPreviousAnswers,
             PersonalRepresentative
           )
 
-          val newSndr =
-            sndr.copy(representeeAnswers =
+          val newDraftReturn =
+            DraftSingleDisposalReturn.newDraftReturn(
+              fillingOutReturn.draftReturn.id,
+              IncompleteSingleDisposalTriageAnswers.empty.copy(
+                individualUserType = draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType)
+              ),
               Some(
                 requiredPreviousAnswers.copy(
                   hasConfirmedPerson = true,
@@ -1705,10 +1725,14 @@ class RepresenteeControllerSpec
               )
             )
 
+          val newFillingOutReturn =
+            fillingOutReturn.copy(draftReturn = newDraftReturn)
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreSession(session.copy(journeyStatus = Some(newSndr)))(
+            mockStoreDraftReturn(newFillingOutReturn)(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(newFillingOutReturn)))(
               Right(())
             )
           }
@@ -3219,7 +3243,14 @@ class RepresenteeControllerSpec
           sessionWithFillingOutReturn(answers, Capacitor)
 
         val newAnswers     = IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(true))
-        val newDraftReturn = draftReturn.copy(representeeAnswers = Some(newAnswers))
+        val newDraftReturn =
+          DraftSingleDisposalReturn.newDraftReturn(
+            fillingOutReturn.draftReturn.id,
+            IncompleteSingleDisposalTriageAnswers.empty.copy(
+              individualUserType = draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType)
+            ),
+            Some(newAnswers)
+          )
         val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
         val newSession     = session.copy(journeyStatus = Some(newJourney))
 
@@ -3254,13 +3285,22 @@ class RepresenteeControllerSpec
           val answers = sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true)
 
           val (session, fillingOutReturn, draftReturn) =
-            sessionWithFillingOutReturn(answers, Capacitor)
+            sessionWithFillingOutReturn(answers, Capacitor, isAmend = true)
 
           val newAnswers = IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(false))
 
-          val newDraftReturn = draftReturn.copy(representeeAnswers = Some(newAnswers))
-          val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
-          val newSession     = session.copy(journeyStatus = Some(newJourney))
+          val newDraftReturn =
+            DraftSingleDisposalReturn.newDraftReturn(
+              fillingOutReturn.draftReturn.id,
+              IncompleteSingleDisposalTriageAnswers.empty.copy(
+                individualUserType = draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType)
+              ),
+              Some(newAnswers)
+            )
+
+          val newJourney =
+            fillingOutReturn.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
+          val newSession = session.copy(journeyStatus = Some(newJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()

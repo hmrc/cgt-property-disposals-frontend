@@ -22,7 +22,10 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
 import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{CGTPropertyDisposalsConnectorImpl, ConnectorSpec, HttpSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.OnboardingDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TelephoneNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode

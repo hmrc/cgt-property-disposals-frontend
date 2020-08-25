@@ -111,7 +111,11 @@
 }
 
 @gainOrLossAfterReliefsState = @{
-    if(isFurtherOrAmendReturn.contains(true)){
+    val showGainOrLossAfterReliefs =
+        fillingOutReturn.amendReturnData.exists(_.shouldDisplayGainOrLossAfterReliefs) ||
+                fillingOutReturn.isFurtherReturn.contains(true)
+
+    if(showGainOrLossAfterReliefs){
         (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState) match {
             case (Complete, Complete, Complete, Complete)  =>
                 Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))

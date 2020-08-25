@@ -58,7 +58,11 @@
 @acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
 
 @gainOrLossAfterReliefsState = @{
-    if(fillingOutReturn.isFurtherOrAmendReturn.contains(true)){
+    val showGainOrLossAfterReliefs =
+        fillingOutReturn.amendReturnData.exists(_.shouldDisplayGainOrLossAfterReliefs) ||
+                fillingOutReturn.isFurtherReturn.contains(true)
+
+    if(showGainOrLossAfterReliefs){
         (companyDetailsState, disposalDetailsState, acquistionDetailsState) match {
             case (Complete, Complete, Complete)  =>
                 Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))
