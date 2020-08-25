@@ -245,7 +245,9 @@ class MixedUsePropertyDetailsController @Inject() (
                   yearToDateLiabilityAnswers = None,
                   gainOrLossAfterReliefs = None
                 )
-                val result             = updateDraftReturnAndSession(r, updatedDraftReturn)
+                val updatedJourney     =
+                  r.journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
+                val result             = updateDraftReturnAndSession(updatedJourney)
 
                 result.fold(
                   { e =>
@@ -263,11 +265,8 @@ class MixedUsePropertyDetailsController @Inject() (
     }
 
   private def updateDraftReturnAndSession(
-    r: EnteringSingleMixedUsePropertyDetails,
-    updatedDraftReturn: DraftSingleMixedUseDisposalReturn
-  )(implicit request: RequestWithSessionData[AnyContent]) = {
-    val updatedJourney = r.journey.copy(draftReturn = updatedDraftReturn)
-
+    updatedJourney: FillingOutReturn
+  )(implicit request: RequestWithSessionData[AnyContent]) =
     for {
       _ <- returnsService.storeDraftReturn(updatedJourney)
       _ <- EitherT(
@@ -276,7 +275,6 @@ class MixedUsePropertyDetailsController @Inject() (
              )
            )
     } yield ()
-  }
 
   def enterAcquisitionValue(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -347,7 +345,9 @@ class MixedUsePropertyDetailsController @Inject() (
                   yearToDateLiabilityAnswers = None,
                   gainOrLossAfterReliefs = None
                 )
-                val result             = updateDraftReturnAndSession(r, updatedDraftReturn)
+                val updatedJourney     =
+                  r.journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
+                val result             = updateDraftReturnAndSession(updatedJourney)
 
                 result.fold(
                   { e =>
@@ -378,7 +378,8 @@ class MixedUsePropertyDetailsController @Inject() (
             case IncompleteMixedUsePropertyDetailsAnswers(Some(a), Some(dp), Some(ap)) =>
               val completeAnswers    = CompleteMixedUsePropertyDetailsAnswers(a, dp, ap)
               val updatedDraftReturn = r.draftReturn.copy(mixedUsePropertyDetailsAnswers = Some(completeAnswers))
-              val result             = updateDraftReturnAndSession(r, updatedDraftReturn)
+              val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
+              val result             = updateDraftReturnAndSession(updatedJourney)
 
               result.fold(
                 _ => errorHandler.errorResult(),

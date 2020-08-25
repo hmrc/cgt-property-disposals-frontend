@@ -32,7 +32,19 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorSc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalMethodGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
@@ -44,7 +56,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, IndividualUserType, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, IndividualUserType, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -105,7 +117,8 @@ class DisposalDetailsControllerSpec
   def fillingOutReturn(
     disposalMethod: DisposalMethod,
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    isAmend: Boolean
   ): (FillingOutReturn, DraftSingleDisposalReturn) = {
     val answers       = sample[CompleteSingleDisposalTriageAnswers].copy(
       disposalMethod = disposalMethod,
@@ -129,7 +142,8 @@ class DisposalDetailsControllerSpec
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
-      agentReferenceNumber = setAgentReferenceNumber(userType)
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
     )
 
     fillingOutReturn -> draftReturn
@@ -139,13 +153,15 @@ class DisposalDetailsControllerSpec
     answers: Option[DisposalDetailsAnswers],
     disposalMethod: DisposalMethod,
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    isAmend: Boolean
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
     val (journey, draftReturn) = fillingOutReturn(
       disposalMethod,
       userType,
-      individualUserType
+      individualUserType,
+      isAmend
     )
     val updatedDraftReturn     = draftReturn.copy(disposalDetailsAnswers = answers)
     val updatedJourney         = journey.copy(draftReturn = updatedDraftReturn)
@@ -162,19 +178,22 @@ class DisposalDetailsControllerSpec
     answers: DisposalDetailsAnswers,
     disposalMethod: DisposalMethod,
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    isAmend: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithDisposalDetailsAnswers(
       Some(answers),
       disposalMethod,
       userType,
-      individualUserType
+      individualUserType,
+      isAmend
     )
 
   def fillingOutIndirectReturn(
     disposalMethod: DisposalMethod,
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    isAmend: Boolean
   ): (FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
 
     val country = Country("NZ")
@@ -196,7 +215,8 @@ class DisposalDetailsControllerSpec
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
-      agentReferenceNumber = setAgentReferenceNumber(userType)
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
     )
 
     fillingOutReturn -> draftReturn
@@ -206,13 +226,15 @@ class DisposalDetailsControllerSpec
     answers: Option[DisposalDetailsAnswers],
     disposalMethod: DisposalMethod,
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    isAmend: Boolean
   ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
 
     val (journey, draftReturn) = fillingOutIndirectReturn(
       disposalMethod,
       userType,
-      individualUserType
+      individualUserType,
+      isAmend
     )
 
     val updatedDraftReturn = draftReturn.copy(
@@ -232,13 +254,15 @@ class DisposalDetailsControllerSpec
     answers: DisposalDetailsAnswers,
     disposalMethod: DisposalMethod,
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    isAmend: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) =
     sessionWithIndirectDisposalDetailsAnswers(
       Some(answers),
       disposalMethod,
       userType,
-      individualUserType
+      individualUserType,
+      isAmend
     )
 
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
@@ -286,7 +310,8 @@ class DisposalDetailsControllerSpec
                     None,
                     disposalMethod,
                     userType,
-                    Some(individualUserType)
+                    Some(individualUserType),
+                    isAmend = false
                   )._1
                 )
               }
@@ -697,7 +722,8 @@ class DisposalDetailsControllerSpec
                   None,
                   disposalMethod,
                   userType,
-                  Some(individualUserType)
+                  Some(individualUserType),
+                  isAmend = true
                 )
               val (newShare, newShareValue)       = ShareOfProperty.Full -> "0"
               val updatedAnswers                  = IncompleteDisposalDetailsAnswers.empty.copy(
@@ -707,7 +733,8 @@ class DisposalDetailsControllerSpec
               )
               val newDraftReturn                  =
                 updateDraftReturn(draftReturn, updatedAnswers)
-              val newJourney                      = journey.copy(draftReturn = newDraftReturn)
+              val newJourney                      =
+                journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -890,7 +917,8 @@ class DisposalDetailsControllerSpec
                 None,
                 disposalMethod,
                 userType,
-                Some(individualUserType)
+                Some(individualUserType),
+                isAmend = false
               )
             val newDraftReturn                  =
               updateDraftReturn(
@@ -940,7 +968,8 @@ class DisposalDetailsControllerSpec
                 None,
                 disposalMethod,
                 userType,
-                Some(individualUserType)
+                Some(individualUserType),
+                isAmend = false
               )
             val newDraftReturn                  =
               updateDraftReturn(
@@ -1517,7 +1546,8 @@ class DisposalDetailsControllerSpec
                   currentAnswers,
                   disposalMethod,
                   userType,
-                  Some(individualUserType)
+                  Some(individualUserType),
+                  isAmend = true
                 )
 
               val newDisposalPrice = 2d
@@ -1525,7 +1555,8 @@ class DisposalDetailsControllerSpec
                 draftReturn,
                 currentAnswers.copy(disposalPrice = AmountInPence.fromPounds(newDisposalPrice))
               )
-              val newJourney       = journey.copy(draftReturn = newDraftReturn)
+              val newJourney       =
+                journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -2116,7 +2147,8 @@ class DisposalDetailsControllerSpec
                   currentAnswers,
                   disposalMethod,
                   userType,
-                  Some(individualUserType)
+                  Some(individualUserType),
+                  isAmend = true
                 )
 
               val newDisposalPrice = 2d
@@ -2125,7 +2157,8 @@ class DisposalDetailsControllerSpec
               )
               val newDraftReturn   =
                 updateDraftReturn(draftReturn, updatedAnswers)
-              val newJourney       = journey.copy(draftReturn = newDraftReturn)
+              val newJourney       =
+                journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -2851,7 +2884,8 @@ class DisposalDetailsControllerSpec
                   incompleteDisposalDetailsAnswers,
                   disposalMethod,
                   userType,
-                  Some(individualUserType)
+                  Some(individualUserType),
+                  isAmend = true
                 )
 
               val newDisposalFees = 2d
@@ -2860,7 +2894,8 @@ class DisposalDetailsControllerSpec
               )
               val newDraftReturn  =
                 updateDraftReturn(draftReturn, updatedAnswers)
-              val newJourney      = journey.copy(draftReturn = newDraftReturn)
+              val newJourney      =
+                journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -3083,7 +3118,8 @@ class DisposalDetailsControllerSpec
                     None,
                     disposalMethod,
                     userType,
-                    Some(individualUserType)
+                    Some(individualUserType),
+                    isAmend = false
                   )._1
                 )
               }
@@ -3117,7 +3153,8 @@ class DisposalDetailsControllerSpec
                     None,
                     disposalMethod,
                     userType,
-                    Some(individualUserType)
+                    Some(individualUserType),
+                    isAmend = false
                   )._1
                 )
               }
@@ -3549,7 +3586,8 @@ class DisposalDetailsControllerSpec
                   fillingOutReturn(
                     disposalMethod,
                     userType,
-                    Some(individualUserType)
+                    Some(individualUserType),
+                    isAmend = false
                   )._1.copy(
                     draftReturn = draftReturn
                   )

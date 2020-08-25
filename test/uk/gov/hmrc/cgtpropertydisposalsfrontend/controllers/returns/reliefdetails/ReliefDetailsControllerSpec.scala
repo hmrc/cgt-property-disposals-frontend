@@ -33,7 +33,21 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
@@ -124,7 +138,8 @@ class ReliefDetailsControllerSpec
   def sessionWithReliefDetailsAnswers(
     reliefDetailsAnswers: Option[ReliefDetailsAnswers],
     userType: UserType,
-    individualUserType: IndividualUserType
+    individualUserType: IndividualUserType,
+    isAmend: Boolean
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
@@ -144,48 +159,8 @@ class ReliefDetailsControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(
         name = setNameForUserType(userType)
-      )
-    )
-
-    val sessionData = SessionData.empty.copy(
-      userType = Some(userType),
-      journeyStatus = Some(journey)
-    )
-
-    (sessionData, journey, draftReturn)
-  }
-
-  def sessionWithReliefDetailsAnswers(
-    fillingOutReturn: FillingOutReturn,
-    singleDisposalDraftReturn: DraftSingleDisposalReturn,
-    reliefDetailsAnswers: Option[ReliefDetailsAnswers],
-    exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
-    disposalDate: DisposalDate,
-    completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
-    taxYear: TaxYear,
-    userType: UserType,
-    individualUserType: IndividualUserType
-  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
-
-    val draftReturn = singleDisposalDraftReturn.copy(
-      reliefDetailsAnswers = reliefDetailsAnswers,
-      exemptionAndLossesAnswers = exemptionAndLossesAnswers,
-      triageAnswers = completeSingleDisposalTriageAnswers.copy(
-        disposalDate = disposalDate.copy(
-          taxYear = taxYear.copy(
-            maxLettingsReliefAmount = maxLettingsReliefValue
-          )
-        ),
-        individualUserType = Some(individualUserType)
-      )
-    )
-
-    val journey = fillingOutReturn.copy(
-      draftReturn = draftReturn,
-      agentReferenceNumber = setAgentReferenceNumber(userType),
-      subscribedDetails = sample[SubscribedDetails].copy(
-        name = setNameForUserType(userType)
-      )
+      ),
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -199,12 +174,14 @@ class ReliefDetailsControllerSpec
   def sessionWithReliefDetailsAnswers(
     reliefDetailsAnswers: ReliefDetailsAnswers,
     userType: UserType,
-    individualUserType: IndividualUserType
+    individualUserType: IndividualUserType,
+    isAmend: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithReliefDetailsAnswers(
       Some(reliefDetailsAnswers),
       userType,
-      individualUserType
+      individualUserType,
+      isAmend
     )
 
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
@@ -260,7 +237,8 @@ class ReliefDetailsControllerSpec
                   sessionWithReliefDetailsAnswers(
                     None,
                     userType,
-                    individualUserType
+                    individualUserType,
+                    isAmend = false
                   )._1
                 )
               }
@@ -843,7 +821,7 @@ class ReliefDetailsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithReliefDetailsAnswers(
-                sample[CompleteReliefDetailsAnswers],
+                sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = AmountInPence(Long.MaxValue)),
                 userType,
                 individualUserType
               )._1
@@ -856,42 +834,6 @@ class ReliefDetailsControllerSpec
             doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe
                 Messages(expectedErrorMessageKey, args: _*),
-            BAD_REQUEST
-          )
-        }
-
-        def testWithResidentsRelief(
-          residentsRelief: AmountInPence,
-          data: (String, String)*
-        )(
-          expectedErrorMessageKey: String
-        )(
-          userType: UserType,
-          individualUserType: IndividualUserType,
-          userKey: String
-        ) = {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithReliefDetailsAnswers(
-                sample[CompleteReliefDetailsAnswers]
-                  .copy(privateResidentsRelief = residentsRelief),
-                userType,
-                individualUserType
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(data),
-            messageFromMessageKey(s"$key$userKey.title"),
-            doc =>
-              doc
-                .select("#error-summary-display > ul > li > a")
-                .text() shouldBe messageFromMessageKey(
-                expectedErrorMessageKey
-              ),
             BAD_REQUEST
           )
         }
@@ -931,14 +873,34 @@ class ReliefDetailsControllerSpec
         "the data is more than private residence relief limit" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeForLettingsRelief) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              testWithResidentsRelief(
-                AmountInPence.fromPounds(5),
-                key      -> "0",
-                valueKey -> "10"
-              )(
-                s"$valueKey.error.amountOverPrivateResidenceRelief"
-              )(userType, individualUserType, userKey)
+              val userKey         = userMessageKey(individualUserType, userType)
+              val residentsRelief = AmountInPence.fromPounds(5)
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithReliefDetailsAnswers(
+                    sample[CompleteReliefDetailsAnswers]
+                      .copy(privateResidentsRelief = residentsRelief),
+                    userType,
+                    individualUserType
+                  )._1
+                )
+              }
+
+              checkPageIsDisplayed(
+                performAction(
+                  Seq(key -> "0", valueKey -> "10")
+                ),
+                messageFromMessageKey(s"$key$userKey.title"),
+                doc =>
+                  doc
+                    .select("#error-summary-display > ul > li > a")
+                    .text() shouldBe messageFromMessageKey(
+                    s"$valueKey.error.amountOverPrivateResidenceRelief"
+                  ),
+                BAD_REQUEST
+              )
           }
         }
 
@@ -947,6 +909,7 @@ class ReliefDetailsControllerSpec
       "show an error page" when {
 
         val currentAnswers    = sample[CompleteReliefDetailsAnswers].copy(
+          privateResidentsRelief = AmountInPence(Long.MaxValue),
           lettingsRelief = AmountInPence.fromPounds(1d)
         )
         val newLettingsRelief = AmountInPence.fromPounds(2d)
@@ -1037,13 +1000,20 @@ class ReliefDetailsControllerSpec
         "the user has not answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
           val currentAnswers = sample[IncompleteReliefDetailsAnswers].copy(
-            privateResidentsRelief = Some(sample[AmountInPence]),
+            privateResidentsRelief = Some(AmountInPence(Long.MaxValue)),
             lettingsRelief = None
           )
 
           val newLettingsRelief = 2d
 
-          val triageAnswers  = sample[CompleteSingleDisposalTriageAnswers]
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            disposalDate = sample[DisposalDate].copy(
+              taxYear = sample[TaxYear].copy(
+                maxLettingsReliefAmount = maxLettingsReliefValue
+              )
+            )
+          )
+
           val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
             triageAnswers = triageAnswers,
             reliefDetailsAnswers = Some(currentAnswers)
@@ -1068,9 +1038,18 @@ class ReliefDetailsControllerSpec
           "and the draft return and session data has been successfully updated" in {
           forAll { c: CompleteReliefDetailsAnswers =>
             val currentAnswers    =
-              c.copy(lettingsRelief = AmountInPence.fromPounds(1d))
+              c.copy(
+                privateResidentsRelief = AmountInPence(Long.MaxValue),
+                lettingsRelief = AmountInPence.fromPounds(1d)
+              )
             val newLettingsRelief = 2d
-            val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+            val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers].copy(
+              disposalDate = sample[DisposalDate].copy(
+                taxYear = sample[TaxYear].copy(
+                  maxLettingsReliefAmount = maxLettingsReliefValue
+                )
+              )
+            )
             val oldDraftReturn    = sample[DraftSingleDisposalReturn].copy(
               reliefDetailsAnswers = Some(currentAnswers),
               triageAnswers = triageAnswers
@@ -1518,7 +1497,8 @@ class ReliefDetailsControllerSpec
           supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers])
         )
         val currentJourney     = sample[FillingOutReturn].copy(
-          draftReturn = currentDraftReturn
+          draftReturn = currentDraftReturn,
+          amendReturnData = None
         )
 
         val currentSession  = SessionData.empty.copy(
@@ -1847,7 +1827,8 @@ class ReliefDetailsControllerSpec
                   sessionWithReliefDetailsAnswers(
                     None,
                     userType,
-                    individualUserType
+                    individualUserType,
+                    isAmend = false
                   )._1
                 )
               }
@@ -2272,9 +2253,12 @@ class ReliefDetailsControllerSpec
     oldDraftReturn: DraftSingleDisposalReturn,
     newDraftReturn: DraftSingleDisposalReturn
   ): Unit = {
-    val journey    = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
+    val journey    = sample[FillingOutReturn].copy(
+      draftReturn = oldDraftReturn,
+      amendReturnData = Some(sample[AmendReturnData])
+    )
     val session    = SessionData.empty.copy(journeyStatus = Some(journey))
-    val newJourney = journey.copy(draftReturn = newDraftReturn)
+    val newJourney = journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
     inSequence {
       mockAuthWithNoRetrievals()

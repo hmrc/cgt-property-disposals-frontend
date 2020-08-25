@@ -137,6 +137,10 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
   def checkIsTechnicalErrorPage(
     result: Future[Result]
   )(implicit messagesApi: MessagesApi): Unit = {
+    import cats.syntax.eq._
+    import cats.instances.int._
+    if (status(result) =!= INTERNAL_SERVER_ERROR) println(contentAsString(result))
+
     (status(result), redirectLocation(result)) shouldBe (INTERNAL_SERVER_ERROR -> None)
     contentAsString(result)                      should include(
       messageFromMessageKey("global.error.InternalServerError500.title")
@@ -147,6 +151,10 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     result: Future[Result],
     expectedRedirectUrl: String
   ): Unit = {
+    import cats.syntax.eq._
+    import cats.instances.int._
+    if (status(result) =!= SEE_OTHER) println(contentAsString(result))
+
     status(result)           shouldBe SEE_OTHER
     redirectLocation(result) shouldBe Some(expectedRedirectUrl)
   }

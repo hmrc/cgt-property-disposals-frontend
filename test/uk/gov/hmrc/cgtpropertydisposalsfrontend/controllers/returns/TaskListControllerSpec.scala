@@ -30,7 +30,23 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SingleMixedUseDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -136,13 +152,14 @@ class TaskListControllerSpec
         sectionLinkHref: Call,
         sectionsStatus: TaskListStatus,
         extraChecks: Document => Unit = _ => (),
-        previousSentReturns: Option[List[ReturnSummary]] = None
+        previousSentReturns: Option[List[ReturnSummary]] = None,
+        amendReturnData: Option[AmendReturnData] = None
       ): Unit =
         withClue(s"For draft return $draftReturn: ") {
           val fillingOutReturn = sample[FillingOutReturn].copy(
             draftReturn = removeEvidence(draftReturn),
             previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence]))),
-            originalReturn = None
+            amendReturnData = amendReturnData
           )
 
           inSequence {
@@ -188,14 +205,15 @@ class TaskListControllerSpec
 
       def testSectionNonExistent(
         draftReturn: DraftReturn,
-        previousSentReturns: Option[List[ReturnSummary]] = None
+        previousSentReturns: Option[List[ReturnSummary]] = None,
+        amendReturnData: Option[AmendReturnData] = None
       )(
         sectionLinkId: String
       ): Unit = {
         val fillingOutReturn = sample[FillingOutReturn].copy(
           draftReturn = removeEvidence(draftReturn),
           previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence]))),
-          originalReturn = None
+          amendReturnData = amendReturnData
         )
 
         inSequence {
@@ -618,6 +636,7 @@ class TaskListControllerSpec
           def test(
             draftReturn: DraftSingleDisposalReturn,
             previousSentReturns: Option[List[ReturnSummary]],
+            amendReturnData: Option[AmendReturnData],
             expectedStatus: TaskListStatus
           ) =
             testStateOfSection(draftReturn)(
@@ -625,7 +644,8 @@ class TaskListControllerSpec
               messageFromMessageKey("task-list.gain-or-loss-after-reliefs.link"),
               gainorlossafterreliefs.routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               expectedStatus,
-              previousSentReturns = previousSentReturns
+              previousSentReturns = previousSentReturns,
+              amendReturnData = amendReturnData
             )
 
           val prerequisiteDraftReturn =
@@ -648,6 +668,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(propertyAddress = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -656,6 +677,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(disposalDetailsAnswers = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -664,6 +686,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(disposalDetailsAnswers = Some(sample[IncompleteDisposalDetailsAnswers])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -672,6 +695,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(acquisitionDetailsAnswers = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -681,6 +705,7 @@ class TaskListControllerSpec
                 prerequisiteDraftReturn
                   .copy(acquisitionDetailsAnswers = Some(sample[IncompleteAcquisitionDetailsAnswers])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -689,6 +714,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(reliefDetailsAnswers = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -697,6 +723,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -705,6 +732,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.ToDo
               )
             }
@@ -713,15 +741,43 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = Some(sample[AmountInPence])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.Complete
               )
             }
 
           }
 
-          "the return is not a further return" in {
-            testSectionNonExistent(prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None), None)(
+          "the return is not a further return or an amend return" in {
+            testSectionNonExistent(prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None), None, None)(
               "gainOrLossAfterReliefs"
+            )
+          }
+
+          "the return is an amend return where gain or loss after reliefs shouldn't be shown" in {
+            testSectionNonExistent(
+              prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
+              None,
+              Some(
+                sample[AmendReturnData].copy(
+                  shouldDisplayGainOrLossAfterReliefs = false
+                )
+              )
+            )(
+              "gainOrLossAfterReliefs"
+            )
+          }
+
+          "the return is an amend return where gain or loss after reliefs should be shown" in {
+            test(
+              prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
+              None,
+              Some(
+                sample[AmendReturnData].copy(
+                  shouldDisplayGainOrLossAfterReliefs = true
+                )
+              ),
+              TaskListStatus.ToDo
             )
           }
 
@@ -1119,7 +1175,7 @@ class TaskListControllerSpec
                         supportingEvidenceAnswers = None,
                         yearToDateLiabilityAnswers = None
                       ),
-                      originalReturn = None
+                      amendReturnData = None
                     )
                   )
                 )
@@ -1301,6 +1357,7 @@ class TaskListControllerSpec
           def test(
             draftReturn: DraftMultipleDisposalsReturn,
             previousSentReturns: Option[List[ReturnSummary]],
+            amendReturnData: Option[AmendReturnData],
             expectedStatus: TaskListStatus
           ) =
             testStateOfSection(draftReturn)(
@@ -1308,7 +1365,8 @@ class TaskListControllerSpec
               messageFromMessageKey("task-list.gain-or-loss-after-reliefs.link"),
               gainorlossafterreliefs.routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               expectedStatus,
-              previousSentReturns = previousSentReturns
+              previousSentReturns = previousSentReturns,
+              amendReturnData = amendReturnData
             )
 
           val prerequisiteDraftReturn =
@@ -1327,6 +1385,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(examplePropertyDetailsAnswers = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -1335,6 +1394,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(examplePropertyDetailsAnswers = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -1343,6 +1403,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.ToDo
               )
             }
@@ -1351,15 +1412,43 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = Some(sample[AmountInPence])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.Complete
               )
             }
 
           }
 
-          "the return is not a further return" in {
-            testSectionNonExistent(prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None), None)(
+          "the return is not a further return or an amend return" in {
+            testSectionNonExistent(prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None), None, None)(
               "gainOrLossAfterReliefs"
+            )
+          }
+
+          "the return is an amend return where gain or loss after reliefs shouldn't be shown" in {
+            testSectionNonExistent(
+              prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
+              None,
+              Some(
+                sample[AmendReturnData].copy(
+                  shouldDisplayGainOrLossAfterReliefs = false
+                )
+              )
+            )(
+              "gainOrLossAfterReliefs"
+            )
+          }
+
+          "the return is an amend return where gain or loss after reliefs should be shown" in {
+            test(
+              prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
+              None,
+              Some(
+                sample[AmendReturnData].copy(
+                  shouldDisplayGainOrLossAfterReliefs = true
+                )
+              ),
+              TaskListStatus.ToDo
             )
           }
 
@@ -1759,6 +1848,7 @@ class TaskListControllerSpec
           def test(
             draftReturn: DraftSingleIndirectDisposalReturn,
             previousSentReturns: Option[List[ReturnSummary]],
+            amendReturnData: Option[AmendReturnData],
             expectedStatus: TaskListStatus
           ) =
             testStateOfSection(draftReturn)(
@@ -1766,7 +1856,8 @@ class TaskListControllerSpec
               messageFromMessageKey("task-list.gain-or-loss-after-reliefs.link"),
               gainorlossafterreliefs.routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               expectedStatus,
-              previousSentReturns = previousSentReturns
+              previousSentReturns = previousSentReturns,
+              amendReturnData = amendReturnData
             )
 
           val prerequisiteDraftReturn =
@@ -1787,6 +1878,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(companyAddress = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -1795,6 +1887,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(disposalDetailsAnswers = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -1803,6 +1896,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(disposalDetailsAnswers = Some(sample[IncompleteDisposalDetailsAnswers])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -1811,6 +1905,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(acquisitionDetailsAnswers = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -1820,6 +1915,7 @@ class TaskListControllerSpec
                 prerequisiteDraftReturn
                   .copy(acquisitionDetailsAnswers = Some(sample[IncompleteAcquisitionDetailsAnswers])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -1828,6 +1924,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.ToDo
               )
             }
@@ -1836,15 +1933,43 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = Some(sample[AmountInPence])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.Complete
               )
             }
 
           }
 
-          "the return is not a further return" in {
-            testSectionNonExistent(prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None), None)(
+          "the return is not a further return or an amend return" in {
+            testSectionNonExistent(prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None), None, None)(
               "gainOrLossAfterReliefs"
+            )
+          }
+
+          "the return is an amend return where gain or loss after reliefs shouldn't be shown" in {
+            testSectionNonExistent(
+              prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
+              None,
+              Some(
+                sample[AmendReturnData].copy(
+                  shouldDisplayGainOrLossAfterReliefs = false
+                )
+              )
+            )(
+              "gainOrLossAfterReliefs"
+            )
+          }
+
+          "the return is an amend return where gain or loss after reliefs should be shown" in {
+            test(
+              prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
+              None,
+              Some(
+                sample[AmendReturnData].copy(
+                  shouldDisplayGainOrLossAfterReliefs = true
+                )
+              ),
+              TaskListStatus.ToDo
             )
           }
 
@@ -2097,7 +2222,7 @@ class TaskListControllerSpec
                         supportingEvidenceAnswers = None,
                         yearToDateLiabilityAnswers = None
                       ),
-                      originalReturn = None
+                      amendReturnData = None
                     )
                   )
                 )
@@ -2285,6 +2410,7 @@ class TaskListControllerSpec
           def test(
             draftReturn: DraftMultipleIndirectDisposalsReturn,
             previousSentReturns: Option[List[ReturnSummary]],
+            amendReturnData: Option[AmendReturnData],
             expectedStatus: TaskListStatus
           ) =
             testStateOfSection(draftReturn)(
@@ -2292,7 +2418,8 @@ class TaskListControllerSpec
               messageFromMessageKey("task-list.gain-or-loss-after-reliefs.link"),
               gainorlossafterreliefs.routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               expectedStatus,
-              previousSentReturns = previousSentReturns
+              previousSentReturns = previousSentReturns,
+              amendReturnData = amendReturnData
             )
 
           val prerequisiteDraftReturn =
@@ -2311,6 +2438,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(exampleCompanyDetailsAnswers = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -2320,6 +2448,7 @@ class TaskListControllerSpec
                 prerequisiteDraftReturn
                   .copy(exampleCompanyDetailsAnswers = Some(sample[IncompleteExampleCompanyDetailsAnswers])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -2328,6 +2457,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.ToDo
               )
             }
@@ -2336,15 +2466,43 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = Some(sample[AmountInPence])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.Complete
               )
             }
 
           }
 
-          "the return is not a further return" in {
-            testSectionNonExistent(prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None), None)(
+          "the return is not a further return or an amend return" in {
+            testSectionNonExistent(prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None), None, None)(
               "gainOrLossAfterReliefs"
+            )
+          }
+
+          "the return is an amend return where gain or loss after reliefs shouldn't be shown" in {
+            testSectionNonExistent(
+              prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
+              None,
+              Some(
+                sample[AmendReturnData].copy(
+                  shouldDisplayGainOrLossAfterReliefs = false
+                )
+              )
+            )(
+              "gainOrLossAfterReliefs"
+            )
+          }
+
+          "the return is an amend return where gain or loss after reliefs should be shown" in {
+            test(
+              prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
+              None,
+              Some(
+                sample[AmendReturnData].copy(
+                  shouldDisplayGainOrLossAfterReliefs = true
+                )
+              ),
+              TaskListStatus.ToDo
             )
           }
 
@@ -2648,6 +2806,7 @@ class TaskListControllerSpec
           def test(
             draftReturn: DraftSingleMixedUseDisposalReturn,
             previousSentReturns: Option[List[ReturnSummary]],
+            amendReturnData: Option[AmendReturnData],
             expectedStatus: TaskListStatus
           ) =
             testStateOfSection(draftReturn)(
@@ -2655,7 +2814,8 @@ class TaskListControllerSpec
               messageFromMessageKey("task-list.gain-or-loss-after-reliefs.link"),
               gainorlossafterreliefs.routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               expectedStatus,
-              previousSentReturns = previousSentReturns
+              previousSentReturns = previousSentReturns,
+              amendReturnData = amendReturnData
             )
 
           val prerequisiteDraftReturn =
@@ -2674,6 +2834,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(mixedUsePropertyDetailsAnswers = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -2683,6 +2844,7 @@ class TaskListControllerSpec
                 prerequisiteDraftReturn
                   .copy(mixedUsePropertyDetailsAnswers = Some(sample[IncompleteMixedUsePropertyDetailsAnswers])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.CannotStart
               )
             }
@@ -2691,6 +2853,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.ToDo
               )
             }
@@ -2699,18 +2862,45 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = Some(sample[AmountInPence])),
                 Some(List(sample[ReturnSummary])),
+                None,
                 TaskListStatus.Complete
               )
             }
 
           }
 
-          "the return is not a further return" in {
-            testSectionNonExistent(prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None), None)(
+          "the return is not a further return or an amend return" in {
+            testSectionNonExistent(prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None), None, None)(
               "gainOrLossAfterReliefs"
             )
           }
 
+          "the return is an amend return where gain or loss after reliefs shouldn't be shown" in {
+            testSectionNonExistent(
+              prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
+              None,
+              Some(
+                sample[AmendReturnData].copy(
+                  shouldDisplayGainOrLossAfterReliefs = false
+                )
+              )
+            )(
+              "gainOrLossAfterReliefs"
+            )
+          }
+
+          "the return is an amend return where gain or loss after reliefs should be shown" in {
+            test(
+              prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
+              None,
+              Some(
+                sample[AmendReturnData].copy(
+                  shouldDisplayGainOrLossAfterReliefs = true
+                )
+              ),
+              TaskListStatus.ToDo
+            )
+          }
         }
 
         "display the page with the enter losses and exemptions section status" when {

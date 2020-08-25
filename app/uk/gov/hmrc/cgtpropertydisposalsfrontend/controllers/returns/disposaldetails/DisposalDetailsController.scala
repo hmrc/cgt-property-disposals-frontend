@@ -191,7 +191,8 @@ class DisposalDetailsController @Inject() (
           formWithErrors => BadRequest(page(formWithErrors, backLink)),
           { value =>
             val newDraftReturn = updateAnswers(value, answers, draftReturn)
-            val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn.merge)
+            val newJourney     =
+              fillingOutReturn.copy(draftReturn = newDraftReturn.merge).withForceDisplayGainOrLossAfterReliefsForAmends
 
             val result = for {
               _ <- if (newDraftReturn.merge === draftReturn.merge)

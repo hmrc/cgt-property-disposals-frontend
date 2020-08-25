@@ -17,7 +17,15 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import org.scalatest.{Matchers, WordSpec}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -26,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, ReturnSummary}
 
 class JourneyStatusSpec extends WordSpec with Matchers {
 
@@ -184,6 +192,37 @@ class JourneyStatusSpec extends WordSpec with Matchers {
 
         }
 
+      }
+
+      "says whether or not the return is an amend return" in {
+        sample[FillingOutReturn].copy(amendReturnData = Some(sample[AmendReturnData])).isAmendReturn shouldBe true
+        sample[FillingOutReturn].copy(amendReturnData = None).isAmendReturn                          shouldBe false
+      }
+
+      "sets the shouldDisplayGainOrLossAfterReliefs field correctly" in {
+        val fillingOutReturn = sample[FillingOutReturn].copy(amendReturnData = None)
+        val amendReturnData  = sample[AmendReturnData]
+
+        def fillingOutReturnWithDisplayGainOrLossAfterReliefsForAmends(shouldDisplayGainOrLossAfterReliefs: Boolean) =
+          fillingOutReturn.copy(amendReturnData =
+            Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = shouldDisplayGainOrLossAfterReliefs))
+          )
+
+        fillingOutReturnWithDisplayGainOrLossAfterReliefsForAmends(
+          true
+        ).withForceDisplayGainOrLossAfterReliefsForAmends shouldBe
+          fillingOutReturnWithDisplayGainOrLossAfterReliefsForAmends(
+            true
+          ).withForceDisplayGainOrLossAfterReliefsForAmends
+
+        fillingOutReturnWithDisplayGainOrLossAfterReliefsForAmends(
+          false
+        ).withForceDisplayGainOrLossAfterReliefsForAmends shouldBe
+          fillingOutReturnWithDisplayGainOrLossAfterReliefsForAmends(
+            true
+          ).withForceDisplayGainOrLossAfterReliefsForAmends
+
+        fillingOutReturn.withForceDisplayGainOrLossAfterReliefsForAmends shouldBe fillingOutReturn
       }
 
     }

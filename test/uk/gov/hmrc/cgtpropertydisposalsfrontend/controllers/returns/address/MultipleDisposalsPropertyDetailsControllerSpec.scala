@@ -34,7 +34,19 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, DateErrorScenarios}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
@@ -49,7 +61,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, SessionData, TaxYear, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 
@@ -1690,13 +1702,22 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         def test(
           result: => Future[Result],
           oldDraftReturn: DraftReturn,
-          updatedDraftReturn: DraftReturn
+          updatedDraftReturn: DraftReturn,
+          isAmend: Boolean
         ): Unit = {
-
-          val journey        =
-            sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
-          val session        = SessionData.empty.copy(journeyStatus = Some(journey))
-          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+          val amendReturnData = sample[AmendReturnData]
+          val journey         =
+            sample[FillingOutReturn].copy(
+              draftReturn = oldDraftReturn,
+              amendReturnData =
+                if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false)) else None
+            )
+          val session         = SessionData.empty.copy(journeyStatus = Some(journey))
+          val updatedJourney  = journey.copy(
+            draftReturn = updatedDraftReturn,
+            amendReturnData =
+              if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true)) else None
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1743,7 +1764,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             test(
               performAction(formData(updatedDisposalDate.value): _*),
               oldDraftReturn,
-              updatedDraftReturn
+              updatedDraftReturn,
+              isAmend = false
             )
 
           }
@@ -1778,7 +1800,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             test(
               performAction(formData(updatedDisposalDate.value): _*),
               oldDraftReturn,
-              updatedDraftReturn
+              updatedDraftReturn,
+              isAmend = false
             )
 
           }
@@ -1816,7 +1839,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             test(
               performAction(formData(disposalDate.value): _*),
               oldDraftReturn,
-              updatedDraftReturn
+              updatedDraftReturn,
+              isAmend = true
             )
 
           }
@@ -2156,13 +2180,23 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         def test(
           result: => Future[Result],
           oldDraftReturn: DraftReturn,
-          updatedDraftReturn: DraftReturn
+          updatedDraftReturn: DraftReturn,
+          isAmend: Boolean
         ): Unit = {
+          val amendReturnData = sample[AmendReturnData]
 
           val journey        =
-            sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
+            sample[FillingOutReturn].copy(
+              draftReturn = oldDraftReturn,
+              amendReturnData =
+                if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false)) else None
+            )
           val session        = SessionData.empty.copy(journeyStatus = Some(journey))
-          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+          val updatedJourney = journey.copy(
+            draftReturn = updatedDraftReturn,
+            amendReturnData =
+              if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true)) else None
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2201,7 +2235,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             performAction(key -> "10"),
             oldDraftReturn,
-            updatedDraftReturn
+            updatedDraftReturn,
+            isAmend = false
           )
         }
 
@@ -2231,7 +2266,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             performAction(key -> "10"),
             oldDraftReturn,
-            updatedDraftReturn
+            updatedDraftReturn,
+            isAmend = false
           )
         }
 
@@ -2306,7 +2342,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     agentReferenceNumber =
                       if (userType === Agent) Some(sample[AgentReferenceNumber])
                       else None,
-                    originalReturn = if (isAmend) Some(sample[CompleteReturnWithSummary]) else None
+                    amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
                   )
                 )
               )
@@ -2751,13 +2787,22 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         def test(
           result: => Future[Result],
           oldDraftReturn: DraftReturn,
-          updatedDraftReturn: DraftReturn
+          updatedDraftReturn: DraftReturn,
+          isAmend: Boolean
         ): Unit = {
-
-          val journey        =
-            sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
-          val session        = SessionData.empty.copy(journeyStatus = Some(journey))
-          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+          val amendReturnData = sample[AmendReturnData]
+          val journey         =
+            sample[FillingOutReturn].copy(
+              draftReturn = oldDraftReturn,
+              amendReturnData =
+                if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false)) else None
+            )
+          val session         = SessionData.empty.copy(journeyStatus = Some(journey))
+          val updatedJourney  = journey.copy(
+            draftReturn = updatedDraftReturn,
+            amendReturnData =
+              if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = true)) else None
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2767,7 +2812,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
             mockStoreSession(
               session
-                .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+                .copy(journeyStatus = Some(updatedJourney))
             )(Right(()))
           }
 
@@ -2800,7 +2845,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             performAction(key -> "100"),
             oldDraftReturn,
-            newDraftReturn
+            newDraftReturn,
+            isAmend = true
           )
         }
 
@@ -2829,7 +2875,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             performAction(key -> "100"),
             oldDraftReturn,
-            newDraftReturn
+            newDraftReturn,
+            isAmend = true
           )
         }
 

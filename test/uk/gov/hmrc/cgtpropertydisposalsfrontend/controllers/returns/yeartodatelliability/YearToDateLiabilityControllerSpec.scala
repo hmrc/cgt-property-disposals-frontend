@@ -36,7 +36,26 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AmountOfMoneyErrorScenarios, AuthSupport, ControllerSpec, SessionSupport, returns}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalMethodGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
@@ -191,7 +210,7 @@ class YearToDateLiabilityControllerSpec
         name = setNameForUserType(userType)
       ),
       draftReturn = draftReturn,
-      originalReturn = None
+      amendReturnData = None
     )
 
   def sessionWithSingleIndirectDisposalState(
@@ -218,7 +237,7 @@ class YearToDateLiabilityControllerSpec
       ),
       draftReturn = draftReturn,
       previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None,
-      originalReturn = None
+      amendReturnData = None
     )
     (
       SessionData.empty.copy(
@@ -265,7 +284,7 @@ class YearToDateLiabilityControllerSpec
       ),
       draftReturn = draftReturn,
       previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None,
-      originalReturn = None
+      amendReturnData = None
     )
     (
       SessionData.empty.copy(
@@ -318,7 +337,7 @@ class YearToDateLiabilityControllerSpec
       previousSentReturns =
         if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence])))
         else None,
-      originalReturn = None
+      amendReturnData = None
     )
     (
       SessionData.empty.copy(
@@ -365,7 +384,7 @@ class YearToDateLiabilityControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
       draftReturn = draftReturn,
       previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None,
-      originalReturn = None
+      amendReturnData = None
     )
     (
       SessionData.empty.copy(
@@ -1164,7 +1183,10 @@ class YearToDateLiabilityControllerSpec
       "redirect to the check your answers page" when {
 
         val disposalDate = sample[DisposalDate].copy(
-          taxYear = sample[TaxYear].copy(personalAllowance = AmountInPence(1000L))
+          taxYear = sample[TaxYear].copy(
+            personalAllowance = AmountInPence(1000L),
+            maxPersonalAllowance = AmountInPence(1000L)
+          )
         )
 
         "the user had started answering questions in this section but had not completed it" in {
@@ -1215,7 +1237,10 @@ class YearToDateLiabilityControllerSpec
       "not do any updates if the submitted answer is the same as one already stored in session and" when {
 
         val disposalDate = sample[DisposalDate].copy(
-          taxYear = sample[TaxYear].copy(personalAllowance = AmountInPence(1000L))
+          taxYear = sample[TaxYear].copy(
+            personalAllowance = AmountInPence(1000L),
+            maxPersonalAllowance = AmountInPence(1000L)
+          )
         )
 
         "the section is incomplete" in {
@@ -2027,7 +2052,7 @@ class YearToDateLiabilityControllerSpec
                       sample[DisposalDate],
                       completeReliefDetailsAnswersWithNoOtherReliefs
                     ),
-                    originalReturn = None
+                    amendReturnData = None
                   )
                 )
               )
@@ -2072,7 +2097,7 @@ class YearToDateLiabilityControllerSpec
                     .copy(
                       subscribedDetails = subscribedDetails,
                       draftReturn = draftReturn,
-                      originalReturn = None
+                      amendReturnData = None
                     )
                 )
               )
@@ -2098,7 +2123,7 @@ class YearToDateLiabilityControllerSpec
             sample[FillingOutReturn].copy(
               draftReturn = draftReturn,
               subscribedDetails = subscribedDetails,
-              originalReturn = None
+              amendReturnData = None
             )
           val updatedFillingOutReturn      = fillingOutReturn.copy(draftReturn =
             draftReturn.copy(
@@ -2147,7 +2172,7 @@ class YearToDateLiabilityControllerSpec
           val fillingOutReturn             = sample[FillingOutReturn].copy(
             subscribedDetails = subscribedDetails,
             draftReturn = draftReturn,
-            originalReturn = None
+            amendReturnData = None
           )
 
           val session =
@@ -2393,7 +2418,7 @@ class YearToDateLiabilityControllerSpec
         val journey     = sample[FillingOutReturn].copy(
           draftReturn = draftReturn,
           previousSentReturns = None,
-          originalReturn = None
+          amendReturnData = None
         )
         val newJourney  = journey.copy(draftReturn =
           draftReturn.copy(
@@ -3402,7 +3427,7 @@ class YearToDateLiabilityControllerSpec
             draftReturn = draftReturn,
             previousSentReturns =
               Some(PreviousReturnData(if (isFurtherReturn) List(sample[ReturnSummary]) else List.empty, None)),
-            originalReturn = None
+            amendReturnData = None
           )
 
           val session = SessionData.empty.copy(journeyStatus = Some(journey))
@@ -4390,7 +4415,7 @@ class YearToDateLiabilityControllerSpec
                       if (userType == UserType.Organisation) Left(sample[TrustName])
                       else Right(sample[IndividualName])
                   ),
-                  originalReturn = None
+                  amendReturnData = None
                 )
               )
             )
@@ -4494,7 +4519,7 @@ class YearToDateLiabilityControllerSpec
                       if (userType == UserType.Organisation) Left(sample[TrustName])
                       else Right(sample[IndividualName])
                   ),
-                  originalReturn = None
+                  amendReturnData = None
                 )
               )
             )
@@ -4680,7 +4705,7 @@ class YearToDateLiabilityControllerSpec
               )
             ),
             subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
-            originalReturn = None
+            amendReturnData = None
           )
           val newJourney                  = journey.copy(
             draftReturn = draftReturn.copy(
@@ -4738,7 +4763,7 @@ class YearToDateLiabilityControllerSpec
               )
             ),
             subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
-            originalReturn = None
+            amendReturnData = None
           )
           val newJourney          = journey.copy(
             draftReturn = draftReturn.copy(
@@ -6466,7 +6491,7 @@ class YearToDateLiabilityControllerSpec
       def test(draftReturn: DraftSingleDisposalReturn): Unit = {
         val session = SessionData.empty.copy(
           journeyStatus = Some(
-            sample[FillingOutReturn].copy(draftReturn = draftReturn, originalReturn = None)
+            sample[FillingOutReturn].copy(draftReturn = draftReturn, amendReturnData = None)
           )
         )
         inSequence {
@@ -6717,7 +6742,10 @@ class YearToDateLiabilityControllerSpec
   ): Unit = {
     val (_, journey, draftReturn) = sessionWithSingleDisposalState(
       currentAnswers,
-      sample[DisposalDate].copy(taxYear = sample[TaxYear].copy(personalAllowance = AmountInPence(Long.MaxValue))),
+      sample[DisposalDate].copy(taxYear =
+        sample[TaxYear]
+          .copy(personalAllowance = AmountInPence(Long.MaxValue), maxPersonalAllowance = AmountInPence(Long.MaxValue))
+      ),
       UserType.Individual,
       wasUkResident = true
     )
@@ -6809,7 +6837,7 @@ class YearToDateLiabilityControllerSpec
         draftReturn = oldDraftReuturn,
         subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
         previousSentReturns = None,
-        originalReturn = None
+        amendReturnData = None
       )
 
     testSuccessfulUpdatesAfterSubmit(
@@ -6864,7 +6892,7 @@ class YearToDateLiabilityControllerSpec
         draftReturn = draftReturn,
         subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
         previousSentReturns = previousSentReturnData,
-        originalReturn = None
+        amendReturnData = None
       )
 
     val newDraftReturn = draftReturn.copy(
@@ -6889,7 +6917,7 @@ class YearToDateLiabilityControllerSpec
         draftReturn = draftReturn,
         subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
         previousSentReturns = None,
-        originalReturn = None
+        amendReturnData = None
       )
     val newDraftReturn   =
       draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))

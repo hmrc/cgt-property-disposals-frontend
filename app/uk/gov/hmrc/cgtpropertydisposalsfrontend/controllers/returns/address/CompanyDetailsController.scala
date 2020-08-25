@@ -303,7 +303,8 @@ class CompanyDetailsController @Inject() (
                       yearToDateLiabilityAnswers = None,
                       gainOrLossAfterReliefs = None
                     )
-                    val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
+                    val updatedJourney     =
+                      r.journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
                     val result             = for {
                       _ <- returnsService.storeDraftReturn(updatedJourney)
                       _ <- EitherT(
@@ -406,7 +407,8 @@ class CompanyDetailsController @Inject() (
                       yearToDateLiabilityAnswers = None,
                       gainOrLossAfterReliefs = None
                     )
-                    val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
+                    val updatedJourney     =
+                      r.journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
                     val result             = for {
                       _ <- returnsService.storeDraftReturn(updatedJourney)
                       _ <- EitherT(
