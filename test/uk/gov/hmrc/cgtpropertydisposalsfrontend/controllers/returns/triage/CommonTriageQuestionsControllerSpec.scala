@@ -209,6 +209,40 @@ class CommonTriageQuestionsControllerSpec
     (sessionData, fillingOutReturn, draftReturn)
   }
 
+  def sessionDataWithFillingOutReturnForSingleMixedUseDisposal(
+    singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+    userType: UserType = UserType.Individual,
+    previousReturns: Option[PreviousReturnData] = None,
+    isAmend: Boolean = false
+  ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) = {
+    val draftReturn      = sample[DraftSingleMixedUseDisposalReturn].copy(
+      triageAnswers = singleDisposalTriageAnswers,
+      gainOrLossAfterReliefs = None,
+      exemptionAndLossesAnswers = None
+    )
+    val fillingOutReturn = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = sample[SubscribedDetails].copy(name = name),
+      previousSentReturns = previousReturns,
+      amendReturnData =
+        if (isAmend)
+          Some(
+            sample[AmendReturnData].copy(
+              shouldDisplayGainOrLossAfterReliefs = true
+            )
+          )
+        else None
+    )
+
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(fillingOutReturn),
+      userType = Some(userType)
+    )
+
+    (sessionData, fillingOutReturn, draftReturn)
+  }
+
   def sessionDataWithFillingOutReturnForMultpleDisposals(
     multipleDisposalsTriageAnswers: MultipleDisposalsTriageAnswers,
     isAmend: Boolean = false
@@ -2470,6 +2504,41 @@ class CommonTriageQuestionsControllerSpec
 
               test(
                 routes.MultipleDisposalsTriageController.disposalDateOfShares()
+              )
+            }
+          }
+
+          "the user is on a single mideduse disposal journey" in {
+            val disposalDate                                = sample[DisposalDate].copy(
+              value = LocalDate.of(2020, 4, 10)
+            )
+            val completeTriageQuestions                     =
+              CompleteSingleDisposalTriageAnswers(
+                Some(IndividualUserType.Self),
+                DisposalMethod.Sold,
+                Country.uk,
+                assetType = AssetType.Residential,
+                disposalDate,
+                sample[CompletionDate]
+              )
+            val completeTriageQuestionsWithIndirectDisposal = completeTriageQuestions.copy(
+              assetType = AssetType.MixedUse,
+              countryOfResidence = Country("TR"),
+              disposalDate = disposalDate.copy(
+                value = LocalDate.of(2019, 4, 10)
+              )
+            )
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturnForSingleMixedUseDisposal(
+                  completeTriageQuestionsWithIndirectDisposal,
+                  isAmend = true
+                )._1
+              )
+
+              test(
+                routes.SingleDisposalsTriageController.whenWasDisposalDate()
               )
             }
           }
