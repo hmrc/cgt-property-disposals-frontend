@@ -2350,7 +2350,11 @@ class SingleDisposalsTriageControllerSpec
                 completeJourney,
                 formData(date),
                 (fillingOutReturn, draftReturn) =>
-                  fillingOutReturn.copy(draftReturn = updateDraftReturn(draftReturn, newAnswers)),
+                  fillingOutReturn
+                    .copy(
+                      draftReturn = updateDraftReturn(draftReturn, newAnswers)
+                    )
+                    .withForceDisplayGainOrLossAfterReliefsForAmends,
                 checkIsRedirect(
                   _,
                   routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
@@ -2369,12 +2373,14 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(today),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(disposalDate = Some(DisposalDate(today, taxYear)))
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(disposalDate = Some(DisposalDate(today, taxYear)))
+                    )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
@@ -2395,12 +2401,14 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(newDisposalDate.value),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(disposalDate = Some(newDisposalDate))
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(disposalDate = Some(newDisposalDate))
+                    )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
@@ -2422,12 +2430,14 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(newDisposalDate.value),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(disposalDate = Some(newDisposalDate), disposalMethod = Some(DisposalMethod.Sold))
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(disposalDate = Some(newDisposalDate), disposalMethod = Some(DisposalMethod.Sold))
+                    )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
@@ -4675,7 +4685,11 @@ class SingleDisposalsTriageControllerSpec
                 completeJourney,
                 formData(date),
                 (fillingOutReturn, draftReturn) =>
-                  fillingOutReturn.copy(draftReturn = updateDraftReturn(draftReturn, newAnswers)),
+                  fillingOutReturn
+                    .copy(
+                      draftReturn = updateDraftReturn(draftReturn, newAnswers)
+                    )
+                    .withForceDisplayGainOrLossAfterReliefsForAmends,
                 checkIsRedirect(
                   _,
                   routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
@@ -4694,15 +4708,17 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(today),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(
-                      disposalDate = Some(DisposalDate(today, taxYear)),
-                      completionDate = Some(CompletionDate(today))
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(
+                        disposalDate = Some(DisposalDate(today, taxYear)),
+                        completionDate = Some(CompletionDate(today))
+                      )
                     )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
@@ -4723,15 +4739,17 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(newDisposalDate.value),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(
-                      disposalDate = Some(newDisposalDate),
-                      completionDate = Some(CompletionDate(newDisposalDate.value))
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(
+                        disposalDate = Some(newDisposalDate),
+                        completionDate = Some(CompletionDate(newDisposalDate.value))
+                      )
                     )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
@@ -4751,16 +4769,18 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(newDisposalDate.value),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(
-                      disposalDate = Some(newDisposalDate),
-                      completionDate = Some(CompletionDate(newDisposalDate.value)),
-                      disposalMethod = Some(DisposalMethod.Sold)
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(
+                        disposalDate = Some(newDisposalDate),
+                        completionDate = Some(CompletionDate(newDisposalDate.value)),
+                        disposalMethod = Some(DisposalMethod.Sold)
+                      )
                     )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
@@ -5819,11 +5839,7 @@ class SingleDisposalsTriageControllerSpec
       draftReturn = draftReturn,
       amendReturnData =
         if (isAmend)
-          Some(
-            sample[AmendReturnData].copy(
-              shouldDisplayGainOrLossAfterReliefs = true
-            )
-          )
+          Some(sample[AmendReturnData])
         else None
     )
 

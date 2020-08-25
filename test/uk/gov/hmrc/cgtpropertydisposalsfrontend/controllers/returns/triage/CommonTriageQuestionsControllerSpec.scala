@@ -151,7 +151,9 @@ class CommonTriageQuestionsControllerSpec
       gainOrLossAfterReliefs = None,
       exemptionAndLossesAnswers = None,
       reliefDetailsAnswers =
-        if (singleDisposalTriageAnswers.isPeriodOfAdmin()) Some(IncompleteReliefDetailsAnswers.empty) else None
+        if (singleDisposalTriageAnswers.isPeriodOfAdmin())
+          Some(IncompleteReliefDetailsAnswers.empty)
+        else None
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
@@ -159,11 +161,7 @@ class CommonTriageQuestionsControllerSpec
       previousSentReturns = previousReturns,
       amendReturnData =
         if (isAmend)
-          Some(
-            sample[AmendReturnData].copy(
-              shouldDisplayGainOrLossAfterReliefs = true
-            )
-          )
+          Some(sample[AmendReturnData])
         else None
     )
 
@@ -193,11 +191,7 @@ class CommonTriageQuestionsControllerSpec
       previousSentReturns = previousReturns,
       amendReturnData =
         if (isAmend)
-          Some(
-            sample[AmendReturnData].copy(
-              shouldDisplayGainOrLossAfterReliefs = true
-            )
-          )
+          Some(sample[AmendReturnData])
         else None
     )
 
@@ -227,11 +221,7 @@ class CommonTriageQuestionsControllerSpec
       previousSentReturns = previousReturns,
       amendReturnData =
         if (isAmend)
-          Some(
-            sample[AmendReturnData].copy(
-              shouldDisplayGainOrLossAfterReliefs = true
-            )
-          )
+          Some(sample[AmendReturnData])
         else None
     )
 
@@ -255,11 +245,7 @@ class CommonTriageQuestionsControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
       amendReturnData =
         if (isAmend)
-          Some(
-            sample[AmendReturnData].copy(
-              shouldDisplayGainOrLossAfterReliefs = true
-            )
-          )
+          Some(sample[AmendReturnData])
         else None
     )
 
@@ -282,11 +268,7 @@ class CommonTriageQuestionsControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
       amendReturnData =
         if (isAmend)
-          Some(
-            sample[AmendReturnData].copy(
-              shouldDisplayGainOrLossAfterReliefs = true
-            )
-          )
+          Some(sample[AmendReturnData])
         else None
     )
 
