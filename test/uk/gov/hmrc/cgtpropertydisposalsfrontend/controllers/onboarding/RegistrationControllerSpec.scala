@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 import cats.Eq
 import cats.data.EitherT
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
@@ -96,11 +96,12 @@ class RegistrationControllerSpec
       .returning(EitherT(Future.successful(result)))
 
   def mockSubscribe(
-    subscriptionDetails: SubscriptionDetails
+    subscriptionDetails: SubscriptionDetails,
+    lang: Lang
   )(result: Either[Error, SubscriptionResponse]) =
     (mockSubscriptionService
-      .subscribe(_: SubscriptionDetails)(_: HeaderCarrier))
-      .expects(subscriptionDetails, *)
+      .subscribe(_: SubscriptionDetails, _: Lang)(_: HeaderCarrier))
+      .expects(subscriptionDetails, lang, *)
       .returning(EitherT(Future.successful(result)))
 
   "RegistrationController" when {
@@ -720,7 +721,7 @@ class RegistrationControllerSpec
             mockRegisterWithoutId(registrationReady.registrationDetails)(
               Right(RegisteredWithoutId(sapNumber))
             )
-            mockSubscribe(subscriptionDetails)(Left(Error("")))
+            mockSubscribe(subscriptionDetails, lang)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -733,7 +734,7 @@ class RegistrationControllerSpec
             mockRegisterWithoutId(registrationReady.registrationDetails)(
               Right(RegisteredWithoutId(sapNumber))
             )
-            mockSubscribe(subscriptionDetails)(
+            mockSubscribe(subscriptionDetails, lang)(
               Right(subscriptionSuccessfulResponse)
             )
             mockStoreSession(
@@ -767,7 +768,7 @@ class RegistrationControllerSpec
             mockRegisterWithoutId(registrationReady.registrationDetails)(
               Right(RegisteredWithoutId(sapNumber))
             )
-            mockSubscribe(subscriptionDetails)(
+            mockSubscribe(subscriptionDetails, lang)(
               Right(subscriptionSuccessfulResponse)
             )
             mockStoreSession(
@@ -813,7 +814,7 @@ class RegistrationControllerSpec
             mockRegisterWithoutId(registrationReady.registrationDetails)(
               Right(RegisteredWithoutId(sapNumber))
             )
-            mockSubscribe(subscriptionDetails)(Right(AlreadySubscribed))
+            mockSubscribe(subscriptionDetails, lang)(Right(AlreadySubscribed))
             mockStoreSession(sessionWithAlreadySubscribed)(Right(()))
           }
 

@@ -273,7 +273,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
     completeReturn.representeeAnswers match {
       case Some(a @ CompleteRepresenteeAnswers(_, NoReferenceId, _, _, _)) =>
         subscriptionService
-          .registerWithoutIdAndSubscribe(a)
+          .registerWithoutIdAndSubscribe(a, request.authenticatedRequest.request.messages.lang)
           .fold(
             _ => {
               logger.warn("Error registering user without id")
