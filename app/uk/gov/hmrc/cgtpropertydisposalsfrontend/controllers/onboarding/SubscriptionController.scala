@@ -68,7 +68,8 @@ class SubscriptionController @Inject() (
     authenticatedActionWithSubscriptionReady.async { implicit request =>
       val details = request.subscriptionReady.subscriptionDetails
       val result  = for {
-        subscriptionResponse <- subscriptionService.subscribe(details)
+        subscriptionResponse <-
+          subscriptionService.subscribe(details, request.authenticatedRequest.request.messages.lang)
         _                    <- EitherT(
                                   subscriptionResponse match {
                                     case SubscriptionSuccessful(cgtReferenceNumber) =>

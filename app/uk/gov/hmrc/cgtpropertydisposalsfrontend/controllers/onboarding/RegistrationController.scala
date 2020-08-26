@@ -314,7 +314,7 @@ class RegistrationController @Inject() (
                   ),
                   "subscription-request"
                 )
-              subscriptionService.subscribe(subscriptionDetails)
+              subscriptionService.subscribe(subscriptionDetails, request.authenticatedRequest.request.messages.lang)
             }
             _                    <- EitherT(subscriptionResponse match {
                                       case SubscriptionSuccessful(cgtReferenceNumber) =>

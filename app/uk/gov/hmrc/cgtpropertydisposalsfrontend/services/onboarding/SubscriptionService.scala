@@ -23,6 +23,7 @@ import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.{CONFLICT, NO_CONTENT, OK}
+import play.api.i18n.Lang
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
@@ -44,7 +45,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[SubscriptionServiceImpl])
 trait SubscriptionService {
 
-  def subscribe(subscriptionDetails: SubscriptionDetails)(implicit
+  def subscribe(subscriptionDetails: SubscriptionDetails, lang: Lang)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionResponse]
 
@@ -63,7 +64,7 @@ trait SubscriptionService {
     hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
-  def registerWithoutIdAndSubscribe(completeRepresenteeAnswers: CompleteRepresenteeAnswers)(implicit
+  def registerWithoutIdAndSubscribe(completeRepresenteeAnswers: CompleteRepresenteeAnswers, lang: Lang)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, RepresenteeCgtReference]
 
@@ -78,10 +79,11 @@ class SubscriptionServiceImpl @Inject() (
 ) extends SubscriptionService {
 
   override def subscribe(
-    subscriptionDetails: SubscriptionDetails
+    subscriptionDetails: SubscriptionDetails,
+    lang: Lang
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubscriptionResponse] =
     connector
-      .subscribe(subscriptionDetails)
+      .subscribe(subscriptionDetails, lang)
       .subflatMap { response =>
         if (response.status === OK)
           response.parseJSON[SubscriptionSuccessful]().leftMap(Error(_))
@@ -161,7 +163,8 @@ class SubscriptionServiceImpl @Inject() (
     }
 
   override def registerWithoutIdAndSubscribe(
-    representeeAnswers: CompleteRepresenteeAnswers
+    representeeAnswers: CompleteRepresenteeAnswers,
+    lang: Lang
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, RepresenteeCgtReference] = {
     val result = for {
       sapNumber            <- registerWithoutId(
@@ -182,7 +185,8 @@ class SubscriptionServiceImpl @Inject() (
                                   ManuallyEnteredEmail,
                                   ManuallyEnteredAddress,
                                   ManuallyEnteredContactName
-                                )
+                                ),
+                                lang
                               )
     } yield subscriptionResponse
 

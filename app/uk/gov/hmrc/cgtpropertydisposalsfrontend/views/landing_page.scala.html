@@ -163,20 +163,20 @@
     <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p1", appConfig.personalRepresentativeUrl))</p>
 
     <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p2", appConfig.contactHmrc))</p>
-    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p3"))</p>
     <ul class="list-bullet">
         <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet1")</li>
         <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet2")</li>
         <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet3")</li>
         <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet4")</li>
+        <ul class="list-bullet">
+            <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet1")</li>
+            <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet2")</li>
+            <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet3")</li>
+        </ul>
         <li>@Html(messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet5", appConfig.powerOfAttorney))</li>
     </ul>
     <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p4"))</p>
-    <ul class="list-bullet">
-        <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet1")</li>
-        <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet2")</li>
-        <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet3")</li>
-    </ul>
+
     <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p5"))</p>
     <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p6"))</p>
     @if(!appConfig.furtherReturnsEnabled) {

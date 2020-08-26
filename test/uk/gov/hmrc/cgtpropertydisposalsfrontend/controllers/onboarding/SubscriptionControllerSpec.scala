@@ -20,7 +20,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
@@ -44,7 +44,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{SubscribedDet
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
-
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -77,11 +76,12 @@ class SubscriptionControllerSpec
     SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails, ggCredId)))
 
   def mockSubscribe(
-    expectedSubscriptionDetails: SubscriptionDetails
+    expectedSubscriptionDetails: SubscriptionDetails,
+    expectedLang: Lang
   )(response: Either[Error, SubscriptionResponse]) =
     (mockSubscriptionService
-      .subscribe(_: SubscriptionDetails)(_: HeaderCarrier))
-      .expects(expectedSubscriptionDetails, *)
+      .subscribe(_: SubscriptionDetails, _: Lang)(_: HeaderCarrier))
+      .expects(expectedSubscriptionDetails, expectedLang, *)
       .returning(EitherT(Future.successful(response)))
 
   def redirectToStart(performAction: () => Future[Result]) =
@@ -186,7 +186,7 @@ class SubscriptionControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithSubscriptionDetails)
-            mockSubscribe(subscriptionDetails)(Left(Error(new Exception(""))))
+            mockSubscribe(subscriptionDetails, lang)(Left(Error(new Exception(""))))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -196,7 +196,7 @@ class SubscriptionControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithSubscriptionDetails)
-            mockSubscribe(subscriptionDetails)(
+            mockSubscribe(subscriptionDetails, lang)(
               Right(subscriptionSuccessfulResponse)
             )
             mockStoreSession(sessionWithSubscriptionComplete)(Left(Error("")))
@@ -213,7 +213,7 @@ class SubscriptionControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithSubscriptionDetails)
-            mockSubscribe(subscriptionDetails)(
+            mockSubscribe(subscriptionDetails, lang)(
               Right(subscriptionSuccessfulResponse)
             )
             mockStoreSession(sessionWithSubscriptionComplete)(Right(()))
@@ -236,7 +236,7 @@ class SubscriptionControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithSubscriptionDetails)
-            mockSubscribe(subscriptionDetails)(Right(AlreadySubscribed))
+            mockSubscribe(subscriptionDetails, lang)(Right(AlreadySubscribed))
             mockStoreSession(sessionWithAlreadySubscribed)(Right(()))
           }
 
