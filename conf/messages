@@ -57,9 +57,8 @@ landingPage.ifAgent.p1=Find out how to <a href="{0}">report your client’s Capi
 landingPage.ifTrust.h2=If you’re representing a trust
 landingPage.ifTrust.p1=The trust must be <a href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Trust Registration Number.
 landingPage.capacitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
-landingPage.capacitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
-landingPage.capacitorOrPersonalRepresentative.p2=To use this service for another person, you’ll need to:
-landingPage.capacitorOrPersonalRepresentative.p3=You’ll need to enter one of these reference numbers for the person you have the authority to act for, if you have one:
+landingPage.capacitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. A <a href="{0}">personal representative</a> is someone responsible for settling the affairs of someone who has died.
+landingPage.capacitorOrPersonalRepresentative.p2=To use this service for another person you’ll need to:
 landingPage.capacitorOrPersonalRepresentative.p4=The details you provide must match the details we hold about the person.
 landingPage.capacitorOrPersonalRepresentative.p5=If you’re a personal representative, you’ll also need to provide the date the person you’re representing died.
 landingPage.capacitorOrPersonalRepresentative.p6=You should download or print a copy of the return for your records. This is because once the return has been sent to HMRC it will not be available online to view or amend online.
@@ -71,11 +70,11 @@ landingPage.capacitorOrPersonalRepresentative.p10=To report and pay the tax, Mr 
 landingPage.capacitorOrPersonalRepresentative.list1.bullet1=sign in to your own Capital Gains Tax on UK property account or create one if you do not have one
 landingPage.capacitorOrPersonalRepresentative.list1.bullet2=start a new return from your account
 landingPage.capacitorOrPersonalRepresentative.list1.bullet3=select that you’re completing the return for someone else or someone who has died
-landingPage.capacitorOrPersonalRepresentative.list1.bullet4=enter the person’s full name
+landingPage.capacitorOrPersonalRepresentative.list1.bullet4=enter the person’s full name and, if available, one of the following:
 landingPage.capacitorOrPersonalRepresentative.list1.bullet5=provide evidence that you have the authority to act on their behalf, for example a <a href="{0}">lasting power of attorney (LPA)</a> document
-landingPage.capacitorOrPersonalRepresentative.list2.bullet1=National Insurance number
-landingPage.capacitorOrPersonalRepresentative.list2.bullet2=Self Assessment Unique Taxpayer Reference
-landingPage.capacitorOrPersonalRepresentative.list2.bullet3=Capital Gains Tax on UK property account number
+landingPage.capacitorOrPersonalRepresentative.list2.bullet1=their National Insurance number
+landingPage.capacitorOrPersonalRepresentative.list2.bullet2=their Self Assessment Unique Taxpayer Reference
+landingPage.capacitorOrPersonalRepresentative.list2.bullet3=their Capital Gains Tax on UK property account number
 
 landingPage.sidebar.title=Related content
 landingPage.sidebar.1=Calculate Capital Gains Tax
