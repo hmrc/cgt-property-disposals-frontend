@@ -5038,7 +5038,10 @@ unmetDependency.li1=answer questions about revised year-to-date gains, losses an
 unmetDependency.li2=work out the new amount of tax due as a result of the change
 unmetDependency.li3=upload a document showing how you worked out the new amount of tax due
 
-
+disposalDateInDifferentTaxYear.title=You cannot change this return online
+disposalDateInDifferentTaxYear.p1=Your disposal date falls into another tax year and affects your overall year to date liability.
+disposalDateInDifferentTaxYear.h2=What you will need to do next
+disposalDateInDifferentTaxYear.p2=You will need to <a href="{0}">Contact HMRC</a> to change your disposal date.
 
 #===================================================
 #  AMEND RETURNS - END

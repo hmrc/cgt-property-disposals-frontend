@@ -2028,7 +2028,10 @@ class SingleDisposalsTriageControllerSpec
 
       val tomorrow = today.plusDays(1L)
 
-      val taxYear = sample[TaxYear]
+      val taxYear = sample[TaxYear].copy(
+        startDateInclusive = LocalDate.of(today.getYear, 4, 6),
+        endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+      )
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
@@ -2313,12 +2316,11 @@ class SingleDisposalsTriageControllerSpec
                   .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(today)(Right(Some(taxYear))),
               isAmend = true
             )
-
           }
 
           "the section is complete" in {
@@ -2348,12 +2350,17 @@ class SingleDisposalsTriageControllerSpec
                 completeJourney,
                 formData(date),
                 (fillingOutReturn, draftReturn) =>
-                  fillingOutReturn.copy(draftReturn = updateDraftReturn(draftReturn, newAnswers)),
+                  fillingOutReturn
+                    .copy(
+                      draftReturn = updateDraftReturn(draftReturn, newAnswers)
+                    )
+                    .withForceDisplayGainOrLossAfterReliefsForAmends,
                 checkIsRedirect(
                   _,
-                  routes.SingleDisposalsTriageController.checkYourAnswers()
+                  routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                 ),
-                () => mockGetTaxYear(date)(Right(Some(taxYear)))
+                () => mockGetTaxYear(date)(Right(Some(taxYear))),
+                isAmend = true
               )
             }
           }
@@ -2366,18 +2373,21 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(today),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(disposalDate = Some(DisposalDate(today, taxYear)))
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(disposalDate = Some(DisposalDate(today, taxYear)))
+                    )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(today)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+              isAmend = true
             )
 
           }
@@ -2391,23 +2401,28 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(newDisposalDate.value),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(disposalDate = Some(newDisposalDate))
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(disposalDate = Some(newDisposalDate))
+                    )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+              isAmend = true
             )
           }
 
           "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
-            val answers         = requiredPreviousAnswers.copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin))
+            val answers         = requiredPreviousAnswers.copy(
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+            )
             val newDisposalDate = DisposalDate(today, taxYear)
 
             testSuccessfulUpdateFillingOutReturn(
@@ -2415,18 +2430,21 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(newDisposalDate.value),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(disposalDate = Some(newDisposalDate), disposalMethod = Some(DisposalMethod.Sold))
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(disposalDate = Some(newDisposalDate), disposalMethod = Some(DisposalMethod.Sold))
+                    )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L)))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
+              isAmend = true
             )
           }
 
@@ -2443,14 +2461,15 @@ class SingleDisposalsTriageControllerSpec
               sessionDataWithFillingOutReturn(
                 requiredPreviousAnswers.copy(
                   disposalDate = Some(DisposalDate(today, taxYear))
-                )
+                ),
+                isAmend = true
               )._1
             )
           }
 
           checkIsRedirect(
             performAction(formData(today): _*),
-            routes.SingleDisposalsTriageController.checkYourAnswers()
+            routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
           )
         }
 
@@ -4398,7 +4417,10 @@ class SingleDisposalsTriageControllerSpec
 
       val tomorrow = today.plusDays(1L)
 
-      val taxYear = sample[TaxYear]
+      val taxYear = sample[TaxYear].copy(
+        startDateInclusive = LocalDate.of(today.getYear, 4, 6),
+        endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+      )
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
@@ -4564,6 +4586,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "a tax year can be found and the journey was complete" in {
+
             val completeJourney = sample[CompleteSingleDisposalTriageAnswers].copy(
               individualUserType = Some(Self),
               disposalDate = DisposalDate(today, taxYear),
@@ -4625,7 +4648,7 @@ class SingleDisposalsTriageControllerSpec
                   .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(today)(Right(Some(taxYear))),
               isAmend = true
@@ -4662,12 +4685,17 @@ class SingleDisposalsTriageControllerSpec
                 completeJourney,
                 formData(date),
                 (fillingOutReturn, draftReturn) =>
-                  fillingOutReturn.copy(draftReturn = updateDraftReturn(draftReturn, newAnswers)),
+                  fillingOutReturn
+                    .copy(
+                      draftReturn = updateDraftReturn(draftReturn, newAnswers)
+                    )
+                    .withForceDisplayGainOrLossAfterReliefsForAmends,
                 checkIsRedirect(
                   _,
-                  routes.SingleDisposalsTriageController.checkYourAnswers()
+                  routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                 ),
-                () => mockGetTaxYear(date)(Right(Some(taxYear)))
+                () => mockGetTaxYear(date)(Right(Some(taxYear))),
+                isAmend = true
               )
             }
           }
@@ -4680,21 +4708,24 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(today),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(
-                      disposalDate = Some(DisposalDate(today, taxYear)),
-                      completionDate = Some(CompletionDate(today))
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(
+                        disposalDate = Some(DisposalDate(today, taxYear)),
+                        completionDate = Some(CompletionDate(today))
+                      )
                     )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(today)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+              isAmend = true
             )
 
           }
@@ -4708,21 +4739,24 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(newDisposalDate.value),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(
-                      disposalDate = Some(newDisposalDate),
-                      completionDate = Some(CompletionDate(newDisposalDate.value))
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(
+                        disposalDate = Some(newDisposalDate),
+                        completionDate = Some(CompletionDate(newDisposalDate.value))
+                      )
                     )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+              isAmend = true
             )
           }
 
@@ -4735,22 +4769,25 @@ class SingleDisposalsTriageControllerSpec
               answers,
               formData(newDisposalDate.value),
               (fillingOutReturn, draftReturn) =>
-                fillingOutReturn.copy(draftReturn =
-                  updateDraftReturn(
-                    draftReturn,
-                    answers.copy(
-                      disposalDate = Some(newDisposalDate),
-                      completionDate = Some(CompletionDate(newDisposalDate.value)),
-                      disposalMethod = Some(DisposalMethod.Sold)
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      answers.copy(
+                        disposalDate = Some(newDisposalDate),
+                        completionDate = Some(CompletionDate(newDisposalDate.value)),
+                        disposalMethod = Some(DisposalMethod.Sold)
+                      )
                     )
                   )
-                ),
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
               checkIsRedirect(
                 _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L)))))
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
+              isAmend = true
             )
           }
 
@@ -5123,12 +5160,10 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "display shares disposal date in case of indirect disposal" in {
-          val completeTriageQuestionsWithIndirectDisposal =
-            completeTriageQuestions
-              .copy(
-                assetType = AssetType.IndirectDisposal,
-                countryOfResidence = Country("TR")
-              )
+          val completeTriageQuestionsWithIndirectDisposal = completeTriageQuestions.copy(
+            assetType = AssetType.IndirectDisposal,
+            countryOfResidence = Country("TR")
+          )
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -5794,15 +5829,19 @@ class SingleDisposalsTriageControllerSpec
     representeeAnswers: Option[RepresenteeAnswers] = None,
     isAmend: Boolean = false
   ): Unit = {
-    val draftReturn =
-      sample[DraftSingleDisposalReturn]
-        .copy(triageAnswers = currentAnswers, representeeAnswers = representeeAnswers, gainOrLossAfterReliefs = None)
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(
+      triageAnswers = currentAnswers,
+      representeeAnswers = representeeAnswers,
+      gainOrLossAfterReliefs = None
+    )
 
-    val fillingOutReturn =
-      sample[FillingOutReturn].copy(
-        draftReturn = draftReturn,
-        amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
-      )
+    val fillingOutReturn = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      amendReturnData =
+        if (isAmend)
+          Some(sample[AmendReturnData])
+        else None
+    )
 
     val updatedFillingOutReturn =
       updateJourney(fillingOutReturn, draftReturn)

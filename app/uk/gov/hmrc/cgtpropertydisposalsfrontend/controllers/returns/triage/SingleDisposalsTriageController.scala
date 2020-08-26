@@ -119,7 +119,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           }
         )
@@ -148,7 +148,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           },
           updateState = { (disposalMethod, state, answers) =>
@@ -247,7 +247,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           }
         )
@@ -274,7 +274,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           },
           updateState = { (wasAUKResident, state, answers) =>
@@ -469,7 +469,7 @@ class SingleDisposalsTriageController @Inject() (
                 isDraftReturn,
                 isATrust,
                 currentAnswers.representativeType(),
-                state.fold(_ => false, _._2.isAmendReturn)
+                isAmendReturn(state)
               )
             }
           )
@@ -500,15 +500,20 @@ class SingleDisposalsTriageController @Inject() (
                         state.isRight,
                         isATrust,
                         triageAnswers.representativeType(),
-                        state.fold(_ => false, _._2.isAmendReturn)
+                        isAmendReturn(state)
                       )
                     ),
                   { date =>
-                    val result = triageAnswers
-                      .fold(_.disposalDate, c => Some(c.disposalDate)) match {
-                      case Some(existingDisposalDate) if existingDisposalDate.value === date =>
-                        EitherT.pure(Some(existingDisposalDate.taxYear))
-                      case _                                                                 =>
+                    val existingDisposalDate = triageAnswers.fold(
+                      _.disposalDate,
+                      c => Some(c.disposalDate)
+                    )
+
+                    val result = existingDisposalDate match {
+                      case Some(existingDate) if existingDate.value === date =>
+                        EitherT.pure(Some(existingDate.taxYear))
+
+                      case _                                                 =>
                         for {
                           taxYear       <- taxYearService.taxYear(date)
                           updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers)
@@ -542,17 +547,28 @@ class SingleDisposalsTriageController @Inject() (
                         logger.warn("Could not update session", e)
                         errorHandler.errorResult()
                       },
-                      taxYear =>
-                        if (taxYear.isEmpty)
-                          Redirect(
-                            routes.CommonTriageQuestionsController
-                              .disposalDateTooEarly()
-                          )
-                        else
-                          Redirect(
-                            routes.SingleDisposalsTriageController
-                              .checkYourAnswers()
-                          )
+                      taxYear => {
+                        val amendReturnOriginalTaxYear =
+                          state.map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
+
+                        taxYear match {
+                          case Some(t)
+                              if amendReturnOriginalTaxYear
+                                .map(_.startDateInclusive)
+                                .exists(_ =!= t.startDateInclusive) =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+                            )
+                          case Some(_) =>
+                            Redirect(
+                              routes.SingleDisposalsTriageController.checkYourAnswers()
+                            )
+                          case None    =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.disposalDateTooEarly()
+                            )
+                        }
+                      }
                     )
                   }
                 )
@@ -665,7 +681,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           }
         )
@@ -691,7 +707,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           },
           updateState = { (date, state, answers) =>
@@ -782,7 +798,7 @@ class SingleDisposalsTriageController @Inject() (
               isATrust,
               currentAnswers.representativeType(),
               representeeAnswers,
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           }
         )
@@ -817,7 +833,7 @@ class SingleDisposalsTriageController @Inject() (
               isATrust,
               currentAnswers.representativeType(),
               representeeAnswers,
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           },
           updateState = { (country, state, answers) =>
@@ -915,7 +931,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           }
         )
@@ -944,7 +960,7 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              state.fold(_ => false, _._2.isAmendReturn)
+              isAmendReturn(state)
             )
           },
           updateState = { (assetType, state, answers) =>
@@ -1086,7 +1102,7 @@ class SingleDisposalsTriageController @Inject() (
                 ),
                 isDraftReturn,
                 routes.SingleDisposalsTriageController.disposalDateOfSharesSubmit(),
-                state.fold(_ => false, _._2.isAmendReturn)
+                isAmendReturn(state)
               )
           )
         }
@@ -1114,20 +1130,21 @@ class SingleDisposalsTriageController @Inject() (
                         state.isRight,
                         routes.SingleDisposalsTriageController
                           .disposalDateOfSharesSubmit(),
-                        state.fold(_ => false, _._2.isAmendReturn)
+                        isAmendReturn(state)
                       )
                     ),
                   { date =>
-                    val result = triageAnswers
-                      .fold(_.disposalDate, c => Some(c.disposalDate)) match {
-                      case Some(existingDisposalDate) if existingDisposalDate.value === date.value =>
-                        EitherT.pure(Some(existingDisposalDate.taxYear))
-                      case _                                                                       =>
+                    val existingDisposalDate = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate))
+                    val result               = existingDisposalDate match {
+                      case Some(existingDate) if existingDate.value === date.value =>
+                        EitherT.pure(Some(existingDate.taxYear))
+                      case _                                                       =>
                         for {
                           taxYear                         <- taxYearService.taxYear(date.value)
                           updatedDisposalDate              = updateDisposalDate(date.value, taxYear, triageAnswers)
-                          updatedDisposalAndCompletionDate = updatedDisposalDate
-                                                               .copy(completionDate = Some(CompletionDate(date.value)))
+                          updatedDisposalAndCompletionDate = updatedDisposalDate.copy(
+                                                               completionDate = Some(CompletionDate(date.value))
+                                                             )
                           newState                         = state.bimap(
                                                                _.copy(newReturnTriageAnswers = Right(updatedDisposalAndCompletionDate)),
                                                                {
@@ -1158,17 +1175,28 @@ class SingleDisposalsTriageController @Inject() (
                         logger.warn("Could not update session", e)
                         errorHandler.errorResult()
                       },
-                      taxYear =>
-                        if (taxYear.isEmpty)
-                          Redirect(
-                            routes.CommonTriageQuestionsController
-                              .disposalsOfSharesTooEarly()
-                          )
-                        else
-                          Redirect(
-                            routes.SingleDisposalsTriageController
-                              .checkYourAnswers()
-                          )
+                      taxYear => {
+                        val amendReturnOriginalTaxYear =
+                          state.map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
+
+                        taxYear match {
+                          case Some(t)
+                              if amendReturnOriginalTaxYear
+                                .map(_.startDateInclusive)
+                                .exists(_ =!= t.startDateInclusive) =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+                            )
+                          case Some(_) =>
+                            Redirect(
+                              routes.SingleDisposalsTriageController.checkYourAnswers()
+                            )
+                          case None    =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
+                            )
+                        }
+                      }
                     )
                   }
                 )
@@ -1177,6 +1205,9 @@ class SingleDisposalsTriageController @Inject() (
         }
       }
     }
+
+  private def isAmendReturn(state: JourneyState): Boolean =
+    state.fold(_ => false, _._2.isAmendReturn)
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>

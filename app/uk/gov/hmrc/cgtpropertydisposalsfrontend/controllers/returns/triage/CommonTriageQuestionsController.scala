@@ -29,6 +29,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{StartingToAmendToFillingOutReturnBehaviour, representee}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -67,7 +68,8 @@ class CommonTriageQuestionsController @Inject() (
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
   previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date,
-  furtherReturnsHelpPage: triagePages.further_retuns_help
+  furtherReturnsHelpPage: triagePages.further_retuns_help,
+  disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -393,6 +395,25 @@ class CommonTriageQuestionsController @Inject() (
             backLink
           )
         )
+      }
+    }
+
+  private def amendReturnDisposalDateBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
+    state.fold(
+      _ => controllers.routes.StartController.start(),
+      _.draftReturn.fold(
+        _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+        _ => routes.SingleDisposalsTriageController.whenWasDisposalDate(),
+        _ => routes.SingleDisposalsTriageController.disposalDateOfShares(),
+        _ => routes.MultipleDisposalsTriageController.disposalDateOfShares(),
+        _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
+      )
+    )
+
+  def amendReturnDisposalDateDifferentTaxYear(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState { (_, state) =>
+        Ok(disposalDateInDifferentTaxYearPage(amendReturnDisposalDateBackLink(state)))
       }
     }
 

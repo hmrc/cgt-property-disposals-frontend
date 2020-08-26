@@ -3651,6 +3651,99 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the check your answers page" when {
 
+        val taxYear = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(today.getYear, 4, 6),
+          endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+        )
+
+        def test(
+          currentAnswers: IncompleteMultipleDisposalsTriageAnswers,
+          representeeAnswers: Option[RepresenteeAnswers],
+          submittedDate: LocalDate,
+          taxYear: Option[TaxYear]
+        ) = {
+
+          val (session, journey, draftReturn) =
+            sessionDataWithFillingOutReturn(
+              currentAnswers,
+              representeeAnswers = representeeAnswers
+            )
+
+          val updatedAnswers     = currentAnswers.copy(
+            completionDate = Some(CompletionDate(submittedDate)),
+            taxYear = taxYear,
+            taxYearAfter6April2020 = Some(taxYear.isDefined)
+          )
+          val updatedDraftReturn =
+            updateDraftReturn(draftReturn, updatedAnswers)
+          val updatedJourney     = journey.copy(
+            draftReturn = updatedDraftReturn
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetTaxYear(submittedDate)(Right(taxYear))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(
+              formData(submittedDate): _*
+            ),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "a valid date is submitted but a tax year cannot be found" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self)),
+            None,
+            LocalDate.of(2020, 1, 1),
+            None
+          )
+        }
+
+        "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+            today,
+            Some(taxYear)
+          )
+        }
+
+        "the disposal date is strictly before the date of death when the user is a non-period of admin personal rep" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+            today.minusDays(1L),
+            Some(taxYear)
+          )
+        }
+
+        "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
+            today,
+            Some(taxYear)
+          )
+        }
+
+      }
+
+      "redirect to the amend return disposaldate different taxyear page" when {
+
+        val taxYear = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(today.getYear, 4, 6),
+          endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+        )
+
         def test(
           currentAnswers: IncompleteMultipleDisposalsTriageAnswers,
           representeeAnswers: Option[RepresenteeAnswers],
@@ -3691,16 +3784,7 @@ class MultipleDisposalsTriageControllerSpec
             performAction(
               formData(submittedDate): _*
             ),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "a valid date is submitted but a tax year cannot be found" in {
-          test(
-            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self)),
-            None,
-            LocalDate.of(2020, 1, 1),
-            None
+            routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
           )
         }
 
@@ -3709,7 +3793,7 @@ class MultipleDisposalsTriageControllerSpec
             sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
             today,
-            Some(sample[TaxYear])
+            Some(taxYear)
           )
         }
 
@@ -3718,7 +3802,7 @@ class MultipleDisposalsTriageControllerSpec
             sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
             today.minusDays(1L),
-            Some(sample[TaxYear])
+            Some(taxYear)
           )
         }
 
@@ -3728,7 +3812,7 @@ class MultipleDisposalsTriageControllerSpec
               .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
             today,
-            Some(sample[TaxYear])
+            Some(taxYear)
           )
         }
 
@@ -3758,6 +3842,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
       }
+
     }
 
     "handling requests to display the check your answers page" must {
