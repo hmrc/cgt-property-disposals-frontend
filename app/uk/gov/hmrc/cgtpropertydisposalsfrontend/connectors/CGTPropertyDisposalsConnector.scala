@@ -18,6 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import controllers.Assets.ACCEPT_LANGUAGE
+import play.api.i18n.Lang
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
@@ -26,6 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationD
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.HttpReads.Implicits._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[CGTPropertyDisposalsConnectorImpl])
@@ -35,7 +38,7 @@ trait CGTPropertyDisposalsConnector {
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def subscribe(subscriptionDetails: SubscriptionDetails)(implicit
+  def subscribe(subscriptionDetails: SubscriptionDetails, lang: Lang)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -92,9 +95,16 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (
     makeCall(_.POST[JsValue, HttpResponse](bprUrl, Json.toJson(request)))
 
   override def subscribe(
-    subscriptionDetails: SubscriptionDetails
+    subscriptionDetails: SubscriptionDetails,
+    lang: Lang
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.POST[JsValue, HttpResponse](subscribeUrl, Json.toJson(subscriptionDetails)))
+    makeCall(
+      _.POST[JsValue, HttpResponse](
+        subscribeUrl,
+        Json.toJson(subscriptionDetails),
+        Seq(ACCEPT_LANGUAGE -> lang.language)
+      )
+    )
 
   override def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
     hc: HeaderCarrier

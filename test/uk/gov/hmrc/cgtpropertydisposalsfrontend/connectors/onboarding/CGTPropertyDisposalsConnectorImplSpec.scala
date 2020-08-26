@@ -17,9 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 
 import com.typesafe.config.ConfigFactory
+import controllers.Assets.ACCEPT_LANGUAGE
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
+import play.api.i18n.Lang
 import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{CGTPropertyDisposalsConnectorImpl, ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
@@ -145,13 +147,15 @@ class CGTPropertyDisposalsConnectorImplSpec
     "handling request to subscribe" must {
       val subscriptionDetails = sample[SubscriptionDetails]
 
+      val lang = Lang("CY")
+
       behave like connectorBehaviour(
         mockPost(
           "http://host:123/cgt-property-disposals/subscription",
-          Seq.empty,
+          Seq(ACCEPT_LANGUAGE -> lang.language),
           Json.toJson(subscriptionDetails)
         )(_),
-        () => connector.subscribe(subscriptionDetails)
+        () => connector.subscribe(subscriptionDetails, lang)
       )
     }
 

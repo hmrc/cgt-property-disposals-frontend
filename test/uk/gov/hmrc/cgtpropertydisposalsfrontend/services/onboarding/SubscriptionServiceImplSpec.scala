@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding
 import cats.data.EitherT
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import play.api.i18n.Lang
 import play.api.libs.json.{JsNumber, JsObject, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
@@ -49,11 +50,12 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
   val service = new SubscriptionServiceImpl(mockConnector, MockMetrics.metrics)
 
   def mockSubscribe(
-    expectedSubscriptionDetails: SubscriptionDetails
+    expectedSubscriptionDetails: SubscriptionDetails,
+    expectedLang: Lang
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .subscribe(_: SubscriptionDetails)(_: HeaderCarrier))
-      .expects(expectedSubscriptionDetails, *)
+      .subscribe(_: SubscriptionDetails, _: Lang)(_: HeaderCarrier))
+      .expects(expectedSubscriptionDetails, expectedLang, *)
       .returning(EitherT(Future.successful(response)))
 
   def mockHasSubscription()(response: Either[Error, HttpResponse]) =
@@ -150,28 +152,30 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
       val subscriptionDetails = sample[SubscriptionDetails]
 
+      val lang = Lang("FR")
+
       "return an error" when {
 
         "the http call comes back with a status other than 200" in {
-          mockSubscribe(subscriptionDetails)(Right(HttpResponse(500, emptyJsonBody)))
+          mockSubscribe(subscriptionDetails, lang)(Right(HttpResponse(500, emptyJsonBody)))
           await(
-            service.subscribe(subscriptionDetails).value
+            service.subscribe(subscriptionDetails, lang).value
           ).isLeft shouldBe true
         }
 
         "there is no JSON in the body of the http response" in {
-          mockSubscribe(subscriptionDetails)(Right(HttpResponse(200, emptyJsonBody)))
+          mockSubscribe(subscriptionDetails, lang)(Right(HttpResponse(200, emptyJsonBody)))
           await(
-            service.subscribe(subscriptionDetails).value
+            service.subscribe(subscriptionDetails, lang).value
           ).isLeft shouldBe true
         }
 
         "the JSON body of the response cannot be parsed" in {
-          mockSubscribe(subscriptionDetails)(
+          mockSubscribe(subscriptionDetails, lang)(
             Right(HttpResponse(200, JsNumber(1), Map[String, Seq[String]]().empty))
           )
           await(
-            service.subscribe(subscriptionDetails).value
+            service.subscribe(subscriptionDetails, lang).value
           ).isLeft shouldBe true
         }
 
@@ -179,10 +183,10 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
       "return the subscription response if the call comes back with a " +
         "200 status and the JSON body can be parsed" in {
-        mockSubscribe(subscriptionDetails)(
+        mockSubscribe(subscriptionDetails, lang)(
           Right(HttpResponse(200, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
         )
-        await(service.subscribe(subscriptionDetails).value) shouldBe Right(
+        await(service.subscribe(subscriptionDetails, lang).value) shouldBe Right(
           SubscriptionSuccessful(cgtReferenceNumber)
         )
       }
@@ -190,9 +194,9 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       "return an already subscribed response" when {
 
         "the response comes back with status 409 (conflict)" in {
-          mockSubscribe(subscriptionDetails)(Right(HttpResponse(409, emptyJsonBody)))
+          mockSubscribe(subscriptionDetails, lang)(Right(HttpResponse(409, emptyJsonBody)))
 
-          await(service.subscribe(subscriptionDetails).value) shouldBe Right(
+          await(service.subscribe(subscriptionDetails, lang).value) shouldBe Right(
             AlreadySubscribed
           )
         }
@@ -351,13 +355,16 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
     }
 
     "handing request to register without id and subscribe" must {
-      val representeeAnswers  = sample[CompleteRepresenteeAnswers]
+
+      val representeeAnswers = sample[CompleteRepresenteeAnswers]
+
       val registrationDetails = RegistrationDetails(
         representeeAnswers.name,
         representeeAnswers.contactDetails.emailAddress,
         representeeAnswers.contactDetails.address,
         ManuallyEnteredEmail
       )
+
       val subscriptionDetails = SubscriptionDetails(
         Right(representeeAnswers.name),
         representeeAnswers.contactDetails.emailAddress,
@@ -369,16 +376,18 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
         ManuallyEnteredContactName
       )
 
+      val lang = Lang("IT")
+
       "successfully register and subscribed returning correct cgt reference" in {
         inSequence {
           mockRegisterWithoutId(registrationDetails)(
             Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
           )
-          mockSubscribe(subscriptionDetails)(
+          mockSubscribe(subscriptionDetails, lang)(
             Right(HttpResponse(200, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
           )
         }
-        await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
+        await(service.registerWithoutIdAndSubscribe(representeeAnswers, lang).value) shouldBe
           Right(RepresenteeCgtReference(CgtReference(cgtReferenceNumber)))
       }
 
@@ -386,7 +395,7 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
         mockRegisterWithoutId(registrationDetails)(
           Right(HttpResponse(500, successfulRegisterResponse, Map[String, Seq[String]]().empty))
         )
-        await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
+        await(service.registerWithoutIdAndSubscribe(representeeAnswers, lang).value) shouldBe
           Left(Error("Call to register without id came back with status 500"))
       }
 
@@ -395,11 +404,11 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
           mockRegisterWithoutId(registrationDetails)(
             Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
           )
-          mockSubscribe(subscriptionDetails)(
+          mockSubscribe(subscriptionDetails, lang)(
             Right(HttpResponse(500, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
           )
         }
-        await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
+        await(service.registerWithoutIdAndSubscribe(representeeAnswers, lang).value) shouldBe
           Left(Error("call to subscribe came back with status 500"))
       }
 
@@ -408,11 +417,11 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
           mockRegisterWithoutId(registrationDetails)(
             Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
           )
-          mockSubscribe(subscriptionDetails)(
+          mockSubscribe(subscriptionDetails, lang)(
             Right(HttpResponse(409, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
           )
         }
-        await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
+        await(service.registerWithoutIdAndSubscribe(representeeAnswers, lang).value) shouldBe
           Left(Error("User is already subscribed"))
       }
 

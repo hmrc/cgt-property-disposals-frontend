@@ -83,7 +83,7 @@ class TestDefaultMessagesApiProvider @Inject() (
 
 trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with MockFactory {
 
-  implicit val lang: Lang = Lang.defaultLang
+  implicit val lang: Lang = Lang("en")
 
   def overrideBindings: List[GuiceableModule] = List.empty[GuiceableModule]
 
