@@ -1020,6 +1020,181 @@ returns.property-address.cyaChange.property-address=cyfeiriad yr eiddo
 #===================================================
 
 #===================================================
+# INDIRECT DISPOSALS COMPANY PAGES - START
+#===================================================
+
+companyDetails.caption=Manylion y cwmni
+companyDetails.isUk.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gennych gyfranddaliadau ynddo?
+companyDetails.isUk.agent.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan eich cleient gyfranddaliadau ynddo?
+companyDetails.isUk.trust.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan yr ymddiriedolaeth gyfranddaliadau ynddo?
+companyDetails.isUk.capacitor.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo?
+companyDetails.isUk.personalRep.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo?
+companyDetails.isUk.personalRepInPeriodOfAdmin.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo?
+isUk.companyDetails.error.required=Dewiswch ‘Iawn’ os oedd cyfeiriad yn y DU gan y cwmni yr oedd gennych gyfranddaliadau ynddo
+isUk.companyDetails.agent.error.required=Dewiswch ‘Iawn’ os oedd cyfeiriad yn y DU gan y cwmni yr oedd gan eich cleient gyfranddaliadau ynddo
+isUk.companyDetails.trust.error.required=Dewiswch ‘Iawn’ os oedd cyfeiriad yn y DU gan y cwmni yr oedd gan yr ymddiriedolaeth gyfranddaliadau ynddo
+isUk.companyDetails.capacitor.error.required=Dewiswch ‘Iawn’ os oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo
+isUk.companyDetails.personalRep.error.required=Dewiswch ‘Iawn’ os oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo
+address.uk.companyDetails.title=Nodwch enw a chyfeiriad y cwmni yr oedd gennych gyfranddaliadau ynddo
+address.uk.companyDetails.agent.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan eich cleient gyfranddaliadau ynddo
+address.uk.companyDetails.trust.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan yr ymddiriedolaeth gyfranddaliadau ynddo
+address.uk.companyDetails.capacitor.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+address.uk.companyDetails.personalRep.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+address.uk.companyDetails.personalRepInPeriodOfAdmin.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+address.uk.companyDetails.helpText=Dylai hwn fod yn gyfeiriad cofrestredig y cwmni
+address.uk.companyDetails.line1.label=Enw’r cwmni
+address.uk.companyDetails.line2.label=Cyfeiriad
+address-line1.companyDetails.error.required=Nodwch enw cwmni
+address-line1.companyDetails.error.tooLong=Mae’n rhaid i enw’r cwmni fod yn 35 o gymeriadau neu lai
+address-line1.companyDetails.error.pattern=Mae’n rhaid i enw’r cwmni gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+address-line2.companyDetails.error.tooLong=Mae’n rhaid i’r cyfeiriad fod yn 35 o gymeriadau neu lai
+address-line2.companyDetails.error.pattern=Mae’n rhaid i’r cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+address-town.companyDetails.error.tooLong=Mae’n rhaid i’r dref neu’r ddinas fod yn 35 o gymeriadau neu lai
+address-town.companyDetails.error.pattern=Mae’n rhaid i’r dref neu’r ddinas gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+address-county.companyDetails.error.tooLong=Mae’n rhaid i’r sir gynnwys 35 o gymeriadau neu lai
+address-county.companyDetails.error.pattern=Mae’n rhaid i’r sir gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+postcode.companyDetails.error.tooLong=Mae’n rhaid i’r cod post fod yn 8 o gymeriadau neu lai
+postcode.companyDetails.error.required=Nodwch god post
+postcode.companyDetails.error.invalidCharacters=Mae’n rhaid i’r cod post gynnwys llythrennau, rhifau a bylchau yn unig
+postcode.companyDetails.error.pattern=Nodwch god post go iawn
+nonUkAddress.companyDetails.title=Nodwch enw a chyfeiriad y cwmni yr oedd gennych gyfranddaliadau ynddo
+nonUkAddress.companyDetails.agent.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan eich cleient gyfranddaliadau ynddo
+nonUkAddress.companyDetails.trust.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan yr ymddiriedolaeth gyfranddaliadau ynddo
+nonUkAddress.companyDetails.capacitor.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+nonUkAddress.companyDetails.personalRep.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+nonUkAddress.companyDetails.personalRepInPeriodOfAdmin.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+nonUkAddress.companyDetails.line1.label=Enw’r cwmni
+nonUkAddress.companyDetails.line2.label=Cyfeiriad
+nonUkAddress-line1.companyDetails.error.required=Nodwch enw cwmni
+nonUkAddress-line1.companyDetails.error.tooLong=Mae’n rhaid i enw’r cwmni fod yn 35 o gymeriadau neu lai
+nonUkAddress-line2.companyDetails.error.tooLong=Mae’n rhaid i’r cyfeiriad fod yn 35 o gymeriadau neu lai
+nonUkAddress-line3.companyDetails.error.tooLong=Mae’n rhaid i linell 3 y cyfeiriad fod yn 35 o gymeriadau neu lai
+nonUkAddress-line4.companyDetails.error.tooLong=Mae’n rhaid i linell 4 y cyfeiriad fod yn 35 o gymeriadau neu lai
+nonUkAddress-line1.companyDetails.error.pattern=Mae’n rhaid i enw’r cwmni gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+nonUkAddress-line2.companyDetails.error.pattern=Mae’n rhaid i’r cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+nonUkAddress-line3.companyDetails.error.pattern=Mae’n rhaid i linell 3 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+nonUkAddress-line4.companyDetails.error.pattern=Mae’n rhaid i linell 4 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+countryCode.companyDetails.error.required=Dewiswch wlad o’r dewisiadau a gyflwynir wrth i chi deipio
+countryCode.companyDetails.error.notFound=Dewiswch wlad o’r dewisiadau a gyflwynir wrth i chi deipio
+companyDetails.cya.title=Gwiriwch eich atebion
+companyDetails.cyaLabel.company-address=Enw a chyfeiriad y cwmni
+companyDetails.cyaChange.company-address=enw a chyfeiriad y cwmni
+non-uk-resident.change-address-to-uk-address.title=Ni allwch ddefnyddio’r gwasanaeth hwn
+non-uk-resident.change-address-to-uk-address.p1=Ni allwch ddefnyddio’r gwasanaeth hwn i roi gwybod am Dreth Enillion Cyfalaf ar werthu neu waredu eiddo yn y DU. Mae hyn oherwydd nad yw’ch cyfeiriad yn y DU.
+non-uk-resident.change-address-to-uk-address.p2=Bydd angen i chi <a href
+company-details.multiple-indirect-disposals.guidance.title=Bydd angen i chi nodi manylion ar gyfer un o’r gwarediadau
+company-details.multiple-indirect-disposals.guidance.p1=Dylech nodi manylion y gwarediad a roddodd yr enillion mwyaf neu’r golled leiaf.
+company-details.multiple-indirect-disposals.guidance.p2=Ar gyfer yr un gwarediad hwnnw, bydd angen i chi nodi’r canlynol:
+company-details.multiple-indirect-disposals.guidance.li1=enw a chyfeiriad y cwmni y cafwyd cyfranddaliadau ynddo
+company-details.multiple-indirect-disposals.guidance.li2=dyddiad gwaredu’r cyfranddaliadau
+company-details.multiple-indirect-disposals.guidance.li3=gwerth y gwarediad, llai costau gwaredu
+company-details.multiple-indirect-disposals.guidance.li4=gwerth y caffaeliad, plws costau caffael
+company-details.multiple-indirect-disposals.guidance.personalRepInPeriodOfAdmin.li3=derbyniadau’r gwarediad llai costau gwaredu
+company-details.multiple-indirect-disposals.guidance.personalRepInPeriodOfAdmin.li4=gwerth marchnadol y cyfranddaliadau plws costau caffael
+company-details.multiple-indirect-disposals.guidance.p3=Bydd angen i chi hefyd uwchlwytho dogfen yn ddiweddarach sy’n darparu manylion y gwarediadau eiddo eraill yn y DU rydych yn eu cynnwys yn y Ffurflen Dreth hon.
+multipleIndirectDisposalsDisposalPrice.title=Beth oedd gwerth gwaredu’r cyfranddaliadau?
+multipleIndirectDisposalsDisposalPrice.helpText=Dyma’r swm y gwerthwyd y cyfranddaliadau amdano, neu eu gwerth marchnadol os cawsant eu gwaredu mewn ffordd arall. Dylech ddidynnu unrhyw gostau gwerthu neu waredu, er enghraifft, ffioedd brocer.
+multipleIndirectDisposalsDisposalPrice.error.required=Nodwch werth gwaredu’r cyfranddaliadau
+multipleIndirectDisposalsDisposalPrice.error.invalid=Mae’n rhaid i werth gwaredu’r cyfranddaliadau fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleIndirectDisposalsDisposalPrice.error.tooManyDecimals=Mae’n rhaid i werth gwaredu’r cyfranddaliadau fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 160,000 neu 23,040.50
+multipleIndirectDisposalsDisposalPrice.error.tooLarge=Mae’n rhaid i werth gwaredu’r cyfranddaliadau fod yn swm o arian rhwng 1 a 50,000,000,000
+multipleIndirectDisposalsDisposalPrice.error.tooSmall=Mae’n rhaid i werth gwaredu’r cyfranddaliadau fod yn swm o arian rhwng 1 a 50,000,000,000
+multipleIndirectDisposalsAcquisitionPrice.title=Beth oedd gwerth caffael y cyfranddaliadau?
+multipleIndirectDisposalsAcquisitionPrice.helpText=Dyma’r swm sy’n cael ei dalu i brynu’r cyfranddaliadau, neu eu gwerth marchnadol os cawsant eu hetifeddu neu os cawsant eu rhoi fel rhodd. Dylech ychwanegu unrhyw gostau caffael, er enghraifft, ffioedd brocer.
+multipleIndirectDisposalsAcquisitionPrice.error.required=Nodwch werth caffael y cyfranddaliadau
+multipleIndirectDisposalsAcquisitionPrice.error.invalid=Mae’n rhaid i werth caffael y cyfranddaliadau fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleIndirectDisposalsAcquisitionPrice.error.tooManyDecimals=Mae’n rhaid i werth caffael y cyfranddaliadau fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 160,000 neu 23,040.50
+multipleIndirectDisposalsAcquisitionPrice.error.tooLarge=Mae’n rhaid i werth caffael y cyfranddaliadau fod yn swm o arian rhwng 1 a 50,000,000,000
+multipleIndirectDisposalsAcquisitionPrice.error.tooSmall=Mae’n rhaid i werth caffael y cyfranddaliadau fod yn swm o arian rhwng 1 a 50,000,000,000
+returns.company-address.cya.title=Gwiriwch eich atebion
+companyDetails.isUk.multipleIndirect.title=A oes cyfeiriad yn y DU gan unrhyw un o’r cwmnïau yr oedd gan y person gyfranddaliadau ynddynt?
+companyDetails.isUk.multipleIndirect.personalRepInPeriodOfAdmin.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo?
+companyDetails.isUk.multipleIndirect.helpText=Dylai hwn fod yn gyfeiriad cofrestredig y cwmni.
+isUk.multipleIndirect.error.required=Dewiswch ‘Iawn’ os oes cyfeiriad yn y DU gan unrhyw un o’r cwmnïau yr oedd gan y person gyfranddaliadau ynddynt
+address.uk.companyDetails.multipleIndirect.title=Nodwch enw a chyfeiriad unrhyw un o’r cwmnïau y cafodd y cyfranddaliadau eu cadw ynddo
+address.uk.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+nonUkAddress.companyDetails.multipleIndirect.title=Nodwch enw a chyfeiriad un o’r cwmnïau y cafodd y cyfranddaliadau eu cadw ynddo
+nonUkAddress.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+returns.company-address.cyaLabel.company-address=Enw a chyfeiriad y cwmni
+returns.company-address.cyaChange.company-address=cyfeiriad yr eiddo
+returns.company-address.cyaLabel.disposal-price=Beth oedd y swm gwaredu?
+returns.company-address.cyaChange.disposal-price=y swm gwaredu
+returns.company-address.cyaLabel.acquisition-price=Beth oedd y swm caffael?
+returns.company-address.cyaChange.acquisition-price=y swm caffael
+
+#===================================================
+# INDIRECT DISPOSALS COMPANY PAGES - END
+#===================================================
+
+#===================================================
+#  INITIAL GAIN OR LOSS PAGES - START
+#===================================================
+
+initialGainOrLoss.title=A wnaethoch enillion cychwynnol neu golled gychwynnol?
+initialGainOrLoss.agent.title=A wnaeth eich cleient enillion cychwynnol neu golled gychwynnol?
+initialGainOrLoss.trust.title=A wnaeth yr ymddiriedolaeth enillion cychwynnol neu golled gychwynnol?
+initialGainOrLoss.capacitor.title=A wnaeth y person enillion cychwynnol neu golled gychwynnol?
+initialGainOrLoss.personalRep.title=A wnaed enillion cychwynnol neu golled gychwynnol?
+initialGainOrLoss.caption=Enillion cychwynnol neu golled gychwynnol
+initialGainOrLoss.error.required=Dewiswch a wnaethoch enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.agent.error.required=Dewiswch a wnaeth eich cleient enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.trust.error.required=Dewiswch a wnaeth yr ymddiriedolaeth enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.capacitor.error.required=Dewiswch a wnaeth y person enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.personalRep.error.required=Dewiswch a wnaeth y person enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.error.invalid=Dewiswch a wnaethoch enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.gain.label=Enillion
+initialGainOrLoss.loss.label=Colled
+initialGainOrLoss.details.summary=Sut i gyfrifo’ch enillion cychwynnol neu golled gychwynnol
+initialGainOrLoss.helpText=Os gwnaethoch enillion cychwynnol neu golled gychwynnol, bydd angen i chi nodi’r swm.
+initialGainOrLoss.agent.helpText=Os gwnaeth eich cleient enillion cychwynnol neu golled gychwynnol, bydd angen i chi nodi’r swm.
+initialGainOrLoss.trust.helpText=Os gwnaeth yr ymddiriedolaeth enillion cychwynnol neu golled gychwynnol, bydd angen i chi nodi’r swm.
+initialGainOrLoss.capacitor.helpText=Os gwnaeth y person enillion cychwynnol neu golled gychwynnol, bydd angen i chi nodi’r swm.
+initialGainOrLoss.personalRep.helpText=Os gwnaeth y person enillion cychwynnol neu golled gychwynnol, bydd angen i chi nodi’r swm.
+initialGainOrLoss.cya.title=Gwiriwch eich atebion
+initialGainOrLoss.details.olTitle=Er mwyn cyfrifo’ch enillion cychwynnol:
+initialGainOrLoss.agent.details.olTitle=Er mwyn cyfrifo enillion cychwynnol eich cleient:
+initialGainOrLoss.trust.details.olTitle=Er mwyn cyfrifo enillion cychwynnol yr ymddiriedolaeth:
+initialGainOrLoss.capacitor.details.olTitle=Er mwyn cyfrifo enillion cychwynnol y person:
+initialGainOrLoss.personalRep.details.olTitle=Er mwyn cyfrifo enillion cychwynnol y person:
+initialGainOrLoss.details.li1=1. Didynnwch y swm y gwnaethoch brynu, neu gaffael, yr eiddo amdano o’r swm y gwnaethoch ei werthu, neu ei waredu amdano.
+initialGainOrLoss.details.li2=2. Didynnwch unrhyw arian y gwnaethoch ei wario ar wella’r eiddo.
+initialGainOrLoss.agent.details.li2=2. Didynnwch unrhyw arian y gwnaeth eich cleient ei wario ar wella’r eiddo.
+initialGainOrLoss.trust.details.li2=2. Didynnwch unrhyw arian y gwnaeth yr ymddiriedolaeth ei wario ar wella’r eiddo.
+initialGainOrLoss.capacitor.details.li2=2. Didynnwch unrhyw arian y gwnaeth y person ei wario ar wella’r eiddo.
+initialGainOrLoss.personalRep.details.li2=2. Didynnwch unrhyw arian y gwnaeth y person ei wario ar wella’r eiddo.
+initialGainOrLoss.details.li3=3. Didynnwch unrhyw arian y gwnaethoch ei wario ar waredu’r eiddo, megis ffioedd cyfreithiol neu asiantau eiddo, yn ogystal â chostau caffael.
+initialGainOrLoss.agent.details.li3=3. Didynnwch unrhyw arian y gwnaeth eich cleient ei wario ar waredu’r eiddo, megis ffioedd cyfreithiol neu asiantau eiddo, yn ogystal â chostau caffael.
+initialGainOrLoss.trust.details.li3=3. Didynnwch unrhyw arian y gwnaeth yr ymddiriedolaeth ei wario ar waredu’r eiddo, megis ffioedd cyfreithiol neu asiantau eiddo, yn ogystal â chostau caffael.
+initialGainOrLoss.capacitor.details.li3=3. Didynnwch unrhyw arian y gwnaeth y person ei wario ar waredu’r eiddo, megis ffioedd cyfreithiol neu asiantau eiddo, yn ogystal â chostau caffael.
+initialGainOrLoss.personalRep.details.li3=3. Didynnwch unrhyw arian y gwnaeth y person ei wario ar waredu’r eiddo, megis ffioedd cyfreithiol neu asiantau eiddo, yn ogystal â chostau caffael.
+initialGainOrLoss.details.li4=4. Bydd hyn yn rhoi swm yr enillion cychwynnol neu’r golled gychwynnol i chi.
+initialGainOrLoss.details.example.title=Enghraifft
+initialGainOrLoss.details.example.details=Rydych wedi etifeddu eiddo. Gwerth marchnadol yr eiddo pan gafodd ei gaffael oedd £120,000. Gwnaethoch dalu £5,000 mewn ffioedd cyfreithiol pan wnaethoch etifeddu’r eiddo. Gwnaethoch wario £10,000 ar wella’r eiddo. Ar ôl 10 mlynedd, gwnaethoch werthu’r eiddo am £150,000. Gwnaethoch dalu £5,000 am ffioedd cyfreithiol ac asiantau eiddo diriaethol. Rhoddodd hyn enillion cychwynnol o £10,000.
+initialGainOrLoss.agent.details.example.details=Gwnaeth eich cleient etifeddu eiddo. Gwerth marchnadol yr eiddo pan gafodd ei gaffael oedd £120,000. Gwnaeth eich cleient dalu £5,000 mewn ffioedd cyfreithiol pan wnaeth etifeddu’r eiddo. Gwnaeth eich cleient wario £10,000 ar wella’r eiddo. Ar ôl 10 mlynedd, gwnaeth eich cleient werthu’r eiddo am £150,000. Gwnaeth eich cleient dalu £5,000 am ffioedd cyfreithiol ac asiantau eiddo diriaethol. Rhoddodd hyn enillion cychwynnol o £10,000.
+initialGainOrLoss.trust.details.example.details=Gwnaeth yr ymddiriedolaeth etifeddu eiddo. Gwerth marchnadol yr eiddo pan gafodd ei gaffael oedd £120,000. Gwnaeth yr ymddiriedolaeth dalu £5,000 mewn ffioedd cyfreithiol pan wnaeth etifeddu’r eiddo. Gwnaeth yr ymddiriedolaeth wario £10,000 ar wella’r eiddo. Ar ôl 10 mlynedd, gwnaeth yr ymddiriedolaeth werthu’r eiddo am £150,000. Gwnaeth yr ymddiriedolaeth dalu £5,000 am ffioedd cyfreithiol ac asiantau eiddo diriaethol. Rhoddodd hyn enillion cychwynnol o £10,000.
+initialGainOrLoss.capacitor.details.example.details=Gwnaeth y person etifeddu eiddo. Gwerth marchnadol yr eiddo pan gafodd ei gaffael oedd £120,000. Gwnaeth y person dalu £5,000 mewn ffioedd cyfreithiol pan wnaeth etifeddu’r eiddo. Gwnaeth y person wario £10,000 ar wella’r eiddo. Ar ôl 10 mlynedd, gwnaeth y person werthu’r eiddo am £150,000. Gwnaeth y person dalu £5,000 am ffioedd cyfreithiol ac asiantau eiddo diriaethol. Rhoddodd hyn enillion cychwynnol o £10,000.
+initialGainOrLoss.personalRep.details.example.details=Gwnaeth y person etifeddu eiddo. Gwerth marchnadol yr eiddo pan gafodd ei gaffael oedd £120,000. Gwnaeth y person dalu £5,000 mewn ffioedd cyfreithiol pan wnaeth etifeddu’r eiddo. Gwnaeth y person wario £10,000 ar wella’r eiddo. Ar ôl 10 mlynedd, gwnaeth y person werthu’r eiddo am £150,000. Y ffioedd cyfreithiol ac asiantau eiddo diriaethol oedd £5,000. Rhoddodd hyn enillion cychwynnol o £10,000.
+initialGainOrLoss.noLossOrGain.label=Dim enillion cychwynnol, dim colled gychwynnol
+initialGainOrLoss.summary.hint=Cliciwch ar y cysylltiad er mwyn newid eich atebion
+initialGainOrLoss.cyaChange=p’un a wnaethoch enillion cychwynnol, colled gychwynnol, neu dim enillion na cholled
+gain.error.required=Nodwch swm yr enillion cychwynnol
+gain.error.invalid=Mae’n rhaid i swm yr enillion cychwynnol gynnwys rhifau, megis 2,908 neu 740.50 yn unig
+gain.error.tooLarge=Mae’n rhaid i swm yr enillion cychwynnol fod yn rhif sy’n fwy na 0 ac yn llai na 50,000,000,000.00, neu dewiswch ‘dim enillion na cholled’
+gain.error.tooManyDecimals=Mae’n rhaid i swm yr enillion cychwynnol gynnwys 2 le degol neu lai, megis 2,908 neu 740.50
+gain.error.tooSmall=Mae’n rhaid i swm yr enillion cychwynnol fod yn rhif sy’n fwy na 0 ac yn llai na 50,000,000,000.00
+gain.label=Swm yr enillion cychwynnol
+loss.error.required=Nodwch swm y golled gychwynnol
+loss.error.invalid=Mae’n rhaid i swm y golled gychwynnol gynnwys rhifau, megis 2,908 neu 740.50 yn unig
+loss.error.tooLarge=Mae’n rhaid i swm y golled gychwynnol fod yn rhif sy’n fwy na 0 ac yn llai na 50,000,000,000.00, neu dewiswch ‘dim enillion na cholled’
+loss.error.tooManyDecimals=Mae’n rhaid i swm y golled gychwynnol gynnwys 2 le degol neu lai, megis 2,908 neu 740.50
+loss.error.tooSmall=Mae’n rhaid i swm y golled gychwynnol fod yn rhif sy’n fwy na 0 ac yn llai na 50,000,000,000.00
+loss.label=Swm y golled gychwynnol
+
+#===================================================
+#  INITIAL GAIN OR LOSS PAGES - END
+#===================================================
+
+#===================================================
 #  SUPPORTING EVIDENCE PAGES - START
 #===================================================
 
