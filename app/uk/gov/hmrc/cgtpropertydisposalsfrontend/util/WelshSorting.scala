@@ -75,7 +75,7 @@ object WelshSorting {
       }
 
     private def clean(code: String): String =
-      StringUtils.stripAccents(code.toLowerCase().stripPrefix(YR).replaceAll("[^A-Za-z0-9] ", ""))
+      StringUtils.stripAccents(code.toLowerCase().stripPrefix(YR).filter(s => s.isLetter || s.isWhitespace))
 
     @scala.annotation.tailrec
     private def toCharacterValues(str: String, acc: List[Int]): List[Int] =
