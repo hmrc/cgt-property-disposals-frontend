@@ -40,10 +40,9 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
     sessionStore: SessionStore,
     errorHandler: ErrorHandler,
     uuidGenerator: UUIDGenerator,
-    redirectUrlOverride: Option[String] = None,
-    forceDisplayGainOrLossAfterReliefs: Boolean = false
+    redirectUrlOverride: Option[String] = None
   )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
-    val fillingOutReturn = toFillingOutReturn(startingToAmendReturn, uuidGenerator, forceDisplayGainOrLossAfterReliefs)
+    val fillingOutReturn = toFillingOutReturn(startingToAmendReturn, uuidGenerator)
 
     updateSession(sessionStore, request)(
       _.copy(
@@ -83,13 +82,10 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
 
   private def toFillingOutReturn(
     s: StartingToAmendReturn,
-    uuidGenerator: UUIDGenerator,
-    forceShowGainOrLossAfterReliefs: Boolean
+    uuidGenerator: UUIDGenerator
   ): FillingOutReturn = {
-    val id                                  = uuidGenerator.nextId()
-    val now                                 = TimeUtils.now().toLocalDate
-    val shouldDisplayGainOrLossAfterReliefs =
-      forceShowGainOrLossAfterReliefs || s.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
+    val id  = uuidGenerator.nextId()
+    val now = TimeUtils.now().toLocalDate
 
     val draftReturn = s.originalReturn.completeReturn match {
       case m: CompleteMultipleDisposalsReturn        =>
@@ -114,7 +110,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
           Some(s.reliefDetails),
           None,
           None,
-          if (shouldDisplayGainOrLossAfterReliefs) None else s.initialGainOrLoss,
+          s.initialGainOrLoss,
           None,
           None,
           s.gainOrLossAfterReliefs,
@@ -172,7 +168,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
       Some(
         AmendReturnData(
           s.originalReturn,
-          shouldDisplayGainOrLossAfterReliefs
+          s.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
         )
       )
     )
