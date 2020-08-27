@@ -1814,7 +1814,9 @@ class SingleDisposalsTriageController @Inject() (
     completionDate: LocalDate,
     individualUserType: Option[IndividualUserType],
     state: JourneyState
-  ) =
+  ) = {
+    val originalReturnId = state.toOption.flatMap(_._2.amendReturnData.map(_.originalReturn.summary.submissionId))
+
     individualUserType match {
       case Some(_: RepresentativeType) => false
       case _                           =>
@@ -1823,9 +1825,11 @@ class SingleDisposalsTriageController @Inject() (
             .fold(_.previousSentReturns, _._2.previousSentReturns)
             .map(_.summaries)
             .getOrElse(List.empty)
+            .filterNot(summary => originalReturnId.contains(summary.submissionId))
             .map(_.completionDate)
         previousSentCompletionDates.contains(completionDate)
     }
+  }
 
   private def withPersonalRepresentativeDetails(state: JourneyState)(
     f: Option[PersonalRepresentativeDetails] => Future[Result]
