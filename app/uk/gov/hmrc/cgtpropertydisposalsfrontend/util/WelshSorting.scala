@@ -71,25 +71,11 @@ object WelshSorting {
       else {
         val listOfWeights        = convertToCharacterValues(clean(s), List.empty)
         val compareListOfWeights = convertToCharacterValues(clean(other), List.empty)
-
-        val maxLength      = Math.min(listOfWeights.length, compareListOfWeights.length)
-        var divergentIndex = 0
-        while (divergentIndex < maxLength && listOfWeights(divergentIndex) === compareListOfWeights(divergentIndex))
-          divergentIndex = divergentIndex + 1
-
-        //Is a substring, and return shorter
-        if (divergentIndex === maxLength)
-          compareListOfWeights.length > listOfWeights.length
-        else
-          listOfWeights(divergentIndex) < compareListOfWeights(divergentIndex)
+        f(listOfWeights, compareListOfWeights)
       }
 
     def clean(code: String): String =
-      //Some welsh country codes have the prefix "Yr" - e.g "Yr foo". We are only interested 'foo'
-      if (code.toLowerCase().startsWith(YR)) {
-        val truncated = code.substring(2, code.length)
-        StringUtils.stripAccents(truncated).replaceAll("[^A-Za-z0-9] ", "").toLowerCase()
-      } else StringUtils.stripAccents(code).replaceAll("[^A-Za-z0-9] ", "").toLowerCase()
+      StringUtils.stripAccents(code.toLowerCase().stripPrefix(YR).replaceAll("[^A-Za-z0-9] ", ""))
 
     @scala.annotation.tailrec
     def convertToCharacterValues(str: String, acc: List[Int]): List[Int] =
@@ -98,9 +84,18 @@ object WelshSorting {
         case s if validMultiCharacterWelshCharacter(s) =>
           convertToCharacterValues(s.substring(2), acc ::: List(WELSH_ALPHABET(s.substring(0, 2))))
         case s                                         => convertToCharacterValues(s.substring(1), acc ::: List(WELSH_ALPHABET(s.substring(0, 1))))
-
       }
-  }
 
-  def validMultiCharacterWelshCharacter(str: String) = str.length > 1 && welshCharacters.contains(str.substring(0, 2))
+    @scala.annotation.tailrec
+    def f(l1: List[Int], l2: List[Int]): Boolean =
+      (l1 -> l2) match {
+        case (h1 :: Nil, h2 :: Nil) => h1 < h2
+        case (h1 :: Nil, h2 :: _)   => if (h1 === h2) true else h1 < h2
+        case (h1 :: _, h2 :: Nil)   => if (h1 === h2) false else h1 < h2
+        case (h1 :: t1, h2 :: t2)   => if (h1 === h2) f(t1, t2) else h1 < h2
+        case _                      => false
+      }
+
+    def validMultiCharacterWelshCharacter(str: String) = str.length > 1 && welshCharacters.contains(str.substring(0, 2))
+  }
 }
