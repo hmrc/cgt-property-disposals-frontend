@@ -60,7 +60,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -4199,7 +4199,7 @@ class MultipleDisposalsTriageControllerSpec
 
       "show an error page" when {
 
-        "there is an error updating the session when converting from inomplete answers to " +
+        "there is an error updating the session when converting from incomplete answers to " +
           "complete answers" in {
           val (session, journey) =
             sessionDataWithStartingNewDraftReturn(allQuestionsAnsweredUk)
@@ -4327,6 +4327,33 @@ class MultipleDisposalsTriageControllerSpec
               }
             )
 
+          }
+
+          "the user is on an amend journey where the completion date hasn't changed" in {
+            val originalReturnSummary =
+              sample[ReturnSummary].copy(completionDate = completeAnswersUk.completionDate.value)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  completeAnswersUk,
+                  previousSentReturns = Some(List(originalReturnSummary)),
+                  amendReturnData = Some(
+                    sample[AmendReturnData].copy(originalReturn =
+                      sample[CompleteReturnWithSummary].copy(
+                        summary = originalReturnSummary
+                      )
+                    )
+                  )
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("multipleDisposals.triage.cya.title")
+            )
           }
 
         }

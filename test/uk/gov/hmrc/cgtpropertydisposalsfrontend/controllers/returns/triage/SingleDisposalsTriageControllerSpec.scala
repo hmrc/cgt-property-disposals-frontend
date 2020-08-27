@@ -58,7 +58,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -131,13 +131,13 @@ class SingleDisposalsTriageControllerSpec
     draftReturn: DraftSingleDisposalReturn,
     name: Either[TrustName, IndividualName],
     previousSentReturns: Option[List[ReturnSummary]],
-    isAmend: Boolean = false
+    amendReturnData: Option[AmendReturnData] = None
   ): (SessionData, FillingOutReturn) = {
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None)),
-      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
+      amendReturnData = amendReturnData
     )
 
     val sessionData = SessionData.empty.copy(
@@ -152,7 +152,7 @@ class SingleDisposalsTriageControllerSpec
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     representeeAnswers: Option[RepresenteeAnswers] = Some(sample[IncompleteRepresenteeAnswers]),
     previousSentReturns: Option[List[ReturnSummary]] = None,
-    isAmend: Boolean = false
+    amendReturnData: Option[AmendReturnData] = None
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers,
@@ -163,7 +163,7 @@ class SingleDisposalsTriageControllerSpec
       draftReturn,
       name,
       previousSentReturns,
-      isAmend
+      amendReturnData
     )
     (session, journey, draftReturn)
   }
@@ -2462,7 +2462,7 @@ class SingleDisposalsTriageControllerSpec
                 requiredPreviousAnswers.copy(
                   disposalDate = Some(DisposalDate(today, taxYear))
                 ),
-                isAmend = true
+                amendReturnData = Some(sample[AmendReturnData])
               )._1
             )
           }
@@ -4343,7 +4343,7 @@ class SingleDisposalsTriageControllerSpec
               requiredPreviousAnswers.copy(
                 assetType = Some(AssetType.IndirectDisposal)
               ),
-              isAmend = isAmend
+              amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
             )._1
           )
         }
@@ -5321,6 +5321,33 @@ class SingleDisposalsTriageControllerSpec
 
           "the user is a personal rep in period of admin" in {
             test(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
+          }
+
+          "the user is on an amend return journey where the completion date has not changed" in {
+            val originalReturnSummary =
+              sample[ReturnSummary].copy(completionDate = completeTriageQuestions.completionDate.value)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  completeTriageQuestions,
+                  previousSentReturns = Some(List(originalReturnSummary)),
+                  amendReturnData = Some(
+                    sample[AmendReturnData].copy(originalReturn =
+                      sample[CompleteReturnWithSummary].copy(
+                        summary = originalReturnSummary
+                      )
+                    )
+                  )
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("triage.check-your-answers.title")
+            )
           }
 
         }
