@@ -160,7 +160,8 @@ class AmendReturnController @Inject() (
               sessionStore,
               errorHandler,
               uuidGenerator,
-              Some(controllers.returns.routes.TaskListController.taskList().url)
+              Some(controllers.returns.routes.TaskListController.taskList().url),
+              forceDisplayGainOrLossAfterReliefs = true
             )
         }
       }

@@ -64,8 +64,11 @@
 
 @gainOrLossAfterReliefsState = @{
   val showGainOrLossAfterReliefs =
-      fillingOutReturn.amendReturnData.exists(_.shouldDisplayGainOrLossAfterReliefs) ||
-              fillingOutReturn.isFurtherReturn.contains(true)
+      fillingOutReturn.amendReturnData match {
+          case Some(amendReturnData) => amendReturnData.shouldDisplayGainOrLossAfterReliefs
+          case _ => fillingOutReturn.isFurtherReturn.contains(true)
+      }
+
 
   if(showGainOrLossAfterReliefs){
     examplePropertyDetailsState match {

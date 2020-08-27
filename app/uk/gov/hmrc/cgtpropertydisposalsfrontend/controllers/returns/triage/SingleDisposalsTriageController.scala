@@ -858,39 +858,25 @@ class SingleDisposalsTriageController @Inject() (
                 {
                   case (d, r) =>
                     r.copy(
-                        draftReturn = d.fold(
-                          _.fold(
-                            mixedUseDraftReturn =>
-                              mixedUseDraftReturn.copy(
-                                triageAnswers = newAnswers,
-                                yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers.flatMap {
-                                  case _: CalculatedYTDAnswers    => None
-                                  case n: NonCalculatedYTDAnswers =>
-                                    Some(
-                                      n.unset(_.hasEstimatedDetails)
-                                        .unset(_.yearToDateLiability)
-                                        .unset(_.mandatoryEvidence)
-                                    )
-                                }
-                              ),
-                            indirectDraftReturn =>
-                              indirectDraftReturn.copy(
-                                triageAnswers = newAnswers,
-                                yearToDateLiabilityAnswers = indirectDraftReturn.yearToDateLiabilityAnswers.flatMap {
-                                  case _: CalculatedYTDAnswers    => None
-                                  case n: NonCalculatedYTDAnswers =>
-                                    Some(
-                                      n.unset(_.hasEstimatedDetails)
-                                        .unset(_.yearToDateLiability)
-                                        .unset(_.mandatoryEvidence)
-                                    )
-                                }
-                              )
-                          ),
-                          s =>
-                            s.copy(
+                      draftReturn = d.fold(
+                        _.fold(
+                          mixedUseDraftReturn =>
+                            mixedUseDraftReturn.copy(
                               triageAnswers = newAnswers,
-                              yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap {
+                              yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers.flatMap {
+                                case _: CalculatedYTDAnswers    => None
+                                case n: NonCalculatedYTDAnswers =>
+                                  Some(
+                                    n.unset(_.hasEstimatedDetails)
+                                      .unset(_.yearToDateLiability)
+                                      .unset(_.mandatoryEvidence)
+                                  )
+                              }
+                            ),
+                          indirectDraftReturn =>
+                            indirectDraftReturn.copy(
+                              triageAnswers = newAnswers,
+                              yearToDateLiabilityAnswers = indirectDraftReturn.yearToDateLiabilityAnswers.flatMap {
                                 case _: CalculatedYTDAnswers    => None
                                 case n: NonCalculatedYTDAnswers =>
                                   Some(
@@ -900,9 +886,22 @@ class SingleDisposalsTriageController @Inject() (
                                   )
                               }
                             )
-                        )
+                        ),
+                        s =>
+                          s.copy(
+                            triageAnswers = newAnswers,
+                            yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap {
+                              case _: CalculatedYTDAnswers    => None
+                              case n: NonCalculatedYTDAnswers =>
+                                Some(
+                                  n.unset(_.hasEstimatedDetails)
+                                    .unset(_.yearToDateLiability)
+                                    .unset(_.mandatoryEvidence)
+                                )
+                            }
+                          )
                       )
-                      .withForceDisplayGainOrLossAfterReliefsForAmends
+                    )
                 }
               )
             }

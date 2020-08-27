@@ -42,7 +42,8 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
   def amendReturnToFillingOutReturnSpecBehaviour(
     performAction: Action[AnyContent],
     mockUUIDGenerator: UUIDGenerator,
-    expectedRedirectToOverride: Option[String] = None
+    expectedRedirectToOverride: Option[String] = None,
+    expectForceDisplayGainOrLossAfterReliefs: Boolean = false
   )(implicit messagesApi: MessagesApi): Unit = {
 
     "redirect to the same endpoint when converting from a start amend journey to a filling out return journey" when {
@@ -65,7 +66,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           Some(
             AmendReturnData(
               startingToAmend.originalReturn,
-              startingToAmend.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
+              expectForceDisplayGainOrLossAfterReliefs || startingToAmend.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
             )
           )
         )
@@ -111,7 +112,8 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           Some(completeReturn.reliefDetails),
           None,
           None,
-          None,
+          if (expectForceDisplayGainOrLossAfterReliefs || completeReturn.gainOrLossAfterReliefs.isDefined) None
+          else completeReturn.initialGainOrLoss,
           None,
           None,
           completeReturn.gainOrLossAfterReliefs,
@@ -206,7 +208,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           Some(
             AmendReturnData(
               startingToAmend.originalReturn,
-              startingToAmend.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
+              expectForceDisplayGainOrLossAfterReliefs || startingToAmend.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
             )
           )
         )
