@@ -951,6 +951,50 @@ multipleDisposals.triage.cya.guidanceLink=Help i lenwi’r adran hon
 #===================================================
 
 #===================================================
+#  TASK LIST AND SAVE DRAFT PAGES - START
+#===================================================
+
+returns.return-to-summary-link=Yn ôl i’r crynodeb
+task-list.InProgress=Wrthi’n llenwi
+task-list.Complete=Wedi’i llenwi
+task-list.CannotStart=Methu dechrau
+task-list.ToDo=I’w gwneud
+task-list.incompleteTriage=Mae’n rhaid i chi lenwi’r adran hon er mwyn mynd yn eich blaen. Mae’n bosibl bod rhai o’r manylion a nodwyd gennych wedi’u cadw fel drafft.
+task-list.representee.link=Nodwch fanylion y person yr ydych yn ei gynrychioli
+task-list.triage.link=Gwiriwch a allwch ddefnyddio’r gwasanaeth hwn
+task-list.provide-details.heading=Rhowch fanylion
+task-list.enter-initial-gain-or-loss.link=Nodwch ennill neu golled gychwynnol
+task-list.enter-property-address.link=Nodwch gyfeiriad yr eiddo
+task-list.enter-property-details.link=Nodwch fanylion yr eiddo
+task-list.enter-property-details-single-mixed-use.link=Nodwch fanylion yr eiddo aml-ddefnydd
+task-list.enter-company-details.link=Nodwch fanylion y cwmni
+task-list.example-company-details.link=Enghraifft o fanylion cwmni
+task-list.disposals-details.link=Nodwch y manylion gwerthu neu waredu
+task-list.acquisition-details.link=Nodwch y manylion prynu neu gaffael
+task-list.exemptions-and-losses.link=Nodwch golledion ac eithriadau
+task-list.gainOrLossAfterReliefs.link=Nodwch ennill neu golled ar ôl rhyddhad
+task-list.save-and-come-back.link=Cadw a dod yn ôl yn nes ymlaen
+task-list.relief-details.link=Nodwch ryddhad
+task-list.gain-or-loss-after-reliefs.link=Nodwch ennill neu golled ar ôl rhyddhad
+task-list.report-and-pay-the-tax.heading=Rhowch wybod am y dreth a’i thalu
+task-list.enter-cgt-liability.link=Nodwch y rhwymedigaeth o ran Treth Enillion Cyfalaf ar gyfer y flwyddyn dreth hon hyd yn hyn
+task-list.ytd-liability.link=Nodwch y rhwymedigaeth o ran Treth Enillion Cyfalaf ar gyfer y flwyddyn dreth hon hyd yn hyn
+task-list.check-and-send-return.link=Gwirio ac anfon datganiad, talu unrhyw dreth sy’n ddyledus
+task-list.upload-supporting-docs.link=Uwchlwythwch eich Dogfennau Ategol
+task-list.enter-example-property-address.link=Nodwch fanylion un eiddo
+task-list.indirect.enter-example-company-address.link=Nodwch fanylion un cwmni
+draftReturnSaved.title=Caiff eich Ffurflen Dreth Enillion Cyfalaf ar eiddo yn y DU ei chadw ar gyfer 30 diwrnod
+draftReturnSaved.warning=Ar ôl {0}, bydd yr holl fanylion ar eich Ffurflen Dreth Enillion Cyfalaf ar eiddo yn y DU yn cael eu dileu.
+draftReturnSaved.trust.warning=Ar ôl {0}, bydd yr holl fanylion ar Ffurflen Dreth Enillion Cyfalaf ar eiddo yn y DU yr ymddiriedolaeth yn cael eu dileu.
+draftReturnSaved.agent.warning=Ar ôl {0}, bydd yr holl fanylion ar Ffurflen Dreth Enillion Cyfalaf ar eiddo yn y DU eich cleient yn cael eu dileu.
+draftReturnSaved.p1=Ar ôl y dyddiad hwnnw, bydd angen i chi ddechrau eto.
+draftReturnSaved.p2=Byddwn yn cadw Ffurflen Dreth sydd wedi’i nodi fel un sydd wrthi’n cael ei llenwi am 30 diwrnod o’r dyddiad y cafodd ei chadw ddiwethaf. Byddwn ond yn cadw dogfennau sydd wedi’u huwchlwytho am 5 diwrnod  o’r diwrnod olaf y cawsant eu cadw.
+
+#===================================================
+#  TASK LIST AND SAVE DRAFT PAGES - END
+#===================================================
+
+#===================================================
 #  PROPERTY DETAILS PAGES - START
 #===================================================
 
@@ -1017,6 +1061,399 @@ returns.property-address.cyaChange.property-address=cyfeiriad yr eiddo
 
 #===================================================
 #  PROPERTY DETAILS PAGES - END
+#===================================================
+
+#===================================================
+# INDIRECT DISPOSALS COMPANY PAGES - START
+#===================================================
+
+companyDetails.caption=Manylion y cwmni
+companyDetails.isUk.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gennych gyfranddaliadau ynddo?
+companyDetails.isUk.agent.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan eich cleient gyfranddaliadau ynddo?
+companyDetails.isUk.trust.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan yr ymddiriedolaeth gyfranddaliadau ynddo?
+companyDetails.isUk.capacitor.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo?
+companyDetails.isUk.personalRep.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo?
+companyDetails.isUk.personalRepInPeriodOfAdmin.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo?
+isUk.companyDetails.error.required=Dewiswch ‘Iawn’ os oedd cyfeiriad yn y DU gan y cwmni yr oedd gennych gyfranddaliadau ynddo
+isUk.companyDetails.agent.error.required=Dewiswch ‘Iawn’ os oedd cyfeiriad yn y DU gan y cwmni yr oedd gan eich cleient gyfranddaliadau ynddo
+isUk.companyDetails.trust.error.required=Dewiswch ‘Iawn’ os oedd cyfeiriad yn y DU gan y cwmni yr oedd gan yr ymddiriedolaeth gyfranddaliadau ynddo
+isUk.companyDetails.capacitor.error.required=Dewiswch ‘Iawn’ os oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo
+isUk.companyDetails.personalRep.error.required=Dewiswch ‘Iawn’ os oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo
+address.uk.companyDetails.title=Nodwch enw a chyfeiriad y cwmni yr oedd gennych gyfranddaliadau ynddo
+address.uk.companyDetails.agent.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan eich cleient gyfranddaliadau ynddo
+address.uk.companyDetails.trust.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan yr ymddiriedolaeth gyfranddaliadau ynddo
+address.uk.companyDetails.capacitor.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+address.uk.companyDetails.personalRep.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+address.uk.companyDetails.personalRepInPeriodOfAdmin.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+address.uk.companyDetails.helpText=Dylai hwn fod yn gyfeiriad cofrestredig y cwmni
+address.uk.companyDetails.line1.label=Enw’r cwmni
+address.uk.companyDetails.line2.label=Cyfeiriad
+address-line1.companyDetails.error.required=Nodwch enw cwmni
+address-line1.companyDetails.error.tooLong=Mae’n rhaid i enw’r cwmni fod yn 35 o gymeriadau neu lai
+address-line1.companyDetails.error.pattern=Mae’n rhaid i enw’r cwmni gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+address-line2.companyDetails.error.tooLong=Mae’n rhaid i’r cyfeiriad fod yn 35 o gymeriadau neu lai
+address-line2.companyDetails.error.pattern=Mae’n rhaid i’r cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+address-town.companyDetails.error.tooLong=Mae’n rhaid i’r dref neu’r ddinas fod yn 35 o gymeriadau neu lai
+address-town.companyDetails.error.pattern=Mae’n rhaid i’r dref neu’r ddinas gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+address-county.companyDetails.error.tooLong=Mae’n rhaid i’r sir gynnwys 35 o gymeriadau neu lai
+address-county.companyDetails.error.pattern=Mae’n rhaid i’r sir gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+postcode.companyDetails.error.tooLong=Mae’n rhaid i’r cod post fod yn 8 o gymeriadau neu lai
+postcode.companyDetails.error.required=Nodwch god post
+postcode.companyDetails.error.invalidCharacters=Mae’n rhaid i’r cod post gynnwys llythrennau, rhifau a bylchau yn unig
+postcode.companyDetails.error.pattern=Nodwch god post go iawn
+nonUkAddress.companyDetails.title=Nodwch enw a chyfeiriad y cwmni yr oedd gennych gyfranddaliadau ynddo
+nonUkAddress.companyDetails.agent.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan eich cleient gyfranddaliadau ynddo
+nonUkAddress.companyDetails.trust.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan yr ymddiriedolaeth gyfranddaliadau ynddo
+nonUkAddress.companyDetails.capacitor.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+nonUkAddress.companyDetails.personalRep.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+nonUkAddress.companyDetails.personalRepInPeriodOfAdmin.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+nonUkAddress.companyDetails.line1.label=Enw’r cwmni
+nonUkAddress.companyDetails.line2.label=Cyfeiriad
+nonUkAddress-line1.companyDetails.error.required=Nodwch enw cwmni
+nonUkAddress-line1.companyDetails.error.tooLong=Mae’n rhaid i enw’r cwmni fod yn 35 o gymeriadau neu lai
+nonUkAddress-line2.companyDetails.error.tooLong=Mae’n rhaid i’r cyfeiriad fod yn 35 o gymeriadau neu lai
+nonUkAddress-line3.companyDetails.error.tooLong=Mae’n rhaid i linell 3 y cyfeiriad fod yn 35 o gymeriadau neu lai
+nonUkAddress-line4.companyDetails.error.tooLong=Mae’n rhaid i linell 4 y cyfeiriad fod yn 35 o gymeriadau neu lai
+nonUkAddress-line1.companyDetails.error.pattern=Mae’n rhaid i enw’r cwmni gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+nonUkAddress-line2.companyDetails.error.pattern=Mae’n rhaid i’r cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+nonUkAddress-line3.companyDetails.error.pattern=Mae’n rhaid i linell 3 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+nonUkAddress-line4.companyDetails.error.pattern=Mae’n rhaid i linell 4 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, ampersandau, collnodau a blaenslaesys yn unig
+countryCode.companyDetails.error.required=Dewiswch wlad o’r dewisiadau a gyflwynir wrth i chi deipio
+countryCode.companyDetails.error.notFound=Dewiswch wlad o’r dewisiadau a gyflwynir wrth i chi deipio
+companyDetails.cya.title=Gwiriwch eich atebion
+companyDetails.cyaLabel.company-address=Enw a chyfeiriad y cwmni
+companyDetails.cyaChange.company-address=enw a chyfeiriad y cwmni
+non-uk-resident.change-address-to-uk-address.title=Ni allwch ddefnyddio’r gwasanaeth hwn
+non-uk-resident.change-address-to-uk-address.p1=Ni allwch ddefnyddio’r gwasanaeth hwn i roi gwybod am Dreth Enillion Cyfalaf ar werthu neu waredu eiddo yn y DU. Mae hyn oherwydd nad yw’ch cyfeiriad yn y DU.
+non-uk-resident.change-address-to-uk-address.p2=Bydd angen i chi <a href
+company-details.multiple-indirect-disposals.guidance.title=Bydd angen i chi nodi manylion ar gyfer un o’r gwarediadau
+company-details.multiple-indirect-disposals.guidance.p1=Dylech nodi manylion y gwarediad a roddodd yr enillion mwyaf neu’r golled leiaf.
+company-details.multiple-indirect-disposals.guidance.p2=Ar gyfer yr un gwarediad hwnnw, bydd angen i chi nodi’r canlynol:
+company-details.multiple-indirect-disposals.guidance.li1=enw a chyfeiriad y cwmni y cafwyd cyfranddaliadau ynddo
+company-details.multiple-indirect-disposals.guidance.li2=dyddiad gwaredu’r cyfranddaliadau
+company-details.multiple-indirect-disposals.guidance.li3=gwerth y gwarediad, llai costau gwaredu
+company-details.multiple-indirect-disposals.guidance.li4=gwerth y caffaeliad, plws costau caffael
+company-details.multiple-indirect-disposals.guidance.personalRepInPeriodOfAdmin.li3=derbyniadau’r gwarediad llai costau gwaredu
+company-details.multiple-indirect-disposals.guidance.personalRepInPeriodOfAdmin.li4=gwerth marchnadol y cyfranddaliadau plws costau caffael
+company-details.multiple-indirect-disposals.guidance.p3=Bydd angen i chi hefyd uwchlwytho dogfen yn ddiweddarach sy’n darparu manylion y gwarediadau eiddo eraill yn y DU rydych yn eu cynnwys yn y Ffurflen Dreth hon.
+multipleIndirectDisposalsDisposalPrice.title=Beth oedd gwerth gwaredu’r cyfranddaliadau?
+multipleIndirectDisposalsDisposalPrice.helpText=Dyma’r swm y gwerthwyd y cyfranddaliadau amdano, neu eu gwerth marchnadol os cawsant eu gwaredu mewn ffordd arall. Dylech ddidynnu unrhyw gostau gwerthu neu waredu, er enghraifft, ffioedd brocer.
+multipleIndirectDisposalsDisposalPrice.error.required=Nodwch werth gwaredu’r cyfranddaliadau
+multipleIndirectDisposalsDisposalPrice.error.invalid=Mae’n rhaid i werth gwaredu’r cyfranddaliadau fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleIndirectDisposalsDisposalPrice.error.tooManyDecimals=Mae’n rhaid i werth gwaredu’r cyfranddaliadau fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 160,000 neu 23,040.50
+multipleIndirectDisposalsDisposalPrice.error.tooLarge=Mae’n rhaid i werth gwaredu’r cyfranddaliadau fod yn swm o arian rhwng 1 a 50,000,000,000
+multipleIndirectDisposalsDisposalPrice.error.tooSmall=Mae’n rhaid i werth gwaredu’r cyfranddaliadau fod yn swm o arian rhwng 1 a 50,000,000,000
+multipleIndirectDisposalsAcquisitionPrice.title=Beth oedd gwerth caffael y cyfranddaliadau?
+multipleIndirectDisposalsAcquisitionPrice.helpText=Dyma’r swm sy’n cael ei dalu i brynu’r cyfranddaliadau, neu eu gwerth marchnadol os cawsant eu hetifeddu neu os cawsant eu rhoi fel rhodd. Dylech ychwanegu unrhyw gostau caffael, er enghraifft, ffioedd brocer.
+multipleIndirectDisposalsAcquisitionPrice.error.required=Nodwch werth caffael y cyfranddaliadau
+multipleIndirectDisposalsAcquisitionPrice.error.invalid=Mae’n rhaid i werth caffael y cyfranddaliadau fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleIndirectDisposalsAcquisitionPrice.error.tooManyDecimals=Mae’n rhaid i werth caffael y cyfranddaliadau fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 160,000 neu 23,040.50
+multipleIndirectDisposalsAcquisitionPrice.error.tooLarge=Mae’n rhaid i werth caffael y cyfranddaliadau fod yn swm o arian rhwng 1 a 50,000,000,000
+multipleIndirectDisposalsAcquisitionPrice.error.tooSmall=Mae’n rhaid i werth caffael y cyfranddaliadau fod yn swm o arian rhwng 1 a 50,000,000,000
+returns.company-address.cya.title=Gwiriwch eich atebion
+companyDetails.isUk.multipleIndirect.title=A oes cyfeiriad yn y DU gan unrhyw un o’r cwmnïau yr oedd gan y person gyfranddaliadau ynddynt?
+companyDetails.isUk.multipleIndirect.personalRepInPeriodOfAdmin.title=A oedd cyfeiriad yn y DU gan y cwmni yr oedd gan y person gyfranddaliadau ynddo?
+companyDetails.isUk.multipleIndirect.helpText=Dylai hwn fod yn gyfeiriad cofrestredig y cwmni.
+isUk.multipleIndirect.error.required=Dewiswch ‘Iawn’ os oes cyfeiriad yn y DU gan unrhyw un o’r cwmnïau yr oedd gan y person gyfranddaliadau ynddynt
+address.uk.companyDetails.multipleIndirect.title=Nodwch enw a chyfeiriad unrhyw un o’r cwmnïau y cafodd y cyfranddaliadau eu cadw ynddo
+address.uk.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+nonUkAddress.companyDetails.multipleIndirect.title=Nodwch enw a chyfeiriad un o’r cwmnïau y cafodd y cyfranddaliadau eu cadw ynddo
+nonUkAddress.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title=Nodwch enw a chyfeiriad y cwmni yr oedd gan y person gyfranddaliadau ynddo
+returns.company-address.cyaLabel.company-address=Enw a chyfeiriad y cwmni
+returns.company-address.cyaChange.company-address=cyfeiriad yr eiddo
+returns.company-address.cyaLabel.disposal-price=Beth oedd y swm gwaredu?
+returns.company-address.cyaChange.disposal-price=y swm gwaredu
+returns.company-address.cyaLabel.acquisition-price=Beth oedd y swm caffael?
+returns.company-address.cyaChange.acquisition-price=y swm caffael
+
+#===================================================
+# INDIRECT DISPOSALS COMPANY PAGES - END
+#===================================================
+
+#===================================================
+#  INITIAL GAIN OR LOSS PAGES - START
+#===================================================
+
+initialGainOrLoss.title=A wnaethoch enillion cychwynnol neu golled gychwynnol?
+initialGainOrLoss.agent.title=A wnaeth eich cleient enillion cychwynnol neu golled gychwynnol?
+initialGainOrLoss.trust.title=A wnaeth yr ymddiriedolaeth enillion cychwynnol neu golled gychwynnol?
+initialGainOrLoss.capacitor.title=A wnaeth y person enillion cychwynnol neu golled gychwynnol?
+initialGainOrLoss.personalRep.title=A wnaed enillion cychwynnol neu golled gychwynnol?
+initialGainOrLoss.caption=Enillion cychwynnol neu golled gychwynnol
+initialGainOrLoss.error.required=Dewiswch a wnaethoch enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.agent.error.required=Dewiswch a wnaeth eich cleient enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.trust.error.required=Dewiswch a wnaeth yr ymddiriedolaeth enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.capacitor.error.required=Dewiswch a wnaeth y person enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.personalRep.error.required=Dewiswch a wnaeth y person enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.error.invalid=Dewiswch a wnaethoch enillion, colled, neu dim enillion na cholled
+initialGainOrLoss.gain.label=Enillion
+initialGainOrLoss.loss.label=Colled
+initialGainOrLoss.details.summary=Sut i gyfrifo’ch enillion cychwynnol neu golled gychwynnol
+initialGainOrLoss.helpText=Os gwnaethoch enillion cychwynnol neu golled gychwynnol, bydd angen i chi nodi’r swm.
+initialGainOrLoss.agent.helpText=Os gwnaeth eich cleient enillion cychwynnol neu golled gychwynnol, bydd angen i chi nodi’r swm.
+initialGainOrLoss.trust.helpText=Os gwnaeth yr ymddiriedolaeth enillion cychwynnol neu golled gychwynnol, bydd angen i chi nodi’r swm.
+initialGainOrLoss.capacitor.helpText=Os gwnaeth y person enillion cychwynnol neu golled gychwynnol, bydd angen i chi nodi’r swm.
+initialGainOrLoss.personalRep.helpText=Os gwnaeth y person enillion cychwynnol neu golled gychwynnol, bydd angen i chi nodi’r swm.
+initialGainOrLoss.cya.title=Gwiriwch eich atebion
+initialGainOrLoss.details.olTitle=Er mwyn cyfrifo’ch enillion cychwynnol:
+initialGainOrLoss.agent.details.olTitle=Er mwyn cyfrifo enillion cychwynnol eich cleient:
+initialGainOrLoss.trust.details.olTitle=Er mwyn cyfrifo enillion cychwynnol yr ymddiriedolaeth:
+initialGainOrLoss.capacitor.details.olTitle=Er mwyn cyfrifo enillion cychwynnol y person:
+initialGainOrLoss.personalRep.details.olTitle=Er mwyn cyfrifo enillion cychwynnol y person:
+initialGainOrLoss.details.li1=1. Didynnwch y swm y gwnaethoch brynu, neu gaffael, yr eiddo amdano o’r swm y gwnaethoch ei werthu, neu ei waredu amdano.
+initialGainOrLoss.details.li2=2. Didynnwch unrhyw arian y gwnaethoch ei wario ar wella’r eiddo.
+initialGainOrLoss.agent.details.li2=2. Didynnwch unrhyw arian y gwnaeth eich cleient ei wario ar wella’r eiddo.
+initialGainOrLoss.trust.details.li2=2. Didynnwch unrhyw arian y gwnaeth yr ymddiriedolaeth ei wario ar wella’r eiddo.
+initialGainOrLoss.capacitor.details.li2=2. Didynnwch unrhyw arian y gwnaeth y person ei wario ar wella’r eiddo.
+initialGainOrLoss.personalRep.details.li2=2. Didynnwch unrhyw arian y gwnaeth y person ei wario ar wella’r eiddo.
+initialGainOrLoss.details.li3=3. Didynnwch unrhyw arian y gwnaethoch ei wario ar waredu’r eiddo, megis ffioedd cyfreithiol neu asiantau eiddo, yn ogystal â chostau caffael.
+initialGainOrLoss.agent.details.li3=3. Didynnwch unrhyw arian y gwnaeth eich cleient ei wario ar waredu’r eiddo, megis ffioedd cyfreithiol neu asiantau eiddo, yn ogystal â chostau caffael.
+initialGainOrLoss.trust.details.li3=3. Didynnwch unrhyw arian y gwnaeth yr ymddiriedolaeth ei wario ar waredu’r eiddo, megis ffioedd cyfreithiol neu asiantau eiddo, yn ogystal â chostau caffael.
+initialGainOrLoss.capacitor.details.li3=3. Didynnwch unrhyw arian y gwnaeth y person ei wario ar waredu’r eiddo, megis ffioedd cyfreithiol neu asiantau eiddo, yn ogystal â chostau caffael.
+initialGainOrLoss.personalRep.details.li3=3. Didynnwch unrhyw arian y gwnaeth y person ei wario ar waredu’r eiddo, megis ffioedd cyfreithiol neu asiantau eiddo, yn ogystal â chostau caffael.
+initialGainOrLoss.details.li4=4. Bydd hyn yn rhoi swm yr enillion cychwynnol neu’r golled gychwynnol i chi.
+initialGainOrLoss.details.example.title=Enghraifft
+initialGainOrLoss.details.example.details=Rydych wedi etifeddu eiddo. Gwerth marchnadol yr eiddo pan gafodd ei gaffael oedd £120,000. Gwnaethoch dalu £5,000 mewn ffioedd cyfreithiol pan wnaethoch etifeddu’r eiddo. Gwnaethoch wario £10,000 ar wella’r eiddo. Ar ôl 10 mlynedd, gwnaethoch werthu’r eiddo am £150,000. Gwnaethoch dalu £5,000 am ffioedd cyfreithiol ac asiantau eiddo diriaethol. Rhoddodd hyn enillion cychwynnol o £10,000.
+initialGainOrLoss.agent.details.example.details=Gwnaeth eich cleient etifeddu eiddo. Gwerth marchnadol yr eiddo pan gafodd ei gaffael oedd £120,000. Gwnaeth eich cleient dalu £5,000 mewn ffioedd cyfreithiol pan wnaeth etifeddu’r eiddo. Gwnaeth eich cleient wario £10,000 ar wella’r eiddo. Ar ôl 10 mlynedd, gwnaeth eich cleient werthu’r eiddo am £150,000. Gwnaeth eich cleient dalu £5,000 am ffioedd cyfreithiol ac asiantau eiddo diriaethol. Rhoddodd hyn enillion cychwynnol o £10,000.
+initialGainOrLoss.trust.details.example.details=Gwnaeth yr ymddiriedolaeth etifeddu eiddo. Gwerth marchnadol yr eiddo pan gafodd ei gaffael oedd £120,000. Gwnaeth yr ymddiriedolaeth dalu £5,000 mewn ffioedd cyfreithiol pan wnaeth etifeddu’r eiddo. Gwnaeth yr ymddiriedolaeth wario £10,000 ar wella’r eiddo. Ar ôl 10 mlynedd, gwnaeth yr ymddiriedolaeth werthu’r eiddo am £150,000. Gwnaeth yr ymddiriedolaeth dalu £5,000 am ffioedd cyfreithiol ac asiantau eiddo diriaethol. Rhoddodd hyn enillion cychwynnol o £10,000.
+initialGainOrLoss.capacitor.details.example.details=Gwnaeth y person etifeddu eiddo. Gwerth marchnadol yr eiddo pan gafodd ei gaffael oedd £120,000. Gwnaeth y person dalu £5,000 mewn ffioedd cyfreithiol pan wnaeth etifeddu’r eiddo. Gwnaeth y person wario £10,000 ar wella’r eiddo. Ar ôl 10 mlynedd, gwnaeth y person werthu’r eiddo am £150,000. Gwnaeth y person dalu £5,000 am ffioedd cyfreithiol ac asiantau eiddo diriaethol. Rhoddodd hyn enillion cychwynnol o £10,000.
+initialGainOrLoss.personalRep.details.example.details=Gwnaeth y person etifeddu eiddo. Gwerth marchnadol yr eiddo pan gafodd ei gaffael oedd £120,000. Gwnaeth y person dalu £5,000 mewn ffioedd cyfreithiol pan wnaeth etifeddu’r eiddo. Gwnaeth y person wario £10,000 ar wella’r eiddo. Ar ôl 10 mlynedd, gwnaeth y person werthu’r eiddo am £150,000. Y ffioedd cyfreithiol ac asiantau eiddo diriaethol oedd £5,000. Rhoddodd hyn enillion cychwynnol o £10,000.
+initialGainOrLoss.noLossOrGain.label=Dim enillion cychwynnol, dim colled gychwynnol
+initialGainOrLoss.summary.hint=Cliciwch ar y cysylltiad er mwyn newid eich atebion
+initialGainOrLoss.cyaChange=p’un a wnaethoch enillion cychwynnol, colled gychwynnol, neu dim enillion na cholled
+gain.error.required=Nodwch swm yr enillion cychwynnol
+gain.error.invalid=Mae’n rhaid i swm yr enillion cychwynnol gynnwys rhifau, megis 2,908 neu 740.50 yn unig
+gain.error.tooLarge=Mae’n rhaid i swm yr enillion cychwynnol fod yn rhif sy’n fwy na 0 ac yn llai na 50,000,000,000.00, neu dewiswch ‘dim enillion na cholled’
+gain.error.tooManyDecimals=Mae’n rhaid i swm yr enillion cychwynnol gynnwys 2 le degol neu lai, megis 2,908 neu 740.50
+gain.error.tooSmall=Mae’n rhaid i swm yr enillion cychwynnol fod yn rhif sy’n fwy na 0 ac yn llai na 50,000,000,000.00
+gain.label=Swm yr enillion cychwynnol
+loss.error.required=Nodwch swm y golled gychwynnol
+loss.error.invalid=Mae’n rhaid i swm y golled gychwynnol gynnwys rhifau, megis 2,908 neu 740.50 yn unig
+loss.error.tooLarge=Mae’n rhaid i swm y golled gychwynnol fod yn rhif sy’n fwy na 0 ac yn llai na 50,000,000,000.00, neu dewiswch ‘dim enillion na cholled’
+loss.error.tooManyDecimals=Mae’n rhaid i swm y golled gychwynnol gynnwys 2 le degol neu lai, megis 2,908 neu 740.50
+loss.error.tooSmall=Mae’n rhaid i swm y golled gychwynnol fod yn rhif sy’n fwy na 0 ac yn llai na 50,000,000,000.00
+loss.label=Swm y golled gychwynnol
+
+#===================================================
+#  INITIAL GAIN OR LOSS PAGES - END
+#===================================================
+
+#===================================================
+#  RELIEFS PAGES - START
+#===================================================
+
+reliefDetails.caption=Rhyddhad
+privateResidentsRelief.title=A oes gennych hawl i Ryddhad Preswylfan Preifat?
+privateResidentsRelief.agent.title=A oes gan eich cleient hawl i Ryddhad Preswylfan Preifat?
+privateResidentsRelief.trust.title=A oes gan yr ymddiriedolaeth hawl i Ryddhad Preswylfan Preifat?
+privateResidentsRelief.capacitor.title=A oes gan y person hawl i Ryddhad Preswylfan Preifat?
+privateResidentsRelief.personalRep.title=A oedd gan y person hawl i Ryddhad Preswylfan Preifat?
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.title=A yw Rhyddhad Preswylfan Preifat yn cael ei hawlio?
+privateResidentsRelief.personalRepInPeriodOfAdmin.title=A yw Rhyddhad Preswylfan Preifat yn cael ei hawlio?
+privateResidentsRelief.personalRepInPeriodOfAdmin.main.title=Rhowch wybod i ni a yw Rhyddhad Preswylfan Preifat yn cael ei hawlio
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.main.title=Rhowch wybod i ni a yw Rhyddhad Preswylfan Preifat yn cael ei hawlio
+privateResidentsRelief.helpText=Mae’n bosibl y byddwch yn gymwys i gael y rhyddhad hwn os yw’r eiddo wedi bod yn brif gartref i chi ar ryw adeg.
+privateResidentsRelief.agent.helpText=Mae’n bosibl y bydd eich cleient yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref iddo ar ryw adeg.
+privateResidentsRelief.trust.helpText=Mae’n bosibl y bydd eich cleient yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref iddo ar ryw adeg.
+privateResidentsRelief.capacitor.helpText=Mae’n bosibl y bydd y person yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref iddo ar ryw adeg.
+privateResidentsRelief.personalRep.helpText=Mae’n bosibl y bydd y person yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref iddo ar ryw adeg.
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.helpText.p1=Gellir ond hawlio Rhyddhad Preswylfan Preifat os:
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.helpText.li1=mai’r eiddo oedd unig gartref buddiolwr, cyn ac ar ôl marwolaeth yr ymadawedig
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.helpText.li2=oedd gan y buddiolwr hwnnw hawl hefyd i o leiaf 75% o dderbyniadau gwaredu’r eiddo (gan dybio nad oedd angen unrhyw un o’r derbyniadau er mwyn bodloni unrhyw rwymedigaethau ystâd yr ymadawedig)
+privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Gellir ond hawlio Rhyddhad Preswylfan Preifat os:
+privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=mai’r eiddo oedd unig gartref buddiolwr, cyn ac ar ôl marwolaeth yr ymadawedig
+privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=oedd gan y buddiolwr hwnnw hawl hefyd i o leiaf 75% o dderbyniadau gwaredu’r eiddo (gan dybio nad oedd angen unrhyw un o’r derbyniadau er mwyn bodloni unrhyw rwymedigaethau ystâd yr ymadawedig)
+privateResidentsReliefValue.label=Swm y Rhyddhad Preswylfan Preifat y mae gennych hawl iddo
+privateResidentsReliefValue.agent.label=Swm y Rhyddhad Preswylfan Preifat y mae gan eich cleient hawl iddo
+privateResidentsReliefValue.trust.label=Swm y Rhyddhad Preswylfan Preifat y mae gan yr ymddiriedolaeth hawl iddo
+privateResidentsReliefValue.capacitor.label=Swm y Rhyddhad Preswylfan Preifat y mae gan y person hawl iddo
+privateResidentsReliefValue.personalRep.label=Swm y Rhyddhad Preswylfan Preifat yr oedd gan y person hawl iddo
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.label=Swm y Rhyddhad Preswylfan Preifat sy’n cael ei hawlio
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.label=Swm y Rhyddhad Preswylfan Preifat sy’n cael ei hawlio
+privateResidentsRelief.furtherInfoLink=Dysgwch ragor am Ryddhad Preswylfan Preifat (yn agor ffenestr newydd)
+privateResidentsRelief.error.required=Dewiswch ‘Iawn’ os oes gennych hawl i Ryddhad Preswylfan Preifat
+privateResidentsRelief.agent.error.required=Dewiswch ‘Iawn’ os oes gan eich cleient hawl i Ryddhad Preswylfan Preifat
+privateResidentsRelief.trust.error.required=Dewiswch ‘Iawn’ os oes gan yr ymddiriedolaeth hawl i Ryddhad Preswylfan Preifat
+privateResidentsRelief.capacitor.error.required=Dewiswch ‘Iawn’ os oes gan y person hawl i Ryddhad Preswylfan Preifat
+privateResidentsRelief.personalRep.error.required=Dewiswch ‘Iawn’ os oedd gan y person hawl i Ryddhad Preswylfan Preifat
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.error.required=Dewiswch ‘Iawn’ os yw’ch cleient yn hawlio Rhyddhad Preswylfan Preifat
+privateResidentsRelief.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os ydych yn hawlio Rhyddhad Preswylfan Preifat
+privateResidentsReliefValue.error.required=Nodwch swm y Rhyddhad Preswylfan Preifat, fel 108 neu 2,940.54
+privateResidentsReliefValue.agent.error.required=Nodwch swm y Rhyddhad Preswylfan Preifat y mae gan eich cleient hawl iddo
+privateResidentsReliefValue.trust.error.required=Nodwch swm y Rhyddhad Preswylfan Preifat y mae gan yr ymddiriedolaeth hawl iddo
+privateResidentsReliefValue.capacitor.error.required=Nodwch swm y Rhyddhad Preswylfan Preifat y mae gan y person hawl iddo
+privateResidentsReliefValue.personalRep.error.required=Nodwch swm y Rhyddhad Preswylfan Preifat yr oedd gan y person hawl iddo
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.required=Nodwch swm y Rhyddhad Preswylfan Preifat sy’n cael ei hawlio
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.required=Nodwch swm y Rhyddhad Preswylfan Preifat sy’n cael ei hawlio
+privateResidentsReliefValue.error.tooSmall=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.agent.error.tooSmall=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.trust.error.tooSmall=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.capacitor.error.tooSmall=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.personalRep.error.tooSmall=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooSmall=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooSmall=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.error.tooLarge=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.agent.error.tooLarge=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.trust.error.tooLarge=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.capacitor.error.tooLarge=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.personalRep.error.tooLarge=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooLarge=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooLarge=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian rhwng 1 a 50,000,000,000
+privateResidentsReliefValue.error.invalid=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian, fel 108 neu 2,940.54
+privateResidentsReliefValue.agent.error.invalid=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian, fel 108 neu 2,940.54
+privateResidentsReliefValue.trust.error.invalid=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian, fel 108 neu 2,940.54
+privateResidentsReliefValue.capacitor.error.invalid=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian, fel 108 neu 2,940.54
+privateResidentsReliefValue.personalRep.error.invalid=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian, fel 108 neu 2,940.54
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.invalid=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian, fel 108 neu 2,940.54
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.invalid=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian, fel 108 neu 2,940.54
+privateResidentsReliefValue.error.tooManyDecimals=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 108 neu 2,940.54
+privateResidentsReliefValue.agent.error.tooManyDecimals=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 108 neu 2,940.54
+privateResidentsReliefValue.trust.error.tooManyDecimals=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 108 neu 2,940.54
+privateResidentsReliefValue.capacitor.error.tooManyDecimals=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 108 neu 2,940.54
+privateResidentsReliefValue.personalRep.error.tooManyDecimals=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 108 neu 2,940.54
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 108 neu 2,940.54
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooManyDecimals=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 108 neu 2,940.54
+privateResidentsRelief.cyaChange=os yw Rhyddhad Preswylfan Preifat yn cael ei hawlio
+privateResidentsReliefValue.cyaChange=swm y Rhyddhad Preswylfan Preifat
+lettingsRelief.title=A oes gennych hawl i Ryddhad Gosod?
+lettingsRelief.agent.title=A oes gan eich cleient hawl i Ryddhad Gosod?
+lettingsRelief.trust.title=A oes gan yr ymddiriedolaeth hawl i Ryddhad Gosod?
+lettingsRelief.capacitor.title=A oes gan y person hawl i Ryddhad Gosod?
+lettingsRelief.personalRep.title=A oedd gan y person hawl i Ryddhad Gosod?
+lettingsRelief.helpText=Mae’n bosibl y gallwch hawlio’r rhyddhad hwn os mai’ch prif gartref oedd yr eiddo, a’ch bod hefyd wedi’i roi ar osod am gyfnod.
+lettingsRelief.agent.helpText=Mae’n bosibl y gall eich cleient hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i fod hefyd wedi’i roi ar osod am gyfnod.
+lettingsRelief.trust.helpText=Mae’n bosibl y gall yr ymddiriedolaeth hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i fod hefyd wedi’i roi ar osod am gyfnod.
+lettingsRelief.capacitor.helpText=Mae’n bosibl y gall yr ymddiriedolaeth hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i bod hefyd wedi’i roi ar osod am gyfnod.
+lettingsRelief.personalRep.helpText=Mae’n bosibl y gall y person hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i fod hefyd wedi’i roi ar osod am gyfnod.
+lettingsRelief.error.required=Dewiswch ‘Iawn’ os ydych yn hawlio Rhyddhad Gosod
+lettingsRelief.agent.error.required=Dewiswch ‘Iawn’ os oes gan eich cleient hawl i Ryddhad Gosod
+lettingsRelief.trust.error.required=Dewiswch ‘Iawn’ os oes gan yr ymddiriedolaeth hawl i Ryddhad Gosod
+lettingsRelief.capacitor.error.required=Dewiswch ‘Iawn’ os oes gan y person hawl i Ryddhad Gosod
+lettingsRelief.personalRep.error.required=Dewiswch ‘Iawn’ os oedd gan y person hawl i Ryddhad Gosod
+lettingsRelief.furtherInfoLink=Dysgwch ragor am Ryddhad Gosod a sut i’w gyfrifo (yn agor ffenestr newydd)
+lettingsReliefValue.label=Swm y Rhyddhad Gosod
+lettingsReliefValue.error.required=Nodwch swm y Rhyddhad Gosod, fel 108 neu 2,940.54
+lettingsReliefValue.error.tooSmall=Mae’n rhaid i swm y Rhyddhad Gosod fod yn swm o arian rhwng 1 a {0}
+lettingsReliefValue.error.tooLarge=Mae’n rhaid i swm y Rhyddhad Gosod fod yn swm o arian rhwng 1 a {0}
+lettingsReliefValue.error.invalid=Mae’n rhaid i swm y Rhyddhad Gosod fod yn swm o arian, fel 108 neu 2,940.54
+lettingsReliefValue.error.tooManyDecimals=Mae’n rhaid i swm y Rhyddhad Gosod fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 108 neu 2,940.54
+lettingsReliefValue.error.amountOverLimit=Mae’n rhaid i swm y Rhyddhad Gosod fod yn swm o arian rhwng 1 a {0}
+lettingsReliefValue.error.amountOverPrivateResidenceRelief=Ni all swm y Rhyddhad Gosod fod yn uwch na swm y Rhyddhad Preswylfan Preifat
+lettingsRelief.cyaChange=os yw Rhyddhad Gosod yn cael ei hawlio
+lettingsReliefValue.cyaChange=swm y Rhyddhad Gosod
+otherReliefs.title=A ydych am hawlio unrhyw ryddhad arall sy’n ymwneud â Threth Enillion Cyfalaf?
+otherReliefs.agent.title=A yw’ch cleient am hawlio unrhyw ryddhad arall sy’n ymwneud â Threth Enillion Cyfalaf?
+otherReliefs.trust.title=A yw’r ymddiriedolaeth am hawlio unrhyw ryddhad araill sy’n ymwneud â Threth Enillion Cyfalaf?
+otherReliefs.capacitor.title=A yw’r person am hawlio unrhyw ryddhad arall sy’n ymwneud â Threth Enillion Cyfalaf?
+otherReliefs.personalRep.title=A oedd gan y person hawl i unrhyw ryddhad arall sy’n ymwneud â Threth Enillion Cyfalaf?
+otherReliefs.personalRepInPeriodOfAdmin.agent.title=A oes unrhyw ryddhad arall sy’n ymwneud â Threth Enillion Cyfalaf yn cael ei hawlio?
+otherReliefs.personalRepInPeriodOfAdmin.title=A oes unrhyw ryddhad arall sy’n ymwneud â Threth Enillion Cyfalaf yn cael ei hawlio?
+otherReliefs.helpText=Bydd angen i chi roi gwybod i ni pa ryddhad arall rydych yn ei hawlio a beth yw’r cyfanswm.
+otherReliefs.agent.helpText=Bydd angen i chi roi gwybod i ni pa ryddhad arall y mae’ch cleient yn ei hawlio a beth yw’r cyfanswm.
+otherReliefs.trust.helpText=Bydd angen i chi roi gwybod i ni pa ryddhad arall y mae’r ymddiriedolaeth yn ei hawlio a beth yw’r cyfanswm.
+otherReliefs.capacitor.helpText=Bydd angen i chi roi gwybod i ni pa ryddhad arall y mae’r person yn ei hawlio a beth yw’r cyfanswm.
+otherReliefs.personalRep.helpText=Bydd angen i chi roi gwybod i ni pa ryddhad arall yr oedd gan y person hawl iddo a beth yw’r cyfanswm.
+otherReliefs.personalRepInPeriodOfAdmin.agent.helpText=Bydd angen i chi roi gwybod i ni pa ryddhad arall y mae’ch cleient, neu’r ystâd, yn ei hawlio a beth yw’r cyfanswm.
+otherReliefs.personalRepInPeriodOfAdmin.helpText=Bydd angen i chi roi gwybod i ni pa ryddhad arall yr ydych chi, neu’r ystâd, yn ei hawlio a beth yw’r cyfanswm.
+otherReliefs.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth, a elwir yn eich lwfans personol sy’n rhydd o dreth ar gyfer Treth Enillion Cyfalaf, yma.
+otherReliefs.agent.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth, a elwir yn lwfans personol sy’n rhydd o dreth ar gyfer Treth Enillion Cyfalaf, yma.
+otherReliefs.trust.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth, a elwir yn lwfans personol sy’n rhydd o dreth ar gyfer Treth Enillion Cyfalaf, yma.
+otherReliefs.capacitor.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth, a elwir yn lwfans personol sy’n rhydd o dreth ar gyfer Treth Enillion Cyfalaf, yma.
+otherReliefs.personalRep.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth, a elwir yn lwfans personol sy’n rhydd o dreth ar gyfer Treth Enillion Cyfalaf, yma.
+otherReliefs.personalRepInPeriodOfAdmin.agent.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth, a elwir yn lwfans personol sy’n rhydd o dreth ar gyfer Treth Enillion Cyfalaf, yma.
+otherReliefs.personalRepInPeriodOfAdmin.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth, a elwir yn lwfans personol sy’n rhydd o dreth ar gyfer Treth Enillion Cyfalaf, yma.
+otherReliefs.furtherInfoLink=Dysgwch ragor am ryddhad y gallwch fod yn gymwys i’w gael (yn agor ffenestr newydd)
+otherReliefs.agent.furtherInfoLink=Dysgwch ragor am ryddhad y gall eich cleient fod yn gymwys i’w gael (yn agor ffenestr newydd)
+otherReliefs.trust.furtherInfoLink=Dysgwch ragor am ryddhad y gall yr ymddiriedolaeth fod yn gymwys i’w gael (yn agor ffenestr newydd)
+otherReliefs.capacitor.furtherInfoLink=Dysgwch ragor am ryddhad y gall y person fod yn gymwys i’w gael (yn agor ffenestr newydd)
+otherReliefs.personalRep.furtherInfoLink=Dysgwch ragor am ryddhad y gallai’r person wedi bod yn gymwys i’w gael (yn agor ffenestr newydd)
+otherReliefs.personalRepInPeriodOfAdmin.agent.furtherInfoLink=Dysgwch ragor am ryddhad y gallai’r person wedi bod yn gymwys i’w gael (yn agor ffenestr newydd)
+otherReliefs.personalRepInPeriodOfAdmin.furtherInfoLink=Dysgwch ragor am ryddhad y gallai’r person wedi bod yn gymwys i’w gael (yn agor ffenestr newydd)
+otherReliefs.error.required=Dewiswch ‘Iawn’ os ydych yn hawlio rhyddhad arall
+otherReliefs.agent.error.required=Dewiswch ‘Iawn’ os yw’ch cleient yn hawlio rhyddhad arall
+otherReliefs.trust.error.required=Dewiswch ‘Iawn’ os yw’r ymddiriedolaeth yn hawlio rhyddhad arall
+otherReliefs.capacitor.error.required=Dewiswch ‘Iawn’ os oes gan y person hawl i unrhyw ryddhad arall
+otherReliefs.personalRep.error.required=Dewiswch ‘Iawn’ os oedd gan y person hawl i unrhyw ryddhad arall
+otherReliefs.personalRepInPeriodOfAdmin.error.agent.required=Dewiswch ‘Iawn’ os yw’ch cleient, neu’r ystâd, yn hawlio unrhyw ryddhad arall
+otherReliefs.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os ydych chi, neu’r ystâd, yn hawlio unrhyw ryddhad arall
+otherReliefs.personalRepInPeriodOfAdmin.agent.error.required=Dewiswch ‘Iawn’ os yw’ch cleient, neu’r ystâd, yn hawlio unrhyw ryddhad arall
+otherReliefsName.label=Enwau’r rhyddhad arall rydych yn ei hawlio
+otherReliefsName.agent.label=Enwau’r rhyddhad arall y mae’ch cleient yn ei hawlio
+otherReliefsName.trust.label=Enwau’r rhyddhad arall y mae’r ymddiriedolaeth yn ei hawlio
+otherReliefsName.capacitor.label=Enwau’r rhyddhad arall y mae’r person yn ei hawlio
+otherReliefsName.personalRep.label=Enwau’r rhyddhad arall sy’n cael ei hawlio
+otherReliefsName.personalRepInPeriodOfAdmin.agent.label=Enwau’r rhyddhad arall sy’n cael ei hawlio
+otherReliefsName.personalRepInPeriodOfAdmin.label=Enwau’r rhyddhad arall sy’n cael ei hawlio
+otherReliefsName.error.required=Enwau pob rhyddhad arall rydych yn ei hawlio
+otherReliefsName.agent.error.required=Enwau pob rhyddhad arall y mae’ch cleient yn ei hawlio
+otherReliefsName.trust.error.required=Enwau pob rhyddhad arall y mae’r ymddiriedolaeth yn ei hawlio
+otherReliefsName.capacitor.error.required=Enwau pob rhyddhad arall y mae’r person yn ei hawlio
+otherReliefsName.personalRep.error.required=Enwau pob rhyddhad arall sy’n cael ei hawlio
+otherReliefsName.personalRepInPeriodOfAdmin.agent.error.required=Enwau pob rhyddhad arall sy’n cael ei hawlio
+otherReliefsName.personalRepInPeriodOfAdmin.error.required=Enwau pob rhyddhad arall sy’n cael ei hawlio
+otherReliefsName.error.tooLong=Mae’n rhaid i enwau’r rhyddhad arall rydych yn ei hawlio fod yn 105 o gymeriadau neu lai
+otherReliefsName.agent.error.tooLong=Mae’n rhaid i enwau’r rhyddhad arall y mae’ch cleient yn ei hawlio fod yn 105 o gymeriadau neu lai
+otherReliefsName.trust.error.tooLong=Mae’n rhaid i enwau’r rhyddhad arall y mae’r ymddiriedolaeth yn ei hawlio fod yn 105 o gymeriadau neu lai
+otherReliefsName.capacitor.error.tooLong=Mae’n rhaid i enwau’r rhyddhad arall y mae’r person yn ei hawlio fod yn 105 o gymeriadau neu lai
+otherReliefsName.personalRep.error.tooLong=Mae’n rhaid i enwau’r rhyddhad arall sy’n cael ei hawlio fod yn 105 o gymeriadau neu lai
+otherReliefsName.personalRepInPeriodOfAdmin.agent.error.tooLong=Mae’n rhaid i enwau’r rhyddhad arall sy’n cael ei hawlio fod yn 105 o gymeriadau neu lai
+otherReliefsName.personalRepInPeriodOfAdmin.error.tooLong=Mae’n rhaid i enwau’r rhyddhad arall sy’n cael ei hawlio fod yn 105 o gymeriadau neu lai
+otherReliefsName.error.invalid=Mae’n rhaid i enwau’r rhyddhad arall gynnwys llythrennau, bylchau neu rifau yn unig
+otherReliefsName.agent.error.invalid=Mae’n rhaid i enwau’r rhyddhad arall gynnwys llythrennau, bylchau neu rifau yn unig
+otherReliefsName.trust.error.invalid=Mae’n rhaid i enwau’r rhyddhad arall gynnwys llythrennau, bylchau neu rifau yn unig
+otherReliefsName.capacitor.error.invalid=Mae’n rhaid i enwau’r rhyddhad arall gynnwys llythrennau, bylchau neu rifau yn unig
+otherReliefsName.personalRep.error.invalid=Mae’n rhaid i enwau’r rhyddhad arall gynnwys llythrennau, bylchau neu rifau yn unig
+otherReliefsName.personalRepInPeriodOfAdmin.agent.error.invalid=Mae’n rhaid i enwau’r rhyddhad arall gynnwys llythrennau, bylchau neu rifau yn unig
+otherReliefsName.personalRepInPeriodOfAdmin.error.invalid=Mae’n rhaid i enwau’r rhyddhad arall gynnwys llythrennau, bylchau neu rifau yn unig
+otherReliefsAmount.label=Cyfanswm y rhyddhad arall rydych yn ei hawlio
+otherReliefsAmount.agent.label=Cyfanswm y rhyddhad arall y mae’ch cleient yn ei hawlio
+otherReliefsAmount.trust.label=Cyfanswm y rhyddhad arall y mae’r ymddiriedolaeth yn ei hawlio
+otherReliefsAmount.capacitor.label=Cyfanswm y rhyddhad arall y mae’r person yn ei hawlio
+otherReliefsAmount.personalRep.label=Cyfanswm y rhyddhad arall sy’n cael ei hawlio
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.label=Cyfanswm y rhyddhad arall sy’n cael ei hawlio
+otherReliefsAmount.personalRepInPeriodOfAdmin.label=Cyfanswm y rhyddhad arall sy’n cael ei hawlio
+otherReliefsAmount.error.required=Nodwch gyfanswm y rhyddhad arall rydych yn ei hawlio
+otherReliefsAmount.agent.error.required=Nodwch gyfanswm y rhyddhad arall y mae’ch cleient yn ei hawlio
+otherReliefsAmount.trust.error.required=Nodwch gyfanswm y rhyddhad arall y mae’r ymddiriedolaeth yn ei hawlio
+otherReliefsAmount.capacitor.error.required=Nodwch gyfanswm y rhyddhad arall y mae’r person yn ei hawlio
+otherReliefsAmount.personalRep.error.required=Nodwch gyfanswm y rhyddhad arall sy’n cael ei hawlio
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.error.required=Nodwch gyfanswm y rhyddhad arall sy’n cael ei hawlio
+otherReliefsAmount.personalRepInPeriodOfAdmin.error.required=Nodwch gyfanswm y rhyddhad arall sy’n cael ei hawlio
+otherReliefsAmount.error.tooSmall=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.agent.error.tooSmall=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.trust.error.tooSmall=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.capacitor.error.tooSmall=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.personalRep.error.tooSmall=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.error.tooSmall=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.personalRepInPeriodOfAdmin.error.tooSmall=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.error.tooLarge=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.agent.error.tooLarge=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.trust.error.tooLarge=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.capacitor.error.tooLarge=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.personalRep.error.tooLarge=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.error.tooLarge=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.personalRepInPeriodOfAdmin.error.tooLarge=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian rhwng 0 a 50,000,000,000
+otherReliefsAmount.error.invalid=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian, fel 108 neu 2,940.54
+otherReliefsAmount.agent.error.invalid=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian, fel 108 neu 2,940.54
+otherReliefsAmount.trust.error.invalid=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian, fel 108 neu 2,940.54
+otherReliefsAmount.capacitor.error.invalid=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian, fel 108 neu 2,940.54
+otherReliefsAmount.personalRep.error.invalid=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian, fel 108 neu 2,940.54
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.error.invalid=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian, fel 108 neu 2,940.54
+otherReliefsAmount.personalRepInPeriodOfAdmin.error.invalid=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian, fel 108 neu 2,940.54
+otherReliefsAmount.error.tooManyDecimals=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 4,820.54 neu 539
+otherReliefsAmount.agent.error.tooManyDecimals=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 4,820.54 neu 539
+otherReliefsAmount.trust.error.tooManyDecimals=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 4,820.54 neu 539
+otherReliefsAmount.capacitor.error.tooManyDecimals=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 4,820.54 neu 539
+otherReliefsAmount.personalRep.error.tooManyDecimals=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 4,820.54 neu 539
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 4,820.54 neu 539
+otherReliefsAmount.personalRepInPeriodOfAdmin.error.tooManyDecimals=Mae’n rhaid i swm pob rhyddhad arall fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 4,820.54 neu 539
+otherReliefs.cyaChange=os yw rhyddhad arall yn cael ei hawlio
+otherReliefsName.cyaChange=enwau’r rhyddhad arall sy’n cael ei hawlio
+otherReliefsAmount.cyaChange=swm y rhyddhad arall sy’n cael ei hawlio
+reliefDetails.cya.title=Gwiriwch eich atebion
+
+#===================================================
+#  RELIEFS PAGES - END
 #===================================================
 
 #===================================================
@@ -1229,6 +1666,96 @@ enterUPRN-line1.error.invalid=Mae’n rhaid i UPRN gynnwys rhifau yn unig
 #===================================================
 # MULTIPLE DISPOSALS EXAMPLE PROPERTY PAGES - END
 #===================================================
+
+#===================================================
+# SINGLE MIXED USE PROPERTY DETAILS PAGES - START
+#===================================================
+
+singleMixedUse.cya.title=Gwiriwch eich atebion
+singleMixedUse.cyaLabel.address=Cyfeiriad yr eiddo
+singleMixedUse.cyaLabel.disposal-price=Beth oedd y swm gwaredu?
+singleMixedUse.cyaLabel.acquisition-price=Beth oedd y swm caffael?
+singleMixedUse.caption=Manylion yr eiddo
+singleMixedUse.guidance.title=Bydd angen i chi nodi manylion ynghylch gwaredu’r eiddo
+singleMixedUse.guidance.list.title=Bydd angen i chi nodi’r canlynol:
+singleMixedUse.guidance.list.l1=cyfeiriad yr eiddo yn y DU
+singleMixedUse.guidance.list.l2=gwerth gwaredu’r eiddo
+singleMixedUse.guidance.list.l3=gwerth caffael yr eiddo
+singleMixedUse.guidance.personalRepInPeriodOfAdmin.p1=Ar gyfer yr adran hon o’r ffurflen, dylech ystyried rhannau masnachol a phreswyl yr eiddo fel un eiddo.
+singleMixedUse.guidance.personalRepInPeriodOfAdmin.list.l1=cyfeiriad yr eiddo yn y DU
+singleMixedUse.guidance.personalRepInPeriodOfAdmin.list.l2=gwerth gwaredu’r eiddo cyfan
+singleMixedUse.guidance.personalRepInPeriodOfAdmin.list.l3=gwerth marchnadol yr eiddo cyfan
+singleMixedUseDisposalsDisposalPrice.title=Beth oedd gwerth gwaredu’r eiddo?
+singleMixedUseDisposalsDisposalPrice.personalRep.title=Beth oedd gwerth gwaredu’r eiddo?
+singleMixedUseDisposalsDisposalPrice.capacitor.title=Beth oedd gwerth gwaredu’r eiddo?
+singleMixedUseDisposalsDisposalPrice.agent.title=Beth oedd gwerth gwaredu’r eiddo?
+singleMixedUseDisposalsDisposalPrice.trust.title=Beth oedd gwerth gwaredu’r eiddo?
+singleMixedUseDisposalsDisposalPrice.personalRepInPeriodOfAdmin.title=Beth oedd derbyniadau’r gwarediad?
+singleMixedUseDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.title=Beth oedd derbyniadau’r gwarediad?
+singleMixedUseDisposalsDisposalPrice.helpText=Dyma’r swm a gawsoch pan werthwyd yr eiddo, neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech ddidynnu unrhyw gostau gwerthu neu waredu.
+singleMixedUseDisposalsDisposalPrice.personalRep.helpText=Dyma’r swm a gafodd y person pan werthwyd yr eiddo, neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech ddidynnu unrhyw gostau gwerthu neu waredu.
+singleMixedUseDisposalsDisposalPrice.capacitor.helpText=Dyma’r swm a gafodd y person pan werthwyd yr eiddo, neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech ddidynnu unrhyw gostau gwerthu neu waredu.
+singleMixedUseDisposalsDisposalPrice.agent.helpText=Dyma’r swm a gafodd y person pan werthwyd yr eiddo, neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech ddidynnu unrhyw gostau gwerthu neu waredu.
+singleMixedUseDisposalsDisposalPrice.trust.helpText=Dyma’r swm a gafodd yr ymddiriedolaeth pan werthwyd yr eiddo, neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech ddidynnu unrhyw gostau gwerthu neu waredu.
+singleMixedUseDisposalsDisposalPrice.personalRepInPeriodOfAdmin.helpText=Dyma’r swm a gafodd yr ystâd pan werthwyd yr eiddo. Dylech ddidynnu unrhyw gostau gwerthu neu waredu.
+singleMixedUseDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=Dyma’r swm a gafodd yr ystâd pan werthwyd yr eiddo. Dylech ddidynnu unrhyw gostau gwerthu neu waredu.
+singleMixedUseDisposalsDisposalPrice.link=Beth yw costau gwaredu?
+singleMixedUseDisposalsDisposalPrice.details.p1=Mae costau gwaredu neu werthu yn cynnwys ffioedd ar gyfer asiantau eiddo neu gyfreithwyr.
+singleMixedUseDisposalsDisposalPrice.error.required=Nodwch werth gwaredu’r eiddo
+singleMixedUseDisposalsDisposalPrice.error.invalid=Mae’n rhaid i werth gwaredu’r eiddo fod yn swm o arian, megis 160,000 neu 23,040.50
+singleMixedUseDisposalsDisposalPrice.error.tooLarge=Mae’n rhaid i werth gwaredu’r eiddo fod yn swm o arian rhwng 1 a 50,000,000,000
+singleMixedUseDisposalsDisposalPrice.error.tooSmall=Mae’n rhaid i werth gwaredu’r eiddo fod yn swm o arian rhwng 1 a 50,000,000,000
+singleMixedUseDisposalsDisposalPrice.error.tooManyDecimals=Mae’n rhaid i werth gwaredu’r eiddo fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 160,000 neu 23,040.50
+singleMixedUseDisposalsAcquisitionPrice.title=Beth oedd gwerth caffael yr eiddo?
+singleMixedUseDisposalsAcquisitionPrice.personalRep.title=Beth oedd gwerth caffael yr eiddo?
+singleMixedUseDisposalsAcquisitionPrice.capacitor.title=Beth oedd gwerth caffael yr eiddo?
+singleMixedUseDisposalsAcquisitionPrice.agent.title=Beth oedd gwerth caffael yr eiddo?
+singleMixedUseDisposalsAcquisitionPrice.trust.title=Beth oedd gwerth caffael yr eiddo?
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=Beth oedd gwerth marchnadol yr eiddo ar {0}?
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=Beth oedd gwerth marchnadol yr eiddo ar {0}?
+singleMixedUseDisposalsAcquisitionPrice.helpText=Dyma’r swm y gwnaethoch ei dalu pan brynwyd yr eiddo, neu ei werth marchnadol os gwnaethoch ei etifeddu neu ei gael yn anrheg. Dylech ychwanegu unrhyw gostau gwella neu gaffael.
+singleMixedUseDisposalsAcquisitionPrice.personalRep.helpText=Dyma’r swm y gwnaeth y person ei dalu pan brynwyd yr eiddo, neu ei werth marchnadol os gwnaeth y person ei etifeddu neu ei gael yn anrheg. Dylech ychwanegu unrhyw gostau caffael neu gostau gwelliannau.
+singleMixedUseDisposalsAcquisitionPrice.capacitor.helpText=Dyma’r swm y gwnaeth y person ei dalu pan brynwyd yr eiddo, neu ei werth marchnadol os gwnaeth y person ei etifeddu neu ei gael yn anrheg. Dylech ychwanegu unrhyw gostau caffael neu gostau gwelliannau.
+singleMixedUseDisposalsAcquisitionPrice.agent.helpText=Dyma’r swm y gwnaeth eich cleient ei dalu pan brynwyd yr eiddo, neu ei werth marchnadol os gwnaeth eich cleient ei etifeddu neu ei gael yn anrheg. Dylech ychwanegu unrhyw gostau caffael neu gostau gwelliannau.
+singleMixedUseDisposalsAcquisitionPrice.trust.helpText=Dyma’r swm y gwnaeth yr ymddiriedolaeth ei dalu pan brynwyd eiddo, neu ei werth marchnadol os gwnaeth yr ymddiriedolaeth ei etifeddu neu ei gael yn anrheg. Dylech ychwanegu unrhyw gostau caffael neu gostau gwelliannau.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=Gallwch roi prisiad gan syrfëwr neu amcangyfrif realistig. Os cafodd yr eiddo ei rannu, nodwch werth marchnadol cyfran yr ystâd yn unig. Dylech ychwanegu unrhyw gostau caffael neu gostau gwelliannau.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=Gallwch roi prisiad gan syrfëwr neu amcangyfrif realistig. Os cafodd yr eiddo ei rannu, nodwch werth marchnadol cyfran yr ystâd yn unig. Dylech ychwanegu unrhyw gostau caffael neu gostau gwelliannau.
+singleMixedUseDisposalsAcquisitionPrice.link=Beth yw costau caffael a chostau gwelliannau?
+singleMixedUseDisposalsAcquisitionPrice.details.p1=Gallwch gynnwys costau’r gwelliannau a ychwanegodd werth at yr eiddo. Er enghraifft, os gwnaethoch adeiladu estyniad neu osod cegin foethus yn lle un sylfaenol. Ni ellir hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+singleMixedUseDisposalsAcquisitionPrice.personalRep.details.p1=Gellir cynnwys costau’r gwelliannau a ychwanegodd werth at yr eiddo. Er enghraifft, os gwnaeth y person adeiladu estyniad, neu osod cegin foethus yn lle un sylfaenol. Ni ellir hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+singleMixedUseDisposalsAcquisitionPrice.capacitor.details.p1=Gall y person gynnwys costau’r gwelliannau a ychwanegodd werth at yr eiddo. Er enghraifft, os gwnaeth y person adeiladu estyniad, neu osod cegin foethus yn lle un sylfaenol. Ni ellir hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+singleMixedUseDisposalsAcquisitionPrice.agent.details.p1=Gall eich cleient gynnwys costau’r gwelliannau a ychwanegodd werth at yr eiddo. Er enghraifft, os gwnaeth eich cleient adeiladu estyniad, neu osod cegin foethus yn lle un sylfaenol. Ni ellir hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+singleMixedUseDisposalsAcquisitionPrice.trust.details.p1=Gall yr ymddiriedolaeth gynnwys costau’r gwelliannau a ychwanegodd werth at yr eiddo. Er enghraifft, os gwnaeth yr ymddiriedolaeth adeiladu estyniad, neu osod cegin foethus yn lle un sylfaenol. Ni ellir hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p1=Gellir cynnwys costau’r gwelliannau a ychwanegodd werth at yr eiddo. Er enghraifft, os gwnaeth yr ystâd adeiladu estyniad, neu osod cegin foethus yn lle un sylfaenol. Ni allwch gynnwys cost llog morgais, costau addurno na chostau cynnal a chadw.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p1=Gellir cynnwys costau’r gwelliannau a ychwanegodd werth at yr eiddo. Er enghraifft, os gwnaeth yr ystâd adeiladu estyniad, neu osod cegin foethus yn lle un sylfaenol. Ni all eich cleient gynnwys cost llog morgais, costau addurno na chostau cynnal a chadw.
+singleMixedUseDisposalsAcquisitionPrice.details.p2=Mae costau caffael neu brynu yn cynnwys ffioedd ar gyfer syrfewyr neu gyfreithwyr.
+singleMixedUseDisposalsAcquisitionPrice.details.p3=Os gwnaethoch rannu unrhyw rai o’r costau, dim ond eich cyfran chi y gallwch ei hawlio.
+singleMixedUseDisposalsAcquisitionPrice.personalRep.details.p3=Os gwnaeth y person rannu unrhyw rai o’r costau, dim ond cyfran y person y gallwch ei hawlio.
+singleMixedUseDisposalsAcquisitionPrice.capacitor.details.p3=Os gwnaeth y person rannu unrhyw rai o’r costau, dim ond ei gyfran ef y gall ei hawlio.
+singleMixedUseDisposalsAcquisitionPrice.agent.details.p3=Os gwnaeth eich cleient rannu unrhyw rai o’r costau, dim ond ei gyfran ef y gall ei hawlio.
+singleMixedUseDisposalsAcquisitionPrice.trust.details.p3=Os gwnaeth yr ymddiriedolaeth rannu unrhyw rai o’r costau, dim ond ei chyfran hi y gall ei hawlio.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=Os gwnaeth yr ystâd rannu unrhyw rai o’r costau, dim ond cyfran yr ystâd y gallwch ei chynnwys.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=Os gwnaeth yr ystâd rannu unrhyw rai o’r costau, dim ond cyfran yr ystâd y gall eich cleient ei chynnwys.
+singleMixedUseDisposalsAcquisitionPrice.error.required=Nodwch werth caffael yr eiddo
+singleMixedUseDisposalsAcquisitionPrice.error.invalid=Mae’n rhaid i werth caffael yr eiddo fod yn swm o arian, megis 160,000 neu 23,040.50
+singleMixedUseDisposalsAcquisitionPrice.error.tooLarge=Mae’n rhaid i werth caffael yr eiddo fod yn swm o arian rhwng 1 a 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.error.tooSmall=Mae’n rhaid i werth caffael yr eiddo fod yn swm o arian rhwng 1 a 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.error.tooManyDecimals=Mae’n rhaid i werth caffael yr eiddo fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 160,000 neu 23,040.50
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.required=Nodwch werth marchnadol yr eiddo
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.invalid=Mae’n rhaid i werth marchnadol yr eiddo fod yn swm o arian, megis 160,000 neu 23,040.50
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooLarge=Mae’n rhaid i werth marchnadol yr eiddo fod yn swm o arian rhwng 1 a 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooSmall=Mae’n rhaid i werth marchnadol yr eiddo fod yn swm o arian rhwng 1 a 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooManyDecimals=Mae’n rhaid i werth marchnadol yr eiddo fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 160,000 neu 23,040.50
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.required=Nodwch werth marchnadol yr eiddo
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.invalid=Mae’n rhaid i werth marchnadol yr eiddo fod yn swm o arian, megis 160,000 neu 23,040.50
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=Mae’n rhaid i werth marchnadol yr eiddo fod yn swm o arian rhwng 1 a 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=Mae’n rhaid i werth marchnadol yr eiddo fod yn swm o arian rhwng 1 a 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Mae’n rhaid i werth marchnadol yr eiddo fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 160,000 neu 23,040.50
+
+#===================================================
+# SINGLE MIXED USE PROPERTY DETAILS PAGES - END
+#===================================================
+
 
 #===================================================
 #  COUNTRIES - START
