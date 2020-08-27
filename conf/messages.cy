@@ -404,12 +404,12 @@ countryCode.error.noMatch=Mae’n rhaid i’r wlad gyd-fynd â’r wlad a ddefny
 agent.too-many-attempts.title=Bydd angen i chi aros a rhoi cynnig arall arni
 agent.too-many-attempts.p1=Rydych wedi nodi manylion anghywir ar gyfer eich cleient ormod o weithiau.
 agent.too-many-attempts.p2=Bydd angen i chi aros am 2 awr a rhoi cynnig arall arni.
-agent.too-many-attempts.p3=Gallwch <a href="{0}">newid i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sy''n perthyn i gleient</a>.
+agent.too-many-attempts.p3=Gallwch <a href="{0}">newid i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sy''n perthyn i gleient gwahanol</a>.
 agent.confirm-client.title=Gwirio a chadarnhau manylion eich cleient
 agent.confirm-client.name=Enw
 agent.confirm-client.cgt-reference=Rhif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 agent.confirm-client.change-client=Newid cleient
-agentNoEnrolment.title=Creu cyfrif gwasanaethau asiant i fynd at y gwasanaeth hwn
+agentNoEnrolment.title=Defnyddiwch eich cyfrif gwasanaethau asiant i fynd at y gwasanaeth hwn
 agentNoEnrolment.p1=Bydd angen i chi fewngofnodi gan ddefnyddio Dynodydd Defnyddiwr (ID) a chyfrinair eich cyfrif gwasanaethau asiant. Os nad oes gennych un, bydd angen i chi <a href="{0}">greu cyfrif gwasanaethau asiant</a>.
 agentNoEnrolment.p2=Peidiwch â defnyddio manylion mewngofnodi ar gyfer cyfrif gwasanaethau ar-lein CThEM ar gyfer asiantau.
 agentNoEnrolment.button.tryAgain=Rhowch gynnig arall arni
@@ -601,9 +601,9 @@ wereYouAUKResident.agent.helpText.p2=Os oedd eich cleient yn ddibreswyl ac wedi 
 wereYouAUKResident.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.error.required=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU pan wnaethoch gyfnewid contractau
 wereYouAUKResident.error.boolean=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU pan wnaethoch gyfnewid contractau
 wereYouAUKResident.agent.error.required=Dewiswch ‘Iawn’ os oedd eich cleient yn breswylydd yn y DU pan wnaeth gyfnewid contractau
@@ -735,7 +735,7 @@ disposalDate.trust.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi
 disposalDate.capacitor.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 disposalDate.personalRep.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 disposalDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
-disposalDate.link=<a href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cyfnewid (yn agor ffenestr newydd)</a>.
+disposalDate.link=<a href="{0}" target="_blank">Cael gwybod beth sy’n digwydd ar y dyddiad cyfnewid (yn agor ffenestr newydd)</a>.
 disposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
 disposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
 disposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod heddiw neu yn y gorffennol
