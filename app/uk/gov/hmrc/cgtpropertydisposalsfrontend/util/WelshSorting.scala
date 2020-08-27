@@ -22,7 +22,7 @@ import cats.syntax.eq._
 import org.apache.commons.lang3.StringUtils
 
 object WelshSorting {
-  val WELSH_ALPHABET = Map(
+  private val WELSH_ALPHABET = Map(
     " "  -> 0,
     "a"  -> 1,
     "b"  -> 2,
@@ -60,42 +60,44 @@ object WelshSorting {
     "z"  -> 34
   )
 
-  val YR = "yr "
+  private val YR = "yr "
 
-  val welshCharacters = WELSH_ALPHABET.filter(s => s._1.length === 2)
+  private val welshCharacters = WELSH_ALPHABET.filter(s => s._1.length === 2)
 
   implicit class WelshStringOps(private val s: String) extends AnyVal {
 
     def isBeforeInWelsh(other: String): Boolean =
       if (other === s) false
       else {
-        val listOfWeights        = convertToCharacterValues(clean(s), List.empty)
-        val compareListOfWeights = convertToCharacterValues(clean(other), List.empty)
-        f(listOfWeights, compareListOfWeights)
+        val listOfWeights        = toCharacterValues(clean(s), List.empty)
+        val compareListOfWeights = toCharacterValues(clean(other), List.empty)
+        isBefore(listOfWeights, compareListOfWeights)
       }
 
-    def clean(code: String): String =
+    private def clean(code: String): String =
       StringUtils.stripAccents(code.toLowerCase().stripPrefix(YR).replaceAll("[^A-Za-z0-9] ", ""))
 
     @scala.annotation.tailrec
-    def convertToCharacterValues(str: String, acc: List[Int]): List[Int] =
+    private def toCharacterValues(str: String, acc: List[Int]): List[Int] =
       str match {
-        case ""                                        => acc
-        case s if validMultiCharacterWelshCharacter(s) =>
-          convertToCharacterValues(s.substring(2), acc ::: List(WELSH_ALPHABET(s.substring(0, 2))))
-        case s                                         => convertToCharacterValues(s.substring(1), acc ::: List(WELSH_ALPHABET(s.substring(0, 1))))
+        case ""                           => acc
+        case s if isMultiCharWelshChar(s) =>
+          toCharacterValues(s.substring(2), acc ::: List(WELSH_ALPHABET(s.substring(0, 2))))
+        case s                            => toCharacterValues(s.substring(1), acc ::: List(WELSH_ALPHABET(s.substring(0, 1))))
       }
 
     @scala.annotation.tailrec
-    def f(l1: List[Int], l2: List[Int]): Boolean =
+    private def isBefore(l1: List[Int], l2: List[Int]): Boolean =
       (l1 -> l2) match {
         case (h1 :: Nil, h2 :: Nil) => h1 < h2
-        case (h1 :: Nil, h2 :: _)   => if (h1 === h2) true else h1 < h2
-        case (h1 :: _, h2 :: Nil)   => if (h1 === h2) false else h1 < h2
-        case (h1 :: t1, h2 :: t2)   => if (h1 === h2) f(t1, t2) else h1 < h2
+        case (h1 :: Nil, h2 :: _)   => h1 <= h2
+        case (h1 :: _, h2 :: Nil)   => h1 < h2
+        case (h1 :: t1, h2 :: t2)   => if (h1 === h2) isBefore(t1, t2) else h1 < h2
         case _                      => false
       }
 
-    def validMultiCharacterWelshCharacter(str: String) = str.length > 1 && welshCharacters.contains(str.substring(0, 2))
+    private def isMultiCharWelshChar(str: String) =
+      str.length > 1 && welshCharacters.contains(str.substring(0, 2))
+
   }
 }
