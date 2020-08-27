@@ -1006,12 +1006,16 @@ class MultipleDisposalsTriageController @Inject() (
                         val amendReturnOriginalTaxYear =
                           state.map(_._1.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
                         taxYear match {
+                          case None if isAmendReturn(state) =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+                            )
                           case Some(t)
                               if amendReturnOriginalTaxYear
                                 .map(_.startDateInclusive)
                                 .exists(_ =!= t.startDateInclusive) =>
                             Redirect(routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear())
-                          case _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                          case _                            => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
                         }
 
                       }

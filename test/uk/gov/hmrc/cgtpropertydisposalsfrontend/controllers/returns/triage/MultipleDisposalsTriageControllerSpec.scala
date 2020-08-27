@@ -3788,6 +3788,17 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
+        "the disposal date has an invalid tax year and" +
+          "it is on the date of death when the user is a non-period of admin personal rep" in {
+          val disposalDate = today.minusYears(20)
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+            disposalDate,
+            Some(taxYear)
+          )
+        }
+
         "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
           test(
             sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
