@@ -4795,6 +4795,91 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
+      "redirect to amend return disposaldate different taxtear page" when {
+
+        val date = today.minusYears(20)
+
+        "the user is filling out a draft return and entered invalid taxyear" when {
+
+          "the section is incomplete" in {
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              requiredPreviousAnswers.copy(
+                disposalMethod = Some(DisposalMethod.Sold),
+                completionDate = Some(CompletionDate(date))
+              ),
+              formData(date),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      requiredPreviousAnswers.copy(
+                        disposalDate = None,
+                        tooEarlyDisposalDate = Some(date),
+                        completionDate = Some(CompletionDate(date)),
+                        disposalMethod = Some(DisposalMethod.Sold)
+                      )
+                    )
+                  )
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
+              checkIsRedirect(
+                _,
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+              ),
+              () => mockGetTaxYear(date)(Right(None)),
+              isAmend = true
+            )
+
+          }
+
+          "the section is complete" in {
+            forAll { c: CompleteSingleDisposalTriageAnswers =>
+              val completeJourney = c.copy(
+                individualUserType = Some(Self),
+                disposalDate = DisposalDate(today, taxYear),
+                completionDate = CompletionDate(today),
+                assetType = IndirectDisposal,
+                disposalMethod = DisposalMethod.Sold
+              )
+              val newAnswers      =
+                IncompleteSingleDisposalTriageAnswers(
+                  completeJourney.individualUserType,
+                  true,
+                  Some(completeJourney.disposalMethod),
+                  Some(completeJourney.countryOfResidence.isUk()),
+                  if (completeJourney.countryOfResidence.isUk()) None
+                  else Some(completeJourney.countryOfResidence),
+                  Some(completeJourney.assetType),
+                  None,
+                  Some(CompletionDate(date)),
+                  Some(date)
+                )
+
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeJourney,
+                formData(date),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn
+                    .copy(
+                      draftReturn = updateDraftReturn(draftReturn, newAnswers)
+                    )
+                    .withForceDisplayGainOrLossAfterReliefsForAmends,
+                checkIsRedirect(
+                  _,
+                  routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+                ),
+                () => mockGetTaxYear(date)(Right(None)),
+                isAmend = true
+              )
+            }
+          }
+
+        }
+
+      }
+
       "not do any updates" when {
 
         "the answers submitted is the same as the one in session" in {
