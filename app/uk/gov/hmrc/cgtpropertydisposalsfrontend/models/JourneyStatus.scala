@@ -125,7 +125,11 @@ object JourneyStatus {
 
       def withForceDisplayGainOrLossAfterReliefsForAmends: FillingOutReturn =
         f.copy(
-          amendReturnData = f.amendReturnData.map(_.copy(shouldDisplayGainOrLossAfterReliefs = true))
+          amendReturnData = f.amendReturnData.map(_.copy(shouldDisplayGainOrLossAfterReliefs = true)),
+          draftReturn = f.draftReturn match {
+            case s: DraftSingleDisposalReturn if isAmendReturn => s.copy(initialGainOrLoss = None)
+            case other                                         => other
+          }
         )
 
     }

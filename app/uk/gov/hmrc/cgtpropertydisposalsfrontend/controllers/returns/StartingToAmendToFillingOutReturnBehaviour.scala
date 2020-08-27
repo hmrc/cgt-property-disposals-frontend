@@ -40,9 +40,10 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
     sessionStore: SessionStore,
     errorHandler: ErrorHandler,
     uuidGenerator: UUIDGenerator,
-    redirectUrlOverride: Option[String] = None
+    redirectUrlOverride: Option[String] = None,
+    forceDisplayGainOrLossAfterReliefs: Boolean = false
   )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
-    val fillingOutReturn = toFillingOutReturn(startingToAmendReturn, uuidGenerator)
+    val fillingOutReturn = toFillingOutReturn(startingToAmendReturn, uuidGenerator, forceDisplayGainOrLossAfterReliefs)
 
     updateSession(sessionStore, request)(
       _.copy(
@@ -80,9 +81,16 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
         Redirect(amend.routes.AmendReturnController.unmetDependency())
     }
 
-  private def toFillingOutReturn(s: StartingToAmendReturn, uuidGenerator: UUIDGenerator): FillingOutReturn = {
-    val id          = uuidGenerator.nextId()
-    val now         = TimeUtils.now().toLocalDate
+  private def toFillingOutReturn(
+    s: StartingToAmendReturn,
+    uuidGenerator: UUIDGenerator,
+    forceShowGainOrLossAfterReliefs: Boolean
+  ): FillingOutReturn = {
+    val id                                  = uuidGenerator.nextId()
+    val now                                 = TimeUtils.now().toLocalDate
+    val shouldDisplayGainOrLossAfterReliefs =
+      forceShowGainOrLossAfterReliefs || s.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
+
     val draftReturn = s.originalReturn.completeReturn match {
       case m: CompleteMultipleDisposalsReturn        =>
         DraftMultipleDisposalsReturn(
@@ -106,7 +114,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
           Some(s.reliefDetails),
           None,
           None,
-          None,
+          if (shouldDisplayGainOrLossAfterReliefs) None else s.initialGainOrLoss,
           None,
           None,
           s.gainOrLossAfterReliefs,
@@ -164,7 +172,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
       Some(
         AmendReturnData(
           s.originalReturn,
-          s.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
+          shouldDisplayGainOrLossAfterReliefs
         )
       )
     )

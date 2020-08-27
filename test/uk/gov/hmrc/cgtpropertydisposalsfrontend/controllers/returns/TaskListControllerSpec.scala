@@ -757,7 +757,7 @@ class TaskListControllerSpec
           "the return is an amend return where gain or loss after reliefs shouldn't be shown" in {
             testSectionNonExistent(
               prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-              None,
+              Some(List(sample[ReturnSummary])),
               Some(
                 sample[AmendReturnData].copy(
                   shouldDisplayGainOrLossAfterReliefs = false
@@ -771,7 +771,7 @@ class TaskListControllerSpec
           "the return is an amend return where gain or loss after reliefs should be shown" in {
             test(
               prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-              None,
+              Some(List(sample[ReturnSummary])),
               Some(
                 sample[AmendReturnData].copy(
                   shouldDisplayGainOrLossAfterReliefs = true
@@ -1949,7 +1949,7 @@ class TaskListControllerSpec
           "the return is an amend return where gain or loss after reliefs shouldn't be shown" in {
             testSectionNonExistent(
               prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-              None,
+              Some(List(sample[ReturnSummary])),
               Some(
                 sample[AmendReturnData].copy(
                   shouldDisplayGainOrLossAfterReliefs = false
@@ -1963,7 +1963,7 @@ class TaskListControllerSpec
           "the return is an amend return where gain or loss after reliefs should be shown" in {
             test(
               prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-              None,
+              Some(List(sample[ReturnSummary])),
               Some(
                 sample[AmendReturnData].copy(
                   shouldDisplayGainOrLossAfterReliefs = true
@@ -2878,7 +2878,7 @@ class TaskListControllerSpec
           "the return is an amend return where gain or loss after reliefs shouldn't be shown" in {
             testSectionNonExistent(
               prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-              None,
+              Some(List(sample[ReturnSummary])),
               Some(
                 sample[AmendReturnData].copy(
                   shouldDisplayGainOrLossAfterReliefs = false
@@ -2892,7 +2892,7 @@ class TaskListControllerSpec
           "the return is an amend return where gain or loss after reliefs should be shown" in {
             test(
               prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-              None,
+              Some(List(sample[ReturnSummary])),
               Some(
                 sample[AmendReturnData].copy(
                   shouldDisplayGainOrLossAfterReliefs = true
