@@ -4874,7 +4874,7 @@ class SingleDisposalsTriageControllerSpec
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               ),
               () => mockGetTaxYear(date)(Right(None)),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )
 
           }
@@ -4917,7 +4917,7 @@ class SingleDisposalsTriageControllerSpec
                   routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                 ),
                 () => mockGetTaxYear(date)(Right(None)),
-                isAmend = true
+                amendReturnData = Some(sample[AmendReturnData])
               )
             }
           }
