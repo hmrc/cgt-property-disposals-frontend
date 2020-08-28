@@ -3839,6 +3839,17 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
+        "the disposal date has an invalid tax year and" +
+          "it is on the date of death when the user is a non-period of admin personal rep" in {
+          val disposalDate = today.minusYears(20)
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+            disposalDate,
+            Some(taxYear)
+          )
+        }
+
         "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
           test(
             sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
@@ -4239,7 +4250,7 @@ class MultipleDisposalsTriageControllerSpec
 
       "show an error page" when {
 
-        "there is an error updating the session when converting from inomplete answers to " +
+        "there is an error updating the session when converting from incomplete answers to " +
           "complete answers" in {
           val (session, journey) =
             sessionDataWithStartingNewDraftReturn(allQuestionsAnsweredUk)
@@ -4367,6 +4378,33 @@ class MultipleDisposalsTriageControllerSpec
               }
             )
 
+          }
+
+          "the user is on an amend journey where the completion date hasn't changed" in {
+            val originalReturnSummary =
+              sample[ReturnSummary].copy(completionDate = completeAnswersUk.completionDate.value)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  completeAnswersUk,
+                  previousSentReturns = Some(List(originalReturnSummary)),
+                  amendReturnData = Some(
+                    sample[AmendReturnData].copy(originalReturn =
+                      sample[CompleteReturnWithSummary].copy(
+                        summary = originalReturnSummary
+                      )
+                    )
+                  )
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("multipleDisposals.triage.cya.title")
+            )
           }
 
         }

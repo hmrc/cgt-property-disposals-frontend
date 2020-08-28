@@ -80,9 +80,13 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
         Redirect(amend.routes.AmendReturnController.unmetDependency())
     }
 
-  private def toFillingOutReturn(s: StartingToAmendReturn, uuidGenerator: UUIDGenerator): FillingOutReturn = {
-    val id          = uuidGenerator.nextId()
-    val now         = TimeUtils.now().toLocalDate
+  private def toFillingOutReturn(
+    s: StartingToAmendReturn,
+    uuidGenerator: UUIDGenerator
+  ): FillingOutReturn = {
+    val id  = uuidGenerator.nextId()
+    val now = TimeUtils.now().toLocalDate
+
     val draftReturn = s.originalReturn.completeReturn match {
       case m: CompleteMultipleDisposalsReturn        =>
         DraftMultipleDisposalsReturn(
@@ -106,7 +110,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
           Some(s.reliefDetails),
           None,
           None,
-          None,
+          s.initialGainOrLoss,
           None,
           None,
           s.gainOrLossAfterReliefs,

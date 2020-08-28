@@ -552,6 +552,10 @@ class SingleDisposalsTriageController @Inject() (
                           state.map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
 
                         taxYear match {
+                          case None if isAmendReturn(state) =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+                            )
                           case Some(t)
                               if amendReturnOriginalTaxYear
                                 .map(_.startDateInclusive)
@@ -559,11 +563,11 @@ class SingleDisposalsTriageController @Inject() (
                             Redirect(
                               routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                             )
-                          case Some(_) =>
+                          case Some(_)                      =>
                             Redirect(
                               routes.SingleDisposalsTriageController.checkYourAnswers()
                             )
-                          case None    =>
+                          case None                         =>
                             Redirect(
                               routes.CommonTriageQuestionsController.disposalDateTooEarly()
                             )
@@ -1085,7 +1089,10 @@ class SingleDisposalsTriageController @Inject() (
             _ => routes.SingleDisposalsTriageController.countryOfResidence()
           )(_ => sharesDisposalDateForm(personalRepDetails))(
             _.fold(
-              _.disposalDate.map(d => ShareDisposalDate(d.value)),
+              i =>
+                i.disposalDate
+                  .map(d => ShareDisposalDate(d.value))
+                  .orElse(i.tooEarlyDisposalDate.map(d => ShareDisposalDate(d))),
               e => Some(ShareDisposalDate(e.disposalDate.value))
             ),
             (_, currentAnswers, form, isDraftReturn, _) =>
@@ -1176,6 +1183,10 @@ class SingleDisposalsTriageController @Inject() (
                           state.map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
 
                         taxYear match {
+                          case None if isAmendReturn(state) =>
+                            Redirect(
+                              routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+                            )
                           case Some(t)
                               if amendReturnOriginalTaxYear
                                 .map(_.startDateInclusive)
@@ -1183,11 +1194,11 @@ class SingleDisposalsTriageController @Inject() (
                             Redirect(
                               routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
                             )
-                          case Some(_) =>
+                          case Some(_)                      =>
                             Redirect(
                               routes.SingleDisposalsTriageController.checkYourAnswers()
                             )
-                          case None    =>
+                          case None                         =>
                             Redirect(
                               routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
                             )
@@ -1800,7 +1811,9 @@ class SingleDisposalsTriageController @Inject() (
     completionDate: LocalDate,
     individualUserType: Option[IndividualUserType],
     state: JourneyState
-  ) =
+  ) = {
+    val originalReturnId = state.toOption.flatMap(_._2.amendReturnData.map(_.originalReturn.summary.submissionId))
+
     individualUserType match {
       case Some(_: RepresentativeType) => false
       case _                           =>
@@ -1809,9 +1822,11 @@ class SingleDisposalsTriageController @Inject() (
             .fold(_.previousSentReturns, _._2.previousSentReturns)
             .map(_.summaries)
             .getOrElse(List.empty)
+            .filterNot(summary => originalReturnId.contains(summary.submissionId))
             .map(_.completionDate)
         previousSentCompletionDates.contains(completionDate)
     }
+  }
 
   private def withPersonalRepresentativeDetails(state: JourneyState)(
     f: Option[PersonalRepresentativeDetails] => Future[Result]

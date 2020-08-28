@@ -135,13 +135,13 @@ class SingleDisposalsTriageControllerSpec
     draftReturn: DraftSingleDisposalReturn,
     name: Either[TrustName, IndividualName],
     previousSentReturns: Option[List[ReturnSummary]],
-    isAmend: Boolean = false
+    amendReturnData: Option[AmendReturnData] = None
   ): (SessionData, FillingOutReturn) = {
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None)),
-      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
+      amendReturnData = amendReturnData
     )
 
     val sessionData = SessionData.empty.copy(
@@ -156,7 +156,7 @@ class SingleDisposalsTriageControllerSpec
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     representeeAnswers: Option[RepresenteeAnswers] = Some(sample[IncompleteRepresenteeAnswers]),
     previousSentReturns: Option[List[ReturnSummary]] = None,
-    isAmend: Boolean = false
+    amendReturnData: Option[AmendReturnData] = None
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers,
@@ -167,7 +167,7 @@ class SingleDisposalsTriageControllerSpec
       draftReturn,
       name,
       previousSentReturns,
-      isAmend
+      amendReturnData
     )
     (session, journey, draftReturn)
   }
@@ -2466,7 +2466,7 @@ class SingleDisposalsTriageControllerSpec
                 requiredPreviousAnswers.copy(
                   disposalDate = Some(DisposalDate(today, taxYear))
                 ),
-                isAmend = true
+                amendReturnData = Some(sample[AmendReturnData])
               )._1
             )
           }
@@ -4389,7 +4389,7 @@ class SingleDisposalsTriageControllerSpec
               requiredPreviousAnswers.copy(
                 assetType = Some(AssetType.IndirectDisposal)
               ),
-              isAmend = isAmend
+              amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
             )._1
           )
         }
@@ -4841,6 +4841,91 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
+      "redirect to amend return disposaldate different taxtear page" when {
+
+        val date = today.minusYears(20)
+
+        "the user is filling out a draft return and entered invalid taxyear" when {
+
+          "the section is incomplete" in {
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              requiredPreviousAnswers.copy(
+                disposalMethod = Some(DisposalMethod.Sold),
+                completionDate = Some(CompletionDate(date))
+              ),
+              formData(date),
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn
+                  .copy(draftReturn =
+                    updateDraftReturn(
+                      draftReturn,
+                      requiredPreviousAnswers.copy(
+                        disposalDate = None,
+                        tooEarlyDisposalDate = Some(date),
+                        completionDate = Some(CompletionDate(date)),
+                        disposalMethod = Some(DisposalMethod.Sold)
+                      )
+                    )
+                  )
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
+              checkIsRedirect(
+                _,
+                routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+              ),
+              () => mockGetTaxYear(date)(Right(None)),
+              isAmend = true
+            )
+
+          }
+
+          "the section is complete" in {
+            forAll { c: CompleteSingleDisposalTriageAnswers =>
+              val completeJourney = c.copy(
+                individualUserType = Some(Self),
+                disposalDate = DisposalDate(today, taxYear),
+                completionDate = CompletionDate(today),
+                assetType = IndirectDisposal,
+                disposalMethod = DisposalMethod.Sold
+              )
+              val newAnswers      =
+                IncompleteSingleDisposalTriageAnswers(
+                  completeJourney.individualUserType,
+                  true,
+                  Some(completeJourney.disposalMethod),
+                  Some(completeJourney.countryOfResidence.isUk()),
+                  if (completeJourney.countryOfResidence.isUk()) None
+                  else Some(completeJourney.countryOfResidence),
+                  Some(completeJourney.assetType),
+                  None,
+                  Some(CompletionDate(date)),
+                  Some(date)
+                )
+
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeJourney,
+                formData(date),
+                (fillingOutReturn, draftReturn) =>
+                  fillingOutReturn
+                    .copy(
+                      draftReturn = updateDraftReturn(draftReturn, newAnswers)
+                    )
+                    .withForceDisplayGainOrLossAfterReliefsForAmends,
+                checkIsRedirect(
+                  _,
+                  routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+                ),
+                () => mockGetTaxYear(date)(Right(None)),
+                isAmend = true
+              )
+            }
+          }
+
+        }
+
+      }
+
       "not do any updates" when {
 
         "the answers submitted is the same as the one in session" in {
@@ -5282,6 +5367,33 @@ class SingleDisposalsTriageControllerSpec
 
           "the user is a personal rep in period of admin" in {
             test(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
+          }
+
+          "the user is on an amend return journey where the completion date has not changed" in {
+            val originalReturnSummary =
+              sample[ReturnSummary].copy(completionDate = completeTriageQuestions.completionDate.value)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  completeTriageQuestions,
+                  previousSentReturns = Some(List(originalReturnSummary)),
+                  amendReturnData = Some(
+                    sample[AmendReturnData].copy(originalReturn =
+                      sample[CompleteReturnWithSummary].copy(
+                        summary = originalReturnSummary
+                      )
+                    )
+                  )
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("triage.check-your-answers.title")
+            )
           }
 
         }

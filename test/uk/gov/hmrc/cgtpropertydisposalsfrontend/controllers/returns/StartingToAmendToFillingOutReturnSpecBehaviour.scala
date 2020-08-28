@@ -111,7 +111,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           Some(completeReturn.reliefDetails),
           None,
           None,
-          None,
+          completeReturn.initialGainOrLoss,
           None,
           None,
           completeReturn.gainOrLossAfterReliefs,
