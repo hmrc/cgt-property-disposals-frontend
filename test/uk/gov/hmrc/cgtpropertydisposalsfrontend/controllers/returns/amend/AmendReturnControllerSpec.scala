@@ -449,8 +449,7 @@ class AmendReturnControllerSpec
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.unmetDependencySubmit(),
         mockUUIDGenerator,
-        Some(controllers.returns.routes.TaskListController.taskList().url),
-        expectForceDisplayGainOrLossAfterReliefs = true
+        Some(controllers.returns.routes.TaskListController.taskList().url)
       )
 
       "redirect to the amend cya page" when {
