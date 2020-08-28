@@ -17,8 +17,12 @@
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
 
+@import cats.syntax.eq._
+@import cats.instances.string._
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.CountryCode
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.WelshSorting.WelshStringOps
 
 @this(
   errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
@@ -54,6 +58,14 @@
     <label for="@{fieldId}" class="form-label">@{label}</label>
   }
 }
+@isWelsh = @{ messages("lang") =!= "en" }
+@sortedCountryCodeOptions = @{
+  val countries = countryCodes.map(countryCode => countryCode -> messages(s"country.$countryCode"))
+      countries.sortWith{ case ((_, countryName1), (_, countryName2)) =>
+          if(isWelsh) countryName1.isBeforeInWelsh(countryName2)
+          else countryName1.compare(countryName2) < 0
+      }
+}
 
 @describedByKeys = @{List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
@@ -79,8 +91,8 @@
    autocomplete="@{autoComplete.value}"
    @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
     <option value="">@messages("countryCode.placeholder")</option>
-      @for(countryCode <- countryCodes) {
-        <option value="@{countryCode}" @{if(selected.contains(countryCode))"selected"}>@messages(s"country.$countryCode")</option>
-      }
+     @sortedCountryCodeOptions.map { countryCodeWithCountryName =>
+         <option value="@{countryCodeWithCountryName._1}" @{if(selected.contains(countryCodeWithCountryName._1))"selected"}>@{countryCodeWithCountryName._2}</option>
+     }
  </select>
 </div>
