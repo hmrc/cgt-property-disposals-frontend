@@ -668,6 +668,9 @@ drafts.list.lastUpdated=Draft last saved on {0}
 drafts.list.sendAndPayBy=Send and pay by
 drafts.list.resume=Complete return
 
+multiple-draft.exit.title=You have an existing draft return
+multiple-draft.exit.p1=Complete your draft return before you start a new one.
+
 #===================================================
 # ACCOUNT PAGES -  END
 #===================================================

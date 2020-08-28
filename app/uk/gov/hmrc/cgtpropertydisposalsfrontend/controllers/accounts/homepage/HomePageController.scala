@@ -56,7 +56,8 @@ class HomePageController @Inject() (
   paymentsService: PaymentsService,
   cc: MessagesControllerComponents,
   homePage: views.html.account.home,
-  subsequentReturnExitPage: views.html.returns.subsequent_return_exit
+  subsequentReturnExitPage: views.html.returns.subsequent_return_exit,
+  multipleDraftExitPage: views.html.returns.multiple_draft_return_exit
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -73,14 +74,10 @@ class HomePageController @Inject() (
   def startNewReturn(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withSubscribedUser { (_, subscribed) =>
-        val redirectToExitPage =
-          if (viewConfig.furtherReturnsEnabled)
-            subscribed.draftReturns.nonEmpty
-          else
-            subscribed.sentReturns.nonEmpty || subscribed.draftReturns.nonEmpty
+        val redirectToExitPage = subscribed.draftReturns.nonEmpty
 
         if (redirectToExitPage)
-          Redirect(routes.HomePageController.exitForSubsequentReturn())
+          Redirect(routes.HomePageController.exitForMultipleDraftReturn())
         else {
           val redirectTo = subscribed.subscribedDetails
             .userType()
@@ -281,6 +278,11 @@ class HomePageController @Inject() (
           routes.HomePageController.homepage()
       }
       Ok(subsequentReturnExitPage(backLink))
+    }
+
+  def exitForMultipleDraftReturn(): Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit request =>
+      Ok(multipleDraftExitPage(routes.HomePageController.homepage()))
     }
 
   private def getPreviousYearToDateLiability(

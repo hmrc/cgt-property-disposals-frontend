@@ -1484,7 +1484,7 @@ class HomePageControllerSpec
 
       }
 
-      "redirect to the subsequent return exit page" when {
+      "redirect to the multiple draft return exit page" when {
 
         "the session has a draft return" in {
           val subscribed = sample[Subscribed].copy(
@@ -1500,26 +1500,7 @@ class HomePageControllerSpec
 
           checkIsRedirect(
             performAction(),
-            routes.HomePageController.exitForSubsequentReturn()
-          )
-        }
-
-        "there is submitted and draft returns" in {
-          val subscribed =
-            sample[Subscribed].copy(
-              subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
-              sentReturns = List(sample[ReturnSummary]),
-              draftReturns = List(sample[DraftSingleDisposalReturn])
-            )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithSubscribed(subscribed))
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.HomePageController.exitForSubsequentReturn()
+            routes.HomePageController.exitForMultipleDraftReturn()
           )
         }
 
