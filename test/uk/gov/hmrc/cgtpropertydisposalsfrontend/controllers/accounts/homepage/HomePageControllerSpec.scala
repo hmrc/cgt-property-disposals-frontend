@@ -1529,6 +1529,41 @@ class HomePageControllerSpec
 
     }
 
+    "handling requests to multiple draft return exit page" must {
+
+      def performAction(): Future[Result] =
+        controller.exitForMultipleDraftReturn()(FakeRequest())
+
+      val expectedPageTitleMessageKey = "multiple-draft.exit.title"
+
+      "display the page" when {
+
+        def test(sessionData: SessionData, expectedBackLink: Call): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(expectedPageTitleMessageKey),
+            doc => doc.select("#back").attr("href") shouldBe expectedBackLink.url
+          )
+        }
+
+        "there is a draft" in {
+          test(
+            SessionData.empty.copy(
+              journeyStatus = Some(sample[Subscribed])
+            ),
+            routes.HomePageController.homepage()
+          )
+        }
+
+      }
+
+    }
+
     "handling requests to subsequent return exit page" must {
 
       def performAction(): Future[Result] =
