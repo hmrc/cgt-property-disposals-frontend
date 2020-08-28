@@ -37,7 +37,8 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliabilit
         taxYear: TaxYear,
         isATrust: Boolean,
         representativeType: Option[RepresentativeType],
-        wasUkResident: Boolean
+        wasUkResident: Boolean,
+        hideEstimatesQuestion: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
@@ -47,7 +48,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliabilit
 
  @pageHeading(title, Some(messages("ytdLiability.caption")))
 
- @summary(answers, taxYear, showFiles = true, isATrust, representativeType, wasUkResident)
+ @summary(answers, taxYear, showFiles = true, isATrust, representativeType, wasUkResident, hideEstimatesQuestion)
 
  @formWrapper(routes.YearToDateLiabilityController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
  @submitButton(messages("button.confirmAndContinue"))

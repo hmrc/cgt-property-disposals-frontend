@@ -2359,7 +2359,7 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     isATrust: Boolean,
     isAnAgent: Boolean,
     individualUserType: IndividualUserType,
-    isFurtherReturn: Boolean = false
+    isFurtherOrAmendReturn: Boolean = false
   ): Unit = {
 
     if (completeExemptionAndLossesAnswers.inYearLosses.isZero)
@@ -2384,7 +2384,7 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       )
     }
 
-    if (isFurtherReturn)
+    if (isFurtherOrAmendReturn)
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe ""
@@ -2417,7 +2417,7 @@ object ExemptionAndLossesControllerSpec extends Matchers {
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of your Capital Gains Tax Annual Exempt Amount do you want to use?"
 
-    if (!isFurtherReturn)
+    if (!isFurtherOrAmendReturn)
       doc
         .select("#annualExemptAmount-answer")
         .text   shouldBe formatAmountOfMoneyWithPoundSign(

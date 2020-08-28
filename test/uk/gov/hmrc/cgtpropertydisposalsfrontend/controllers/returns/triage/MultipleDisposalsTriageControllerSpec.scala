@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServ
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
@@ -48,16 +49,19 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteMultipleIndirectDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsTriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
@@ -2253,14 +2257,16 @@ class MultipleDisposalsTriageControllerSpec
 
       def updateDraftReturn(
         d: DraftMultipleDisposalsReturn,
-        newAnswers: MultipleDisposalsTriageAnswers
+        newAnswers: MultipleDisposalsTriageAnswers,
+        preserveEstimatesAnswer: Boolean = false
       ) =
         d.copy(
           triageAnswers = newAnswers,
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
             case _: CalculatedYTDAnswers    => None
             case n: NonCalculatedYTDAnswers =>
-              Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
+              if (preserveEstimatesAnswer) Some(n.unset(_.taxDue))
+              else Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
           }
         )
 
@@ -2356,7 +2362,7 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user has started a draft return and" when {
 
-          "have completed the section and they enter a figure which is " +
+          "have completed the section and they enter a country which is " +
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
               val answers = c.copy(countryOfResidence = Country("FI"))
@@ -2367,6 +2373,51 @@ class MultipleDisposalsTriageControllerSpec
               val updatedAnswers     = answers.copy(countryOfResidence = country)
               val updatedDraftReturn =
                 updateDraftReturn(draftReturn, updatedAnswers)
+              val updatedJourney     =
+                journey.copy(draftReturn = updatedDraftReturn)
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(updatedJourney)(
+                  Right(())
+                )
+                mockStoreSession(
+                  session.copy(journeyStatus = Some(updatedJourney))
+                )(Right(()))
+              }
+
+              checkIsRedirect(
+                performAction(key -> country.code),
+                routes.MultipleDisposalsTriageController.checkYourAnswers()
+              )
+            }
+
+          }
+
+          "the user is on an amend journey where the estimates answer should be preserved" in {
+            forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+              val answers = c.copy(countryOfResidence = Country("FI"))
+
+              val (session, journey, draftReturn) =
+                sessionDataWithFillingOutReturn(
+                  answers,
+                  amendReturnData = Some(
+                    sample[AmendReturnData].copy(
+                      originalReturn = sample[CompleteReturnWithSummary].copy(
+                        completeReturn = sample[CompleteMultipleIndirectDisposalReturn].copy(
+                          yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+                            hasEstimatedDetails = false
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+
+              val updatedAnswers     = answers.copy(countryOfResidence = country)
+              val updatedDraftReturn =
+                updateDraftReturn(draftReturn, updatedAnswers, preserveEstimatesAnswer = true)
               val updatedJourney     =
                 journey.copy(draftReturn = updatedDraftReturn)
 

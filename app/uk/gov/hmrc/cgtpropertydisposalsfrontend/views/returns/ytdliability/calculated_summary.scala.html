@@ -37,7 +37,8 @@
     showFiles: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    wasUkResident: Boolean
+    wasUkResident: Boolean,
+    hideEstimatesQuestion: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
@@ -73,12 +74,15 @@
             )
         }
     }
-    @cyaRow(
-        messages("hasEstimatedDetails.title"),
-        Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
-        Some(cyaChange(messages("hasEstimatedDetails.cyaChange"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
-        "hasEstimatedDetails-value"
-    )
+    @if(!hideEstimatesQuestion) {
+        @cyaRow(
+            messages("hasEstimatedDetails.title"),
+            Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
+            Some(cyaChange(messages("hasEstimatedDetails.cyaChange"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
+            "hasEstimatedDetails-value"
+        )
+    }
+
     @cyaRow(
         messages("taxDue.title"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),

@@ -342,7 +342,8 @@ class ViewReturnControllerSpec
             rebasingUtil.isEligibleForRebase(completeSingleDisposalReturn),
             viewingReturn.subscribedDetails.isATrust,
             completeSingleDisposalReturn.triageAnswers.assetType,
-            isFurtherReturn = false
+            isFurtherOrAmendReturn = false,
+            !completeSingleDisposalReturn.yearToDateLiabilityAnswers.fold(_.hasEstimatedDetails, _.hasEstimatedDetails)
           )
 
         }
@@ -461,7 +462,8 @@ class ViewReturnControllerSpec
             completeMultipleDisposalsReturn,
             Some(userType),
             subscribedDetails.isATrust,
-            isFurtherReturn = false
+            isFurtherOrAmendReturn = false,
+            !completeMultipleDisposalsReturn.yearToDateLiabilityAnswers.hasEstimatedDetails
           )
         }
 
@@ -574,7 +576,8 @@ class ViewReturnControllerSpec
             completeMultipleIndirectDisposalsReturn,
             Some(userType),
             subscribedDetails.isATrust,
-            isFurtherReturn = false
+            isFurtherOrAmendReturn = false,
+            !completeMultipleIndirectDisposalsReturn.yearToDateLiabilityAnswers.hasEstimatedDetails
           )
         }
 

@@ -291,7 +291,7 @@ class DisposalDetailsController @Inject() (
                     i.copy(
                       disposalDetailsAnswers = Some(newAnswers),
                       acquisitionDetailsAnswers =
-                        if (fillingOutReturn.isFurtherReturn.contains(true))
+                        if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
                           None
                         else
                           i.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(i.triageAnswers)),

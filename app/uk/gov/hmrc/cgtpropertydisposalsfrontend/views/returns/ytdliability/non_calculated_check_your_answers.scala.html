@@ -38,7 +38,8 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isFurtherOrAmendReturn: Option[Boolean],
-    taxYear: TaxYear
+    taxYear: TaxYear,
+    hideEstimatesQuestion: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("ytdLiability.cya.title")}
@@ -47,7 +48,7 @@
 
  @pageHeading(title, Some(messages(s"ytdLiability${if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}.caption")))
 
- @summary(answers, showFiles = true, isMultiple, isATrust, representativeType, isFurtherOrAmendReturn, taxYear)
+ @summary(answers, showFiles = true, isMultiple, isATrust, representativeType, isFurtherOrAmendReturn, taxYear, hideEstimatesQuestion)
 
  @formWrapper(routes.YearToDateLiabilityController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
  @submitButton(messages("button.confirmAndContinue"))

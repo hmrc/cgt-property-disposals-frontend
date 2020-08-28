@@ -857,48 +857,45 @@ class SingleDisposalsTriageController @Inject() (
                 _.copy(newReturnTriageAnswers = Right(newAnswers)),
                 {
                   case (d, r) =>
+                    def updateYearToDateSection(
+                      yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers]
+                    ): Option[YearToDateLiabilityAnswers] =
+                      yearToDateLiabilityAnswers.flatMap {
+                        case _: CalculatedYTDAnswers    => None
+                        case n: NonCalculatedYTDAnswers =>
+                          if (preserveEstimatesAnswer(state))
+                            Some(
+                              n.unset(_.yearToDateLiability)
+                                .unset(_.mandatoryEvidence)
+                            )
+                          else
+                            Some(
+                              n.unset(_.hasEstimatedDetails)
+                                .unset(_.yearToDateLiability)
+                                .unset(_.mandatoryEvidence)
+                            )
+                      }
+
                     r.copy(
                       draftReturn = d.fold(
                         _.fold(
                           mixedUseDraftReturn =>
                             mixedUseDraftReturn.copy(
                               triageAnswers = newAnswers,
-                              yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers.flatMap {
-                                case _: CalculatedYTDAnswers    => None
-                                case n: NonCalculatedYTDAnswers =>
-                                  Some(
-                                    n.unset(_.hasEstimatedDetails)
-                                      .unset(_.yearToDateLiability)
-                                      .unset(_.mandatoryEvidence)
-                                  )
-                              }
+                              yearToDateLiabilityAnswers =
+                                updateYearToDateSection(mixedUseDraftReturn.yearToDateLiabilityAnswers)
                             ),
                           indirectDraftReturn =>
                             indirectDraftReturn.copy(
                               triageAnswers = newAnswers,
-                              yearToDateLiabilityAnswers = indirectDraftReturn.yearToDateLiabilityAnswers.flatMap {
-                                case _: CalculatedYTDAnswers    => None
-                                case n: NonCalculatedYTDAnswers =>
-                                  Some(
-                                    n.unset(_.hasEstimatedDetails)
-                                      .unset(_.yearToDateLiability)
-                                      .unset(_.mandatoryEvidence)
-                                  )
-                              }
+                              yearToDateLiabilityAnswers =
+                                updateYearToDateSection(indirectDraftReturn.yearToDateLiabilityAnswers)
                             )
                         ),
                         s =>
                           s.copy(
                             triageAnswers = newAnswers,
-                            yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap {
-                              case _: CalculatedYTDAnswers    => None
-                              case n: NonCalculatedYTDAnswers =>
-                                Some(
-                                  n.unset(_.hasEstimatedDetails)
-                                    .unset(_.yearToDateLiability)
-                                    .unset(_.mandatoryEvidence)
-                                )
-                            }
+                            yearToDateLiabilityAnswers = updateYearToDateSection(s.yearToDateLiabilityAnswers)
                           )
                       )
                     )
@@ -1849,6 +1846,9 @@ class SingleDisposalsTriageController @Inject() (
       f
     )
   }
+
+  private def preserveEstimatesAnswer(state: JourneyState): Boolean =
+    state.exists(_._2.amendReturnData.exists(_.preserveEstimatesAnswer))
 
 }
 

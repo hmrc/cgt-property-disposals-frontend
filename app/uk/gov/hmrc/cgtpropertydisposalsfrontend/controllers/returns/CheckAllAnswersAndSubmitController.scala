@@ -81,7 +81,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
             completeReturn.isIndirectDisposal(),
             fillingOutReturn.agentReferenceNumber,
             fillingOutReturn.isFurtherOrAmendReturn,
-            false
+            false,
+            fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)
           )
         )
       }
@@ -103,7 +104,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
                     completeReturn.isIndirectDisposal(),
                     fillingOutReturn.agentReferenceNumber,
                     fillingOutReturn.isFurtherOrAmendReturn,
-                    true
+                    true,
+                    fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)
                   )(request, explicitEnglishMessage, viewConfig)
                     .toString()
                     .getBytes

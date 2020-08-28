@@ -43,7 +43,7 @@
     subscribedDetails: SubscribedDetails,
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
-    isFurtherReturn: Option[Boolean],
+    isFurtherOrAmendReturn: Option[Boolean],
     backLink: Call
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
@@ -83,7 +83,7 @@
         subscribedDetails,
         representativeType,
         isIndirectDisposal,
-        isFurtherReturn
+        isFurtherOrAmendReturn
     )
 
     <p>@messages(s"$key.p1")</p>
