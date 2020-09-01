@@ -6294,9 +6294,9 @@ class YearToDateLiabilityControllerSpec
       "not do any updates" when {
 
         "the answer submitted is the same as the one held in session" in {
-          val submittedAnswer = "100"
+          val submittedAnswer = "0"
           val answers         = sample[CompleteNonCalculatedYTDAnswers].copy(
-            yearToDateLiability = Some(AmountInPence(10000L))
+            yearToDateLiability = Some(AmountInPence.zero)
           )
 
           val (session, _, _) = sessionWithSingleDisposalState(
