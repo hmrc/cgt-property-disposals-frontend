@@ -2556,7 +2556,7 @@ object YearToDateLiabilityController {
       mapping(
         "yearToDateLiability" -> of(
           MoneyUtils.amountInPoundsFormatter(
-            _ <= 0,
+            _ < 0,
             _ > MoneyUtils.maxAmountOfPounds,
             requiredErrorArgs = List(
               taxYear.startDateInclusive.getYear.toString,
