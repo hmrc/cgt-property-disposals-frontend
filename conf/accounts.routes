@@ -5,7 +5,7 @@ GET /resume-draft-return/:id                                                    
 GET /view-sent-return/:submissionId                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.viewSentReturn(submissionId: String)
 GET /pay-total-outstanding                                                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.payTotalAmountLeftToPay()
 GET /exit/report-another-way                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.exitForSubsequentReturn()
-
+GET /exit/draft-already-exists                                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.exitForMultipleDraftReturn()
 GET /signed-out                                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.signedOut()
 
 # Change address

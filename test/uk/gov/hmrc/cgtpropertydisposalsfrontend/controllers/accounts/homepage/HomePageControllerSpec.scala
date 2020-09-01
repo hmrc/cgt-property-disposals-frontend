@@ -1484,7 +1484,7 @@ class HomePageControllerSpec
 
       }
 
-      "redirect to the subsequent return exit page" when {
+      "redirect to the multiple draft return exit page" when {
 
         "the session has a draft return" in {
           val subscribed = sample[Subscribed].copy(
@@ -1500,26 +1500,7 @@ class HomePageControllerSpec
 
           checkIsRedirect(
             performAction(),
-            routes.HomePageController.exitForSubsequentReturn()
-          )
-        }
-
-        "there is submitted and draft returns" in {
-          val subscribed =
-            sample[Subscribed].copy(
-              subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
-              sentReturns = List(sample[ReturnSummary]),
-              draftReturns = List(sample[DraftSingleDisposalReturn])
-            )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithSubscribed(subscribed))
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.HomePageController.exitForSubsequentReturn()
+            routes.HomePageController.exitForMultipleDraftReturn()
           )
         }
 
@@ -1545,6 +1526,41 @@ class HomePageControllerSpec
         controllers.returns.triage.routes.CommonTriageQuestionsController
           .whoIsIndividualRepresenting()
       )
+
+    }
+
+    "handling requests to multiple draft return exit page" must {
+
+      def performAction(): Future[Result] =
+        controller.exitForMultipleDraftReturn()(FakeRequest())
+
+      val expectedPageTitleMessageKey = "multiple-draft.exit.title"
+
+      "display the page" when {
+
+        def test(sessionData: SessionData, expectedBackLink: Call): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(expectedPageTitleMessageKey),
+            doc => doc.select("#back").attr("href") shouldBe expectedBackLink.url
+          )
+        }
+
+        "there is a draft" in {
+          test(
+            SessionData.empty.copy(
+              journeyStatus = Some(sample[Subscribed])
+            ),
+            routes.HomePageController.homepage()
+          )
+        }
+
+      }
 
     }
 
