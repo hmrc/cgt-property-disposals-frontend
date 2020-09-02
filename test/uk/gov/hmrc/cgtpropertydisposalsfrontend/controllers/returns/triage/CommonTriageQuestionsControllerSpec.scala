@@ -31,6 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServ
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
@@ -48,12 +49,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleMixedUseDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 
@@ -144,7 +146,7 @@ class CommonTriageQuestionsControllerSpec
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
     previousReturns: Option[PreviousReturnData] = None,
-    isAmend: Boolean = false
+    amendReturnData: Option[AmendReturnData] = None
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn      = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers,
@@ -159,10 +161,7 @@ class CommonTriageQuestionsControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       previousSentReturns = previousReturns,
-      amendReturnData =
-        if (isAmend)
-          Some(sample[AmendReturnData])
-        else None
+      amendReturnData = amendReturnData
     )
 
     val sessionData = SessionData.empty.copy(
@@ -760,7 +759,7 @@ class CommonTriageQuestionsControllerSpec
               performAction("individualUserType" -> "1"),
               IncompleteSingleDisposalTriageAnswers.empty
                 .copy(individualUserType = Some(IndividualUserType.Self)),
-              isAmend = true
+              amendReturnData = Some(sample[AmendReturnData])
             )(
               (fillingOutReturn, draftReturn) =>
                 fillingOutReturn
@@ -804,7 +803,7 @@ class CommonTriageQuestionsControllerSpec
             testSuccessfulUpdateFillingOutReturn(
               performAction("individualUserType" -> "2"),
               answers,
-              isAmend = false
+              amendReturnData = None
             )(
               (fillingOutReturn, draftReturn) =>
                 fillingOutReturn.copy(draftReturn =
@@ -1644,7 +1643,7 @@ class CommonTriageQuestionsControllerSpec
               testSuccessfulUpdateFillingOutReturn(
                 performAction("numberOfProperties" -> "1"),
                 answers,
-                isAmend = true
+                amendReturnData = Some(sample[AmendReturnData])
               )(
                 (fillingOutReturn, draftReturn) =>
                   fillingOutReturn
@@ -2094,6 +2093,15 @@ class CommonTriageQuestionsControllerSpec
 
       "display the page" when {
 
+        def singleDisposalTriageAnswers(individualUserType: Option[IndividualUserType]) =
+          IncompleteSingleDisposalTriageAnswers.empty.copy(
+            individualUserType = individualUserType,
+            hasConfirmedSingleDisposal = true,
+            disposalMethod = Some(DisposalMethod.Sold),
+            wasAUKResident = Some(true),
+            assetType = Some(AssetType.NonResidential)
+          )
+
         "the user was a uk resident and they disposed of a non-residential property and" when {
 
           def test(expectedBackLink: Call, expectedP1Key: String): Unit =
@@ -2104,15 +2112,6 @@ class CommonTriageQuestionsControllerSpec
                 doc.select("#back").attr("href")                         shouldBe expectedBackLink.url
                 doc.select("#content > article > p:nth-child(3)").text() shouldBe messageFromMessageKey(expectedP1Key)
               }
-            )
-
-          def singleDisposalTriageAnswers(individualUserType: Option[IndividualUserType]) =
-            IncompleteSingleDisposalTriageAnswers.empty.copy(
-              individualUserType = individualUserType,
-              hasConfirmedSingleDisposal = true,
-              disposalMethod = Some(DisposalMethod.Sold),
-              wasAUKResident = Some(true),
-              assetType = Some(AssetType.NonResidential)
             )
 
           "the user is on a single disposal journey" in {
@@ -2264,6 +2263,107 @@ class CommonTriageQuestionsControllerSpec
 
         }
 
+        "the user is on an amend returns journey where they originally said they were a non-uk resident and" when {
+
+          def test(expectedBackLink: Call, expectedWarningKey: String): Unit =
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("cannotAmendResidentialStatusForAssetType.title"),
+              { doc =>
+                doc.select("#back").attr("href") shouldBe expectedBackLink.url
+                doc.select("#warning").text()    shouldBe messageFromMessageKey(expectedWarningKey)
+              }
+            )
+
+          def amendReturnData(completeReturn: CompleteReturn) =
+            sample[AmendReturnData].copy(
+              originalReturn = sample[CompleteReturnWithSummary].copy(
+                completeReturn = completeReturn
+              )
+            )
+
+          "the user is an individual" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  singleDisposalTriageAnswers(Some(Self)),
+                  Right(sample[IndividualName]),
+                  amendReturnData = Some(
+                    amendReturnData(
+                      sample[CompleteSingleDisposalReturn].copy(
+                        triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                          assetType = AssetType.NonResidential
+                        )
+                      )
+                    )
+                  )
+                )._1
+              )
+            }
+
+            test(
+              routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty(),
+              "cannotAmendResidentialStatusForAssetType.warning"
+            )
+          }
+
+          "the user is an agent" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  singleDisposalTriageAnswers(Some(Self)),
+                  Right(sample[IndividualName]),
+                  userType = UserType.Agent,
+                  amendReturnData = Some(
+                    amendReturnData(
+                      sample[CompleteMultipleDisposalsReturn].copy(
+                        triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                          assetTypes = List(AssetType.NonResidential)
+                        )
+                      )
+                    )
+                  )
+                )._1
+              )
+            }
+
+            test(
+              routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty(),
+              "cannotAmendResidentialStatusForAssetType.agent.warning"
+            )
+          }
+
+          "the user is a trust" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  singleDisposalTriageAnswers(None),
+                  Left(sample[TrustName]),
+                  userType = UserType.Organisation,
+                  amendReturnData = Some(
+                    amendReturnData(
+                      sample[CompleteSingleMixedUseDisposalReturn].copy(
+                        triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                          assetType = AssetType.MixedUse
+                        )
+                      )
+                    )
+                  )
+                )._1
+              )
+            }
+
+            test(
+              routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty(),
+              "cannotAmendResidentialStatusForAssetType.trust.warning"
+            )
+          }
+
+        }
+
       }
 
     }
@@ -2397,7 +2497,7 @@ class CommonTriageQuestionsControllerSpec
                   sample[CompleteSingleDisposalTriageAnswers].copy(
                     disposalDate = sample[DisposalDate]
                   ),
-                  isAmend = true
+                  amendReturnData = Some(sample[AmendReturnData])
                 )._1
               )
 
@@ -2571,14 +2671,14 @@ class CommonTriageQuestionsControllerSpec
   def testSuccessfulUpdateFillingOutReturn(
     performAction: => Future[Result],
     answers: SingleDisposalTriageAnswers,
-    isAmend: Boolean
+    amendReturnData: Option[AmendReturnData]
   )(
     updateJourney: (FillingOutReturn, DraftSingleDisposalReturn) => FillingOutReturn,
     expectedRedirect: Call
   ): Unit = {
     val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(
       answers,
-      isAmend = isAmend
+      amendReturnData = amendReturnData
     )
     val updatedJourney                  =
       updateJourney(journey, draftReturn)
