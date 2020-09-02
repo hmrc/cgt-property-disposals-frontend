@@ -1636,7 +1636,7 @@ object MultipleDisposalsTriageController {
         "" -> of(
           TimeUtils.dateFormatter(
             Some(maximumDateInclusive),
-            None,
+            Some(TaxYear.earliestTaxYearStartDate),
             "multipleDisposalsCompletionDate-day",
             "multipleDisposalsCompletionDate-month",
             "multipleDisposalsCompletionDate-year",
