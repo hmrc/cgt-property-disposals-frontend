@@ -29,7 +29,8 @@ final case class SubmitReturnRequest(
   subscribedDetails: SubscribedDetails,
   agentReferenceNumber: Option[AgentReferenceNumber],
   isFurtherReturn: Boolean,
-  checkYourAnswerPageHtml: B64Html
+  checkYourAnswerPageHtml: B64Html,
+  originalReturnFormBundleId: Option[String]
 )
 
 object SubmitReturnRequest {
