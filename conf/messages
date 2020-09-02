@@ -4025,6 +4025,8 @@ supporting-evidence.scan-failed.button.tryAgain=Try again
 #===================================================
 
 checkAllAnswers.title=Check your answers before sending the return
+checkAllAnswers.amend.title=Change your return
+checkAllAnswers.amend.warning=You will not be able to save and come back later while you’re changing your return.
 checkAllAnswers.declaration=Declaration
 checkAllAnswers.declaration.p1=By continuing you are confirming that, to the best of your knowledge, the details you are providing are correct.
 checkAllAnswers.declaration.p2=You may have to pay financial penalties and face prosecution if you give incorrect information.

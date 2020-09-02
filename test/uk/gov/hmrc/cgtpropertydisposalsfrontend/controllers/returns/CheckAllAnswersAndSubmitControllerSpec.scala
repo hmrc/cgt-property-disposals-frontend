@@ -437,7 +437,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             test(
               sessionWithJourney(completeFillingOutReturn),
               completeReturn,
-              "checkAllAnswers.title",
+              "checkAllAnswers.amend.title",
               None,
               completeFillingOutReturn.subscribedDetails.isATrust,
               isFurtherOrAmendReturn = true,
@@ -1294,11 +1294,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           cyaPge(
             completeReturn,
             instanceOf[RebasingEligibilityUtil],
-            completeFillingOutReturnNoRepresentee.subscribedDetails,
-            completeReturn.representativeType(),
-            completeReturn.isIndirectDisposal(),
-            completeFillingOutReturnNoRepresentee.agentReferenceNumber,
-            completeFillingOutReturnNoRepresentee.isFurtherOrAmendReturn,
+            completeFillingOutReturnNoRepresentee,
             showSubmissionDetails = true,
             hideEstimatesQuestion = false
           ).toString
@@ -1309,7 +1305,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           completeFillingOutReturnNoRepresentee.subscribedDetails,
           completeFillingOutReturnNoRepresentee.agentReferenceNumber,
           completeFillingOutReturnNoRepresentee.isFurtherOrAmendReturn.contains(true),
-          B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes())))
+          B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes()))),
+          completeFillingOutReturnNoRepresentee.amendReturnData.map(_.originalReturn.summary.submissionId)
         )
       }
 
@@ -1341,11 +1338,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           cyaPge(
             mockedCompleteReturn,
             instanceOf[RebasingEligibilityUtil],
-            completeFillingOutReturnWithRepresenteeWithNoReference.subscribedDetails,
-            mockedCompleteReturn.representativeType(),
-            mockedCompleteReturn.isIndirectDisposal(),
-            completeFillingOutReturnWithRepresenteeWithNoReference.agentReferenceNumber,
-            completeFillingOutReturnWithRepresenteeWithNoReference.isFurtherOrAmendReturn,
+            completeFillingOutReturnWithRepresenteeWithNoReference,
             showSubmissionDetails = true,
             hideEstimatesQuestion = hideEstimatesQuestion
           ).toString
@@ -1356,7 +1349,10 @@ class CheckAllAnswersAndSubmitControllerSpec
           completeFillingOutReturnWithRepresenteeWithNoReference.subscribedDetails,
           completeFillingOutReturnWithRepresenteeWithNoReference.agentReferenceNumber,
           completeFillingOutReturnWithRepresenteeWithNoReference.isFurtherOrAmendReturn.contains(true),
-          B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes())))
+          B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes()))),
+          completeFillingOutReturnWithRepresenteeWithNoReference.amendReturnData.map(
+            _.originalReturn.summary.submissionId
+          )
         )
       }
 

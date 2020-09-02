@@ -76,11 +76,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
           checkAllAnswersPage(
             completeReturn,
             rebasingEligibilityUtil,
-            fillingOutReturn.subscribedDetails,
-            completeReturn.representativeType(),
-            completeReturn.isIndirectDisposal(),
-            fillingOutReturn.agentReferenceNumber,
-            fillingOutReturn.isFurtherOrAmendReturn,
+            fillingOutReturn,
             false,
             fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)
           )
@@ -99,11 +95,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                   checkAllAnswersPage(
                     updatedCompleteReturn,
                     rebasingEligibilityUtil,
-                    fillingOutReturn.subscribedDetails,
-                    completeReturn.representativeType(),
-                    completeReturn.isIndirectDisposal(),
-                    fillingOutReturn.agentReferenceNumber,
-                    fillingOutReturn.isFurtherOrAmendReturn,
+                    fillingOutReturn,
                     true,
                     fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)
                   )(request, explicitEnglishMessage, viewConfig)
@@ -190,7 +182,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
           fillingOutReturn.subscribedDetails,
           fillingOutReturn.agentReferenceNumber,
           fillingOutReturn.isFurtherOrAmendReturn.contains(true),
-          cyaPageB64Html
+          cyaPageB64Html,
+          fillingOutReturn.amendReturnData.map(_.originalReturn.summary.submissionId)
         ),
         language
       )

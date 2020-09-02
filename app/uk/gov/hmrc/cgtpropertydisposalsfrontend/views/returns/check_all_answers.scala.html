@@ -21,16 +21,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, DisposalDate, RepresentativeType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, DisposalDate}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeNino
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeSautr
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -57,22 +56,24 @@
     singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
     singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
     gainOrLossAfterReliefsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary,
-    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
+    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+    insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
 )
 
 @(
     completeReturn: CompleteReturn,
     rebasingEligibilityUtil: RebasingEligibilityUtil,
-    subscribedDetails: SubscribedDetails,
-    representativeType: Option[RepresentativeType],
-    isIndirectDisposal: Boolean,
-    agentReferenceNumber: Option[AgentReferenceNumber],
-    isFurtherOrAmendReturn: Option[Boolean],
+    fillingOutReturn: FillingOutReturn,
     showSubmissionDetails: Boolean,
     hideEstimatesQuestion: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@title = @{ messages("checkAllAnswers.title") }
+@subscribedDetails = @{ fillingOutReturn.subscribedDetails }
+@representativeType = @{ completeReturn.representativeType() }
+@isIndirectDisposal = @{ completeReturn.isIndirectDisposal() }
+@isFurtherOrAmendReturn = @{ fillingOutReturn.isFurtherOrAmendReturn }
+
+@title = @{ messages( if(fillingOutReturn.isAmendReturn) "checkAllAnswers.amend.title" else  "checkAllAnswers.title") }
 @isATrust = @{ subscribedDetails.isATrust }
 
 @representeeSection(representeeAnswers: Option[CompleteRepresenteeAnswers]) = @{
@@ -98,6 +99,10 @@
 
  @pageHeading(title)
 
+  @if(fillingOutReturn.isAmendReturn && !showSubmissionDetails){
+    @insetPanel(Html(messages("checkAllAnswers.amend.warning")))
+  }
+
   @if(showSubmissionDetails) {
       <h2 class="heading-medium">@messages("checkAllAnswers.submissionDetails.title") </h2>
       @cyaSection() {
@@ -110,7 +115,7 @@
               )
           }
           @{
-              agentReferenceNumber.map { agentRef =>
+              fillingOutReturn.agentReferenceNumber.map { agentRef =>
                   cyaRow(
                       messages("checkAllAnswers.submissionDetails.agentReferencenumber"),
                       Html(messages(agentRef.value)),
