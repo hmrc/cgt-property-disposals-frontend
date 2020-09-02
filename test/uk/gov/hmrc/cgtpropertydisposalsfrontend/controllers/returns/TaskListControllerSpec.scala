@@ -1162,7 +1162,7 @@ class TaskListControllerSpec
           }
         }
 
-        "display the page with Save and come back later link" when {
+        "display the page with a Save and come back later link" when {
 
           "the session data indicates that they are filling in a return" in {
             inSequence {
@@ -1192,6 +1192,36 @@ class TaskListControllerSpec
               .attr("href")       shouldBe routes.DraftReturnSavedController
               .draftReturnSaved()
               .url
+          }
+
+        }
+
+        "display the page without a Save and come back later link" when {
+
+          "the session data indicates that they are amending a return" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(
+                    sample[FillingOutReturn].copy(
+                      draftReturn = sample[DraftSingleDisposalReturn].copy(
+                        supportingEvidenceAnswers = None,
+                        yearToDateLiabilityAnswers = None
+                      ),
+                      amendReturnData = Some(sample[AmendReturnData])
+                    )
+                  )
+                )
+              )
+            }
+
+            val result = performAction()
+            status(result) shouldBe OK
+
+            val doc: Document = parse(contentAsString(result))
+            doc.select("h1").text                        shouldBe messageFromMessageKey("service.title")
+            doc.select("a#saveAndComeBackLater").isEmpty shouldBe true
           }
 
         }
@@ -2209,7 +2239,7 @@ class TaskListControllerSpec
 
         }
 
-        "display the page with Save and come back later link" when {
+        "display the page with a Save and come back later link" when {
 
           "the session data indicates that they are filling in a return" in {
             inSequence {
@@ -2239,6 +2269,36 @@ class TaskListControllerSpec
               .attr("href")       shouldBe routes.DraftReturnSavedController
               .draftReturnSaved()
               .url
+          }
+
+        }
+
+        "display the page without a Save and come back later link" when {
+
+          "the session data indicates that they are amending a return" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(
+                    sample[FillingOutReturn].copy(
+                      draftReturn = sample[DraftSingleIndirectDisposalReturn].copy(
+                        supportingEvidenceAnswers = None,
+                        yearToDateLiabilityAnswers = None
+                      ),
+                      amendReturnData = Some(sample[AmendReturnData])
+                    )
+                  )
+                )
+              )
+            }
+
+            val result = performAction()
+            status(result) shouldBe OK
+
+            val doc: Document = parse(contentAsString(result))
+            doc.select("h1").text                        shouldBe messageFromMessageKey("service.title")
+            doc.select("a#saveAndComeBackLater").isEmpty shouldBe true
           }
 
         }
