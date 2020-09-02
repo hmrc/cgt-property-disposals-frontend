@@ -57,13 +57,6 @@
   }
 }
 
-@titleUserMessageKey = @{
-    representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent => ".personalRepInPeriodOfAdmin.agent"
-        case _ => userKey
-    }
-}
-
 @journeyErrorKey = @{
   addressJourneyType match {
     case _: AddressJourneyType.Returns.EnteringCompanyDetails => ".companyDetails."
@@ -81,7 +74,7 @@
   case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
     f.draftReturn.fold(
       _ => messages(s"$key.uk.returns.multipleDisposals.title"),
-      _ => messages(s"$key.uk.returns$titleUserMessageKey.singleDisposal.title")
+      _ => messages(s"$key.uk.returns$userKey.singleDisposal.title")
     )
   case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
     if(c.draftReturn.isLeft)
@@ -102,7 +95,7 @@
         }
 
   case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
-      messages(s"$key.uk.returns$titleUserMessageKey.singleDisposal.title")
+      messages(s"$key.uk.returns$userKey.singleDisposal.title")
 
   case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
     messages(s"$key.uk.representee.title")
