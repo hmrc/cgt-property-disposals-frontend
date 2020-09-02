@@ -66,13 +66,6 @@
   }
 }
 
-@titleUserMessageKey = @{
-    representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent => ".personalRepInPeriodOfAdmin.agent"
-        case _ => userKey.stripSuffix(".")
-    }
-}
-
 @journeyErrorKey = @{ addressJourneyType match {
     case _:AddressJourneyType.Returns.FillingOutReturnAddressJourney => ".returns."
     case _ => ""
@@ -82,14 +75,14 @@
     case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
         f.draftReturn.fold(
             _ => messages(s"$key.returns.multipleDisposals.title"),
-            _ => messages(s"$key.returns$titleUserMessageKey.singleDisposal.title")
+            _ => messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
         )
 
     case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
         messages("address-select.representee.title")
 
     case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
-        messages(s"$key.returns$titleUserMessageKey.singleDisposal.title")
+        messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
 
     case _ => messages("address-select.title")
 }}
