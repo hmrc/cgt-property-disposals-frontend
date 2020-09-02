@@ -3273,11 +3273,11 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
-        "the date entered is before 01-01-1900" in {
-          val date = LocalDate.of(1800, 1, 1)
+        "the date entered is before 06-04-2020" in {
+          val date = LocalDate.of(2020, 4, 5)
 
           testFormError(formData(date))(
-            "multipleDisposalsCompletionDate.error.before1900"
+            "multipleDisposalsCompletionDate.error.tooFarInPast"
           )
         }
 

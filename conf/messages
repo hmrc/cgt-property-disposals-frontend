@@ -1221,7 +1221,7 @@ multipleDisposalsCompletionDate.details.p1=The <a href="{0}" target=_blank>‘co
 multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
-multipleDisposalsCompletionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
+multipleDisposalsCompletionDate.error.tooFarInPast=Completion date must be on or after 6 April 2020
 
 multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
 multipleDisposalsCompletionDate-month.error.required=Completion date must include a month

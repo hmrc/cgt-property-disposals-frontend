@@ -52,6 +52,8 @@ object TaxYear {
     LocalDate.of(startYear, 4, 6)
   }
 
+  val earliestTaxYearStartDate: LocalDate = LocalDate.of(2020, 4, 6)
+
   implicit val format: OFormat[TaxYear] = Json.format
 
 }
