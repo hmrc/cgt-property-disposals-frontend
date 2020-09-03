@@ -18,9 +18,11 @@
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, DisposalDate}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
@@ -303,18 +305,36 @@
 
   }
 
-
- @formWrapper(routes.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit(), 'novalidate -> "novalidate") {
-  <h2 class="heading-medium">@messages("checkAllAnswers.declaration")</h2>
-  <p>@messages("checkAllAnswers.declaration.p1")</p>
-  <p>@messages("checkAllAnswers.declaration.p2")</p>
-  @submitButton(messages("button.acceptAndSend"))
+    @formWrapper(routes.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit(), 'novalidate -> "novalidate") {
+        <h2 class="heading-medium">@messages("checkAllAnswers.declaration")</h2>
+        <p>@messages("checkAllAnswers.declaration.p1")</p>
+        <p>@messages("checkAllAnswers.declaration.p2")</p>
+            @submitButton(messages("button.acceptAndSend"),
+                if(!fillingOutReturn.isAmendReturn) None
+                else
+                    Some(
+                        Html(
+                            s"""<a
+                               | class="button--secondary"
+                               |   role="button"
+                               |   id="cancelButton"
+                               |   href="${controllers.returns.amend.routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.checkAnswersAcceptSend).url}"
+                               |>
+                               |${messages("button.cancel")}
+                               |</a>
+                               |""".stripMargin
+                        )
+                    )
+            )
  }
 
  @printLink(messages("viewReturn.printLink"))
 
- <a href="@{routes.DraftReturnSavedController.draftReturnSaved().url}">@messages("task-list.save-and-come-back.link")</a>
-
+  @if(!fillingOutReturn.isAmendReturn) {
+      <a id="saveAndComeBackLater" href="@{
+          routes.DraftReturnSavedController.draftReturnSaved().url
+      }">@messages("task-list.save-and-come-back.link")</a>
+  }
 }
 
 

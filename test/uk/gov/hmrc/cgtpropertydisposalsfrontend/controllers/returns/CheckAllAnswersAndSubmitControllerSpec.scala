@@ -29,6 +29,7 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, MessagesRequest, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedRequest, RequestWithSessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
@@ -36,6 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.MultipleDisposalsPropertyDetailsControllerSpec.validateExamplePropertyDetailsSummary
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.GainOrLossAfterReliefsControllerSpec.validateGainOrLossOrReliefsCheckYourAnswersPage
@@ -279,7 +281,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             userType: Option[UserType],
             isATrust: Boolean,
             isFurtherOrAmendReturn: Boolean,
-            hideEstimatesQuestion: Boolean
+            hideEstimatesQuestion: Boolean,
+            extraChecks: Document => Unit = _ => ()
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -313,6 +316,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                   )             shouldBe routes.CheckAllAnswersAndSubmitController
                   .checkAllAnswersSubmit()
                   .url
+                extraChecks(doc)
               }
             )
           }
@@ -325,7 +329,13 @@ class CheckAllAnswersAndSubmitControllerSpec
               None,
               completeFillingOutReturn.subscribedDetails.isATrust,
               isFurtherOrAmendReturn = false,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              extraChecks = { doc =>
+                doc.select("#cancelButton").isEmpty shouldBe true
+                doc
+                  .select("#saveAndComeBackLater")
+                  .attr("href")                     shouldBe controllers.returns.routes.DraftReturnSavedController.draftReturnSaved().url
+              }
             )
           }
 
@@ -441,7 +451,15 @@ class CheckAllAnswersAndSubmitControllerSpec
               None,
               completeFillingOutReturn.subscribedDetails.isATrust,
               isFurtherOrAmendReturn = true,
-              hideEstimatesQuestion = true
+              hideEstimatesQuestion = true,
+              extraChecks = { doc =>
+                doc.select("#cancelButton").attr("href")    shouldBe controllers.returns.amend.routes.AmendReturnController
+                  .confirmCancel(
+                    AmendReturnController.ConfirmCancelBackLocations.checkAnswersAcceptSend
+                  )
+                  .url
+                doc.select("#saveAndComeBackLater").isEmpty shouldBe true
+              }
             )
           }
 

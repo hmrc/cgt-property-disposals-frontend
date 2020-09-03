@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend
 
 import cats.syntax.eq._
 import cats.instances.string._
-
 import com.google.inject.Inject
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
@@ -200,18 +199,21 @@ class AmendReturnController @Inject() (
 object AmendReturnController {
 
   object ConfirmCancelBackLocations {
-    val calculateAmounts: String = "calculateAmounts"
-    val checkAnswers: String     = "checkAnswers"
-    val unmetDependency: String  = "unmetDependency"
-    val taskList: String         = "taskList"
+    val calculateAmounts: String       = "calculateAmounts"
+    val checkAnswers: String           = "checkAnswers"
+    val unmetDependency: String        = "unmetDependency"
+    val taskList: String               = "taskList"
+    val checkAnswersAcceptSend: String = "checkAnswersAmendSend"
   }
 
   val confirmCancelBackLinkMappings: Map[String, Call] =
     Map(
-      ConfirmCancelBackLocations.calculateAmounts -> routes.AmendReturnController.youNeedToCalculate(),
-      ConfirmCancelBackLocations.checkAnswers     -> routes.AmendReturnController.checkYourAnswers(),
-      ConfirmCancelBackLocations.unmetDependency  -> routes.AmendReturnController.unmetDependency(),
-      ConfirmCancelBackLocations.taskList         -> controllers.returns.routes.TaskListController.taskList()
+      ConfirmCancelBackLocations.calculateAmounts       -> routes.AmendReturnController.youNeedToCalculate(),
+      ConfirmCancelBackLocations.checkAnswers           -> routes.AmendReturnController.checkYourAnswers(),
+      ConfirmCancelBackLocations.unmetDependency        -> routes.AmendReturnController.unmetDependency(),
+      ConfirmCancelBackLocations.taskList               -> controllers.returns.routes.TaskListController.taskList(),
+      ConfirmCancelBackLocations.checkAnswersAcceptSend -> controllers.returns.routes.CheckAllAnswersAndSubmitController
+        .checkAllAnswers()
     )
 
   val confirmCancelForm: Form[Boolean] =
