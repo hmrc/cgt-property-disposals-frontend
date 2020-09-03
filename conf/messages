@@ -697,6 +697,9 @@ individualUserType.error.invalid=Select who are you reporting the tax for
 
 individualUserType.cyaChange=who you are reporting the tax for
 
+who-are-you-reporting-for-exit-page.title=You cannot change this return online
+who-are-you-reporting-for-exit-page.helpText=You must <a href="{0}">contact HMRC</a>. Tell HMRC you need to change who you’re completing this return for. 
+
 numberOfProperties.main.title=Tell us how many disposals you are including in this return
 numberOfProperties.helpText.p1.heading=UK property disposals
 numberOfProperties.helpText.p1.text=You can include more than one disposal in this return if all the properties had the same completion date.

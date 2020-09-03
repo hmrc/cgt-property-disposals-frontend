@@ -754,34 +754,6 @@ class CommonTriageQuestionsControllerSpec
 
         "the user is filling in a return and" when {
 
-          "the user is on a single disposal journey and they haven't completed the triage section" in {
-            testSuccessfulUpdateFillingOutReturn(
-              performAction("individualUserType" -> "1"),
-              IncompleteSingleDisposalTriageAnswers.empty
-                .copy(individualUserType = Some(IndividualUserType.Self)),
-              amendReturnData = Some(sample[AmendReturnData])
-            )(
-              (fillingOutReturn, draftReturn) =>
-                fillingOutReturn
-                  .copy(draftReturn =
-                    draftReturn.copy(
-                      triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
-                        .copy(individualUserType = Some(IndividualUserType.Capacitor)),
-                      representeeAnswers = None,
-                      propertyAddress = None,
-                      disposalDetailsAnswers = None,
-                      acquisitionDetailsAnswers = None,
-                      reliefDetailsAnswers = None,
-                      yearToDateLiabilityAnswers = None,
-                      initialGainOrLoss = None,
-                      supportingEvidenceAnswers = None
-                    )
-                  )
-                  .withForceDisplayGainOrLossAfterReliefsForAmends,
-              routes.SingleDisposalsTriageController.checkYourAnswers()
-            )
-          }
-
           "the user is on a single disposal journey and they have completed the triage section" in {
             val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
               individualUserType = Some(IndividualUserType.Self)
@@ -885,6 +857,17 @@ class CommonTriageQuestionsControllerSpec
             performAction("individualUserType" -> "0"),
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
+        }
+
+        "the user changes from self to other " in {
+          testRedirectedWithoutUpdateAmendFillingOutReturn(
+            performAction("individualUserType" -> "1"),
+            IncompleteSingleDisposalTriageAnswers.empty
+              .copy(individualUserType = Some(IndividualUserType.Self))
+          )(
+            routes.CommonTriageQuestionsController.amendWhoAreYouSubmittingFor()
+          )
+
         }
 
       }
@@ -2631,6 +2614,36 @@ class CommonTriageQuestionsControllerSpec
 
     }
 
+    "handling requests to display the ammend 'who are you representing' exit page" must {
+
+      def performAction(): Future[Result] =
+        controller.amendWhoAreYouSubmittingFor()(FakeRequest())
+
+      "display the page" in {
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithFillingOutReturn(
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                disposalDate = sample[DisposalDate]
+              ),
+              amendReturnData = Some(sample[AmendReturnData])
+            )._1
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("who-are-you-reporting-for-exit-page.title"),
+          doc =>
+            doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
+              .whoIsIndividualRepresenting()
+              .url
+        )
+      }
+    }
+
   }
 
   def testSuccessfulUpdateStartingNewDraftReturn(
@@ -2690,6 +2703,25 @@ class CommonTriageQuestionsControllerSpec
       mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(
         Right(())
       )
+    }
+
+    checkIsRedirect(performAction, expectedRedirect)
+  }
+
+  def testRedirectedWithoutUpdateAmendFillingOutReturn(
+    performAction: => Future[Result],
+    answers: SingleDisposalTriageAnswers
+  )(
+    expectedRedirect: Call
+  ): Unit = {
+    val session = sessionDataWithFillingOutReturn(
+      answers,
+      amendReturnData = Some(sample[AmendReturnData])
+    )._1
+
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(session)
     }
 
     checkIsRedirect(performAction, expectedRedirect)

@@ -70,7 +70,8 @@ class CommonTriageQuestionsController @Inject() (
   previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date,
   furtherReturnsHelpPage: triagePages.further_retuns_help,
   disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
-  cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type
+  cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
+  whoAreYouSubmittingAmendExitPage: triagePages.ammend_who_are_you_submitting_for_exit_page
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -145,7 +146,9 @@ class CommonTriageQuestionsController @Inject() (
                   updateIndividualUserType(state, individualUserType)
 
                 val redirectTo =
-                  if (
+                  if (state.fold(_ => false, _.isAmendReturn) && (individualUserType =!= Self))
+                    routes.CommonTriageQuestionsController.amendWhoAreYouSubmittingFor()
+                  else if (
                     updatedState
                       .fold(_.isFurtherReturn, _.isFurtherReturn)
                       .contains(true)
@@ -162,7 +165,11 @@ class CommonTriageQuestionsController @Inject() (
                     )
                   else redirectToCheckYourAnswers(state)
 
-                if (oldIndividualUserType.contains(individualUserType))
+                if (
+                  oldIndividualUserType
+                    .contains(individualUserType) || (state
+                    .fold(_ => false, _.isAmendReturn) && (individualUserType =!= Self))
+                )
                   Redirect(redirectTo)
                 else {
 
@@ -432,6 +439,11 @@ class CommonTriageQuestionsController @Inject() (
       withState { (_, state) =>
         Ok(disposalDateInDifferentTaxYearPage(amendReturnDisposalDateBackLink(state)))
       }
+    }
+
+  def amendWhoAreYouSubmittingFor(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      Ok(whoAreYouSubmittingAmendExitPage(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()))
     }
 
   private def redirectToCheckYourAnswers(
