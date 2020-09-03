@@ -173,6 +173,13 @@ class AmendReturnControllerSpec
           )
         }
 
+        "the user came from the check all answers and send return page" in {
+          test(
+            AmendReturnController.ConfirmCancelBackLocations.checkAnswersAcceptSend,
+            controllers.returns.routes.CheckAllAnswersAndSubmitController.checkAllAnswers()
+          )
+        }
+
       }
     }
 
