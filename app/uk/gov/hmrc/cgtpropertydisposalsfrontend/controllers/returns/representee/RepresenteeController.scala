@@ -801,22 +801,19 @@ class RepresenteeController @Inject() (
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
         answers match {
 
-          case IncompleteRepresenteeAnswers(_, _, _, _, _, _, None)                                             =>
+          case IncompleteRepresenteeAnswers(_, _, _, _, _, _, None)                                     =>
             Redirect(routes.RepresenteeController.isFirstReturn())
 
-          case IncompleteRepresenteeAnswers(None, None, None, None, false, false, Some(false))                  =>
+          case IncompleteRepresenteeAnswers(None, None, None, None, false, false, Some(false))          =>
             Redirect(triageRoutes.CommonTriageQuestionsController.furtherReturnHelp())
 
-          case IncompleteRepresenteeAnswers(_, _, _, _, _, _, Some(false)) if !viewConfig.furtherReturnsEnabled =>
-            Redirect(controllers.accounts.homepage.routes.HomePageController.exitForSubsequentReturn())
-
-          case IncompleteRepresenteeAnswers(None, _, _, _, _, _, _)                                             =>
+          case IncompleteRepresenteeAnswers(None, _, _, _, _, _, _)                                     =>
             Redirect(routes.RepresenteeController.enterName())
 
-          case IncompleteRepresenteeAnswers(_, _, None, _, _, _, _) if representativeType =!= Capacitor         =>
+          case IncompleteRepresenteeAnswers(_, _, None, _, _, _, _) if representativeType =!= Capacitor =>
             Redirect(routes.RepresenteeController.enterDateOfDeath())
 
-          case IncompleteRepresenteeAnswers(_, None, _, _, _, _, _)                                             =>
+          case IncompleteRepresenteeAnswers(_, None, _, _, _, _, _)                                     =>
             Redirect(routes.RepresenteeController.enterId())
 
           case IncompleteRepresenteeAnswers(
@@ -878,7 +875,7 @@ class RepresenteeController @Inject() (
                 )
             )
 
-          case completeAnswers: CompleteRepresenteeAnswers                                                      =>
+          case completeAnswers: CompleteRepresenteeAnswers                                              =>
             Ok(
               cyaPage(
                 completeAnswers,

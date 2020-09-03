@@ -62,7 +62,6 @@ landingPage.capacitorOrPersonalRepresentative.p2=To use this service for another
 landingPage.capacitorOrPersonalRepresentative.p4=The details you provide must match the details we hold about the person.
 landingPage.capacitorOrPersonalRepresentative.p5=If you’re a personal representative, you’ll also need to provide the date the person you’re representing died.
 landingPage.capacitorOrPersonalRepresentative.p6=You should download or print a copy of the return for your records. This is because once the return has been sent to HMRC it will not be available online to view or amend online.
-landingPage.capacitorOrPersonalRepresentative.p7=You can only use this service to send the person’s or the estate’s first return for the tax year. <a href="{0}">Contact HMRC</a> to send additional returns or amend a return.
 landingPage.capacitorOrPersonalRepresentative.example.title=<strong class="bold">Example</strong>
 landingPage.capacitorOrPersonalRepresentative.p8=Mr Andrews died on 20 April 2020. Mr Smith is the personal representative for Mr Andrews’ estate. Before he died Mr Andrews had agreed to sell his UK residential investment property.
 landingPage.capacitorOrPersonalRepresentative.p9=Mr Andrews exchanged contracts on 15 April 2020 before he died. After he died Mr Smith completed the property sale. Capital Gains Tax was due.
@@ -81,10 +80,6 @@ landingPage.sidebar.1=Calculate Capital Gains Tax
 landingPage.sidebar.2=Capital Gains Tax
 landingPage.sidebar.3=Tell HMRC about Capital Gains Tax on UK property or land if you’re non-resident
 landingPage.sidebar.4=Pay your tax
-
-subsequentReturnExit.title=You’ll need to contact HMRC
-subsequentReturnExit.p1=Only first returns for UK property sales or disposals in the tax year can be completed online.
-subsequentReturnExit.p2=You’ll need to <a href="{0}">contact HMRC</a> and ask for a paper return to be posted to you.
 
 checkAllAnswers.submissionDetails.title=Submission Details
 checkAllAnswers.submissionDetails.cgtReferencenumber=CGT reference number
