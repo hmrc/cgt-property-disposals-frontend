@@ -23,7 +23,6 @@ import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Configuration
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -33,7 +32,6 @@ import play.api.mvc._
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, BusinessPartnerRecordServiceSupport, ContactNameFormValidationTests, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
@@ -3563,63 +3561,4 @@ object RepresenteeControllerSpec extends Matchers {
     }
 
   }
-}
-
-class FurtherReturnsDisposalsRepresenteeControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
-
-  override val overrideBindings =
-    List[GuiceableModule](
-      bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
-    )
-
-  override lazy val additionalConfig: Configuration = Configuration("further-returns.enabled" -> "false")
-
-  lazy val controller = instanceOf[RepresenteeController]
-
-  "RepresenteeController" when {
-
-    "further returns are disabled" must {
-
-      "redirect to the further return exit page" when {
-
-        "a user says it is not a first return" in {
-
-          val answers = IncompleteRepresenteeAnswers(
-            Some(sample[IndividualName]),
-            Some(sample[RepresenteeReferenceId]),
-            None,
-            None,
-            hasConfirmedPerson = true,
-            hasConfirmedContactDetails = false,
-            Some(false)
-          )
-
-          val journey = sample[StartingNewDraftReturn].copy(
-            newReturnTriageAnswers = Right(
-              sample[IncompleteSingleDisposalTriageAnswers].copy(
-                individualUserType = Some(Capacitor)
-              )
-            ),
-            representeeAnswers = Some(answers)
-          )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(journeyStatus = Some(journey))
-            )
-          }
-          checkIsRedirect(
-            controller.checkYourAnswers()(FakeRequest()),
-            controllers.accounts.homepage.routes.HomePageController.exitForSubsequentReturn()
-          )
-        }
-
-      }
-
-    }
-
-  }
-
 }

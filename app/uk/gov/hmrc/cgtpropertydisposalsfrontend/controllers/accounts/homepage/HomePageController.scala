@@ -56,7 +56,6 @@ class HomePageController @Inject() (
   paymentsService: PaymentsService,
   cc: MessagesControllerComponents,
   homePage: views.html.account.home,
-  subsequentReturnExitPage: views.html.returns.subsequent_return_exit,
   multipleDraftExitPage: views.html.returns.multiple_draft_return_exit
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -266,18 +265,6 @@ class HomePageController @Inject() (
             )
       }(withUplift = false)
 
-    }
-
-  def exitForSubsequentReturn(): Action[AnyContent] =
-    authenticatedActionWithSessionData { implicit request =>
-      val backLink = request.sessionData.flatMap(_.journeyStatus) match {
-        case Some(_: StartingNewDraftReturn | _: FillingOutReturn) =>
-          controllers.returns.representee.routes.RepresenteeController.isFirstReturn()
-
-        case _                                                     =>
-          routes.HomePageController.homepage()
-      }
-      Ok(subsequentReturnExitPage(backLink))
     }
 
   def exitForMultipleDraftReturn(): Action[AnyContent] =
