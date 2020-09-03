@@ -754,34 +754,6 @@ class CommonTriageQuestionsControllerSpec
 
         "the user is filling in a return and" when {
 
-          "the user is on a single disposal journey and they haven't completed the triage section" in {
-            testSuccessfulUpdateFillingOutReturn(
-              performAction("individualUserType" -> "1"),
-              IncompleteSingleDisposalTriageAnswers.empty
-                .copy(individualUserType = Some(IndividualUserType.Self)),
-              amendReturnData = Some(sample[AmendReturnData])
-            )(
-              (fillingOutReturn, draftReturn) =>
-                fillingOutReturn
-                  .copy(draftReturn =
-                    draftReturn.copy(
-                      triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
-                        .copy(individualUserType = Some(IndividualUserType.Capacitor)),
-                      representeeAnswers = None,
-                      propertyAddress = None,
-                      disposalDetailsAnswers = None,
-                      acquisitionDetailsAnswers = None,
-                      reliefDetailsAnswers = None,
-                      yearToDateLiabilityAnswers = None,
-                      initialGainOrLoss = None,
-                      supportingEvidenceAnswers = None
-                    )
-                  )
-                  .withForceDisplayGainOrLossAfterReliefsForAmends,
-              routes.SingleDisposalsTriageController.checkYourAnswers()
-            )
-          }
-
           "the user is on a single disposal journey and they have completed the triage section" in {
             val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
               individualUserType = Some(IndividualUserType.Self)
@@ -885,6 +857,17 @@ class CommonTriageQuestionsControllerSpec
             performAction("individualUserType" -> "0"),
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
+        }
+
+        "the user changes from self to other " in {
+          testRedirectedWithoutUpdateAmendFillingOutReturn(
+            performAction("individualUserType" -> "1"),
+            IncompleteSingleDisposalTriageAnswers.empty
+              .copy(individualUserType = Some(IndividualUserType.Self))
+          )(
+            routes.CommonTriageQuestionsController.amendWhoAreYouSubmittingFor()
+          )
+
         }
 
       }
@@ -2690,6 +2673,25 @@ class CommonTriageQuestionsControllerSpec
       mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(
         Right(())
       )
+    }
+
+    checkIsRedirect(performAction, expectedRedirect)
+  }
+
+  def testRedirectedWithoutUpdateAmendFillingOutReturn(
+    performAction: => Future[Result],
+    answers: SingleDisposalTriageAnswers
+  )(
+    expectedRedirect: Call
+  ): Unit = {
+    val session = sessionDataWithFillingOutReturn(
+      answers,
+      isAmend = true
+    )._1
+
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(session)
     }
 
     checkIsRedirect(performAction, expectedRedirect)

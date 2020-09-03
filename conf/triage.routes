@@ -77,3 +77,5 @@ GET  /how-work-out-overall-gain                             uk.gov.hmrc.cgtprope
 GET  /how-work-out-overall-liability                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.overallGainGuidance()
 
 GET  /exit/different-tax-year                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+
+GET /exit/change-who-completing-return-for                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendWhoAreYouSubmittingFor()
