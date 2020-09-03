@@ -2614,6 +2614,36 @@ class CommonTriageQuestionsControllerSpec
 
     }
 
+    "handling requests to display the ammend 'who are you representing' exit page" must {
+
+      def performAction(): Future[Result] =
+        controller.amendWhoAreYouSubmittingFor()(FakeRequest())
+
+      "display the page" in {
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithFillingOutReturn(
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                disposalDate = sample[DisposalDate]
+              ),
+              amendReturnData = Some(sample[AmendReturnData])
+            )._1
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("who-are-you-reporting-for-exit-page.title"),
+          doc =>
+            doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
+              .whoIsIndividualRepresenting()
+              .url
+        )
+      }
+    }
+
   }
 
   def testSuccessfulUpdateStartingNewDraftReturn(
