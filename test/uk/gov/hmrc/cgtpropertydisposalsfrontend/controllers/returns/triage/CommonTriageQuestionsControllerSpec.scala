@@ -2686,7 +2686,7 @@ class CommonTriageQuestionsControllerSpec
   ): Unit = {
     val session = sessionDataWithFillingOutReturn(
       answers,
-      isAmend = true
+      amendReturnData = Some(sample[AmendReturnData])
     )._1
 
     inSequence {

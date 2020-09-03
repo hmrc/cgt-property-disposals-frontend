@@ -146,7 +146,7 @@ class CommonTriageQuestionsController @Inject() (
                   updateIndividualUserType(state, individualUserType)
 
                 val redirectTo =
-                  if (individualUserAmendingRepresenteeFromSelf(state, oldIndividualUserType, individualUserType))
+                  if (state.fold(_ => false, _.isAmendReturn) && (individualUserType =!= Self))
                     routes.CommonTriageQuestionsController.amendWhoAreYouSubmittingFor()
                   else if (
                     updatedState
@@ -167,11 +167,8 @@ class CommonTriageQuestionsController @Inject() (
 
                 if (
                   oldIndividualUserType
-                    .contains(individualUserType) || individualUserAmendingRepresenteeFromSelf(
-                    state,
-                    oldIndividualUserType,
-                    individualUserType
-                  )
+                    .contains(individualUserType) || (state
+                    .fold(_ => false, _.isAmendReturn) && (individualUserType =!= Self))
                 )
                   Redirect(redirectTo)
                 else {
@@ -201,14 +198,6 @@ class CommonTriageQuestionsController @Inject() (
             )
       }
     }
-
-  private def individualUserAmendingRepresenteeFromSelf(
-    state: Either[StartingNewDraftReturn, FillingOutReturn],
-    oldIndividualUserType: Option[IndividualUserType],
-    updatedIndividualUserType: IndividualUserType
-  ) =
-    !oldIndividualUserType.contains(updatedIndividualUserType) && state
-      .fold(_ => false, _.isAmendReturn) && oldIndividualUserType.contains(Self)
 
   def furtherReturnHelp(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
