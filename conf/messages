@@ -28,8 +28,8 @@ landingPage.howTo.list1.bullet2=pay any tax you might owe for that disposal
 landingPage.howTo.list1.bullet3=view your previous and current returns
 landingPage.amendReturn.howTo.list1.bullet3=view and change your previous returns
 
-landingPage.howTo.firstReturnsOnly=At the moment, only the first return for UK property sales or disposals in the tax year can be submitted online. If you need to amend an existing return or complete any further returns for the tax year you will need to <a href="{0}">contact HMRC</a>.
-landingPage.howTo.furtherReturns=At the moment, if you need to amend an existing return you will need to <a href="{0}">contact HMRC</a>.
+
+landingPage.howTo.insetText=If you need to amend an existing return you will need to <a href="{0}">contact HMRC</a>.
 
 landingPage.howTo.p3=If you’re a non-resident you must use this service to report sales or disposals from 6 April 2020 of:
 landingPage.howTo.list2.bullet1=residential UK property or land
@@ -768,6 +768,32 @@ previousReturnExistsWithSameCompletionDate.propertyDisposals.li2=a contract exch
 previousReturnExistsWithSameCompletionDate.indirectDisposals.title=Indirect disposals
 previousReturnExistsWithSameCompletionDate.indirectDisposals.p1=You’ll need to amend the return that had shares with the same sale of disposal date as the disposal you’re wanting to report now.
 
+
+cannotAmendResidentialStatusForAssetType.title=You must contact HMRC
+
+cannotAmendResidentialStatusForAssetType.warning=To change your residence status for this return, you must contact HMRC as soon as possible.
+cannotAmendResidentialStatusForAssetType.agent.warning=To change your client’s residence status for this return, you must contact HMRC as soon as possible.
+cannotAmendResidentialStatusForAssetType.trust.warning=To change the trust’s residence status for this return, you must contact HMRC as soon as possible.
+
+cannotAmendResidentialStatusForAssetType.p1=This is because this change may affect:
+
+cannotAmendResidentialStatusForAssetType.li1=the date you need to pay the Capital Gains Tax by
+cannotAmendResidentialStatusForAssetType.agent.li1=the date they need to pay the Capital Gains Tax by
+cannotAmendResidentialStatusForAssetType.trust.li1=the date the Capital Gains Tax needs to be paid by
+
+cannotAmendResidentialStatusForAssetType.li2=how much tax you owe
+cannotAmendResidentialStatusForAssetType.agent.li2=how much tax they owe
+cannotAmendResidentialStatusForAssetType.trust.li2=how much tax is owed
+
+cannotAmendResidentialStatusForAssetType.li3=how you need to report the disposal
+cannotAmendResidentialStatusForAssetType.agent.li3=how they need to report the disposal
+cannotAmendResidentialStatusForAssetType.trust.li3=how the tax needs to be reported
+
+cannotAmendResidentialStatusForAssetType.li4=interest and penalty payments you might already owe or be charged in the future
+cannotAmendResidentialStatusForAssetType.agent.li4=interest and penalty payments they might already owe or be charged in the future
+cannotAmendResidentialStatusForAssetType.trust.li4=interest and penalty payments the trust might already owe or be charged in the future
+
+cannotAmendResidentialStatusForAssetType.link=Contact HMRC
 
 #===================================================
 # COMMON TRIAGE PAGES - END

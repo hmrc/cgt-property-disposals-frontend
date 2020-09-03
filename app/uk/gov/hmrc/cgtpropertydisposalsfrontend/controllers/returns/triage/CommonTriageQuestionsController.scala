@@ -69,7 +69,8 @@ class CommonTriageQuestionsController @Inject() (
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
   previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date,
   furtherReturnsHelpPage: triagePages.further_retuns_help,
-  disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear
+  disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
+  cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -324,24 +325,40 @@ class CommonTriageQuestionsController @Inject() (
           _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
           _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
         )
-        lazy val backLink                      = triageAnswers.fold(
-          _ =>
-            routes.MultipleDisposalsTriageController
-              .wereAllPropertiesResidential(),
-          _ =>
-            routes.SingleDisposalsTriageController
-              .didYouDisposeOfAResidentialProperty()
-        )
 
         wasUkResident match {
           case Some(true) if isAssetTypeNonResidential =>
-            Ok(
-              ukResidentCanOnlyDisposeResidentialPage(
-                backLink,
-                state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
-                triageAnswers.fold(_.representativeType(), _.representativeType())
-              )
+            val backLink                                      = triageAnswers.fold(
+              _ =>
+                routes.MultipleDisposalsTriageController
+                  .wereAllPropertiesResidential(),
+              _ =>
+                routes.SingleDisposalsTriageController
+                  .didYouDisposeOfAResidentialProperty()
             )
+            val isATrust                                      = state.fold(_.subscribedDetails, _.subscribedDetails).isATrust
+            val disposedOfNonResidentialAssetInOriginalReturn =
+              state.fold(
+                _ => false,
+                _.amendReturnData.exists(
+                  _.originalReturn.completeReturn.triageAnswers.fold(
+                    _.assetTypes =!= List(AssetType.Residential),
+                    _.assetType =!= AssetType.Residential
+                  )
+                )
+              )
+
+            Ok(
+              if (disposedOfNonResidentialAssetInOriginalReturn)
+                cannotAmendResidentialStatusForAssetTypePage(backLink, isATrust)
+              else
+                ukResidentCanOnlyDisposeResidentialPage(
+                  backLink,
+                  isATrust,
+                  triageAnswers.fold(_.representativeType(), _.representativeType())
+                )
+            )
+
           case _                                       => Redirect(redirectToCheckYourAnswers(state))
         }
       }
