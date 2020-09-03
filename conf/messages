@@ -773,6 +773,32 @@ previousReturnExistsWithSameCompletionDate.indirectDisposals.title=Indirect disp
 previousReturnExistsWithSameCompletionDate.indirectDisposals.p1=You’ll need to amend the return that had shares with the same sale of disposal date as the disposal you’re wanting to report now.
 
 
+cannotAmendResidentialStatusForAssetType.title=You must contact HMRC
+
+cannotAmendResidentialStatusForAssetType.warning=To change your residence status for this return, you must contact HMRC as soon as possible.
+cannotAmendResidentialStatusForAssetType.agent.warning=To change your client’s residence status for this return, you must contact HMRC as soon as possible.
+cannotAmendResidentialStatusForAssetType.trust.warning=To change the trust’s residence status for this return, you must contact HMRC as soon as possible.
+
+cannotAmendResidentialStatusForAssetType.p1=This is because this change may affect:
+
+cannotAmendResidentialStatusForAssetType.li1=the date you need to pay the Capital Gains Tax by
+cannotAmendResidentialStatusForAssetType.agent.li1=the date they need to pay the Capital Gains Tax by
+cannotAmendResidentialStatusForAssetType.trust.li1=the date the Capital Gains Tax needs to be paid by
+
+cannotAmendResidentialStatusForAssetType.li2=how much tax you owe
+cannotAmendResidentialStatusForAssetType.agent.li2=how much tax they owe
+cannotAmendResidentialStatusForAssetType.trust.li2=how much tax is owed
+
+cannotAmendResidentialStatusForAssetType.li3=how you need to report the disposal
+cannotAmendResidentialStatusForAssetType.agent.li3=how they need to report the disposal
+cannotAmendResidentialStatusForAssetType.trust.li3=how the tax needs to be reported
+
+cannotAmendResidentialStatusForAssetType.li4=interest and penalty payments you might already owe or be charged in the future
+cannotAmendResidentialStatusForAssetType.agent.li4=interest and penalty payments they might already owe or be charged in the future
+cannotAmendResidentialStatusForAssetType.trust.li4=interest and penalty payments the trust might already owe or be charged in the future
+
+cannotAmendResidentialStatusForAssetType.link=Contact HMRC
+
 #===================================================
 # COMMON TRIAGE PAGES - END
 #===================================================

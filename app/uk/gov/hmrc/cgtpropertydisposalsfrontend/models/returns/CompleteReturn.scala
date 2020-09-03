@@ -398,6 +398,15 @@ object CompleteReturn {
         _.yearToDateLiabilityAnswers.hasEstimatedDetails
       )
 
+    def triageAnswers: Either[CompleteMultipleDisposalsTriageAnswers, CompleteSingleDisposalTriageAnswers] =
+      fold(
+        multiple => Left(multiple.triageAnswers),
+        single => Right(single.triageAnswers),
+        singleIndirect => Right(singleIndirect.triageAnswers),
+        multipleIndirect => Left(multipleIndirect.triageAnswers),
+        singleMixedUse => Right(singleMixedUse.triageAnswers)
+      )
+
   }
 
   private def validRepresenteeAnswers(
