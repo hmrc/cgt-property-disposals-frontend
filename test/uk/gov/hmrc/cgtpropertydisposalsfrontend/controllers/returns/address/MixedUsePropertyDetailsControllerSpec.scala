@@ -740,6 +740,11 @@ class MixedUsePropertyDetailsControllerSpec
             { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
+                .select("#content > article > span")
+                .text()                        shouldBe messageFromMessageKey(
+                "singleMixedUse.caption"
+              )
+              doc
                 .select("#content > article > form")
                 .attr("action")                shouldBe routes.MixedUsePropertyDetailsController
                 .enterDisposalValueSubmit()
@@ -1143,6 +1148,11 @@ class MixedUsePropertyDetailsControllerSpec
             messageFromMessageKey(s"$key$userKey.title", titleArgs: _*),
             { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc
+                .select("#content > article > span")
+                .text()                        shouldBe messageFromMessageKey(
+                "singleMixedUse.caption"
+              )
               doc
                 .select("#content > article > form")
                 .attr("action")                shouldBe routes.MixedUsePropertyDetailsController
