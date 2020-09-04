@@ -2767,8 +2767,8 @@ lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculat
 lettingsReliefValue.label=Amount of Letting Relief
 
 lettingsReliefValue.error.required=Enter an amount of Letting Relief, like 108 or 2,940.54
-lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be an amount of money between 1 and {0}
-lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be an amount of money between 1 and {0}
+lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be an amount of money between 1 and 50,000,000,000
+lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be an amount of money between 1 and 50,000,000,000
 lettingsReliefValue.error.invalid=Amount of Letting Relief must be an amount of money, like 108 or 2,940.54
 lettingsReliefValue.error.tooManyDecimals=Amount of Letting Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
 lettingsReliefValue.error.amountOverLimit=Amount of Letting Relief must be an amount of money between 1 and {0}
@@ -2776,7 +2776,6 @@ lettingsReliefValue.error.amountOverPrivateResidenceRelief=Amount of Letting Rel
 
 lettingsRelief.cyaChange=if Letting Relief is being claimed
 lettingsReliefValue.cyaChange=the amount of Letting Relief
-
 
 otherReliefs.title=Do you want to claim any other Capital Gains Tax reliefs?
 otherReliefs.agent.title=Does your client want to claim any other Capital Gains Tax reliefs?
@@ -4422,8 +4421,6 @@ enterUPRN-line1.error.invalid=UPRN must only include numbers
 
 singleMixedUse.cya.title=Check you answers
 singleMixedUse.cyaLabel.address=Property address
-singleMixedUse.cyaLabel.disposal-price=What was the disposal amount?
-singleMixedUse.cyaLabel.acquisition-price=What was the acquisition amount?
 
 singleMixedUse.caption=Property details
 
