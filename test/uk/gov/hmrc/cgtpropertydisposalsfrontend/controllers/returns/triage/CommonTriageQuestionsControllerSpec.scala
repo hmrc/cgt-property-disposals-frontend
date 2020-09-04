@@ -2368,7 +2368,11 @@ class CommonTriageQuestionsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                Left(sample[IncompleteMultipleDisposalsTriageAnswers]),
+                Left(
+                  sample[IncompleteMultipleDisposalsTriageAnswers].copy(
+                    assetTypes = Some(List(AssetType.Residential))
+                  )
+                ),
                 Right(sample[IndividualName]),
                 UserType.Individual
               )._1
@@ -2393,7 +2397,11 @@ class CommonTriageQuestionsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                Right(sample[SingleDisposalTriageAnswers]),
+                Right(
+                  sample[IncompleteSingleDisposalTriageAnswers].copy(
+                    assetType = Some(AssetType.Residential)
+                  )
+                ),
                 Left(sample[TrustName]),
                 UserType.Organisation
               )._1
@@ -2420,7 +2428,11 @@ class CommonTriageQuestionsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                Right(sample[SingleDisposalTriageAnswers]),
+                Right(
+                  sample[IncompleteSingleDisposalTriageAnswers].copy(
+                    assetType = Some(AssetType.Residential)
+                  )
+                ),
                 Left(sample[TrustName]),
                 UserType.Agent
               )._1
@@ -2439,6 +2451,52 @@ class CommonTriageQuestionsControllerSpec
                 viewConfig.contactHmrc
               )
             }
+          )
+        }
+
+        "the user is on a single indirect disposal journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Left(
+                  sample[IncompleteMultipleDisposalsTriageAnswers].copy(
+                    assetTypes = Some(List(AssetType.IndirectDisposal))
+                  )
+                ),
+                Right(sample[IndividualName]),
+                UserType.Individual
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
+            _.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController.disposalDateOfShares().url
+          )
+        }
+
+        "the user is on a multiple indirect disposals journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(
+                  sample[IncompleteSingleDisposalTriageAnswers].copy(
+                    assetType = Some(AssetType.IndirectDisposal)
+                  )
+                ),
+                Right(sample[IndividualName]),
+                UserType.Individual
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
+            _.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController.disposalDateOfShares().url
           )
         }
 

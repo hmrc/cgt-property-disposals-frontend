@@ -410,8 +410,14 @@ class CommonTriageQuestionsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
         val backLink =
-          if (triageAnswersFomState(state).isLeft) routes.MultipleDisposalsTriageController.completionDate()
-          else routes.SingleDisposalsTriageController.whenWasCompletionDate()
+          triageAnswersFomState(state) match {
+            case Left(multiple) =>
+              if (multiple.isIndirectDisposal()) routes.MultipleDisposalsTriageController.disposalDateOfShares()
+              else routes.MultipleDisposalsTriageController.completionDate()
+            case Right(single)  =>
+              if (single.isIndirectDisposal()) routes.SingleDisposalsTriageController.disposalDateOfShares()
+              else routes.SingleDisposalsTriageController.whenWasCompletionDate()
+          }
 
         Ok(
           previousReturnExistsWithSameCompletionDatePage(
