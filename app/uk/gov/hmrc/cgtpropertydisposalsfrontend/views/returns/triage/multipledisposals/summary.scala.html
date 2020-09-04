@@ -133,12 +133,15 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
             "wereAllPropertiesResidential"
         )
     }
-  @cyaRow(
-    messages("multipleDisposalsTaxYear.title"),
-    Html(s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"),
-    Some(cyaChange(messages("multipleDisposalsTaxYear.cyaChange"), routes.MultipleDisposalsTriageController.whenWereContractsExchanged().url)),
-      "taxYear"
-  )
+
+  @if(!answers.isIndirectDisposal()) {
+      @cyaRow(
+          messages("multipleDisposalsTaxYear.title"),
+          Html(s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"),
+          Some(cyaChange(messages("multipleDisposalsTaxYear.cyaChange"), routes.MultipleDisposalsTriageController.whenWereContractsExchanged().url)),
+          "taxYear"
+      )
+  }
 
 
   @if(answers.assetTypes === List(AssetType.IndirectDisposal)) {

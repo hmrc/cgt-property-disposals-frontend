@@ -552,110 +552,117 @@ class MultipleDisposalsTriageController @Inject() (
   def whenWereContractsExchanged(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
-        val taxYearExchanged =
-          answers.fold(_.taxYearAfter6April2020, _ => Some(true))
-        val form             =
-          taxYearExchanged.fold(taxYearExchangedForm)(taxYearExchangedForm.fill)
-        val backLink         = answers.fold(
-          i => incompleteJourneyTaxYearBackLink(i.wasAUKResident.contains(true)),
-          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-        Ok(
-          taxYearExchangedPage(
-            form,
-            backLink,
-            state.isRight,
-            state.fold(_ => false, _._1.isAmendReturn)
+        if (answers.isIndirectDisposal())
+          Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+        else {
+          val taxYearExchanged =
+            answers.fold(_.taxYearAfter6April2020, _ => Some(true))
+          val form             =
+            taxYearExchanged.fold(taxYearExchangedForm)(taxYearExchangedForm.fill)
+          val backLink         = answers.fold(
+            i => incompleteJourneyTaxYearBackLink(i.wasAUKResident.contains(true)),
+            _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
-        )
+          Ok(
+            taxYearExchangedPage(
+              form,
+              backLink,
+              state.isRight,
+              state.fold(_ => false, _._1.isAmendReturn)
+            )
+          )
+        }
       }
     }
 
   def whenWereContractsExchangedSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
-        taxYearExchangedForm
-          .bindFromRequest()
-          .fold(
-            { formWithErrors =>
-              val backLink = answers.fold(
-                i =>
-                  incompleteJourneyTaxYearBackLink(
-                    i.wasAUKResident.contains(true)
-                  ),
-                _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-              )
-              BadRequest(
-                taxYearExchangedPage(
-                  formWithErrors,
-                  backLink,
-                  state.isRight,
-                  state.fold(_ => false, _._1.isAmendReturn)
+        if (answers.isIndirectDisposal())
+          Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+        else
+          taxYearExchangedForm
+            .bindFromRequest()
+            .fold(
+              { formWithErrors =>
+                val backLink = answers.fold(
+                  i =>
+                    incompleteJourneyTaxYearBackLink(
+                      i.wasAUKResident.contains(true)
+                    ),
+                  _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-              )
-            },
-            taxYearAfter6April2020 =>
-              if (
-                answers
-                  .fold(_.taxYearAfter6April2020, _ => Some(true))
-                  .contains(taxYearAfter6April2020)
-              )
-                Redirect(
-                  routes.MultipleDisposalsTriageController.checkYourAnswers()
+                BadRequest(
+                  taxYearExchangedPage(
+                    formWithErrors,
+                    backLink,
+                    state.isRight,
+                    state.fold(_ => false, _._1.isAmendReturn)
+                  )
                 )
-              else {
+              },
+              taxYearAfter6April2020 =>
+                if (
+                  answers
+                    .fold(_.taxYearAfter6April2020, _ => Some(true))
+                    .contains(taxYearAfter6April2020)
+                )
+                  Redirect(
+                    routes.MultipleDisposalsTriageController.checkYourAnswers()
+                  )
+                else {
 
-                val result =
-                  for {
-                    taxYear        <- if (taxYearAfter6April2020)
-                                        taxYearService.taxYear(TimeUtils.today())
-                                      else EitherT.pure[Future, Error](None)
-                    updatedAnswers <- EitherT.fromEither[Future](
-                                        updateTaxYearToAnswers(
-                                          taxYearAfter6April2020,
-                                          taxYear,
-                                          answers
+                  val result =
+                    for {
+                      taxYear        <- if (taxYearAfter6April2020)
+                                          taxYearService.taxYear(TimeUtils.today())
+                                        else EitherT.pure[Future, Error](None)
+                      updatedAnswers <- EitherT.fromEither[Future](
+                                          updateTaxYearToAnswers(
+                                            taxYearAfter6April2020,
+                                            taxYear,
+                                            answers
+                                          )
                                         )
-                                      )
-                    newState        = updateState(
-                                        state,
-                                        updatedAnswers,
-                                        d =>
-                                          d.bimap(
-                                            mi => mi.copy(exampleCompanyDetailsAnswers = mi.exampleCompanyDetailsAnswers),
-                                            m =>
-                                              m.copy(examplePropertyDetailsAnswers =
-                                                m.examplePropertyDetailsAnswers
-                                                  .map(_.unset(_.disposalDate))
-                                              )
-                                          ),
-                                        forceDisplayGainOrLossAfterReliefsForAmends = true
-                                      )
-                    _              <- newState.fold(
-                                        _ => EitherT.pure[Future, Error](()),
-                                        returnsService.storeDraftReturn(_)
-                                      )
-                    _              <- EitherT(
-                                        updateSession(sessionStore, request)(
-                                          _.copy(journeyStatus = Some(newState.merge))
+                      newState        = updateState(
+                                          state,
+                                          updatedAnswers,
+                                          d =>
+                                            d.bimap(
+                                              mi => mi.copy(exampleCompanyDetailsAnswers = mi.exampleCompanyDetailsAnswers),
+                                              m =>
+                                                m.copy(examplePropertyDetailsAnswers =
+                                                  m.examplePropertyDetailsAnswers
+                                                    .map(_.unset(_.disposalDate))
+                                                )
+                                            ),
+                                          forceDisplayGainOrLossAfterReliefsForAmends = true
                                         )
-                                      )
-                  } yield ()
+                      _              <- newState.fold(
+                                          _ => EitherT.pure[Future, Error](()),
+                                          returnsService.storeDraftReturn(_)
+                                        )
+                      _              <- EitherT(
+                                          updateSession(sessionStore, request)(
+                                            _.copy(journeyStatus = Some(newState.merge))
+                                          )
+                                        )
+                    } yield ()
 
-                result.fold(
-                  { e =>
-                    logger.warn("Could not find tax year or update session", e)
-                    errorHandler.errorResult()
-                  },
-                  _ =>
-                    Redirect(
-                      routes.MultipleDisposalsTriageController
-                        .checkYourAnswers()
-                    )
-                )
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not find tax year or update session", e)
+                      errorHandler.errorResult()
+                    },
+                    _ =>
+                      Redirect(
+                        routes.MultipleDisposalsTriageController
+                          .checkYourAnswers()
+                      )
+                  )
 
-              }
-          )
+                }
+            )
       }
     }
 

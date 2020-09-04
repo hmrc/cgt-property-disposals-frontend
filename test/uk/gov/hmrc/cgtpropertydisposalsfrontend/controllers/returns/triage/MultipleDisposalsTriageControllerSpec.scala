@@ -1628,6 +1628,28 @@ class MultipleDisposalsTriageControllerSpec
         mockUUIDGenerator
       )
 
+      "redirect to the check your answers endpoint" when {
+
+        "the user is on an indirect disposal journey" in {
+          val incompleteAnswers =
+            IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2),
+              wasAUKResident = Some(false),
+              countryOfResidence = Some(sample[Country]),
+              assetTypes = Some(List(AssetType.IndirectDisposal))
+            )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithFillingOutReturn(incompleteAnswers)._1)
+          }
+
+          checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.checkYourAnswers())
+        }
+
+      }
+
       "display the page" when {
 
         def test(
@@ -1741,6 +1763,24 @@ class MultipleDisposalsTriageControllerSpec
           startDateInclusive = LocalDate.of(2019, 4, 6),
           endDateExclusive = LocalDate.of(2020, 4, 6)
         )
+
+        "the user is on an indirect disposal journey" in {
+          val incompleteAnswers =
+            IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2),
+              wasAUKResident = Some(false),
+              countryOfResidence = Some(sample[Country]),
+              assetTypes = Some(List(AssetType.IndirectDisposal))
+            )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithFillingOutReturn(incompleteAnswers)._1)
+          }
+
+          checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.checkYourAnswers())
+        }
 
         "the user has not started a draft return and" when {
 
@@ -4837,7 +4877,10 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
 
     doc
       .select("#taxYear-answer")
-      .text()                                   shouldBe s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"
+      .text()                                   shouldBe (
+      if (answers.isIndirectDisposal()) ""
+      else s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"
+    )
     doc.select("#completionDate-answer").text() shouldBe TimeUtils
       .govDisplayFormat(answers.completionDate.value)
   }
