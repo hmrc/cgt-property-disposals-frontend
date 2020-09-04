@@ -133,11 +133,11 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
     @backLinkComponent(backLink)
 
-    @caption(messages("initialGainOrLoss.caption"))
-
     @if(hasErrors) {
         @errorSummary(form, customErrorKey)
     }
+
+    @caption(messages("initialGainOrLoss.caption"))
 
     @formWrapper(routes.InitialGainOrLossController.submitInitialGainOrLoss(), 'novalidate -> "novalidate") {
       @radioGroupConditional(
