@@ -82,6 +82,9 @@ landingPage.sidebar.3=Tell HMRC about Capital Gains Tax on UK property or land i
 landingPage.sidebar.4=Pay your tax
 
 checkAllAnswers.submissionDetails.title=Submission Details
+checkAllAnswers.submissionDetails.returnType=Return type
+checkAllAnswers.submissionDetails.returnType.amend=Amend
+checkAllAnswers.submissionDetails.returnType.new=New
 checkAllAnswers.submissionDetails.cgtReferencenumber=CGT reference number
 checkAllAnswers.submissionDetails.agentReferencenumber=Agent reference number
 checkAllAnswers.submissionDetails.nino=NINO of person being represented

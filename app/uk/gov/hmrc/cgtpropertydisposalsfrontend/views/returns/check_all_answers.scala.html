@@ -93,7 +93,7 @@
 }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @representeeId = @{completeReturn.fold(_.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id))}
-
+@submissionDetailsKey=@{"checkAllAnswers.submissionDetails"}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -106,11 +106,11 @@
   }
 
   @if(showSubmissionDetails) {
-      <h2 class="heading-medium">@messages("checkAllAnswers.submissionDetails.title") </h2>
+      <h2 class="heading-medium">@messages(s"$submissionDetailsKey.title") </h2>
       @cyaSection() {
           @if(!isAgent) {
               @cyaRow(
-                  messages("checkAllAnswers.submissionDetails.cgtReferencenumber"),
+                  messages(s"$submissionDetailsKey.cgtReferencenumber"),
                   Html(subscribedDetails.cgtReference.value),
                   None,
                   "cgtReferenceNumber"
@@ -119,7 +119,7 @@
           @{
               fillingOutReturn.agentReferenceNumber.map { agentRef =>
                   cyaRow(
-                      messages("checkAllAnswers.submissionDetails.agentReferencenumber"),
+                      messages(s"$submissionDetailsKey.agentReferencenumber"),
                       Html(messages(agentRef.value)),
                       None,
                       "agentReferenceNumber"
@@ -128,17 +128,22 @@
           }
           @{
               representeeId match {
-                  case Some(RepresenteeNino(nino)) => cyaRow(messages("checkAllAnswers.submissionDetails.nino"), Html(nino.value), None, "representeeNino")
-                  case Some(RepresenteeSautr(sautr)) => cyaRow(messages("checkAllAnswers.submissionDetails.sautr"), Html(sautr.value), None, "representeeSautr")
-                  case Some(RepresenteeCgtReference(cgt)) => cyaRow(messages("checkAllAnswers.submissionDetails.cgt"), Html(cgt.value), None, "representeeCgt")
+                  case Some(RepresenteeNino(nino)) => cyaRow(messages(s"$submissionDetailsKey.nino"), Html(nino.value), None, "representeeNino")
+                  case Some(RepresenteeSautr(sautr)) => cyaRow(messages(s"$submissionDetailsKey.sautr"), Html(sautr.value), None, "representeeSautr")
+                  case Some(RepresenteeCgtReference(cgt)) => cyaRow(messages(s"$submissionDetailsKey.cgt"), Html(cgt.value), None, "representeeCgt")
                   case _ => ""
               }
           }
+          @cyaRow(messages(s"$submissionDetailsKey.returnType"),
+              Html(messages(if(fillingOutReturn.isAmendReturn) s"$submissionDetailsKey.returnType.amend" else s"$submissionDetailsKey.returnType.new")),
+              None,
+              "returnType"
+          )
       }
   }
 
-  @completeReturn match {
-    case s: CompleteSingleDisposalReturn => {
+    @completeReturn match {
+        case s: CompleteSingleDisposalReturn => {
      @representeeSection(s.representeeAnswers)
 
      <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
