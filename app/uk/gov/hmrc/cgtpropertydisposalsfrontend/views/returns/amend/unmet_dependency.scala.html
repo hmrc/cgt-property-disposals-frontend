@@ -33,15 +33,7 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
-@(backLink: Call, section: String)(implicit messages:Messages, appConfig: ViewConfig, request: RequestWithSessionData[_])
-
-@key=@{
-    if((section === "initialGainOrLoss") || (section === "annualExemptAmount") || (section === "income") || (section === "personalAllowance")){
-        "unmetDependency.x1"
-    }else{
-        "unmetDependency.x2"
-    }
-}
+@(backLink: Call, key: String)(implicit messages:Messages, appConfig: ViewConfig, request: RequestWithSessionData[_])
 
 @title = @{messages(s"$key.title")}
 

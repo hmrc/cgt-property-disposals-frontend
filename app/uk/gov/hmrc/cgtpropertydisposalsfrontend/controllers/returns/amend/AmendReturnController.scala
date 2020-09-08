@@ -168,7 +168,7 @@ class AmendReturnController @Inject() (
   private def unmetDependencyTitleKey(unmetDependencyFieldUrl: String): Option[String] = {
     def is(s: String): Boolean = unmetDependencyFieldUrl === s
 
-    val titleKey =
+    val key =
       if (is(exemptionsAndLossesRoutes.inYearLosses().url)) Some("inYearLosses")
       else if (is(exemptionsAndLossesRoutes.previousYearsLosses().url)) Some("previousYearLosses")
       else if (is(exemptionsAndLossesRoutes.annualExemptAmount().url)) Some("annualExemptAmount")
@@ -183,7 +183,12 @@ class AmendReturnController @Inject() (
       else if (is(initialGainorLossRoutes.enterInitialGainOrLoss().url)) Some("initialGainOrLoss")
       else None
 
-    titleKey.map(k => s"unmetDependency.title.$k")
+    key.map(k =>
+      if (k === "initialGainOrLoss" || k === "annualExemptAmount" || k === "income" || k === "personalAllowance")
+        s"unmetDependency.x1"
+      else
+        s"unmetDependency.x2"
+    )
   }
 
   private def withStartingToAmendReturn(
