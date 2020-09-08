@@ -89,7 +89,7 @@
 
     @pageHeading(title)
 
-    @if(isATrust || representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) || (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && isAgent) ){
+    @if(isATrust || representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)){
         <p>@messages(s"$key$userKey.p1")</p>
     } else  {
         <p>@messages(s"$key.p1")</p>

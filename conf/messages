@@ -3690,12 +3690,12 @@ hasEstimatedDetails.cyaChange=if any of the amounts in the return have been esti
 yearToDateLiability.title=What is your overall Capital Gains Tax liability on your UK property-related disposals in tax year 2020 to 2021?
 yearToDateLiability.agent.title=What is your client’s overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
 yearToDateLiability.trust.title=What is the trust’s overall Capital Gains Tax liability on its UK property-related disposals in tax year 2020 to 2021?
-yearToDateLiability.capacitor.title=What is the person's overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
+yearToDateLiability.capacitor.title=What is the person’s overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
 yearToDateLiability.personalRep.title=What is the person’s overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
 yearToDateLiability.personalRepInPeriodOfAdmin.title=What is the estate’s overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
 yearToDateLiability.personalRepInPeriodOfAdmin.agent.title=What is your client’s overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
 
-yearToDateLiability.trust.p1=You’ll need to multiply the trust's net gain by the correct rate of tax to get this amount.
+yearToDateLiability.trust.p1=You’ll need to multiply the trust’s net gain by the correct rate of tax to get this amount.
 yearToDateLiability.personalRepInPeriodOfAdmin.p1=Multiply the estate’s net gain for the year by the relevant rate of tax for the tax year for the estate to work out its overall Capital Gains Tax liability on its UK property-related disposals.
 yearToDateLiability.personalRepInPeriodOfAdmin.agent.p1=Multiply the estate’s net gain for the year by the relevant rate of tax for the tax year for the estate to work out its overall Capital Gains Tax liability on its UK property-related disposals.
 
@@ -3704,17 +3704,17 @@ yearToDateLiability.li1=Work out your taxable income.
 yearToDateLiability.li2=Work out what basic rate band can be used against the net gain.
 yearToDateLiability.li3=Work out your overall Capital Gains Tax liability on your UK property-related disposals.
 
-yearToDateLiability.agent.li1=Work out your client's taxable income.
+yearToDateLiability.agent.li1=Work out your client’s taxable income.
 yearToDateLiability.agent.li2=Work out what basic rate band can be used against the net gain.
-yearToDateLiability.agent.li3=Work out the overall Capital Gains Tax liability on your client's UK property-related disposals.
+yearToDateLiability.agent.li3=Work out the overall Capital Gains Tax liability on your client’s UK property-related disposals.
 
-yearToDateLiability.capacitor.li1=Work out the person's taxable income.
+yearToDateLiability.capacitor.li1=Work out the person’s taxable income.
 yearToDateLiability.capacitor.li2=Work out what basic rate band can be used against the net gain.
-yearToDateLiability.capacitor.li3=Work out the overall Capital Gains Tax liability on the person's UK property-related disposals.
+yearToDateLiability.capacitor.li3=Work out the overall Capital Gains Tax liability on the person’s UK property-related disposals.
 
-yearToDateLiability.personalRep.li1=Work out the person's taxable income.
+yearToDateLiability.personalRep.li1=Work out the person’s taxable income.
 yearToDateLiability.personalRep.li2=Work out what basic rate band can be used against the net gain.
-yearToDateLiability.personalRep.li3=Work out the overall Capital Gains Tax liability on the person's UK property-related disposals.
+yearToDateLiability.personalRep.li3=Work out the overall Capital Gains Tax liability on the person’s UK property-related disposals.
 
 yearToDateLiability.h2=What is your overall liability for your gains made so far in tax year {0} to {1}?
 yearToDateLiability.agent.h2=What is your client’s overall liability for their gains made so far in tax year {0} to {1}?
@@ -3725,20 +3725,20 @@ yearToDateLiability.personalRepInPeriodOfAdmin.h2=What is the estate’s overall
 yearToDateLiability.personalRepInPeriodOfAdmin.agent.h2=What is your client’s overall liability their gains made so far in tax year {0} to {1}?
 
 yearToDateLiability.link=How to work out your overall Capital Gains Tax liability on your UK property-related disposals
-yearToDateLiability.agent.link=How to work out your client's overall Capital Gains Tax liability on their UK property-related disposals
-yearToDateLiability.trust.link=How to work out the trust's overall Capital Gains Tax liability on its UK property-related disposals
-yearToDateLiability.capacitor.link=How to work out the person's overall Capital Gains Tax liability on their UK property-related disposals
-yearToDateLiability.personalRep.link=How to work out the person's overall Capital Gains Tax liability on their UK property-related disposals
-yearToDateLiability.personalRepInPeriodOfAdmin.link=How to work out the estate's overall Capital Gains Tax liability on their UK property-related disposals
-yearToDateLiability.personalRepInPeriodOfAdmin.agent.link=How to work out the estate's overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiability.agent.link=How to work out your client’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiability.trust.link=How to work out the trust’s overall Capital Gains Tax liability on its UK property-related disposals
+yearToDateLiability.capacitor.link=How to work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiability.personalRep.link=How to work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiability.personalRepInPeriodOfAdmin.link=How to work out the estate’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.link=How to work out the estate’s overall Capital Gains Tax liability on their UK property-related disposals
 
 yearToDateLiability.error.required=Enter your overall Capital Gains Tax liability on your UK property-related disposals in tax year {0} to {1}
-yearToDateLiability.agent.error.required=Enter your client's overall Capital Gains Tax liability on your UK property-related disposals in tax year {0} to {1}
-yearToDateLiability.trust.error.required=Enter the trust's Capital Gains Tax liability on its UK property-related disposals in tax year {0} to {1}
-yearToDateLiability.capacitor.error.required=Enter the person's overall Capital Gains Tax liability on UK property-related disposals in tax year {0} to {1}
-yearToDateLiability.personalRep.error.required=Enter the person's overall Capital Gains Tax liability on UK property-related disposals in tax year {0} to {1}
-yearToDateLiability.personalRepInPeriodOfAdmin.error.required=Enter the estate's overall Capital Gains Tax liability on UK property-related disposals in tax year {0} to {1}
-yearToDateLiability.personalRepInPeriodOfAdmin.agent.error.required=Enter your client's overall Capital Gains Tax liability on your UK property-related disposals in tax year {0} to {1}
+yearToDateLiability.agent.error.required=Enter your client’s overall Capital Gains Tax liability on your UK property-related disposals in tax year {0} to {1}
+yearToDateLiability.trust.error.required=Enter the trust’s Capital Gains Tax liability on its UK property-related disposals in tax year {0} to {1}
+yearToDateLiability.capacitor.error.required=Enter the person’s overall Capital Gains Tax liability on UK property-related disposals in tax year {0} to {1}
+yearToDateLiability.personalRep.error.required=Enter the person’s overall Capital Gains Tax liability on UK property-related disposals in tax year {0} to {1}
+yearToDateLiability.personalRepInPeriodOfAdmin.error.required=Enter the estate’s overall Capital Gains Tax liability on UK property-related disposals in tax year {0} to {1}
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.error.required=Enter your client’s overall Capital Gains Tax liability on your UK property-related disposals in tax year {0} to {1}
 
 yearToDateLiability.error.invalid=The overall Capital Gains Tax liability must be an amount of money, like 1,500 or 7,300.50
 yearToDateLiability.error.tooManyDecimals=The overall Capital Gains Tax liability must be 2 decimal places or less, for example 160,000 or 23,040.50

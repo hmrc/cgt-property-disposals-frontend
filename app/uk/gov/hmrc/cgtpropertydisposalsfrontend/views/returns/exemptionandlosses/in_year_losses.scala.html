@@ -70,13 +70,6 @@
   }
 }
 
-@details = @{
-    representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => messages(s"$key$userKey.link", appConfig.personalRepresentativeUrl)
-        case _ => messages(s"$key$userKey.link", appConfig.cgtLossesUrl)
-}}
-
-
 @title = @{messages(
   s"$key$userKey.title",
   taxYear.startDateInclusive.getYear.toString,
@@ -140,9 +133,6 @@
             )),
             customErrorKey = Some(s"$key$userKey")
         )
-ddd
-
-        <p>@Html(details)</p>
 
         @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
