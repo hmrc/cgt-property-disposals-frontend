@@ -25,15 +25,15 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnSpecBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes.{ExemptionAndLossesController => exemptionsAndLossesRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes.{InitialGainOrLossController => initialGainorLossRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes.{YearToDateLiabilityController => ytdRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnSpecBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingToAmendReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingToAmendReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -387,7 +387,7 @@ class AmendReturnControllerSpec
 
         def test(
           unmetDependencyFieldUrl: String,
-          expectedTitleKey: String
+          expectedKey: String
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -404,7 +404,7 @@ class AmendReturnControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(expectedTitleKey),
+            messageFromMessageKey(s"${expectedKey + ".title"}"),
             { doc =>
               doc.select("#back").attr("href")         shouldBe routes.AmendReturnController.checkYourAnswers().url
               doc
@@ -436,7 +436,14 @@ class AmendReturnControllerSpec
           testCases.foreach {
             case (unmetDependencyFieldUrl, titleKey) =>
               withClue(s"For '$unmetDependencyFieldUrl' and '$titleKey': ") {
-                test(unmetDependencyFieldUrl, s"unmetDependency.title.$titleKey")
+                val key =
+                  if (
+                    titleKey === "initialGainOrLoss" || titleKey === "annualExemptAmount" || titleKey === "income" || titleKey === "personalAllowance"
+                  )
+                    "unmetDependency.x1"
+                  else
+                    "unmetDependency.x2"
+                test(unmetDependencyFieldUrl, key)
               }
 
           }

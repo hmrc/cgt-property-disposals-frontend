@@ -137,10 +137,10 @@ class AmendReturnController @Inject() (
             Redirect(routes.AmendReturnController.checkYourAnswers())
 
           case Some(unmetDependencyFieldUrl) =>
-            unmetDependencyTitleKey(unmetDependencyFieldUrl).fold {
+            unmetDependencyKey(unmetDependencyFieldUrl).fold {
               logger.warn(s"Could not understand unmet dependency field url '$unmetDependencyFieldUrl'")
               errorHandler.errorResult()
-            }(titleKey => Ok(unmetDependencyPage(routes.AmendReturnController.checkYourAnswers(), titleKey)))
+            }(key => Ok(unmetDependencyPage(routes.AmendReturnController.checkYourAnswers(), key)))
 
         }
       }
@@ -165,7 +165,7 @@ class AmendReturnController @Inject() (
       }
     }
 
-  private def unmetDependencyTitleKey(unmetDependencyFieldUrl: String): Option[String] = {
+  private def unmetDependencyKey(unmetDependencyFieldUrl: String): Option[String] = {
     def is(s: String): Boolean = unmetDependencyFieldUrl === s
 
     val key =
