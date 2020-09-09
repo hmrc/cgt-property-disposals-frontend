@@ -5027,7 +5027,7 @@ country.ZW=Zimbabwe
 #  AMEND RETURNS - START
 #===================================================
 
-youNeedToCalculate.title=You will need to calculate the amounts in this return
+youNeedToCalculate.title=If you change this return you will need to calculate the amounts yourself
 youNeedToCalculate.warning=We do not calculate the amounts you will need to enter. If you change this return, you will need to work out the amounts yourself.
 youNeedToCalculate.p1=You will need to:
 youNeedToCalculate.li1=calculate your Capital Gains Tax liability on your UK property-related disposals for the tax year so far
