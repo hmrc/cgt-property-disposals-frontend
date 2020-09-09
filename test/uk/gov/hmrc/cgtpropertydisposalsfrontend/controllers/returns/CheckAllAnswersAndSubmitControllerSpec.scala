@@ -1791,12 +1791,11 @@ class CheckAllAnswersAndSubmitControllerSpec
             UserType.Individual,
             AmountInPence(10000),
             "Estate: ",
-            taxDueRefLine,
+            noTaxDueRefLine,
             List(
               submissionLine,
               returnReferenceWithBundleId,
-              addressLine,
-              taxDueDateLine
+              addressLine
             ),
             Right(IndividualName("John", "Doe")),
             Some(PersonalRepresentativeInPeriodOfAdmin)
@@ -1806,12 +1805,11 @@ class CheckAllAnswersAndSubmitControllerSpec
             UserType.Agent,
             AmountInPence(10000),
             "Client: ",
-            taxDueRefLine,
+            noTaxDueRefLine,
             List(
               submissionLine,
               returnReferenceWithBundleId,
-              addressLine,
-              taxDueDateLine
+              addressLine
             ),
             Right(IndividualName("John", "Doe")),
             Some(PersonalRepresentativeInPeriodOfAdmin)

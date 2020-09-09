@@ -84,6 +84,8 @@
   }
 }
 
+@isPeriodOfAdmin = @{representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)}
+
 @name = @{
     justSubmittedReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName())
 }
@@ -129,20 +131,25 @@
          }
      </p>
     <h1 class="heading-xlarge">@title</h1>
-    <span class="heading-large" style="font-weight: normal;">
-      @messages(s"$key.taxOwed")
-      <strong style="display:block; font-weight: bold;">
-        @{{formatAmountOfMoneyWithPoundSign(amountOwed)}}
-      </strong>
-    </span>
+    @if(!isPeriodOfAdmin) {
+      <span class="heading-large" style="font-weight: normal;">
+        @messages(s"$key.taxOwed")
+        <strong style="display:block; font-weight: bold;">
+          @{{formatAmountOfMoneyWithPoundSign(amountOwed)}}
+        </strong>
+      </span>
+    }
+
     <span class="heading-large" style="font-weight: normal;">
       <div id="ref-id">
-       @{if(amountOwed.equals(BigDecimal(0))) messages(s"$key.returnReference") else messages(s"$key.paymentReference")}
-    <strong style="display:block; font-weight: bold;">
-       @{if(amountOwed.equals(BigDecimal(0))) justSubmittedReturn.submissionResponse.formBundleId else chargeReference}
-       </strong>
+        @{if(amountOwed.equals(BigDecimal(0)) || isPeriodOfAdmin) messages(s"$key.returnReference") else messages(s"$key.paymentReference")}
+        <strong style="display:block; font-weight: bold;">
+        @{if(amountOwed.equals(BigDecimal(0)) || isPeriodOfAdmin) justSubmittedReturn.submissionResponse.formBundleId else chargeReference}
+        </strong>
       </div>
     </span>
+
+
     </div>
 
     <p>
@@ -180,7 +187,7 @@
             None,
             "property-address-table"
         )
-        @{if(!amountOwed.equals(BigDecimal(0))) {
+        @{if(!amountOwed.equals(BigDecimal(0)) && !isPeriodOfAdmin) {
             justSubmittedReturn.submissionResponse.charge.map { charge =>
                 cyaRow(
                     messages(s"$key.taxDue"),
@@ -218,12 +225,12 @@
               @payNowButton
           }
 
-            case Some(PersonalRepresentativeInPeriodOfAdmin) => {
-                <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
+          case Some(PersonalRepresentativeInPeriodOfAdmin) => {
+            <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
 
-                <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
+            <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
 
-            }
+          }
 
 
           case None => {
