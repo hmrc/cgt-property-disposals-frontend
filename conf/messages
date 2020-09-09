@@ -3866,17 +3866,17 @@ nonCalculatedTaxDue.furtherReturn.enterTaxDue.capacitor.title=Enter the amount o
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRep.title=Enter the amount of Capital Gains Tax now due for this return
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.title=Enter the amount of Capital Gains Tax now due for this return
 
-nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1=To work out this amount you’ll need to:
+nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1=To work out this amount, you’ll need to:
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.li1=Start with your previous overall Capital Gains Tax liability on your UK property-related disposals for the tax year {0} to {1}. This is what your overall liability was before this return.
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.li2=Subtract this amount from your new overall Capital Gains Tax liability on the UK property-related disposals for the tax year {0} to {1}. This is what your new overall liability is and includes the disposal in this return.
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.li3=Add this amount to the previously reported liability for this return and this will give you the figure to enter.
 
-nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.p1=To work out this amount you’ll need to:
+nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.p1=To work out this amount, you’ll need to:
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.li1=Start with your client’s previous overall Capital Gains Tax liability on their UK property-related disposals for the tax year {0} to {1}. This is what their overall liability was before this return.
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.li2=Subtract this amount from your client’s new overall Capital Gains Tax liability on their UK property-related disposals for the tax year {0} to {1}. This is what their new overall liability is and includes the disposal in this return.
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.li3=Add this amount to the previously reported liability for this return and this will give you the figure to enter.
 
-nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.p1=To work out this amount you’ll need to:
+nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.p1=To work out this amount, you’ll need to:
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.li1=Start with the trust’s previous overall Capital Gains Tax liability on its UK property-related disposals for the tax year {0} to {1}. This is what its overall liability was before this return.
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.li2=Subtract this amount from the trust’s new overall Capital Gains Tax liability on its UK property-related disposals for the tax year {0} to {1}. This is what its new overall liability is and includes the disposal in this return.
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.li3=Add this amount to the previously reported liability for this return and this will give you the figure to enter.
