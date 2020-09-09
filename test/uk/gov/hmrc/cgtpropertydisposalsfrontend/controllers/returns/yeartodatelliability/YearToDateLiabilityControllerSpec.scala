@@ -4795,9 +4795,11 @@ class YearToDateLiabilityControllerSpec
               mockGetSession(sessionData)
             }
 
+            val userKey = userMessageKey(userType, Some(individualUserType))
+
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("nonCalculatedTaxDue.furtherReturn.enterTaxDue.title"),
+              messageFromMessageKey(s"nonCalculatedTaxDue.furtherReturn.enterTaxDue$userKey.title"),
               { doc =>
                 doc.select("#nonCalculatedTaxDue-form-hint") contains expectedP1Key
                 doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController

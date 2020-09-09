@@ -40,6 +40,7 @@
     backLink: Call,
     yearToDateLiability: AmountInPence,
     previousYearToDateLiability: AmountInPence,
+    taxOwnedOnOriginalReturn: AmountInPence,
     isATrust: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
@@ -55,7 +56,7 @@
 @title = @{messages(s"$key.title")}
 
 @formattedTaxDue = @{
-    val taxDue = (yearToDateLiability -- previousYearToDateLiability).withFloorZero
+    val taxDue = (taxOwnedOnOriginalReturn ++ (yearToDateLiability -- previousYearToDateLiability)).withFloorZero
     MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDue.inPounds())
 }
 
@@ -78,7 +79,7 @@
             ),
             SumPartDisplay(
                 label = messages(s"$key.table.label2"),
-                operator = Some("-"),
+                operator = None,
                 amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())
             )
             ),
@@ -97,7 +98,6 @@
     @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit()) {
         @submitButton(messages("button.confirmAndContinue"))
     }
-
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
 

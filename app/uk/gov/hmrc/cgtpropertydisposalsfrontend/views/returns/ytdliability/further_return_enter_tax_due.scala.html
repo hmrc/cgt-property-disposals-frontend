@@ -62,7 +62,7 @@
     }
 }
 
-@title = @{messages(s"$key.furtherReturn.enterTaxDue.title")}
+@title = @{messages(s"$key.furtherReturn.enterTaxDue$userKey.title")}
 
 @taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
