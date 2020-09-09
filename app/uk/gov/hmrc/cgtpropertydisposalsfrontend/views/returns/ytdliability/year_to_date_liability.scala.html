@@ -48,7 +48,7 @@
     taxYear: TaxYear,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isAmmend: Boolean
+    isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "yearToDateLiability" }
@@ -90,13 +90,13 @@
     @pageHeading(title)
 
     @if(isATrust || representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)){
-        <p>@Html(messages(s"$key$userKey.p1", viewConfig.trustsAndCgtUrl))</p>
+        <p>@messages(s"$key$userKey.p1")</p>
     } else  {
-        <p>@Html(messages(s"$key.p1"))</p>
+        <p>@messages(s"$key.p1")</p>
 
         <ol class="list list-number">
-            <li>@Html(messages(s"$key.li1", viewConfig.cgtRatesUrl))</li>
-            <li>@Html(messages(s"$key.li2", viewConfig.cgtRatesUrl))</li>
+            <li>@messages(s"$key.li1")</li>
+            <li>@messages(s"$key.li2")</li>
             <li>@messages(s"$key$userKey.li3")</li>
         </ol>
     }
@@ -124,7 +124,7 @@
           </a>
         </p>
 
-        @submitButton(messages(if(isAmmend) "button.continue" else "button.saveAndContinue"))
+        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

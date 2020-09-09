@@ -17,7 +17,8 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-
+@import cats.instances.string._
+@import cats.syntax.eq._
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -32,11 +33,9 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
-@(backLink: Call, titleKey: String)(implicit messages:Messages, appConfig: ViewConfig, request: RequestWithSessionData[_])
+@(backLink: Call, key: String)(implicit messages:Messages, appConfig: ViewConfig, request: RequestWithSessionData[_])
 
-@key = @{ "unmetDependency" }
-
-@title = @{messages(titleKey)}
+@title = @{messages(s"$key.title")}
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
 
@@ -50,6 +49,9 @@
         <li>@messages(s"$key.li1")</li>
         <li>@messages(s"$key.li2")</li>
         <li>@messages(s"$key.li3")</li>
+        @if(key === "unmetDependency.x1"){
+            <li>@messages(s"$key.li4")</li>
+        }
     </ul>
 
     @formWrapper(routes.AmendReturnController.unmetDependencySubmit(), 'novalidate -> "novalidate") {
