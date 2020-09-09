@@ -40,11 +40,12 @@
     backLink: Call,
     yearToDateLiability: AmountInPence,
     previousYearToDateLiability: AmountInPence,
-    taxOwnedOnOriginalReturn: AmountInPence,
-    isATrust: Boolean
+    taxOwedOnOriginalReturn: Option[AmountInPence],
+    isATrust: Boolean,
+    isAmendReturn:Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@key = @{ "nonCalculatedTaxDue.furtherReturn.checkTaxDue" }
+@key = @{ "nonCalculatedTaxDue" }
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
@@ -53,10 +54,13 @@
         else ""
 }
 
-@title = @{messages(s"$key.title")}
+@returnTypeKey = @{ if(isAmendReturn) ".amendReturn" else ".furtherReturn" }
+
+@title = @{messages(s"$key.furtherReturn.checkTaxDue.title")}
 
 @formattedTaxDue = @{
-    val taxDue = (taxOwnedOnOriginalReturn ++ (yearToDateLiability -- previousYearToDateLiability)).withFloorZero
+    val taxOwed = taxOwedOnOriginalReturn.getOrElse(AmountInPence.zero)
+    val taxDue = (taxOwed ++ (yearToDateLiability -- previousYearToDateLiability)).withFloorZero
     MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDue.inPounds())
 }
 
@@ -64,36 +68,36 @@
 
     @backLinkComponent(backLink)
 
-    @caption(messages("ytdLiability.furtherReturn.caption"))
+    @caption(messages(s"ytdLiability$returnTypeKey.caption"))
 
     @pageHeading(title)
 
-    <h2 class="heading-medium">@messages(s"$key.h2")</h2>
+    <h2 class="heading-medium">@messages(s"$key$returnTypeKey.checkTaxDue.h2")</h2>
 
     @calcSum(
         List(
             SumPartDisplay(
-                label = messages(s"$key.table.label1"),
+                label = messages(s"$key$returnTypeKey.checkTaxDue.table.label1"),
                 operator = None,
                 amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(yearToDateLiability.inPounds())
             ),
             SumPartDisplay(
-                label = messages(s"$key.table.label2"),
-                operator = None,
+                label = messages(s"$key$returnTypeKey.checkTaxDue.table.label2"),
+                operator = if(isAmendReturn) None else Some("-"),
                 amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())
             )
-            ),
+        ),
         SumPartDisplay(
-            label = messages(s"$key.table.label3"),
+            label = messages(s"$key$returnTypeKey.checkTaxDue.table.label3"),
             operator = Some("="),
             amount = formattedTaxDue,
             total = true
         )
     )
 
-    <p>@messages(s"$key$userKey.p1", formattedTaxDue)</p>
+    <p>@messages(s"$key.furtherReturn.checkTaxDue$userKey.p1", formattedTaxDue)</p>
 
-    <p>@messages(s"$key.p2")</p>
+    <p>@messages(s"$key.furtherReturn.checkTaxDue.p2")</p>
 
     @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit()) {
         @submitButton(messages("button.confirmAndContinue"))
