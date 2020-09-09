@@ -84,7 +84,7 @@
   }
 }
 
-@isPeriodOfAdmin = @{userKey.contains(".personalRepInPeriodOfAdmin")}
+@isPeriodOfAdmin = @{representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)}
 
 @name = @{
     justSubmittedReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName())
