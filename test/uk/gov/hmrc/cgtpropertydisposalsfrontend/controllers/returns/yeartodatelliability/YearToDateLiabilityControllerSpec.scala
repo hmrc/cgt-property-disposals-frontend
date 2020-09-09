@@ -36,15 +36,20 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AmountOfMoneyErrorScenarios, AuthSupport, ControllerSpec, SessionSupport, returns}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalMethodGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.{completeMultipleDisposalsReturnGen, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalMethodGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
@@ -54,15 +59,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.completeMultipleDisposalsReturnGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -6171,11 +6170,14 @@ class YearToDateLiabilityControllerSpec
 
         def test(sessionData: SessionData)(
           data: (String, String)*
-        )(expectedTitleKey: String, expectedErrorKey: String, expectedErrorArgs: String*): Unit =
+        )(
+          expectedTitleKey: String,
+          expectedTitleArgs: String*
+        )(expectedErrorKey: String, expectedErrorArgs: String*): Unit =
           testFormError(data: _*)(
             expectedErrorKey,
             expectedErrorArgs
-          )(expectedTitleKey, expectedErrorArgs: _*)(performAction, sessionData)
+          )(expectedTitleKey, expectedTitleArgs: _*)(performAction, sessionData)
 
         val taxYear = sample[TaxYear]
 
@@ -6214,8 +6216,7 @@ class YearToDateLiabilityControllerSpec
           testCases.foreach {
             case (userKey, session) =>
               withClue(s"For user key '$userKey': ") {
-                test(session)()(
-                  s"yearToDateLiability$userKey.title",
+                test(session)()(s"yearToDateLiability$userKey.title", taxYearStart, taxYearEnd)(
                   s"yearToDateLiability$userKey.error.required",
                   taxYearStart,
                   taxYearEnd
@@ -6234,6 +6235,9 @@ class YearToDateLiabilityControllerSpec
                   withClue(s"For user key '$userKey' and $scenario: ") {
                     test(session)(scenario.formData: _*)(
                       s"yearToDateLiability$userKey.title",
+                      taxYearStart,
+                      taxYearEnd
+                    )(
                       scenario.expectedErrorMessageKey,
                       taxYearStart,
                       taxYearEnd
