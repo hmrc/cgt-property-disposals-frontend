@@ -6175,7 +6175,7 @@ class YearToDateLiabilityControllerSpec
           testFormError(data: _*)(
             expectedErrorKey,
             expectedErrorArgs
-          )(expectedTitleKey)(performAction, sessionData)
+          )(expectedTitleKey, expectedErrorArgs: _*)(performAction, sessionData)
 
         val taxYear = sample[TaxYear]
 
