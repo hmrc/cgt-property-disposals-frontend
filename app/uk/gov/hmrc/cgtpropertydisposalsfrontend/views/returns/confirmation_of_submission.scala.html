@@ -167,7 +167,7 @@
             None,
             "sent-date-table"
         )
-        @if(!amountOwed.equals(BigDecimal(0)) && !isPeriodOfAdmin) {
+        @if(!amountOwed.equals(BigDecimal(0))) {
             @cyaRow(
                 messages(s"$key.returnReference"),
                 Html(justSubmittedReturn.submissionResponse.formBundleId),
