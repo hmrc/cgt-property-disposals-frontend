@@ -6169,9 +6169,7 @@ class YearToDateLiabilityControllerSpec
 
       "show a form error" when {
 
-        def test(
-          sessionData: SessionData
-        )(
+        def test(sessionData: SessionData)(
           data: (String, String)*
         )(expectedTitleKey: String, expectedErrorKey: String, expectedErrorArgs: String*): Unit =
           testFormError(data: _*)(

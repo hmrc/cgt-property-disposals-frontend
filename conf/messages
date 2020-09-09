@@ -404,7 +404,7 @@ further-returns.personalRepInPeriodOfAdmin.help.l1=calculate the estate’s Capi
 
 further-returns.help.link=<a href="{0}"" id="guidanceLink">How to calculate the amount needed in this return</a>
 further-returns.help.prompt=If you need help
-further-returns.help.contact=<a href="{0}">Contact HMRC</a>
+further-returns.help.contact=<a href="{0}">contact HMRC</a>
 
 subscribed.title=Account created
 subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account
@@ -3040,14 +3040,6 @@ inYearLosses.furtherReturn.personalRep.helpText2=If the person made a loss on th
 inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText2=If the estate made a loss on the disposal you have reported in this return you should also include that amount in this total.
 inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText2=If the estate made a loss on the disposal you have reported in this return you should also include that amount in this total.
 
-inYearLosses.furtherReturn.link=<a href="{0}" id="guidanceLink">How to work out your overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.agent.link=<a href="{0}" id="guidanceLink">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.trust.link=<a href="{0}" id="guidanceLink">How to work out the trust’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.capacitor.link=<a href="{0}" id="guidanceLink">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.personalRep.link=<a href="{0}" id="guidanceLink">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.link=<a href="{0}" id="guidanceLink">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" id="guidanceLink">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
-
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.agent.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.trust.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
@@ -3687,13 +3679,13 @@ hasEstimatedDetails.error.boolean=Select yes if any of the details in this retur
 
 hasEstimatedDetails.cyaChange=if any of the amounts in the return have been estimated
 
-yearToDateLiability.title=What is your overall Capital Gains Tax liability on your UK property-related disposals in tax year 2020 to 2021?
-yearToDateLiability.agent.title=What is your client’s overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
-yearToDateLiability.trust.title=What is the trust’s overall Capital Gains Tax liability on its UK property-related disposals in tax year 2020 to 2021?
-yearToDateLiability.capacitor.title=What is the person’s overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
-yearToDateLiability.personalRep.title=What is the person’s overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
-yearToDateLiability.personalRepInPeriodOfAdmin.title=What is the estate’s overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
-yearToDateLiability.personalRepInPeriodOfAdmin.agent.title=What is your client’s overall Capital Gains Tax liability on their UK property-related disposals in tax year 2020 to 2021?
+yearToDateLiability.title=What is your overall Capital Gains Tax liability on your UK property-related disposals in tax year {0} to {1}?
+yearToDateLiability.agent.title=What is your client’s overall Capital Gains Tax liability on their UK property-related disposals in tax year {0} to {1}?
+yearToDateLiability.trust.title=What is the trust’s overall Capital Gains Tax liability on its UK property-related disposals in tax year {0} to {1}?
+yearToDateLiability.capacitor.title=What is the person’s overall Capital Gains Tax liability on their UK property-related disposals in tax year {0} to {1}?
+yearToDateLiability.personalRep.title=What is the person’s overall Capital Gains Tax liability on their UK property-related disposals in tax year {0} to {1}?
+yearToDateLiability.personalRepInPeriodOfAdmin.title=What is the estate’s overall Capital Gains Tax liability on their UK property-related disposals in tax year {0} to {1}?
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.title=What is your client’s overall Capital Gains Tax liability on their UK property-related disposals in tax year {0} to {1}?
 
 yearToDateLiability.trust.p1=You’ll need to multiply the trust’s net gain by the correct rate of tax to get this amount.
 yearToDateLiability.personalRepInPeriodOfAdmin.p1=Multiply the estate’s net gain for the year by the relevant rate of tax for the tax year for the estate to work out its overall Capital Gains Tax liability on its UK property-related disposals.
@@ -5042,7 +5034,7 @@ youNeedToCalculate.li1=calculate your Capital Gains Tax liability on your UK pro
 youNeedToCalculate.li2=upload a document showing how you worked out the amount of the Capital Gains Tax due
 youNeedToCalculate.link1=How to calculate the amounts needed for this return
 youNeedToCalculate.h2=If you need help
-youNeedToCalculate.link2=<a href="{0}">Contact HMRC</a>.
+youNeedToCalculate.link2=<a href="{0}">contact HMRC</a>.
 
 confirmCancelAmendReturn.title=Are you sure you want to cancel the changes?
 confirmCancelAmendReturn.helpText=If you cancel and you made some changes they will not be saved.
@@ -5071,7 +5063,7 @@ unmetDependency.x2.li3=upload a document showing how the new amount of tax due w
 
 disposalDateInDifferentTaxYear.title=You cannot change this return online
 disposalDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in.
-disposalDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">Contact HMRC</a>
+disposalDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">contact HMRC</a>
 
 #===================================================
 #  AMEND RETURNS - END
