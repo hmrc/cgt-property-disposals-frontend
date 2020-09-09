@@ -4081,7 +4081,7 @@ confirmationOfSubmission.trust.printPage=<a href="{0}">Print or save this page a
 confirmationOfSubmission.capacitor.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
 confirmationOfSubmission.capacitor.noId.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
 confirmationOfSubmission.personalRep.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your client’s Capital Gain Tax on UK property account.
 
 
