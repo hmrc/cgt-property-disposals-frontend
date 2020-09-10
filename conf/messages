@@ -3244,8 +3244,7 @@ exemptionsAndLosses.cya.title=Check your answers
 #===================================================
 
 ytdLiability.caption=Tax owed
-ytdLiability.furtherReturn.caption=Year to date position
-ytdLiability.amendReturn.caption=Year-to-date position
+ytdLiability.furtherReturn.caption=Year-to-date position
 
 taxableGainOrLoss.title=Did you make an overall gain or loss on the property sale or disposal?
 taxableGainOrLoss.multiple.title=Did you make an overall gain or loss on the property sales or disposals in this return?
