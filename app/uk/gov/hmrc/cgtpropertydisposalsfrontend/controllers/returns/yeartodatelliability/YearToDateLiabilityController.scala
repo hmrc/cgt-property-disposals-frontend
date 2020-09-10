@@ -1459,15 +1459,28 @@ class YearToDateLiabilityController @Inject() (
                   case Some(yearToDateLiability) =>
                     if (nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability).isEmpty)
                       Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
-                    else
+                    else {
+                      val taxOwedOnOriginalReturn = fillingOutReturn.amendReturnData
+                        .map(
+                          _.originalReturn.completeReturn.fold(
+                            _.yearToDateLiabilityAnswers.taxDue,
+                            _.yearToDateLiabilityAnswers.fold(_.taxDue, _.taxDue),
+                            _.yearToDateLiabilityAnswers.taxDue,
+                            _.yearToDateLiabilityAnswers.taxDue,
+                            _.yearToDateLiabilityAnswers.taxDue
+                          )
+                        )
+
                       Ok(
                         furtherReturnCheckTaxDuePage(
                           routes.YearToDateLiabilityController.hasEstimatedDetails(),
                           yearToDateLiability,
                           previousYtd,
+                          taxOwedOnOriginalReturn,
                           fillingOutReturn.subscribedDetails.isATrust
                         )
                       )
+                    }
                 }
 
               case _                                                      =>

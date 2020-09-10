@@ -4796,7 +4796,7 @@ class YearToDateLiabilityControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("nonCalculatedTaxDue.furtherReturn.enterTaxDue.title"),
+              messageFromMessageKey(s"nonCalculatedTaxDue.furtherReturn.enterTaxDue.title"),
               { doc =>
                 doc.select("#nonCalculatedTaxDue-form-hint") contains expectedP1Key
                 doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
@@ -4857,6 +4857,203 @@ class YearToDateLiabilityControllerSpec
               UserType.Individual,
               IndividualUserType.PersonalRepresentativeInPeriodOfAdmin,
               "nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.p1"
+            )
+          }
+
+        }
+
+        "the return is a amend return where the previous year to date is present" when {
+
+          def testCheckTaxDuePage(
+            yearToDateLiability: AmountInPence,
+            previousYearToDateLiability: AmountInPence,
+            taxDue: AmountInPence,
+            userType: UserType,
+            expectedP1Key: String
+          ): Unit = {
+            val sessionData = SessionData.empty.copy(
+              userType = Some(userType),
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
+                    triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+                    yearToDateLiabilityAnswers = Some(
+                      sample[CompleteNonCalculatedYTDAnswers].copy(
+                        yearToDateLiability = Some(yearToDateLiability)
+                      )
+                    )
+                  ),
+                  agentReferenceNumber = if (userType == UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
+                  previousSentReturns = Some(
+                    sample[PreviousReturnData].copy(
+                      summaries = List(sample[ReturnSummary]),
+                      previousYearToDate = Some(previousYearToDateLiability)
+                    )
+                  ),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name =
+                      if (userType == UserType.Organisation) Left(sample[TrustName])
+                      else Right(sample[IndividualName])
+                  ),
+                  amendReturnData = Some(
+                    sample[AmendReturnData].copy(
+                      originalReturn = sample[CompleteReturnWithSummary].copy(
+                        completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                          yearToDateLiabilityAnswers = Left(
+                            sample[CompleteNonCalculatedYTDAnswers].copy(
+                              taxDue = AmountInPence(2000)
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionData)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("nonCalculatedTaxDue.furtherReturn.checkTaxDue.title"),
+              { doc =>
+                val formattedTaxDue = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDue.inPounds())
+
+                doc.select("#content > article > dl > div:nth-child(1) > dd").text() shouldBe MoneyUtils
+                  .formatAmountOfMoneyWithPoundSign(yearToDateLiability.inPounds())
+
+                doc.select("#content > article > dl > div:nth-child(2) > dd").text() shouldBe s"${MoneyUtils
+                  .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
+
+                doc.select("#content > article > dl > div.sum-total > dd").text() shouldBe s"= $formattedTaxDue"
+
+                doc.select("#content > article > p:nth-child(6)").text() shouldBe messageFromMessageKey(
+                  expectedP1Key,
+                  formattedTaxDue
+                )
+
+                doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
+                  .nonCalculatedEnterTaxDueSubmit()
+                  .url
+              }
+            )
+          }
+
+          "the user is an individual" in {
+            testCheckTaxDuePage(
+              AmountInPence(1000L),
+              AmountInPence(3000L),
+              AmountInPence.zero,
+              UserType.Individual,
+              "nonCalculatedTaxDue.furtherReturn.checkTaxDue.p1"
+            )
+
+          }
+
+          "the user is an agent" in {
+            testCheckTaxDuePage(
+              AmountInPence(3000L),
+              AmountInPence(1000L),
+              AmountInPence(4000L),
+              UserType.Agent,
+              "nonCalculatedTaxDue.furtherReturn.checkTaxDue.agent.p1"
+            )
+          }
+
+          "the user is a trust" in {
+            testCheckTaxDuePage(
+              AmountInPence(1000L),
+              AmountInPence(1000L),
+              AmountInPence(2000L),
+              UserType.Organisation,
+              "nonCalculatedTaxDue.furtherReturn.checkTaxDue.trust.p1"
+            )
+          }
+
+        }
+
+        "the return is a amend return where the previous year to date is not present" when {
+
+          def testEnterTaxDuePage(
+            yearToDateLiability: AmountInPence,
+            userType: UserType,
+            individualUserType: IndividualUserType,
+            expectedP1Key: String
+          ): Unit = {
+            val sessionData = SessionData.empty.copy(
+              userType = Some(userType),
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
+                    triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                      individualUserType = Some(individualUserType)
+                    ),
+                    yearToDateLiabilityAnswers = Some(
+                      sample[CompleteNonCalculatedYTDAnswers].copy(
+                        yearToDateLiability = Some(yearToDateLiability)
+                      )
+                    ),
+                    representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false))
+                  ),
+                  agentReferenceNumber = if (userType == UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
+                  previousSentReturns = None,
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name =
+                      if (userType == UserType.Organisation) Left(sample[TrustName])
+                      else Right(sample[IndividualName])
+                  ),
+                  amendReturnData = Some(sample[AmendReturnData])
+                )
+              )
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionData)
+            }
+
+            val userKey = userMessageKey(userType, Some(individualUserType))
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"nonCalculatedTaxDue.amendReturn.enterTaxDue$userKey.title"),
+              { doc =>
+                doc.select("#nonCalculatedTaxDue-form-hint") contains expectedP1Key
+                doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
+                  .nonCalculatedEnterTaxDueSubmit()
+                  .url
+              }
+            )
+          }
+
+          "the user is an individual" in {
+            testEnterTaxDuePage(
+              AmountInPence(1000L),
+              UserType.Individual,
+              IndividualUserType.Self,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1"
+            )
+          }
+
+          "the user is an agent" in {
+            testEnterTaxDuePage(
+              AmountInPence(1000L),
+              UserType.Agent,
+              IndividualUserType.Self,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.p1"
+            )
+          }
+
+          "the user is a trust" in {
+            testEnterTaxDuePage(
+              AmountInPence(1000L),
+              UserType.Organisation,
+              IndividualUserType.Self,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.p1"
             )
           }
 
@@ -6718,6 +6915,7 @@ class YearToDateLiabilityControllerSpec
       }
 
     }
+
   }
 
   def noPendingUploadbBehaviour(performAction: () => Future[Result]): Unit =

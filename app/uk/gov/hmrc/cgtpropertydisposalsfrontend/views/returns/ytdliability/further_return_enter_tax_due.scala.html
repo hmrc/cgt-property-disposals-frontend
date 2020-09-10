@@ -44,7 +44,7 @@
     taxYear: TaxYear,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isAmmend: Boolean
+    isAmendReturn: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "nonCalculatedTaxDue" }
@@ -62,18 +62,25 @@
     }
 }
 
-@title = @{messages(s"$key.furtherReturn.enterTaxDue.title")}
+@returnTypeKey = @{ if(isAmendReturn) ".amendReturn" else ".furtherReturn" }
+
+@title = @{
+    if(isAmendReturn)
+        messages(s"$key$returnTypeKey.enterTaxDue$userKey.title")
+    else
+        messages(s"$key$returnTypeKey.enterTaxDue.title")
+}
 
 @taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
 
 @helpText = @{
     Some(Html(s"""
-        ${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.p1")}<br/>
+        ${messages(s"$key$returnTypeKey.enterTaxDue$userKey.helpText.p1")}<br/>
         <ol class="list list-number">
-            <li>${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.li1", taxYearStartYear, taxYearEndYear)}</li>
-            <li>${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.li2", taxYearStartYear, taxYearEndYear)}</li>
-            <li>${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.li3")}</li>
+            <li>${messages(s"$key$returnTypeKey.enterTaxDue$userKey.helpText.li1", taxYearStartYear, taxYearEndYear)}</li>
+            <li>${messages(s"$key$returnTypeKey.enterTaxDue$userKey.helpText.li2", taxYearStartYear, taxYearEndYear)}</li>
+            <li>${messages(s"$key$returnTypeKey.enterTaxDue$userKey.helpText.li3")}</li>
         </ol>
     """))
 }
@@ -88,7 +95,7 @@
         @errorSummary(form)
     }
 
-    @caption(messages("ytdLiability.furtherReturn.caption"))
+    @caption(messages(s"ytdLiability$returnTypeKey.caption"))
 
     @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
@@ -105,7 +112,7 @@
             unit = "£",
             assistiveText = messages("unit-input.assistive.pounds")
         )
-        @submitButton(messages(if(isAmmend) "button.continue" else "button.saveAndContinue"))
+        @submitButton(messages(if(isAmendReturn) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
