@@ -1300,7 +1300,7 @@ task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.check-and-send-return.link=Check and send return, pay any tax due
-task-list.upload-supporting-docs.link=Upload Your Supporting Documents
+task-list.upload-supporting-docs.link=Upload supporting evidence
 
 task-list.enter-example-property-address.link=Enter details of one property
 task-list.indirect.enter-example-company-address.link=Enter details of one company
