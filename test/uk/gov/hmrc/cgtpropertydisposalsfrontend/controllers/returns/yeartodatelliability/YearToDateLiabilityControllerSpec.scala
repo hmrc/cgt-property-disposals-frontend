@@ -4917,7 +4917,7 @@ class YearToDateLiabilityControllerSpec
               mockGetSession(sessionData)
             }
 
-            checkPageIsDisplayed( //nonCalculatedTaxDue.furtherReturn.checkTaxDue.title
+            checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("nonCalculatedTaxDue.furtherReturn.checkTaxDue.title"),
               { doc =>

@@ -41,8 +41,7 @@
     yearToDateLiability: AmountInPence,
     previousYearToDateLiability: AmountInPence,
     taxOwedOnOriginalReturn: Option[AmountInPence],
-    isATrust: Boolean,
-    isAmendReturn:Boolean
+    isATrust: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "nonCalculatedTaxDue" }
@@ -52,6 +51,13 @@
         if (isAgent) ".agent"
         else if (isATrust) ".trust"
         else ""
+}
+
+@isAmendReturn = @{
+    taxOwedOnOriginalReturn match {
+        case Some(_) => true
+        case None    => false
+    }
 }
 
 @returnTypeKey = @{ if(isAmendReturn) ".amendReturn" else ".furtherReturn" }

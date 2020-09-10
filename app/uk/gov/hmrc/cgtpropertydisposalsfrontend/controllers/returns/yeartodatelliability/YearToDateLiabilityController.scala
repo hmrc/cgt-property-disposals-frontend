@@ -1477,8 +1477,7 @@ class YearToDateLiabilityController @Inject() (
                           yearToDateLiability,
                           previousYtd,
                           taxOwedOnOriginalReturn,
-                          fillingOutReturn.subscribedDetails.isATrust,
-                          fillingOutReturn.isAmendReturn
+                          fillingOutReturn.subscribedDetails.isATrust
                         )
                       )
                     }
