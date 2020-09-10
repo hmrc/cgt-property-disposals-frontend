@@ -68,6 +68,8 @@
 @taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
 
+@returnTypeKey = @{ if(isAmend) ".amendReturn" else ".furtherReturn" }
+
 @title = @{messages(s"$key$userKey.title", taxYearStartYear, taxYearEndYear)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @customErrorKey = @{
@@ -85,7 +87,7 @@
         @errorSummary(form, customErrorKey = customErrorKey)
     }
 
-    @caption(messages("ytdLiability.furtherReturn.caption"))
+    @caption(messages(s"ytdLiability$returnTypeKey.caption"))
 
     @pageHeading(title)
 

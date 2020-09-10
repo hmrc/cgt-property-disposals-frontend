@@ -29,14 +29,25 @@
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(isFurtherOrAmendReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(
+    isFurtherOrAmendReturn: Option[Boolean],
+    isAmendReturn: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
     @key = @{"mandatoryEvidence.scan-progress"}
     @title = @{messages(s"$key.title")}
 
-    @mainTemplate(title = title, userType = request.userType) {
+    @captionMsg = @{
+        if(isAmendReturn)
+            "ytdLiability.amendReturn.caption"
+        else if(isFurtherOrAmendReturn.contains(true))
+            "ytdLiability.furtherReturn.caption"
+        else "ytdLiability.caption"
+    }
 
-    @caption(messages(s"ytdLiability${if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}.caption"))
+@mainTemplate(title = title, userType = request.userType) {
+
+    @caption(messages(captionMsg))
     @pageHeading(title)
 
     <p>@{messages(s"$key.p1")}</p>

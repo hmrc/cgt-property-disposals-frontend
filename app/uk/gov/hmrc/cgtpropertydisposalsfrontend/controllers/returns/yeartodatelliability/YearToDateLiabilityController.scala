@@ -1728,7 +1728,13 @@ class YearToDateLiabilityController @Inject() (
           upscanCallBack: Option[UpscanCallBack]
         ): Result =
           upscanCallBack match {
-            case None                   => Ok(mandatoryEvidenceScanProgressPage(fillingOutReturn.isFurtherOrAmendReturn))
+            case None                   =>
+              Ok(
+                mandatoryEvidenceScanProgressPage(
+                  fillingOutReturn.isFurtherOrAmendReturn,
+                  fillingOutReturn.isAmendReturn
+                )
+              )
             case Some(_: UpscanFailure) => Ok(mandatoryEvidenceScanFailedPage())
             case Some(_: UpscanSuccess) =>
               Redirect(
