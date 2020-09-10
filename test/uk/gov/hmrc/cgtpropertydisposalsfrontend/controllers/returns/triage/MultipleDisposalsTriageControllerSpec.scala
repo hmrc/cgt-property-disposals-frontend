@@ -1891,7 +1891,7 @@ class MultipleDisposalsTriageControllerSpec
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
               val amendReturnData                 = sample[AmendReturnData]
-              val answers                         = c.copy(taxYear = taxYear)
+              val answers                         = c.copy(taxYear = taxYear, assetTypes = List(AssetType.Residential))
               val (session, journey, draftReturn) =
                 sessionDataWithFillingOutReturn(
                   answers,
