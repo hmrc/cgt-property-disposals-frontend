@@ -4982,7 +4982,8 @@ class YearToDateLiabilityControllerSpec
             yearToDateLiability: AmountInPence,
             userType: UserType,
             individualUserType: IndividualUserType,
-            expectedP1Key: String
+            expectedP1Key: String,
+            expectedBackLink: Call
           ): Unit = {
             val sessionData = SessionData.empty.copy(
               userType = Some(userType),
@@ -5022,6 +5023,7 @@ class YearToDateLiabilityControllerSpec
               performAction(),
               messageFromMessageKey(s"nonCalculatedTaxDue.amendReturn.enterTaxDue$userKey.title"),
               { doc =>
+                doc.select("#back").attr("href")                       shouldBe expectedBackLink.url
                 doc.select("#nonCalculatedTaxDue-form-hint") contains expectedP1Key
                 doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
@@ -5035,7 +5037,8 @@ class YearToDateLiabilityControllerSpec
               AmountInPence(1000L),
               UserType.Individual,
               IndividualUserType.Self,
-              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1"
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1",
+              routes.YearToDateLiabilityController.checkYourAnswers()
             )
           }
 
@@ -5044,7 +5047,8 @@ class YearToDateLiabilityControllerSpec
               AmountInPence(1000L),
               UserType.Agent,
               IndividualUserType.Self,
-              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.p1"
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.p1",
+              routes.YearToDateLiabilityController.checkYourAnswers()
             )
           }
 
@@ -5053,7 +5057,8 @@ class YearToDateLiabilityControllerSpec
               AmountInPence(1000L),
               UserType.Organisation,
               IndividualUserType.Self,
-              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.p1"
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.p1",
+              routes.YearToDateLiabilityController.checkYourAnswers()
             )
           }
 
