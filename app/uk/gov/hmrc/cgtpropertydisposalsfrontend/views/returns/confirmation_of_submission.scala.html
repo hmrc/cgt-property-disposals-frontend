@@ -199,6 +199,11 @@
         }
     }
 
+  @if(justSubmittedReturn.submissionResponse.charge.isEmpty && isPeriodOfAdmin) {
+    <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
+    <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
+  } else {
+
     @justSubmittedReturn.submissionResponse.charge.map { charge =>
       @representativeType match {
           case Some(PersonalRepresentative) => {
@@ -271,6 +276,7 @@
           }
       }
     }
+  }
 
     <div class="panel panel-border-wide">
         <h2 class="heading-medium" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
