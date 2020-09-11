@@ -4979,10 +4979,10 @@ class YearToDateLiabilityControllerSpec
         "the return is a amend return where the previous year to date is not present" when {
 
           def testEnterTaxDuePage(
-            yearToDateLiability: AmountInPence,
             userType: UserType,
             individualUserType: IndividualUserType,
             expectedP1Key: String,
+            yearToDateLiabilityAnswers: YearToDateLiabilityAnswers,
             expectedBackLink: Call
           ): Unit = {
             val sessionData = SessionData.empty.copy(
@@ -4993,11 +4993,7 @@ class YearToDateLiabilityControllerSpec
                     triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
                       individualUserType = Some(individualUserType)
                     ),
-                    yearToDateLiabilityAnswers = Some(
-                      sample[CompleteNonCalculatedYTDAnswers].copy(
-                        yearToDateLiability = Some(yearToDateLiability)
-                      )
-                    ),
+                    yearToDateLiabilityAnswers = Some(yearToDateLiabilityAnswers),
                     representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false))
                   ),
                   agentReferenceNumber = if (userType == UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
@@ -5033,32 +5029,90 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the user is an individual" in {
+            val yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+              yearToDateLiability = Some(AmountInPence(1000L))
+            )
+
             testEnterTaxDuePage(
-              AmountInPence(1000L),
               UserType.Individual,
               IndividualUserType.Self,
               "nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1",
+              yearToDateLiabilityAnswers,
               routes.YearToDateLiabilityController.checkYourAnswers()
             )
           }
 
           "the user is an agent" in {
+            val yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+              yearToDateLiability = Some(AmountInPence(1000L))
+            )
             testEnterTaxDuePage(
-              AmountInPence(1000L),
               UserType.Agent,
               IndividualUserType.Self,
               "nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.p1",
+              yearToDateLiabilityAnswers,
               routes.YearToDateLiabilityController.checkYourAnswers()
             )
           }
 
           "the user is a trust" in {
+            val yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+              yearToDateLiability = Some(AmountInPence(1000L))
+            )
             testEnterTaxDuePage(
-              AmountInPence(1000L),
               UserType.Organisation,
               IndividualUserType.Self,
               "nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.p1",
+              yearToDateLiabilityAnswers,
               routes.YearToDateLiabilityController.checkYourAnswers()
+            )
+          }
+
+          "the user is an individual and not answered this section completely" in {
+            val yearToDateLiabilityAnswers = IncompleteNonCalculatedYTDAnswers.empty.copy(
+              taxableGainOrLoss = Some(AmountInPence(1000L)),
+              hasEstimatedDetails = Some(false),
+              yearToDateLiability = Some(AmountInPence(1000L))
+            )
+
+            testEnterTaxDuePage(
+              UserType.Individual,
+              IndividualUserType.Self,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1",
+              yearToDateLiabilityAnswers,
+              routes.YearToDateLiabilityController.yearToDateLiability()
+            )
+          }
+
+          "the user is an agent and not answered this section completely" in {
+            val yearToDateLiabilityAnswers = IncompleteNonCalculatedYTDAnswers.empty.copy(
+              taxableGainOrLoss = Some(AmountInPence(1000L)),
+              hasEstimatedDetails = Some(false),
+              yearToDateLiability = Some(AmountInPence(1000L))
+            )
+
+            testEnterTaxDuePage(
+              UserType.Agent,
+              IndividualUserType.Self,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.p1",
+              yearToDateLiabilityAnswers,
+              routes.YearToDateLiabilityController.yearToDateLiability()
+            )
+          }
+
+          "the user is a trust and not answered this section completely" in {
+            val yearToDateLiabilityAnswers = IncompleteNonCalculatedYTDAnswers.empty.copy(
+              taxableGainOrLoss = Some(AmountInPence(1000L)),
+              hasEstimatedDetails = Some(false),
+              yearToDateLiability = Some(AmountInPence(1000L))
+            )
+
+            testEnterTaxDuePage(
+              UserType.Organisation,
+              IndividualUserType.Self,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.p1",
+              yearToDateLiabilityAnswers,
+              routes.YearToDateLiabilityController.yearToDateLiability()
             )
           }
 
