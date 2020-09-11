@@ -68,6 +68,7 @@ class CommonTriageQuestionsController @Inject() (
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
   previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date,
+  previousReturnExistsWithSameCompletionDateAmendPage: triagePages.previous_return_exists_with_same_completion_date_ammend,
   furtherReturnsHelpPage: triagePages.further_retuns_help,
   disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
   cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
@@ -419,12 +420,59 @@ class CommonTriageQuestionsController @Inject() (
               else routes.SingleDisposalsTriageController.whenWasCompletionDate()
           }
 
-        Ok(
-          previousReturnExistsWithSameCompletionDatePage(
-            state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
-            backLink
-          )
+        val invalidCompletionDate = state.fold(
+          _.newReturnTriageAnswers
+            .fold(
+              _.fold(
+                _.completionDate,
+                e => Some(e.completionDate)
+              ),
+              _.fold(
+                _.completionDate,
+                e => Some(e.completionDate)
+              )
+            ),
+          _.draftReturn
+            .triageAnswers()
+            .fold(
+              _.fold(
+                _.completionDate,
+                e => Some(e.completionDate)
+              ),
+              _.fold(
+                _.completionDate,
+                e => Some(e.completionDate)
+              )
+            )
         )
+        val matching              = state.fold(
+          _.previousSentReturns
+            .map(_.summaries)
+            .getOrElse(List.empty)
+            .filter(e => invalidCompletionDate.contains(CompletionDate(e.completionDate)))
+            .headOption,
+          _.previousSentReturns
+            .map(_.summaries)
+            .getOrElse(List.empty)
+            .filter(e => invalidCompletionDate.contains(CompletionDate(e.completionDate)))
+            .headOption
+        )
+
+        if (state.fold(_ => false, _.isAmendReturn))
+          Ok(
+            previousReturnExistsWithSameCompletionDateAmendPage(
+              invalidCompletionDate,
+              state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
+              backLink
+            )
+          )
+        else
+          Ok(
+            previousReturnExistsWithSameCompletionDatePage(
+              matching,
+              backLink
+            )
+          )
       }
     }
 

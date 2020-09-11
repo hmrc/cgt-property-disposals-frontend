@@ -760,19 +760,22 @@ numberOfProperties.error.required=Select how many UK properties you are includin
 
 numberOfProperties.cyaChange=how many properties you want to include in this return
 
-previousReturnExistsWithSameCompletionDate.title=You cannot complete this return online
+previousReturnExistsWithSameCompletionDate.amend.title=You already have a return with the completion date of {0}
 
-previousReturnExistsWithSameCompletionDate.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your previous returns.
-previousReturnExistsWithSameCompletionDate.trust.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your trust’s previous returns.
-previousReturnExistsWithSameCompletionDate.agent.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your client’s previous returns.
+previousReturnExistsWithSameCompletionDate.amend.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your previous returns.
+previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your trust’s previous returns.
+previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your client’s previous returns.
 
-previousReturnExistsWithSameCompletionDate.propertyDisposals.title=Property disposals
-previousReturnExistsWithSameCompletionDate.propertyDisposals.p1=You’ll need to amend the return with the property that had:
-previousReturnExistsWithSameCompletionDate.propertyDisposals.li1=the same completion date as the one you’re wanting to report now
-previousReturnExistsWithSameCompletionDate.propertyDisposals.li2=a contract exchange date in the same tax year as the one you’re wanting to report now
-previousReturnExistsWithSameCompletionDate.indirectDisposals.title=Indirect disposals
-previousReturnExistsWithSameCompletionDate.indirectDisposals.p1=You’ll need to amend the return that had shares with the same sale of disposal date as the disposal you’re wanting to report now.
+previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.title=Property disposals
+previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.p1=You’ll need to amend the return with the property that had:
+previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.li1=the same completion date as the one you’re wanting to report now
+previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.li2=a contract exchange date in the same tax year as the one you’re wanting to report now
+previousReturnExistsWithSameCompletionDate.amend.indirectDisposals.title=Indirect disposals
+previousReturnExistsWithSameCompletionDate.amend.indirectDisposals.p1=You’ll need to amend the return that had shares with the same sale of disposal date as the disposal you’re wanting to report now.
 
+previousReturnExistsWithSameCompletionDate.title=You’ll need to change an existing return
+previousReturnExistsWithSameCompletionDate.p1=You already sent a return that had a disposal on <strong class="bold">{0}</strong>. You’ll need to change that return instead of creating a new one.
+previousReturnExistsWithSameCompletionDate.p2=You’ll need to change the <strong class="bold">number of disposals you are including</strong> in that return
 
 cannotAmendResidentialStatusForAssetType.title=You must contact HMRC
 

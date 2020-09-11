@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import java.time.{Clock, LocalDate}
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -49,11 +49,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homePageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleMixedUseDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
@@ -83,6 +84,8 @@ class CommonTriageQuestionsControllerSpec
   lazy val controller = instanceOf[CommonTriageQuestionsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+
+  implicit val messages: Messages = MessagesImpl(lang, messagesApi)
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean =
     journeyStatus match {
@@ -2353,6 +2356,10 @@ class CommonTriageQuestionsControllerSpec
 
     "handling requests to display the previous return has same completion date exit page" must {
 
+      def previousReturnData(id: String, date: LocalDate) =
+        sample[PreviousReturnData]
+          .copy(summaries = List(sample[ReturnSummary].copy(submissionId = id, completionDate = date)))
+
       def performAction(): Future[Result] =
         controller.previousReturnExistsWithSameCompletionDate()(FakeRequest())
 
@@ -2364,17 +2371,21 @@ class CommonTriageQuestionsControllerSpec
       "display the page" when {
 
         "the user is an individual" in {
+          val date = sample[CompletionDate]
+          val id   = sample[String]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 Left(
                   sample[IncompleteMultipleDisposalsTriageAnswers].copy(
-                    assetTypes = Some(List(AssetType.Residential))
+                    assetTypes = Some(List(AssetType.Residential)),
+                    completionDate = Some(date)
                   )
                 ),
                 Right(sample[IndividualName]),
-                UserType.Individual
+                UserType.Individual,
+                previousSentReturns = Some(previousReturnData(id, date.value))
               )._1
             )
           }
@@ -2386,24 +2397,34 @@ class CommonTriageQuestionsControllerSpec
               doc.select("#back").attr("href")                         shouldBe routes.MultipleDisposalsTriageController.completionDate().url
               doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.p1",
-                viewConfig.contactHmrc
+                TimeUtils.govDisplayFormat(date.value)
               )
+              doc.select("#content > article > p:nth-child(4)").html() shouldBe messageFromMessageKey(
+                "previousReturnExistsWithSameCompletionDate.p2"
+              )
+              doc.select(s"#viewSentReturn-$id").attr("href")          shouldBe homePageRoutes.HomePageController
+                .viewSentReturn(id)
+                .url
             }
           )
         }
 
         "the user is a trust" in {
+          val date = sample[CompletionDate]
+          val id   = sample[String]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 Right(
                   sample[IncompleteSingleDisposalTriageAnswers].copy(
-                    assetType = Some(AssetType.Residential)
+                    assetType = Some(AssetType.Residential),
+                    completionDate = Some(date)
                   )
                 ),
                 Left(sample[TrustName]),
-                UserType.Organisation
+                UserType.Organisation,
+                previousSentReturns = Some(previousReturnData(id, date.value))
               )._1
             )
           }
@@ -2416,38 +2437,159 @@ class CommonTriageQuestionsControllerSpec
                 .whenWasCompletionDate()
                 .url
               doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
-                "previousReturnExistsWithSameCompletionDate.trust.p1",
+                "previousReturnExistsWithSameCompletionDate.p1",
+                TimeUtils.govDisplayFormat(date.value)
+              )
+              doc.select("#content > article > p:nth-child(4)").html() shouldBe messageFromMessageKey(
+                "previousReturnExistsWithSameCompletionDate.p2"
+              )
+              doc.select(s"#viewSentReturn-$id").attr("href")          shouldBe homePageRoutes.HomePageController
+                .viewSentReturn(id)
+                .url
+            }
+          )
+        }
+
+        "the user is an agent" in {
+          val date = sample[CompletionDate]
+          val id   = sample[String]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(
+                  sample[IncompleteSingleDisposalTriageAnswers].copy(
+                    assetType = Some(AssetType.Residential),
+                    completionDate = Some(date)
+                  )
+                ),
+                Left(sample[TrustName]),
+                UserType.Agent,
+                previousSentReturns = Some(previousReturnData(id, date.value))
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
+            { doc =>
+              doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
+                .whenWasCompletionDate()
+                .url
+              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+                "previousReturnExistsWithSameCompletionDate.p1",
+                TimeUtils.govDisplayFormat(date.value)
+              )
+              doc.select("#content > article > p:nth-child(4)").html() shouldBe messageFromMessageKey(
+                "previousReturnExistsWithSameCompletionDate.p2"
+              )
+              doc.select(s"#viewSentReturn-$id").attr("href")          shouldBe homePageRoutes.HomePageController
+                .viewSentReturn(id)
+                .url
+            }
+          )
+        }
+
+        "the user is an individual amending" in {
+          val completionDate = sample[CompletionDate]
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                sample[CompleteSingleDisposalTriageAnswers].copy(
+                  disposalDate = sample[DisposalDate],
+                  completionDate = completionDate
+                ),
+                Right(sample[IndividualName]),
+                UserType.Individual,
+                amendReturnData = Some(sample[AmendReturnData])
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "previousReturnExistsWithSameCompletionDate.amend.title",
+              TimeUtils.govDisplayFormat(completionDate.value)
+            ),
+            { doc =>
+              doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
+                .whenWasCompletionDate()
+                .url
+              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+                "previousReturnExistsWithSameCompletionDate.amend.p1",
                 viewConfig.contactHmrc
               )
             }
           )
         }
 
-        "the user is an agent" in {
+        "the user is a trust amending" in {
+          val completionDate = sample[CompletionDate]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                Right(
-                  sample[IncompleteSingleDisposalTriageAnswers].copy(
-                    assetType = Some(AssetType.Residential)
-                  )
+              sessionDataWithFillingOutReturn(
+                sample[CompleteSingleDisposalTriageAnswers].copy(
+                  disposalDate = sample[DisposalDate],
+                  completionDate = completionDate
                 ),
                 Left(sample[TrustName]),
-                UserType.Agent
+                UserType.Organisation,
+                amendReturnData = Some(sample[AmendReturnData])
               )._1
             )
           }
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
+            messageFromMessageKey(
+              "previousReturnExistsWithSameCompletionDate.amend.title",
+              TimeUtils.govDisplayFormat(completionDate.value)
+            ),
             { doc =>
               doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
                 .whenWasCompletionDate()
                 .url
               doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
-                "previousReturnExistsWithSameCompletionDate.agent.p1",
+                "previousReturnExistsWithSameCompletionDate.amend.trust.p1",
+                viewConfig.contactHmrc
+              )
+            }
+          )
+        }
+
+        "the user is an agent amending" in {
+          val completionDate = sample[CompletionDate]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                sample[CompleteSingleDisposalTriageAnswers].copy(
+                  disposalDate = sample[DisposalDate],
+                  completionDate = completionDate
+                ),
+                amendReturnData = Some(sample[AmendReturnData])
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "previousReturnExistsWithSameCompletionDate.amend.title",
+              TimeUtils.govDisplayFormat(completionDate.value)
+            ),
+            { doc =>
+              doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
+                .whenWasCompletionDate()
+                .url
+              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+                "previousReturnExistsWithSameCompletionDate.amend.p1",
                 viewConfig.contactHmrc
               )
             }
