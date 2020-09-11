@@ -55,10 +55,18 @@
           else ""
   }
 }
+
+@isPeriodOfAdmin = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => true
+        case _ => false
+    }
+}
+
 @nrKey = @{ if(wasUkResident) "" else ".non-resident" }
 
 @cyaSection() {
-    @if(!isATrust) {
+    @if(!isATrust & !isPeriodOfAdmin) {
         @cyaRow(
             messages(s"estimatedIncome$userKey$nrKey.title"),
             Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.estimatedIncome.inPounds())),
