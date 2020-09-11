@@ -1473,7 +1473,7 @@ class YearToDateLiabilityController @Inject() (
 
                       Ok(
                         furtherReturnCheckTaxDuePage(
-                          routes.YearToDateLiabilityController.hasEstimatedDetails(),
+                          routes.YearToDateLiabilityController.yearToDateLiability(),
                           yearToDateLiability,
                           previousYtd,
                           taxOwedOnOriginalReturn,
@@ -1606,8 +1606,8 @@ class YearToDateLiabilityController @Inject() (
     yearToDateLiability: AmountInPence,
     fillingOutReturn: FillingOutReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
-    if (nonCalculatedAnswers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).isEmpty)
-      Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
+    if (nonCalculatedAnswers.fold(_.yearToDateLiability, c => c.yearToDateLiability).isEmpty)
+      Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
     else {
       val taxDue = (yearToDateLiability -- previousYearToDateLiability: AmountInPence).withFloorZero
       if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue))
