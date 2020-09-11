@@ -21,15 +21,15 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
 import configs.syntax._
 import play.api.Configuration
-import play.api.http.HeaderNames.USER_AGENT
 import play.api.mvc.Call
 import play.mvc.Http.Status
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{upscan => _, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpReads.Implicits._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[UpscanConnectorImpl])
@@ -110,8 +110,7 @@ class UpscanConnectorImpl @Inject() (
       http
         .POST[UpscanInitiateRequest, HttpResponse](
           upscanInitiateUrl,
-          payload,
-          Seq(USER_AGENT -> "cgt-property-disposals-frontend")
+          payload
         )
         .map[Either[Error, HttpResponse]] { response =>
           if (response.status != Status.OK) {

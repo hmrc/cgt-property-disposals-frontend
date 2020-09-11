@@ -95,7 +95,7 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
       behave like upscanConnectorBehaviour(
         mockPost[UpscanInitiateRequest](
           expectedUrl,
-          Seq("User-Agent" -> "cgt-property-disposals-frontend"),
+          Seq.empty,
           payload
         ),
         () => connector.initiate(mockFailiure, mockSuccess, reference)
@@ -151,7 +151,6 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
       }
       "the future fails" in {
         mockResponse(None)
-
         await(performCall().value).isLeft shouldBe true
       }
 
