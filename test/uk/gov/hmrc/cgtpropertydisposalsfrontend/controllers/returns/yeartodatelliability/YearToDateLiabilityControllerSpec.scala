@@ -3050,6 +3050,7 @@ class YearToDateLiabilityControllerSpec
                     Some(completeAnswers),
                     Some(sample[DisposalDate]),
                     UserType.Individual,
+                    individualUserType = Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin),
                     wasUkResident = true,
                     amendReturnData = Some(
                       sample[AmendReturnData].copy(
@@ -3076,7 +3077,51 @@ class YearToDateLiabilityControllerSpec
                     completeAnswers,
                     isATrust = false,
                     hideEstimatesQuestion = true,
-                    doc
+                    doc = doc,
+                    isPeriodOfAdmin = true
+                  )
+              )
+            }
+          }
+
+          "the user is period of admin on an amend journey where the income and allowance question should be hidden" in {
+            forAll { completeAnswers: CompleteCalculatedYTDAnswers =>
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithSingleDisposalState(
+                    Some(completeAnswers),
+                    Some(sample[DisposalDate]),
+                    UserType.Individual,
+                    individualUserType = Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin),
+                    wasUkResident = true,
+                    amendReturnData = Some(
+                      sample[AmendReturnData].copy(
+                        originalReturn = sample[CompleteReturnWithSummary].copy(
+                          completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                            yearToDateLiabilityAnswers = Right(
+                              sample[CompleteCalculatedYTDAnswers].copy(
+                                hasEstimatedDetails = true
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )._1
+                )
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("ytdLiability.cya.title"),
+                doc =>
+                  validateCalculatedYearToDateLiabilityPage(
+                    completeAnswers,
+                    isATrust = false,
+                    hideEstimatesQuestion = false,
+                    doc = doc,
+                    isPeriodOfAdmin = true
                   )
               )
             }
@@ -7676,11 +7721,13 @@ object YearToDateLiabilityControllerSpec extends Matchers {
     completeYearToDateLiabilityAnswers: CompleteCalculatedYTDAnswers,
     isATrust: Boolean,
     hideEstimatesQuestion: Boolean,
-    doc: Document
+    doc: Document,
+    isPeriodOfAdmin: Boolean = false
   ): Unit = {
 
     doc.select("#estimatedIncome-value-answer").text() shouldBe (
       if (isATrust) ""
+      else if (isPeriodOfAdmin) ""
       else
         formatAmountOfMoneyWithPoundSign(
           completeYearToDateLiabilityAnswers.estimatedIncome.inPounds()
@@ -7690,6 +7737,7 @@ object YearToDateLiabilityControllerSpec extends Matchers {
     completeYearToDateLiabilityAnswers.personalAllowance.foreach(f =>
       doc.select("#personalAllowance-value-answer").text() shouldBe (
         if (isATrust) ""
+        else if (isPeriodOfAdmin) ""
         else formatAmountOfMoneyWithPoundSign(f.inPounds())
       )
     )
@@ -7775,4 +7823,5 @@ object YearToDateLiabilityControllerSpec extends Matchers {
       answers.taxDue.inPounds()
     )
   }
+
 }
