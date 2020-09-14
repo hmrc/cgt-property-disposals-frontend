@@ -31,37 +31,23 @@
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(previousReturn: Option[ReturnSummary], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(previousReturn: ReturnSummary, backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"previousReturnExistsWithSameCompletionDate"}
 @title = @{ messages(s"$key.title") }
-@submissionId = @{
-    previousReturn match {
-        case Some(value) => value.submissionId
-        case None => ""
+@line1Display = @{
+    previousReturn.propertyAddress match {
+        case Address.UkAddress(line1, _, _, _, _) => line1
+        case Address.NonUkAddress(line1, _, _, _, _, _) => line1
     }
-
 }
 
-@line1Display = @{
-    previousReturn match {
-        case Some(value) => value.propertyAddress match {
-            case Address.UkAddress(line1, _, _, _, _) => line1
-            case Address.NonUkAddress(_, _, _, _, _, _) => ""
-        }
-        case None => ""
-    }
-  }
-
 @line2Display = @{
-    previousReturn match {
-        case Some(value) => value.propertyAddress match {
-            case Address.UkAddress(_, _, _, Some(town), postcode) => s"$town, ${postcode.value}"
-            case _ => ""
-        }
-        case None => ""
+    previousReturn.propertyAddress match {
+        case Address.UkAddress(_, _, _, Some(town), postcode) => s"$town, ${postcode.value}"
+        case _ => ""
     }
-  }
+}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -69,11 +55,7 @@
 
     @pageHeading(title)
     <p>
-    @{
-        previousReturn.map{ e =>
-            Html(messages(s"$key.p1", TimeUtils.govDisplayFormat(e.completionDate)))
-      }
-    }
+    @Html(messages(s"$key.p1", TimeUtils.govDisplayFormat(previousReturn.completionDate)))
   </p>
 
     <p>@Html(messages(s"$key.p2"))</p>
@@ -85,16 +67,16 @@
             <div class="grid-row">
                 <div class="column-three-quarters submission-summary">
                     <h3>
-                        <span class="caption">Existing return details</span>
+                        <span class="caption">@messages(s"$key.caption")</span>
                         @line1Display
                         <span class="sub-heading">@line2Display</span>
                     </h3>
                 </div>
                 </div>
-            <a id="viewSentReturn-@submissionId"
+            <a id="viewSentReturn-@{previousReturn.submissionId}"
             class="button"
             role="button"
-            href=@controllers.accounts.homepage.routes.HomePageController.viewSentReturn(submissionId)>View and change return</a>
+            href=@controllers.accounts.homepage.routes.HomePageController.viewSentReturn(previousReturn.submissionId)>@messages(s"$key.button.viewAndChange")</a>
             </div>
 
         </li>

@@ -56,6 +56,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homePageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.Residential
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleMixedUseDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
@@ -2500,11 +2501,13 @@ class CommonTriageQuestionsControllerSpec
               sessionDataWithFillingOutReturn(
                 sample[CompleteSingleDisposalTriageAnswers].copy(
                   disposalDate = sample[DisposalDate],
-                  completionDate = completionDate
+                  completionDate = completionDate,
+                  assetType = Residential
                 ),
                 Right(sample[IndividualName]),
                 UserType.Individual,
-                amendReturnData = Some(sample[AmendReturnData])
+                amendReturnData = Some(sample[AmendReturnData]),
+                previousReturns = Some(previousReturnData("id", completionDate.value))
               )._1
             )
           }
@@ -2535,7 +2538,8 @@ class CommonTriageQuestionsControllerSpec
               sessionDataWithFillingOutReturn(
                 sample[CompleteSingleDisposalTriageAnswers].copy(
                   disposalDate = sample[DisposalDate],
-                  completionDate = completionDate
+                  completionDate = completionDate,
+                  assetType = Residential
                 ),
                 Left(sample[TrustName]),
                 UserType.Organisation,
@@ -2571,7 +2575,8 @@ class CommonTriageQuestionsControllerSpec
               sessionDataWithFillingOutReturn(
                 sample[CompleteSingleDisposalTriageAnswers].copy(
                   disposalDate = sample[DisposalDate],
-                  completionDate = completionDate
+                  completionDate = completionDate,
+                  assetType = Residential
                 ),
                 amendReturnData = Some(sample[AmendReturnData])
               )._1
@@ -2597,17 +2602,20 @@ class CommonTriageQuestionsControllerSpec
         }
 
         "the user is on a single indirect disposal journey" in {
+          val completionDate = sample[CompletionDate]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 Left(
                   sample[IncompleteMultipleDisposalsTriageAnswers].copy(
-                    assetTypes = Some(List(AssetType.IndirectDisposal))
+                    assetTypes = Some(List(AssetType.IndirectDisposal)),
+                    completionDate = Some(completionDate)
                   )
                 ),
                 Right(sample[IndividualName]),
-                UserType.Individual
+                UserType.Individual,
+                previousSentReturns = Some(previousReturnData("id", completionDate.value))
               )._1
             )
           }
@@ -2620,17 +2628,20 @@ class CommonTriageQuestionsControllerSpec
         }
 
         "the user is on a multiple indirect disposals journey" in {
+          val completionDate = sample[CompletionDate]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 Right(
                   sample[IncompleteSingleDisposalTriageAnswers].copy(
-                    assetType = Some(AssetType.IndirectDisposal)
+                    assetType = Some(AssetType.IndirectDisposal),
+                    completionDate = Some(completionDate)
                   )
                 ),
                 Right(sample[IndividualName]),
-                UserType.Individual
+                UserType.Individual,
+                previousSentReturns = Some(previousReturnData("id", completionDate.value))
               )._1
             )
           }
