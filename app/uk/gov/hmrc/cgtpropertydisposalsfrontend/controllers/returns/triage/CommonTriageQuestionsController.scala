@@ -68,6 +68,7 @@ class CommonTriageQuestionsController @Inject() (
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
   previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date,
+  previousReturnExistsWithSameCompletionDateAmendPage: triagePages.previous_return_exists_with_same_completion_date_ammend,
   furtherReturnsHelpPage: triagePages.further_retuns_help,
   disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
   cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
@@ -419,14 +420,69 @@ class CommonTriageQuestionsController @Inject() (
               else routes.SingleDisposalsTriageController.whenWasCompletionDate()
           }
 
-        Ok(
-          previousReturnExistsWithSameCompletionDatePage(
-            state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
-            backLink
-          )
-        )
+        withCompletionDate(state) { completionDate =>
+          state
+            .fold(_.previousSentReturns, _.previousSentReturns)
+            .map(_.summaries)
+            .getOrElse(List.empty)
+            .find(e => CompletionDate(e.completionDate) === completionDate) match {
+            case Some(matchingPreviousReturn) if state.forall(!_.isAmendReturn) =>
+              Ok(
+                previousReturnExistsWithSameCompletionDatePage(
+                  matchingPreviousReturn,
+                  backLink
+                )
+              )
+            case _ if state.exists(_.isAmendReturn)                             =>
+              Ok(
+                previousReturnExistsWithSameCompletionDateAmendPage(
+                  completionDate,
+                  state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
+                  backLink
+                )
+              )
+            case _                                                              => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
+          }
+        }
       }
     }
+
+  private def withCompletionDate(state: Either[StartingNewDraftReturn, FillingOutReturn])(
+    f: CompletionDate => Future[Result]
+  ): Future[Result] = {
+    def routeSingle(singleDisposalTriageAnswers: SingleDisposalTriageAnswers): Future[Result] =
+      singleDisposalTriageAnswers match {
+        case incomplete: IncompleteSingleDisposalTriageAnswers                         =>
+          incomplete.completionDate match {
+            case Some(value) => f(value)
+            case None        => Redirect(routes.SingleDisposalsTriageController.whenWasCompletionDate())
+          }
+        case complete: SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers => f(complete.completionDate)
+      }
+
+    def routeMultiple(multipleDisposalsTriageAnswers: MultipleDisposalsTriageAnswers): Future[Result] =
+      multipleDisposalsTriageAnswers match {
+        case s: IncompleteMultipleDisposalsTriageAnswers                              =>
+          s.completionDate match {
+            case Some(value) => f(value)
+            case None        => Redirect(routes.MultipleDisposalsTriageController.completionDate())
+          }
+        case s: MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers => f(s.completionDate)
+      }
+
+    state match {
+      case Left(startingNewReturn) =>
+        startingNewReturn.newReturnTriageAnswers match {
+          case Left(multiple) => routeMultiple(multiple)
+          case Right(single)  => routeSingle(single)
+        }
+      case Right(fillingOutReturn) =>
+        fillingOutReturn.draftReturn.triageAnswers() match {
+          case Left(multiple) => routeMultiple(multiple)
+          case Right(single)  => routeSingle(single)
+        }
+    }
+  }
 
   private def amendReturnDisposalDateBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
     state.fold(
