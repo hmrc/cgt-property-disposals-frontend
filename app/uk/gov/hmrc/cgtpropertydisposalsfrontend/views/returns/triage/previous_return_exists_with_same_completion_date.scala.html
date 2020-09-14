@@ -39,12 +39,14 @@
     previousReturn.propertyAddress match {
         case Address.UkAddress(line1, _, _, _, _) => line1
         case Address.NonUkAddress(line1, _, _, _, _, _) => line1
+        case _ => ""
     }
 }
 
 @line2Display = @{
     previousReturn.propertyAddress match {
         case Address.UkAddress(_, _, _, Some(town), postcode) => s"$town, ${postcode.value}"
+        case Address.NonUkAddress(_, Some(area), Some(townOrCity), _, _, _) => s"$area, $townOrCity"
         case _ => ""
     }
 }

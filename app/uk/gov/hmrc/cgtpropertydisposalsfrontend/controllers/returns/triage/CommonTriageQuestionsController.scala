@@ -420,33 +420,28 @@ class CommonTriageQuestionsController @Inject() (
               else routes.SingleDisposalsTriageController.whenWasCompletionDate()
           }
 
-        withCompletionDate(state) { value =>
-          state.fold(
-            _.previousSentReturns
-              .map(_.summaries)
-              .getOrElse(List.empty)
-              .find(e => CompletionDate(e.completionDate) === value),
-            _.previousSentReturns
-              .map(_.summaries)
-              .getOrElse(List.empty)
-              .find(e => CompletionDate(e.completionDate) === value)
-          ) match {
-            case Some(matchingPreviousReturn) if state.fold(_ => true, r => !r.isAmendReturn) =>
+        withCompletionDate(state) { completionDate =>
+          state
+            .fold(_.previousSentReturns, _.previousSentReturns)
+            .map(_.summaries)
+            .getOrElse(List.empty)
+            .find(e => CompletionDate(e.completionDate) === completionDate) match {
+            case Some(matchingPreviousReturn) if state.forall(!_.isAmendReturn) =>
               Ok(
                 previousReturnExistsWithSameCompletionDatePage(
                   matchingPreviousReturn,
                   backLink
                 )
               )
-            case _ if state.fold(_ => false, _.isAmendReturn)                                 =>
+            case _ if state.exists(_.isAmendReturn)                             =>
               Ok(
                 previousReturnExistsWithSameCompletionDateAmendPage(
-                  value,
+                  completionDate,
                   state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
                   backLink
                 )
               )
-            case _                                                                            => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
+            case _                                                              => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
           }
         }
       }
@@ -454,51 +449,40 @@ class CommonTriageQuestionsController @Inject() (
 
   private def withCompletionDate(state: Either[StartingNewDraftReturn, FillingOutReturn])(
     f: CompletionDate => Future[Result]
-  ): Future[Result] =
+  ): Future[Result] = {
+    def routeSingle(singleDisposalTriageAnswers: SingleDisposalTriageAnswers): Future[Result] =
+      singleDisposalTriageAnswers match {
+        case incomplete: IncompleteSingleDisposalTriageAnswers                         =>
+          incomplete.completionDate match {
+            case Some(value) => f(value)
+            case None        => Redirect(routes.SingleDisposalsTriageController.whenWasCompletionDate())
+          }
+        case complete: SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers => f(complete.completionDate)
+      }
+
+    def routeMultiple(multipleDisposalsTriageAnswers: MultipleDisposalsTriageAnswers): Future[Result] =
+      multipleDisposalsTriageAnswers match {
+        case s: IncompleteMultipleDisposalsTriageAnswers                              =>
+          s.completionDate match {
+            case Some(value) => f(value)
+            case None        => Redirect(routes.MultipleDisposalsTriageController.completionDate())
+          }
+        case s: MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers => f(s.completionDate)
+      }
+
     state match {
-      case Left(value)  =>
-        value.newReturnTriageAnswers match {
-          case Left(value)  =>
-            value match {
-              case s: IncompleteMultipleDisposalsTriageAnswers                              =>
-                s.completionDate match {
-                  case Some(value) => f(value)
-                  case None        => Redirect(routes.MultipleDisposalsTriageController.completionDate())
-                }
-              case s: MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers => f(s.completionDate)
-            }
-          case Right(value) =>
-            value match {
-              case s: IncompleteSingleDisposalTriageAnswers                           =>
-                s.completionDate match {
-                  case Some(value) => f(value)
-                  case None        => Redirect(routes.SingleDisposalsTriageController.whenWasCompletionDate())
-                }
-              case s: SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers => f(s.completionDate)
-            }
+      case Left(startingNewReturn) =>
+        startingNewReturn.newReturnTriageAnswers match {
+          case Left(multiple) => routeMultiple(multiple)
+          case Right(single)  => routeSingle(single)
         }
-      case Right(value) =>
-        value.draftReturn.triageAnswers() match {
-          case Left(value)  =>
-            value match {
-              case m: IncompleteMultipleDisposalsTriageAnswers                              =>
-                m.completionDate match {
-                  case Some(value) => f(value)
-                  case None        => Redirect(routes.MultipleDisposalsTriageController.completionDate())
-                }
-              case m: MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers => f(m.completionDate)
-            }
-          case Right(value) =>
-            value match {
-              case s: IncompleteSingleDisposalTriageAnswers                           =>
-                s.completionDate match {
-                  case Some(value) => f(value)
-                  case None        => Redirect(routes.SingleDisposalsTriageController.whenWasCompletionDate())
-                }
-              case s: SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers => f(s.completionDate)
-            }
+      case Right(fillingOutReturn) =>
+        fillingOutReturn.draftReturn.triageAnswers() match {
+          case Left(multiple) => routeMultiple(multiple)
+          case Right(single)  => routeSingle(single)
         }
     }
+  }
 
   private def amendReturnDisposalDateBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
     state.fold(
