@@ -44,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
@@ -101,9 +101,7 @@ class MixedUsePropertyDetailsControllerSpec
     name: Either[TrustName, IndividualName],
     userType: UserType,
     individualUserType: Option[IndividualUserType],
-    mixedUsePropertyDetailsAnswers: Option[MixedUsePropertyDetailsAnswers],
-    previousReturnData: Option[PreviousReturnData] = None,
-    amendReturnData: Option[AmendReturnData] = None
+    mixedUsePropertyDetailsAnswers: Option[MixedUsePropertyDetailsAnswers]
   ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) = {
     val draftReturn      = sample[DraftSingleMixedUseDisposalReturn].copy(
       triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType),
@@ -122,9 +120,7 @@ class MixedUsePropertyDetailsControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       agentReferenceNumber =
         if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber])
-        else None,
-      previousSentReturns = previousReturnData,
-      amendReturnData = amendReturnData
+        else None
     )
     val sessionData      = SessionData.empty.copy(
       journeyStatus = Some(fillingOutReturn),
@@ -134,17 +130,13 @@ class MixedUsePropertyDetailsControllerSpec
   }
 
   def individualState(
-    address: Option[UkAddress] = None,
-    previousReturnData: Option[PreviousReturnData] = None,
-    amendReturnData: Option[AmendReturnData] = None
+    address: Option[UkAddress] = None
   ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) =
     sessionWithDraftMixedUseDisposal(
       Right(sample[IndividualName]),
       UserType.Individual,
       Some(Self),
-      Some(IncompleteMixedUsePropertyDetailsAnswers(address, None, None)),
-      previousReturnData,
-      amendReturnData
+      Some(IncompleteMixedUsePropertyDetailsAnswers(address, None, None))
     )
 
   def capacitorState(
@@ -616,10 +608,7 @@ class MixedUsePropertyDetailsControllerSpec
 
       "show an error page" when {
 
-        val (session, journey, draftReturn) = individualState(
-          previousReturnData = None,
-          amendReturnData = None
-        )
+        val (session, journey, draftReturn) = individualState()
         val address                         =
           UkAddress("address line 1", None, None, None, Postcode("ZZ10ZZ"))
 
@@ -668,72 +657,33 @@ class MixedUsePropertyDetailsControllerSpec
 
       "redirect to the cya page" when {
 
-        def test(
-          formData: Seq[(String, String)]
-        )(session: SessionData, newJourney: FillingOutReturn): Unit = {
+        "all updates are successful" in {
+          val (session, journey, draftReturn) = agentState()
+          val address                         =
+            UkAddress("address line 1", None, None, None, Postcode("ZZ10ZZ"))
+
+          val newDraftReturn = draftReturn.copy(mixedUsePropertyDetailsAnswers =
+            Some(IncompleteMixedUsePropertyDetailsAnswers(Some(address), None, None))
+          )
+          val newJourney     = journey.copy(draftReturn = newDraftReturn)
+          val newSession     = session.copy(journeyStatus = Some(newJourney))
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockStoreDraftReturn(newJourney)(
               Right(())
             )
-            mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+            mockStoreSession(newSession)(Right(()))
           }
 
           checkIsRedirect(
-            performAction(formData: _*),
+            performAction(
+              "address-line1" -> address.line1,
+              "postcode"      -> address.postcode.value
+            ),
             routes.MixedUsePropertyDetailsController.checkYourAnswers()
           )
-        }
-
-        val address  = UkAddress("address line 1", None, None, None, Postcode("ZZ10ZZ"))
-        val formData =
-          List(
-            "address-line1" -> address.line1,
-            "postcode"      -> address.postcode.value
-          )
-
-        "all updates are successful" in {
-          val (session, journey, draftReturn) = agentState()
-
-          val newDraftReturn = draftReturn.copy(mixedUsePropertyDetailsAnswers =
-            Some(IncompleteMixedUsePropertyDetailsAnswers(Some(address), None, None))
-          )
-          val newJourney     = journey.copy(draftReturn = newDraftReturn)
-
-          test(formData)(session, newJourney)
-        }
-
-        "the user is on an amend return journey" in {
-          val (session, journey, draftReturn) = individualState(
-            previousReturnData = None,
-            amendReturnData = Some(sample[AmendReturnData])
-          )
-
-          val newDraftReturn = draftReturn.copy(
-            mixedUsePropertyDetailsAnswers = Some(IncompleteMixedUsePropertyDetailsAnswers(Some(address), None, None)),
-            exemptionAndLossesAnswers = None,
-            yearToDateLiabilityAnswers = None
-          )
-          val newJourney     = journey.copy(draftReturn = newDraftReturn)
-
-          test(formData)(session, newJourney)
-        }
-
-        "the user is on a further return journey" in {
-          val (session, journey, draftReturn) = individualState(
-            previousReturnData = Some(sample[PreviousReturnData]),
-            amendReturnData = None
-          )
-
-          val newDraftReturn = draftReturn.copy(
-            mixedUsePropertyDetailsAnswers = Some(IncompleteMixedUsePropertyDetailsAnswers(Some(address), None, None)),
-            exemptionAndLossesAnswers = None,
-            yearToDateLiabilityAnswers = None
-          )
-          val newJourney     = journey.copy(draftReturn = newDraftReturn)
-
-          test(formData)(session, newJourney)
         }
 
       }

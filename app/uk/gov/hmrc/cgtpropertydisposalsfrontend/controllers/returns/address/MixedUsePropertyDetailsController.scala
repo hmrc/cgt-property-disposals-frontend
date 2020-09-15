@@ -108,9 +108,7 @@ class MixedUsePropertyDetailsController @Inject() (
     journey: EnteringSingleMixedUsePropertyDetails,
     address: Address,
     isManuallyEnteredAddress: Boolean
-  )(implicit hc: HeaderCarrier, request: Request[_]): EitherT[Future, Error, JourneyStatus] = {
-    val isFurtherOrAmendReturn = journey.journey.isFurtherOrAmendReturn.contains(true)
-
+  )(implicit hc: HeaderCarrier, request: Request[_]): EitherT[Future, Error, JourneyStatus] =
     address match {
       case _: NonUkAddress =>
         EitherT.leftT[Future, JourneyStatus](
@@ -121,13 +119,7 @@ class MixedUsePropertyDetailsController @Inject() (
           IncompleteMixedUsePropertyDetailsAnswers.empty
         )
         val updatedDraftReturn = journey.draftReturn
-          .copy(
-            mixedUsePropertyDetailsAnswers = Some(answers.unset(_.address).copy(address = Some(a))),
-            exemptionAndLossesAnswers =
-              if (isFurtherOrAmendReturn) None else journey.draftReturn.exemptionAndLossesAnswers,
-            yearToDateLiabilityAnswers =
-              if (isFurtherOrAmendReturn) None else journey.draftReturn.yearToDateLiabilityAnswers
-          )
+          .copy(mixedUsePropertyDetailsAnswers = Some(answers.unset(_.address).copy(address = Some(a))))
 
         val updatedJourney = journey.journey.copy(draftReturn = updatedDraftReturn)
 
@@ -136,7 +128,6 @@ class MixedUsePropertyDetailsController @Inject() (
           .map(_ => updatedJourney)
 
     }
-  }
 
   def isATrust(journey: EnteringSingleMixedUsePropertyDetails): Boolean =
     journey.journey.subscribedDetails.isATrust

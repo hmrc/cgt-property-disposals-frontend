@@ -2297,11 +2297,17 @@ class MultipleDisposalsTriageControllerSpec
 
       def updateDraftReturn(
         d: DraftMultipleDisposalsReturn,
-        newAnswers: MultipleDisposalsTriageAnswers
+        newAnswers: MultipleDisposalsTriageAnswers,
+        preserveEstimatesAnswer: Boolean = false
       ) =
         d.copy(
           triageAnswers = newAnswers,
-          yearToDateLiabilityAnswers = None
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
+            case _: CalculatedYTDAnswers    => None
+            case n: NonCalculatedYTDAnswers =>
+              if (preserveEstimatesAnswer) Some(n.unset(_.taxDue))
+              else Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
+          }
         )
 
       val key     = "countryCode"
@@ -2451,7 +2457,7 @@ class MultipleDisposalsTriageControllerSpec
 
               val updatedAnswers     = answers.copy(countryOfResidence = country)
               val updatedDraftReturn =
-                updateDraftReturn(draftReturn, updatedAnswers)
+                updateDraftReturn(draftReturn, updatedAnswers, preserveEstimatesAnswer = true)
               val updatedJourney     =
                 journey.copy(draftReturn = updatedDraftReturn)
 
@@ -3234,7 +3240,7 @@ class MultipleDisposalsTriageControllerSpec
         d.copy(
           triageAnswers = newAnswers,
           examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
-            _.unset(_.disposalDate).unset(_.acquisitionPrice)
+            _.unset(_.disposalDate)
           ),
           yearToDateLiabilityAnswers = None,
           gainOrLossAfterReliefs = None

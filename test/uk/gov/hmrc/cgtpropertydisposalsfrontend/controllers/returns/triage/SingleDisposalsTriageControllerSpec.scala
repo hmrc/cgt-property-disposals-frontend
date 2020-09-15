@@ -861,7 +861,6 @@ class SingleDisposalsTriageControllerSpec
           disposalDetailsAnswers = None,
           acquisitionDetailsAnswers = None,
           initialGainOrLoss = None,
-          gainOrLossAfterReliefs = None,
           reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
           exemptionAndLossesAnswers = None,
           yearToDateLiabilityAnswers = None,
@@ -3265,11 +3264,27 @@ class SingleDisposalsTriageControllerSpec
 
       def updateDraftReturn(
         d: DraftSingleDisposalReturn,
-        newAnswers: SingleDisposalTriageAnswers
+        newAnswers: SingleDisposalTriageAnswers,
+        preserveEstimatesAnswer: Boolean = false
       ) =
         d.copy(
           triageAnswers = newAnswers,
-          yearToDateLiabilityAnswers = None
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
+            case _: CalculatedYTDAnswers    => None
+            case n: NonCalculatedYTDAnswers =>
+              if (preserveEstimatesAnswer)
+                Some(
+                  n.unset(_.mandatoryEvidence)
+                    .unset(_.yearToDateLiability)
+                )
+              else
+                Some(
+                  n.unset(_.hasEstimatedDetails)
+                    .unset(_.mandatoryEvidence)
+                    .unset(_.yearToDateLiability)
+                )
+          },
+          gainOrLossAfterReliefs = None
         )
 
       val requiredPreviousAnswers =
@@ -3407,7 +3422,7 @@ class SingleDisposalsTriageControllerSpec
         requiredPreviousAnswers,
         List("countryCode" -> country.code),
         requiredPreviousAnswers.copy(countryOfResidence = Some(country)),
-        updateDraftReturn(_, _)
+        updateDraftReturn(_, _, false)
       )
 
       "handle successful updates" when {
@@ -3506,7 +3521,8 @@ class SingleDisposalsTriageControllerSpec
                   fillingOutReturn.copy(draftReturn =
                     updateDraftReturn(
                       draftReturn,
-                      completeAnswers.copy(countryOfResidence = country)
+                      completeAnswers.copy(countryOfResidence = country),
+                      preserveEstimatesAnswer = true
                     )
                   ),
                 checkIsRedirect(

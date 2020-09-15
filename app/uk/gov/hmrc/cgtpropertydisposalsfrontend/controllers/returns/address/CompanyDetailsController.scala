@@ -146,8 +146,6 @@ class CompanyDetailsController @Inject() (
     hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] = {
-    val isFurtherOrAmendReturn = journey.journey.isFurtherOrAmendReturn.contains(true)
-
     val newJourney = journey.journey.copy(
       draftReturn = journey.draftReturn.fold(
         multipleIndirect =>
@@ -159,18 +157,9 @@ class CompanyDetailsController @Inject() (
                   _.copy(address = Some(address)),
                   _.copy(address = address)
                 )
-            ),
-            exemptionAndLossesAnswers =
-              if (isFurtherOrAmendReturn) None else multipleIndirect.exemptionAndLossesAnswers,
-            yearToDateLiabilityAnswers =
-              if (isFurtherOrAmendReturn) None else multipleIndirect.yearToDateLiabilityAnswers
+            )
           ),
-        singleIndirect =>
-          singleIndirect.copy(
-            companyAddress = Some(address),
-            exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else singleIndirect.exemptionAndLossesAnswers,
-            yearToDateLiabilityAnswers = if (isFurtherOrAmendReturn) None else singleIndirect.yearToDateLiabilityAnswers
-          )
+        _.copy(companyAddress = Some(address))
       )
     )
 

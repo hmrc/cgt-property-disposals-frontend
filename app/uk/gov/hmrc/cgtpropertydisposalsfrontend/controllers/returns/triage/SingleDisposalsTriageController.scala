@@ -44,6 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.{G
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnStarted
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -300,7 +301,6 @@ class SingleDisposalsTriageController @Inject() (
                           disposalDetailsAnswers = None,
                           acquisitionDetailsAnswers = None,
                           initialGainOrLoss = None,
-                          gainOrLossAfterReliefs = None,
                           reliefDetailsAnswers = d.reliefDetailsAnswers
                             .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
                           exemptionAndLossesAnswers = None,
@@ -316,7 +316,6 @@ class SingleDisposalsTriageController @Inject() (
                           companyAddress = None,
                           disposalDetailsAnswers = None,
                           acquisitionDetailsAnswers = None,
-                          gainOrLossAfterReliefs = None,
                           exemptionAndLossesAnswers = None,
                           yearToDateLiabilityAnswers = None,
                           supportingEvidenceAnswers = None
@@ -328,7 +327,6 @@ class SingleDisposalsTriageController @Inject() (
                         mixedUseDraftReturn.copy(
                           triageAnswers = newAnswers,
                           mixedUsePropertyDetailsAnswers = None,
-                          gainOrLossAfterReliefs = None,
                           exemptionAndLossesAnswers = None,
                           yearToDateLiabilityAnswers = None,
                           supportingEvidenceAnswers = None
@@ -859,24 +857,45 @@ class SingleDisposalsTriageController @Inject() (
                 _.copy(newReturnTriageAnswers = Right(newAnswers)),
                 {
                   case (d, r) =>
+                    def updateYearToDateSection(
+                      yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers]
+                    ): Option[YearToDateLiabilityAnswers] =
+                      yearToDateLiabilityAnswers.flatMap {
+                        case _: CalculatedYTDAnswers    => None
+                        case n: NonCalculatedYTDAnswers =>
+                          if (preserveEstimatesAnswer(state))
+                            Some(
+                              n.unset(_.yearToDateLiability)
+                                .unset(_.mandatoryEvidence)
+                            )
+                          else
+                            Some(
+                              n.unset(_.hasEstimatedDetails)
+                                .unset(_.yearToDateLiability)
+                                .unset(_.mandatoryEvidence)
+                            )
+                      }
+
                     r.copy(
                       draftReturn = d.fold(
                         _.fold(
                           mixedUseDraftReturn =>
                             mixedUseDraftReturn.copy(
                               triageAnswers = newAnswers,
-                              yearToDateLiabilityAnswers = None
+                              yearToDateLiabilityAnswers =
+                                updateYearToDateSection(mixedUseDraftReturn.yearToDateLiabilityAnswers)
                             ),
                           indirectDraftReturn =>
                             indirectDraftReturn.copy(
                               triageAnswers = newAnswers,
-                              yearToDateLiabilityAnswers = None
+                              yearToDateLiabilityAnswers =
+                                updateYearToDateSection(indirectDraftReturn.yearToDateLiabilityAnswers)
                             )
                         ),
                         s =>
                           s.copy(
                             triageAnswers = newAnswers,
-                            yearToDateLiabilityAnswers = None
+                            yearToDateLiabilityAnswers = updateYearToDateSection(s.yearToDateLiabilityAnswers)
                           )
                       )
                     )
@@ -1827,6 +1846,9 @@ class SingleDisposalsTriageController @Inject() (
       f
     )
   }
+
+  private def preserveEstimatesAnswer(state: JourneyState): Boolean =
+    state.exists(_._2.amendReturnData.exists(_.preserveEstimatesAnswer))
 
 }
 

@@ -40,11 +40,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
@@ -61,7 +60,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, User
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 
 import scala.concurrent.Future
 
@@ -102,14 +100,11 @@ class CompanyDetailsControllerSpec
     name: Either[TrustName, IndividualName],
     userType: UserType,
     individualUserType: Option[IndividualUserType],
-    companyAddress: Option[Address],
-    amendReturnData: Option[AmendReturnData] = None,
-    previousReturnData: Option[PreviousReturnData] = None
+    companyAddress: Option[Address]
   ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
     val draftReturn      = sample[DraftSingleIndirectDisposalReturn].copy(
       triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
         .copy(individualUserType = individualUserType),
-      representeeAnswers = if (individualUserType.contains(Self)) None else Some(sample[CompleteRepresenteeAnswers]),
       companyAddress = companyAddress
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
@@ -117,9 +112,7 @@ class CompanyDetailsControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       agentReferenceNumber =
         if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber])
-        else None,
-      amendReturnData = amendReturnData,
-      previousSentReturns = previousReturnData
+        else None
     )
     val sessionData      = SessionData.empty.copy(
       journeyStatus = Some(fillingOutReturn),
@@ -129,17 +122,13 @@ class CompanyDetailsControllerSpec
   }
 
   def individualState(
-    companyAddress: Option[Address] = None,
-    amendReturnData: Option[AmendReturnData] = None,
-    previousReturnData: Option[PreviousReturnData] = None
+    companyAddress: Option[Address] = None
   ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) =
     sessionWithDraftSingleIndirectDisposal(
       Right(sample[IndividualName]),
       UserType.Individual,
       Some(Self),
-      companyAddress,
-      amendReturnData,
-      previousReturnData
+      companyAddress
     )
 
   def sessionWithDraftMultipleIndirectDisposals(
@@ -1238,96 +1227,31 @@ class CompanyDetailsControllerSpec
 
       "redirect to the cya page" when {
 
-        "all updates are successful" when {
+        "all updates are successful" in {
+          val (session, journey, draftReturn) = agentState()
+          val address                         =
+            UkAddress("The Company", None, None, None, Postcode("ZZ10ZZ"))
 
-          "the user is not an an amend or further return journey" in {
-            val (session, journey, draftReturn) = agentState()
-            val address                         =
-              UkAddress("The Company", None, None, None, Postcode("ZZ10ZZ"))
+          val newDraftReturn = draftReturn.copy(companyAddress = Some(address))
+          val newJourney     = journey.copy(draftReturn = newDraftReturn)
+          val newSession     = session.copy(journeyStatus = Some(newJourney))
 
-            val newDraftReturn = draftReturn.copy(companyAddress = Some(address))
-            val newJourney     = journey.copy(draftReturn = newDraftReturn)
-            val newSession     = session.copy(journeyStatus = Some(newJourney))
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(session)
-              mockStoreDraftReturn(newJourney)(
-                Right(())
-              )
-              mockStoreSession(newSession)(Right(()))
-            }
-
-            checkIsRedirect(
-              performAction(
-                "address-line1" -> address.line1,
-                "postcode"      -> address.postcode.value
-              ),
-              routes.CompanyDetailsController.checkYourAnswers()
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(newJourney)(
+              Right(())
             )
+            mockStoreSession(newSession)(Right(()))
           }
 
-          "the user is on an amend journey" in {
-            val (session, journey, draftReturn) = individualState(amendReturnData = Some(sample[AmendReturnData]))
-            val address                         =
-              UkAddress("The Company", None, None, None, Postcode("ZZ10ZZ"))
-
-            val newDraftReturn = draftReturn.copy(
-              companyAddress = Some(address),
-              exemptionAndLossesAnswers = None,
-              yearToDateLiabilityAnswers = None
-            )
-            val newJourney     = journey.copy(draftReturn = newDraftReturn)
-            val newSession     = session.copy(journeyStatus = Some(newJourney))
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(session)
-              mockStoreDraftReturn(newJourney)(
-                Right(())
-              )
-              mockStoreSession(newSession)(Right(()))
-            }
-
-            checkIsRedirect(
-              performAction(
-                "address-line1" -> address.line1,
-                "postcode"      -> address.postcode.value
-              ),
-              routes.CompanyDetailsController.checkYourAnswers()
-            )
-          }
-
-          "the user is on a further return journey" in {
-            val (session, journey, draftReturn) = individualState(previousReturnData = Some(sample[PreviousReturnData]))
-            val address                         =
-              UkAddress("The Company", None, None, None, Postcode("ZZ10ZZ"))
-
-            val newDraftReturn = draftReturn.copy(
-              companyAddress = Some(address),
-              exemptionAndLossesAnswers = None,
-              yearToDateLiabilityAnswers = None
-            )
-            val newJourney     = journey.copy(draftReturn = newDraftReturn)
-            val newSession     = session.copy(journeyStatus = Some(newJourney))
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(session)
-              mockStoreDraftReturn(newJourney)(
-                Right(())
-              )
-              mockStoreSession(newSession)(Right(()))
-            }
-
-            checkIsRedirect(
-              performAction(
-                "address-line1" -> address.line1,
-                "postcode"      -> address.postcode.value
-              ),
-              routes.CompanyDetailsController.checkYourAnswers()
-            )
-          }
+          checkIsRedirect(
+            performAction(
+              "address-line1" -> address.line1,
+              "postcode"      -> address.postcode.value
+            ),
+            routes.CompanyDetailsController.checkYourAnswers()
+          )
         }
 
       }
