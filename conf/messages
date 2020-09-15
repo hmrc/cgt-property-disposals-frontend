@@ -3927,7 +3927,8 @@ hasSupportingDocsToUpload.error.required=Select yes if you want to upload any su
 hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents
 
 mandatoryEvidence.title=Upload a document showing how the Capital Gains Tax due was worked out
-mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG.
+mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG, Any files you upload to a draft return will be saved for 5 days.
+mandatoryEvidence.amendReturn.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG.
 
 mandatoryEvidence.cyaChange=the document showing how the Capital Gains Tax due was worked out
 
