@@ -50,6 +50,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homePageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Organisation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,6 +63,7 @@ class CommonTriageQuestionsController @Inject() (
   uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
+  servicesConfig: ServicesConfig,
   whoAreYouReportingForPage: triagePages.who_are_you_reporting_for,
   howManyPropertiesPage: triagePages.how_many_properties,
   ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
@@ -72,7 +74,7 @@ class CommonTriageQuestionsController @Inject() (
   furtherReturnsHelpPage: triagePages.further_retuns_help,
   disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
   cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
-  whoAreYouSubmittingAmendExitPage: triagePages.ammend_who_are_you_submitting_for_exit_page
+  whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -81,6 +83,8 @@ class CommonTriageQuestionsController @Inject() (
     with StartingToAmendToFillingOutReturnBehaviour {
 
   import CommonTriageQuestionsController._
+
+  val newCompletionDateUsedFlag = servicesConfig.getBoolean("amend-returns.enabled")
 
   private def isIndividual(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
@@ -426,21 +430,21 @@ class CommonTriageQuestionsController @Inject() (
             .map(_.summaries)
             .getOrElse(List.empty)
             .find(e => CompletionDate(e.completionDate) === completionDate) match {
-            case Some(matchingPreviousReturn) if state.forall(!_.isAmendReturn) =>
+            case Some(matchingPreviousReturn) if state.forall(!_.isAmendReturn) && newCompletionDateUsedFlag =>
               Ok(
                 previousReturnExistsWithSameCompletionDatePage(
                   matchingPreviousReturn,
                   backLink
                 )
               )
-            case _ if state.exists(_.isAmendReturn)                             =>
+            case _ if state.exists(_.isAmendReturn) || !newCompletionDateUsedFlag                            =>
               Ok(
                 previousReturnExistsWithSameCompletionDateAmendPage(
                   state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
                   backLink
                 )
               )
-            case _                                                              => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
+            case _                                                                                           => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
           }
         }
       }
