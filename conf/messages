@@ -760,7 +760,7 @@ numberOfProperties.error.required=Select how many UK properties you are includin
 
 numberOfProperties.cyaChange=how many properties you want to include in this return
 
-previousReturnExistsWithSameCompletionDate.amend.title=You already have a return with the completion date of {0}
+previousReturnExistsWithSameCompletionDate.amend.title=You cannot change this return online
 
 previousReturnExistsWithSameCompletionDate.amend.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your previous returns.
 previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your trust’s previous returns.

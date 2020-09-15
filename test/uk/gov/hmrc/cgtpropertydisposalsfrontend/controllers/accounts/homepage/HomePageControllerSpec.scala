@@ -1669,8 +1669,13 @@ class HomePageControllerSpec
       redirectToStartWhenInvalidJourney(
         () => performAction(""),
         {
-          case _: Subscribed => true
-          case _             => false
+          case _: Subscribed             => true
+          case _: SubmitReturnFailed     => true
+          case _: StartingNewDraftReturn => true
+          case _: JustSubmittedReturn    => true
+          case _: ViewingReturn          => true
+          case _: FillingOutReturn       => true
+          case _                         => false
         }
       )
 

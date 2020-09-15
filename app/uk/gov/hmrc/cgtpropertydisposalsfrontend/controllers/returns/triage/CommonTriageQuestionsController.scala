@@ -436,7 +436,6 @@ class CommonTriageQuestionsController @Inject() (
             case _ if state.exists(_.isAmendReturn)                             =>
               Ok(
                 previousReturnExistsWithSameCompletionDateAmendPage(
-                  completionDate,
                   state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
                   backLink
                 )
