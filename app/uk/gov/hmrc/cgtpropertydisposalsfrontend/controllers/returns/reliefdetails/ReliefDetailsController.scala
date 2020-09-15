@@ -260,7 +260,10 @@ class ReliefDetailsController @Inject() (
                 yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(
                   _.unsetAllButIncomeDetails()
                 ),
-                gainOrLossAfterReliefs = None
+                gainOrLossAfterReliefs = None,
+                exemptionAndLossesAnswers =
+                  if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) None
+                  else draftReturn.exemptionAndLossesAnswers
               )
             }
           }
@@ -334,6 +337,9 @@ class ReliefDetailsController @Inject() (
                       _.copy(lettingsRelief = AmountInPence.fromPounds(p))
                     )
                   ),
+                  exemptionAndLossesAnswers =
+                    if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) None
+                    else draftReturn.exemptionAndLossesAnswers,
                   yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(
                     _.unsetAllButIncomeDetails()
                   )
@@ -454,6 +460,9 @@ class ReliefDetailsController @Inject() (
               else
                 draftReturn.copy(
                   reliefDetailsAnswers = Some(updatedReliefDetailsAnswers),
+                  exemptionAndLossesAnswers =
+                    if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) None
+                    else draftReturn.exemptionAndLossesAnswers,
                   yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(
                     _.unsetAllButIncomeDetails()
                   )
