@@ -44,7 +44,7 @@
   displayReturnToSummaryLink: Boolean,
   isATrust: Boolean,
   representativeType: Option[RepresentativeType],
-  isAmmend: Boolean
+  isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"completionDate"}
@@ -86,7 +86,7 @@
    hasErrors = hasErrors
   )
   <p>@Html(messages("completionDate.link", viewConfig.tranferringOwnershipHelp))</p>
-  @submitButton(messages(if(isAmmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+  @submitButton(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
  }
 
   @returnToSummaryLink(displayReturnToSummaryLink)

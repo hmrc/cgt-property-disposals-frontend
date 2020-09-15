@@ -2825,7 +2825,7 @@ class CommonTriageQuestionsControllerSpec
 
     }
 
-    "handling requests to display the ammend 'who are you representing' exit page" must {
+    "handling requests to display the amend 'who are you representing' exit page" must {
 
       def performAction(): Future[Result] =
         controller.amendWhoAreYouSubmittingFor()(FakeRequest())

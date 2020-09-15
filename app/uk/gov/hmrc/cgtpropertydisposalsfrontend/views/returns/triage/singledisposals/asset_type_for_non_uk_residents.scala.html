@@ -45,7 +45,7 @@
     displayReturnToSummaryLink: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isAmmend: Boolean
+    isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"assetTypeForNonUkResidents"}
@@ -119,7 +119,7 @@
             customErrorKey = Some(s"$key$userKey")
         )
 
-        @submitButton(messages(if (isAmmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+        @submitButton(messages(if (isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

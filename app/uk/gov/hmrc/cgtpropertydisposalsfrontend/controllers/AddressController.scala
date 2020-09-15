@@ -171,7 +171,7 @@ trait AddressController[A <: AddressJourneyType] {
               journey,
               isATrust(journey),
               extractRepresentativeType(journey),
-              extractIsAmmend(journey)
+              extractIsAmend(journey)
             )
           )
       }
@@ -194,7 +194,7 @@ trait AddressController[A <: AddressJourneyType] {
                     journey,
                     isATrust(journey),
                     extractRepresentativeType(journey),
-                    extractIsAmmend(journey)
+                    extractIsAmend(journey)
                   )
                 ),
               storeAddress(continueCall, journey, true)
@@ -212,7 +212,7 @@ trait AddressController[A <: AddressJourneyType] {
               isUkCall,
               enterNonUkAddressSubmitCall,
               journey,
-              extractIsAmmend(journey)
+              extractIsAmend(journey)
             )
           )
       }
@@ -232,7 +232,7 @@ trait AddressController[A <: AddressJourneyType] {
                     isUkCall,
                     enterNonUkAddressSubmitCall,
                     journey,
-                    extractIsAmmend(journey)
+                    extractIsAmend(journey)
                   )
                 ),
               storeAddress(continueCall, journey, true)
@@ -357,7 +357,7 @@ trait AddressController[A <: AddressJourneyType] {
                   journey,
                   isATrust(journey),
                   extractRepresentativeType(journey),
-                  extractIsAmmend(journey)
+                  extractIsAmend(journey)
                 )
               )
           }
@@ -388,7 +388,7 @@ trait AddressController[A <: AddressJourneyType] {
                         journey,
                         isATrust(journey),
                         extractRepresentativeType(journey),
-                        extractIsAmmend(journey)
+                        extractIsAmend(journey)
                       )
                     ),
                   storeAddress(continueCall, journey, false)
@@ -426,7 +426,7 @@ trait AddressController[A <: AddressJourneyType] {
 
   }
 
-  private def extractIsAmmend(
+  private def extractIsAmend(
     journey: AddressJourneyType
   ): Boolean =
     journey match {
