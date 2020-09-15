@@ -38,6 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
@@ -47,6 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
@@ -56,10 +58,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -132,18 +136,23 @@ class MultipleDisposalsPropertyDetailsControllerSpec
   override def updateAddress(
     journey: FillingOutReturnAddressJourney,
     address: Address
-  ): FillingOutReturn =
+  ): FillingOutReturn = {
+    val isFurtherOrAmendReturn = journey.journey.isFurtherOrAmendReturn.contains(true)
+
     address match {
       case a: UkAddress    =>
         journey.journey.copy(draftReturn =
-          draftReturn.copy(examplePropertyDetailsAnswers =
-            Some(
+          draftReturn.copy(
+            examplePropertyDetailsAnswers = Some(
               incompleteAnswers.copy(address = Some(a), disposalDate = None)
-            )
+            ),
+            exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else draftReturn.exemptionAndLossesAnswers,
+            yearToDateLiabilityAnswers = if (isFurtherOrAmendReturn) None else draftReturn.yearToDateLiabilityAnswers
           )
         )
       case _: NonUkAddress => journey.journey
     }
+  }
 
   override val mockUpdateAddress: Option[
     (FillingOutReturnAddressJourney, Address, Either[Error, Unit]) => Unit
@@ -822,7 +831,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         )
 
       val nonResidentialFillingOutReturn = sample[FillingOutReturn].copy(
-        draftReturn = nonResidentialPropertyDraftReturn
+        draftReturn = nonResidentialPropertyDraftReturn,
+        amendReturnData = None,
+        previousSentReturns = None
       )
 
       "show a form error" when {
@@ -978,7 +989,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           examplePropertyDetailsAnswers = Some(answers)
         )
         val journey     =
-          nonResidentialFillingOutReturn.copy(draftReturn = draftReturn)
+          nonResidentialFillingOutReturn
+            .copy(draftReturn = draftReturn, amendReturnData = Some(sample[AmendReturnData]))
         val newAddress  = UkAddress("1", None, None, None, Postcode("ZZ00ZZ"))
 
         val newDraftReturn = draftReturn.copy(
@@ -989,7 +1001,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               Some(answers.disposalPrice),
               Some(answers.acquisitionPrice)
             )
-          )
+          ),
+          exemptionAndLossesAnswers = None,
+          yearToDateLiabilityAnswers = None
         )
         val newJourney     = journey.copy(draftReturn = newDraftReturn)
 
@@ -1008,7 +1022,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         }
 
         "there is an error updating the session" in {
-
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1710,7 +1723,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             sample[FillingOutReturn].copy(
               draftReturn = oldDraftReturn,
               amendReturnData =
-                if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false)) else None
+                if (isAmend) Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = false)) else None,
+              previousSentReturns = None
             )
           val session         = SessionData.empty.copy(journeyStatus = Some(journey))
           val updatedJourney  = journey.copy(
@@ -1826,14 +1840,20 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   completionDate = CompletionDate(taxYear.endDateExclusive),
                   individualUserType = Some(Self)
                 ),
-              examplePropertyDetailsAnswers = Some(answers)
+              examplePropertyDetailsAnswers = Some(answers),
+              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = Some(sample[CompleteNonCalculatedYTDAnswers]),
+              gainOrLossAfterReliefs = Some(sample[AmountInPence])
             )
             val updatedDraftReturn = oldDraftReturn.copy(
               examplePropertyDetailsAnswers = Some(
                 answers.copy(
                   disposalDate = disposalDate
                 )
-              )
+              ),
+              exemptionAndLossesAnswers = None,
+              yearToDateLiabilityAnswers = None,
+              gainOrLossAfterReliefs = None
             )
 
             test(
