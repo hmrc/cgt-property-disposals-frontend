@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import java.time.LocalDate
 
+import cats.Eq
 import play.api.libs.json.{Json, OFormat}
 
 final case class CompletionDate(value: LocalDate) extends AnyVal
@@ -25,5 +26,6 @@ final case class CompletionDate(value: LocalDate) extends AnyVal
 object CompletionDate {
 
   implicit val format: OFormat[CompletionDate] = Json.format
+  implicit val eq: Eq[CompletionDate]          = Eq.fromUniversalEquals
 
 }

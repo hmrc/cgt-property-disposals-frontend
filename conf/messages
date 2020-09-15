@@ -210,7 +210,7 @@ accessibilityStatement.usingThisService.p4=We have also made the text in the ser
 accessibilityStatement.usingThisService.p5=<a href="{0}">AbilityNet</a> has advice on making your device easier to use if you have a disability.
 accessibilityStatement.howAccessible.title=How accessible this service is
 accessibilityStatement.howAccessible.p1=HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
-accessibilityStatement.howAccessible.p2=This service is partially compliant with the <a href="{0}">Web Content Accessibility Guidelines version 2.1 AA standard</a>. We cannot be certain that it is fully compliant. It will be fully tested by June 2020.
+accessibilityStatement.howAccessible.p2=This service was tested on 15 May 2020 by the Digital Accessibility Centre. It was found to be compliant with the <a href="{0}">Web Content Accessibility Guidelines version 2.1 AAA standard</a>. Since then, it has been extended. We cannot be certain that it is fully compliant. The full service will be tested by HMRC within the next three months.
 accessibilityStatement.reportingProblems.title=Reporting accessibility problems with this service
 accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a href="{0}" target="_blank">accessibility problem (opens in a new window or tab)</a>.
 accessibilityStatement.notHappy.title=What to do if you are not happy with how we respond to your complaint
@@ -220,8 +220,8 @@ accessibilityStatement.contactingUs.p1=We provide a text relay service if you ar
 accessibilityStatement.contactingUs.p2=We can provide a British Sign Language (BSL) interpreter, or you can arrange a visit from an HMRC advisor to help you complete the service.
 accessibilityStatement.contactingUs.p3=Find out how to <a href="{0}">contact us</a>.
 accessibilityStatement.howWeTested.title=How we tested this service
-accessibilityStatement.howWeTested.p1=The service was tested on 6 December 2019 and checked for compliance with WCAG 2.1 AA. It was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>. Since then, it has been extended and the full service will be tested by HMRC within the next three months. Tests will include disabled users.
-accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 6 April 2020.
+accessibilityStatement.howWeTested.p1=The service was tested on 15 May 2020 and checked for compliance with WCAG 2.1 AAA. It was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>.
+accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 14 September 2020.
 
 #===================================================
 # SERVICE WIDE AND GENERIC - END
@@ -760,19 +760,24 @@ numberOfProperties.error.required=Select how many UK properties you are includin
 
 numberOfProperties.cyaChange=how many properties you want to include in this return
 
-previousReturnExistsWithSameCompletionDate.title=You cannot complete this return online
+previousReturnExistsWithSameCompletionDate.amend.title=You already have a return with the completion date of {0}
 
-previousReturnExistsWithSameCompletionDate.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your previous returns.
-previousReturnExistsWithSameCompletionDate.trust.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your trust’s previous returns.
-previousReturnExistsWithSameCompletionDate.agent.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your client’s previous returns.
+previousReturnExistsWithSameCompletionDate.amend.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your previous returns.
+previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your trust’s previous returns.
+previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your client’s previous returns.
 
-previousReturnExistsWithSameCompletionDate.propertyDisposals.title=Property disposals
-previousReturnExistsWithSameCompletionDate.propertyDisposals.p1=You’ll need to amend the return with the property that had:
-previousReturnExistsWithSameCompletionDate.propertyDisposals.li1=the same completion date as the one you’re wanting to report now
-previousReturnExistsWithSameCompletionDate.propertyDisposals.li2=a contract exchange date in the same tax year as the one you’re wanting to report now
-previousReturnExistsWithSameCompletionDate.indirectDisposals.title=Indirect disposals
-previousReturnExistsWithSameCompletionDate.indirectDisposals.p1=You’ll need to amend the return that had shares with the same sale of disposal date as the disposal you’re wanting to report now.
+previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.title=Property disposals
+previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.p1=You’ll need to amend the return with the property that had:
+previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.li1=the same completion date as the one you’re wanting to report now
+previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.li2=a contract exchange date in the same tax year as the one you’re wanting to report now
+previousReturnExistsWithSameCompletionDate.amend.indirectDisposals.title=Indirect disposals
+previousReturnExistsWithSameCompletionDate.amend.indirectDisposals.p1=You’ll need to amend the return that had shares with the same sale of disposal date as the disposal you’re wanting to report now.
 
+previousReturnExistsWithSameCompletionDate.title=You’ll need to change an existing return
+previousReturnExistsWithSameCompletionDate.p1=You already sent a return that had a disposal on <strong class="bold">{0}</strong>. You’ll need to change that return instead of creating a new one.
+previousReturnExistsWithSameCompletionDate.p2=You’ll need to change the <strong class="bold">number of disposals you are including</strong> in that return
+previousReturnExistsWithSameCompletionDate.caption=Existing return details
+previousReturnExistsWithSameCompletionDate.button.viewAndChange=Existing return details
 
 cannotAmendResidentialStatusForAssetType.title=You must contact HMRC
 
