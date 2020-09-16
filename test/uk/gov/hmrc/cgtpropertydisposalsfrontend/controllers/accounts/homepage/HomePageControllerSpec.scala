@@ -1168,7 +1168,8 @@ class HomePageControllerSpec
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
           sample[CompleteSingleDisposalReturn],
-          sample[SubmitReturnResponse]
+          sample[SubmitReturnResponse],
+          None
         )
 
         val viewingReturn = ViewingReturn(

@@ -141,7 +141,8 @@ object JourneyStatus {
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
     completeReturn: CompleteReturn,
-    submissionResponse: SubmitReturnResponse
+    submissionResponse: SubmitReturnResponse,
+    amendReturnData: Option[AmendReturnData]
   ) extends JourneyStatus
 
   final case class SubmitReturnFailed(
