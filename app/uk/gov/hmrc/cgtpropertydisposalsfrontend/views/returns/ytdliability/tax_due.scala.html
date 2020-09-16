@@ -66,7 +66,7 @@
   calculatedTax: CalculatedTaxDue,
   isATrust: Boolean,
   representativeType: Option[RepresentativeType],
-  isAmmend: Boolean
+  isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @key = @{ "taxDue" }
@@ -172,7 +172,7 @@
             assistiveText = messages("unit-input.assistive.pounds")
         )
 
-        @submitButton(messages(if(isAmmend) "button.continue" else "button.saveAndContinue"))
+        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @if(isATrust) {

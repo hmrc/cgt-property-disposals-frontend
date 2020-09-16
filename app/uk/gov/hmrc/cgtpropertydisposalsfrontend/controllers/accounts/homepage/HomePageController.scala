@@ -233,7 +233,7 @@ class HomePageController @Inject() (
                 _ => Redirect(returns.routes.ViewReturnController.displayReturn())
               )
             }
-      }(withUplift = false)
+      }(withUplift = true)
     }
 
   def payTotalAmountLeftToPay(): Action[AnyContent] =
