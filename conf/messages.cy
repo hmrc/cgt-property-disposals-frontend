@@ -1754,6 +1754,85 @@ singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.t
 # SINGLE MIXED USE PROPERTY DETAILS PAGES - END
 #===================================================
 
+#===================================================
+#  GAIN OR LOSS AFTER RELIEFS PAGES - START
+#===================================================
+
+gainOrLossAfterReliefs.caption=Enillion neu golled ar ôl rhyddhad
+gainOrLossAfterReliefs.title=Rhowch wybod i ni a wnaethoch enillion ar y gwarediad ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.agent.title=Rhowch wybod i ni a wnaeth eich cleient enillion ar y gwarediad ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.trust.title=Rhowch wybod i ni a wnaeth yr ymddiriedolaeth enillion ar y gwarediad ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.capacitor.title=Rhowch wybod i ni a wnaeth y person enillion ar y gwarediad ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.personalRep.title=Rhowch wybod i ni a wnaeth y person enillion ar y gwarediad ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Rhowch wybod i ni a wnaeth yr ystâd enillion ar y gwarediad ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Rhowch wybod i ni a wnaeth eich cleient neu’r ystâd enillion ar y gwarediad ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.multipleDisposals.title=Rhowch wybod i ni a wnaethoch enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.agent.multipleDisposals.title=Rhowch wybod i ni a wnaeth eich cleient enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.trust.multipleDisposals.title=Rhowch wybod i ni a wnaeth yr ymddiriedolaeth enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.capacitor.multipleDisposals.title=Rhowch wybod i ni a wnaeth y person enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Rhowch wybod i ni a wnaeth y person enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Rhowch wybod i ni a wnaeth yr ystâd enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Rhowch wybod i ni a wnaeth eich cleient neu’r ystâd enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.p1=I wneud hyn, bydd angen i chi wneud y canlynol:
+gainOrLossAfterReliefs.li1=Dechrau gyda derbyniadau’r gwarediad.
+gainOrLossAfterReliefs.li2=Tynnu’r costau gwerthu neu waredu.
+gainOrLossAfterReliefs.li3=Tynnu unrhyw gostau gwella.
+gainOrLossAfterReliefs.li4=Tynnu unrhyw gostau caffael i roi’ch enillion neu’ch colled ar gyfer y gwarediad hwn.
+gainOrLossAfterReliefs.li5=Tynnu unrhyw ryddhad (ond nid y swm blynyddol a eithrir) o’r enillion hyn neu’r golled hon i roi’ch enillion neu’ch colled ar ôl rhyddhad.
+gainOrLossAfterReliefs.multipleDisposals.li1=Dechrau gydag enillion yr holl warediadau yn y Ffurflen Dreth hon.
+gainOrLossAfterReliefs.multipleDisposals.li4=Tynnu unrhyw gostau caffael i roi’ch enillion neu golled ar gyfer yr holl warediadau yn y Ffurflen Dreth hon.
+gainOrLossAfterReliefs.h2=A wnaethoch enillion ar y gwarediad yn y Ffurflen Dreth hon ar ôl i’r rhyddhad gael ei dynnu?
+gainOrLossAfterReliefs.agent.h2=A wnaeth eich cleient enillion ar y gwarediad yn y Ffurflen Dreth hon ar ôl i’r rhyddhad gael ei dynnu?
+gainOrLossAfterReliefs.trust.h2=A wnaeth yr ymddiriedolaeth enillion ar y gwarediad yn y Ffurflen Dreth hon ar ôl i’r rhyddhad gael ei dynnu?
+gainOrLossAfterReliefs.capacitor.h2=A wnaeth y person enillion ar y gwarediad yn y Ffurflen Dreth hon ar ôl i’r rhyddhad gael ei dynnu?
+gainOrLossAfterReliefs.personalRep.h2=A wnaeth y person enillion ar y gwarediad yn y Ffurflen Dreth hon ar ôl i’r rhyddhad gael ei dynnu?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.h2=A wnaeth yr ystâd enillion ar y gwarediad yn y Ffurflen Dreth hon ar ôl i’r rhyddhad gael ei dynnu?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.h2=A wnaeth eich cleient enillion ar y gwarediad yn y Ffurflen Dreth hon ar ôl i’r rhyddhad gael ei dynnu?
+gainOrLossAfterReliefs.multipleDisposals.h2=A wnaethoch enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl i’r rhyddhad gael ei dynnu?
+gainOrLossAfterReliefs.agent.multipleDisposals.h2=A wnaeth eich cleient enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl i’r rhyddhad gael ei dynnu?
+gainOrLossAfterReliefs.trust.multipleDisposals.h2=A wnaeth yr ymddiriedolaeth enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl i ryddhad gael ei dynnu?
+gainOrLossAfterReliefs.capacitor.multipleDisposals.h2=A wnaeth y person enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl i ryddhad gael ei dynnu?
+gainOrLossAfterReliefs.personalRep.multipleDisposals.h2=A wnaeth y person enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl i ryddhad gael ei dynnu?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.h2=A wnaeth yr ystâd enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl i ryddhad gael ei dynnu?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.h2=A wnaeth eich cleient enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl i’r rhyddhad gael ei dynnu?
+gainOrLossAfterReliefs.gain.outerLabel=Do, fe wnes i enillion
+gainOrLossAfterReliefs.loss.outerLabel=Naddo, fe wnes i golled
+gainOrLossAfterReliefs.noLossOrGain.outerLabel=Ni wnes i unrhyw enillion na cholled ar ôl rhyddhad
+gainOrLossAfterReliefs.gain.notSelf.outerLabel=Do, gwnaeth enillion
+gainOrLossAfterReliefs.loss.notSelf.outerLabel=Naddo, gwnaeth golled
+gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel=Ni wnaeth unrhyw enillion na cholled ar ôl rhyddhad
+gainOrLossAfterReliefs.gain.innerLabel=Swm yr enillion
+gainOrLossAfterReliefs.loss.innerLabel=Swm y golled
+gainOrLossAfterReliefs.error.required=Dewiswch ‘Iawn’ os gwnaethoch enillion
+gainOrLossAfterReliefs.agent.error.required=Dewiswch ‘Iawn’ os gwnaeth eich cleient enillion
+gainOrLossAfterReliefs.trust.error.required=Dewiswch ‘Iawn’ os gwnaeth yr ymddiriedolaeth enillion
+gainOrLossAfterReliefs.capacitor.error.required=Dewiswch ‘Iawn’ os gwnaeth y person enillion
+gainOrLossAfterReliefs.personalRep.error.required=Dewiswch ‘Iawn’ os gwnaeth y person enillion
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os gwnaeth yr ystâd enillion
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.error.required=Dewiswch ‘Iawn’ os gwnaeth eich cleient enillion
+gainOrLossAfterReliefs.error.invalid=Dewiswch ‘Iawn’ os gwnaethoch enillion
+gainOrLossAfterReliefs.agent.error.invalid=Dewiswch ‘Iawn’ os gwnaeth eich cleient enillion
+gainOrLossAfterReliefs.trust.error.invalid=Dewiswch ‘Iawn’ os gwnaeth yr ymddiriedolaeth enillion
+gainOrLossAfterReliefs.capacitor.error.invalid=Dewiswch ‘Iawn’ os gwnaeth y person enillion
+gainOrLossAfterReliefs.personalRep.error.invalid=Dewiswch ‘Iawn’ os gwnaeth y person enillion
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.error.invalid=Dewiswch ‘Iawn’ os gwnaeth yr ystâd enillion
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.error.invalid=Dewiswch ‘Iawn’ os gwnaeth eich cleient enillion
+gainAfterReliefs.error.required=Nodwch swm yr enillion, megis 50,000 neu 52,500.54
+gainAfterReliefs.error.invalid=Mae’n rhaid i swm yr enillion fod yn rhif, megis 50,000 neu 52,500.54
+gainAfterReliefs.error.tooLarge=Mae’n rhaid i swm yr enillion fod yn 50,000,000,000.00 neu lai
+gainAfterReliefs.error.tooManyDecimals=Mae’n rhaid i swm yr enillion gael 2 le degol neu lai, megis 2,908 neu 740.50
+gainAfterReliefs.error.tooSmall=Mae’n rhaid i swm yr enillion fod yn fwy na 0
+lossAfterReliefs.error.required=Nodwch swm y golled, megis 50,000 neu 32,500.83
+lossAfterReliefs.error.invalid=Mae’n rhaid i swm y golled fod yn rhif, megis 50,000 neu 32,500.83
+lossAfterReliefs.error.tooLarge=Mae’n rhaid i swm y golled fod yn 50,000,000,000.00 neu lai
+lossAfterReliefs.error.tooManyDecimals=Mae’n rhaid i swm y golled gael 2 le degol neu lai, megis 2,908 neu 740.50
+lossAfterReliefs.error.tooSmall=Mae’n rhaid i swm y golled fod yn fwy na 0
+gainOrLossAfterReliefs.cya.title=Gwiriwch eich atebion
+gainOrLossAfterReliefs.cyaChange=a wnaed enillion, colled, neu ddim enillion neu golled ar ôl rhyddhad
+
+#===================================================
+#  GAIN OR LOSS AFTER RELIEFS PAGES - END
+#===================================================
 
 #===================================================
 #  COUNTRIES - START
