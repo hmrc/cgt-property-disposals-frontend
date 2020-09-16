@@ -37,9 +37,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, UUIDGenerator}
@@ -95,13 +96,22 @@ class SingleDisposalPropertyDetailsControllerSpec
   override def updateAddress(
     journey: FillingOutReturnAddressJourney,
     address: Address
-  ): FillingOutReturn =
+  ): FillingOutReturn = {
+    val isFurtherOrAmendReturn = journey.journey.isFurtherOrAmendReturn.contains(true)
+
     address match {
       case a: UkAddress    =>
         journey.journey
-          .copy(draftReturn = draftReturn.copy(propertyAddress = Some(a)))
+          .copy(draftReturn =
+            draftReturn.copy(
+              propertyAddress = Some(a),
+              exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else draftReturn.exemptionAndLossesAnswers,
+              yearToDateLiabilityAnswers = if (isFurtherOrAmendReturn) None else draftReturn.yearToDateLiabilityAnswers
+            )
+          )
       case _: NonUkAddress => journey.journey
     }
+  }
 
   override val mockUpdateAddress: Option[
     (FillingOutReturnAddressJourney, Address, Either[Error, Unit]) => Unit
@@ -694,7 +704,9 @@ class SingleDisposalPropertyDetailsControllerSpec
         )
 
       val nonResidentialFillingOutReturn = sample[FillingOutReturn].copy(
-        draftReturn = nonResidentialPropertyDraftReturn
+        draftReturn = nonResidentialPropertyDraftReturn,
+        amendReturnData = None,
+        previousSentReturns = None
       )
 
       "show a form error" when {
@@ -816,7 +828,8 @@ class SingleDisposalPropertyDetailsControllerSpec
             propertyAddress = Some(newAddress)
           )
           val newJourney     =
-            nonResidentialFillingOutReturn.copy(draftReturn = newDraftReturn)
+            nonResidentialFillingOutReturn
+              .copy(draftReturn = newDraftReturn, amendReturnData = None, previousSentReturns = None)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -842,13 +855,16 @@ class SingleDisposalPropertyDetailsControllerSpec
       "show an error page" when {
 
         val draftReturn = nonResidentialPropertyDraftReturn
-          .copy(propertyAddress = Some(sample[UkAddress]))
+          .copy(propertyAddress = Some(sample[UkAddress]), representeeAnswers = None)
         val journey     =
-          nonResidentialFillingOutReturn.copy(draftReturn = draftReturn)
+          nonResidentialFillingOutReturn
+            .copy(draftReturn = draftReturn, previousSentReturns = Some(sample[PreviousReturnData]))
         val newAddress  = UkAddress("1", None, None, None, Postcode("ZZ00ZZ"))
 
         val newDraftReturn = draftReturn.copy(
-          propertyAddress = Some(newAddress)
+          propertyAddress = Some(newAddress),
+          exemptionAndLossesAnswers = None,
+          yearToDateLiabilityAnswers = None
         )
         val newJourney     = journey.copy(draftReturn = newDraftReturn)
 

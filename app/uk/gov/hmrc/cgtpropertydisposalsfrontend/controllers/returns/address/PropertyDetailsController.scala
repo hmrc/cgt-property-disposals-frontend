@@ -169,6 +169,7 @@ class PropertyDetailsController @Inject() (
           Error("Got non uk address in returns journey but expected uk address")
         )
       case a: UkAddress    =>
+        val isFurtherOrAmendReturn = journey.journey.isFurtherOrAmendReturn.contains(true)
         journey.draftReturn match {
           case Left(m: DraftMultipleDisposalsReturn) =>
             val answers = m.examplePropertyDetailsAnswers.getOrElse(
@@ -178,7 +179,9 @@ class PropertyDetailsController @Inject() (
               EitherT.pure(journey.journey)
             else {
               val updatedDraftReturn = m.copy(
-                examplePropertyDetailsAnswers = Some(answers.unset(_.disposalDate).copy(address = Some(a)))
+                examplePropertyDetailsAnswers = Some(answers.unset(_.disposalDate).copy(address = Some(a))),
+                exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else m.exemptionAndLossesAnswers,
+                yearToDateLiabilityAnswers = if (isFurtherOrAmendReturn) None else m.yearToDateLiabilityAnswers
               )
               val updatedJourney     = journey.journey.copy(draftReturn = updatedDraftReturn)
               returnsService
@@ -190,7 +193,11 @@ class PropertyDetailsController @Inject() (
             if (d.propertyAddress.contains(a))
               EitherT.pure(journey.journey)
             else {
-              val updatedDraftReturn = d.copy(propertyAddress = Some(a))
+              val updatedDraftReturn = d.copy(
+                propertyAddress = Some(a),
+                exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else d.exemptionAndLossesAnswers,
+                yearToDateLiabilityAnswers = if (isFurtherOrAmendReturn) None else d.yearToDateLiabilityAnswers
+              )
               val updatedJourney     = journey.journey.copy(draftReturn = updatedDraftReturn)
               returnsService
                 .storeDraftReturn(updatedJourney)
@@ -520,14 +527,22 @@ class PropertyDetailsController @Inject() (
                             routes.PropertyDetailsController.checkYourAnswers()
                           )
                         else {
-                          val updatedAnswers     =
+                          val isFurtherOrAmendReturn = r.journey.isFurtherOrAmendReturn.contains(true)
+                          val updatedAnswers         =
                             answers
                               .fold(
                                 _.copy(disposalDate = Some(disposalDate)),
                                 _.copy(disposalDate = disposalDate)
                               )
-                          val updatedDraftReturn =
-                            m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
+                          val updatedDraftReturn     =
+                            m.copy(
+                              examplePropertyDetailsAnswers = Some(updatedAnswers),
+                              gainOrLossAfterReliefs = if (isFurtherOrAmendReturn) None else m.gainOrLossAfterReliefs,
+                              exemptionAndLossesAnswers =
+                                if (isFurtherOrAmendReturn) None else m.exemptionAndLossesAnswers,
+                              yearToDateLiabilityAnswers =
+                                if (isFurtherOrAmendReturn) None else m.yearToDateLiabilityAnswers
+                            )
 
                           val updatedJourney = r.journey
                             .copy(draftReturn = updatedDraftReturn)

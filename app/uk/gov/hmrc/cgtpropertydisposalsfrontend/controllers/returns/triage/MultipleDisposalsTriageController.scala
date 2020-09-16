@@ -517,24 +517,8 @@ class MultipleDisposalsTriageController @Inject() (
                   updatedAnswers,
                   d =>
                     d.bimap(
-                      multipleIndirect =>
-                        multipleIndirect.copy(
-                          yearToDateLiabilityAnswers = multipleIndirect.yearToDateLiabilityAnswers.flatMap {
-                            case _: CalculatedYTDAnswers    => None
-                            case n: NonCalculatedYTDAnswers =>
-                              if (preserveEstimatesAnswer(state)) Some(n.unset(_.taxDue))
-                              else Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
-                          }
-                        ),
-                      multiple =>
-                        multiple.copy(
-                          yearToDateLiabilityAnswers = multiple.yearToDateLiabilityAnswers.flatMap {
-                            case _: CalculatedYTDAnswers    => None
-                            case n: NonCalculatedYTDAnswers =>
-                              if (preserveEstimatesAnswer(state)) Some(n.unset(_.taxDue))
-                              else Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
-                          }
-                        )
+                      multipleIndirect => multipleIndirect.copy(yearToDateLiabilityAnswers = None),
+                      multiple => multiple.copy(yearToDateLiabilityAnswers = None)
                     ),
                   forceDisplayGainOrLossAfterReliefsForAmends = false
                 )
@@ -852,14 +836,16 @@ class MultipleDisposalsTriageController @Inject() (
                     d.bimap(
                       multipleIndirect =>
                         multipleIndirect.copy(
-                          exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
+                          exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers.map(
+                            _.unset(_.acquisitionPrice)
+                          ),
                           yearToDateLiabilityAnswers = None,
                           gainOrLossAfterReliefs = None
                         ),
                       multiple =>
                         multiple.copy(
                           examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers.map(
-                            _.unset(_.disposalDate)
+                            _.unset(_.disposalDate).unset(_.acquisitionPrice)
                           ),
                           yearToDateLiabilityAnswers = None,
                           gainOrLossAfterReliefs = None
@@ -1531,9 +1517,6 @@ class MultipleDisposalsTriageController @Inject() (
       f
     )
   }
-
-  private def preserveEstimatesAnswer(state: JourneyState): Boolean =
-    state.exists(_._1.amendReturnData.exists(_.preserveEstimatesAnswer))
 
 }
 

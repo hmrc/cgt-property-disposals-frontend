@@ -295,12 +295,16 @@ class AcquisitionDetailsController @Inject() (
 
   private def commonUpdateDraftReturn(
     d: JourneyState,
-    newAnswers: AcquisitionDetailsAnswers
-  ): Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn] =
+    newAnswers: AcquisitionDetailsAnswers,
+    fillingOutReturn: FillingOutReturn
+  ): Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn] = {
+    val isFurtherOrAmendReturn = fillingOutReturn.isFurtherOrAmendReturn.contains(true)
+
     d.bimap(
       i =>
         i.copy(
           acquisitionDetailsAnswers = Some(newAnswers),
+          exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else i.exemptionAndLossesAnswers,
           yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
           gainOrLossAfterReliefs = None
         ),
@@ -313,11 +317,13 @@ class AcquisitionDetailsController @Inject() (
           acquisitionDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
           reliefDetailsAnswers = reliefDetailsAnswers,
+          exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else s.exemptionAndLossesAnswers,
           yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
           gainOrLossAfterReliefs = None
         )
       }
     )
+  }
 
   def acquisitionMethod(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -386,7 +392,7 @@ class AcquisitionDetailsController @Inject() (
                       .unset(_.shouldUseRebase)
                       .unset(_.acquisitionFees)
                       .copy(acquisitionMethod = Some(m))
-                    commonUpdateDraftReturn(draftReturn, newAnswers)
+                    commonUpdateDraftReturn(draftReturn, newAnswers, fillingOutReturn)
                   }
               }
             )
@@ -477,7 +483,8 @@ class AcquisitionDetailsController @Inject() (
                         commonUpdateDraftReturn(
                           draftReturn,
                           if (assetType === AssetType.IndirectDisposal) newAnswers
-                          else newAnswers.unset(_.improvementCosts)
+                          else newAnswers.unset(_.improvementCosts),
+                          fillingOutReturn
                         )
                       }
                   }
@@ -565,7 +572,7 @@ class AcquisitionDetailsController @Inject() (
                       _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(p))),
                       _.copy(acquisitionPrice = AmountInPence.fromPounds(p))
                     )
-                    commonUpdateDraftReturn(draftReturn, newAnswers)
+                    commonUpdateDraftReturn(draftReturn, newAnswers, fillingOutReturn)
                   }
                 }
               )
@@ -642,7 +649,7 @@ class AcquisitionDetailsController @Inject() (
                     _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(p))),
                     _.copy(acquisitionPrice = AmountInPence.fromPounds(p))
                   )
-                  commonUpdateDraftReturn(draftReturn, newAnswers)
+                  commonUpdateDraftReturn(draftReturn, newAnswers, fillingOutReturn)
                 }
               }
             )
@@ -785,7 +792,7 @@ class AcquisitionDetailsController @Inject() (
                             _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p)))
                           )
 
-                      commonUpdateDraftReturn(draftReturn, newAnswers)
+                      commonUpdateDraftReturn(draftReturn, newAnswers, fillingOutReturn)
                     }
                   }
                 )
@@ -916,7 +923,7 @@ class AcquisitionDetailsController @Inject() (
                     _.copy(improvementCosts = AmountInPence.fromPounds(p))
                   )
 
-                  commonUpdateDraftReturn(draftReturn, newAnswers)
+                  commonUpdateDraftReturn(draftReturn, newAnswers, fillingOutReturn)
                 }
               }
             )
@@ -1004,7 +1011,7 @@ class AcquisitionDetailsController @Inject() (
                       _.copy(shouldUseRebase = p)
                     )
 
-                    commonUpdateDraftReturn(draftReturn, newAnswers)
+                    commonUpdateDraftReturn(draftReturn, newAnswers, fillingOutReturn)
                   }
                 }
               )
@@ -1099,7 +1106,7 @@ class AcquisitionDetailsController @Inject() (
                     _.copy(acquisitionFees = Some(AmountInPence.fromPounds(p))),
                     _.copy(acquisitionFees = AmountInPence.fromPounds(p))
                   )
-                  commonUpdateDraftReturn(draftReturn, newAnswers)
+                  commonUpdateDraftReturn(draftReturn, newAnswers, fillingOutReturn)
                 }
               }
             )
