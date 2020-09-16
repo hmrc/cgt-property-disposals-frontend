@@ -762,16 +762,14 @@ numberOfProperties.cyaChange=how many properties you want to include in this ret
 
 previousReturnExistsWithSameCompletionDate.amend.title=You cannot change this return online
 
-previousReturnExistsWithSameCompletionDate.amend.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your previous returns.
-previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your trust’s previous returns.
-previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your client’s previous returns.
+previousReturnExistsWithSameCompletionDate.amend.p1=You must <a href="{0}">contact HMRC</a>.
+previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>.
+previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>.
+previousReturnExistsWithSameCompletionDate.amend.p2=This is because sales or disposals with the same completion date must be in the same return.
+previousReturnExistsWithSameCompletionDate.amend.p3=Tell HMRC you need to change:
+previousReturnExistsWithSameCompletionDate.amend.li1=A previous return
+previousReturnExistsWithSameCompletionDate.amend.li2=A return that has the same disposal completion date as the one you entered on the previous page
 
-previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.title=Property disposals
-previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.p1=You’ll need to amend the return with the property that had:
-previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.li1=the same completion date as the one you’re wanting to report now
-previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.li2=a contract exchange date in the same tax year as the one you’re wanting to report now
-previousReturnExistsWithSameCompletionDate.amend.indirectDisposals.title=Indirect disposals
-previousReturnExistsWithSameCompletionDate.amend.indirectDisposals.p1=You’ll need to amend the return that had shares with the same sale of disposal date as the disposal you’re wanting to report now.
 
 previousReturnExistsWithSameCompletionDate.title=You’ll need to change an existing return
 previousReturnExistsWithSameCompletionDate.p1=You already have a return with completion date of <strong class="bold">{0}</strong>. You’ll need to change that return instead of creating a new one.

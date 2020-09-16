@@ -430,21 +430,27 @@ class CommonTriageQuestionsController @Inject() (
             .map(_.summaries)
             .getOrElse(List.empty)
             .find(e => CompletionDate(e.completionDate) === completionDate) match {
-            case Some(matchingPreviousReturn) if state.forall(!_.isAmendReturn) && newCompletionDateUsedFlag =>
-              Ok(
-                previousReturnExistsWithSameCompletionDatePage(
-                  matchingPreviousReturn,
-                  backLink
+            case Some(matchingPreviousReturn) if state.forall(!_.isAmendReturn) =>
+              if (newCompletionDateUsedFlag)
+                Ok(
+                  previousReturnExistsWithSameCompletionDatePage(
+                    matchingPreviousReturn,
+                    backLink
+                  )
                 )
-              )
-            case _ if state.exists(_.isAmendReturn) || !newCompletionDateUsedFlag                            =>
+              else
+                Ok(
+                  previousReturnExistsWithSameCompletionDateAmendPage(
+                    backLink
+                  )
+                )
+            case _ if state.exists(_.isAmendReturn)                             =>
               Ok(
                 previousReturnExistsWithSameCompletionDateAmendPage(
-                  state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
                   backLink
                 )
               )
-            case _                                                                                           => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
+            case _                                                              => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
           }
         }
       }

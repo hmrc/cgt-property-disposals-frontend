@@ -3272,7 +3272,7 @@ class CommonTriageQuestionsControllerDisabledNewCompletionDatePageFlatSpec
                 .whenWasCompletionDate()
                 .url
               doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
-                "previousReturnExistsWithSameCompletionDate.amend.trust.p1",
+                "previousReturnExistsWithSameCompletionDate.amend.p1",
                 viewConfig.contactHmrc
               )
             }
@@ -3308,7 +3308,7 @@ class CommonTriageQuestionsControllerDisabledNewCompletionDatePageFlatSpec
                 .whenWasCompletionDate()
                 .url
               doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
-                "previousReturnExistsWithSameCompletionDate.amend.agent.p1",
+                "previousReturnExistsWithSameCompletionDate.amend.p1",
                 viewConfig.contactHmrc
               )
             }
