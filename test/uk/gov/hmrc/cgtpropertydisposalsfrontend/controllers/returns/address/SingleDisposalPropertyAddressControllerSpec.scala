@@ -45,6 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
@@ -670,7 +671,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
     }
 
-    "handling submits on the has a enter UPRN page" must {
+    "handling submits on the enter UPRN page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.singleDisposalEnterLandUprnSubmit()(
@@ -698,8 +699,10 @@ class SingleDisposalPropertyDetailsControllerSpec
       val nonResidentialPropertyDraftReturn =
         sample[DraftSingleDisposalReturn].copy(
           triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-            assetType = AssetType.NonResidential
+            assetType = AssetType.NonResidential,
+            individualUserType = Some(Self)
           ),
+          representeeAnswers = None,
           propertyAddress = None
         )
 
@@ -855,7 +858,7 @@ class SingleDisposalPropertyDetailsControllerSpec
       "show an error page" when {
 
         val draftReturn = nonResidentialPropertyDraftReturn
-          .copy(propertyAddress = Some(sample[UkAddress]), representeeAnswers = None)
+          .copy(propertyAddress = Some(sample[UkAddress]))
         val journey     =
           nonResidentialFillingOutReturn
             .copy(draftReturn = draftReturn, previousSentReturns = Some(sample[PreviousReturnData]))
