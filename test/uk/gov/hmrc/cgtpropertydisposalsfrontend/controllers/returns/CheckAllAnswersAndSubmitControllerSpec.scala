@@ -2242,6 +2242,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             ),
             representeeAnswers = None
           ),
+          submissionResponse = sample[SubmitReturnResponse].copy(
+            charge = Some(sample[ReturnCharge])
+          ),
           amendReturnData = None
         )
 
@@ -2272,6 +2275,9 @@ class CheckAllAnswersAndSubmitControllerSpec
               ),
               representeeAnswers = None
             ),
+            submissionResponse = sample[SubmitReturnResponse].copy(
+              charge = Some(sample[ReturnCharge])
+            ),
             amendReturnData = None
           )
 
@@ -2299,6 +2305,9 @@ class CheckAllAnswersAndSubmitControllerSpec
                 completionDate = completionDate
               ),
               representeeAnswers = None
+            ),
+            submissionResponse = sample[SubmitReturnResponse].copy(
+              charge = Some(sample[ReturnCharge])
             ),
             amendReturnData = Some(
               sample[AmendReturnData].copy(
