@@ -80,7 +80,9 @@
         <ol class="list list-number">
             <li>${messages(s"$key$returnTypeKey.enterTaxDue$userKey.helpText.li1", taxYearStartYear, taxYearEndYear)}</li>
             <li>${messages(s"$key$returnTypeKey.enterTaxDue$userKey.helpText.li2", taxYearStartYear, taxYearEndYear)}</li>
-            <li>${messages(s"$key$returnTypeKey.enterTaxDue$userKey.helpText.li3")}</li>
+            if(!isAmendReturn){
+                <li>${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.li3")}</li>
+            }
         </ol>
     """))
 }
