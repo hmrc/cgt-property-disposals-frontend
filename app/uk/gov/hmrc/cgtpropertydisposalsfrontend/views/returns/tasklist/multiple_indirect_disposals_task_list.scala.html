@@ -20,6 +20,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftMultipleIndirectDisposalsReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
@@ -27,16 +29,39 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
-        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
+    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
 )
 
-@(draftReturn: DraftMultipleIndirectDisposalsReturn, fillingOutReturn: FillingOutReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(
+    draftReturn: DraftMultipleIndirectDisposalsReturn,
+    fillingOutReturn: FillingOutReturn
+)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("service.title")}
+@isAnAgent = @{ request.userType.contains(UserType.Agent)}
+
+@accountNamePrefix = @{
+    fillingOutReturn.draftReturn.representativeType match {
+        case Some(PersonalRepresentative) =>
+            s"${messages("account.personalRep.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) =>
+            s"${messages("account.personalRepInPeriodOfAdmin.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
+        case Some(Capacitor) =>
+            s"${messages("account.personalRep.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
+        case None =>
+            if (isAnAgent)
+                s"${messages("account.agent.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
+                else if (fillingOutReturn.subscribedDetails.isATrust)
+            s"${messages("account.trust.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
+            else s"${fillingOutReturn.subscribedDetails.makeAccountName()}"
+    }
+}
+
 @representeeState = @{
     draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType) match {
         case Some(_: RepresentativeType) =>
@@ -109,6 +134,7 @@
 
 @mainTemplate(title = title, userType = request.userType) {
 
+    @caption(accountNamePrefix)
     @pageHeading(title)
 
     <ol class="app-task-list">
