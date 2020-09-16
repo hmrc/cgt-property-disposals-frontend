@@ -36,12 +36,7 @@
     @backLinkComponent(backLink)
 
     @pageHeading(title)
-    <p>@Html(messages(s"$key.p1", appConfig.contactHmrc))</p>
-    <p>@messages(s"$key.p2")</p>
-    <p>@messages(s"$key.p3")</p>
-    <ul class="list-bullet">
-        <li>@messages(s"$key.li1")</li>
-        <li>@messages(s"$key.li2")</li>
-    </ul>
+    <p>@messages(s"$key.p1")</p>
+    <p>@Html(messages(s"$key.p2", appConfig.contactHmrc))</p>
 
 }
