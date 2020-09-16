@@ -825,8 +825,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       val nonResidentialPropertyDraftReturn =
         sample[DraftMultipleDisposalsReturn].copy(
           triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-            assetTypes = List(AssetType.NonResidential)
+            assetTypes = List(AssetType.NonResidential),
+            individualUserType = Some(Self)
           ),
+          representeeAnswers = None,
           examplePropertyDetailsAnswers = Some(answers)
         )
 
