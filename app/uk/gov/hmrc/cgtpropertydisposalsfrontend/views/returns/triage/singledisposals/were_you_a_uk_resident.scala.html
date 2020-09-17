@@ -44,7 +44,7 @@
     displayReturnToSummaryLink: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isAmmend: Boolean
+    isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -100,7 +100,7 @@
 
         <p>@Html(messages(s"$key$userMsgKey.link", viewConfig.workOurYouResidenceStatusUrl))</p>
 
-        @submitButton(messages(if(isAmmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+        @submitButton(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

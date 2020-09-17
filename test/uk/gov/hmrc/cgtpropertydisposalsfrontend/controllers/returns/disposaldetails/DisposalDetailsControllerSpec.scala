@@ -41,6 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusG
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
@@ -55,6 +56,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, IndividualUserType, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
@@ -120,22 +122,26 @@ class DisposalDetailsControllerSpec
     individualUserType: Option[IndividualUserType],
     isAmend: Boolean
   ): (FillingOutReturn, DraftSingleDisposalReturn) = {
-    val answers       = sample[CompleteSingleDisposalTriageAnswers].copy(
+    val answers            = sample[CompleteSingleDisposalTriageAnswers].copy(
       disposalMethod = disposalMethod,
       individualUserType = individualUserType
     )
-    val reliefDetails =
+    val reliefDetails      =
       if (individualUserType.contains(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin))
         sample[CompleteReliefDetailsAnswers].copy(
           lettingsRelief = AmountInPence.zero
         )
       else sample[CompleteReliefDetailsAnswers]
-
-    val subscribedDetails = sample[SubscribedDetails].copy(
+    val representeeAnswers = individualUserType.flatMap {
+      case Self => None
+      case _    => Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true))
+    }
+    val subscribedDetails  = sample[SubscribedDetails].copy(
       name = setNameForUserType(userType)
     )
-    val draftReturn       = sample[DraftSingleDisposalReturn].copy(
+    val draftReturn        = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = answers,
+      representeeAnswers = representeeAnswers,
       reliefDetailsAnswers = Some(reliefDetails)
     )
 
@@ -143,7 +149,8 @@ class DisposalDetailsControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
       agentReferenceNumber = setAgentReferenceNumber(userType),
-      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None,
+      previousSentReturns = None
     )
 
     fillingOutReturn -> draftReturn
@@ -405,15 +412,18 @@ class DisposalDetailsControllerSpec
 
       def updateDraftReturn(
         d: DraftSingleDisposalReturn,
-        newAnswers: DisposalDetailsAnswers
+        newAnswers: DisposalDetailsAnswers,
+        isFurtherOrAmendReturn: Boolean
       ) =
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
-          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(d.triageAnswers)),
+          acquisitionDetailsAnswers = None,
           initialGainOrLoss = None,
-          reliefDetailsAnswers =
-            d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
-          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+          reliefDetailsAnswers = d.reliefDetailsAnswers
+            .map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
+          exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else d.exemptionAndLossesAnswers,
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers
+            .flatMap(_.unsetAllButIncomeDetails()),
           gainOrLossAfterReliefs = None
         )
 
@@ -632,13 +642,15 @@ class DisposalDetailsControllerSpec
                   currentAnswers,
                   disposalMethod,
                   userType,
-                  Some(individualUserType)
+                  Some(individualUserType),
+                  isAmend = false
                 )
               val newShare                        = ShareOfProperty.Full
               val newDraftReturn                  =
                 updateDraftReturn(
                   draftReturn,
-                  IncompleteDisposalDetailsAnswers(Some(newShare), None, None)
+                  IncompleteDisposalDetailsAnswers(Some(newShare), None, None),
+                  isFurtherOrAmendReturn = false
                 )
               val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
@@ -680,7 +692,8 @@ class DisposalDetailsControllerSpec
               val newDraftReturn                  =
                 updateDraftReturn(
                   draftReturn,
-                  IncompleteDisposalDetailsAnswers(Some(newShare), None, None)
+                  IncompleteDisposalDetailsAnswers(Some(newShare), None, None),
+                  isFurtherOrAmendReturn = false
                 )
               val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
@@ -732,7 +745,7 @@ class DisposalDetailsControllerSpec
                   disposalFees = None
                 )
                 val newDraftReturn                  =
-                  updateDraftReturn(draftReturn, updatedAnswers)
+                  updateDraftReturn(draftReturn, updatedAnswers, isFurtherOrAmendReturn = true)
                 val newJourney                      =
                   journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
@@ -785,7 +798,7 @@ class DisposalDetailsControllerSpec
                   disposalFees = None
                 )
                 val newDraftReturn                  =
-                  updateDraftReturn(draftReturn, updatedAnswers)
+                  updateDraftReturn(draftReturn, updatedAnswers, isFurtherOrAmendReturn = false)
                 val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
                 inSequence {
@@ -836,7 +849,8 @@ class DisposalDetailsControllerSpec
 
                   val newDraftReturn = updateDraftReturn(
                     draftReturn,
-                    IncompleteDisposalDetailsAnswers(Some(newShare), None, None)
+                    IncompleteDisposalDetailsAnswers(Some(newShare), None, None),
+                    isFurtherOrAmendReturn = false
                   )
                   val newJourney     = journey.copy(draftReturn = newDraftReturn)
 
@@ -927,7 +941,8 @@ class DisposalDetailsControllerSpec
                   Some(ShareOfProperty.Full),
                   None,
                   None
-                )
+                ),
+                isFurtherOrAmendReturn = false
               )
             val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
@@ -978,7 +993,8 @@ class DisposalDetailsControllerSpec
                   Some(ShareOfProperty.Half),
                   None,
                   None
-                )
+                ),
+                isFurtherOrAmendReturn = false
               )
             val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
@@ -1215,13 +1231,16 @@ class DisposalDetailsControllerSpec
 
       def updateDraftReturn(
         d: DraftSingleDisposalReturn,
-        newAnswers: DisposalDetailsAnswers
+        newAnswers: DisposalDetailsAnswers,
+        isFurtherOrAmendReturn: Boolean
       ) =
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
           reliefDetailsAnswers =
             d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
+          gainOrLossAfterReliefs = None,
+          exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else d.exemptionAndLossesAnswers,
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
@@ -1349,7 +1368,8 @@ class DisposalDetailsControllerSpec
               val newDisposalPrice                = AmountInPence.fromPounds(2d)
               val newDraftReturn                  = updateDraftReturn(
                 draftReturn,
-                currentAnswers.copy(disposalPrice = newDisposalPrice)
+                currentAnswers.copy(disposalPrice = newDisposalPrice),
+                isFurtherOrAmendReturn = false
               )
               val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
@@ -1393,7 +1413,8 @@ class DisposalDetailsControllerSpec
               val newDisposalPrice                = AmountInPence.fromPounds(2d)
               val newDraftReturn                  = updateDraftReturn(
                 draftReturn,
-                currentAnswers.copy(disposalPrice = newDisposalPrice)
+                currentAnswers.copy(disposalPrice = newDisposalPrice),
+                isFurtherOrAmendReturn = false
               )
               val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
@@ -1451,7 +1472,7 @@ class DisposalDetailsControllerSpec
                   disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
                 )
                 val newDraftReturn   =
-                  updateDraftReturn(draftReturn, updatedAnswers)
+                  updateDraftReturn(draftReturn, updatedAnswers, isFurtherOrAmendReturn = false)
                 val newJourney       = journey.copy(draftReturn = newDraftReturn)
 
                 inSequence {
@@ -1505,7 +1526,7 @@ class DisposalDetailsControllerSpec
                   disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
                 )
                 val newDraftReturn   =
-                  updateDraftReturn(draftReturn, updatedAnswers)
+                  updateDraftReturn(draftReturn, updatedAnswers, isFurtherOrAmendReturn = false)
                 val newJourney       = journey.copy(draftReturn = newDraftReturn)
 
                 inSequence {
@@ -1550,7 +1571,8 @@ class DisposalDetailsControllerSpec
                 val newDisposalPrice = 2d
                 val newDraftReturn   = updateDraftReturn(
                   draftReturn,
-                  currentAnswers.copy(disposalPrice = AmountInPence.fromPounds(newDisposalPrice))
+                  currentAnswers.copy(disposalPrice = AmountInPence.fromPounds(newDisposalPrice)),
+                  isFurtherOrAmendReturn = true
                 )
                 val newJourney       =
                   journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
@@ -1862,13 +1884,16 @@ class DisposalDetailsControllerSpec
 
       def updateDraftReturn(
         d: DraftSingleDisposalReturn,
-        newAnswers: DisposalDetailsAnswers
+        newAnswers: DisposalDetailsAnswers,
+        isFurtherOrAmendReturn: Boolean
       ) =
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
           reliefDetailsAnswers =
             d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
+          gainOrLossAfterReliefs = None,
+          exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else d.exemptionAndLossesAnswers,
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
@@ -1993,7 +2018,8 @@ class DisposalDetailsControllerSpec
               val newDisposalPrice                = AmountInPence.fromPounds(2d)
               val newDraftReturn                  = updateDraftReturn(
                 draftReturn,
-                currentAnswers.copy(disposalPrice = newDisposalPrice)
+                currentAnswers.copy(disposalPrice = newDisposalPrice),
+                isFurtherOrAmendReturn = false
               )
               val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
@@ -2037,7 +2063,8 @@ class DisposalDetailsControllerSpec
               val newDisposalPrice                = AmountInPence.fromPounds(2d)
               val newDraftReturn                  = updateDraftReturn(
                 draftReturn,
-                currentAnswers.copy(disposalPrice = newDisposalPrice)
+                currentAnswers.copy(disposalPrice = newDisposalPrice),
+                isFurtherOrAmendReturn = false
               )
               val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
@@ -2095,7 +2122,7 @@ class DisposalDetailsControllerSpec
                   disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
                 )
                 val newDraftReturn   =
-                  updateDraftReturn(draftReturn, updatedAnswers)
+                  updateDraftReturn(draftReturn, updatedAnswers, isFurtherOrAmendReturn = false)
                 val newJourney       = journey.copy(draftReturn = newDraftReturn)
 
                 inSequence {
@@ -2150,7 +2177,7 @@ class DisposalDetailsControllerSpec
                   disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
                 )
                 val newDraftReturn   =
-                  updateDraftReturn(draftReturn, updatedAnswers)
+                  updateDraftReturn(draftReturn, updatedAnswers, isFurtherOrAmendReturn = true)
                 val newJourney       =
                   journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
@@ -2197,7 +2224,8 @@ class DisposalDetailsControllerSpec
                 val newDisposalPrice = 2d
                 val newDraftReturn   = updateDraftReturn(
                   draftReturn,
-                  currentAnswers.copy(disposalPrice = AmountInPence.fromPounds(newDisposalPrice))
+                  currentAnswers.copy(disposalPrice = AmountInPence.fromPounds(newDisposalPrice)),
+                  isFurtherOrAmendReturn = false
                 )
                 val newJourney       = journey.copy(draftReturn = newDraftReturn)
 
@@ -2566,13 +2594,16 @@ class DisposalDetailsControllerSpec
 
       def updateDraftReturn(
         d: DraftSingleDisposalReturn,
-        newAnswers: DisposalDetailsAnswers
+        newAnswers: DisposalDetailsAnswers,
+        isFurtherOrAmendReturn: Boolean
       ) =
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
           reliefDetailsAnswers =
             d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
+          gainOrLossAfterReliefs = None,
+          exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else d.exemptionAndLossesAnswers,
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
@@ -2725,7 +2756,8 @@ class DisposalDetailsControllerSpec
                 draftReturn,
                 currentAnswers.copy(
                   disposalFees = newDisposalFees
-                )
+                ),
+                isFurtherOrAmendReturn = false
               )
               val newJourney      = journey.copy(draftReturn = newDraftReturn)
 
@@ -2772,7 +2804,8 @@ class DisposalDetailsControllerSpec
                 draftReturn,
                 currentAnswers.copy(
                   disposalFees = newDisposalFees
-                )
+                ),
+                isFurtherOrAmendReturn = false
               )
               val newJourney      = journey.copy(draftReturn = newDraftReturn)
 
@@ -2832,7 +2865,7 @@ class DisposalDetailsControllerSpec
                 val updatedAnswers = incompleteDisposalDetailsAnswers.copy(
                   disposalFees = Some(AmountInPence.fromPounds(disposalFees))
                 )
-                val newDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
+                val newDraftReturn = updateDraftReturn(draftReturn, updatedAnswers, isFurtherOrAmendReturn = false)
                 val newJourney     = journey.copy(draftReturn = newDraftReturn)
 
                 inSequence {
@@ -2887,7 +2920,7 @@ class DisposalDetailsControllerSpec
                   disposalFees = Some(AmountInPence.fromPounds(newDisposalFees))
                 )
                 val newDraftReturn  =
-                  updateDraftReturn(draftReturn, updatedAnswers)
+                  updateDraftReturn(draftReturn, updatedAnswers, isFurtherOrAmendReturn = true)
                 val newJourney      =
                   journey.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
@@ -2938,7 +2971,8 @@ class DisposalDetailsControllerSpec
                   draftReturn,
                   currentAnswers.copy(
                     disposalFees = AmountInPence.fromPounds(newDisposalFees)
-                  )
+                  ),
+                  isFurtherOrAmendReturn = false
                 )
                 val newJourney      = journey.copy(draftReturn = newDraftReturn)
 

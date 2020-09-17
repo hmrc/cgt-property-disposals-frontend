@@ -43,6 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
@@ -58,6 +59,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -151,7 +153,11 @@ class ReliefDetailsControllerSpec
           )
         ),
         individualUserType = Some(individualUserType)
-      )
+      ),
+      representeeAnswers = individualUserType match {
+        case Self => None
+        case _    => Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true))
+      }
     )
 
     val journey = sample[FillingOutReturn].copy(
@@ -160,7 +166,8 @@ class ReliefDetailsControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(
         name = setNameForUserType(userType)
       ),
-      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None,
+      previousSentReturns = None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -321,12 +328,14 @@ class ReliefDetailsControllerSpec
 
       def updateDraftReturn(
         d: DraftSingleDisposalReturn,
-        newAnswers: ReliefDetailsAnswers
+        newAnswers: ReliefDetailsAnswers,
+        isFurtherOrAmendReturn: Boolean
       ) =
         d.copy(
           reliefDetailsAnswers = Some(newAnswers),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
-          gainOrLossAfterReliefs = None
+          gainOrLossAfterReliefs = None,
+          exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else d.exemptionAndLossesAnswers
         )
 
       val key      = "privateResidentsRelief"
@@ -429,7 +438,7 @@ class ReliefDetailsControllerSpec
             )
 
           val newDraftReturn =
-            updateDraftReturn(draftReturn, incompleteReliefDetailsAnswers)
+            updateDraftReturn(draftReturn, incompleteReliefDetailsAnswers, isFurtherOrAmendReturn = false)
 
           (session, journey, newDraftReturn)
         }
@@ -503,7 +512,8 @@ class ReliefDetailsControllerSpec
                 oldDraftReturn,
                 IncompleteReliefDetailsAnswers.empty.copy(
                   privateResidentsRelief = Some(AmountInPence.fromPounds(newPrivateResidentsReliefValue))
-                )
+                ),
+                isFurtherOrAmendReturn = true
               )
 
             testSuccessfulUpdatesAfterSubmit(
@@ -541,7 +551,8 @@ class ReliefDetailsControllerSpec
                     AmountInPence.fromPounds(newPrivateResidentsReliefValue)
                   ),
                   lettingsRelief = lettingsRelief
-                )
+                ),
+                isFurtherOrAmendReturn = true
               )
 
             testSuccessfulUpdatesAfterSubmit(
@@ -614,7 +625,7 @@ class ReliefDetailsControllerSpec
                     completeAnswers.otherReliefs
                   )
                   val updatedDraftReturn =
-                    updateDraftReturn(draftReturn, newAnswers)
+                    updateDraftReturn(draftReturn, newAnswers, isFurtherOrAmendReturn = false)
                   val updatedJourney     =
                     journey.copy(draftReturn = updatedDraftReturn)
                   val updatedSession     =
@@ -791,11 +802,13 @@ class ReliefDetailsControllerSpec
 
       def updateDraftReturn(
         d: DraftSingleDisposalReturn,
-        newAnswers: ReliefDetailsAnswers
+        newAnswers: ReliefDetailsAnswers,
+        isFurtherOrAmendReturn: Boolean
       ) =
         d.copy(
           reliefDetailsAnswers = Some(newAnswers),
-          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+          exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else d.exemptionAndLossesAnswers
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -926,7 +939,8 @@ class ReliefDetailsControllerSpec
             )
           val newDraftReturn                  = updateDraftReturn(
             draftReturn,
-            currentAnswers.copy(lettingsRelief = newLettingsRelief)
+            currentAnswers.copy(lettingsRelief = newLettingsRelief),
+            isFurtherOrAmendReturn = false
           )
 
           (session, journey, newDraftReturn)
@@ -1022,7 +1036,8 @@ class ReliefDetailsControllerSpec
               oldDraftReturn,
               currentAnswers.copy(
                 lettingsRelief = Some(AmountInPence.fromPounds(newLettingsRelief))
-              )
+              ),
+              isFurtherOrAmendReturn = true
             )
 
             testSuccessfulUpdatesAfterSubmit(
@@ -1060,7 +1075,8 @@ class ReliefDetailsControllerSpec
                   oldDraftReturn,
                   currentAnswers.copy(
                     lettingsRelief = AmountInPence.fromPounds(newLettingsRelief)
-                  )
+                  ),
+                  isFurtherOrAmendReturn = true
                 )
 
               testSuccessfulUpdatesAfterSubmit(
@@ -1668,6 +1684,7 @@ class ReliefDetailsControllerSpec
               val newDraftReturn =
                 oldDraftReturn.copy(
                   reliefDetailsAnswers = Some(updatedAnswers),
+                  exemptionAndLossesAnswers = None,
                   yearToDateLiabilityAnswers = oldDraftReturn.yearToDateLiabilityAnswers.flatMap(
                     _.unsetAllButIncomeDetails()
                   )

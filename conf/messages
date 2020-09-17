@@ -762,24 +762,22 @@ numberOfProperties.error.required=Select how many UK properties you are includin
 
 numberOfProperties.cyaChange=how many properties you want to include in this return
 
-previousReturnExistsWithSameCompletionDate.amend.title=You already have a return with the completion date of {0}
+previousReturnExistsWithSameCompletionDate.amend.title=You cannot change this return online
 
-previousReturnExistsWithSameCompletionDate.amend.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your previous returns.
-previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your trust’s previous returns.
-previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your client’s previous returns.
+previousReturnExistsWithSameCompletionDate.amend.p1=You must <a href="{0}">contact HMRC</a>.
+previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>.
+previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>.
+previousReturnExistsWithSameCompletionDate.amend.p2=This is because sales or disposals with the same completion date must be in the same return.
+previousReturnExistsWithSameCompletionDate.amend.p3=Tell HMRC you need to change:
+previousReturnExistsWithSameCompletionDate.amend.li1=A previous return
+previousReturnExistsWithSameCompletionDate.amend.li2=A return that has the same disposal completion date as the one you entered on the previous page
 
-previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.title=Property disposals
-previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.p1=You’ll need to amend the return with the property that had:
-previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.li1=the same completion date as the one you’re wanting to report now
-previousReturnExistsWithSameCompletionDate.amend.propertyDisposals.li2=a contract exchange date in the same tax year as the one you’re wanting to report now
-previousReturnExistsWithSameCompletionDate.amend.indirectDisposals.title=Indirect disposals
-previousReturnExistsWithSameCompletionDate.amend.indirectDisposals.p1=You’ll need to amend the return that had shares with the same sale of disposal date as the disposal you’re wanting to report now.
 
 previousReturnExistsWithSameCompletionDate.title=You’ll need to change an existing return
-previousReturnExistsWithSameCompletionDate.p1=You already sent a return that had a disposal on <strong class="bold">{0}</strong>. You’ll need to change that return instead of creating a new one.
+previousReturnExistsWithSameCompletionDate.p1=You already have a return with completion date of <strong class="bold">{0}</strong>. You’ll need to change that return instead of creating a new one.
 previousReturnExistsWithSameCompletionDate.p2=You’ll need to change the <strong class="bold">number of disposals you are including</strong> in that return
 previousReturnExistsWithSameCompletionDate.caption=Existing return details
-previousReturnExistsWithSameCompletionDate.button.viewAndChange=Existing return details
+previousReturnExistsWithSameCompletionDate.button.viewAndChange=View and change return
 
 cannotAmendResidentialStatusForAssetType.title=You must contact HMRC
 
@@ -3878,19 +3876,16 @@ nonCalculatedTaxDue.amendReturn.enterTaxDue.agent.title=What is your client’s 
 nonCalculatedTaxDue.amendReturn.enterTaxDue.trust.title=What is the trust’s updated Capital Gains Tax liability for this return?
 
 nonCalculatedTaxDue.amendReturn.enterTaxDue.helpText.p1=To work out this amount, you’ll need to:
-nonCalculatedTaxDue.amendReturn.enterTaxDue.helpText.li1=Start with your previous overall Capital Gains Tax liability on your UK property-related disposals for the tax year {0} to {1}. This is what your overall liability was before this return.
-nonCalculatedTaxDue.amendReturn.enterTaxDue.helpText.li2=Subtract this amount from your new overall Capital Gains Tax liability on the UK property-related disposals for the tax year {0} to {1}. This is what your new overall liability is and includes the disposal in this return.
-nonCalculatedTaxDue.amendReturn.enterTaxDue.helpText.li3=Add this amount to the previously reported liability for this return and this will give you the figure to enter.
+nonCalculatedTaxDue.amendReturn.enterTaxDue.helpText.li1=Calculate your overall Capital Gains Tax liability to date on your UK property-related disposals for the tax year {0} to {1}.
+nonCalculatedTaxDue.amendReturn.enterTaxDue.helpText.li2=Subtract your previous Capital Gains Tax liability on your UK property-related disposals for the tax year {0} to {1} from this amount. Your previous liability is what your liability was before you updated this return.
 
 nonCalculatedTaxDue.amendReturn.enterTaxDue.agent.helpText.p1=To work out this amount, you’ll need to:
-nonCalculatedTaxDue.amendReturn.enterTaxDue.agent.helpText.li1=Start with your client’s previous overall Capital Gains Tax liability on their UK property-related disposals for the tax year {0} to {1}. This is what their overall liability was before this return.
-nonCalculatedTaxDue.amendReturn.enterTaxDue.agent.helpText.li2=Subtract this amount from your client’s new overall Capital Gains Tax liability on their UK property-related disposals for the tax year {0} to {1}. This is what their new overall liability is and includes the disposal in this return.
-nonCalculatedTaxDue.amendReturn.enterTaxDue.agent.helpText.li3=Add this amount to the previously reported liability for this return and this will give you the figure to enter.
+nonCalculatedTaxDue.amendReturn.enterTaxDue.agent.helpText.li1=Calculate your client’s overall Capital Gains Tax liability to date on their UK property-related disposals for the tax year {0} to {1}.
+nonCalculatedTaxDue.amendReturn.enterTaxDue.agent.helpText.li2=Subtract your client’s previous Capital Gains Tax liability on their UK property-related disposals for the tax year {0} to {1} from this amount. Your client’s previous liability is what their liability was before this return was updated.
 
 nonCalculatedTaxDue.amendReturn.enterTaxDue.trust.helpText.p1=To work out this amount, you’ll need to:
-nonCalculatedTaxDue.amendReturn.enterTaxDue.trust.helpText.li1=Start with the trust’s previous overall Capital Gains Tax liability on its UK property-related disposals for the tax year {0} to {1}. This is what its overall liability was before this return.
-nonCalculatedTaxDue.amendReturn.enterTaxDue.trust.helpText.li2=Subtract this amount from the trust’s new overall Capital Gains Tax liability on its UK property-related disposals for the tax year {0} to {1}. This is what its new overall liability is and includes the disposal in this return.
-nonCalculatedTaxDue.amendReturn.enterTaxDue.trust.helpText.li3=Add this amount to the previously reported liability for this return and this will give you the figure to enter.
+nonCalculatedTaxDue.amendReturn.enterTaxDue.trust.helpText.li1=Calculate the trust’s overall Capital Gains Tax liability to date on its UK property-related disposals for the tax year {0} to {1}.
+nonCalculatedTaxDue.amendReturn.enterTaxDue.trust.helpText.li2=Subtract the trust’s previous Capital Gains Tax liability on its UK property-related disposals for the tax year {0} to {1} from this amount. The trust’s previous liability is what its liability was before this return was updated.
 
 
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1=To work out this amount, you’ll need to:
@@ -3933,6 +3928,7 @@ hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any sup
 
 mandatoryEvidence.title=Upload a document showing how the Capital Gains Tax due was worked out
 mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG, Any files you upload to a draft return will be saved for 5 days.
+mandatoryEvidence.amendReturn.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG.
 
 mandatoryEvidence.cyaChange=the document showing how the Capital Gains Tax due was worked out
 
@@ -5057,7 +5053,7 @@ country.ZW=Zimbabwe
 #  AMEND RETURNS - START
 #===================================================
 
-youNeedToCalculate.title=If you change this return you will need to calculate the amounts yourself
+youNeedToCalculate.title=If you want to change this return you will need to calculate any amounts you are updating
 youNeedToCalculate.warning=We do not calculate the amounts you will need to enter. If you change this return, you will need to work out the amounts yourself.
 youNeedToCalculate.p1=You will need to:
 youNeedToCalculate.li1=calculate your Capital Gains Tax liability on your UK property-related disposals for the tax year so far

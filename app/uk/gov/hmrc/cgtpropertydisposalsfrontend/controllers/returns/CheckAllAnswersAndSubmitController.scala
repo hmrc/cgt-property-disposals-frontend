@@ -130,7 +130,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
                                        fillingOutReturn.ggCredId,
                                        fillingOutReturn.agentReferenceNumber,
                                        updatedCompleteReturn,
-                                       submitReturnResponse
+                                       submitReturnResponse,
+                                       fillingOutReturn.amendReturnData
                                      )
                                  }
               _               <- EitherT(

@@ -31,16 +31,18 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
@@ -51,10 +53,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -64,8 +62,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
 
 import scala.concurrent.Future
 
@@ -283,7 +283,8 @@ class AcquisitionDetailsControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(
         name = setNameForUserType(userType)
       ),
-      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None,
+      previousSentReturns = None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -333,22 +334,28 @@ class AcquisitionDetailsControllerSpec
 
   def commonUpdateDraftReturn(
     d: DraftSingleDisposalReturn,
-    newAnswers: AcquisitionDetailsAnswers
+    newAnswers: AcquisitionDetailsAnswers,
+    fillingOutReturn: FillingOutReturn
   ) =
     d.copy(
       acquisitionDetailsAnswers = Some(newAnswers),
       initialGainOrLoss = None,
       reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
+      exemptionAndLossesAnswers =
+        if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) None else d.exemptionAndLossesAnswers,
       yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
       gainOrLossAfterReliefs = None
     )
 
   def commonUpdateDraftReturn(
     d: DraftSingleIndirectDisposalReturn,
-    newAnswers: AcquisitionDetailsAnswers
+    newAnswers: AcquisitionDetailsAnswers,
+    fillingOutReturn: FillingOutReturn
   ) =
     d.copy(
       acquisitionDetailsAnswers = Some(newAnswers),
+      exemptionAndLossesAnswers =
+        if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) None else d.exemptionAndLossesAnswers,
       yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
       gainOrLossAfterReliefs = None
     )
@@ -638,7 +645,8 @@ class AcquisitionDetailsControllerSpec
             draftReturn,
             IncompleteAcquisitionDetailsAnswers.empty.copy(
               acquisitionMethod = Some(method)
-            )
+            ),
+            journey
           )
           (session, journey, updatedDraftReturn)
         }
@@ -719,7 +727,8 @@ class AcquisitionDetailsControllerSpec
             val updatedDraftReturn              = commonUpdateDraftReturn(
               draftReturn,
               IncompleteAcquisitionDetailsAnswers.empty
-                .copy(acquisitionMethod = Some(method))
+                .copy(acquisitionMethod = Some(method)),
+              journey
             )
             val updatedJourney                  =
               journey.copy(draftReturn = updatedDraftReturn)
@@ -792,7 +801,8 @@ class AcquisitionDetailsControllerSpec
             val updatedDraftReturn              = commonUpdateDraftReturn(
               draftReturn,
               IncompleteAcquisitionDetailsAnswers.empty
-                .copy(acquisitionMethod = Some(AcquisitionMethod.Gifted), improvementCosts = Some(AmountInPence.zero))
+                .copy(acquisitionMethod = Some(AcquisitionMethod.Gifted), improvementCosts = Some(AmountInPence.zero)),
+              journey
             )
             val updatedJourney                  =
               journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
@@ -842,7 +852,7 @@ class AcquisitionDetailsControllerSpec
             )
 
             val updatedDraftReturn =
-              commonUpdateDraftReturn(draftReturn, updatedAnswers)
+              commonUpdateDraftReturn(draftReturn, updatedAnswers, journey)
             val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
             val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
 
@@ -1292,7 +1302,7 @@ class AcquisitionDetailsControllerSpec
             )
 
           val updatedDraftReturn =
-            commonUpdateDraftReturn(draftReturn, newAnswers)
+            commonUpdateDraftReturn(draftReturn, newAnswers, journey)
 
           (session, journey, updatedDraftReturn)
         }
@@ -1373,7 +1383,7 @@ class AcquisitionDetailsControllerSpec
             else newAnswers
 
           val updatedDraftReturn =
-            commonUpdateDraftReturn(draftReturn, updatedNewAnswers)
+            commonUpdateDraftReturn(draftReturn, updatedNewAnswers, journey)
           val updatedJourney     =
             journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
           val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
@@ -1703,7 +1713,8 @@ class AcquisitionDetailsControllerSpec
           draftReturn,
           answers.copy(
             acquisitionPrice = Some(AmountInPence(123L))
-          )
+          ),
+          journey
         )
 
         "there is an error updating the draft return" in {
@@ -1763,7 +1774,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionMethod = Some(AcquisitionMethod.Other("period of admin")),
                   acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
                   acquisitionPrice = Some(expectedAmountInPence)
-                )
+                ),
+                journey
               )
 
               val updatedJourney =
@@ -1807,7 +1819,8 @@ class AcquisitionDetailsControllerSpec
                 draftReturn,
                 answers.copy(
                   acquisitionPrice = expectedAmountInPence
-                )
+                ),
+                journey
               )
               val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
               val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
@@ -2115,7 +2128,8 @@ class AcquisitionDetailsControllerSpec
 
           val updatedDraftReturn = commonUpdateDraftReturn(
             draftReturn,
-            answers.copy(acquisitionPrice = Some(AmountInPence(123L)))
+            answers.copy(acquisitionPrice = Some(AmountInPence(123L))),
+            journey
           )
 
           (session, journey, updatedDraftReturn)
@@ -2188,7 +2202,8 @@ class AcquisitionDetailsControllerSpec
 
               val updatedDraftReturn = commonUpdateDraftReturn(
                 draftReturn,
-                answers.copy(acquisitionPrice = Some(AmountInPence(123400L)))
+                answers.copy(acquisitionPrice = Some(AmountInPence(123400L))),
+                journey
               )
 
               val updatedJourney =
@@ -2222,7 +2237,8 @@ class AcquisitionDetailsControllerSpec
               )
               val updatedDraftReturn              = commonUpdateDraftReturn(
                 draftReturn,
-                answers.copy(acquisitionPrice = AmountInPence(123456L))
+                answers.copy(acquisitionPrice = AmountInPence(123456L)),
+                journey
               )
 
               val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
@@ -2757,7 +2773,8 @@ class AcquisitionDetailsControllerSpec
               rebasedAcquisitionPrice = Some(AmountInPence(123L)),
               acquisitionPrice = Some(AmountInPence(123L)),
               shouldUseRebase = Some(true)
-            )
+            ),
+            journey
           )
 
           (session, journey, updatedDraftReturn)
@@ -2841,7 +2858,8 @@ class AcquisitionDetailsControllerSpec
                       rebasedAcquisitionPrice = Some(expectedAmountInPence),
                       acquisitionPrice = Some(expectedAmountInPence),
                       shouldUseRebase = Some(true)
-                    )
+                    ),
+                    journey
                   )
 
                   val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
@@ -2889,7 +2907,8 @@ class AcquisitionDetailsControllerSpec
                       rebasedAcquisitionPrice = Some(expectedAmountInPence),
                       acquisitionPrice = expectedAmountInPence,
                       shouldUseRebase = true
-                    )
+                    ),
+                    journey
                   )
                   val updatedJourney                  =
                     journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
@@ -3425,7 +3444,8 @@ class AcquisitionDetailsControllerSpec
           )
           val updatedDraftReturn              = commonUpdateDraftReturn(
             draftReturn,
-            answers.copy(improvementCosts = Some(AmountInPence(123L)))
+            answers.copy(improvementCosts = Some(AmountInPence(123L))),
+            journey
           )
 
           (session, journey, updatedDraftReturn)
@@ -3505,7 +3525,8 @@ class AcquisitionDetailsControllerSpec
                   )
                   val updatedDraftReturn              = commonUpdateDraftReturn(
                     draftReturn,
-                    answers.copy(improvementCosts = Some(expectedAmountInPence))
+                    answers.copy(improvementCosts = Some(expectedAmountInPence)),
+                    journey
                   )
                   val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
                   val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
@@ -3550,7 +3571,8 @@ class AcquisitionDetailsControllerSpec
                   )
                   val updatedDraftReturn              = commonUpdateDraftReturn(
                     draftReturn,
-                    answers.copy(improvementCosts = expectedAmountInPence)
+                    answers.copy(improvementCosts = expectedAmountInPence),
+                    journey
                   )
                   val updatedJourney                  =
                     journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
@@ -4082,7 +4104,8 @@ class AcquisitionDetailsControllerSpec
           )
           val updatedDraftReturn              = commonUpdateDraftReturn(
             draftReturn,
-            answers.copy(acquisitionFees = Some(AmountInPence(123L)))
+            answers.copy(acquisitionFees = Some(AmountInPence(123L))),
+            journey
           )
 
           (session, journey, updatedDraftReturn)
@@ -4163,7 +4186,8 @@ class AcquisitionDetailsControllerSpec
                   )
                   val updatedDraftReturn              = commonUpdateDraftReturn(
                     draftReturn,
-                    answers.copy(acquisitionFees = Some(expectedAmountInPence))
+                    answers.copy(acquisitionFees = Some(expectedAmountInPence)),
+                    journey
                   )
 
                   val updatedJourney =
@@ -4205,7 +4229,8 @@ class AcquisitionDetailsControllerSpec
                   )
                   val updatedDraftReturn              = commonUpdateDraftReturn(
                     draftReturn,
-                    answers.copy(acquisitionFees = expectedAmountInPence)
+                    answers.copy(acquisitionFees = expectedAmountInPence),
+                    journey
                   )
                   val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
                   val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))

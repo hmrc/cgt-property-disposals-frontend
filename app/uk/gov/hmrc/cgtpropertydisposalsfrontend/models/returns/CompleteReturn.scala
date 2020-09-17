@@ -407,6 +407,9 @@ object CompleteReturn {
         singleMixedUse => Right(singleMixedUse.triageAnswers)
       )
 
+    def completionDate: CompletionDate =
+      triageAnswers.fold(_.completionDate, _.completionDate)
+
   }
 
   private def validRepresenteeAnswers(

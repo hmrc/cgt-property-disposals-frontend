@@ -35,7 +35,7 @@
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[BigDecimal], backLink: Call, isAmmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "nonCalculatedTaxDue" }
 
@@ -68,7 +68,7 @@
             assistiveText = messages("unit-input.assistive.pounds")
         )
 
-        @submitButton(messages(if(isAmmend) "button.continue" else "button.saveAndContinue"))
+        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

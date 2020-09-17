@@ -279,7 +279,8 @@ class DisposalDetailsController @Inject() (
             )
               draftReturn
             else {
-              val newAnswers = answers
+              val isFurtherOrAmendReturn = fillingOutReturn.isFurtherOrAmendReturn.contains(true)
+              val newAnswers             = answers
                 .unset(_.disposalPrice)
                 .unset(_.disposalFees)
                 .copy(shareOfProperty = Some(percentage))
@@ -288,23 +289,20 @@ class DisposalDetailsController @Inject() (
                 i =>
                   i.copy(
                     disposalDetailsAnswers = Some(newAnswers),
-                    acquisitionDetailsAnswers =
-                      if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
-                        None
-                      else
-                        i.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(i.triageAnswers)),
+                    acquisitionDetailsAnswers = None,
                     yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
                       .flatMap(_.unsetAllButIncomeDetails()),
-                    gainOrLossAfterReliefs = None
+                    gainOrLossAfterReliefs = None,
+                    exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else i.exemptionAndLossesAnswers
                   ),
                 s =>
                   s.copy(
                     disposalDetailsAnswers = Some(newAnswers),
-                    acquisitionDetailsAnswers =
-                      s.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(s.triageAnswers)),
+                    acquisitionDetailsAnswers = None,
                     initialGainOrLoss = None,
                     reliefDetailsAnswers = s.reliefDetailsAnswers
                       .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
+                    exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else s.exemptionAndLossesAnswers,
                     yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers
                       .flatMap(_.unsetAllButIncomeDetails()),
                     gainOrLossAfterReliefs = None
@@ -377,7 +375,8 @@ class DisposalDetailsController @Inject() (
               )
                 draftReturn
               else {
-                val newAnswers = answers.fold(
+                val isFurtherOrAmendReturn = fillingOutReturn.isFurtherOrAmendReturn.contains(true)
+                val newAnswers             = answers.fold(
                   _.copy(disposalPrice = Some(fromPounds(price))),
                   _.copy(disposalPrice = fromPounds(price))
                 )
@@ -386,6 +385,8 @@ class DisposalDetailsController @Inject() (
                   i =>
                     i.copy(
                       disposalDetailsAnswers = Some(newAnswers),
+                      gainOrLossAfterReliefs = None,
+                      exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else i.exemptionAndLossesAnswers,
                       yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
                         .flatMap(_.unsetAllButIncomeDetails())
                     ),
@@ -395,6 +396,8 @@ class DisposalDetailsController @Inject() (
                       initialGainOrLoss = None,
                       reliefDetailsAnswers = s.reliefDetailsAnswers
                         .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
+                      gainOrLossAfterReliefs = None,
+                      exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else s.exemptionAndLossesAnswers,
                       yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(
                         _.unsetAllButIncomeDetails()
                       )
@@ -462,7 +465,8 @@ class DisposalDetailsController @Inject() (
               )
                 draftReturn
               else {
-                val newAnswers =
+                val isFurtherOrAmendReturn = fillingOutReturn.isFurtherOrAmendReturn.contains(true)
+                val newAnswers             =
                   answers.fold(
                     _.copy(disposalFees = Some(fromPounds(price))),
                     _.copy(disposalFees = fromPounds(price))
@@ -472,6 +476,8 @@ class DisposalDetailsController @Inject() (
                   i =>
                     i.copy(
                       disposalDetailsAnswers = Some(newAnswers),
+                      gainOrLossAfterReliefs = None,
+                      exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else i.exemptionAndLossesAnswers,
                       yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
                         .flatMap(_.unsetAllButIncomeDetails())
                     ),
@@ -481,6 +487,8 @@ class DisposalDetailsController @Inject() (
                       initialGainOrLoss = None,
                       reliefDetailsAnswers = s.reliefDetailsAnswers
                         .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
+                      gainOrLossAfterReliefs = None,
+                      exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else s.exemptionAndLossesAnswers,
                       yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(
                         _.unsetAllButIncomeDetails()
                       )

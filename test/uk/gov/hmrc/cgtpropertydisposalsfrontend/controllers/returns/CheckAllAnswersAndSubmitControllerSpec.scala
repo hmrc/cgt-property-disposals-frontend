@@ -1293,7 +1293,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         completeFillingOutReturnNoRepresentee.ggCredId,
         completeFillingOutReturnNoRepresentee.agentReferenceNumber,
         completeReturn.copy(hasAttachments = hasAttachments),
-        submitReturnResponse
+        submitReturnResponse,
+        completeFillingOutReturnNoRepresentee.amendReturnData
       )
 
       lazy val submitReturnRequest = {
@@ -2228,6 +2229,113 @@ class CheckAllAnswersAndSubmitControllerSpec
                 }
               )
             }
+        }
+      }
+
+      "display the late filing penalty warning if the completion date is more than 30 days before today" in {
+        val completionDate      = CompletionDate(LocalDate.now().minusDays(31L))
+        val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+          completeReturn = sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self),
+              completionDate = completionDate
+            ),
+            representeeAnswers = None
+          ),
+          submissionResponse = sample[SubmitReturnResponse].copy(
+            charge = Some(sample[ReturnCharge])
+          ),
+          amendReturnData = None
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithJourney(justSubmittedReturn)
+              .copy(userType = Some(UserType.Individual))
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("confirmationOfSubmission.title"),
+          _.select("#lfpWarning").text shouldBe messageFromMessageKey("confirmationOfSubmission.penalty.warning")
+        )
+      }
+
+      "not display the late filing penalty warning" when {
+
+        "if the completion date is not more than 30 days before today" in {
+          val completionDate      = CompletionDate(LocalDate.now().minusDays(30L))
+          val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+            completeReturn = sample[CompleteSingleDisposalReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                individualUserType = Some(Self),
+                completionDate = completionDate
+              ),
+              representeeAnswers = None
+            ),
+            submissionResponse = sample[SubmitReturnResponse].copy(
+              charge = Some(sample[ReturnCharge])
+            ),
+            amendReturnData = None
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithJourney(justSubmittedReturn)
+                .copy(userType = Some(UserType.Individual))
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("confirmationOfSubmission.title"),
+            _.select("#lfpWarning").text shouldBe ""
+          )
+        }
+
+        "the return has been amended but the completion date has not been changed" in {
+          val completionDate      = CompletionDate(LocalDate.now().minusDays(31L))
+          val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+            completeReturn = sample[CompleteSingleDisposalReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                individualUserType = Some(Self),
+                completionDate = completionDate
+              ),
+              representeeAnswers = None
+            ),
+            submissionResponse = sample[SubmitReturnResponse].copy(
+              charge = Some(sample[ReturnCharge])
+            ),
+            amendReturnData = Some(
+              sample[AmendReturnData].copy(
+                originalReturn = sample[CompleteReturnWithSummary].copy(
+                  completeReturn = sample[CompleteSingleDisposalReturn]
+                    .copy(
+                      triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                        completionDate = completionDate
+                      )
+                    )
+                )
+              )
+            )
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithJourney(justSubmittedReturn)
+                .copy(userType = Some(UserType.Individual))
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("confirmationOfSubmission.title"),
+            _.select("#lfpWarning").text shouldBe ""
+          )
         }
       }
 

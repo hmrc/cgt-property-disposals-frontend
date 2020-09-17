@@ -50,6 +50,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homePageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Organisation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,17 +63,18 @@ class CommonTriageQuestionsController @Inject() (
   uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
+  servicesConfig: ServicesConfig,
   whoAreYouReportingForPage: triagePages.who_are_you_reporting_for,
   howManyPropertiesPage: triagePages.how_many_properties,
   ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
   previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date,
-  previousReturnExistsWithSameCompletionDateAmendPage: triagePages.previous_return_exists_with_same_completion_date_ammend,
+  previousReturnExistsWithSameCompletionDateAmendPage: triagePages.previous_return_exists_with_same_completion_date_amend,
   furtherReturnsHelpPage: triagePages.further_retuns_help,
   disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
   cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
-  whoAreYouSubmittingAmendExitPage: triagePages.ammend_who_are_you_submitting_for_exit_page
+  whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -81,6 +83,8 @@ class CommonTriageQuestionsController @Inject() (
     with StartingToAmendToFillingOutReturnBehaviour {
 
   import CommonTriageQuestionsController._
+
+  val newCompletionDateUsedFlag = servicesConfig.getBoolean("amend-returns.enabled")
 
   private def isIndividual(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
@@ -427,17 +431,22 @@ class CommonTriageQuestionsController @Inject() (
             .getOrElse(List.empty)
             .find(e => CompletionDate(e.completionDate) === completionDate) match {
             case Some(matchingPreviousReturn) if state.forall(!_.isAmendReturn) =>
-              Ok(
-                previousReturnExistsWithSameCompletionDatePage(
-                  matchingPreviousReturn,
-                  backLink
+              if (newCompletionDateUsedFlag)
+                Ok(
+                  previousReturnExistsWithSameCompletionDatePage(
+                    matchingPreviousReturn,
+                    backLink
+                  )
                 )
-              )
+              else
+                Ok(
+                  previousReturnExistsWithSameCompletionDateAmendPage(
+                    backLink
+                  )
+                )
             case _ if state.exists(_.isAmendReturn)                             =>
               Ok(
                 previousReturnExistsWithSameCompletionDateAmendPage(
-                  completionDate,
-                  state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
                   backLink
                 )
               )
