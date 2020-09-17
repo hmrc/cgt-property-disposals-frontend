@@ -772,7 +772,7 @@ previousReturnExistsWithSameCompletionDate.amend.li2=A return that has the same 
 
 
 previousReturnExistsWithSameCompletionDate.title=You’ll need to change an existing return
-previousReturnExistsWithSameCompletionDate.p1=You already have a return with completion date of <strong class="bold">{0}</strong>. You’ll need to change that return instead of creating a new one.
+previousReturnExistsWithSameCompletionDate.p1=You already sent a return that had a disposal with a completion date of <strong class="bold">{0}</strong>. You’ll need to change that return instead of creating a new one.
 previousReturnExistsWithSameCompletionDate.p2=You’ll need to change the <strong class="bold">number of disposals you are including</strong> in that return
 previousReturnExistsWithSameCompletionDate.caption=Existing return details
 previousReturnExistsWithSameCompletionDate.button.viewAndChange=View and change return
