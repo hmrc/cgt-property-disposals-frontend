@@ -765,10 +765,10 @@ previousReturnExistsWithSameCompletionDate.amend.title=You cannot change this re
 previousReturnExistsWithSameCompletionDate.amend.p1=You must <a href="{0}">contact HMRC</a>.
 previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>.
 previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>.
-previousReturnExistsWithSameCompletionDate.amend.p2=This is because sales or disposals with the same completion date must be in the same return.
+previousReturnExistsWithSameCompletionDate.amend.p2=This is because sales or disposals with the same completion date must all be in the same return.
 previousReturnExistsWithSameCompletionDate.amend.p3=Tell HMRC you need to change:
 previousReturnExistsWithSameCompletionDate.amend.li1=A previous return
-previousReturnExistsWithSameCompletionDate.amend.li2=A return that has the same disposal completion date as the one you entered on the previous page
+previousReturnExistsWithSameCompletionDate.amend.li2=the return that has the same disposal completion date as the one you entered on the previous page
 
 
 previousReturnExistsWithSameCompletionDate.title=You’ll need to change an existing return
@@ -5069,7 +5069,7 @@ amendCya.title=Change your return
 amendCya.agent.title=Change your client’s return
 amendCya.p1=Once all questions have been answered you will be able to submit your return.
 amendCya.printLink=Print or save this page as a PDF
-amendCya.insetText=You cannot ‘save and come back later’ when you change a return.
+amendCya.insetText=You will not be able to save and come back later while you’re changing your return.
 
 unmetDependency.x1.title=What you’ll need to do next
 unmetDependency.x2.title=You’ll need to answer some additional questions
