@@ -26,6 +26,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -59,18 +60,31 @@
     messages(messageKey)
 }
 
+@crOrPRAccountName = @{ completeReturn.representeeAnswers.fold("")(_.makeAccountName) }
+@accountName = @{ subscribedDetails.makeAccountName }
+
+@accountFullName = @{
+    completeReturn.representativeType match {
+        case Some(PersonalRepresentative) =>
+            s"${messages("account.personalRep.prefix")} ${crOrPRAccountName}"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) =>
+            s"${messages("account.personalRepInPeriodOfAdmin.prefix")} $accountName"
+        case Some(Capacitor) =>
+            s"${messages("account.personalRep.prefix")} ${crOrPRAccountName}"
+        case None =>
+            if (isAgent)
+                s"${messages("account.agent.prefix")} $accountName"
+            else if (subscribedDetails.isATrust)
+                s"${messages("account.trust.prefix")} $accountName"
+            else s"$accountName"
+    }
+}
+
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
-    @caption(
-        if(isAgent) {
-            s"${messages("account.agent.prefix")} ${subscribedDetails.makeAccountName}"
-        } else {
-            subscribedDetails.makeAccountName()
-        }
-    )
-
+    @caption(accountFullName)
     @pageHeading(title)
 
     <div class="panel panel-border-wide">
