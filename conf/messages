@@ -630,7 +630,7 @@ account.totalLeftToPay=Total left to pay
 account.make.payment.link=Make a payment
 account.totalLeftToPay.penalties=Includes taxes, penalties and interest owed
 account.totalLeftToPay.payments=It takes 3 to 5 days for payments or charges to show in your account
-account.balance-updating=Balance Updating
+account.balance-updating=Balance updating
 
 account.manageYourDetails.title=Manage account
 account.manageYourDetails.subtitle=Account number

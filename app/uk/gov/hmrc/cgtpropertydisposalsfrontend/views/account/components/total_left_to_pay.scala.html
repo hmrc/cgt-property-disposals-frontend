@@ -36,7 +36,7 @@
     @messages("account.totalLeftToPay")
   </span>
     @if(hasRecentlyAmendedReturn){
-        @{"£" + messages("account.balance-updating")}
+        @{"£ " + messages("account.balance-updating")}
     }else{
         @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay.inPounds())
     }
