@@ -26,10 +26,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
@@ -44,7 +43,7 @@
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
     warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
     taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    accountName: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.partials.account_name,
     cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
 )
 
@@ -55,25 +54,6 @@
 
 @title = @{messages("service.title")}
 
-@isAnAgent = @{ request.userType.contains(UserType.Agent)}
-
-@accountNamePrefix = @{
-    fillingOutReturn.draftReturn.representativeType match {
-        case Some(PersonalRepresentative) =>
-            s"${messages("account.personalRep.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) =>
-            s"${messages("account.personalRepInPeriodOfAdmin.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
-        case Some(Capacitor) =>
-            s"${messages("account.personalRep.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
-        case None =>
-        if (isAnAgent)
-            s"${messages("account.agent.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
-        else if (fillingOutReturn.subscribedDetails.isATrust)
-            s"${messages("account.trust.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
-        else s"${fillingOutReturn.subscribedDetails.makeAccountName()}"
-    }
-}
-
 @representeeState = @{
   draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType) match {
       case Some(_: RepresentativeType) =>
@@ -82,6 +62,7 @@
           None
   }
 }
+
 @triageState = @{draftReturn.triageAnswers.fold(_ => InProgress, _ => Complete)}
 @propertyAddressState = @{draftReturn.propertyAddress.fold[TaskListStatus](ToDo)(_ => Complete)}
 
@@ -187,7 +168,7 @@
 
 @mainTemplate(title = title, userType = request.userType) {
 
-@caption(accountNamePrefix)
+@accountName(fillingOutReturn)
 @pageHeading(title)
 
 <ol class="app-task-list">

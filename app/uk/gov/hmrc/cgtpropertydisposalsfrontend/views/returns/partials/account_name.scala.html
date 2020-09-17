@@ -1,0 +1,50 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+
+@this(caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption)
+
+@(fillingOutReturn: FillingOutReturn)(implicit request: RequestWithSessionData[_], messages: Messages)
+
+@isAnAgent = @{ request.userType.contains(UserType.Agent)}
+
+@crOrPRAccountName = @{ fillingOutReturn.draftReturn.representeeAnswers.fold("")(_.makeAccountName()) }
+@accountName = @{ fillingOutReturn.subscribedDetails.makeAccountName() }
+
+@accountFullName = @{
+  fillingOutReturn.draftReturn.representativeType match {
+    case Some(PersonalRepresentative) =>
+        s"${messages("account.personalRep.prefix")} ${crOrPRAccountName}"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) =>
+        s"${messages("account.personalRepInPeriodOfAdmin.prefix")} ${accountName}"
+    case Some(Capacitor) =>
+        s"${messages("account.personalRep.prefix")} ${crOrPRAccountName}"
+    case None =>
+    if (isAnAgent)
+        s"${messages("account.agent.prefix")} ${accountName}"
+    else if (fillingOutReturn.subscribedDetails.isATrust)
+        s"${messages("account.trust.prefix")} ${accountName}"
+    else s"${accountName}"
+  }
+}
+
+@caption(accountFullName)

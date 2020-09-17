@@ -66,6 +66,10 @@ object RepresenteeAnswers {
         case i: IncompleteRepresenteeAnswers => ifIncomplete(i)
         case c: CompleteRepresenteeAnswers   => ifComplete(c)
       }
+
+    def makeAccountName(): String =
+      r.fold(_.name.fold("")(_.makeSingleName), _.name.makeSingleName)
+
   }
 
   implicit val format: OFormat[RepresenteeAnswers] = derived.oformat()

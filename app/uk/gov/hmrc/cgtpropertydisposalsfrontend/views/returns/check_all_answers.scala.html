@@ -29,7 +29,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeNino
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeSautr
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
@@ -60,7 +59,7 @@
     singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
     gainOrLossAfterReliefsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary,
     printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    accountName: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.partials.account_name,
     insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
 )
 
@@ -79,6 +78,7 @@
 
 @title = @{ messages( if(fillingOutReturn.isAmendReturn) "checkAllAnswers.amend.title" else  "checkAllAnswers.title") }
 @isATrust = @{ subscribedDetails.isATrust }
+@isAnAgent = @{ request.userType.contains(UserType.Agent) }
 
 @representeeSection(representeeAnswers: Option[CompleteRepresenteeAnswers]) = @{
     (representeeAnswers, representativeType) match {
@@ -93,24 +93,6 @@
         case _ => Html("")
     }
 }
-@isAnAgent = @{ request.userType.contains(UserType.Agent) }
-
-@accountNamePrefix = @{
-    fillingOutReturn.draftReturn.representativeType match {
-        case Some(PersonalRepresentative) =>
-            s"${messages("account.personalRep.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) =>
-            s"${messages("account.personalRepInPeriodOfAdmin.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
-        case Some(Capacitor) =>
-            s"${messages("account.personalRep.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
-        case None =>
-            if (isAnAgent)
-                s"${messages("account.agent.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
-            else if (isATrust)
-                s"${messages("account.trust.prefix")} ${fillingOutReturn.subscribedDetails.makeAccountName()}"
-            else s"${fillingOutReturn.subscribedDetails.makeAccountName()}"
-    }
-}
 
 @representeeId = @{completeReturn.fold(_.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id))}
 @submissionDetailsKey=@{"checkAllAnswers.submissionDetails"}
@@ -119,7 +101,7 @@
 
  @backLinkComponent(routes.TaskListController.taskList())
 
- @caption(accountNamePrefix)
+ @accountName(fillingOutReturn)
  @pageHeading(title)
 
   @if(fillingOutReturn.isAmendReturn && !showSubmissionDetails){
