@@ -59,18 +59,21 @@
     messages(messageKey)
 }
 
+@accountName = @{ subscribedDetails.makeAccountName }
+
+@accountFullName = @{
+    if (isAgent)
+        s"${messages("account.agent.prefix")} $accountName"
+    else if (subscribedDetails.isATrust)
+        s"${messages("account.trust.prefix")} $accountName"
+    else s"$accountName"
+}
+
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
-    @caption(
-        if(isAgent) {
-            s"${messages("account.agent.prefix")} ${subscribedDetails.makeAccountName}"
-        } else {
-            subscribedDetails.makeAccountName()
-        }
-    )
-
+    @caption(accountFullName)
     @pageHeading(title)
 
     <div class="panel panel-border-wide">

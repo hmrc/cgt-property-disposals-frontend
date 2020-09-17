@@ -59,6 +59,7 @@
     singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
     gainOrLossAfterReliefsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary,
     printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+    accountName: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.partials.account_name,
     insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
 )
 
@@ -77,6 +78,7 @@
 
 @title = @{ messages( if(fillingOutReturn.isAmendReturn) "checkAllAnswers.amend.title" else  "checkAllAnswers.title") }
 @isATrust = @{ subscribedDetails.isATrust }
+@isAnAgent = @{ request.userType.contains(UserType.Agent) }
 
 @representeeSection(representeeAnswers: Option[CompleteRepresenteeAnswers]) = @{
     (representeeAnswers, representativeType) match {
@@ -91,7 +93,7 @@
         case _ => Html("")
     }
 }
-@isAgent = @{ request.userType.contains(UserType.Agent) }
+
 @representeeId = @{completeReturn.fold(_.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id))}
 @submissionDetailsKey=@{"checkAllAnswers.submissionDetails"}
 
@@ -99,6 +101,7 @@
 
  @backLinkComponent(routes.TaskListController.taskList())
 
+ @accountName(fillingOutReturn)
  @pageHeading(title)
 
   @if(fillingOutReturn.isAmendReturn && !showSubmissionDetails){
@@ -108,7 +111,7 @@
   @if(showSubmissionDetails) {
       <h2 class="heading-medium">@messages(s"$submissionDetailsKey.title") </h2>
       @cyaSection() {
-          @if(!isAgent) {
+          @if(!isAnAgent) {
               @cyaRow(
                   messages(s"$submissionDetailsKey.cgtReferencenumber"),
                   Html(subscribedDetails.cgtReference.value),
