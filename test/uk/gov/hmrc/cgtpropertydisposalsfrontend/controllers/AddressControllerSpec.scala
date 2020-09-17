@@ -814,7 +814,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     s"display the enter postcode page for ${getUserClue(userType, individualUserType)}" when {
       lazy val expectedTitleMessageKey =
         validJourneyStatus match {
-          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney           =>
+          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             f.draftReturn.fold(
               _ => "enterPostcode.returns.multipleDisposals.title",
               _ => s"enterPostcode.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
@@ -823,7 +823,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
             "enterPostcode.representee.title"
 
-          case _                                                                      => "enterPostcode.title"
+          case _ => "enterPostcode.title"
         }
 
       lazy val session = validJourneyStatus match {
@@ -1037,50 +1037,50 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
     "redirect to select address when the address lookup result has been stored in mongo " +
       "and the postcode is valid" in {
-      List(
-        "AA9A 9AA",
-        "A9A 9AA",
-        "A9 9AA",
-        "A99 9AA",
-        "AA9 9AA",
-        "AA99 9AA",
-        "  aA99 9Aa ",
-        "BFPO1",
-        "BFPO12",
-        "BFPO12 3",
-        " BfpO123 ",
-        "BFPO 123"
-      ).foreach { postcode =>
-        withClue(s"For postcode '$postcode': ") {
-          val formattedPostcode   = Postcode(postcode.trim)
-          val addressLookupResult =
-            AddressLookupResult(
-              formattedPostcode,
-              None,
-              List(sample[UkAddress])
-            )
+        List(
+          "AA9A 9AA",
+          "A9A 9AA",
+          "A9 9AA",
+          "A99 9AA",
+          "AA9 9AA",
+          "AA99 9AA",
+          "  aA99 9Aa ",
+          "BFPO1",
+          "BFPO12",
+          "BFPO12 3",
+          " BfpO123 ",
+          "BFPO 123"
+        ).foreach { postcode =>
+          withClue(s"For postcode '$postcode': ") {
+            val formattedPostcode   = Postcode(postcode.trim)
+            val addressLookupResult =
+              AddressLookupResult(
+                formattedPostcode,
+                None,
+                List(sample[UkAddress])
+              )
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithValidJourneyStatus)
-            mockAddressLookup(formattedPostcode, None)(
-              Right(addressLookupResult)
-            )
-            mockStoreSession(
-              sessionWithValidJourneyStatus
-                .copy(addressLookupResult = Some(addressLookupResult))
-            )(
-              Right(())
-            )
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionWithValidJourneyStatus)
+              mockAddressLookup(formattedPostcode, None)(
+                Right(addressLookupResult)
+              )
+              mockStoreSession(
+                sessionWithValidJourneyStatus
+                  .copy(addressLookupResult = Some(addressLookupResult))
+              )(
+                Right(())
+              )
+            }
+
+            val result = performAction(Seq("postcode" -> postcode))
+            checkIsRedirect(result, selectAddress)
           }
 
-          val result = performAction(Seq("postcode" -> postcode))
-          checkIsRedirect(result, selectAddress)
         }
 
       }
-
-    }
 
     "trim leading and trailing spaces in postcodes" in {
       inSequence {
@@ -1155,7 +1155,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
     s"display the select address page for ${getUserClue(userType, individualUserType)}" when {
       lazy val expectedMessageTitleKey = validJourneyStatus match {
-        case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney           =>
+        case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
           f.draftReturn.fold(
             _ => "address-select.returns.multipleDisposals.title",
             _ => s"address-select.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
@@ -1164,7 +1164,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
           "address-select.representee.title"
 
-        case _                                                                      => "address-select.title"
+        case _ => "address-select.title"
       }
 
       s"there is an address lookup result in session for ${getUserClue(userType, individualUserType)}" in {
@@ -1235,22 +1235,21 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           "-1"                                        -> "address-select.invalid",
           addressLookupResult.addresses.size.toString -> "address-select.invalid",
           "a"                                         -> "address-select.error.number"
-        ).foreach {
-          case (submitted, errorKey) =>
-            withClue(s"For submitted data '$submitted': ") {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithValidJourneyStatusAndAddressLookupResult
-                )
-              }
-
-              val result = performAction(Seq("address-select" -> submitted))
-              status(result)        shouldBe BAD_REQUEST
-              contentAsString(result) should include(
-                messageFromMessageKey(errorKey)
+        ).foreach { case (submitted, errorKey) =>
+          withClue(s"For submitted data '$submitted': ") {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithValidJourneyStatusAndAddressLookupResult
               )
             }
+
+            val result = performAction(Seq("address-select" -> submitted))
+            status(result)        shouldBe BAD_REQUEST
+            contentAsString(result) should include(
+              messageFromMessageKey(errorKey)
+            )
+          }
         }
       }
 

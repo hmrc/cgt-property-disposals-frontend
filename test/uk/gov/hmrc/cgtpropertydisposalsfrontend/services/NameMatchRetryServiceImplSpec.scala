@@ -833,37 +833,37 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
       "a BPR was not found and the user has now exceeded the configured maximum number of " +
         "unsuccessful attempts" in {
-        inSequence {
-          mockSendBprNameMatchAttemptEvent(
-            maxRetries,
-            maxRetries,
-            auditEvent
-          )(())
-          mockGetBpr(Right(BusinessPartnerRecordResponse(None, None)))
-          mockStoreNumberOfUnsccessfulAttempts(
-            ggCredId,
-            UnsuccessfulNameMatchAttempts(
+          inSequence {
+            mockSendBprNameMatchAttemptEvent(
               maxRetries,
               maxRetries,
-              sampleNameMatchDetails
-            )
-          )(Right(()))
-        }
-
-        testIsErrorOfType[A, NameMatchServiceError.TooManyUnsuccessfulAttempts](
-          toResult(
-            sampleNameMatchDetails,
-            ggCredId,
-            Some(
+              auditEvent
+            )(())
+            mockGetBpr(Right(BusinessPartnerRecordResponse(None, None)))
+            mockStoreNumberOfUnsccessfulAttempts(
+              ggCredId,
               UnsuccessfulNameMatchAttempts(
-                maxRetries - 1,
                 maxRetries,
-                sample[A]
+                maxRetries,
+                sampleNameMatchDetails
+              )
+            )(Right(()))
+          }
+
+          testIsErrorOfType[A, NameMatchServiceError.TooManyUnsuccessfulAttempts](
+            toResult(
+              sampleNameMatchDetails,
+              ggCredId,
+              Some(
+                UnsuccessfulNameMatchAttempts(
+                  maxRetries - 1,
+                  maxRetries,
+                  sample[A]
+                )
               )
             )
           )
-        )
-      }
+        }
 
     }
 
@@ -919,37 +919,37 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
       "a BPR was not found and the user has not exceeded the configured maximum number of " +
         "unsuccessful attempts" in {
-        inSequence {
-          mockSendBprNameMatchAttemptEvent(
-            2,
-            maxRetries,
-            auditEvent
-          )(())
+          inSequence {
+            mockSendBprNameMatchAttemptEvent(
+              2,
+              maxRetries,
+              auditEvent
+            )(())
 
-          mockGetBpr(Right(BusinessPartnerRecordResponse(None, None)))
+            mockGetBpr(Right(BusinessPartnerRecordResponse(None, None)))
 
-          mockStoreNumberOfUnsccessfulAttempts(
-            ggCredId,
-            UnsuccessfulNameMatchAttempts(2, maxRetries, sampleNameMatchDetails)
-          )(
-            Right(())
-          )
-        }
+            mockStoreNumberOfUnsccessfulAttempts(
+              ggCredId,
+              UnsuccessfulNameMatchAttempts(2, maxRetries, sampleNameMatchDetails)
+            )(
+              Right(())
+            )
+          }
 
-        testIsErrorOfType[A, NameMatchServiceError.NameMatchFailed[A]](
-          toResult(
-            sampleNameMatchDetails,
-            ggCredId,
-            Some(
-              UnsuccessfulNameMatchAttempts(
-                1,
-                maxRetries,
-                sample[A]
+          testIsErrorOfType[A, NameMatchServiceError.NameMatchFailed[A]](
+            toResult(
+              sampleNameMatchDetails,
+              ggCredId,
+              Some(
+                UnsuccessfulNameMatchAttempts(
+                  1,
+                  maxRetries,
+                  sample[A]
+                )
               )
             )
           )
-        )
-      }
+        }
 
       "the name and sautr passed in are the same as the previous attempt" in {
         mockSendBprNameMatchAttemptEvent(1, maxRetries, auditEvent)(())

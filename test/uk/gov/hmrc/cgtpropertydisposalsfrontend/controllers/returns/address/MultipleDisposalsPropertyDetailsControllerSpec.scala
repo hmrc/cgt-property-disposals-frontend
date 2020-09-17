@@ -1813,37 +1813,37 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
 
-            val answers = sample[CompleteExamplePropertyDetailsAnswers].copy(
-              disposalDate = disposalDate.copy(
-                value = today.minusDays(10L)
-              )
-            )
-
-            val oldDraftReturn     = sample[DraftMultipleDisposalsReturn].copy(
-              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                .copy(
-                  taxYear = taxYear,
-                  completionDate = CompletionDate(taxYear.endDateExclusive),
-                  individualUserType = Some(Self)
-                ),
-              examplePropertyDetailsAnswers = Some(answers)
-            )
-            val updatedDraftReturn = oldDraftReturn.copy(
-              examplePropertyDetailsAnswers = Some(
-                answers.copy(
-                  disposalDate = disposalDate
+              val answers = sample[CompleteExamplePropertyDetailsAnswers].copy(
+                disposalDate = disposalDate.copy(
+                  value = today.minusDays(10L)
                 )
               )
-            )
 
-            test(
-              performAction(formData(disposalDate.value): _*),
-              oldDraftReturn,
-              updatedDraftReturn,
-              isAmend = true
-            )
+              val oldDraftReturn     = sample[DraftMultipleDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(
+                    taxYear = taxYear,
+                    completionDate = CompletionDate(taxYear.endDateExclusive),
+                    individualUserType = Some(Self)
+                  ),
+                examplePropertyDetailsAnswers = Some(answers)
+              )
+              val updatedDraftReturn = oldDraftReturn.copy(
+                examplePropertyDetailsAnswers = Some(
+                  answers.copy(
+                    disposalDate = disposalDate
+                  )
+                )
+              )
 
-          }
+              test(
+                performAction(formData(disposalDate.value): _*),
+                oldDraftReturn,
+                updatedDraftReturn,
+                isAmend = true
+              )
+
+            }
         }
       }
 
@@ -2243,33 +2243,33 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user hasn't ever answered the disposal price question " +
           "and the draft return and session data has been successfully updated" in {
 
-          val answers = sample[IncompleteExamplePropertyDetailsAnswers].copy(
-            address = Some(sample[UkAddress]),
-            disposalDate = Some(disposalDate),
-            disposalPrice = Some(AmountInPence.fromPounds(1))
-          )
+            val answers = sample[IncompleteExamplePropertyDetailsAnswers].copy(
+              address = Some(sample[UkAddress]),
+              disposalDate = Some(disposalDate),
+              disposalPrice = Some(AmountInPence.fromPounds(1))
+            )
 
-          val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
-            examplePropertyDetailsAnswers = Some(answers)
-          )
+            val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(answers)
+            )
 
-          val updatedDraftReturn = oldDraftReturn.copy(
-            examplePropertyDetailsAnswers = Some(
-              answers.copy(
-                disposalPrice = Some(AmountInPence.fromPounds(10))
-              )
-            ),
-            yearToDateLiabilityAnswers = None,
-            gainOrLossAfterReliefs = None
-          )
+            val updatedDraftReturn = oldDraftReturn.copy(
+              examplePropertyDetailsAnswers = Some(
+                answers.copy(
+                  disposalPrice = Some(AmountInPence.fromPounds(10))
+                )
+              ),
+              yearToDateLiabilityAnswers = None,
+              gainOrLossAfterReliefs = None
+            )
 
-          test(
-            performAction(key -> "10"),
-            oldDraftReturn,
-            updatedDraftReturn,
-            isAmend = false
-          )
-        }
+            test(
+              performAction(key -> "10"),
+              oldDraftReturn,
+              updatedDraftReturn,
+              isAmend = false
+            )
+          }
 
       }
 
@@ -2853,32 +2853,32 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user hasn't ever answered the acquisition price question " +
           "and the draft return and session data has been successfully updated" in {
 
-          val answers = sample[IncompleteExamplePropertyDetailsAnswers].copy(
-            disposalDate = Some(disposalDate),
-            acquisitionPrice = Some(AmountInPence.fromPounds(10))
-          )
+            val answers = sample[IncompleteExamplePropertyDetailsAnswers].copy(
+              disposalDate = Some(disposalDate),
+              acquisitionPrice = Some(AmountInPence.fromPounds(10))
+            )
 
-          val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
-            examplePropertyDetailsAnswers = Some(answers)
-          )
+            val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(answers)
+            )
 
-          val newDraftReturn = oldDraftReturn.copy(
-            examplePropertyDetailsAnswers = Some(
-              answers.copy(
-                acquisitionPrice = Some(AmountInPence.fromPounds(100))
-              )
-            ),
-            yearToDateLiabilityAnswers = None,
-            gainOrLossAfterReliefs = None
-          )
+            val newDraftReturn = oldDraftReturn.copy(
+              examplePropertyDetailsAnswers = Some(
+                answers.copy(
+                  acquisitionPrice = Some(AmountInPence.fromPounds(100))
+                )
+              ),
+              yearToDateLiabilityAnswers = None,
+              gainOrLossAfterReliefs = None
+            )
 
-          test(
-            performAction(key -> "100"),
-            oldDraftReturn,
-            newDraftReturn,
-            isAmend = true
-          )
-        }
+            test(
+              performAction(key -> "100"),
+              oldDraftReturn,
+              newDraftReturn,
+              isAmend = true
+            )
+          }
 
       }
 

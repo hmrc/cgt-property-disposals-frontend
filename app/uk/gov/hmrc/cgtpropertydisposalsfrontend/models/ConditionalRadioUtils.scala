@@ -66,7 +66,7 @@ object ConditionalRadioUtils {
               case Some(Left(innerOption)) =>
                 innerOption.readValue(data)
 
-              case None                    => Left(Seq(FormError(outerKey, "error.invalid", requiredErrorArgs)))
+              case None => Left(Seq(FormError(outerKey, "error.invalid", requiredErrorArgs)))
             }
           }
 

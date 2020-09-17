@@ -2297,32 +2297,32 @@ class CompanyDetailsControllerSpec
         "the user hasn't ever answered the disposal price question " +
           "and the draft return and session data has been successfully updated" in {
 
-          val answers = sample[IncompleteExampleCompanyDetailsAnswers].copy(
-            address = Some(sample[UkAddress]),
-            disposalPrice = Some(AmountInPence.fromPounds(1))
-          )
+            val answers = sample[IncompleteExampleCompanyDetailsAnswers].copy(
+              address = Some(sample[UkAddress]),
+              disposalPrice = Some(AmountInPence.fromPounds(1))
+            )
 
-          val oldDraftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
-            exampleCompanyDetailsAnswers = Some(answers)
-          )
+            val oldDraftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(answers)
+            )
 
-          val updatedDraftReturn = oldDraftReturn.copy(
-            exampleCompanyDetailsAnswers = Some(
-              answers.copy(
-                disposalPrice = Some(AmountInPence.fromPounds(10))
-              )
-            ),
-            yearToDateLiabilityAnswers = None,
-            gainOrLossAfterReliefs = None
-          )
+            val updatedDraftReturn = oldDraftReturn.copy(
+              exampleCompanyDetailsAnswers = Some(
+                answers.copy(
+                  disposalPrice = Some(AmountInPence.fromPounds(10))
+                )
+              ),
+              yearToDateLiabilityAnswers = None,
+              gainOrLossAfterReliefs = None
+            )
 
-          test(
-            performAction(key -> "10"),
-            oldDraftReturn,
-            updatedDraftReturn,
-            isAmend = false
-          )
-        }
+            test(
+              performAction(key -> "10"),
+              oldDraftReturn,
+              updatedDraftReturn,
+              isAmend = false
+            )
+          }
 
       }
 
@@ -2776,31 +2776,31 @@ class CompanyDetailsControllerSpec
         "the user hasn't ever answered the acquisition price question " +
           "and the draft return and session data has been successfully updated" in {
 
-          val answers = sample[IncompleteExampleCompanyDetailsAnswers].copy(
-            acquisitionPrice = Some(AmountInPence.fromPounds(10))
-          )
+            val answers = sample[IncompleteExampleCompanyDetailsAnswers].copy(
+              acquisitionPrice = Some(AmountInPence.fromPounds(10))
+            )
 
-          val oldDraftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
-            exampleCompanyDetailsAnswers = Some(answers)
-          )
+            val oldDraftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(answers)
+            )
 
-          val newDraftReturn = oldDraftReturn.copy(
-            exampleCompanyDetailsAnswers = Some(
-              answers.copy(
-                acquisitionPrice = Some(AmountInPence.fromPounds(100))
-              )
-            ),
-            yearToDateLiabilityAnswers = None,
-            gainOrLossAfterReliefs = None
-          )
+            val newDraftReturn = oldDraftReturn.copy(
+              exampleCompanyDetailsAnswers = Some(
+                answers.copy(
+                  acquisitionPrice = Some(AmountInPence.fromPounds(100))
+                )
+              ),
+              yearToDateLiabilityAnswers = None,
+              gainOrLossAfterReliefs = None
+            )
 
-          test(
-            performAction(key -> "100"),
-            oldDraftReturn,
-            newDraftReturn,
-            isAmend = true
-          )
-        }
+            test(
+              performAction(key -> "100"),
+              oldDraftReturn,
+              newDraftReturn,
+              isAmend = true
+            )
+          }
 
       }
 

@@ -71,7 +71,7 @@ class AmendReturnController @Inject() (
   def confirmCancel(back: String): Action[AnyContent] =
     authenticatedActionWithSessionData { implicit request =>
       confirmCancelBackLinkMappings.get(back) match {
-        case None           =>
+        case None =>
           logger.warn(s"Could not get back link location for '$back'")
           errorHandler.errorResult()
 
@@ -89,7 +89,7 @@ class AmendReturnController @Inject() (
   def confirmCancelSubmit(back: String): Action[AnyContent] =
     authenticatedActionWithSessionData { implicit request =>
       confirmCancelBackLinkMappings.get(back) match {
-        case None           =>
+        case None =>
           logger.warn(s"Could not get back link location for '$back'")
           errorHandler.errorResult()
 
@@ -133,7 +133,7 @@ class AmendReturnController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withStartingToAmendReturn(request) { startingToAmend =>
         startingToAmend.unmetDependencyFieldUrl match {
-          case None                          =>
+          case None =>
             Redirect(routes.AmendReturnController.checkYourAnswers())
 
           case Some(unmetDependencyFieldUrl) =>
@@ -150,7 +150,7 @@ class AmendReturnController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withStartingToAmendReturn(request) { startingToAmend =>
         startingToAmend.unmetDependencyFieldUrl match {
-          case None    =>
+          case None =>
             Redirect(routes.AmendReturnController.checkYourAnswers())
 
           case Some(_) =>

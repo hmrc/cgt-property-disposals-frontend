@@ -107,8 +107,8 @@ class ReturnsConnectorImpl @Inject() (
       http
         .POST[DraftReturn, HttpResponse](storeDraftReturnUrl, draftReturn)
         .map(Right(_))
-        .recover {
-          case NonFatal(e) => Left(Error(e))
+        .recover { case NonFatal(e) =>
+          Left(Error(e))
         }
     )
   }
@@ -120,8 +120,8 @@ class ReturnsConnectorImpl @Inject() (
       http
         .GET[HttpResponse](getDraftReturnsUrl(cgtReference))
         .map(Right(_))
-        .recover {
-          case NonFatal(e) => Left(Error(e))
+        .recover { case NonFatal(e) =>
+          Left(Error(e))
         }
     )
 
@@ -132,8 +132,8 @@ class ReturnsConnectorImpl @Inject() (
       http
         .POST[DeleteDraftReturnsRequest, HttpResponse](deleteDraftReturnsUrl, DeleteDraftReturnsRequest(draftReturnIds))
         .map(Right(_))
-        .recover {
-          case NonFatal(e) => Left(Error(e))
+        .recover { case NonFatal(e) =>
+          Left(Error(e))
         }
     )
 
@@ -149,8 +149,8 @@ class ReturnsConnectorImpl @Inject() (
           Seq(ACCEPT_LANGUAGE -> lang.language)
         )
         .map(Right(_))
-        .recover {
-          case NonFatal(e) => Left(Error(e))
+        .recover { case NonFatal(e) =>
+          Left(Error(e))
         }
     )
 
@@ -192,8 +192,8 @@ class ReturnsConnectorImpl @Inject() (
       http
         .POST[CalculateCgtTaxDueRequest, HttpResponse](calculateCgtTaxDueUrl, request)
         .map(Right(_))
-        .recover {
-          case NonFatal(e) => Left(Error(e))
+        .recover { case NonFatal(e) =>
+          Left(Error(e))
         }
     )
 

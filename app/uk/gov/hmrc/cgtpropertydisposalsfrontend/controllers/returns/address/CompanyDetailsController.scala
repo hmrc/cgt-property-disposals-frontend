@@ -135,7 +135,7 @@ class CompanyDetailsController @Inject() (
           )
         )
 
-      case _                                   => Left(Redirect(controllers.routes.StartController.start()))
+      case _ => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(
@@ -186,7 +186,7 @@ class CompanyDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { (_, r) =>
         r.draftReturn match {
-          case Right(_: DraftSingleIndirectDisposalReturn)   =>
+          case Right(_: DraftSingleIndirectDisposalReturn) =>
             Redirect(routes.PropertyDetailsController.checkYourAnswers())
 
           case Left(m: DraftMultipleIndirectDisposalsReturn) =>
@@ -267,7 +267,7 @@ class CompanyDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { (_, r) =>
         r.draftReturn match {
-          case Right(_: DraftSingleIndirectDisposalReturn)   =>
+          case Right(_: DraftSingleIndirectDisposalReturn) =>
             Redirect(routes.PropertyDetailsController.checkYourAnswers())
 
           case Left(m: DraftMultipleIndirectDisposalsReturn) =>
@@ -342,7 +342,7 @@ class CompanyDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { (_, r) =>
         r.draftReturn match {
-          case Right(_: DraftSingleIndirectDisposalReturn)   =>
+          case Right(_: DraftSingleIndirectDisposalReturn) =>
             Redirect(routes.PropertyDetailsController.checkYourAnswers())
 
           case Left(m: DraftMultipleIndirectDisposalsReturn) =>
@@ -367,7 +367,7 @@ class CompanyDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { (_, r) =>
         r.draftReturn match {
-          case Right(_: DraftSingleIndirectDisposalReturn)   =>
+          case Right(_: DraftSingleIndirectDisposalReturn) =>
             Redirect(routes.PropertyDetailsController.checkYourAnswers())
 
           case Left(m: DraftMultipleIndirectDisposalsReturn) =>
@@ -436,75 +436,73 @@ class CompanyDetailsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, journey) =>
-          journey.draftReturn match {
+      withValidJourney(request) { case (_, journey) =>
+        journey.draftReturn match {
 
-            case Right(singleIndirect)  =>
-              singleIndirect.companyAddress.fold(
-                Redirect(routes.CompanyDetailsController.isUk())
-              )(companyAddress => Ok(checkYourAnswersPage(companyAddress)))
+          case Right(singleIndirect) =>
+            singleIndirect.companyAddress.fold(
+              Redirect(routes.CompanyDetailsController.isUk())
+            )(companyAddress => Ok(checkYourAnswersPage(companyAddress)))
 
-            case Left(multipleIndirect) =>
-              multipleIndirect.exampleCompanyDetailsAnswers.fold[Future[Result]](
-                Redirect(routes.CompanyDetailsController.multipleIndirectDisposalsGuidance())
-              ) {
+          case Left(multipleIndirect) =>
+            multipleIndirect.exampleCompanyDetailsAnswers.fold[Future[Result]](
+              Redirect(routes.CompanyDetailsController.multipleIndirectDisposalsGuidance())
+            ) {
 
-                case IncompleteExampleCompanyDetailsAnswers(None, _, _)                  =>
-                  Redirect(
-                    routes.CompanyDetailsController.multipleIndirectDisposalsGuidance()
-                  )
+              case IncompleteExampleCompanyDetailsAnswers(None, _, _) =>
+                Redirect(
+                  routes.CompanyDetailsController.multipleIndirectDisposalsGuidance()
+                )
 
-                case IncompleteExampleCompanyDetailsAnswers(_, None, _)                  =>
-                  Redirect(
-                    routes.CompanyDetailsController.multipleIndirectDisposalPrice()
-                  )
+              case IncompleteExampleCompanyDetailsAnswers(_, None, _) =>
+                Redirect(
+                  routes.CompanyDetailsController.multipleIndirectDisposalPrice()
+                )
 
-                case IncompleteExampleCompanyDetailsAnswers(_, _, None)                  =>
-                  Redirect(
-                    routes.CompanyDetailsController.multipleIndirectAcquisitionPrice()
-                  )
+              case IncompleteExampleCompanyDetailsAnswers(_, _, None) =>
+                Redirect(
+                  routes.CompanyDetailsController.multipleIndirectAcquisitionPrice()
+                )
 
-                case IncompleteExampleCompanyDetailsAnswers(Some(a), Some(dp), Some(ap)) =>
-                  val completeAnswers    = CompleteExampleCompanyDetailsAnswers(a, dp, ap)
-                  val updatedDraftReturn = multipleIndirect.copy(
-                    exampleCompanyDetailsAnswers = Some(completeAnswers)
-                  )
-                  val updatedJourney     = journey.journey.copy(
-                    draftReturn = updatedDraftReturn
-                  )
+              case IncompleteExampleCompanyDetailsAnswers(Some(a), Some(dp), Some(ap)) =>
+                val completeAnswers    = CompleteExampleCompanyDetailsAnswers(a, dp, ap)
+                val updatedDraftReturn = multipleIndirect.copy(
+                  exampleCompanyDetailsAnswers = Some(completeAnswers)
+                )
+                val updatedJourney     = journey.journey.copy(
+                  draftReturn = updatedDraftReturn
+                )
 
-                  val result = for {
-                    _ <- returnsService.storeDraftReturn(updatedJourney)
-                    _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
-                  } yield ()
+                val result = for {
+                  _ <- returnsService.storeDraftReturn(updatedJourney)
+                  _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+                } yield ()
 
-                  result.fold(
-                    { e =>
-                      logger.warn("Could not update draft return", e)
-                      errorHandler.errorResult()
-                    },
-                    _ =>
-                      Ok(
-                        multipleIndirectCheckYourAnswersPage(completeAnswers)
-                      )
-                  )
+                result.fold(
+                  { e =>
+                    logger.warn("Could not update draft return", e)
+                    errorHandler.errorResult()
+                  },
+                  _ =>
+                    Ok(
+                      multipleIndirectCheckYourAnswersPage(completeAnswers)
+                    )
+                )
 
-                case c: CompleteExampleCompanyDetailsAnswers                             =>
-                  Ok(
-                    multipleIndirectCheckYourAnswersPage(c)
-                  )
+              case c: CompleteExampleCompanyDetailsAnswers =>
+                Ok(
+                  multipleIndirectCheckYourAnswersPage(c)
+                )
 
-              }
-          }
+            }
+        }
       }
     }
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, _) =>
-          Redirect(controllers.returns.routes.TaskListController.taskList())
+      withValidJourney(request) { case (_, _) =>
+        Redirect(controllers.returns.routes.TaskListController.taskList())
       }
     }
 

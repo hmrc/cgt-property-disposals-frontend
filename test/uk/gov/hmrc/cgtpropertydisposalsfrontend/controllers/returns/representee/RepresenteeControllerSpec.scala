@@ -1318,21 +1318,20 @@ class RepresenteeControllerSpec
               PersonalRepresentative -> routes.RepresenteeController
                 .enterDateOfDeath(),
               Capacitor              -> routes.RepresenteeController.enterName()
-            ) foreach {
-              case (representativeType, redirect) =>
-                val (session, journey) =
-                  sessionWithStartingNewDraftReturn(
-                    requiredPreviousAnswers,
-                    representativeType
-                  )
-
-                test(
-                  session,
-                  journey.ggCredId,
-                  redirect,
-                  expectReturnToSummaryLink = false,
-                  None
+            ) foreach { case (representativeType, redirect) =>
+              val (session, journey) =
+                sessionWithStartingNewDraftReturn(
+                  requiredPreviousAnswers,
+                  representativeType
                 )
+
+              test(
+                session,
+                journey.ggCredId,
+                redirect,
+                expectReturnToSummaryLink = false,
+                None
+              )
             }
           }
 
@@ -1341,22 +1340,21 @@ class RepresenteeControllerSpec
               PersonalRepresentative -> routes.RepresenteeController
                 .enterDateOfDeath(),
               Capacitor              -> routes.RepresenteeController.enterName()
-            ) foreach {
-              case (representativeType, redirect) =>
-                val cgtReference       = sample[RepresenteeCgtReference]
-                val (session, journey) =
-                  sessionWithStartingNewDraftReturn(
-                    requiredPreviousAnswers.copy(id = Some(cgtReference)),
-                    representativeType
-                  )
-
-                test(
-                  session,
-                  journey.ggCredId,
-                  redirect,
-                  expectReturnToSummaryLink = false,
-                  Some(cgtReference)
+            ) foreach { case (representativeType, redirect) =>
+              val cgtReference       = sample[RepresenteeCgtReference]
+              val (session, journey) =
+                sessionWithStartingNewDraftReturn(
+                  requiredPreviousAnswers.copy(id = Some(cgtReference)),
+                  representativeType
                 )
+
+              test(
+                session,
+                journey.ggCredId,
+                redirect,
+                expectReturnToSummaryLink = false,
+                Some(cgtReference)
+              )
             }
           }
 
@@ -2362,86 +2360,86 @@ class RepresenteeControllerSpec
         "the journey is incomplete and there are no contact details in session and " +
           "all updates are successful and" when {
 
-          "the user has started a draft return" in {
-            val contactDetails                  = sample[RepresenteeContactDetails]
-            val answers                         =
-              sample[IncompleteRepresenteeAnswers].copy(contactDetails = None)
-            val (session, journey, draftReturn) =
-              sessionWithFillingOutReturn(
-                answers,
-                PersonalRepresentative,
-                sample[SubscribedDetails].copy(
-                  contactName = contactDetails.contactName,
-                  address = contactDetails.address,
-                  emailAddress = contactDetails.emailAddress
+            "the user has started a draft return" in {
+              val contactDetails                  = sample[RepresenteeContactDetails]
+              val answers                         =
+                sample[IncompleteRepresenteeAnswers].copy(contactDetails = None)
+              val (session, journey, draftReturn) =
+                sessionWithFillingOutReturn(
+                  answers,
+                  PersonalRepresentative,
+                  sample[SubscribedDetails].copy(
+                    contactName = contactDetails.contactName,
+                    address = contactDetails.address,
+                    emailAddress = contactDetails.emailAddress
+                  )
                 )
+
+              val newAnswers     = answers.copy(
+                contactDetails = Some(contactDetails),
+                hasConfirmedContactDetails = false
               )
+              val newDraftReturn =
+                DraftSingleDisposalReturn.newDraftReturn(
+                  draftReturn.id,
+                  IncompleteSingleDisposalTriageAnswers.empty
+                    .copy(individualUserType = Some(PersonalRepresentative)),
+                  Some(newAnswers)
+                )
 
-            val newAnswers     = answers.copy(
-              contactDetails = Some(contactDetails),
-              hasConfirmedContactDetails = false
-            )
-            val newDraftReturn =
-              DraftSingleDisposalReturn.newDraftReturn(
-                draftReturn.id,
-                IncompleteSingleDisposalTriageAnswers.empty
-                  .copy(individualUserType = Some(PersonalRepresentative)),
-                Some(newAnswers)
-              )
+              val newJourney = journey.copy(draftReturn = newDraftReturn)
 
-            val newJourney = journey.copy(draftReturn = newDraftReturn)
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(session)
-              mockStoreDraftReturn(newJourney)(Right(()))
-              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
-                Right(())
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(newJourney)(Right(()))
+                mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
+                  Right(())
+                )
+              }
+              checkPage(
+                performAction(),
+                contactDetails,
+                expectReturnToSummaryLink = true
               )
             }
-            checkPage(
-              performAction(),
-              contactDetails,
-              expectReturnToSummaryLink = true
-            )
-          }
 
-          "the user has not started a draft return" in {
-            val contactDetails     = sample[RepresenteeContactDetails]
-            val answers            =
-              sample[IncompleteRepresenteeAnswers].copy(contactDetails = None)
-            val (session, journey) =
-              sessionWithStartingNewDraftReturn(
-                answers,
-                PersonalRepresentative,
-                sample[SubscribedDetails].copy(
-                  contactName = contactDetails.contactName,
-                  address = contactDetails.address,
-                  emailAddress = contactDetails.emailAddress
+            "the user has not started a draft return" in {
+              val contactDetails     = sample[RepresenteeContactDetails]
+              val answers            =
+                sample[IncompleteRepresenteeAnswers].copy(contactDetails = None)
+              val (session, journey) =
+                sessionWithStartingNewDraftReturn(
+                  answers,
+                  PersonalRepresentative,
+                  sample[SubscribedDetails].copy(
+                    contactName = contactDetails.contactName,
+                    address = contactDetails.address,
+                    emailAddress = contactDetails.emailAddress
+                  )
                 )
+
+              val newAnswers = answers.copy(
+                contactDetails = Some(contactDetails),
+                hasConfirmedContactDetails = false
               )
+              val newJourney = journey.copy(representeeAnswers = Some(newAnswers))
 
-            val newAnswers = answers.copy(
-              contactDetails = Some(contactDetails),
-              hasConfirmedContactDetails = false
-            )
-            val newJourney = journey.copy(representeeAnswers = Some(newAnswers))
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(session)
-              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
-                Right(())
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
+                  Right(())
+                )
+              }
+              checkPage(
+                performAction(),
+                contactDetails,
+                expectReturnToSummaryLink = false
               )
             }
-            checkPage(
-              performAction(),
-              contactDetails,
-              expectReturnToSummaryLink = false
-            )
-          }
 
-        }
+          }
 
       }
 
@@ -2543,31 +2541,31 @@ class RepresenteeControllerSpec
 
         "the section is incomplete and the user hasn't confirmed the contact details yet and" +
           "all updates are successful" in {
-          val answers                         = sample[IncompleteRepresenteeAnswers].copy(
-            contactDetails = Some(sample[RepresenteeContactDetails]),
-            hasConfirmedContactDetails = false
-          )
-          val (session, journey, draftReturn) =
-            sessionWithFillingOutReturn(answers, Capacitor)
-          val newAnswers                      = answers.copy(hasConfirmedContactDetails = true)
-          val newDraftReturn                  =
-            draftReturn.copy(representeeAnswers = Some(newAnswers))
-          val newJourney                      = journey.copy(draftReturn = newDraftReturn)
+            val answers                         = sample[IncompleteRepresenteeAnswers].copy(
+              contactDetails = Some(sample[RepresenteeContactDetails]),
+              hasConfirmedContactDetails = false
+            )
+            val (session, journey, draftReturn) =
+              sessionWithFillingOutReturn(answers, Capacitor)
+            val newAnswers                      = answers.copy(hasConfirmedContactDetails = true)
+            val newDraftReturn                  =
+              draftReturn.copy(representeeAnswers = Some(newAnswers))
+            val newJourney                      = journey.copy(draftReturn = newDraftReturn)
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(newJourney)(Right(()))
-            mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
-              Right(())
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(newJourney)(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
+                Right(())
+              )
+            }
+
+            checkIsRedirect(
+              performAction(),
+              routes.RepresenteeController.checkYourAnswers()
             )
           }
-
-          checkIsRedirect(
-            performAction(),
-            routes.RepresenteeController.checkYourAnswers()
-          )
-        }
 
       }
 

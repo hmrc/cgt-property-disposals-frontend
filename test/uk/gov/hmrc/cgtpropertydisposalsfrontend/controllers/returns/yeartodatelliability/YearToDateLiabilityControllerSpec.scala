@@ -654,60 +654,60 @@ class YearToDateLiabilityControllerSpec
 
         "an individual has answered the question before but has " +
           "not completed the section" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithSingleDisposalState(
-                IncompleteCalculatedYTDAnswers.empty.copy(
-                  estimatedIncome = Some(AmountInPence.fromPounds(12.34))
-                ),
-                sample[DisposalDate],
-                UserType.Individual,
-                wasUkResident = true
-              )._1
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithSingleDisposalState(
+                  IncompleteCalculatedYTDAnswers.empty.copy(
+                    estimatedIncome = Some(AmountInPence.fromPounds(12.34))
+                  ),
+                  sample[DisposalDate],
+                  UserType.Individual,
+                  wasUkResident = true
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("estimatedIncome.title"),
+              doc => doc.select("#estimatedIncome").attr("value") shouldBe "12.34"
             )
           }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("estimatedIncome.title"),
-            doc => doc.select("#estimatedIncome").attr("value") shouldBe "12.34"
-          )
-        }
 
         "the user has answered the question before but has " +
           "completed the section" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithSingleDisposalState(
-                sample[CompleteCalculatedYTDAnswers]
-                  .copy(estimatedIncome = AmountInPence.fromPounds(12.34)),
-                sample[DisposalDate],
-                UserType.Individual,
-                wasUkResident = true
-              )._1
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithSingleDisposalState(
+                  sample[CompleteCalculatedYTDAnswers]
+                    .copy(estimatedIncome = AmountInPence.fromPounds(12.34)),
+                  sample[DisposalDate],
+                  UserType.Individual,
+                  wasUkResident = true
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("estimatedIncome.title"),
+              { doc =>
+                doc.select("#estimatedIncome").attr("value") shouldBe "12.34"
+                doc
+                  .select("#back")
+                  .attr("href")                              shouldBe routes.YearToDateLiabilityController
+                  .checkYourAnswers()
+                  .url
+                doc
+                  .select("#content > article > form")
+                  .attr("action")                            shouldBe routes.YearToDateLiabilityController
+                  .estimatedIncomeSubmit()
+                  .url
+              }
             )
           }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("estimatedIncome.title"),
-            { doc =>
-              doc.select("#estimatedIncome").attr("value") shouldBe "12.34"
-              doc
-                .select("#back")
-                .attr("href")                              shouldBe routes.YearToDateLiabilityController
-                .checkYourAnswers()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action")                            shouldBe routes.YearToDateLiabilityController
-                .estimatedIncomeSubmit()
-                .url
-            }
-          )
-        }
 
       }
 
@@ -1318,25 +1318,25 @@ class YearToDateLiabilityControllerSpec
 
           "the estimated income is more than zero and the user has not answered " +
             "the personal allowance question yet" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithSingleDisposalState(
-                  IncompleteCalculatedYTDAnswers.empty.copy(
-                    estimatedIncome = Some(AmountInPence(1L))
-                  ),
-                  sample[DisposalDate],
-                  UserType.Individual,
-                  wasUkResident = true
-                )._1
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithSingleDisposalState(
+                    IncompleteCalculatedYTDAnswers.empty.copy(
+                      estimatedIncome = Some(AmountInPence(1L))
+                    ),
+                    sample[DisposalDate],
+                    UserType.Individual,
+                    wasUkResident = true
+                  )._1
+                )
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.YearToDateLiabilityController.personalAllowance()
               )
             }
-
-            checkIsRedirect(
-              performAction(),
-              routes.YearToDateLiabilityController.personalAllowance()
-            )
-          }
 
         }
 
@@ -1656,25 +1656,25 @@ class YearToDateLiabilityControllerSpec
 
           "the estimated income is more than zero and the user has not answered " +
             "the personal allowance question yet" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithSingleDisposalState(
-                  IncompleteCalculatedYTDAnswers.empty.copy(
-                    estimatedIncome = Some(AmountInPence(1L))
-                  ),
-                  sample[DisposalDate],
-                  UserType.Individual,
-                  wasUkResident = true
-                )._1
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithSingleDisposalState(
+                    IncompleteCalculatedYTDAnswers.empty.copy(
+                      estimatedIncome = Some(AmountInPence(1L))
+                    ),
+                    sample[DisposalDate],
+                    UserType.Individual,
+                    wasUkResident = true
+                  )._1
+                )
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.YearToDateLiabilityController.personalAllowance()
               )
             }
-
-            checkIsRedirect(
-              performAction(),
-              routes.YearToDateLiabilityController.personalAllowance()
-            )
-          }
 
         }
 
@@ -2095,25 +2095,25 @@ class YearToDateLiabilityControllerSpec
 
         "the estimated income is more than zero and the user has not answered " +
           "the personal allowance question yet" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithSingleDisposalState(
-                IncompleteCalculatedYTDAnswers.empty.copy(
-                  estimatedIncome = Some(AmountInPence(1L))
-                ),
-                sample[DisposalDate],
-                UserType.Individual,
-                wasUkResident = true
-              )._1
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithSingleDisposalState(
+                  IncompleteCalculatedYTDAnswers.empty.copy(
+                    estimatedIncome = Some(AmountInPence(1L))
+                  ),
+                  sample[DisposalDate],
+                  UserType.Individual,
+                  wasUkResident = true
+                )._1
+              )
+            }
+
+            checkIsRedirect(
+              performAction(),
+              routes.YearToDateLiabilityController.checkYourAnswers()
             )
           }
-
-          checkIsRedirect(
-            performAction(),
-            routes.YearToDateLiabilityController.checkYourAnswers()
-          )
-        }
 
         "the user hasn't verified whether or not any details given in the return were estimates" in {
           inSequence {
@@ -2299,31 +2299,30 @@ class YearToDateLiabilityControllerSpec
               sample[SubscribedDetails]
                 .copy(name = Right(sample[IndividualName])),
               None,
-              {
-                case (fillingOutReturn, draftReturn, triageAnswers) =>
-                  mockCalculationService(
-                    calculateRequest(
-                      AmountInPence.zero,
-                      AmountInPence.zero,
-                      isATrust = false,
-                      triageAnswers
-                    )
-                  )(
-                    Right(calculatedTaxDue)
+              { case (fillingOutReturn, draftReturn, triageAnswers) =>
+                mockCalculationService(
+                  calculateRequest(
+                    AmountInPence.zero,
+                    AmountInPence.zero,
+                    isATrust = false,
+                    triageAnswers
                   )
-                  mockStoreSession(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        fillingOutReturn.copy(draftReturn =
-                          draftReturn.copy(
-                            yearToDateLiabilityAnswers = Some(
-                              answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
-                            )
+                )(
+                  Right(calculatedTaxDue)
+                )
+                mockStoreSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(
+                      fillingOutReturn.copy(draftReturn =
+                        draftReturn.copy(
+                          yearToDateLiabilityAnswers = Some(
+                            answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
                           )
                         )
                       )
                     )
-                  )(Right(()))
+                  )
+                )(Right(()))
               },
               routes.YearToDateLiabilityController.hasEstimatedDetails()
             )
@@ -2348,31 +2347,30 @@ class YearToDateLiabilityControllerSpec
               sample[SubscribedDetails]
                 .copy(name = Left(sample[TrustName])),
               None,
-              {
-                case (fillingOutReturn, draftReturn, triageAnswers) =>
-                  mockCalculationService(
-                    calculateRequest(
-                      AmountInPence.zero,
-                      AmountInPence.zero,
-                      isATrust = true,
-                      triageAnswers
-                    )
-                  )(
-                    Right(calculatedTaxDue)
+              { case (fillingOutReturn, draftReturn, triageAnswers) =>
+                mockCalculationService(
+                  calculateRequest(
+                    AmountInPence.zero,
+                    AmountInPence.zero,
+                    isATrust = true,
+                    triageAnswers
                   )
-                  mockStoreSession(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        fillingOutReturn.copy(draftReturn =
-                          draftReturn.copy(
-                            yearToDateLiabilityAnswers = Some(
-                              answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
-                            )
+                )(
+                  Right(calculatedTaxDue)
+                )
+                mockStoreSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(
+                      fillingOutReturn.copy(draftReturn =
+                        draftReturn.copy(
+                          yearToDateLiabilityAnswers = Some(
+                            answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
                           )
                         )
                       )
                     )
-                  )(Right(()))
+                  )
+                )(Right(()))
               },
               routes.YearToDateLiabilityController.hasEstimatedDetails()
             )
@@ -2397,31 +2395,30 @@ class YearToDateLiabilityControllerSpec
               sample[SubscribedDetails]
                 .copy(name = Right(sample[IndividualName])),
               Some(PersonalRepresentativeInPeriodOfAdmin),
-              {
-                case (fillingOutReturn, draftReturn, triageAnswers) =>
-                  mockCalculationService(
-                    calculateRequest(
-                      AmountInPence.zero,
-                      AmountInPence.zero,
-                      isATrust = true,
-                      triageAnswers
-                    )
-                  )(
-                    Right(calculatedTaxDue)
+              { case (fillingOutReturn, draftReturn, triageAnswers) =>
+                mockCalculationService(
+                  calculateRequest(
+                    AmountInPence.zero,
+                    AmountInPence.zero,
+                    isATrust = true,
+                    triageAnswers
                   )
-                  mockStoreSession(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        fillingOutReturn.copy(draftReturn =
-                          draftReturn.copy(
-                            yearToDateLiabilityAnswers = Some(
-                              answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
-                            )
+                )(
+                  Right(calculatedTaxDue)
+                )
+                mockStoreSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(
+                      fillingOutReturn.copy(draftReturn =
+                        draftReturn.copy(
+                          yearToDateLiabilityAnswers = Some(
+                            answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
                           )
                         )
                       )
                     )
-                  )(Right(()))
+                  )
+                )(Right(()))
               },
               routes.YearToDateLiabilityController.hasEstimatedDetails()
             )
@@ -2519,25 +2516,25 @@ class YearToDateLiabilityControllerSpec
 
         "the estimated income is more than zero and the user has not answered " +
           "the personal allowance question yet" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithSingleDisposalState(
-                IncompleteCalculatedYTDAnswers.empty.copy(
-                  estimatedIncome = Some(AmountInPence(1L))
-                ),
-                sample[DisposalDate],
-                UserType.Individual,
-                wasUkResident = true
-              )._1
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithSingleDisposalState(
+                  IncompleteCalculatedYTDAnswers.empty.copy(
+                    estimatedIncome = Some(AmountInPence(1L))
+                  ),
+                  sample[DisposalDate],
+                  UserType.Individual,
+                  wasUkResident = true
+                )._1
+              )
+            }
+
+            checkIsRedirect(
+              performAction(),
+              routes.YearToDateLiabilityController.checkYourAnswers()
             )
           }
-
-          checkIsRedirect(
-            performAction(),
-            routes.YearToDateLiabilityController.checkYourAnswers()
-          )
-        }
 
         "the user hasn't verified whether or not any details given in the return were estimates" in {
           inSequence {
@@ -3885,37 +3882,37 @@ class YearToDateLiabilityControllerSpec
 
         "the user has not started this section yet and they are on a single disposal journey and " +
           "have selected to use other reliefs" in {
-          test(
-            sessionWithSingleDisposalState(
-              None,
-              Some(sample[DisposalDate]),
-              UserType.Individual,
-              wasUkResident = true,
-              Some(
-                sample[CompleteReliefDetailsAnswers].copy(
-                  otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs])
+            test(
+              sessionWithSingleDisposalState(
+                None,
+                Some(sample[DisposalDate]),
+                UserType.Individual,
+                wasUkResident = true,
+                Some(
+                  sample[CompleteReliefDetailsAnswers].copy(
+                    otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs])
+                  )
                 )
-              )
-            )._1,
-            returns.routes.TaskListController.taskList(),
-            "taxableGainOrLoss.title"
-          )
-        }
+              )._1,
+              returns.routes.TaskListController.taskList(),
+              "taxableGainOrLoss.title"
+            )
+          }
 
         "the user has not started this section yet and they are on a single indirect disposal journey and " +
           "have selected to use other reliefs" in {
-          test(
-            sessionWithSingleIndirectDisposalState(
-              None,
-              Some(sample[DisposalDate]),
-              UserType.Individual,
-              wasUkResident = true,
-              address = Some(sample[Address])
-            )._1,
-            returns.routes.TaskListController.taskList(),
-            "taxableGainOrLoss.title"
-          )
-        }
+            test(
+              sessionWithSingleIndirectDisposalState(
+                None,
+                Some(sample[DisposalDate]),
+                UserType.Individual,
+                wasUkResident = true,
+                address = Some(sample[Address])
+              )._1,
+              returns.routes.TaskListController.taskList(),
+              "taxableGainOrLoss.title"
+            )
+          }
 
         "the user has already started this uncalculated section but have not completed it yet" in {
           test(
@@ -4337,78 +4334,73 @@ class YearToDateLiabilityControllerSpec
           }
 
           "no option is selected" in {
-            testCases.foreach {
-              case (userKey, session) =>
-                withClue(s"For user key '$userKey': ") {
-                  test(session)()(
-                    s"taxableGainOrLoss$userKey.furtherReturn.title",
-                    s"taxableGainOrLoss$userKey.furtherReturn.error.required"
-                  )
-                }
+            testCases.foreach { case (userKey, session) =>
+              withClue(s"For user key '$userKey': ") {
+                test(session)()(
+                  s"taxableGainOrLoss$userKey.furtherReturn.title",
+                  s"taxableGainOrLoss$userKey.furtherReturn.error.required"
+                )
+              }
             }
           }
 
           "the amount of gain is invalid" in {
-            testCases.foreach {
-              case (userKey, session) =>
-                AmountOfMoneyErrorScenarios
-                  .amountOfMoneyErrorScenarios("taxableGain", errorContext = Some(s"taxableGain.furtherReturn"))
-                  .foreach { scenario =>
-                    withClue(s"For user key '$userKey' and $scenario: ") {
-                      val data = ("taxableGainOrLoss" -> "0") :: scenario.formData
-                      test(session)(data: _*)(
-                        s"taxableGainOrLoss$userKey.furtherReturn.title",
-                        scenario.expectedErrorMessageKey
-                      )
-                    }
+            testCases.foreach { case (userKey, session) =>
+              AmountOfMoneyErrorScenarios
+                .amountOfMoneyErrorScenarios("taxableGain", errorContext = Some(s"taxableGain.furtherReturn"))
+                .foreach { scenario =>
+                  withClue(s"For user key '$userKey' and $scenario: ") {
+                    val data = ("taxableGainOrLoss" -> "0") :: scenario.formData
+                    test(session)(data: _*)(
+                      s"taxableGainOrLoss$userKey.furtherReturn.title",
+                      scenario.expectedErrorMessageKey
+                    )
                   }
+                }
             }
           }
 
           "the amount of gain is zero" in {
-            testCases.foreach {
-              case (userKey, session) =>
-                withClue(s"For user key '$userKey': ") {
-                  test(session)(
-                    "taxableGainOrLoss" -> "0",
-                    "taxableGain"       -> "0"
-                  )(
-                    s"taxableGainOrLoss$userKey.furtherReturn.title",
-                    "taxableGain.furtherReturn.error.tooSmall"
-                  )
-                }
+            testCases.foreach { case (userKey, session) =>
+              withClue(s"For user key '$userKey': ") {
+                test(session)(
+                  "taxableGainOrLoss" -> "0",
+                  "taxableGain"       -> "0"
+                )(
+                  s"taxableGainOrLoss$userKey.furtherReturn.title",
+                  "taxableGain.furtherReturn.error.tooSmall"
+                )
+              }
             }
           }
 
           "the amount of loss is invalid" in {
-            testCases.foreach {
-              case (userKey, session) =>
-                AmountOfMoneyErrorScenarios
-                  .amountOfMoneyErrorScenarios("netLoss", errorContext = Some(s"netLoss.furtherReturn"))
-                  .foreach { scenario =>
-                    withClue(s"For user key '$userKey' and $scenario: ") {
-                      val data = ("taxableGainOrLoss" -> "1") :: scenario.formData
-                      test(session)(data: _*)(
-                        s"taxableGainOrLoss$userKey.furtherReturn.title",
-                        scenario.expectedErrorMessageKey
-                      )
-                    }
+            testCases.foreach { case (userKey, session) =>
+              AmountOfMoneyErrorScenarios
+                .amountOfMoneyErrorScenarios("netLoss", errorContext = Some(s"netLoss.furtherReturn"))
+                .foreach { scenario =>
+                  withClue(s"For user key '$userKey' and $scenario: ") {
+                    val data = ("taxableGainOrLoss" -> "1") :: scenario.formData
+                    test(session)(data: _*)(
+                      s"taxableGainOrLoss$userKey.furtherReturn.title",
+                      scenario.expectedErrorMessageKey
+                    )
                   }
+                }
             }
           }
 
           "the amount of loss is zero" in {
-            testCases.foreach {
-              case (userKey, session) =>
-                withClue(s"For user key '$userKey': ") {
-                  test(session)(
-                    "taxableGainOrLoss" -> "1",
-                    "netLoss"           -> "0"
-                  )(
-                    s"taxableGainOrLoss$userKey.furtherReturn.title",
-                    "netLoss.furtherReturn.error.tooSmall"
-                  )
-                }
+            testCases.foreach { case (userKey, session) =>
+              withClue(s"For user key '$userKey': ") {
+                test(session)(
+                  "taxableGainOrLoss" -> "1",
+                  "netLoss"           -> "0"
+                )(
+                  s"taxableGainOrLoss$userKey.furtherReturn.title",
+                  "netLoss.furtherReturn.error.tooSmall"
+                )
+              }
             }
           }
 
@@ -6121,40 +6113,40 @@ class YearToDateLiabilityControllerSpec
 
       "redirect to the taxable gain or loss page if the user has not answered that question yet and the estimates question should be " +
         "preserved for an amend journey" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithSingleDisposalState(
-              Some(requiredPreviousAnswers.copy(taxableGainOrLoss = None)),
-              Some(sample[DisposalDate].copy(taxYear = sample[TaxYear])),
-              UserType.Individual,
-              wasUkResident = true,
-              Some(
-                sample[CompleteReliefDetailsAnswers].copy(
-                  otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
-                )
-              ),
-              isFurtherReturn = true,
-              individualUserType = Some(Self),
-              amendReturnData = Some(
-                sample[AmendReturnData].copy(
-                  originalReturn = sample[CompleteReturnWithSummary].copy(
-                    completeReturn = sample[CompleteSingleDisposalReturn].copy(
-                      yearToDateLiabilityAnswers = Left(
-                        sample[CompleteNonCalculatedYTDAnswers].copy(
-                          hasEstimatedDetails = false
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                Some(requiredPreviousAnswers.copy(taxableGainOrLoss = None)),
+                Some(sample[DisposalDate].copy(taxYear = sample[TaxYear])),
+                UserType.Individual,
+                wasUkResident = true,
+                Some(
+                  sample[CompleteReliefDetailsAnswers].copy(
+                    otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
+                  )
+                ),
+                isFurtherReturn = true,
+                individualUserType = Some(Self),
+                amendReturnData = Some(
+                  sample[AmendReturnData].copy(
+                    originalReturn = sample[CompleteReturnWithSummary].copy(
+                      completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                        yearToDateLiabilityAnswers = Left(
+                          sample[CompleteNonCalculatedYTDAnswers].copy(
+                            hasEstimatedDetails = false
+                          )
                         )
                       )
                     )
                   )
                 )
-              )
-            )._1
-          )
-        }
+              )._1
+            )
+          }
 
-        checkIsRedirect(performAction(), routes.YearToDateLiabilityController.taxableGainOrLoss())
-      }
+          checkIsRedirect(performAction(), routes.YearToDateLiabilityController.taxableGainOrLoss())
+        }
 
       "display the page" when {
 
@@ -6514,37 +6506,35 @@ class YearToDateLiabilityControllerSpec
         }
 
         "nothing is submitted" in {
-          testCases.foreach {
-            case (userKey, session) =>
-              withClue(s"For user key '$userKey': ") {
-                test(session)()(s"yearToDateLiability$userKey.title", taxYearStart, taxYearEnd)(
-                  s"yearToDateLiability$userKey.error.required",
-                  taxYearStart,
-                  taxYearEnd
-                )
-              }
+          testCases.foreach { case (userKey, session) =>
+            withClue(s"For user key '$userKey': ") {
+              test(session)()(s"yearToDateLiability$userKey.title", taxYearStart, taxYearEnd)(
+                s"yearToDateLiability$userKey.error.required",
+                taxYearStart,
+                taxYearEnd
+              )
+            }
           }
         }
 
         "the amount submitted is invalid" in {
-          testCases.foreach {
-            case (userKey, session) =>
-              AmountOfMoneyErrorScenarios
-                .amountOfMoneyErrorScenarios("yearToDateLiability")
-                .filter(s => s.input.filter(_.nonEmpty).isDefined)
-                .foreach { scenario =>
-                  withClue(s"For user key '$userKey' and $scenario: ") {
-                    test(session)(scenario.formData: _*)(
-                      s"yearToDateLiability$userKey.title",
-                      taxYearStart,
-                      taxYearEnd
-                    )(
-                      scenario.expectedErrorMessageKey,
-                      taxYearStart,
-                      taxYearEnd
-                    )
-                  }
+          testCases.foreach { case (userKey, session) =>
+            AmountOfMoneyErrorScenarios
+              .amountOfMoneyErrorScenarios("yearToDateLiability")
+              .filter(s => s.input.filter(_.nonEmpty).isDefined)
+              .foreach { scenario =>
+                withClue(s"For user key '$userKey' and $scenario: ") {
+                  test(session)(scenario.formData: _*)(
+                    s"yearToDateLiability$userKey.title",
+                    taxYearStart,
+                    taxYearEnd
+                  )(
+                    scenario.expectedErrorMessageKey,
+                    taxYearStart,
+                    taxYearEnd
+                  )
                 }
+              }
           }
         }
 
@@ -6930,26 +6920,24 @@ class YearToDateLiabilityControllerSpec
         }
 
         "nothing is submitted" in {
-          testCases.foreach {
-            case (userKey, session) =>
-              withClue(s"For user key '$userKey': ") {
-                test(session)()(
-                  s"repayment$userKey.title",
-                  s"repayment$userKey.error.required"
-                )
-              }
+          testCases.foreach { case (userKey, session) =>
+            withClue(s"For user key '$userKey': ") {
+              test(session)()(
+                s"repayment$userKey.title",
+                s"repayment$userKey.error.required"
+              )
+            }
           }
         }
 
         "the value submitted is invalid" in {
-          testCases.foreach {
-            case (userKey, session) =>
-              withClue(s"For user key '$userKey': ") {
-                test(session)("repayment" -> "123")(
-                  s"repayment$userKey.title",
-                  s"repayment$userKey.error.boolean"
-                )
-              }
+          testCases.foreach { case (userKey, session) =>
+            withClue(s"For user key '$userKey': ") {
+              test(session)("repayment" -> "123")(
+                s"repayment$userKey.title",
+                s"repayment$userKey.error.boolean"
+              )
+            }
           }
         }
 
@@ -7261,27 +7249,27 @@ class YearToDateLiabilityControllerSpec
 
       "the user has not started this section yet but they are on a single disposal journey and have " +
         "not chosen other reliefs" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithSingleDisposalState(
-              None,
-              Some(sample[DisposalDate]),
-              UserType.Individual,
-              wasUkResident = true,
-              Some(
-                sample[CompleteReliefDetailsAnswers]
-                  .copy(otherReliefs = Some(OtherReliefsOption.NoOtherReliefs))
-              )
-            )._1
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                None,
+                Some(sample[DisposalDate]),
+                UserType.Individual,
+                wasUkResident = true,
+                Some(
+                  sample[CompleteReliefDetailsAnswers]
+                    .copy(otherReliefs = Some(OtherReliefsOption.NoOtherReliefs))
+                )
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
-        checkIsRedirect(
-          performAction(),
-          routes.YearToDateLiabilityController.checkYourAnswers()
-        )
-      }
 
     }
 
@@ -7349,26 +7337,28 @@ class YearToDateLiabilityControllerSpec
 
       "the user has not started this section and they are on a single disposal journey and have " +
         "chosen to use other reliefs" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithSingleDisposalState(
-              Some(sample[CompleteNonCalculatedYTDAnswers]),
-              Some(sample[DisposalDate]),
-              UserType.Individual,
-              wasUkResident = true,
-              Some(
-                sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs]))
-              )
-            )._1
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                Some(sample[CompleteNonCalculatedYTDAnswers]),
+                Some(sample[DisposalDate]),
+                UserType.Individual,
+                wasUkResident = true,
+                Some(
+                  sample[CompleteReliefDetailsAnswers].copy(otherReliefs =
+                    Some(sample[OtherReliefsOption.OtherReliefs])
+                  )
+                )
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
-        checkIsRedirect(
-          performAction(),
-          routes.YearToDateLiabilityController.checkYourAnswers()
-        )
-      }
 
       "the user is on a multiple disposals journey" in {
         inSequence {

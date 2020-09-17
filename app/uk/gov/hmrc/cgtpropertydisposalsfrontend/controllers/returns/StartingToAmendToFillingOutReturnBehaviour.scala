@@ -49,7 +49,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
         journeyStatus = Some(fillingOutReturn)
       )
     ).map {
-      case Left(e)  =>
+      case Left(e) =>
         logger.warn("Could not convert from StartingToAmend to FillingOutReturn", e)
         errorHandler.errorResult()
 
@@ -72,7 +72,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
     updateSession(sessionStore, request)(
       _.copy(journeyStatus = Some(startingToAmendReturn.copy(unmetDependencyFieldUrl = Some(request.uri))))
     ).map {
-      case Left(e)  =>
+      case Left(e) =>
         logger.warn("Could not mark unmet dependency", e)
         errorHandler.errorResult()
 
@@ -88,7 +88,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
     val now = TimeUtils.now().toLocalDate
 
     val draftReturn = s.originalReturn.completeReturn match {
-      case m: CompleteMultipleDisposalsReturn        =>
+      case m: CompleteMultipleDisposalsReturn =>
         DraftMultipleDisposalsReturn(
           id,
           m.triageAnswers,
@@ -100,7 +100,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
           m.gainOrLossAfterReliefs,
           now
         )
-      case s: CompleteSingleDisposalReturn           =>
+      case s: CompleteSingleDisposalReturn    =>
         DraftSingleDisposalReturn(
           id,
           s.triageAnswers,
@@ -117,7 +117,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
           now
         )
 
-      case s: CompleteSingleIndirectDisposalReturn   =>
+      case s: CompleteSingleIndirectDisposalReturn =>
         DraftSingleIndirectDisposalReturn(
           id,
           s.triageAnswers,
@@ -145,7 +145,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
           now
         )
 
-      case s: CompleteSingleMixedUseDisposalReturn   =>
+      case s: CompleteSingleMixedUseDisposalReturn =>
         DraftSingleMixedUseDisposalReturn(
           id,
           s.triageAnswers,

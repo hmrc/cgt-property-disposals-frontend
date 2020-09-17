@@ -124,13 +124,12 @@ object MultipleDisposalsTriageAnswers {
 
     def isIndirectDisposal(): Boolean =
       m.fold[Option[List[AssetType]]](
-          _.assetTypes,
-          c => Some(c.assetTypes)
-        )
-        .exists {
-          case List(IndirectDisposal) => true
-          case _                      => false
-        }
+        _.assetTypes,
+        c => Some(c.assetTypes)
+      ).exists {
+        case List(IndirectDisposal) => true
+        case _                      => false
+      }
 
     def isPeriodOfAdmin(): Boolean = representativeType().contains(PersonalRepresentativeInPeriodOfAdmin)
 

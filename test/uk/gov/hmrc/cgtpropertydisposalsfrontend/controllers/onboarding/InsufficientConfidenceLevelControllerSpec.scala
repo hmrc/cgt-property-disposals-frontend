@@ -175,26 +175,26 @@ class InsufficientConfidenceLevelControllerSpec
 
         "the session indicates that the user does not have sufficient confidence level and the user " +
           "has previously answered this question" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              session(
-                TryingToGetIndividualsFootprint(
-                  Some(true),
-                  None,
-                  None,
-                  sample[GGCredId]
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                session(
+                  TryingToGetIndividualsFootprint(
+                    Some(true),
+                    None,
+                    None,
+                    sample[GGCredId]
+                  )
                 )
               )
-            )
-          }
+            }
 
-          val result = performAction()
-          status(result) shouldBe OK
-          val content = contentAsString(result)
-          content should include(messageFromMessageKey("haveANino.title"))
-          content should include("checked=\"checked\"")
-        }
+            val result = performAction()
+            status(result) shouldBe OK
+            val content = contentAsString(result)
+            content should include(messageFromMessageKey("haveANino.title"))
+            content should include("checked=\"checked\"")
+          }
 
       }
 
@@ -280,39 +280,39 @@ class InsufficientConfidenceLevelControllerSpec
         "the user indicates that they do have a NINO and the application " +
           "has been configured to used absolute urls to iv" in new ControllerSpec {
 
-          override val overrideBindings =
-            List[GuiceableModule](
-              bind[NameMatchRetryService].toInstance(mockBprNameMatchService),
-              bind[AuthConnector].toInstance(mockAuthConnector),
-              bind[SessionStore].toInstance(mockSessionStore)
-            )
-
-          override lazy val additionalConfig = ivConfig(useRelativeUrls = true)
-
-          lazy val controller =
-            instanceOf[InsufficientConfidenceLevelController]
-          val credId          = sample[GGCredId]
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              session(TryingToGetIndividualsFootprint(None, None, None, credId))
-            )
-            mockStoreSession(
-              session(
-                TryingToGetIndividualsFootprint(Some(true), None, None, credId)
+            override val overrideBindings =
+              List[GuiceableModule](
+                bind[NameMatchRetryService].toInstance(mockBprNameMatchService),
+                bind[AuthConnector].toInstance(mockAuthConnector),
+                bind[SessionStore].toInstance(mockSessionStore)
               )
-            )(Right(()))
-          }
 
-          val result =
-            controller.doYouHaveNINOSubmit()(
-              FakeRequest()
-                .withFormUrlEncodedBody("hasNino" -> "true")
-                .withCSRFToken
-            )
-          checkIsRedirectToIv(result, true)
-        }
+            override lazy val additionalConfig = ivConfig(useRelativeUrls = true)
+
+            lazy val controller =
+              instanceOf[InsufficientConfidenceLevelController]
+            val credId          = sample[GGCredId]
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                session(TryingToGetIndividualsFootprint(None, None, None, credId))
+              )
+              mockStoreSession(
+                session(
+                  TryingToGetIndividualsFootprint(Some(true), None, None, credId)
+                )
+              )(Right(()))
+            }
+
+            val result =
+              controller.doYouHaveNINOSubmit()(
+                FakeRequest()
+                  .withFormUrlEncodedBody("hasNino" -> "true")
+                  .withCSRFToken
+              )
+            checkIsRedirectToIv(result, true)
+          }
 
       }
 
@@ -423,75 +423,75 @@ class InsufficientConfidenceLevelControllerSpec
 
         "the session indicates that the user does not have sufficient confidence level and the user " +
           "has indicated that they do not have a NINO" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              session(
-                TryingToGetIndividualsFootprint(
-                  Some(false),
-                  None,
-                  None,
-                  sample[GGCredId]
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                session(
+                  TryingToGetIndividualsFootprint(
+                    Some(false),
+                    None,
+                    None,
+                    sample[GGCredId]
+                  )
                 )
               )
+            }
+
+            val result = performAction()
+            status(result)        shouldBe OK
+            contentAsString(result) should include(
+              messageFromMessageKey("haveAnSaUtr.title")
             )
+
           }
-
-          val result = performAction()
-          status(result)        shouldBe OK
-          contentAsString(result) should include(
-            messageFromMessageKey("haveAnSaUtr.title")
-          )
-
-        }
 
         "the session indicates that the user does not have sufficient confidence level and the user " +
           "has indicated that they do not have a NINO and the user has previously indicated that they " +
           "have an SAUTR" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              session(
-                TryingToGetIndividualsFootprint(
-                  Some(false),
-                  Some(true),
-                  None,
-                  sample[GGCredId]
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                session(
+                  TryingToGetIndividualsFootprint(
+                    Some(false),
+                    Some(true),
+                    None,
+                    sample[GGCredId]
+                  )
                 )
               )
-            )
-          }
+            }
 
-          val result = performAction()
-          status(result) shouldBe OK
-          val content = contentAsString(result)
-          content should include(messageFromMessageKey("haveAnSaUtr.title"))
-          content should include("checked=\"checked\"")
-        }
+            val result = performAction()
+            status(result) shouldBe OK
+            val content = contentAsString(result)
+            content should include(messageFromMessageKey("haveAnSaUtr.title"))
+            content should include("checked=\"checked\"")
+          }
 
         "the session indicates that the user does not have sufficient confidence level and the user " +
           "has indicated that they do not have a NINO and the user has previously indicated that they " +
           "do not have an SAUTR" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              session(
-                TryingToGetIndividualsFootprint(
-                  Some(false),
-                  Some(false),
-                  None,
-                  sample[GGCredId]
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                session(
+                  TryingToGetIndividualsFootprint(
+                    Some(false),
+                    Some(false),
+                    None,
+                    sample[GGCredId]
+                  )
                 )
               )
-            )
-          }
+            }
 
-          val result = performAction()
-          status(result) shouldBe OK
-          val content = contentAsString(result)
-          content should include(messageFromMessageKey("haveAnSaUtr.title"))
-          content should include("checked=\"checked\"")
-        }
+            val result = performAction()
+            status(result) shouldBe OK
+            val content = contentAsString(result)
+            content should include(messageFromMessageKey("haveAnSaUtr.title"))
+            content should include("checked=\"checked\"")
+          }
 
       }
 
@@ -697,41 +697,41 @@ class InsufficientConfidenceLevelControllerSpec
 
         "the user has indicated that they have no NINO but they do have an SA UTR and they have " +
           "previously made unsuccessful attempts to do a name match" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              session(
-                TryingToGetIndividualsFootprint(
-                  Some(false),
-                  Some(true),
-                  None,
-                  ggCredId
-                )
-              )
-            )
-            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-              Right(
-                Some(
-                  UnsuccessfulNameMatchAttempts(
-                    1,
-                    2,
-                    sample[IndividualSautrNameMatchDetails]
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                session(
+                  TryingToGetIndividualsFootprint(
+                    Some(false),
+                    Some(true),
+                    None,
+                    ggCredId
                   )
                 )
               )
-            )
-          }
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+                Right(
+                  Some(
+                    UnsuccessfulNameMatchAttempts(
+                      1,
+                      2,
+                      sample[IndividualSautrNameMatchDetails]
+                    )
+                  )
+                )
+              )
+            }
 
-          val result = performAction()
-          contentAsString(result) should include(
-            messageFromMessageKey("enterSaUtr.title")
-          )
-          contentAsString(result) should not include (messageFromMessageKey(
-            "enterSaUtr.error.notFound",
-            1,
-            2
-          ))
-        }
+            val result = performAction()
+            contentAsString(result) should include(
+              messageFromMessageKey("enterSaUtr.title")
+            )
+            contentAsString(result) should not include (messageFromMessageKey(
+              "enterSaUtr.error.notFound",
+              1,
+              2
+            ))
+          }
 
       }
 
@@ -973,40 +973,40 @@ class InsufficientConfidenceLevelControllerSpec
 
         "a valid SA UTR and name are entered but they cannot be matched to a BPR and the " +
           "user has not yet made too many unsuccessful attempts" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(expectedSessionData)
-            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-              Right(Some(previousUnsuccessfulNameMatchAttempt))
-            )
-            mockAttemptNameMatch(
-              validSautr,
-              validName,
-              ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
-            )(
-              Left(
-                NameMatchServiceError.NameMatchFailed(
-                  UnsuccessfulNameMatchAttempts(
-                    2,
-                    3,
-                    IndividualSautrNameMatchDetails(validName, validSautr)
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(expectedSessionData)
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+                Right(Some(previousUnsuccessfulNameMatchAttempt))
+              )
+              mockAttemptNameMatch(
+                validSautr,
+                validName,
+                ggCredId,
+                Some(previousUnsuccessfulNameMatchAttempt)
+              )(
+                Left(
+                  NameMatchServiceError.NameMatchFailed(
+                    UnsuccessfulNameMatchAttempts(
+                      2,
+                      3,
+                      IndividualSautrNameMatchDetails(validName, validSautr)
+                    )
                   )
                 )
               )
+            }
+
+            val result = performAction(
+              "firstName" -> validName.firstName,
+              "lastName"  -> validName.lastName,
+              "saUtr"     -> validSautr.value
+            )
+            status(result) shouldBe BAD_REQUEST
+            contentAsString(result) should include(
+              messageFromMessageKey("enterSaUtr.error.notFound", 2, 3)
             )
           }
-
-          val result = performAction(
-            "firstName" -> validName.firstName,
-            "lastName"  -> validName.lastName,
-            "saUtr"     -> validSautr.value
-          )
-          status(result) shouldBe BAD_REQUEST
-          contentAsString(result) should include(
-            messageFromMessageKey("enterSaUtr.error.notFound", 2, 3)
-          )
-        }
 
       }
 
@@ -1212,33 +1212,33 @@ class InsufficientConfidenceLevelControllerSpec
 
         "the user has not initially made too many unsuccessful attempts but submits " +
           "details which do not match a BPR and have now made too many attempts" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(expectedSessionData)
-            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-              Right(Some(previousUnsuccessfulNameMatchAttempt))
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(expectedSessionData)
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+                Right(Some(previousUnsuccessfulNameMatchAttempt))
+              )
+              mockAttemptNameMatch(
+                validSautr,
+                validName,
+                ggCredId,
+                Some(previousUnsuccessfulNameMatchAttempt)
+              )(
+                Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
+              )
+            }
+
+            val result = performAction(
+              "firstName" -> validName.firstName,
+              "lastName"  -> validName.lastName,
+              "saUtr"     -> validSautr.value
             )
-            mockAttemptNameMatch(
-              validSautr,
-              validName,
-              ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
-            )(
-              Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
+
+            checkIsRedirect(
+              result,
+              routes.InsufficientConfidenceLevelController.tooManyAttempts()
             )
           }
-
-          val result = performAction(
-            "firstName" -> validName.firstName,
-            "lastName"  -> validName.lastName,
-            "saUtr"     -> validSautr.value
-          )
-
-          checkIsRedirect(
-            result,
-            routes.InsufficientConfidenceLevelController.tooManyAttempts()
-          )
-        }
 
       }
 

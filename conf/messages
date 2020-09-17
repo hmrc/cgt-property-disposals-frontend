@@ -630,6 +630,7 @@ account.totalLeftToPay=Total left to pay
 account.make.payment.link=Make a payment
 account.totalLeftToPay.penalties=Includes taxes, penalties and interest owed
 account.totalLeftToPay.payments=It takes 3 to 5 days for payments or charges to show in your account
+account.balance-updating=Balance Updating
 
 account.manageYourDetails.title=Manage account
 account.manageYourDetails.subtitle=Account number
@@ -656,6 +657,7 @@ returns.list.leftToPay=Total left to pay
 returns.list.taxOwed=Tax owed for return
 returns.list.sentDate=Sent to HMRC on {0}
 returns.list.disposalDetails=Disposal details
+returns.list.updating-payment-details=We are updating the payment details
 returns.paymentTakes3Days=Payments may take up to 3 working days to be shown on this page
 
 drafts.list.title=Draft return

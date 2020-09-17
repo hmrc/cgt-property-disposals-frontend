@@ -328,28 +328,28 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       "redirect to the has uk postcode page if there is no address in session and the user " +
         "has a non-residential property type" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(journeyStatus =
-              Some(
-                sample[FillingOutReturn].copy(
-                  draftReturn = draftReturn.copy(
-                    triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                      .copy(assetType = AssetType.NonResidential),
-                    propertyAddress = None
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(journeyStatus =
+                Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = draftReturn.copy(
+                      triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                        .copy(assetType = AssetType.NonResidential),
+                      propertyAddress = None
+                    )
                   )
                 )
               )
             )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.PropertyDetailsController.singleDisposalHasUkPostcode()
           )
         }
-
-        checkIsRedirect(
-          performAction(),
-          routes.PropertyDetailsController.singleDisposalHasUkPostcode()
-        )
-      }
 
       "redirect to the enter postcode page if there is no property address in session" in {
         inSequence {

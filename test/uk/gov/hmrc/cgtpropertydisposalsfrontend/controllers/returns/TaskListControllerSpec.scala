@@ -555,37 +555,37 @@ class TaskListControllerSpec
 
           "the property address, disposal details and acquisition details section have all " +
             "been completed and the reliefs section has not been started yet" in {
-            test(
-              sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
-                propertyAddress = Some(sample[UkAddress]),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
-                reliefDetailsAnswers = None,
-                exemptionAndLossesAnswers = None,
-                initialGainOrLoss = Some(sample[AmountInPence])
-              ),
-              TaskListStatus.ToDo
-            )
-          }
+              test(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                    .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                  propertyAddress = Some(sample[UkAddress]),
+                  disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                  acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+                  reliefDetailsAnswers = None,
+                  exemptionAndLossesAnswers = None,
+                  initialGainOrLoss = Some(sample[AmountInPence])
+                ),
+                TaskListStatus.ToDo
+              )
+            }
 
           "the property address, disposal details and acquisition details section have all " +
             "been completed and the reliefs section has been started but not completed yet" in {
-            test(
-              sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
-                propertyAddress = Some(sample[UkAddress]),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
-                reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers]),
-                exemptionAndLossesAnswers = None,
-                initialGainOrLoss = Some(sample[AmountInPence])
-              ),
-              TaskListStatus.InProgress
-            )
-          }
+              test(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                    .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                  propertyAddress = Some(sample[UkAddress]),
+                  disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                  acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+                  reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers]),
+                  exemptionAndLossesAnswers = None,
+                  initialGainOrLoss = Some(sample[AmountInPence])
+                ),
+                TaskListStatus.InProgress
+              )
+            }
 
           "the session data indicates that they are filling in a return and they have completed the section" in {
             test(
@@ -605,29 +605,29 @@ class TaskListControllerSpec
 
           "the initial gain or loss section is not completed, " +
             " the property address, disposal details & acquisition details sections have been completed" in {
-            val country = Country("HK")
+              val country = Country("HK")
 
-            test(
-              sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-                  individualUserType = Some(Self),
-                  countryOfResidence = country,
-                  assetType = AssetType.Residential
+              test(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                    individualUserType = Some(Self),
+                    countryOfResidence = country,
+                    assetType = AssetType.Residential
+                  ),
+                  propertyAddress = Some(sample[UkAddress]),
+                  disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                  acquisitionDetailsAnswers = Some(
+                    sample[CompleteAcquisitionDetailsAnswers].copy(
+                      acquisitionDate = AcquisitionDate(LocalDate.of(1200, 1, 1))
+                    )
+                  ),
+                  reliefDetailsAnswers = None,
+                  exemptionAndLossesAnswers = None,
+                  initialGainOrLoss = None
                 ),
-                propertyAddress = Some(sample[UkAddress]),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(
-                  sample[CompleteAcquisitionDetailsAnswers].copy(
-                    acquisitionDate = AcquisitionDate(LocalDate.of(1200, 1, 1))
-                  )
-                ),
-                reliefDetailsAnswers = None,
-                exemptionAndLossesAnswers = None,
-                initialGainOrLoss = None
-              ),
-              TaskListStatus.CannotStart
-            )
-          }
+                TaskListStatus.CannotStart
+              )
+            }
 
         }
 
@@ -1044,87 +1044,87 @@ class TaskListControllerSpec
 
           "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought BEFORE 01/04/2015 " +
             "and the user has not completed the section yet" in {
-            test(
-              sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(
-                    assetType = AssetType.Residential,
-                    countryOfResidence = Country("TR"),
-                    individualUserType = Some(Self)
+              test(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                    .copy(
+                      assetType = AssetType.Residential,
+                      countryOfResidence = Country("TR"),
+                      individualUserType = Some(Self)
+                    ),
+                  disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                  acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                    answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
                   ),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                  answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
+                  initialGainOrLoss = None
                 ),
-                initialGainOrLoss = None
-              ),
-              TaskListStatus.ToDo
-            )
-          }
+                TaskListStatus.ToDo
+              )
+            }
 
           "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought BEFORE 01/04/2015 " +
             "and the user has completed the section" in {
-            test(
-              sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(
-                    assetType = AssetType.Residential,
-                    countryOfResidence = Country("TR"),
-                    individualUserType = Some(Self)
+              test(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                    .copy(
+                      assetType = AssetType.Residential,
+                      countryOfResidence = Country("TR"),
+                      individualUserType = Some(Self)
+                    ),
+                  disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                  acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                    answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
                   ),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                  answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
+                  initialGainOrLoss = Some(sample[AmountInPence])
                 ),
-                initialGainOrLoss = Some(sample[AmountInPence])
-              ),
-              TaskListStatus.Complete
-            )
-          }
+                TaskListStatus.Complete
+              )
+            }
 
           "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought BEFORE 01/04/2015 " +
             "and it is a further return" in {
-            testSectionNonExistent(
-              sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(
-                    assetType = AssetType.Residential,
-                    countryOfResidence = Country("TR"),
-                    individualUserType = Some(Self)
+              testSectionNonExistent(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                    .copy(
+                      assetType = AssetType.Residential,
+                      countryOfResidence = Country("TR"),
+                      individualUserType = Some(Self)
+                    ),
+                  disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                  acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                    answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
                   ),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                  answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
+                  initialGainOrLoss = None
                 ),
-                initialGainOrLoss = None
-              ),
-              Some(List(sample[ReturnSummary]))
-            )(
-              "initialGainOrLoss"
-            )
-          }
+                Some(List(sample[ReturnSummary]))
+              )(
+                "initialGainOrLoss"
+              )
+            }
 
           "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought BEFORE 01/04/2015 and " +
             "the user is on a period of admin journey" in {
-            val dateOfDeath = LocalDate.of(2014, 10, 1)
-            testSectionNonExistent(
-              sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(
-                    assetType = AssetType.Residential,
-                    countryOfResidence = Country("TR"),
-                    individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+              val dateOfDeath = LocalDate.of(2014, 10, 1)
+              testSectionNonExistent(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                    .copy(
+                      assetType = AssetType.Residential,
+                      countryOfResidence = Country("TR"),
+                      individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+                    ),
+                  representeeAnswers =
+                    Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))),
+                  disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                  acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                    answers.copy(acquisitionDate = AcquisitionDate(dateOfDeath))
                   ),
-                representeeAnswers =
-                  Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                  answers.copy(acquisitionDate = AcquisitionDate(dateOfDeath))
-                ),
-                initialGainOrLoss = None
-              )
-            )("initialGainOrLoss")
-          }
+                  initialGainOrLoss = None
+                )
+              )("initialGainOrLoss")
+            }
 
           "the session data indicates that the country of residence is NOT United Kingdom and NON-RESIDENTIAL property was bought" in {
             testSectionNonExistent(
@@ -1574,26 +1574,26 @@ class TaskListControllerSpec
 
           "the session data indicates that they are filling in a return and" +
             " the enter capital gains tax liability so far this tax year section is incomplete" in {
-            val incompleteNonCalculatedYTDAnswers =
-              sample[DraftMultipleDisposalsReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                  .copy(individualUserType = Some(Self)),
-                examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
-                exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
-                yearToDateLiabilityAnswers = Some(sample[NonCalculatedYTDAnswers])
+              val incompleteNonCalculatedYTDAnswers =
+                sample[DraftMultipleDisposalsReturn].copy(
+                  triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                    .copy(individualUserType = Some(Self)),
+                  examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+                  exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+                  yearToDateLiabilityAnswers = Some(sample[NonCalculatedYTDAnswers])
+                )
+
+              testStateOfSection(
+                incompleteNonCalculatedYTDAnswers
+              )(
+                "enterCgtLiability",
+                messageFromMessageKey("task-list.enter-cgt-liability.link"),
+                yeartodatelliability.routes.YearToDateLiabilityController
+                  .checkYourAnswers(),
+                TaskListStatus.Complete
               )
 
-            testStateOfSection(
-              incompleteNonCalculatedYTDAnswers
-            )(
-              "enterCgtLiability",
-              messageFromMessageKey("task-list.enter-cgt-liability.link"),
-              yeartodatelliability.routes.YearToDateLiabilityController
-                .checkYourAnswers(),
-              TaskListStatus.Complete
-            )
-
-          }
+            }
 
         }
 
@@ -1601,26 +1601,26 @@ class TaskListControllerSpec
 
           "the session data indicates that they are filling in a return and" +
             " the check and send return, pay any tax due section is incomplete" in {
-            val checkAllAnswersAndSubmitAnswers =
-              sample[DraftMultipleDisposalsReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                  .copy(individualUserType = Some(Self)),
-                examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
-                exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
-                yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]),
-                supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers])
+              val checkAllAnswersAndSubmitAnswers =
+                sample[DraftMultipleDisposalsReturn].copy(
+                  triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                    .copy(individualUserType = Some(Self)),
+                  examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+                  exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+                  yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]),
+                  supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers])
+                )
+
+              testStateOfSection(
+                checkAllAnswersAndSubmitAnswers
+              )(
+                "checkAndSendReturn",
+                messageFromMessageKey("task-list.check-and-send-return.link"),
+                routes.CheckAllAnswersAndSubmitController.checkAllAnswers(),
+                TaskListStatus.ToDo
               )
 
-            testStateOfSection(
-              checkAllAnswersAndSubmitAnswers
-            )(
-              "checkAndSendReturn",
-              messageFromMessageKey("task-list.check-and-send-return.link"),
-              routes.CheckAllAnswersAndSubmitController.checkAllAnswers(),
-              TaskListStatus.ToDo
-            )
-
-          }
+            }
 
         }
 
@@ -2035,23 +2035,22 @@ class TaskListControllerSpec
               Some(sample[CompleteDisposalDetailsAnswers])   -> Some(
                 sample[IncompleteAcquisitionDetailsAnswers]
               )
-            ).foreach {
-              case (disposalDetailsAnswers, acquisitionDetailsAnswers) =>
-                withClue(
-                  s"For $disposalDetailsAnswers and $acquisitionDetailsAnswers:"
-                ) {
-                  test(
-                    sample[DraftSingleIndirectDisposalReturn].copy(
-                      triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                        .copy(individualUserType = Some(Self)),
-                      companyAddress = Some(sample[Address]),
-                      disposalDetailsAnswers = disposalDetailsAnswers,
-                      acquisitionDetailsAnswers = acquisitionDetailsAnswers,
-                      exemptionAndLossesAnswers = None
-                    ),
-                    TaskListStatus.CannotStart
-                  )
-                }
+            ).foreach { case (disposalDetailsAnswers, acquisitionDetailsAnswers) =>
+              withClue(
+                s"For $disposalDetailsAnswers and $acquisitionDetailsAnswers:"
+              ) {
+                test(
+                  sample[DraftSingleIndirectDisposalReturn].copy(
+                    triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                      .copy(individualUserType = Some(Self)),
+                    companyAddress = Some(sample[Address]),
+                    disposalDetailsAnswers = disposalDetailsAnswers,
+                    acquisitionDetailsAnswers = acquisitionDetailsAnswers,
+                    exemptionAndLossesAnswers = None
+                  ),
+                  TaskListStatus.CannotStart
+                )
+              }
             }
           }
 
@@ -2099,37 +2098,37 @@ class TaskListControllerSpec
 
           "the company address, disposal details and acquisition details section are complete " +
             "but the gain or loss after reliefs section is not complete for a further return" in {
-            test(
-              sample[DraftSingleIndirectDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
-                companyAddress = Some(sample[UkAddress]),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
-                gainOrLossAfterReliefs = None,
-                exemptionAndLossesAnswers = None
-              ),
-              TaskListStatus.CannotStart,
-              Some(List(sample[ReturnSummary]))
-            )
-          }
+              test(
+                sample[DraftSingleIndirectDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                    .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                  companyAddress = Some(sample[UkAddress]),
+                  disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                  acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+                  gainOrLossAfterReliefs = None,
+                  exemptionAndLossesAnswers = None
+                ),
+                TaskListStatus.CannotStart,
+                Some(List(sample[ReturnSummary]))
+              )
+            }
 
           "the company address, disposal details and acquisition details section arecomplete " +
             "and the gain or loss after reliefs section is complete for a further return" in {
-            test(
-              sample[DraftSingleIndirectDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
-                companyAddress = Some(sample[UkAddress]),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
-                gainOrLossAfterReliefs = Some(sample[AmountInPence]),
-                exemptionAndLossesAnswers = None
-              ),
-              TaskListStatus.ToDo,
-              Some(List(sample[ReturnSummary]))
-            )
-          }
+              test(
+                sample[DraftSingleIndirectDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                    .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                  companyAddress = Some(sample[UkAddress]),
+                  disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                  acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+                  gainOrLossAfterReliefs = Some(sample[AmountInPence]),
+                  exemptionAndLossesAnswers = None
+                ),
+                TaskListStatus.ToDo,
+                Some(List(sample[ReturnSummary]))
+              )
+            }
 
         }
 
@@ -2418,50 +2417,50 @@ class TaskListControllerSpec
 
           "the session data indicates that they are filling in a return and" +
             " the enter details of one company section is incomplete" in {
-            val multipleIndirectDisposalsReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
-              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                numberOfProperties = 2,
-                countryOfResidence = country,
-                assetTypes = List(AssetType.IndirectDisposal),
-                individualUserType = Some(Self)
-              ),
-              exampleCompanyDetailsAnswers = Some(sample[IncompleteExampleCompanyDetailsAnswers])
-            )
+              val multipleIndirectDisposalsReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                  numberOfProperties = 2,
+                  countryOfResidence = country,
+                  assetTypes = List(AssetType.IndirectDisposal),
+                  individualUserType = Some(Self)
+                ),
+                exampleCompanyDetailsAnswers = Some(sample[IncompleteExampleCompanyDetailsAnswers])
+              )
 
-            testStateOfSection(
-              multipleIndirectDisposalsReturn
-            )(
-              "exampleCompanyDetails",
-              messageFromMessageKey("task-list.indirect.enter-example-company-address.link"),
-              address.routes.CompanyDetailsController.checkYourAnswers(),
-              TaskListStatus.InProgress,
-              _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
-            )
+              testStateOfSection(
+                multipleIndirectDisposalsReturn
+              )(
+                "exampleCompanyDetails",
+                messageFromMessageKey("task-list.indirect.enter-example-company-address.link"),
+                address.routes.CompanyDetailsController.checkYourAnswers(),
+                TaskListStatus.InProgress,
+                _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+              )
 
-          }
+            }
 
           "the session data indicates that they are filling in a return and" +
             " the enter details of one company section is complete" in {
-            val multipleIndirectDisposalsReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
-              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                numberOfProperties = 2,
-                countryOfResidence = country,
-                assetTypes = List(AssetType.IndirectDisposal),
-                individualUserType = Some(Self)
-              ),
-              exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers])
-            )
+              val multipleIndirectDisposalsReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                  numberOfProperties = 2,
+                  countryOfResidence = country,
+                  assetTypes = List(AssetType.IndirectDisposal),
+                  individualUserType = Some(Self)
+                ),
+                exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers])
+              )
 
-            testStateOfSection(
-              multipleIndirectDisposalsReturn
-            )(
-              "exampleCompanyDetails",
-              messageFromMessageKey("task-list.indirect.enter-example-company-address.link"),
-              address.routes.CompanyDetailsController.checkYourAnswers(),
-              TaskListStatus.Complete
-            )
+              testStateOfSection(
+                multipleIndirectDisposalsReturn
+              )(
+                "exampleCompanyDetails",
+                messageFromMessageKey("task-list.indirect.enter-example-company-address.link"),
+                address.routes.CompanyDetailsController.checkYourAnswers(),
+                TaskListStatus.Complete
+              )
 
-          }
+            }
 
         }
 
@@ -2657,26 +2656,26 @@ class TaskListControllerSpec
 
           "the session data indicates that they are filling in a return and" +
             " the enter capital gains tax liability so far this tax year section is incomplete" in {
-            val incompleteNonCalculatedYTDAnswers =
-              sample[DraftMultipleIndirectDisposalsReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                  .copy(individualUserType = Some(Self)),
-                exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers]),
-                exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
-                yearToDateLiabilityAnswers = Some(sample[NonCalculatedYTDAnswers])
+              val incompleteNonCalculatedYTDAnswers =
+                sample[DraftMultipleIndirectDisposalsReturn].copy(
+                  triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                    .copy(individualUserType = Some(Self)),
+                  exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers]),
+                  exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+                  yearToDateLiabilityAnswers = Some(sample[NonCalculatedYTDAnswers])
+                )
+
+              testStateOfSection(
+                incompleteNonCalculatedYTDAnswers
+              )(
+                "enterCgtLiability",
+                messageFromMessageKey("task-list.enter-cgt-liability.link"),
+                yeartodatelliability.routes.YearToDateLiabilityController
+                  .checkYourAnswers(),
+                TaskListStatus.Complete
               )
 
-            testStateOfSection(
-              incompleteNonCalculatedYTDAnswers
-            )(
-              "enterCgtLiability",
-              messageFromMessageKey("task-list.enter-cgt-liability.link"),
-              yeartodatelliability.routes.YearToDateLiabilityController
-                .checkYourAnswers(),
-              TaskListStatus.Complete
-            )
-
-          }
+            }
 
         }
 
@@ -2684,26 +2683,26 @@ class TaskListControllerSpec
 
           "the session data indicates that they are filling in a return and" +
             " the check and send return, pay any tax due section is incomplete" in {
-            val checkAllAnswersAndSubmitAnswers =
-              sample[DraftMultipleIndirectDisposalsReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                  .copy(individualUserType = Some(Self)),
-                exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers]),
-                exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
-                yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]),
-                supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers])
+              val checkAllAnswersAndSubmitAnswers =
+                sample[DraftMultipleIndirectDisposalsReturn].copy(
+                  triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                    .copy(individualUserType = Some(Self)),
+                  exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers]),
+                  exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+                  yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]),
+                  supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers])
+                )
+
+              testStateOfSection(
+                checkAllAnswersAndSubmitAnswers
+              )(
+                "checkAndSendReturn",
+                messageFromMessageKey("task-list.check-and-send-return.link"),
+                routes.CheckAllAnswersAndSubmitController.checkAllAnswers(),
+                TaskListStatus.ToDo
               )
 
-            testStateOfSection(
-              checkAllAnswersAndSubmitAnswers
-            )(
-              "checkAndSendReturn",
-              messageFromMessageKey("task-list.check-and-send-return.link"),
-              routes.CheckAllAnswersAndSubmitController.checkAllAnswers(),
-              TaskListStatus.ToDo
-            )
-
-          }
+            }
 
         }
 
@@ -3052,26 +3051,26 @@ class TaskListControllerSpec
 
           "the session data indicates that they are filling in a return and" +
             " the enter capital gains tax liability so far this tax year section is incomplete" in {
-            val incompleteNonCalculatedYTDAnswers =
-              sample[DraftSingleMixedUseDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = Some(Self)),
-                mixedUsePropertyDetailsAnswers = Some(sample[CompleteMixedUsePropertyDetailsAnswers]),
-                exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
-                yearToDateLiabilityAnswers = Some(sample[NonCalculatedYTDAnswers])
+              val incompleteNonCalculatedYTDAnswers =
+                sample[DraftSingleMixedUseDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                    .copy(individualUserType = Some(Self)),
+                  mixedUsePropertyDetailsAnswers = Some(sample[CompleteMixedUsePropertyDetailsAnswers]),
+                  exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+                  yearToDateLiabilityAnswers = Some(sample[NonCalculatedYTDAnswers])
+                )
+
+              testStateOfSection(
+                incompleteNonCalculatedYTDAnswers
+              )(
+                "enterCgtLiability",
+                messageFromMessageKey("task-list.enter-cgt-liability.link"),
+                yeartodatelliability.routes.YearToDateLiabilityController
+                  .checkYourAnswers(),
+                TaskListStatus.Complete
               )
 
-            testStateOfSection(
-              incompleteNonCalculatedYTDAnswers
-            )(
-              "enterCgtLiability",
-              messageFromMessageKey("task-list.enter-cgt-liability.link"),
-              yeartodatelliability.routes.YearToDateLiabilityController
-                .checkYourAnswers(),
-              TaskListStatus.Complete
-            )
-
-          }
+            }
 
         }
 
@@ -3079,26 +3078,26 @@ class TaskListControllerSpec
 
           "the session data indicates that they are filling in a return and" +
             " the check and send return, pay any tax due section is incomplete" in {
-            val checkAllAnswersAndSubmitAnswers =
-              sample[DraftSingleMixedUseDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = Some(Self)),
-                exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
-                yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]),
-                supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers]),
-                mixedUsePropertyDetailsAnswers = Some(sample[CompleteMixedUsePropertyDetailsAnswers])
+              val checkAllAnswersAndSubmitAnswers =
+                sample[DraftSingleMixedUseDisposalReturn].copy(
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                    .copy(individualUserType = Some(Self)),
+                  exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+                  yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]),
+                  supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers]),
+                  mixedUsePropertyDetailsAnswers = Some(sample[CompleteMixedUsePropertyDetailsAnswers])
+                )
+
+              testStateOfSection(
+                checkAllAnswersAndSubmitAnswers
+              )(
+                "checkAndSendReturn",
+                messageFromMessageKey("task-list.check-and-send-return.link"),
+                routes.CheckAllAnswersAndSubmitController.checkAllAnswers(),
+                TaskListStatus.ToDo
               )
 
-            testStateOfSection(
-              checkAllAnswersAndSubmitAnswers
-            )(
-              "checkAndSendReturn",
-              messageFromMessageKey("task-list.check-and-send-return.link"),
-              routes.CheckAllAnswersAndSubmitController.checkAllAnswers(),
-              TaskListStatus.ToDo
-            )
-
-          }
+            }
 
         }
 

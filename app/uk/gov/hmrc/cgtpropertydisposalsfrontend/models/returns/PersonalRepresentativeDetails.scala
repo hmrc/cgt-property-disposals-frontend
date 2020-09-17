@@ -48,7 +48,7 @@ object PersonalRepresentativeDetails {
     lazy val dateOfDeath = representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
 
     individualUserType match {
-      case Some(PersonalRepresentative)                =>
+      case Some(PersonalRepresentative) =>
         dateOfDeath.fold[Either[String, Option[PersonalRepresentativeDetails]]](
           Left("Could not find date of death for personal rep")
         )(date => Right(Some(PersonalRepresentativeDetails(Right(PersonalRepresentative), date))))
@@ -58,7 +58,7 @@ object PersonalRepresentativeDetails {
           Left("Could not find date of death for personal rep in period of admin")
         )(date => Right(Some(PersonalRepresentativeDetails(Left(PersonalRepresentativeInPeriodOfAdmin), date))))
 
-      case _                                           =>
+      case _ =>
         Right(None)
     }
   }

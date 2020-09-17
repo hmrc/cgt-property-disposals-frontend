@@ -23,7 +23,7 @@
 
 @this()
 
-@(totalLeftToPay: AmountInPence)(implicit messages: Messages)
+@(totalLeftToPay: AmountInPence, hasRecentlyAmendedReturn : Boolean)(implicit messages: Messages)
 
 @numberClass = @{
   if(totalLeftToPay.inPounds() > 999999999) "very-large-number"
@@ -35,7 +35,13 @@
   <span class="govuk-caption-xl">
     @messages("account.totalLeftToPay")
   </span>
-  @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay.inPounds())
+    @if(hasRecentlyAmendedReturn){
+        @{"£" + messages("account.balance-updating")}
+        @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay.inPounds())
+    }else{
+        @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay.inPounds())
+    }
+
   <span class="sub-heading">
     @messages("account.totalLeftToPay.penalties")
   </span>

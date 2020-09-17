@@ -116,7 +116,7 @@ class DisposalDetailsController @Inject() (
             f(s, r, Left(d), answers)
           )(f(s, r, Left(d), _))
 
-      case _                                   => Redirect(controllers.routes.StartController.start())
+      case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def withDisposalMethod(draftReturn: JourneyState)(
@@ -232,89 +232,87 @@ class DisposalDetailsController @Inject() (
 
   def howMuchDidYouOwn(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
-          displayPage(answers)(
-            form = _.fold(
-              _.shareOfProperty
-                .fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
-              c => shareOfPropertyForm.fill(c.shareOfProperty)
-            )
-          )(
-            page = howMuchDidYouOwnPage(
-              _,
-              _,
-              fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(state),
-              fillingOutReturn.isAmendReturn
-            )
-          )(
-            requiredPreviousAnswer = _ => Some(()),
-            redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+      withFillingOutReturnAndDisposalDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        displayPage(answers)(
+          form = _.fold(
+            _.shareOfProperty
+              .fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
+            c => shareOfPropertyForm.fill(c.shareOfProperty)
           )
+        )(
+          page = howMuchDidYouOwnPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(state),
+            fillingOutReturn.isAmendReturn
+          )
+        )(
+          requiredPreviousAnswer = _ => Some(()),
+          redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+        )
       }
     }
 
   def howMuchDidYouOwnSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
-          submitBehaviour(fillingOutReturn, state, answers)(
-            form = shareOfPropertyForm
-          )(
-            page = howMuchDidYouOwnPage(
-              _,
-              _,
-              fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(state),
-              fillingOutReturn.isAmendReturn
-            )
-          )(
-            requiredPreviousAnswer = _ => Some(()),
-            redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
-          )(
-            updateAnswers = { (percentage, answers, draftReturn) =>
-              if (
-                answers
-                  .fold(_.shareOfProperty, c => Some(c.shareOfProperty))
-                  .contains(percentage)
-              )
-                draftReturn
-              else {
-                val newAnswers = answers
-                  .unset(_.disposalPrice)
-                  .unset(_.disposalFees)
-                  .copy(shareOfProperty = Some(percentage))
-
-                draftReturn.bimap(
-                  i =>
-                    i.copy(
-                      disposalDetailsAnswers = Some(newAnswers),
-                      acquisitionDetailsAnswers =
-                        if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
-                          None
-                        else
-                          i.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(i.triageAnswers)),
-                      yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
-                        .flatMap(_.unsetAllButIncomeDetails()),
-                      gainOrLossAfterReliefs = None
-                    ),
-                  s =>
-                    s.copy(
-                      disposalDetailsAnswers = Some(newAnswers),
-                      acquisitionDetailsAnswers =
-                        s.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(s.triageAnswers)),
-                      initialGainOrLoss = None,
-                      reliefDetailsAnswers = s.reliefDetailsAnswers
-                        .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
-                      yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers
-                        .flatMap(_.unsetAllButIncomeDetails()),
-                      gainOrLossAfterReliefs = None
-                    )
-                )
-              }
-            }
+      withFillingOutReturnAndDisposalDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        submitBehaviour(fillingOutReturn, state, answers)(
+          form = shareOfPropertyForm
+        )(
+          page = howMuchDidYouOwnPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(state),
+            fillingOutReturn.isAmendReturn
           )
+        )(
+          requiredPreviousAnswer = _ => Some(()),
+          redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+        )(
+          updateAnswers = { (percentage, answers, draftReturn) =>
+            if (
+              answers
+                .fold(_.shareOfProperty, c => Some(c.shareOfProperty))
+                .contains(percentage)
+            )
+              draftReturn
+            else {
+              val newAnswers = answers
+                .unset(_.disposalPrice)
+                .unset(_.disposalFees)
+                .copy(shareOfProperty = Some(percentage))
+
+              draftReturn.bimap(
+                i =>
+                  i.copy(
+                    disposalDetailsAnswers = Some(newAnswers),
+                    acquisitionDetailsAnswers =
+                      if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
+                        None
+                      else
+                        i.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(i.triageAnswers)),
+                    yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
+                      .flatMap(_.unsetAllButIncomeDetails()),
+                    gainOrLossAfterReliefs = None
+                  ),
+                s =>
+                  s.copy(
+                    disposalDetailsAnswers = Some(newAnswers),
+                    acquisitionDetailsAnswers =
+                      s.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(s.triageAnswers)),
+                    initialGainOrLoss = None,
+                    reliefDetailsAnswers = s.reliefDetailsAnswers
+                      .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
+                    yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers
+                      .flatMap(_.unsetAllButIncomeDetails()),
+                    gainOrLossAfterReliefs = None
+                  )
+              )
+            }
+          }
+        )
       }
     }
 
@@ -326,268 +324,255 @@ class DisposalDetailsController @Inject() (
 
   def whatWasDisposalPrice(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
-          withDisposalMethodAndShareOfProperty(state, answers) {
-            case (disposalMethod, _) =>
-              displayPage(answers)(
-                form = _.fold(
-                  _.disposalPrice.fold(disposalPriceForm)(a => disposalPriceForm.fill(a.inPounds())),
-                  c => disposalPriceForm.fill(c.disposalPrice.inPounds())
-                )
-              )(
-                page = disposalPricePage(
-                  _,
-                  _,
-                  disposalMethod,
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state),
-                  isIndirectDisposal(state),
-                  fillingOutReturn.isAmendReturn
-                )
-              )(
-                requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
-                redirectToIfNoRequiredPreviousAnswer = disposalPriceBackLink(state)
-              )
-          }
+      withFillingOutReturnAndDisposalDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        withDisposalMethodAndShareOfProperty(state, answers) { case (disposalMethod, _) =>
+          displayPage(answers)(
+            form = _.fold(
+              _.disposalPrice.fold(disposalPriceForm)(a => disposalPriceForm.fill(a.inPounds())),
+              c => disposalPriceForm.fill(c.disposalPrice.inPounds())
+            )
+          )(
+            page = disposalPricePage(
+              _,
+              _,
+              disposalMethod,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(state),
+              isIndirectDisposal(state),
+              fillingOutReturn.isAmendReturn
+            )
+          )(
+            requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
+            redirectToIfNoRequiredPreviousAnswer = disposalPriceBackLink(state)
+          )
+        }
       }
     }
 
   def whatWasDisposalPriceSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
-          withDisposalMethodAndShareOfProperty(state, answers) {
-            case (disposalMethod, _) =>
-              submitBehaviour(fillingOutReturn, state, answers)(
-                form = disposalPriceForm
-              )(
-                page = disposalPricePage(
-                  _,
-                  _,
-                  disposalMethod,
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state),
-                  isIndirectDisposal(state),
-                  fillingOutReturn.isAmendReturn
-                )
-              )(
-                requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
-                redirectToIfNoRequiredPreviousAnswer = disposalPriceBackLink(state)
-              )(
-                updateAnswers = { (price, answers, draftReturn) =>
-                  if (
-                    answers
-                      .fold(_.disposalPrice, c => Some(c.disposalPrice))
-                      .exists(_.inPounds() === price)
-                  )
-                    draftReturn
-                  else {
-                    val newAnswers = answers.fold(
-                      _.copy(disposalPrice = Some(fromPounds(price))),
-                      _.copy(disposalPrice = fromPounds(price))
-                    )
-
-                    draftReturn.bimap(
-                      i =>
-                        i.copy(
-                          disposalDetailsAnswers = Some(newAnswers),
-                          yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
-                            .flatMap(_.unsetAllButIncomeDetails())
-                        ),
-                      s =>
-                        s.copy(
-                          disposalDetailsAnswers = Some(newAnswers),
-                          initialGainOrLoss = None,
-                          reliefDetailsAnswers = s.reliefDetailsAnswers
-                            .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
-                          yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(
-                            _.unsetAllButIncomeDetails()
-                          )
-                        )
-                    )
-                  }
-                }
+      withFillingOutReturnAndDisposalDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        withDisposalMethodAndShareOfProperty(state, answers) { case (disposalMethod, _) =>
+          submitBehaviour(fillingOutReturn, state, answers)(
+            form = disposalPriceForm
+          )(
+            page = disposalPricePage(
+              _,
+              _,
+              disposalMethod,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(state),
+              isIndirectDisposal(state),
+              fillingOutReturn.isAmendReturn
+            )
+          )(
+            requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
+            redirectToIfNoRequiredPreviousAnswer = disposalPriceBackLink(state)
+          )(
+            updateAnswers = { (price, answers, draftReturn) =>
+              if (
+                answers
+                  .fold(_.disposalPrice, c => Some(c.disposalPrice))
+                  .exists(_.inPounds() === price)
               )
-          }
+                draftReturn
+              else {
+                val newAnswers = answers.fold(
+                  _.copy(disposalPrice = Some(fromPounds(price))),
+                  _.copy(disposalPrice = fromPounds(price))
+                )
+
+                draftReturn.bimap(
+                  i =>
+                    i.copy(
+                      disposalDetailsAnswers = Some(newAnswers),
+                      yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
+                        .flatMap(_.unsetAllButIncomeDetails())
+                    ),
+                  s =>
+                    s.copy(
+                      disposalDetailsAnswers = Some(newAnswers),
+                      initialGainOrLoss = None,
+                      reliefDetailsAnswers = s.reliefDetailsAnswers
+                        .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
+                      yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(
+                        _.unsetAllButIncomeDetails()
+                      )
+                    )
+                )
+              }
+            }
+          )
+        }
       }
     }
 
   def whatWereDisposalFees(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
-          withDisposalMethodAndShareOfProperty(state, answers) {
-            case (_, _) =>
-              displayPage(answers)(
-                form = _.fold(
-                  _.disposalFees.fold(disposalFeesForm)(a => disposalFeesForm.fill(a.inPounds())),
-                  c => disposalFeesForm.fill(c.disposalFees.inPounds())
-                )
-              )(
-                page = disposalFeesPage(
-                  _,
-                  _,
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state),
-                  isIndirectDisposal(state),
-                  fillingOutReturn.isAmendReturn
-                )
-              )(
-                requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
-                redirectToIfNoRequiredPreviousAnswer =
-                  controllers.returns.disposaldetails.routes.DisposalDetailsController
-                    .whatWasDisposalPrice()
-              )
-          }
+      withFillingOutReturnAndDisposalDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        withDisposalMethodAndShareOfProperty(state, answers) { case (_, _) =>
+          displayPage(answers)(
+            form = _.fold(
+              _.disposalFees.fold(disposalFeesForm)(a => disposalFeesForm.fill(a.inPounds())),
+              c => disposalFeesForm.fill(c.disposalFees.inPounds())
+            )
+          )(
+            page = disposalFeesPage(
+              _,
+              _,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(state),
+              isIndirectDisposal(state),
+              fillingOutReturn.isAmendReturn
+            )
+          )(
+            requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
+            redirectToIfNoRequiredPreviousAnswer = controllers.returns.disposaldetails.routes.DisposalDetailsController
+              .whatWasDisposalPrice()
+          )
+        }
       }
     }
 
   def whatWereDisposalFeesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
-          withDisposalMethodAndShareOfProperty(state, answers) {
-            case (_, _) =>
-              submitBehaviour(fillingOutReturn, state, answers)(
-                form = disposalFeesForm
-              )(
-                page = disposalFeesPage(
-                  _,
-                  _,
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state),
-                  isIndirectDisposal(state),
-                  fillingOutReturn.isAmendReturn
-                )
-              )(
-                requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
-                redirectToIfNoRequiredPreviousAnswer =
-                  controllers.returns.disposaldetails.routes.DisposalDetailsController
-                    .whatWasDisposalPrice()
-              )(
-                updateAnswers = { (price, answers, draftReturn) =>
-                  if (
-                    answers
-                      .fold(_.disposalFees, c => Some(c.disposalFees))
-                      .exists(_.inPounds() === price)
-                  )
-                    draftReturn
-                  else {
-                    val newAnswers =
-                      answers.fold(
-                        _.copy(disposalFees = Some(fromPounds(price))),
-                        _.copy(disposalFees = fromPounds(price))
-                      )
-
-                    draftReturn.bimap(
-                      i =>
-                        i.copy(
-                          disposalDetailsAnswers = Some(newAnswers),
-                          yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
-                            .flatMap(_.unsetAllButIncomeDetails())
-                        ),
-                      s =>
-                        s.copy(
-                          disposalDetailsAnswers = Some(newAnswers),
-                          initialGainOrLoss = None,
-                          reliefDetailsAnswers = s.reliefDetailsAnswers
-                            .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
-                          yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(
-                            _.unsetAllButIncomeDetails()
-                          )
-                        )
-                    )
-                  }
-                }
+      withFillingOutReturnAndDisposalDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        withDisposalMethodAndShareOfProperty(state, answers) { case (_, _) =>
+          submitBehaviour(fillingOutReturn, state, answers)(
+            form = disposalFeesForm
+          )(
+            page = disposalFeesPage(
+              _,
+              _,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(state),
+              isIndirectDisposal(state),
+              fillingOutReturn.isAmendReturn
+            )
+          )(
+            requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
+            redirectToIfNoRequiredPreviousAnswer = controllers.returns.disposaldetails.routes.DisposalDetailsController
+              .whatWasDisposalPrice()
+          )(
+            updateAnswers = { (price, answers, draftReturn) =>
+              if (
+                answers
+                  .fold(_.disposalFees, c => Some(c.disposalFees))
+                  .exists(_.inPounds() === price)
               )
-          }
+                draftReturn
+              else {
+                val newAnswers =
+                  answers.fold(
+                    _.copy(disposalFees = Some(fromPounds(price))),
+                    _.copy(disposalFees = fromPounds(price))
+                  )
+
+                draftReturn.bimap(
+                  i =>
+                    i.copy(
+                      disposalDetailsAnswers = Some(newAnswers),
+                      yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
+                        .flatMap(_.unsetAllButIncomeDetails())
+                    ),
+                  s =>
+                    s.copy(
+                      disposalDetailsAnswers = Some(newAnswers),
+                      initialGainOrLoss = None,
+                      reliefDetailsAnswers = s.reliefDetailsAnswers
+                        .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
+                      yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(
+                        _.unsetAllButIncomeDetails()
+                      )
+                    )
+                )
+              }
+            }
+          )
+        }
       }
     }
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
-          withDisposalMethod(state) {
-            case (disposalMethod) =>
-              answers match {
+      withFillingOutReturnAndDisposalDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        withDisposalMethod(state) { case (disposalMethod) =>
+          answers match {
 
-                case IncompleteDisposalDetailsAnswers(None, _, _) =>
-                  Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
+            case IncompleteDisposalDetailsAnswers(None, _, _) =>
+              Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
 
-                case IncompleteDisposalDetailsAnswers(_, None, _) =>
-                  Redirect(
-                    routes.DisposalDetailsController.whatWasDisposalPrice()
-                  )
+            case IncompleteDisposalDetailsAnswers(_, None, _) =>
+              Redirect(
+                routes.DisposalDetailsController.whatWasDisposalPrice()
+              )
 
-                case IncompleteDisposalDetailsAnswers(_, _, None) =>
-                  Redirect(
-                    routes.DisposalDetailsController.whatWereDisposalFees()
-                  )
+            case IncompleteDisposalDetailsAnswers(_, _, None) =>
+              Redirect(
+                routes.DisposalDetailsController.whatWereDisposalFees()
+              )
 
-                case IncompleteDisposalDetailsAnswers(
-                      Some(share),
-                      Some(price),
-                      Some(fees)
-                    ) =>
-                  val completeAnswers    =
-                    CompleteDisposalDetailsAnswers(share, price, fees)
-                  val updatedDraftReturn =
-                    state.fold(
-                      _.copy(disposalDetailsAnswers = Some(completeAnswers)),
-                      _.copy(disposalDetailsAnswers = Some(completeAnswers))
-                    )
+            case IncompleteDisposalDetailsAnswers(
+                  Some(share),
+                  Some(price),
+                  Some(fees)
+                ) =>
+              val completeAnswers    =
+                CompleteDisposalDetailsAnswers(share, price, fees)
+              val updatedDraftReturn =
+                state.fold(
+                  _.copy(disposalDetailsAnswers = Some(completeAnswers)),
+                  _.copy(disposalDetailsAnswers = Some(completeAnswers))
+                )
 
-                  val updatedJourney = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
+              val updatedJourney = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
 
-                  val result = for {
-                    _ <- returnsService.storeDraftReturn(updatedJourney)
-                    _ <- EitherT(
-                           updateSession(sessionStore, request)(
-                             _.copy(journeyStatus = Some(updatedJourney))
-                           )
-                         )
-                  } yield ()
+              val result = for {
+                _ <- returnsService.storeDraftReturn(updatedJourney)
+                _ <- EitherT(
+                       updateSession(sessionStore, request)(
+                         _.copy(journeyStatus = Some(updatedJourney))
+                       )
+                     )
+              } yield ()
 
-                  result.fold(
-                    { e =>
-                      logger.warn("Could not update session", e)
-                      errorHandler.errorResult
-                    },
-                    _ =>
-                      Ok(
-                        checkYouAnswers(
-                          completeAnswers,
-                          disposalMethod,
-                          fillingOutReturn.subscribedDetails.isATrust,
-                          representativeType(state),
-                          isIndirectDisposal(state)
-                        )
-                      )
-                  )
-
-                case answers: CompleteDisposalDetailsAnswers      =>
+              result.fold(
+                { e =>
+                  logger.warn("Could not update session", e)
+                  errorHandler.errorResult
+                },
+                _ =>
                   Ok(
                     checkYouAnswers(
-                      answers,
+                      completeAnswers,
                       disposalMethod,
                       fillingOutReturn.subscribedDetails.isATrust,
                       representativeType(state),
                       isIndirectDisposal(state)
                     )
                   )
-              }
+              )
 
+            case answers: CompleteDisposalDetailsAnswers =>
+              Ok(
+                checkYouAnswers(
+                  answers,
+                  disposalMethod,
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  representativeType(state),
+                  isIndirectDisposal(state)
+                )
+              )
           }
+
+        }
       }
     }
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndDisposalDetailsAnswers {
-        case _ =>
-          Redirect(controllers.returns.routes.TaskListController.taskList())
+      withFillingOutReturnAndDisposalDetailsAnswers { case _ =>
+        Redirect(controllers.returns.routes.TaskListController.taskList())
       }
     }
 

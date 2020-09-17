@@ -146,7 +146,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
               errorHandler.errorResult()
             },
             {
-              case SubmitReturnError(e)   =>
+              case SubmitReturnError(e) =>
                 logger.warn(s"Could not submit return}", e)
                 Redirect(
                   routes.CheckAllAnswersAndSubmitController.submissionError()

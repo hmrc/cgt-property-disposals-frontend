@@ -77,7 +77,7 @@ class ExemptionAndLossesController @Inject() (
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
 
-      case Some((_, s: StartingToAmendReturn))                                                          =>
+      case Some((_, s: StartingToAmendReturn)) =>
         markUnmetDependency(s, sessionStore, errorHandler)
 
       case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) if r.isFurtherOrAmendReturn.contains(true) =>
@@ -96,7 +96,7 @@ class ExemptionAndLossesController @Inject() (
           )
         f(s, r, d, answers)
 
-      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _)))                                            =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) =>
         val answers = d
           .fold(
             _.exemptionAndLossesAnswers,
@@ -108,7 +108,7 @@ class ExemptionAndLossesController @Inject() (
           .getOrElse(IncompleteExemptionAndLossesAnswers.empty)
         f(s, r, d, answers)
 
-      case _                                                                                            =>
+      case _ =>
         Redirect(controllers.routes.StartController.start())
     }
 
@@ -531,7 +531,7 @@ class ExemptionAndLossesController @Inject() (
       withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
           answers match {
-            case c: CompleteExemptionAndLossesAnswers            =>
+            case c: CompleteExemptionAndLossesAnswers =>
               Ok(
                 checkYourAnswersPage(
                   c,
@@ -605,9 +605,8 @@ class ExemptionAndLossesController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers {
-        case _ =>
-          Redirect(controllers.returns.routes.TaskListController.taskList())
+      withFillingOutReturnAndAnswers { case _ =>
+        Redirect(controllers.returns.routes.TaskListController.taskList())
       }
     }
 

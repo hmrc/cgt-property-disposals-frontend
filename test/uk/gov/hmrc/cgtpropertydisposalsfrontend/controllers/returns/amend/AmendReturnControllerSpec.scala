@@ -258,19 +258,18 @@ class AmendReturnControllerSpec
         }
 
         "the user doesn't want to cancel" in {
-          AmendReturnController.confirmCancelBackLinkMappings.foreach {
-            case (backKey, backLink) =>
-              withClue(s"For back key '$backKey' and back location '${backLink.url}': ") {
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(SessionData.empty)
-                }
-
-                checkIsRedirect(
-                  performAction("confirmCancelAmendReturn" -> "false")(backKey),
-                  backLink
-                )
+          AmendReturnController.confirmCancelBackLinkMappings.foreach { case (backKey, backLink) =>
+            withClue(s"For back key '$backKey' and back location '${backLink.url}': ") {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(SessionData.empty)
               }
+
+              checkIsRedirect(
+                performAction("confirmCancelAmendReturn" -> "false")(backKey),
+                backLink
+              )
+            }
           }
         }
 
@@ -433,18 +432,17 @@ class AmendReturnControllerSpec
             initialGainorLossRoutes.enterInitialGainOrLoss().url -> "initialGainOrLoss"
           )
 
-          testCases.foreach {
-            case (unmetDependencyFieldUrl, titleKey) =>
-              withClue(s"For '$unmetDependencyFieldUrl' and '$titleKey': ") {
-                val key =
-                  if (
-                    titleKey === "initialGainOrLoss" || titleKey === "annualExemptAmount" || titleKey === "income" || titleKey === "personalAllowance"
-                  )
-                    "unmetDependency.x1"
-                  else
-                    "unmetDependency.x2"
-                test(unmetDependencyFieldUrl, key)
-              }
+          testCases.foreach { case (unmetDependencyFieldUrl, titleKey) =>
+            withClue(s"For '$unmetDependencyFieldUrl' and '$titleKey': ") {
+              val key =
+                if (
+                  titleKey === "initialGainOrLoss" || titleKey === "annualExemptAmount" || titleKey === "income" || titleKey === "personalAllowance"
+                )
+                  "unmetDependency.x1"
+                else
+                  "unmetDependency.x2"
+              test(unmetDependencyFieldUrl, key)
+            }
 
           }
 

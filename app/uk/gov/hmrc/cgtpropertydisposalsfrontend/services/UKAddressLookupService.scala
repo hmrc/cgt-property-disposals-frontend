@@ -105,9 +105,8 @@ class UKAddressLookupServiceImpl @Inject() (
         case a1 :: as  => Right(a1 -> Some(as.mkString(", ")))
       }
 
-      lines.map {
-        case (l1, l2) =>
-          UkAddress(l1, l2, Some(a.town), a.county, Postcode(a.postcode))
+      lines.map { case (l1, l2) =>
+        UkAddress(l1, l2, Some(a.town), a.county, Postcode(a.postcode))
       }
     }
 

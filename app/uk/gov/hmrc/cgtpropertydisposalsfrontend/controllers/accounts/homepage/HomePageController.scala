@@ -179,90 +179,88 @@ class HomePageController @Inject() (
 
   def viewSentReturn(submissionId: String): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSubscribedUser {
-        case (_, subscribed) =>
-          subscribed.sentReturns
-            .find(_.submissionId === submissionId)
-            .fold[Future[Result]] {
-              logger.warn(
-                s"Could not find return with submission id $submissionId for cgt reference ${subscribed.subscribedDetails.cgtReference.value}"
-              )
-              NotFound
-            } { returnSummary =>
-              val result = for {
-                sentReturn           <- returnsService
-                                          .displayReturn(
-                                            subscribed.subscribedDetails.cgtReference,
-                                            returnSummary.submissionId
-                                          )
-                previousYtdLiability <- getPreviousYearToDateLiability(
-                                          subscribed.sentReturns,
+      withSubscribedUser { case (_, subscribed) =>
+        subscribed.sentReturns
+          .find(_.submissionId === submissionId)
+          .fold[Future[Result]] {
+            logger.warn(
+              s"Could not find return with submission id $submissionId for cgt reference ${subscribed.subscribedDetails.cgtReference.value}"
+            )
+            NotFound
+          } { returnSummary =>
+            val result = for {
+              sentReturn           <- returnsService
+                                        .displayReturn(
                                           subscribed.subscribedDetails.cgtReference,
-                                          Some(
-                                            CompleteReturnWithSummary(
-                                              sentReturn.completeReturn,
-                                              returnSummary,
-                                              sentReturn.isFirstReturn
-                                            )
+                                          returnSummary.submissionId
+                                        )
+              previousYtdLiability <- getPreviousYearToDateLiability(
+                                        subscribed.sentReturns,
+                                        subscribed.subscribedDetails.cgtReference,
+                                        Some(
+                                          CompleteReturnWithSummary(
+                                            sentReturn.completeReturn,
+                                            returnSummary,
+                                            sentReturn.isFirstReturn
                                           )
                                         )
-                _                    <- EitherT(
-                                          updateSession(sessionStore, request)(
-                                            _.copy(
-                                              journeyStatus = Some(
-                                                ViewingReturn(
-                                                  subscribed.subscribedDetails,
-                                                  subscribed.ggCredId,
-                                                  subscribed.agentReferenceNumber,
-                                                  sentReturn.completeReturn,
-                                                  sentReturn.isFirstReturn,
-                                                  returnSummary,
-                                                  Some(PreviousReturnData(subscribed.sentReturns, previousYtdLiability))
-                                                )
+                                      )
+              _                    <- EitherT(
+                                        updateSession(sessionStore, request)(
+                                          _.copy(
+                                            journeyStatus = Some(
+                                              ViewingReturn(
+                                                subscribed.subscribedDetails,
+                                                subscribed.ggCredId,
+                                                subscribed.agentReferenceNumber,
+                                                sentReturn.completeReturn,
+                                                sentReturn.isFirstReturn,
+                                                returnSummary,
+                                                Some(PreviousReturnData(subscribed.sentReturns, previousYtdLiability))
                                               )
                                             )
                                           )
                                         )
-              } yield ()
+                                      )
+            } yield ()
 
-              result.fold(
-                { e =>
-                  logger.warn("Could not get sent return", e)
-                  errorHandler.errorResult()
-                },
-                _ => Redirect(returns.routes.ViewReturnController.displayReturn())
-              )
-            }
+            result.fold(
+              { e =>
+                logger.warn("Could not get sent return", e)
+                errorHandler.errorResult()
+              },
+              _ => Redirect(returns.routes.ViewReturnController.displayReturn())
+            )
+          }
       }(withUplift = false)
     }
 
   def payTotalAmountLeftToPay(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSubscribedUser {
-        case (_, subscribed) =>
-          paymentsService
-            .startPaymentJourney(
-              subscribed.subscribedDetails.cgtReference,
-              None,
-              subscribed.totalLeftToPay(),
-              routes.HomePageController.homepage(),
-              routes.HomePageController.homepage()
-            )
-            .fold(
-              { e =>
-                logger.warn(
-                  "Could not start payments journey to pay total amount outstanding",
-                  e
-                )
-                errorHandler.errorResult()
-              },
-              { journey =>
-                logger.info(
-                  s"Payment journey started with journeyId ${journey.journeyId} to pay total outstanding amount on account"
-                )
-                Redirect(journey.nextUrl)
-              }
-            )
+      withSubscribedUser { case (_, subscribed) =>
+        paymentsService
+          .startPaymentJourney(
+            subscribed.subscribedDetails.cgtReference,
+            None,
+            subscribed.totalLeftToPay(),
+            routes.HomePageController.homepage(),
+            routes.HomePageController.homepage()
+          )
+          .fold(
+            { e =>
+              logger.warn(
+                "Could not start payments journey to pay total amount outstanding",
+                e
+              )
+              errorHandler.errorResult()
+            },
+            { journey =>
+              logger.info(
+                s"Payment journey started with journeyId ${journey.journeyId} to pay total outstanding amount on account"
+              )
+              Redirect(journey.nextUrl)
+            }
+          )
       }(withUplift = false)
 
     }
@@ -326,69 +324,64 @@ class HomePageController @Inject() (
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s: SessionData, r: StartingNewDraftReturn)) if withUplift =>
-        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
-          case (r, draftReturns, sentReturns) =>
-            Subscribed(
-              r.subscribedDetails,
-              r.ggCredId,
-              r.agentReferenceNumber,
-              draftReturns,
-              sentReturns
-            )
+        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) { case (r, draftReturns, sentReturns) =>
+          Subscribed(
+            r.subscribedDetails,
+            r.ggCredId,
+            r.agentReferenceNumber,
+            draftReturns,
+            sentReturns
+          )
         }(f(s, _))
 
-      case Some((s: SessionData, r: FillingOutReturn)) if withUplift       =>
-        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
-          case (r, draftReturns, sentReturns) =>
-            Subscribed(
-              r.subscribedDetails,
-              r.ggCredId,
-              r.agentReferenceNumber,
-              draftReturns,
-              sentReturns
-            )
+      case Some((s: SessionData, r: FillingOutReturn)) if withUplift =>
+        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) { case (r, draftReturns, sentReturns) =>
+          Subscribed(
+            r.subscribedDetails,
+            r.ggCredId,
+            r.agentReferenceNumber,
+            draftReturns,
+            sentReturns
+          )
         }(f(s, _))
 
-      case Some((s: SessionData, r: JustSubmittedReturn)) if withUplift    =>
-        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
-          case (r, draftReturns, sentReturns) =>
-            Subscribed(
-              r.subscribedDetails,
-              r.ggCredId,
-              r.agentReferenceNumber,
-              draftReturns,
-              sentReturns
-            )
+      case Some((s: SessionData, r: JustSubmittedReturn)) if withUplift =>
+        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) { case (r, draftReturns, sentReturns) =>
+          Subscribed(
+            r.subscribedDetails,
+            r.ggCredId,
+            r.agentReferenceNumber,
+            draftReturns,
+            sentReturns
+          )
         }(f(s, _))
 
-      case Some((s: SessionData, r: SubmitReturnFailed)) if withUplift     =>
-        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
-          case (r, draftReturns, sentReturns) =>
-            Subscribed(
-              r.subscribedDetails,
-              r.ggCredId,
-              r.agentReferenceNumber,
-              draftReturns,
-              sentReturns
-            )
+      case Some((s: SessionData, r: SubmitReturnFailed)) if withUplift =>
+        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) { case (r, draftReturns, sentReturns) =>
+          Subscribed(
+            r.subscribedDetails,
+            r.ggCredId,
+            r.agentReferenceNumber,
+            draftReturns,
+            sentReturns
+          )
         }(f(s, _))
 
-      case Some((s: SessionData, r: ViewingReturn)) if withUplift          =>
-        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
-          case (r, draftReturns, sentReturns) =>
-            Subscribed(
-              r.subscribedDetails,
-              r.ggCredId,
-              r.agentReferenceNumber,
-              draftReturns,
-              sentReturns
-            )
+      case Some((s: SessionData, r: ViewingReturn)) if withUplift =>
+        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) { case (r, draftReturns, sentReturns) =>
+          Subscribed(
+            r.subscribedDetails,
+            r.ggCredId,
+            r.agentReferenceNumber,
+            draftReturns,
+            sentReturns
+          )
         }(f(s, _))
 
-      case Some((s: SessionData, r: Subscribed))                           =>
+      case Some((s: SessionData, r: Subscribed)) =>
         f(s, r)
 
-      case _                                                               =>
+      case _ =>
         Redirect(controllers.routes.StartController.start().url)
     }
 

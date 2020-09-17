@@ -103,15 +103,14 @@ class AcquisitionDetailsController @Inject() (
       val answers =
         triageAnswers.fold(_.individualUserType, _.individualUserType) match {
           case Some(PersonalRepresentativeInPeriodOfAdmin) =>
-            representeeAnswers.collect {
-              case CompleteRepresenteeAnswers(_, _, Some(dateOfDeath), _, _) =>
-                IncompleteAcquisitionDetailsAnswers.empty.copy(
-                  acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
-                  acquisitionMethod = Some(AcquisitionMethod.Other("period of admin"))
-                )
+            representeeAnswers.collect { case CompleteRepresenteeAnswers(_, _, Some(dateOfDeath), _, _) =>
+              IncompleteAcquisitionDetailsAnswers.empty.copy(
+                acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
+                acquisitionMethod = Some(AcquisitionMethod.Other("period of admin"))
+              )
             }
 
-          case _                                           =>
+          case _ =>
             Some(IncompleteAcquisitionDetailsAnswers.empty)
         }
 
@@ -151,7 +150,7 @@ class AcquisitionDetailsController @Inject() (
           )(answers => f(s, r, Left(d), answers))
         )(f(s, r, Left(d), _))
 
-      case _                                   => Redirect(controllers.routes.StartController.start())
+      case _ => Redirect(controllers.routes.StartController.start())
     }
   }
 
@@ -321,17 +320,90 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionMethod(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        withAssetType(state) { assetType =>
+          commonDisplayBehaviour(answers)(
+            form = _.fold(
+              _.acquisitionMethod
+                .fold(acquisitionMethodForm)(acquisitionMethodForm.fill),
+              c => acquisitionMethodForm.fill(c.acquisitionMethod)
+            )
+          )(
+            page = acquisitionMethodPage(
+              _,
+              _,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(state),
+              assetType,
+              fillingOutReturn.isAmendReturn
+            )
+          )(
+            requiredPreviousAnswer = _ => true,
+            controllers.returns.routes.TaskListController.taskList()
+          )
+        }
+      }
+    }
+
+  def acquisitionMethodSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        withAssetType(state) { assetType =>
+          commonSubmitBehaviour(
+            fillingOutReturn,
+            state,
+            answers
+          )(
+            acquisitionMethodForm
+          )(
+            acquisitionMethodPage(
+              _,
+              _,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(state),
+              assetType,
+              fillingOutReturn.isAmendReturn
+            )
+          )(
+            requiredPreviousAnswer = _ => noAnswersRequired,
+            controllers.returns.routes.TaskListController.taskList()
+          )(
+            updateState = { case (m, answers, draftReturn) =>
+              if (
+                answers
+                  .fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
+                  .contains(m)
+              )
+                draftReturn
+              else {
+                val newAnswers = answers
+                  .unset(_.acquisitionPrice)
+                  .unset(_.rebasedAcquisitionPrice)
+                  .unset(_.shouldUseRebase)
+                  .unset(_.acquisitionFees)
+                  .copy(acquisitionMethod = Some(m))
+                commonUpdateDraftReturn(draftReturn, newAnswers)
+              }
+            }
+          )
+        }
+      }
+    }
+
+  def acquisitionDate(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        withDisposalDate(state) { case (disposalDate) =>
           withAssetType(state) { assetType =>
+            val form = acquisitionDateForm(disposalDate.value)
+
             commonDisplayBehaviour(answers)(
               form = _.fold(
-                _.acquisitionMethod
-                  .fold(acquisitionMethodForm)(acquisitionMethodForm.fill),
-                c => acquisitionMethodForm.fill(c.acquisitionMethod)
+                _.acquisitionDate.fold(form)(form.fill),
+                c => form.fill(c.acquisitionDate)
               )
             )(
-              page = acquisitionMethodPage(
+              page = acquisitionDatePage(
                 _,
                 _,
                 fillingOutReturn.subscribedDetails.isATrust,
@@ -340,26 +412,30 @@ class AcquisitionDetailsController @Inject() (
                 fillingOutReturn.isAmendReturn
               )
             )(
-              requiredPreviousAnswer = _ => true,
-              controllers.returns.routes.TaskListController.taskList()
+              requiredPreviousAnswer = _.fold(
+                _.acquisitionMethod,
+                c => Some(c.acquisitionMethod)
+              ).isDefined,
+              redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
             )
           }
+        }
       }
     }
 
-  def acquisitionMethodSubmit(): Action[AnyContent] =
+  def acquisitionDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
+        withDisposalDate(state) { case (disposalDate) =>
           withAssetType(state) { assetType =>
             commonSubmitBehaviour(
               fillingOutReturn,
               state,
               answers
             )(
-              acquisitionMethodForm
+              form = acquisitionDateForm(disposalDate.value)
             )(
-              acquisitionMethodPage(
+              acquisitionDatePage(
                 _,
                 _,
                 fillingOutReturn.subscribedDetails.isATrust,
@@ -368,122 +444,37 @@ class AcquisitionDetailsController @Inject() (
                 fillingOutReturn.isAmendReturn
               )
             )(
-              requiredPreviousAnswer = _ => noAnswersRequired,
-              controllers.returns.routes.TaskListController.taskList()
+              requiredPreviousAnswer = _.fold(
+                _.acquisitionMethod,
+                c => Some(c.acquisitionMethod)
+              ).isDefined,
+              redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
             )(
-              updateState = {
-                case (m, answers, draftReturn) =>
-                  if (
-                    answers
-                      .fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
-                      .contains(m)
+              updateState = { case (d, answers, draftReturn) =>
+                val existingAcquisitionDate =
+                  answers
+                    .fold(_.acquisitionDate, c => Some(c.acquisitionDate))
+
+                if (existingAcquisitionDate.contains(d))
+                  draftReturn
+                else {
+                  val newAnswers = answers
+                    .unset(_.acquisitionPrice)
+                    .unset(_.rebasedAcquisitionPrice)
+                    .unset(_.shouldUseRebase)
+                    .unset(_.acquisitionFees)
+                    .copy(acquisitionDate = Some(d))
+
+                  commonUpdateDraftReturn(
+                    draftReturn,
+                    if (assetType === AssetType.IndirectDisposal) newAnswers
+                    else newAnswers.unset(_.improvementCosts)
                   )
-                    draftReturn
-                  else {
-                    val newAnswers = answers
-                      .unset(_.acquisitionPrice)
-                      .unset(_.rebasedAcquisitionPrice)
-                      .unset(_.shouldUseRebase)
-                      .unset(_.acquisitionFees)
-                      .copy(acquisitionMethod = Some(m))
-                    commonUpdateDraftReturn(draftReturn, newAnswers)
-                  }
+                }
               }
             )
           }
-      }
-    }
-
-  def acquisitionDate(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
-          withDisposalDate(state) {
-            case (disposalDate) =>
-              withAssetType(state) { assetType =>
-                val form = acquisitionDateForm(disposalDate.value)
-
-                commonDisplayBehaviour(answers)(
-                  form = _.fold(
-                    _.acquisitionDate.fold(form)(form.fill),
-                    c => form.fill(c.acquisitionDate)
-                  )
-                )(
-                  page = acquisitionDatePage(
-                    _,
-                    _,
-                    fillingOutReturn.subscribedDetails.isATrust,
-                    representativeType(state),
-                    assetType,
-                    fillingOutReturn.isAmendReturn
-                  )
-                )(
-                  requiredPreviousAnswer = _.fold(
-                    _.acquisitionMethod,
-                    c => Some(c.acquisitionMethod)
-                  ).isDefined,
-                  redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
-                )
-              }
-          }
-      }
-    }
-
-  def acquisitionDateSubmit(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers {
-        case (_, fillingOutReturn, state, answers) =>
-          withDisposalDate(state) {
-            case (disposalDate) =>
-              withAssetType(state) { assetType =>
-                commonSubmitBehaviour(
-                  fillingOutReturn,
-                  state,
-                  answers
-                )(
-                  form = acquisitionDateForm(disposalDate.value)
-                )(
-                  acquisitionDatePage(
-                    _,
-                    _,
-                    fillingOutReturn.subscribedDetails.isATrust,
-                    representativeType(state),
-                    assetType,
-                    fillingOutReturn.isAmendReturn
-                  )
-                )(
-                  requiredPreviousAnswer = _.fold(
-                    _.acquisitionMethod,
-                    c => Some(c.acquisitionMethod)
-                  ).isDefined,
-                  redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
-                )(
-                  updateState = {
-                    case (d, answers, draftReturn) =>
-                      val existingAcquisitionDate =
-                        answers
-                          .fold(_.acquisitionDate, c => Some(c.acquisitionDate))
-
-                      if (existingAcquisitionDate.contains(d))
-                        draftReturn
-                      else {
-                        val newAnswers = answers
-                          .unset(_.acquisitionPrice)
-                          .unset(_.rebasedAcquisitionPrice)
-                          .unset(_.shouldUseRebase)
-                          .unset(_.acquisitionFees)
-                          .copy(acquisitionDate = Some(d))
-
-                        commonUpdateDraftReturn(
-                          draftReturn,
-                          if (assetType === AssetType.IndirectDisposal) newAnswers
-                          else newAnswers.unset(_.improvementCosts)
-                        )
-                      }
-                  }
-                )
-              }
-          }
+        }
       }
     }
 
@@ -828,10 +819,9 @@ class AcquisitionDetailsController @Inject() (
               requiredPreviousAnswer = { a =>
                 if (rebaseDate.isDefined)
                   a.fold(
-                      _.rebasedAcquisitionPrice,
-                      _.rebasedAcquisitionPrice
-                    )
-                    .isDefined
+                    _.rebasedAcquisitionPrice,
+                    _.rebasedAcquisitionPrice
+                  ).isDefined
                 else
                   a.fold(_.acquisitionPrice, c => Some(c.acquisitionPrice)).isDefined
               },

@@ -81,7 +81,7 @@ class DraftReturnSavedController @Inject() (
             )
           }
 
-        case _                                        =>
+        case _ =>
           Future.successful(Redirect(baseRoutes.StartController.start()))
       }
 

@@ -68,57 +68,55 @@ trait IndividualNameController[J <: JourneyStatus] {
 
   def enterIndividualName(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, journey) =>
-          val form =
-            name(journey).fold(individualNameForm)(individualNameForm.fill)
+      withValidJourney(request) { case (_, journey) =>
+        val form =
+          name(journey).fold(individualNameForm)(individualNameForm.fill)
 
-          Ok(
-            enterNamePage(
-              form,
-              backLinkCall,
-              enterNameSubmitCall,
-              isSubscribedJourney
-            )
+        Ok(
+          enterNamePage(
+            form,
+            backLinkCall,
+            enterNameSubmitCall,
+            isSubscribedJourney
           )
+        )
       }
     }
 
   def enterIndividualNameSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, journey) =>
-          individualNameForm
-            .bindFromRequest()
-            .fold(
-              e =>
-                BadRequest(
-                  enterNamePage(
-                    e,
-                    backLinkCall,
-                    enterNameSubmitCall,
-                    isSubscribedJourney
-                  )
-                ),
-              contactName => {
-                val result = for {
-                  journey <- updateName(journey, contactName)
-                  _       <- EitherT[Future, Error, Unit](
-                               updateSession(sessionStore, request) { s =>
-                                 s.copy(journeyStatus = Some(journey))
-                               }
-                             )
-                } yield ()
-
-                result.fold(
-                  { e =>
-                    logger.warn(s"Could not update contact name: $e")
-                    errorHandler.errorResult()
-                  },
-                  _ => Redirect(continueCall)
+      withValidJourney(request) { case (_, journey) =>
+        individualNameForm
+          .bindFromRequest()
+          .fold(
+            e =>
+              BadRequest(
+                enterNamePage(
+                  e,
+                  backLinkCall,
+                  enterNameSubmitCall,
+                  isSubscribedJourney
                 )
-              }
-            )
+              ),
+            contactName => {
+              val result = for {
+                journey <- updateName(journey, contactName)
+                _       <- EitherT[Future, Error, Unit](
+                             updateSession(sessionStore, request) { s =>
+                               s.copy(journeyStatus = Some(journey))
+                             }
+                           )
+              } yield ()
+
+              result.fold(
+                { e =>
+                  logger.warn(s"Could not update contact name: $e")
+                  errorHandler.errorResult()
+                },
+                _ => Redirect(continueCall)
+              )
+            }
+          )
 
       }
     }

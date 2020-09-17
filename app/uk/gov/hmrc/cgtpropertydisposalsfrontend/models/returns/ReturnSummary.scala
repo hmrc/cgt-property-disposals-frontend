@@ -30,7 +30,8 @@ final case class ReturnSummary(
   taxYear: String,
   mainReturnChargeAmount: AmountInPence,
   propertyAddress: Address,
-  charges: List[Charge]
+  charges: List[Charge],
+  isRecentlyAmended: Boolean
 )
 
 object ReturnSummary {

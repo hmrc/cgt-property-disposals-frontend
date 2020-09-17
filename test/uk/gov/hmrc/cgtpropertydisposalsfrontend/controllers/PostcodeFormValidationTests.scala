@@ -63,17 +63,16 @@ trait PostcodeFormValidationTests { this: ControllerSpec =>
           "AA0.0AA"  -> "postcode.error.invalidCharacters",
           "AAA123"   -> "postcode.error.pattern",
           "A11AAA"   -> "postcode.error.pattern"
-        ).foreach {
-          case (invalidPostcode, errorMessageKey) =>
-            withClue(s"For postcode '$invalidPostcode'") {
-              mockActions()
+        ).foreach { case (invalidPostcode, errorMessageKey) =>
+          withClue(s"For postcode '$invalidPostcode'") {
+            mockActions()
 
-              val result = performAction(Seq("postcode" -> invalidPostcode))
-              status(result)        shouldBe BAD_REQUEST
-              contentAsString(result) should include(
-                messageFromMessageKey(errorMessageKey)
-              )
-            }
+            val result = performAction(Seq("postcode" -> invalidPostcode))
+            status(result)        shouldBe BAD_REQUEST
+            contentAsString(result) should include(
+              messageFromMessageKey(errorMessageKey)
+            )
+          }
         }
       }
     }

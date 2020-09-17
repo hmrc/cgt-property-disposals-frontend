@@ -174,9 +174,9 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
 
       "the email has characters before and after the '@' character but " +
         "there are more than 132 characters in it" in {
-        val longString = List.fill(100)("a").mkString("")
-        testEmailError(s"$longString@$longString")
-      }
+          val longString = List.fill(100)("a").mkString("")
+          testEmailError(s"$longString@$longString")
+        }
 
     }
 
@@ -249,45 +249,45 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
 
     "redirect to the check you inbox page when the email address verification request " +
       "has successfully been sent" in {
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(sessionDataWithValidJourneyStatus)
-        mockUuidGenerator(id)
-        mockStoreSession(
-          sessionDataWithValidJourneyStatus
-            .copy(emailToBeVerified = Some(emailToBeVerified(false)))
-        )(
-          Right(())
-        )
-        mockEmailVerification(email, expectedName, verifyEmailCall(id), AcceptLanguage.EN)(
-          Right(EmailVerificationRequested)
-        )
-      }
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithValidJourneyStatus)
+          mockUuidGenerator(id)
+          mockStoreSession(
+            sessionDataWithValidJourneyStatus
+              .copy(emailToBeVerified = Some(emailToBeVerified(false)))
+          )(
+            Right(())
+          )
+          mockEmailVerification(email, expectedName, verifyEmailCall(id), AcceptLanguage.EN)(
+            Right(EmailVerificationRequested)
+          )
+        }
 
-      val result: Future[Result] = performAction(
-        Seq("email" -> email.value, "resendVerificationEmail" -> "false")
-      )
-      checkIsRedirect(result, checkYourInboxCall)
-    }
+        val result: Future[Result] = performAction(
+          Seq("email" -> email.value, "resendVerificationEmail" -> "false")
+        )
+        checkIsRedirect(result, checkYourInboxCall)
+      }
 
     "reuse the same id in the continue url if there is an existing email to be verified in session " +
       "and the emails match" in {
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(
-          sessionDataWithValidJourneyStatus
-            .copy(emailToBeVerified = Some(emailToBeVerified(false)))
-        )
-        mockEmailVerification(email, expectedName, verifyEmailCall(id), AcceptLanguage.EN)(
-          Right(EmailVerificationRequested)
-        )
-      }
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithValidJourneyStatus
+              .copy(emailToBeVerified = Some(emailToBeVerified(false)))
+          )
+          mockEmailVerification(email, expectedName, verifyEmailCall(id), AcceptLanguage.EN)(
+            Right(EmailVerificationRequested)
+          )
+        }
 
-      val result: Future[Result] = performAction(
-        Seq("email" -> email.value, "resendVerificationEmail" -> "false")
-      )
-      checkIsRedirect(result, checkYourInboxCall)
-    }
+        val result: Future[Result] = performAction(
+          Seq("email" -> email.value, "resendVerificationEmail" -> "false")
+        )
+        checkIsRedirect(result, checkYourInboxCall)
+      }
 
     "strip out spaces in emails" in {
       val emailWithSpaces    = " a @ b  "
@@ -353,17 +353,17 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
 
     "show the check your inbox page when there is a BPR in session and there is an " +
       "email to be verified in session" in {
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(sessionData)
-      }
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionData)
+        }
 
-      val result         = performAction()
-      val resultAsString = contentAsString(result)
-      status(result) shouldBe OK
-      resultAsString   should include(messageFromMessageKey(expectedTitleKey))
-      resultAsString   should include(expectedBackLink)
-    }
+        val result         = performAction()
+        val resultAsString = contentAsString(result)
+        status(result) shouldBe OK
+        resultAsString   should include(messageFromMessageKey(expectedTitleKey))
+        resultAsString   should include(expectedBackLink)
+      }
   }
 
   def verifyEmail(

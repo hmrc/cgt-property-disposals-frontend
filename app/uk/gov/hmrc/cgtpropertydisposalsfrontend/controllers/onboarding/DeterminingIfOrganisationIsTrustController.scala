@@ -123,7 +123,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                   )
                 )
               ).map {
-                case Left(e)  =>
+                case Left(e) =>
                   logger.warn(
                     "Could not update session data with reporting for trust answer",
                     e
@@ -207,7 +207,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                     )
                   )
                 ).map {
-                  case Left(e)  =>
+                  case Left(e) =>
                     logger.warn(
                       "Could not update session data with has TRN answer",
                       e
@@ -304,28 +304,27 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                   case ServiceError(e)                 =>
                     handleNameMatchServiceError(e)
                 },
-                {
-                  case (_, maybeCgtReference) =>
-                    Redirect(
-                      maybeCgtReference.fold(
-                        controllers.routes.StartController.start()
-                      ) { cgtReference =>
-                        auditService.sendEvent(
-                          "accessWithWrongGGAccount",
-                          WrongGGAccountEvent(
-                            Some(cgtReference.value),
-                            determiningIfOrganisationIsTrust.ggCredId.value
-                          ),
-                          "access-with-wrong-gg-account"
-                        )
-                        onboarding.routes.SubscriptionController
-                          .alreadySubscribedWithDifferentGGAccount()
-                      }
-                    )
+                { case (_, maybeCgtReference) =>
+                  Redirect(
+                    maybeCgtReference.fold(
+                      controllers.routes.StartController.start()
+                    ) { cgtReference =>
+                      auditService.sendEvent(
+                        "accessWithWrongGGAccount",
+                        WrongGGAccountEvent(
+                          Some(cgtReference.value),
+                          determiningIfOrganisationIsTrust.ggCredId.value
+                        ),
+                        "access-with-wrong-gg-account"
+                      )
+                      onboarding.routes.SubscriptionController
+                        .alreadySubscribedWithDifferentGGAccount()
+                    }
+                  )
                 }
               )
 
-          case _          => Redirect(controllers.routes.StartController.start())
+          case _ => Redirect(controllers.routes.StartController.start())
         }
       }
     }
@@ -382,19 +381,18 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                  ggCredId,
                                  previousUnsuccessfulAttempt
                                )
-                               .subflatMap {
-                                 case (bpr, cgtReference) =>
-                                   if (bpr.name.isRight)
-                                     Left(
-                                       NameMatchServiceError
-                                         .BackendError(
-                                           Error(
-                                             "Found BPR for individual but expected one for a trust"
-                                           )
+                               .subflatMap { case (bpr, cgtReference) =>
+                                 if (bpr.name.isRight)
+                                   Left(
+                                     NameMatchServiceError
+                                       .BackendError(
+                                         Error(
+                                           "Found BPR for individual but expected one for a trust"
                                          )
-                                     )
-                                   else
-                                     Right(bpr -> cgtReference)
+                                       )
+                                   )
+                                 else
+                                   Right(bpr -> cgtReference)
                                }
       _                   <- EitherT(
                                updateSession(sessionStore, request)(
@@ -426,7 +424,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
     nameMatchError: NameMatchServiceError[TrustNameMatchDetails]
   )(implicit request: RequestWithSessionData[_]): Result =
     nameMatchError match {
-      case NameMatchServiceError.BackendError(error)                   =>
+      case NameMatchServiceError.BackendError(error) =>
         logger.warn("Could not get BPR with entered TRN", error)
         // errorHandler.errorResult()
         errorHandler.tmpErrorResult(request.userType)
@@ -442,7 +440,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
           )
         )
 
-      case NameMatchServiceError.TooManyUnsuccessfulAttempts()         =>
+      case NameMatchServiceError.TooManyUnsuccessfulAttempts() =>
         Redirect(
           routes.DeterminingIfOrganisationIsTrustController.tooManyAttempts()
         )
@@ -485,9 +483,8 @@ object DeterminingIfOrganisationIsTrustController {
       mapping(
         "trn"       -> TRN.mapping,
         "trustName" -> TrustName.mapping
-      ) {
-        case (trn, trustName) =>
-          TrustNameMatchDetails(TrustName(trustName), TRN(trn))
+      ) { case (trn, trustName) =>
+        TrustNameMatchDetails(TrustName(trustName), TRN(trn))
       }(trustNameMatchDetails =>
         Some(
           (trustNameMatchDetails.trn.value, trustNameMatchDetails.name.value)

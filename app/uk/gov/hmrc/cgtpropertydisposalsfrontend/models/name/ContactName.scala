@@ -32,8 +32,8 @@ object ContactName {
   implicit val format: Format[ContactName] =
     implicitly[Format[String]].inmap(ContactName(_), _.value)
 
-  implicit val eq: Eq[ContactName] = Eq.instance {
-    case (n1, n2) => n1.value === n2.value
+  implicit val eq: Eq[ContactName] = Eq.instance { case (n1, n2) =>
+    n1.value === n2.value
   }
 
   val mapping: Mapping[String] = {

@@ -84,7 +84,7 @@ class MixedUsePropertyDetailsController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Future[Result], (SessionData, EnteringSingleMixedUsePropertyDetails)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((_, s: StartingToAmendReturn))                                                                      =>
+      case Some((_, s: StartingToAmendReturn)) =>
         implicit val r: RequestWithSessionData[_] = request
         Left(convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator))
 
@@ -101,7 +101,7 @@ class MixedUsePropertyDetailsController @Inject() (
           )
         )
 
-      case _                                                                                                        => Left(Redirect(controllers.routes.StartController.start()))
+      case _ => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(
@@ -366,43 +366,42 @@ class MixedUsePropertyDetailsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, r) =>
-          r.answers match {
-            case IncompleteMixedUsePropertyDetailsAnswers(None, _, _)                  =>
-              Redirect(routes.MixedUsePropertyDetailsController.singleMixedUseGuidance())
-            case IncompleteMixedUsePropertyDetailsAnswers(_, None, _)                  =>
-              Redirect(routes.MixedUsePropertyDetailsController.enterDisposalValue())
-            case IncompleteMixedUsePropertyDetailsAnswers(_, _, None)                  =>
-              Redirect(routes.MixedUsePropertyDetailsController.enterAcquisitionValue())
-            case IncompleteMixedUsePropertyDetailsAnswers(Some(a), Some(dp), Some(ap)) =>
-              val completeAnswers    = CompleteMixedUsePropertyDetailsAnswers(a, dp, ap)
-              val updatedDraftReturn = r.draftReturn.copy(mixedUsePropertyDetailsAnswers = Some(completeAnswers))
-              val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
-              val result             = updateDraftReturnAndSession(updatedJourney)
+      withValidJourney(request) { case (_, r) =>
+        r.answers match {
+          case IncompleteMixedUsePropertyDetailsAnswers(None, _, _)                  =>
+            Redirect(routes.MixedUsePropertyDetailsController.singleMixedUseGuidance())
+          case IncompleteMixedUsePropertyDetailsAnswers(_, None, _)                  =>
+            Redirect(routes.MixedUsePropertyDetailsController.enterDisposalValue())
+          case IncompleteMixedUsePropertyDetailsAnswers(_, _, None)                  =>
+            Redirect(routes.MixedUsePropertyDetailsController.enterAcquisitionValue())
+          case IncompleteMixedUsePropertyDetailsAnswers(Some(a), Some(dp), Some(ap)) =>
+            val completeAnswers    = CompleteMixedUsePropertyDetailsAnswers(a, dp, ap)
+            val updatedDraftReturn = r.draftReturn.copy(mixedUsePropertyDetailsAnswers = Some(completeAnswers))
+            val updatedJourney     = r.journey.copy(draftReturn = updatedDraftReturn)
+            val result             = updateDraftReturnAndSession(updatedJourney)
 
-              result.fold(
-                _ => errorHandler.errorResult(),
-                _ =>
-                  Ok(
-                    singleMixedUseCheckYourAnswersPage(
-                      completeAnswers,
-                      r.representativeType,
-                      r.draftReturn.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
-                    )
+            result.fold(
+              _ => errorHandler.errorResult(),
+              _ =>
+                Ok(
+                  singleMixedUseCheckYourAnswersPage(
+                    completeAnswers,
+                    r.representativeType,
+                    r.draftReturn.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
                   )
-              )
-
-            case c: CompleteMixedUsePropertyDetailsAnswers                             =>
-              Ok(
-                singleMixedUseCheckYourAnswersPage(
-                  c,
-                  r.representativeType,
-                  r.draftReturn.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
                 )
-              )
+            )
 
-          }
+          case c: CompleteMixedUsePropertyDetailsAnswers =>
+            Ok(
+              singleMixedUseCheckYourAnswersPage(
+                c,
+                r.representativeType,
+                r.draftReturn.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+              )
+            )
+
+        }
 
       }
     }

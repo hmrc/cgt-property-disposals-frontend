@@ -138,7 +138,8 @@ class ReturnsServiceImpl @Inject() (
     sentReturns: List[ReturnSummary]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
     for {
-      httpResponse                            <- connector.getDraftReturns(cgtReference)
+      httpResponse                            <- connector
+                                                   .getDraftReturns(cgtReference)
                                                    .subflatMap(r =>
                                                      if (r.status === OK) Right(r)
                                                      else
@@ -149,7 +150,8 @@ class ReturnsServiceImpl @Inject() (
                                                        )
                                                    )
       draftReturns                            <- EitherT.fromEither(
-                                                   httpResponse.parseJSON[GetDraftReturnResponse]()
+                                                   httpResponse
+                                                     .parseJSON[GetDraftReturnResponse]()
                                                      .leftMap(Error(_))
                                                      .map(_.draftReturns)
                                                  )

@@ -101,299 +101,288 @@ trait AddressController[A <: AddressJourneyType] {
 
   def isUk(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (sessionData, journey) =>
-          if (sessionData.addressLookupResult.nonEmpty)
-            updateSession(sessionStore, request)(
-              _.copy(addressLookupResult = None)
-            ).map {
-              case Left(e)  =>
-                logger.warn(s"Could not clear addressLookupResult", e)
-                errorHandler.errorResult()
-              case Right(_) =>
-                Ok(
-                  isUkPage(
-                    Address.isUkForm,
-                    backLinkCall(journey),
-                    isUkSubmitCall,
-                    journey
-                  )
+      withValidJourney(request) { case (sessionData, journey) =>
+        if (sessionData.addressLookupResult.nonEmpty)
+          updateSession(sessionStore, request)(
+            _.copy(addressLookupResult = None)
+          ).map {
+            case Left(e)  =>
+              logger.warn(s"Could not clear addressLookupResult", e)
+              errorHandler.errorResult()
+            case Right(_) =>
+              Ok(
+                isUkPage(
+                  Address.isUkForm,
+                  backLinkCall(journey),
+                  isUkSubmitCall,
+                  journey
                 )
-            }
-          else
-            Ok(
-              isUkPage(
-                Address.isUkForm,
-                backLinkCall(journey),
-                isUkSubmitCall,
-                journey
               )
+          }
+        else
+          Ok(
+            isUkPage(
+              Address.isUkForm,
+              backLinkCall(journey),
+              isUkSubmitCall,
+              journey
             )
+          )
       }
     }
 
   def isUkSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, journey) =>
-          Address.isUkForm
-            .bindFromRequest()
-            .fold[Future[Result]](
-              formWithErrors =>
-                BadRequest(
-                  isUkPage(
-                    formWithErrors,
-                    backLinkCall(journey),
-                    isUkSubmitCall,
-                    journey
-                  )
-                ),
-              {
-                case true  =>
-                  if (registeredWithId(journey)) Redirect(enterPostcodeCall)
-                  else Redirect(ukAddressNotAllowedExitPageCall.getOrElse(enterPostcodeCall))
-                case false => Redirect(enterNonUkAddressCall)
-              }
-            )
+      withValidJourney(request) { case (_, journey) =>
+        Address.isUkForm
+          .bindFromRequest()
+          .fold[Future[Result]](
+            formWithErrors =>
+              BadRequest(
+                isUkPage(
+                  formWithErrors,
+                  backLinkCall(journey),
+                  isUkSubmitCall,
+                  journey
+                )
+              ),
+            {
+              case true  =>
+                if (registeredWithId(journey)) Redirect(enterPostcodeCall)
+                else Redirect(ukAddressNotAllowedExitPageCall.getOrElse(enterPostcodeCall))
+              case false => Redirect(enterNonUkAddressCall)
+            }
+          )
       }
     }
 
   def enterUkAddress(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, journey) =>
-          Ok(
-            enterUkAddressPage(
-              Address.ukAddressForm,
-              enterUkAddressBackLinkCall(journey),
-              enterUkAddressSubmitCall,
-              enterPostcodeCall,
-              journey,
-              isATrust(journey),
-              extractRepresentativeType(journey),
-              extractIsAmmend(journey)
-            )
+      withValidJourney(request) { case (_, journey) =>
+        Ok(
+          enterUkAddressPage(
+            Address.ukAddressForm,
+            enterUkAddressBackLinkCall(journey),
+            enterUkAddressSubmitCall,
+            enterPostcodeCall,
+            journey,
+            isATrust(journey),
+            extractRepresentativeType(journey),
+            extractIsAmmend(journey)
           )
+        )
       }
     }
 
   def enterUkAddressSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, journey) =>
-          Address.ukAddressForm
-            .bindFromRequest()
-            .fold[Future[Result]](
-              formWithErrors =>
-                BadRequest(
-                  enterUkAddressPage(
-                    formWithErrors,
-                    enterUkAddressBackLinkCall(journey),
-                    enterUkAddressSubmitCall,
-                    enterPostcodeCall,
-                    journey,
-                    isATrust(journey),
-                    extractRepresentativeType(journey),
-                    extractIsAmmend(journey)
-                  )
-                ),
-              storeAddress(continueCall, journey, true)
-            )
+      withValidJourney(request) { case (_, journey) =>
+        Address.ukAddressForm
+          .bindFromRequest()
+          .fold[Future[Result]](
+            formWithErrors =>
+              BadRequest(
+                enterUkAddressPage(
+                  formWithErrors,
+                  enterUkAddressBackLinkCall(journey),
+                  enterUkAddressSubmitCall,
+                  enterPostcodeCall,
+                  journey,
+                  isATrust(journey),
+                  extractRepresentativeType(journey),
+                  extractIsAmmend(journey)
+                )
+              ),
+            storeAddress(continueCall, journey, true)
+          )
       }
     }
 
   def enterNonUkAddress(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, journey) =>
-          Ok(
-            enterNonUkAddressPage(
-              Address.nonUkAddressForm,
-              isUkCall,
-              enterNonUkAddressSubmitCall,
-              journey,
-              extractIsAmmend(journey)
-            )
+      withValidJourney(request) { case (_, journey) =>
+        Ok(
+          enterNonUkAddressPage(
+            Address.nonUkAddressForm,
+            isUkCall,
+            enterNonUkAddressSubmitCall,
+            journey,
+            extractIsAmmend(journey)
           )
+        )
       }
     }
 
   def enterNonUkAddressSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, journey) =>
-          Address.nonUkAddressForm
-            .bindFromRequest()
-            .fold[Future[Result]](
-              formWithErrors =>
-                BadRequest(
-                  enterNonUkAddressPage(
-                    formWithErrors,
-                    isUkCall,
-                    enterNonUkAddressSubmitCall,
-                    journey,
-                    extractIsAmmend(journey)
-                  )
-                ),
-              storeAddress(continueCall, journey, true)
-            )
+      withValidJourney(request) { case (_, journey) =>
+        Address.nonUkAddressForm
+          .bindFromRequest()
+          .fold[Future[Result]](
+            formWithErrors =>
+              BadRequest(
+                enterNonUkAddressPage(
+                  formWithErrors,
+                  isUkCall,
+                  enterNonUkAddressSubmitCall,
+                  journey,
+                  extractIsAmmend(journey)
+                )
+              ),
+            storeAddress(continueCall, journey, true)
+          )
       }
     }
 
   def enterPostcode(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (sessionData, journey) =>
-          val form = sessionData.addressLookupResult
-            .fold(AddressLookupRequest.form)(r =>
-              AddressLookupRequest.form.fill(
-                AddressLookupRequest(r.postcode, r.filter)
-              )
-            )
-          Ok(
-            enterPostcodePage(
-              form,
-              enterPostcodePageBackLink(journey),
-              enterPostcodeSubmitCall,
-              enterUkAddressCall,
-              journey,
-              isATrust(journey),
-              extractRepresentativeType(journey)
+      withValidJourney(request) { case (sessionData, journey) =>
+        val form = sessionData.addressLookupResult
+          .fold(AddressLookupRequest.form)(r =>
+            AddressLookupRequest.form.fill(
+              AddressLookupRequest(r.postcode, r.filter)
             )
           )
+        Ok(
+          enterPostcodePage(
+            form,
+            enterPostcodePageBackLink(journey),
+            enterPostcodeSubmitCall,
+            enterUkAddressCall,
+            journey,
+            isATrust(journey),
+            extractRepresentativeType(journey)
+          )
+        )
       }
     }
 
   def enterPostcodeSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (sessionData, journey) =>
-          AddressLookupRequest.form
-            .bindFromRequest()
-            .fold(
-              formWithErrors =>
+      withValidJourney(request) { case (sessionData, journey) =>
+        AddressLookupRequest.form
+          .bindFromRequest()
+          .fold(
+            formWithErrors =>
+              BadRequest(
+                enterPostcodePage(
+                  formWithErrors,
+                  enterPostcodePageBackLink(journey),
+                  enterPostcodeSubmitCall,
+                  enterUkAddressCall,
+                  journey,
+                  isATrust(journey),
+                  extractRepresentativeType(journey)
+                )
+              ),
+            { case AddressLookupRequest(postcode, filter) =>
+              def handleEmptyAddresses(r: AddressLookupResult) = {
+                val errorKey = r.filter.fold("postcode")(_ => "filter")
                 BadRequest(
                   enterPostcodePage(
-                    formWithErrors,
-                    enterPostcodePageBackLink(journey),
+                    AddressLookupRequest.form
+                      .bindFromRequest()
+                      .withError(errorKey, "error.noResults"),
+                    isUkCall,
                     enterPostcodeSubmitCall,
                     enterUkAddressCall,
                     journey,
                     isATrust(journey),
                     extractRepresentativeType(journey)
                   )
-                ),
-              {
-                case AddressLookupRequest(postcode, filter) =>
-                  def handleEmptyAddresses(r: AddressLookupResult) = {
-                    val errorKey = r.filter.fold("postcode")(_ => "filter")
-                    BadRequest(
-                      enterPostcodePage(
-                        AddressLookupRequest.form
-                          .bindFromRequest()
-                          .withError(errorKey, "error.noResults"),
-                        isUkCall,
-                        enterPostcodeSubmitCall,
-                        enterUkAddressCall,
-                        journey,
-                        isATrust(journey),
-                        extractRepresentativeType(journey)
-                      )
-                    )
-                  }
-
-                  sessionData.addressLookupResult match {
-                    case Some(a: AddressLookupResult) if a.postcode.value === postcode.value && a.filter === filter =>
-                      if (a.addresses.isEmpty) handleEmptyAddresses(a)
-                      else Redirect(selectAddressCall)
-
-                    case _                                                                                          =>
-                      val result = for {
-                        addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
-                        _                   <- EitherT(
-                                                 updateSession(sessionStore, request)(
-                                                   _.copy(addressLookupResult = Some(addressLookupResult))
-                                                 )
-                                               )
-                      } yield addressLookupResult
-
-                      result.fold(
-                        { e =>
-                          logger.warn(
-                            s"Could not do address lookup for postcode",
-                            e
-                          )
-                          errorHandler.errorResult()
-                        },
-                        r =>
-                          if (r.addresses.isEmpty)
-                            handleEmptyAddresses(r)
-                          else Redirect(selectAddressCall)
-                      )
-                  }
-
+                )
               }
-            )
+
+              sessionData.addressLookupResult match {
+                case Some(a: AddressLookupResult) if a.postcode.value === postcode.value && a.filter === filter =>
+                  if (a.addresses.isEmpty) handleEmptyAddresses(a)
+                  else Redirect(selectAddressCall)
+
+                case _ =>
+                  val result = for {
+                    addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
+                    _                   <- EitherT(
+                                             updateSession(sessionStore, request)(
+                                               _.copy(addressLookupResult = Some(addressLookupResult))
+                                             )
+                                           )
+                  } yield addressLookupResult
+
+                  result.fold(
+                    { e =>
+                      logger.warn(
+                        s"Could not do address lookup for postcode",
+                        e
+                      )
+                      errorHandler.errorResult()
+                    },
+                    r =>
+                      if (r.addresses.isEmpty)
+                        handleEmptyAddresses(r)
+                      else Redirect(selectAddressCall)
+                  )
+              }
+
+            }
+          )
       }
     }
 
   def selectAddress(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (sessionData, journey) =>
-          sessionData.addressLookupResult match {
-            case None                                       =>
-              Redirect(backLinkCall(journey))
+      withValidJourney(request) { case (sessionData, journey) =>
+        sessionData.addressLookupResult match {
+          case None =>
+            Redirect(backLinkCall(journey))
 
-            case Some(AddressLookupResult(_, _, addresses)) =>
-              val form = Address.addressSelectForm(addresses)
-              Ok(
-                selectAddressPage(
-                  addresses,
-                  form,
-                  enterPostcodeCall,
-                  selectAddressSubmitCall,
-                  enterUkAddressCall,
-                  journey,
-                  isATrust(journey),
-                  extractRepresentativeType(journey),
-                  extractIsAmmend(journey)
-                )
+          case Some(AddressLookupResult(_, _, addresses)) =>
+            val form = Address.addressSelectForm(addresses)
+            Ok(
+              selectAddressPage(
+                addresses,
+                form,
+                enterPostcodeCall,
+                selectAddressSubmitCall,
+                enterUkAddressCall,
+                journey,
+                isATrust(journey),
+                extractRepresentativeType(journey),
+                extractIsAmmend(journey)
               )
-          }
+            )
+        }
       }
     }
 
   def selectAddressSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (sessionData, journey) =>
-          sessionData.addressLookupResult match {
-            case None                                       =>
-              Redirect(backLinkCall(journey))
+      withValidJourney(request) { case (sessionData, journey) =>
+        sessionData.addressLookupResult match {
+          case None =>
+            Redirect(backLinkCall(journey))
 
-            case Some(AddressLookupResult(_, _, addresses)) =>
-              Address
-                .addressSelectForm(addresses)
-                .bindFromRequest()
-                .fold(
-                  e =>
-                    BadRequest(
-                      selectAddressPage(
-                        addresses,
-                        e,
-                        enterPostcodeCall,
-                        selectAddressSubmitCall,
-                        enterUkAddressCall,
-                        journey,
-                        isATrust(journey),
-                        extractRepresentativeType(journey),
-                        extractIsAmmend(journey)
-                      )
-                    ),
-                  storeAddress(continueCall, journey, false)
-                )
-          }
+          case Some(AddressLookupResult(_, _, addresses)) =>
+            Address
+              .addressSelectForm(addresses)
+              .bindFromRequest()
+              .fold(
+                e =>
+                  BadRequest(
+                    selectAddressPage(
+                      addresses,
+                      e,
+                      enterPostcodeCall,
+                      selectAddressSubmitCall,
+                      enterUkAddressCall,
+                      journey,
+                      isATrust(journey),
+                      extractRepresentativeType(journey),
+                      extractIsAmmend(journey)
+                    )
+                  ),
+                storeAddress(continueCall, journey, false)
+              )
+        }
       }
     }
 
@@ -443,16 +432,16 @@ trait AddressController[A <: AddressJourneyType] {
     journey: AddressJourneyType
   ): Option[RepresentativeType] =
     journey match {
-      case j: FillingOutReturnAddressJourney        =>
+      case j: FillingOutReturnAddressJourney =>
         j.draftReturn.fold(_.triageAnswers.representativeType(), _.triageAnswers.representativeType())
 
-      case c: EnteringCompanyDetails                =>
+      case c: EnteringCompanyDetails =>
         c.representativeType
 
       case m: EnteringSingleMixedUsePropertyDetails =>
         m.representativeType
 
-      case _                                        => None
+      case _ => None
     }
 
   private def registeredWithId(journey: AddressJourneyType): Boolean =
