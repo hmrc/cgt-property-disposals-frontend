@@ -65,6 +65,15 @@ the cases where we cannot perform a calculation, the user will have to calculate
 Users can upload files to support their return if they wish to. If a user supplied their own figure of how much tax they 
 owe then it is mandatory for them to upload a file to show how they calculated it.  
      
+## How to run
+Use `sbt run` in a terminal to run this service. This service runs on port `7020` by default.
+
+The other services this service relies on can be run using the `CGTPD_ALL` service manager profile and stopping the 
+`CGTPD_FRONTEND` if you want to run this frontend service from source, e.g.:
+```
+sm --start CGTPD_ALL -r
+sm --stop CGTPD_FRONTEND
+```   
 
 ### License
 
