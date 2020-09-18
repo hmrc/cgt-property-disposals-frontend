@@ -4125,13 +4125,13 @@ confirmationOfSubmission.capacitor.whatNext=What happens next
 confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=What happens next
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=What happens next
 
-confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
+confirmationOfSubmission.warning=You may be charged interest on late payments.
 confirmationOfSubmission.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
-confirmationOfSubmission.agent.warning=Your client must pay their Capital Gains Tax on UK property by {0}. Your client may be charged interest on late payments.
+confirmationOfSubmission.agent.warning=Your client may be charged interest on late payments.
 confirmationOfSubmission.agent.penalty.warning=Your client may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
-confirmationOfSubmission.trust.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
+confirmationOfSubmission.trust.warning=You may be charged interest on late payments.
 confirmationOfSubmission.trust.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
-confirmationOfSubmission.capacitor.warning=The person must pay their Capital Gains Tax on UK property by {0}. The person may be charged interest on late payments.
+confirmationOfSubmission.capacitor.warning=The person may be charged interest on late payments.
 confirmationOfSubmission.capacitor.penalty.warning=The person may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
 
 confirmationOfSubmission.howToPay.heading=How to pay
