@@ -420,7 +420,17 @@ class MultipleDisposalsTriageController @Inject() (
                     )
 
                 val newState =
-                  updateState(state, updatedAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = false)
+                  updateState(
+                    state,
+                    updatedAnswers,
+                    _.leftFlatMap(indirect =>
+                      Right(
+                        DraftMultipleDisposalsReturn
+                          .newDraftReturn(indirect.id, updatedAnswers, indirect.representeeAnswers)
+                      )
+                    ),
+                    forceDisplayGainOrLossAfterReliefsForAmends = false
+                  )
                 updateStateAndThen(
                   newState,
                   Redirect(
