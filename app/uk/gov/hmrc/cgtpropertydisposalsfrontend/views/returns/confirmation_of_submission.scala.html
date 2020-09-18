@@ -271,7 +271,7 @@
               <h2 class="heading-medium">@messages(s"$key.capacitor.whatNext")</h2>
 
 
-                @warning(messages(s"$key.capacitor.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
+                @warning(messages(s"$key.capacitor.warning"))
 
                 @if(isLateReturn && !amendedReturnWithSameCompletionDate) {
                     <p id="lfpWarning">@messages(s"$key$userKey.penalty.warning")</p>
@@ -296,7 +296,7 @@
           case None => {
               <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
 
-              @warning(messages(s"$key$userKey.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
+              @warning(messages(s"$key$userKey.warning"))
 
               @if(isLateReturn && !amendedReturnWithSameCompletionDate){
                   <p id="lfpWarning">@messages(s"$key$userKey.penalty.warning")</p>
