@@ -69,7 +69,7 @@ owe then it is mandatory for them to upload a file to show how they calculated i
 Use `sbt run` in a terminal to run this service. This service runs on port `7020` by default.
 
 The other services this service relies on can be run using the `CGTPD_ALL` service manager profile and stopping the 
-`CGTPD_FRONTEND` if you want to run this frontend service from source, e.g.:
+`CGTPD_FRONTEND` service if you want to run this frontend service from source, e.g.:
 ```
 sm --start CGTPD_ALL -r
 sm --stop CGTPD_FRONTEND
