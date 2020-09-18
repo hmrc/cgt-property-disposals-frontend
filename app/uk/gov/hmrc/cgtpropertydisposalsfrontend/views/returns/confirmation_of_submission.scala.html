@@ -204,7 +204,7 @@
 
   @if(showDueDate) {
     @deltaCharge.map { charges =>
-      <table class="borders">
+      <table class="borders delta-table">
         <thead>
           <tr style="vertical-align:bottom;">
             <th scope="col"></th>
@@ -310,17 +310,17 @@
               }
 
               <p id="howToPay">@Html(messages(s"$key$userKey.howToPay.p1", charge.chargeReference))</p>
-
-              @if(isATrust && isAgent) {
-                <span class="form-hint">@messages(s"$key.trust.paymentNotice")</span>
-              } else {
-                <span class="form-hint">@messages(s"$key$userKey.paymentNotice")</span>
-              }
-
               @if(isAmend) {
+                <p>@messages(s"$key$userKey.gotoViewReturn")</p>
                 <div class="panel panel-border-wide">
                   <p>@messages(s"$key$userKey.clearingNotice")</p>
                 </div>
+              } else {
+                @if(isATrust && isAgent) {
+                  <span class="form-hint">@messages(s"$key.trust.paymentNotice")</span>
+                } else {
+                  <span class="form-hint">@messages(s"$key$userKey.paymentNotice")</span>
+                }
               }
 
               @{if (!isAgent) payNowButton }

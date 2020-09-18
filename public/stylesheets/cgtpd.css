@@ -662,6 +662,16 @@ details dl.govuk-check-your-answers {
     margin-bottom: 20px;
 }
 
+.delta-table {
+    margin-top: -60px;
+}
+
+.delta-table .caption {
+    margin-bottom: 0;
+    color: #515A5C;
+    display: block;
+    font-weight: normal;
+}
 .return-list li .caption,
 .charge .caption,
 .account-due .caption {

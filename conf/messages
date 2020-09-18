@@ -4149,6 +4149,9 @@ confirmationOfSubmission.paymentNotice=It takes 3 to 5 days for payments or char
 confirmationOfSubmission.agent.paymentNotice=It takes 3 to 5 days for payments or charges to show in your client’s account.
 confirmationOfSubmission.trust.paymentNotice=It takes 3 to 5 days for payments or charges to show in the trust’s account. 
 
+confirmationOfSubmission.gotoViewReturn=Go to ‘view your return’ in your account to view any payments or charges due.
+confirmationOfSubmission.trust.gotoViewReturn=Go to ‘view your return’ in the trust’s account to view any payments or charges due.
+
 confirmationOfSubmission.agent.inset.heading=<strong class="bold">Self Assessment</strong>
 confirmationOfSubmission.trust.inset.heading=<strong class="bold">If the trust needs to send a Self Assessment tax return</strong>
 confirmationOfSubmission.agent.inset.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
