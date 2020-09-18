@@ -615,6 +615,9 @@ account.menu.manageYourDetails=Manage account
 account.menu.signOut=Sign out
 account.menu.changeClient=Change client
 account.agent.prefix=Client:
+account.trust.prefix=Trust:
+account.personalRep.prefix=Person represented:
+account.personalRepInPeriodOfAdmin.prefix=Estate:
 account.home.title=Capital Gains Tax on UK property account home
 
 account.home.subtitle=Account number: {0}
@@ -767,14 +770,14 @@ previousReturnExistsWithSameCompletionDate.amend.title=You cannot change this re
 previousReturnExistsWithSameCompletionDate.amend.p1=You must <a href="{0}">contact HMRC</a>.
 previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>.
 previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>.
-previousReturnExistsWithSameCompletionDate.amend.p2=This is because sales or disposals with the same completion date must be in the same return.
+previousReturnExistsWithSameCompletionDate.amend.p2=This is because sales or disposals with the same completion date must all be in the same return.
 previousReturnExistsWithSameCompletionDate.amend.p3=Tell HMRC you need to change:
 previousReturnExistsWithSameCompletionDate.amend.li1=A previous return
-previousReturnExistsWithSameCompletionDate.amend.li2=A return that has the same disposal completion date as the one you entered on the previous page
+previousReturnExistsWithSameCompletionDate.amend.li2=the return that has the same disposal completion date as the one you entered on the previous page
 
 
 previousReturnExistsWithSameCompletionDate.title=You’ll need to change an existing return
-previousReturnExistsWithSameCompletionDate.p1=You already have a return with completion date of <strong class="bold">{0}</strong>. You’ll need to change that return instead of creating a new one.
+previousReturnExistsWithSameCompletionDate.p1=You already sent a return that had a disposal with a completion date of <strong class="bold">{0}</strong>. You’ll need to change that return instead of creating a new one.
 previousReturnExistsWithSameCompletionDate.p2=You’ll need to change the <strong class="bold">number of disposals you are including</strong> in that return
 previousReturnExistsWithSameCompletionDate.caption=Existing return details
 previousReturnExistsWithSameCompletionDate.button.viewAndChange=View and change return
@@ -5071,7 +5074,7 @@ amendCya.title=Change your return
 amendCya.agent.title=Change your client’s return
 amendCya.p1=Once all questions have been answered you will be able to submit your return.
 amendCya.printLink=Print or save this page as a PDF
-amendCya.insetText=You cannot ‘save and come back later’ when you change a return.
+amendCya.insetText=You will not be able to save and come back later while you’re changing your return.
 
 unmetDependency.x1.title=What you’ll need to do next
 unmetDependency.x2.title=You’ll need to answer some additional questions
