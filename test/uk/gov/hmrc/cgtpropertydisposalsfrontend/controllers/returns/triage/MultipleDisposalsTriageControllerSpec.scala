@@ -1499,6 +1499,41 @@ class MultipleDisposalsTriageControllerSpec
               )
             }
 
+          "the user was on an indirect disposals journey" in {
+            val draftReturn      = sample[DraftMultipleIndirectDisposalsReturn].copy(
+              triageAnswers = answers
+            )
+            val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+            val updatedDraftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
+              draftReturn.id,
+              answers.copy(assetTypes = Some(List(AssetType.Residential)), wereAllPropertiesResidential = Some(true)),
+              draftReturn.representeeAnswers
+            )
+
+            val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(fillingOutReturn)
+                )
+              )
+              mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
+              mockStoreSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(updatedFillingOutReturn)
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "true"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
         }
 
       }

@@ -1591,6 +1591,76 @@ class SingleDisposalsTriageControllerSpec
             }
           }
 
+          "the user was on an indirect disposal journey" in {
+            val draftReturn      = sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers = requiredPreviousAnswers
+            )
+            val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+            val updatedDraftReturn = DraftSingleDisposalReturn.newDraftReturn(
+              draftReturn.id,
+              requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
+              draftReturn.representeeAnswers
+            )
+
+            val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(fillingOutReturn)
+                )
+              )
+              mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
+              mockStoreSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(updatedFillingOutReturn)
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction("didYouDisposeOfResidentialProperty" -> "true"),
+              routes.SingleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "the user was on a mixed use disposal journey" in {
+            val draftReturn      = sample[DraftSingleMixedUseDisposalReturn].copy(
+              triageAnswers = requiredPreviousAnswers
+            )
+            val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+            val updatedDraftReturn = DraftSingleDisposalReturn.newDraftReturn(
+              draftReturn.id,
+              requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
+              draftReturn.representeeAnswers
+            )
+
+            val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(fillingOutReturn)
+                )
+              )
+              mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
+              mockStoreSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(updatedFillingOutReturn)
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction("didYouDisposeOfResidentialProperty" -> "true"),
+              routes.SingleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
         }
 
       }

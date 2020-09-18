@@ -412,8 +412,12 @@ class SingleDisposalsTriageController @Inject() (
                   r.copy(draftReturn =
                     d.fold(
                       _.fold(
-                        _.copy(triageAnswers = newAnswers),
-                        _.copy(triageAnswers = newAnswers)
+                        mixedUse =>
+                          DraftSingleDisposalReturn
+                            .newDraftReturn(mixedUse.id, newAnswers, mixedUse.representeeAnswers),
+                        indirect =>
+                          DraftSingleDisposalReturn
+                            .newDraftReturn(indirect.id, newAnswers, indirect.representeeAnswers)
                       ),
                       _.copy(triageAnswers = newAnswers)
                     )

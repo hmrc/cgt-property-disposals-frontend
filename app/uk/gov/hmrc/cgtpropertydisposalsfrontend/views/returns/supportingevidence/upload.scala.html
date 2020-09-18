@@ -39,6 +39,8 @@
     @meta = @{upscanUpload.upscanUploadMeta.uploadRequest.fields}
     @href = @{upscanUpload.upscanUploadMeta.uploadRequest.href}
 
+    @helpText = @{ if(isAmend) messages(s"$key.amendReturn.help-text") else messages(s"$key.help-text")}
+
     @mainTemplate(title = title, userType = request.userType) {
 
         @backLinkComponent(backLink)
@@ -54,7 +56,7 @@
             @fileInput(
                 fieldId = field,
                 label = Html(title),
-                helpText = Some(Html(messages(s"$key.help-text"))),
+                helpText = Some(Html(helpText)),
                 hasErrors = false,
                 errorKey = None,
                 labelAsHeading = true,
