@@ -4170,6 +4170,10 @@ confirmationOfSubmission.personalRep.ifSa.p1=You’ll need to provide details fr
 confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa.p1=You’ll need to provide details from this return in the estate’s Self Assessment tax return.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa.p1=Your client will need to provide details from this return in the estate’s Self Assessment tax return.
 
+confirmationOfSubmission.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your account when you update a return. You can make a payment at any time.
+confirmationOfSubmission.agent.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your client’s account when you update a return. Your client can make a payment at any time.
+confirmationOfSubmission.trust.clearingNotice=It takes 24 hours for your outstanding balance to be updated in the trust’s account when you update a return. Your client can make a payment at any time.
+
 confirmationOfSubmission.returnToAccountHome=Go to your <a href="{0}">Capital Gains Tax on UK property account home</a>.
 confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a href="{0}">Capital Gains Tax on UK property account home</a>.
 

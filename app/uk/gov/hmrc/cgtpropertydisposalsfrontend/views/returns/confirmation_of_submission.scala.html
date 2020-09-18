@@ -317,6 +317,12 @@
                 <span class="form-hint">@messages(s"$key$userKey.paymentNotice")</span>
               }
 
+              @if(isAmend) {
+                <div class="panel panel-border-wide">
+                  <p>@messages(s"$key$userKey.clearingNotice")</p>
+                </div>
+              }
+
               @{if (!isAgent) payNowButton }
           }
       }
