@@ -92,30 +92,30 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
       "return the bpr when the http response comes back with status 200 and " +
         "the json body returns a bpr" in {
-        val response = BusinessPartnerRecordResponse(Some(bpr), None)
+          val response = BusinessPartnerRecordResponse(Some(bpr), None)
 
-        mockGetBPR(bprRequest)(
-          Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
-        )
+          mockGetBPR(bprRequest)(
+            Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
+          )
 
-        await(
-          service.getBusinessPartnerRecord(bprRequest).value
-        ) shouldBe Right(response)
-      }
+          await(
+            service.getBusinessPartnerRecord(bprRequest).value
+          ) shouldBe Right(response)
+        }
 
       "return nothing when the http response comes back with status 200 and " +
         "the json body does not contain a bpr" in {
-        val response =
-          BusinessPartnerRecordResponse(Some(bpr), Some(sample[CgtReference]))
+          val response =
+            BusinessPartnerRecordResponse(Some(bpr), Some(sample[CgtReference]))
 
-        mockGetBPR(bprRequest)(
-          Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
-        )
+          mockGetBPR(bprRequest)(
+            Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
+          )
 
-        await(
-          service.getBusinessPartnerRecord(bprRequest).value
-        ) shouldBe Right(response)
-      }
+          await(
+            service.getBusinessPartnerRecord(bprRequest).value
+          ) shouldBe Right(response)
+        }
     }
 
   }

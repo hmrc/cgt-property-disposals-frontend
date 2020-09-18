@@ -196,8 +196,8 @@ class NameMatchRetryServiceImpl @Inject() (
       nameMatchDetails
     ) { u =>
       nameMatchDetails.id match {
-        case NoReferenceId                             => EitherT.pure(NoReferenceId)
-        case n @ RepresenteeNino(nino)                 =>
+        case NoReferenceId             => EitherT.pure(NoReferenceId)
+        case n @ RepresenteeNino(nino) =>
           handleBprNameMatch(
             IndividualBusinessPartnerRecordRequest(
               Right(nino),
@@ -208,7 +208,7 @@ class NameMatchRetryServiceImpl @Inject() (
             u
           ).map(_ => n)
 
-        case s @ RepresenteeSautr(sautr)               =>
+        case s @ RepresenteeSautr(sautr) =>
           handleBprNameMatch(
             IndividualBusinessPartnerRecordRequest(
               Left(sautr),
@@ -267,7 +267,7 @@ class NameMatchRetryServiceImpl @Inject() (
           Left(NameMatchServiceError.NameMatchFailed(u))
         )
 
-      case maybeAttempts                                                                                              =>
+      case maybeAttempts =>
         auditNameMatchEvent(
           maybeAttempts.map(_.unsuccessfulAttempts + 1).getOrElse(1),
           nameMatchDetails

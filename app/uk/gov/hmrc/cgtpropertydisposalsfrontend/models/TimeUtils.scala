@@ -32,9 +32,8 @@ import scala.util.Try
 
 object TimeUtils {
 
-  implicit val configs: Configs[LocalDate] = Configs.fromTry {
-    case (config, key) =>
-      LocalDate.parse(config.getString(key), DateTimeFormatter.ISO_DATE)
+  implicit val configs: Configs[LocalDate] = Configs.fromTry { case (config, key) =>
+    LocalDate.parse(config.getString(key), DateTimeFormatter.ISO_DATE)
   }
 
   val clock: Clock = Clock.systemUTC()
@@ -158,17 +157,16 @@ object TimeUtils {
   ): Either[FormError, Unit] =
     personalRepresentativeDetails.fold[Either[FormError, Unit]](
       Right(())
-    ) {
-      case PersonalRepresentativeDetails(personalRepType, dateOfDeath) =>
-        personalRepType.fold(
-          _ =>
-            if (date > dateOfDeath.value) Right(())
-            else Left(FormError(formErrorKey, "error.periodOfAdminDeathNotAfterDate")),
-          _ =>
-            if (date > dateOfDeath.value)
-              Left(FormError(formErrorKey, "error.nonPeriodOfAdminDeathAfterDate"))
-            else Right(())
-        )
+    ) { case PersonalRepresentativeDetails(personalRepType, dateOfDeath) =>
+      personalRepType.fold(
+        _ =>
+          if (date > dateOfDeath.value) Right(())
+          else Left(FormError(formErrorKey, "error.periodOfAdminDeathNotAfterDate")),
+        _ =>
+          if (date > dateOfDeath.value)
+            Left(FormError(formErrorKey, "error.nonPeriodOfAdminDeathAfterDate"))
+          else Right(())
+      )
 
     }
 

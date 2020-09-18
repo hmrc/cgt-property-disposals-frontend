@@ -173,21 +173,20 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         IvErrorStatus.TechnicalIssue       -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
         IvErrorStatus.PreconditionFailed   -> (() => controllers.onboarding.routes.IvController.getPreconditionFailed()),
         IvErrorStatus.Unknown("")          -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue())
-      ).foreach {
-        case (status, redirectTo) =>
-          s"redirect to ${redirectTo().url}" when {
+      ).foreach { case (status, redirectTo) =>
+        s"redirect to ${redirectTo().url}" when {
 
-            s"the iv error status is $status" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(Right(None))
-                mockGetFailedJourneyStatus(journeyId)(Right(status))
-              }
-
-              checkIsRedirect(performAction(), redirectTo())
+          s"the iv error status is $status" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(Right(None))
+              mockGetFailedJourneyStatus(journeyId)(Right(status))
             }
 
+            checkIsRedirect(performAction(), redirectTo())
           }
+
+        }
       }
 
     }

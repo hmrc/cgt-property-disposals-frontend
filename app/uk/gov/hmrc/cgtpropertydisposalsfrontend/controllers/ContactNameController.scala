@@ -65,56 +65,54 @@ trait ContactNameController[J <: JourneyStatus] {
 
   def enterContactName(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, journey) =>
-          val form =
-            contactName(journey).fold(ContactName.form)(ContactName.form.fill)
-          Ok(
-            enterContactNamePage(
-              form,
-              backLinkCall,
-              enterContactNameSubmitCall,
-              isSubscribedJourney
-            )
+      withValidJourney(request) { case (_, journey) =>
+        val form =
+          contactName(journey).fold(ContactName.form)(ContactName.form.fill)
+        Ok(
+          enterContactNamePage(
+            form,
+            backLinkCall,
+            enterContactNameSubmitCall,
+            isSubscribedJourney
           )
+        )
       }
     }
 
   def enterContactNameSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withValidJourney(request) {
-        case (_, journey) =>
-          ContactName.form
-            .bindFromRequest()
-            .fold(
-              e =>
-                BadRequest(
-                  enterContactNamePage(
-                    e,
-                    backLinkCall,
-                    enterContactNameSubmitCall,
-                    isSubscribedJourney
-                  )
-                ),
-              contactName => {
-                val result = for {
-                  journey <- updateContactName(journey, contactName)
-                  _       <- EitherT[Future, Error, Unit](
-                               updateSession(sessionStore, request) { s =>
-                                 s.copy(journeyStatus = Some(journey))
-                               }
-                             )
-                } yield ()
-
-                result.fold(
-                  { e =>
-                    logger.warn(s"Could not update contact name: $e")
-                    errorHandler.errorResult()
-                  },
-                  _ => Redirect(continueCall)
+      withValidJourney(request) { case (_, journey) =>
+        ContactName.form
+          .bindFromRequest()
+          .fold(
+            e =>
+              BadRequest(
+                enterContactNamePage(
+                  e,
+                  backLinkCall,
+                  enterContactNameSubmitCall,
+                  isSubscribedJourney
                 )
-              }
-            )
+              ),
+            contactName => {
+              val result = for {
+                journey <- updateContactName(journey, contactName)
+                _       <- EitherT[Future, Error, Unit](
+                             updateSession(sessionStore, request) { s =>
+                               s.copy(journeyStatus = Some(journey))
+                             }
+                           )
+              } yield ()
+
+              result.fold(
+                { e =>
+                  logger.warn(s"Could not update contact name: $e")
+                  errorHandler.errorResult()
+                },
+                _ => Redirect(continueCall)
+              )
+            }
+          )
       }
     }
 }

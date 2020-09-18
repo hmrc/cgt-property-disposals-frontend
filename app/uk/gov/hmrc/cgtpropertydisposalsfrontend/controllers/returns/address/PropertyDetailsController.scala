@@ -96,7 +96,7 @@ class PropertyDetailsController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Future[Result], (SessionData, FillingOutReturnAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((_, s: StartingToAmendReturn))      =>
+      case Some((_, s: StartingToAmendReturn)) =>
         implicit val r: RequestWithSessionData[_] = request
         Left(convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator))
 
@@ -129,7 +129,7 @@ class PropertyDetailsController @Inject() (
             )
           }
 
-      case _                                        => Left(Redirect(controllers.routes.StartController.start()))
+      case _ => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   private def withAssetTypes(
@@ -189,7 +189,7 @@ class PropertyDetailsController @Inject() (
                 .map(_ => updatedJourney)
             }
 
-          case Right(d: DraftSingleDisposalReturn)   =>
+          case Right(d: DraftSingleDisposalReturn) =>
             if (d.propertyAddress.contains(a))
               EitherT.pure(journey.journey)
             else {
@@ -445,7 +445,7 @@ class PropertyDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { (_, r) =>
         r.draftReturn match {
-          case Right(_: DraftSingleDisposalReturn)   =>
+          case Right(_: DraftSingleDisposalReturn) =>
             Redirect(routes.PropertyDetailsController.checkYourAnswers())
 
           case Left(m: DraftMultipleDisposalsReturn) =>
@@ -472,7 +472,7 @@ class PropertyDetailsController @Inject() (
                   )
                 }
 
-              case _                                     =>
+              case _ =>
                 Redirect(
                   controllers.returns.routes.TaskListController.taskList()
                 )
@@ -575,7 +575,7 @@ class PropertyDetailsController @Inject() (
                     )
                 }
 
-              case _                                     =>
+              case _ =>
                 Redirect(
                   controllers.returns.routes.TaskListController.taskList()
                 )
@@ -852,7 +852,7 @@ class PropertyDetailsController @Inject() (
                       )
                   )
 
-                case c: CompleteExamplePropertyDetailsAnswers               =>
+                case c: CompleteExamplePropertyDetailsAnswers =>
                   Ok(
                     multipleDisposalsCheckYourAnswersPage(
                       c,
@@ -865,7 +865,7 @@ class PropertyDetailsController @Inject() (
 
               }
 
-            case Right(s: DraftSingleDisposalReturn)   =>
+            case Right(s: DraftSingleDisposalReturn) =>
               s.propertyAddress.fold(
                 Redirect(
                   if (shouldAskIfPostcodeExists(assetTypes))

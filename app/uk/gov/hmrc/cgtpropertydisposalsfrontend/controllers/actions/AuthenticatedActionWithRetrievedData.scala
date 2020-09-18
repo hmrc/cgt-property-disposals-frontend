@@ -76,42 +76,41 @@ class AuthenticatedActionWithRetrievedData @Inject() (
           Retrievals.email and
           Retrievals.allEnrolments and
           Retrievals.credentials
-      ) {
-        case cl ~ affinityGroup ~ maybeNino ~ maybeSautr ~ maybeEmail ~ enrolments ~ creds =>
-          withGGCredentials(creds, request) { ggCredId =>
-            affinityGroup match {
-              case Some(AffinityGroup.Agent)        =>
-                Future.successful(handleAgent(request, ggCredId, enrolments))
+      ) { case cl ~ affinityGroup ~ maybeNino ~ maybeSautr ~ maybeEmail ~ enrolments ~ creds =>
+        withGGCredentials(creds, request) { ggCredId =>
+          affinityGroup match {
+            case Some(AffinityGroup.Agent) =>
+              Future.successful(handleAgent(request, ggCredId, enrolments))
 
-              case Some(AffinityGroup.Individual)   =>
-                handleIndividualOrOrganisation(
-                  Right(AffinityGroup.Individual),
-                  cl,
-                  maybeNino,
-                  maybeSautr,
-                  maybeEmail,
-                  enrolments,
-                  ggCredId,
-                  request
-                )
+            case Some(AffinityGroup.Individual) =>
+              handleIndividualOrOrganisation(
+                Right(AffinityGroup.Individual),
+                cl,
+                maybeNino,
+                maybeSautr,
+                maybeEmail,
+                enrolments,
+                ggCredId,
+                request
+              )
 
-              case Some(AffinityGroup.Organisation) =>
-                handleIndividualOrOrganisation(
-                  Left(AffinityGroup.Organisation),
-                  cl,
-                  maybeNino,
-                  maybeSautr,
-                  maybeEmail,
-                  enrolments,
-                  ggCredId,
-                  request
-                )
+            case Some(AffinityGroup.Organisation) =>
+              handleIndividualOrOrganisation(
+                Left(AffinityGroup.Organisation),
+                cl,
+                maybeNino,
+                maybeSautr,
+                maybeEmail,
+                enrolments,
+                ggCredId,
+                request
+              )
 
-              case other                            =>
-                logger.warn(s"User has usupported affinity group type $other")
-                Future.successful(Left(errorHandler.errorResult(None)(request)))
-            }
+            case other =>
+              logger.warn(s"User has usupported affinity group type $other")
+              Future.successful(Left(errorHandler.errorResult(None)(request)))
           }
+        }
       }
   }
 
@@ -136,9 +135,9 @@ class AuthenticatedActionWithRetrievedData @Inject() (
       case Right(Some(cgtReference)) =>
         handleSubscribedUser(cgtReference, ggCredId, affinityGroup, request)
 
-      case Right(None)               =>
+      case Right(None) =>
         (affinityGroup, confidenceLevel, maybeNino) match {
-          case (Right(AffinityGroup.Individual), cl, _) if cl < ConfidenceLevel.L200           =>
+          case (Right(AffinityGroup.Individual), cl, _) if cl < ConfidenceLevel.L200 =>
             Right(
               AuthenticatedRequestWithRetrievedData(
                 RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
@@ -165,7 +164,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
               )
             )
 
-          case (Left(AffinityGroup.Organisation), _, _)                                        =>
+          case (Left(AffinityGroup.Organisation), _, _) =>
             handleOrganisation(request, enrolments, maybeEmail, ggCredId)
 
         }
@@ -211,7 +210,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
       )
 
     affinityGroup match {
-      case Right(AffinityGroup.Individual)  =>
+      case Right(AffinityGroup.Individual) =>
         Right(authenticatedRequest(UserType.Individual))
 
       case Left(AffinityGroup.Organisation) =>
@@ -229,14 +228,14 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     ]
   ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] =
     credentials match {
-      case None                                       =>
+      case None =>
         logger.warn("No credentials were retrieved")
         Future.successful(Left(errorHandler.errorResult(None)(request)))
 
       case Some(Credentials(id, "GovernmentGateway")) =>
         f(GGCredId(id))
 
-      case Some(Credentials(_, otherProvider))        =>
+      case Some(Credentials(_, otherProvider)) =>
         Future.successful(
           Right(
             AuthenticatedRequestWithRetrievedData(
@@ -291,7 +290,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
     // work out if it is an organisation or not
     enrolments.getEnrolment(TrustsEnrolment.key) match {
-      case None                 =>
+      case None =>
         Right(
           AuthenticatedRequestWithRetrievedData(
             RetrievedUserType

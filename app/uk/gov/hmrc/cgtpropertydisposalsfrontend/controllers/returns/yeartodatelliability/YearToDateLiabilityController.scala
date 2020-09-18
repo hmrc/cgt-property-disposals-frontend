@@ -116,7 +116,7 @@ class YearToDateLiabilityController @Inject() (
       }
 
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((_, s: StartingToAmendReturn))                                       =>
+      case Some((_, s: StartingToAmendReturn)) =>
         markUnmetDependency(s, sessionStore, errorHandler)
 
       case Some((s, r: FillingOutReturn)) if r.isFurtherOrAmendReturn.contains(true) =>
@@ -144,7 +144,7 @@ class YearToDateLiabilityController @Inject() (
               case Some(_: CompleteReliefDetailsAnswers) =>
                 f(s, r, IncompleteCalculatedYTDAnswers.empty)
 
-              case _                                     =>
+              case _ =>
                 Redirect(
                   controllers.returns.routes.TaskListController.taskList()
                 )
@@ -209,7 +209,7 @@ class YearToDateLiabilityController @Inject() (
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
         )(f(s, r, _))
 
-      case _                                                                         => Redirect(controllers.routes.StartController.start())
+      case _ => Redirect(controllers.routes.StartController.start())
     }
   }
 
@@ -229,7 +229,7 @@ class YearToDateLiabilityController @Inject() (
     f: CalculatedTaxDue => Future[Result]
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case complete: CompleteCalculatedYTDAnswers     =>
+      case complete: CompleteCalculatedYTDAnswers =>
         f(complete.calculatedTaxDue)
 
       case incomplete: IncompleteCalculatedYTDAnswers =>
@@ -239,7 +239,7 @@ class YearToDateLiabilityController @Inject() (
           case None if !calculateIfMissing =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
-          case None if calculateIfMissing  =>
+          case None if calculateIfMissing =>
             val result =
               for {
                 calculatedTaxDue <- cgtCalculationService
@@ -370,7 +370,7 @@ class YearToDateLiabilityController @Inject() (
     answers: YearToDateLiabilityAnswers
   )(f: Boolean => Future[Result]): Future[Result] =
     answers match {
-      case _: NonCalculatedYTDAnswers              =>
+      case _: NonCalculatedYTDAnswers =>
         Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
       case calculatedAnswers: CalculatedYTDAnswers =>
@@ -410,7 +410,7 @@ class YearToDateLiabilityController @Inject() (
   ): Future[Result] =
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
       val backLink = currentAnswers match {
-        case c: CalculatedYTDAnswers    =>
+        case c: CalculatedYTDAnswers =>
           c.fold(
             _ => redirectToIfNoRequiredPreviousAnswer,
             _ => routes.YearToDateLiabilityController.checkYourAnswers()
@@ -449,7 +449,7 @@ class YearToDateLiabilityController @Inject() (
   ): Future[Result] =
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
       lazy val backLink = currentAnswers match {
-        case c: CalculatedYTDAnswers    =>
+        case c: CalculatedYTDAnswers =>
           c.fold(
             _ => redirectToIfNoRequiredPreviousAnswer,
             _ => routes.YearToDateLiabilityController.checkYourAnswers()
@@ -529,7 +529,7 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-          case _                                                                         =>
+          case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -599,7 +599,7 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-          case _                                                                         =>
+          case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -1269,7 +1269,7 @@ class YearToDateLiabilityController @Inject() (
             )
             commonDisposalMandatoryEvidence(backLink)
 
-          case _                                                     =>
+          case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
         }
@@ -1309,7 +1309,7 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         answers match {
-          case (_: CalculatedYTDAnswers)                       =>
+          case (_: CalculatedYTDAnswers) =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
           case (nonCalculatedAnswers: NonCalculatedYTDAnswers) =>
@@ -1360,7 +1360,7 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         answers match {
-          case _: CalculatedYTDAnswers                       =>
+          case _: CalculatedYTDAnswers =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
           case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
@@ -1446,14 +1446,14 @@ class YearToDateLiabilityController @Inject() (
       withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         val isFurtherOrAmendReturn = fillingOutReturn.isFurtherOrAmendReturn.contains(true)
         answers match {
-          case _: CalculatedYTDAnswers                       =>
+          case _: CalculatedYTDAnswers =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
           case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
             (fillingOutReturn.previousSentReturns, fillingOutReturn.draftReturn.representativeType()) match {
               case (Some(PreviousReturnData(_, Some(previousYtd))), None) =>
                 nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability) match {
-                  case None                      =>
+                  case None =>
                     Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
                   case Some(yearToDateLiability) =>
@@ -1483,7 +1483,7 @@ class YearToDateLiabilityController @Inject() (
                     }
                 }
 
-              case _                                                      =>
+              case _ =>
                 withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
                   commonDisplayBehaviour(
                     nonCalculatedAnswers
@@ -1528,14 +1528,14 @@ class YearToDateLiabilityController @Inject() (
         val isFurtherReturnorAmendReturn = fillingOutReturn.isFurtherOrAmendReturn.contains(true)
 
         answers match {
-          case _: CalculatedYTDAnswers                       =>
+          case _: CalculatedYTDAnswers =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
           case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
             (fillingOutReturn.previousSentReturns, fillingOutReturn.draftReturn.representativeType()) match {
               case (Some(PreviousReturnData(_, Some(previousYtd))), None) =>
                 nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability) match {
-                  case None                      =>
+                  case None =>
                     Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
                   case Some(yearToDateLiability) =>
@@ -1547,7 +1547,7 @@ class YearToDateLiabilityController @Inject() (
                     )
                 }
 
-              case _                                                      =>
+              case _ =>
                 withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
                   commonSubmitBehaviour(
                     fillingOutReturn,
@@ -1845,7 +1845,7 @@ class YearToDateLiabilityController @Inject() (
               )
             }
 
-          case _                                                                                             =>
+          case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
         }
@@ -1903,7 +1903,7 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-          case _                                                                                             =>
+          case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -1932,7 +1932,7 @@ class YearToDateLiabilityController @Inject() (
               redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
             )
 
-          case _                                                                                             =>
+          case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
         }
@@ -1976,7 +1976,7 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-          case _                                                                                             =>
+          case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -2038,7 +2038,7 @@ class YearToDateLiabilityController @Inject() (
               .copy(mandatoryEvidence = Some(mandatoryEvidence))
           )
 
-        case _: UpscanFailure       =>
+        case _: UpscanFailure =>
           answers.fold(
             _.copy(pendingUpscanUpload = Some(upscanUpload)),
             _.copy(pendingUpscanUpload = Some(upscanUpload))
@@ -2062,7 +2062,7 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
-          case (c: CalculatedYTDAnswers, s: DraftSingleDisposalReturn)         =>
+          case (c: CalculatedYTDAnswers, s: DraftSingleDisposalReturn) =>
             withAssetTypeAndResidentialStatus(s)((_, wasUkResident) =>
               withTaxYear(s)(taxYear =>
                 checkYourAnswersHandleCalculated(
@@ -2075,9 +2075,9 @@ class YearToDateLiabilityController @Inject() (
               )
             )
 
-          case (n: NonCalculatedYTDAnswers, d)                                 =>
+          case (n: NonCalculatedYTDAnswers, d)                            =>
             withTaxYear(d)(taxYear => checkYourAnswersHandleNonCalculated(n, fillingOutReturn, d, taxYear))
-          case (_: CalculatedYTDAnswers, _: DraftMultipleDisposalsReturn)      =>
+          case (_: CalculatedYTDAnswers, _: DraftMultipleDisposalsReturn) =>
             logger.warn(
               "Found calculated year to date liability answers on a multiple disposals draft return"
             )
@@ -2234,7 +2234,7 @@ class YearToDateLiabilityController @Inject() (
             )
         )
 
-      case c: CompleteNonCalculatedYTDAnswers                           =>
+      case c: CompleteNonCalculatedYTDAnswers =>
         Ok(
           nonCalculatedCheckYourAnswersPage(
             c,
@@ -2269,7 +2269,7 @@ class YearToDateLiabilityController @Inject() (
     wasUkResident: Boolean
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case c: CompleteCalculatedYTDAnswers                           =>
+      case c: CompleteCalculatedYTDAnswers =>
         Ok(
           calculatedCheckYouAnswersPage(
             c,
@@ -2438,9 +2438,8 @@ class YearToDateLiabilityController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers {
-        case _ =>
-          Redirect(controllers.returns.routes.TaskListController.taskList())
+      withFillingOutReturnAndYTDLiabilityAnswers { case _ =>
+        Redirect(controllers.returns.routes.TaskListController.taskList())
       }
     }
 

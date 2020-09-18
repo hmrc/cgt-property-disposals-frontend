@@ -16,6 +16,7 @@
 
 @import play.api.i18n.Messages
 @import cats.syntax.order._
+@import cats.instances.boolean._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
@@ -42,6 +43,7 @@
 @isAnAgent = @{subscribed.agentReferenceNumber.isDefined}
 @title = @{messages(s"account.home.title")}
 @subtitle = @{messages("account.home.subtitle", subscribed.subscribedDetails.cgtReference.value)}
+@hasRecentlyAmendedReturn = @{subscribed.sentReturns.exists(r => r.isRecentlyAmended === true)}
 
 @optionalDateOrdering = @{ (date1: Option[LocalDate], date2: Option[LocalDate]) =>
  (date1, date2) match {
@@ -142,7 +144,7 @@
   </div>
   <div class="column-one-third account-due">
    @if(subscribed.sentReturns.nonEmpty) {
-    @totalLeftHeading(subscribed.totalLeftToPay())
+    @totalLeftHeading(subscribed.totalLeftToPay(),hasRecentlyAmendedReturn)
    }
   </div>
  </div>

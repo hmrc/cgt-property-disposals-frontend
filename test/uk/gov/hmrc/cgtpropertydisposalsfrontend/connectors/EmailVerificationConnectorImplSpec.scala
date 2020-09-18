@@ -83,34 +83,34 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
       "send a request to the email verification service with the correct details " +
         "and return the response" when {
 
-        "handling individuals" in {
-          List(
-            HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty),
-            HttpResponse(409, emptyJsonBody),
-            HttpResponse(500, emptyJsonBody)
-          ).foreach { response =>
-            mockPost(expectedUrl, Seq.empty, body(name))(
+          "handling individuals" in {
+            List(
+              HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty),
+              HttpResponse(409, emptyJsonBody),
+              HttpResponse(500, emptyJsonBody)
+            ).foreach { response =>
+              mockPost(expectedUrl, Seq.empty, body(name))(
+                Some(response)
+              )
+
+              await(
+                connector.verifyEmail(email, name, continueCall, AcceptLanguage.EN).value
+              ) shouldBe Right(response)
+            }
+          }
+
+          "handling trusts" in {
+            val response = HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty)
+            mockPost(expectedUrl, Seq.empty, body(trustName))(
               Some(response)
             )
 
             await(
-              connector.verifyEmail(email, name, continueCall, AcceptLanguage.EN).value
+              connector.verifyEmail(email, trustName, continueCall, AcceptLanguage.EN).value
             ) shouldBe Right(response)
+
           }
         }
-
-        "handling trusts" in {
-          val response = HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty)
-          mockPost(expectedUrl, Seq.empty, body(trustName))(
-            Some(response)
-          )
-
-          await(
-            connector.verifyEmail(email, trustName, continueCall, AcceptLanguage.EN).value
-          ) shouldBe Right(response)
-
-        }
-      }
 
       "return an error" when {
         "the future fails" in {
@@ -150,34 +150,34 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
       "send a request to the email verification service with the correct details " +
         "and return the response" when {
 
-        "handling individuals" in {
-          List(
-            HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty),
-            HttpResponse(409, emptyJsonBody),
-            HttpResponse(500, emptyJsonBody)
-          ).foreach { response =>
-            mockPost(expectedUrl, Seq.empty, body(name))(
+          "handling individuals" in {
+            List(
+              HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty),
+              HttpResponse(409, emptyJsonBody),
+              HttpResponse(500, emptyJsonBody)
+            ).foreach { response =>
+              mockPost(expectedUrl, Seq.empty, body(name))(
+                Some(response)
+              )
+
+              await(
+                connector.verifyEmail(email, name, continueCall, AcceptLanguage.CY).value
+              ) shouldBe Right(response)
+            }
+          }
+
+          "handling trusts" in {
+            val response = HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty)
+            mockPost(expectedUrl, Seq.empty, body(trustName))(
               Some(response)
             )
 
             await(
-              connector.verifyEmail(email, name, continueCall, AcceptLanguage.CY).value
+              connector.verifyEmail(email, trustName, continueCall, AcceptLanguage.CY).value
             ) shouldBe Right(response)
+
           }
         }
-
-        "handling trusts" in {
-          val response = HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty)
-          mockPost(expectedUrl, Seq.empty, body(trustName))(
-            Some(response)
-          )
-
-          await(
-            connector.verifyEmail(email, trustName, continueCall, AcceptLanguage.CY).value
-          ) shouldBe Right(response)
-
-        }
-      }
     }
   }
 

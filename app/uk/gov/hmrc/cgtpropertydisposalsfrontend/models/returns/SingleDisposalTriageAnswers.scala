@@ -127,13 +127,12 @@ object SingleDisposalTriageAnswers {
 
     def isIndirectDisposal(): Boolean =
       s.fold(
-          _.assetType,
-          c => Some(c.assetType)
-        )
-        .exists {
-          case AssetType.IndirectDisposal => true
-          case _                          => false
-        }
+        _.assetType,
+        c => Some(c.assetType)
+      ).exists {
+        case AssetType.IndirectDisposal => true
+        case _                          => false
+      }
 
   }
 

@@ -109,16 +109,15 @@ class IvServiceImplSpec extends WordSpec with Matchers with MockFactory {
             "TechnicalIssue"       -> TechnicalIssue,
             "PreconditionFailed"   -> PreconditionFailed,
             "???"                  -> Unknown("???")
-          ).foreach {
-            case (statusString, status) =>
-              mockIvGetFailedJourneyStatus(journeyId)(
-                Right(
-                  HttpResponse(200, JsObject(Seq("result" -> JsString(statusString))), Map[String, Seq[String]]().empty)
-                )
+          ).foreach { case (statusString, status) =>
+            mockIvGetFailedJourneyStatus(journeyId)(
+              Right(
+                HttpResponse(200, JsObject(Seq("result" -> JsString(statusString))), Map[String, Seq[String]]().empty)
               )
-              await(
-                service.getFailedJourneyStatus(journeyId).value
-              ) shouldBe Right(status)
+            )
+            await(
+              service.getFailedJourneyStatus(journeyId).value
+            ) shouldBe Right(status)
           }
 
         }

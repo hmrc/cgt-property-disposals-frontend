@@ -133,20 +133,20 @@ class RegistrationControllerSpec
 
         "the session data indicates that the user has no digital footprint and " +
           "the user has opted to start registration" in {
-          val sessionData =
-            SessionData.empty.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
+            val sessionData =
+              SessionData.empty.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionData)
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionData)
+            }
+
+            val result = performAction()
+            status(result)        shouldBe OK
+            contentAsString(result) should include(
+              messageFromMessageKey("entityType.title")
+            )
           }
-
-          val result = performAction()
-          status(result)        shouldBe OK
-          contentAsString(result) should include(
-            messageFromMessageKey("entityType.title")
-          )
-        }
       }
 
       "prepopulate the form if the user has previously answered the question" in {
@@ -275,19 +275,18 @@ class RegistrationControllerSpec
                 ggCredId
               ),
               "0" -> RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId)
-            ).foreach {
-              case (entityType, registrationStatus) =>
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(sessionData)
-                  mockStoreSession(
-                    sessionData.copy(journeyStatus = Some(registrationStatus))
-                  )(Left(Error("")))
-                }
+            ).foreach { case (entityType, registrationStatus) =>
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(sessionData)
+                mockStoreSession(
+                  sessionData.copy(journeyStatus = Some(registrationStatus))
+                )(Left(Error("")))
+              }
 
-                checkIsTechnicalErrorPage(
-                  performAction("entityType" -> entityType)
-                )
+              checkIsTechnicalErrorPage(
+                performAction("entityType" -> entityType)
+              )
             }
 
           }
@@ -762,36 +761,36 @@ class RegistrationControllerSpec
 
         "the call to register without id and subscribe succeeds and the " +
           "session data has been updated" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionData)
-            mockRegisterWithoutId(registrationReady.registrationDetails)(
-              Right(RegisteredWithoutId(sapNumber))
-            )
-            mockSubscribe(subscriptionDetails, lang)(
-              Right(subscriptionSuccessfulResponse)
-            )
-            mockStoreSession(
-              SessionData.empty
-                .copy(journeyStatus =
-                  Some(
-                    Subscribed(
-                      subscribedDetails,
-                      registrationReady.ggCredId,
-                      None,
-                      List.empty,
-                      List.empty
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionData)
+              mockRegisterWithoutId(registrationReady.registrationDetails)(
+                Right(RegisteredWithoutId(sapNumber))
+              )
+              mockSubscribe(subscriptionDetails, lang)(
+                Right(subscriptionSuccessfulResponse)
+              )
+              mockStoreSession(
+                SessionData.empty
+                  .copy(journeyStatus =
+                    Some(
+                      Subscribed(
+                        subscribedDetails,
+                        registrationReady.ggCredId,
+                        None,
+                        List.empty,
+                        List.empty
+                      )
                     )
                   )
-                )
-            )(Right(()))
-          }
+              )(Right(()))
+            }
 
-          checkIsRedirect(
-            performAction(),
-            controllers.onboarding.routes.SubscriptionController.subscribed()
-          )
-        }
+            checkIsRedirect(
+              performAction(),
+              controllers.onboarding.routes.SubscriptionController.subscribed()
+            )
+          }
 
       }
 

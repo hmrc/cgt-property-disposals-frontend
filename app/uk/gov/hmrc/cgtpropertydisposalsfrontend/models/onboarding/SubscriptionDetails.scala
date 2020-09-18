@@ -62,18 +62,17 @@ object SubscriptionDetails {
         .orElse(enteredAddress.map(_ -> AddressSource.ManuallyEntered))
         .toValidNel(MissingData.Address)
 
-    (addressValidation, emailValidation).mapN {
-      case ((address, addressSource), (email, emailSource)) =>
-        SubscriptionDetails(
-          bpr.name,
-          email,
-          address,
-          ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
-          bpr.sapNumber,
-          emailSource,
-          addressSource,
-          ContactNameSource.DerivedFromBusinessPartnerRecord
-        )
+    (addressValidation, emailValidation).mapN { case ((address, addressSource), (email, emailSource)) =>
+      SubscriptionDetails(
+        bpr.name,
+        email,
+        address,
+        ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
+        bpr.sapNumber,
+        emailSource,
+        addressSource,
+        ContactNameSource.DerivedFromBusinessPartnerRecord
+      )
     }.toEither
   }
 

@@ -44,7 +44,7 @@ object BusinessPartnerRecordNameMatchAuditDetails {
     nameMatchDetails: NameMatchDetails
   ): Option[BusinessPartnerRecordNameMatchAuditDetails] =
     nameMatchDetails match {
-      case IndividualSautrNameMatchDetails(name, sautr)    =>
+      case IndividualSautrNameMatchDetails(name, sautr) =>
         Some(
           IndividualNameWithSaUtrAuditDetails(
             name.firstName,
@@ -53,7 +53,7 @@ object BusinessPartnerRecordNameMatchAuditDetails {
           )
         )
 
-      case TrustNameMatchDetails(name, trn)                =>
+      case TrustNameMatchDetails(name, trn) =>
         Some(TrustNameWithTrnAuditDetails(name.value, trn.value))
 
       case IndividualRepresenteeNameMatchDetails(name, id) =>

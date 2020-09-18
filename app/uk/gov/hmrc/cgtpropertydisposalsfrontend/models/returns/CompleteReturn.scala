@@ -426,7 +426,7 @@ object CompleteReturn {
       case (Some(_: RepresentativeType), _) =>
         None
 
-      case _                                =>
+      case _ =>
         Some(None)
     }
 

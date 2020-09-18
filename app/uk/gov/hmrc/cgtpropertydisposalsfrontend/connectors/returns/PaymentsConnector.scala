@@ -82,8 +82,8 @@ class PaymentsConnectorImpl @Inject() (
         .map(
           Right(_)
         )
-        .recover {
-          case NonFatal(e) => Left(Error(e))
+        .recover { case NonFatal(e) =>
+          Left(Error(e))
         }
     )
 

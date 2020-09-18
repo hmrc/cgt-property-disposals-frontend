@@ -89,7 +89,7 @@ class TaskListController @Inject() (
             )
           )
 
-        case _                                                      =>
+        case _ =>
           Redirect(baseRoutes.StartController.start())
 
       }
@@ -104,38 +104,35 @@ class TaskListController @Inject() (
     hc: HeaderCarrier
   ): EitherT[Future, Error, DraftReturn] = {
     val updatedUploadSupportingEvidenceAnswers =
-      getExpiredSupportingEvidence(draftReturn).map {
-        case (expired, answers) =>
-          val incompleteAnswers =
-            answers.fold(
-              identity,
-              c =>
-                IncompleteSupportingEvidenceAnswers(
-                  Some(c.doYouWantToUploadSupportingEvidence),
-                  c.evidences,
-                  List.empty
-                )
-            )
-          incompleteAnswers.copy(
-            evidences = incompleteAnswers.evidences.diff(expired.toList),
-            expiredEvidences =
-              expired.toList ::: incompleteAnswers.expiredEvidences
+      getExpiredSupportingEvidence(draftReturn).map { case (expired, answers) =>
+        val incompleteAnswers =
+          answers.fold(
+            identity,
+            c =>
+              IncompleteSupportingEvidenceAnswers(
+                Some(c.doYouWantToUploadSupportingEvidence),
+                c.evidences,
+                List.empty
+              )
           )
+        incompleteAnswers.copy(
+          evidences = incompleteAnswers.evidences.diff(expired.toList),
+          expiredEvidences = expired.toList ::: incompleteAnswers.expiredEvidences
+        )
       }
 
     val updatedYearToDateAnswers =
-      getExpiredMandatoryEvidence(draftReturn).map {
-        case (expired, answers) =>
-          answers match {
-            case c: CalculatedYTDAnswers    =>
-              c.unset(_.mandatoryEvidence)
-                .unset(_.pendingUpscanUpload)
-                .copy(expiredEvidence = Some(expired))
-            case n: NonCalculatedYTDAnswers =>
-              n.unset(_.mandatoryEvidence)
-                .unset(_.pendingUpscanUpload)
-                .copy(expiredEvidence = Some(expired))
-          }
+      getExpiredMandatoryEvidence(draftReturn).map { case (expired, answers) =>
+        answers match {
+          case c: CalculatedYTDAnswers    =>
+            c.unset(_.mandatoryEvidence)
+              .unset(_.pendingUpscanUpload)
+              .copy(expiredEvidence = Some(expired))
+          case n: NonCalculatedYTDAnswers =>
+            n.unset(_.mandatoryEvidence)
+              .unset(_.pendingUpscanUpload)
+              .copy(expiredEvidence = Some(expired))
+        }
       }
 
     if (updatedUploadSupportingEvidenceAnswers.isEmpty && updatedYearToDateAnswers.isEmpty)

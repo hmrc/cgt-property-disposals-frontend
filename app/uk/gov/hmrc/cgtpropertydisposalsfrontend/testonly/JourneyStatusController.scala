@@ -66,57 +66,55 @@ class JourneyStatusController @Inject() (
 
   def setReturnState(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withStartingNewReturn(request) {
-        case (_, _) =>
-          Ok(setReturnStatePage(returnStateForm))
+      withStartingNewReturn(request) { case (_, _) =>
+        Ok(setReturnStatePage(returnStateForm))
       }
     }
 
   def setReturnStateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withStartingNewReturn(request) {
-        case (_, newReturn) =>
-          returnStateForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors => BadRequest(setReturnStatePage(formWithErrors)),
-              { answers =>
-                val getDisposalDate =
-                  answers.disposalDate
-                    .map(date =>
-                      taxYearService
-                        .taxYear(date)
-                        .subflatMap(
-                          _.fold[Either[Error, DisposalDate]](
-                            Left(Error(s"Could not find tax year for $date"))
-                          )(t => Right(DisposalDate(date, t)))
-                        )
-                    )
-                    .sequence[EitherT[Future, Error, *], DisposalDate]
+      withStartingNewReturn(request) { case (_, newReturn) =>
+        returnStateForm
+          .bindFromRequest()
+          .fold(
+            formWithErrors => BadRequest(setReturnStatePage(formWithErrors)),
+            { answers =>
+              val getDisposalDate =
+                answers.disposalDate
+                  .map(date =>
+                    taxYearService
+                      .taxYear(date)
+                      .subflatMap(
+                        _.fold[Either[Error, DisposalDate]](
+                          Left(Error(s"Could not find tax year for $date"))
+                        )(t => Right(DisposalDate(date, t)))
+                      )
+                  )
+                  .sequence[EitherT[Future, Error, *], DisposalDate]
 
-                val result = for {
-                  disposalDate <- getDisposalDate
-                  triageAnswers = toSingleDisposalTriageAnswers(answers, disposalDate)
-                  _            <- EitherT(
-                                    updateSession(sessionStore, request)(
-                                      _.copy(journeyStatus =
-                                        Some(
-                                          newReturn.copy(newReturnTriageAnswers = Right(triageAnswers))
-                                        )
+              val result = for {
+                disposalDate <- getDisposalDate
+                triageAnswers = toSingleDisposalTriageAnswers(answers, disposalDate)
+                _            <- EitherT(
+                                  updateSession(sessionStore, request)(
+                                    _.copy(journeyStatus =
+                                      Some(
+                                        newReturn.copy(newReturnTriageAnswers = Right(triageAnswers))
                                       )
                                     )
                                   )
-                } yield ()
+                                )
+              } yield ()
 
-                result.fold(
-                  { e =>
-                    logger.warn("Could not update session", e)
-                    InternalServerError(s"Could not update session: $e")
-                  },
-                  _ => Ok("session updated")
-                )
-              }
-            )
+              result.fold(
+                { e =>
+                  logger.warn("Could not update session", e)
+                  InternalServerError(s"Could not update session: $e")
+                },
+                _ => Ok("session updated")
+              )
+            }
+          )
       }
     }
 

@@ -83,7 +83,7 @@ class RegistrationController @Inject() (
       case Some(r: RegistrationStatus) =>
         f(Right(r))
 
-      case _                           =>
+      case _ =>
         SeeOther(controllers.routes.StartController.start().url)
     }
 
@@ -98,7 +98,7 @@ class RegistrationController @Inject() (
               case RegistrationStatus.IndividualWantsToRegisterTrust(_) =>
                 blankForm.fill(EntityType.Trust)
 
-              case _                                                    =>
+              case _ =>
                 blankForm.fill(EntityType.Individual)
             }
           )
@@ -192,7 +192,7 @@ class RegistrationController @Inject() (
             )
           )
 
-        case _                                                           =>
+        case _ =>
           Redirect(routes.RegistrationController.selectEntityType())
       }
     }
@@ -242,7 +242,7 @@ class RegistrationController @Inject() (
               )
               errorHandler.errorResult()
 
-            case Right(_)    =>
+            case Right(_) =>
               Redirect(
                 email.routes.RegistrationEnterEmailController.enterEmail()
               )
@@ -271,11 +271,11 @@ class RegistrationController @Inject() (
                 )
                 errorHandler.errorResult()
 
-              case Right(_)    =>
+              case Right(_) =>
                 Ok(checkYourDetailsPage(r.registrationDetails))
             }
 
-        case _                                             =>
+        case _ =>
           Redirect(controllers.routes.StartController.start())
 
       }

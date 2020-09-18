@@ -301,7 +301,8 @@ class HomePageControllerSpec
         val sampleSentReturn       = sample[ReturnSummary].copy(
           charges = charges,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
         val subscribed             =
           sample[Subscribed].copy(
@@ -365,7 +366,8 @@ class HomePageControllerSpec
         val sampleSentReturn       = sample[ReturnSummary].copy(
           charges = charges,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
         val subscribed             =
           sample[Subscribed].copy(
@@ -408,7 +410,8 @@ class HomePageControllerSpec
         val sampleSentReturn  = sample[ReturnSummary].copy(
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
         val subscribed        =
           sample[Subscribed].copy(
@@ -451,7 +454,8 @@ class HomePageControllerSpec
         val sampleSentReturn  = sample[ReturnSummary].copy(
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
         val subscribed        =
           sample[Subscribed].copy(
@@ -486,7 +490,8 @@ class HomePageControllerSpec
         val sampleSentReturn = sample[ReturnSummary].copy(
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
         val subscribed       =
           sample[Subscribed].copy(
@@ -545,7 +550,8 @@ class HomePageControllerSpec
         val sampleSentReturn       = sample[ReturnSummary].copy(
           charges = charges,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
         val subscribed             =
           sample[Subscribed].copy(
@@ -739,7 +745,8 @@ class HomePageControllerSpec
         val sentReturn = sample[ReturnSummary].copy(
           charges = chargesWithoutChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -790,7 +797,8 @@ class HomePageControllerSpec
         val sentReturn = sample[ReturnSummary].copy(
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -837,12 +845,63 @@ class HomePageControllerSpec
         )
       }
 
+      "display sent returns on the home page when there has been a recent amend" in {
+
+        val sentReturn = sample[ReturnSummary].copy(
+          charges = chargesWithChargeRaiseAndPartialPayment,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = true
+        )
+        val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          { doc =>
+            doc.select(s"#leftToPay-${sentReturn.submissionId}").text shouldBe messageFromMessageKey(
+              "returns.list.updating-payment-details"
+            )
+            doc
+              .select(s"#paymentDue-${sentReturn.submissionId}")
+              .text                                                   shouldBe govShortDisplayFormat(
+              ukResidentMainReturnChargeDueDate
+            )
+            extractAmount(
+              doc.select(s"#taxOwed-${sentReturn.submissionId}").text
+            )                                                         shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds()
+            )
+            doc
+              .select(s"#viewSentReturn-${sentReturn.submissionId}")
+              .text                                                   shouldBe messageFromMessageKey("returns.list.viewAndPay")
+            doc
+              .select(s"#sentDate-${sentReturn.submissionId}")
+              .text                                                   shouldBe messages(
+              "returns.list.sentDate",
+              govShortDisplayFormat(ukResidentReturnSentDate)
+            )
+          }
+        )
+      }
+
       "display sent returns on the home page when there is a charge raise and partial payment have been made for return" in {
 
         val sentReturn = sample[ReturnSummary].copy(
           charges = chargesWithChargeRaiseAndPartialPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -896,7 +955,8 @@ class HomePageControllerSpec
         val sentReturn = sample[ReturnSummary].copy(
           charges = chargesWithChargeRaiseAndFullPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -970,13 +1030,17 @@ class HomePageControllerSpec
           dueDate = ukResidentMainReturnChargeDueDate,
           payments = List(fullPaymentForUkResidentReturnCharge)
         )
-        val charges                = List(ukResidentReturnCharge, penaltyInterestCharge)
-        val sentReturn             = sample[ReturnSummary].copy(
+
+        val charges = List(ukResidentReturnCharge, penaltyInterestCharge)
+
+        val sentReturn = sample[ReturnSummary].copy(
           charges = charges,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-          submissionDate = ukResidentReturnSentDate
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false
         )
-        val subscribed             = sample[Subscribed].copy(sentReturns = List(sentReturn))
+
+        val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -1178,7 +1242,7 @@ class HomePageControllerSpec
           subscribed.agentReferenceNumber,
           sample[CompleteSingleDisposalReturn],
           false,
-          sample[ReturnSummary],
+          sample[ReturnSummary].copy(isRecentlyAmended = false),
           Some(PreviousReturnData(subscribed.sentReturns, None))
         )
 
@@ -1232,75 +1296,75 @@ class HomePageControllerSpec
 
             s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
               "there is an error updating the session" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  SessionData.empty.copy(
-                    journeyStatus = Some(journeyStatus),
-                    userType = Some(UserType.Individual)
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(journeyStatus),
+                      userType = Some(UserType.Individual)
+                    )
                   )
-                )
-                mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(
-                  Right(subscribed.sentReturns)
-                )
-                mockGetDraftReturns(
-                  subscribed.subscribedDetails.cgtReference,
-                  subscribed.sentReturns
-                )(
-                  Right(subscribed.draftReturns)
-                )
-                mockStoreSession(
-                  SessionData.empty.copy(
-                    journeyStatus = Some(subscribed),
-                    userType = Some(UserType.Individual)
+                  mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(
+                    Right(subscribed.sentReturns)
                   )
-                )(Left(Error("")))
-              }
+                  mockGetDraftReturns(
+                    subscribed.subscribedDetails.cgtReference,
+                    subscribed.sentReturns
+                  )(
+                    Right(subscribed.draftReturns)
+                  )
+                  mockStoreSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(subscribed),
+                      userType = Some(UserType.Individual)
+                    )
+                  )(Left(Error("")))
+                }
 
-              checkIsTechnicalErrorPage(performAction())
-            }
+                checkIsTechnicalErrorPage(performAction())
+              }
 
             s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
               "there is an error getting the draft returns" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  SessionData.empty.copy(
-                    journeyStatus = Some(journeyStatus),
-                    userType = Some(UserType.Individual)
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(journeyStatus),
+                      userType = Some(UserType.Individual)
+                    )
                   )
-                )
-                mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(
-                  Right(subscribed.sentReturns)
-                )
-                mockGetDraftReturns(
-                  subscribed.subscribedDetails.cgtReference,
-                  subscribed.sentReturns
-                )(
-                  Left(Error(""))
-                )
-              }
+                  mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(
+                    Right(subscribed.sentReturns)
+                  )
+                  mockGetDraftReturns(
+                    subscribed.subscribedDetails.cgtReference,
+                    subscribed.sentReturns
+                  )(
+                    Left(Error(""))
+                  )
+                }
 
-              checkIsTechnicalErrorPage(performAction())
-            }
+                checkIsTechnicalErrorPage(performAction())
+              }
 
             s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
               "there is an error getting the list of returns" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  SessionData.empty.copy(
-                    journeyStatus = Some(journeyStatus),
-                    userType = Some(UserType.Individual)
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(journeyStatus),
+                      userType = Some(UserType.Individual)
+                    )
                   )
-                )
-                mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(
-                  Left(Error(""))
-                )
-              }
+                  mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(
+                    Left(Error(""))
+                  )
+                }
 
-              checkIsTechnicalErrorPage(performAction())
-            }
+                checkIsTechnicalErrorPage(performAction())
+              }
 
           }
         }
@@ -1324,7 +1388,7 @@ class HomePageControllerSpec
       "show an error page" when {
 
         "there is an error while calling the display return API" in {
-          val returnSummary = sample[ReturnSummary]
+          val returnSummary = sample[ReturnSummary].copy(isRecentlyAmended = false)
           val subscribed    = sample[Subscribed].copy(
             draftReturns = List.empty,
             sentReturns = List(returnSummary)
@@ -1448,8 +1512,8 @@ class HomePageControllerSpec
 
         "the subscribed user type is trust and the sent returns is non empty" in {
           val sentReturns = List(
-            sample[ReturnSummary].copy(lastUpdatedDate = Some(LocalDate.now())),
-            sample[ReturnSummary].copy(lastUpdatedDate = Some(LocalDate.now()))
+            sample[ReturnSummary].copy(lastUpdatedDate = Some(LocalDate.now()), isRecentlyAmended = false),
+            sample[ReturnSummary].copy(lastUpdatedDate = Some(LocalDate.now()), isRecentlyAmended = false)
           )
           val subscribed  = sample[Subscribed].copy(
             subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
@@ -1660,7 +1724,7 @@ class HomePageControllerSpec
       def performAction(submissionId: String): Future[Result] =
         controller.viewSentReturn(submissionId)(FakeRequest())
 
-      val returnSummary = sample[ReturnSummary]
+      val returnSummary = sample[ReturnSummary].copy(isRecentlyAmended = false)
 
       val subscribed =
         sample[Subscribed].copy(sentReturns = List(returnSummary))
@@ -1712,9 +1776,11 @@ class HomePageControllerSpec
 
         "there is an error getting the most latest return for the previous ytd figure" in {
           val returnSummary1 =
-            sample[ReturnSummary].copy(submissionDate = LocalDate.of(2020, 5, 5), lastUpdatedDate = None)
+            sample[ReturnSummary]
+              .copy(submissionDate = LocalDate.of(2020, 5, 5), lastUpdatedDate = None, isRecentlyAmended = false)
           val returnSummary2 =
-            sample[ReturnSummary].copy(submissionDate = LocalDate.of(2020, 5, 6), lastUpdatedDate = None)
+            sample[ReturnSummary]
+              .copy(submissionDate = LocalDate.of(2020, 5, 6), lastUpdatedDate = None, isRecentlyAmended = false)
 
           val subscribed =
             sample[Subscribed].copy(sentReturns = List(returnSummary1, returnSummary2))
@@ -1953,45 +2019,46 @@ class HomePageControllerSpec
         )
       )
 
-      testCases.foreach {
-        case (description, completeReturn) =>
-          withClue(s"For $description: ") {
-            val displayReturn       = DisplayReturn(completeReturn, false)
-            val latestReturnSummary = sample[ReturnSummary].copy(
-              lastUpdatedDate = Some(latestDate)
+      testCases.foreach { case (description, completeReturn) =>
+        withClue(s"For $description: ") {
+          val displayReturn       = DisplayReturn(completeReturn, false)
+          val latestReturnSummary = sample[ReturnSummary].copy(
+            lastUpdatedDate = Some(latestDate),
+            isRecentlyAmended = false
+          )
+          val otherReturnSummary  =
+            sample[ReturnSummary].copy(
+              submissionDate = latestDate.minusDays(1L),
+              lastUpdatedDate = None,
+              isRecentlyAmended = false
             )
-            val otherReturnSummary  =
-              sample[ReturnSummary].copy(
-                submissionDate = latestDate.minusDays(1L),
-                lastUpdatedDate = None
-              )
 
-            val subscribed = sample[Subscribed]
-              .copy(
-                subscribedDetails = sample[SubscribedDetails]
-                  .copy(name = Right(sample[IndividualName])),
-                draftReturns = draftReturns,
-                sentReturns = List(latestReturnSummary, otherReturnSummary)
-              )
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(sessionDataWithSubscribed(subscribed))
-              mockDisplayReturn(subscribed.subscribedDetails.cgtReference, latestReturnSummary.submissionId)(
-                Right(displayReturn)
-              )
-              mockStoreSession(
-                SessionData.empty.copy(
-                  journeyStatus = Some(toJourneyStatus(Some(previousYearToDate), subscribed))
-                )
-              )(Right(()))
-            }
-
-            checkIsRedirect(
-              performAction(),
-              expectedRedirectLocation
+          val subscribed = sample[Subscribed]
+            .copy(
+              subscribedDetails = sample[SubscribedDetails]
+                .copy(name = Right(sample[IndividualName])),
+              draftReturns = draftReturns,
+              sentReturns = List(latestReturnSummary, otherReturnSummary)
             )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithSubscribed(subscribed))
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, latestReturnSummary.submissionId)(
+              Right(displayReturn)
+            )
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(toJourneyStatus(Some(previousYearToDate), subscribed))
+              )
+            )(Right(()))
           }
+
+          checkIsRedirect(
+            performAction(),
+            expectedRedirectLocation
+          )
+        }
       }
 
     }
@@ -2001,12 +2068,14 @@ class HomePageControllerSpec
       "there is more than one return which has been submitted on the latest date" in {
         val latestReturnSummary = sample[ReturnSummary].copy(
           submissionDate = latestDate,
-          lastUpdatedDate = None
+          lastUpdatedDate = None,
+          isRecentlyAmended = false
         )
         val otherReturnSummary  =
           sample[ReturnSummary].copy(
             submissionDate = latestDate,
-            lastUpdatedDate = None
+            lastUpdatedDate = None,
+            isRecentlyAmended = false
           )
 
         val subscribed = sample[Subscribed]
@@ -2036,12 +2105,14 @@ class HomePageControllerSpec
       "there is a return which has been amended on the date that the latest return has been submitted" in {
         val latestReturnSummary = sample[ReturnSummary].copy(
           submissionDate = latestDate,
-          lastUpdatedDate = None
+          lastUpdatedDate = None,
+          isRecentlyAmended = false
         )
         val otherReturnSummary  =
           sample[ReturnSummary].copy(
             submissionDate = latestDate.minusDays(1L),
-            lastUpdatedDate = Some(latestDate)
+            lastUpdatedDate = Some(latestDate),
+            isRecentlyAmended = false
           )
 
         val subscribed = sample[Subscribed]

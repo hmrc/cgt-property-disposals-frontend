@@ -2288,57 +2288,56 @@ class ExemptionAndLossesControllerSpec
         userType,
         Some(individualUserType)
       )
-    ).foreach {
-      case (session, journey, draftReturn) =>
-        withClue(s"For initial session $session: ") {
-          val updatedDraftReturn = draftReturn.fold(
-            multiple =>
-              multiple.copy(
-                exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = multiple.yearToDateLiabilityAnswers
-                  .flatMap(_.unsetAllButIncomeDetails())
-              ),
-            single =>
-              single.copy(
-                exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = single.yearToDateLiabilityAnswers
-                  .flatMap(_.unsetAllButIncomeDetails())
-              ),
-            singleIndirect =>
-              singleIndirect.copy(
-                exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = singleIndirect.yearToDateLiabilityAnswers
-                  .flatMap(_.unsetAllButIncomeDetails())
-              ),
-            multipleIndirect =>
-              multipleIndirect.copy(
-                exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = multipleIndirect.yearToDateLiabilityAnswers
-                  .flatMap(_.unsetAllButIncomeDetails())
-              ),
-            singleMixedUse =>
-              singleMixedUse.copy(
-                exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = singleMixedUse.yearToDateLiabilityAnswers
-                  .flatMap(_.unsetAllButIncomeDetails())
-              )
-          )
-          val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+    ).foreach { case (session, journey, draftReturn) =>
+      withClue(s"For initial session $session: ") {
+        val updatedDraftReturn = draftReturn.fold(
+          multiple =>
+            multiple.copy(
+              exemptionAndLossesAnswers = Some(newAnswers),
+              yearToDateLiabilityAnswers = multiple.yearToDateLiabilityAnswers
+                .flatMap(_.unsetAllButIncomeDetails())
+            ),
+          single =>
+            single.copy(
+              exemptionAndLossesAnswers = Some(newAnswers),
+              yearToDateLiabilityAnswers = single.yearToDateLiabilityAnswers
+                .flatMap(_.unsetAllButIncomeDetails())
+            ),
+          singleIndirect =>
+            singleIndirect.copy(
+              exemptionAndLossesAnswers = Some(newAnswers),
+              yearToDateLiabilityAnswers = singleIndirect.yearToDateLiabilityAnswers
+                .flatMap(_.unsetAllButIncomeDetails())
+            ),
+          multipleIndirect =>
+            multipleIndirect.copy(
+              exemptionAndLossesAnswers = Some(newAnswers),
+              yearToDateLiabilityAnswers = multipleIndirect.yearToDateLiabilityAnswers
+                .flatMap(_.unsetAllButIncomeDetails())
+            ),
+          singleMixedUse =>
+            singleMixedUse.copy(
+              exemptionAndLossesAnswers = Some(newAnswers),
+              yearToDateLiabilityAnswers = singleMixedUse.yearToDateLiabilityAnswers
+                .flatMap(_.unsetAllButIncomeDetails())
+            )
+        )
+        val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(updatedJourney)(Right(()))
-            mockStoreSession(
-              session.copy(journeyStatus = Some(updatedJourney))
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            result,
-            routes.ExemptionAndLossesController.checkYourAnswers()
-          )
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockStoreDraftReturn(updatedJourney)(Right(()))
+          mockStoreSession(
+            session.copy(journeyStatus = Some(updatedJourney))
+          )(Right(()))
         }
+
+        checkIsRedirect(
+          result,
+          routes.ExemptionAndLossesController.checkYourAnswers()
+        )
+      }
     }
 
 }

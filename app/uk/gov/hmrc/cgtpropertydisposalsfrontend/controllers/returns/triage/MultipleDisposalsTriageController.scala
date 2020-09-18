@@ -955,7 +955,7 @@ class MultipleDisposalsTriageController @Inject() (
                   case Some(existingDate) if existingDate.value === shareDisposalDate.value =>
                     Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
 
-                  case _                                                                    =>
+                  case _ =>
                     val result = for {
                       taxYear        <- taxYearService.taxYear(shareDisposalDate.value)
                       updatedAnswers <- EitherT
@@ -1318,7 +1318,7 @@ class MultipleDisposalsTriageController @Inject() (
               )
             )
 
-          case c: CompleteMultipleDisposalsTriageAnswers                              =>
+          case c: CompleteMultipleDisposalsTriageAnswers =>
             Ok(
               checkYourAnswersPage(
                 c,
@@ -1338,12 +1338,12 @@ class MultipleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, journey, answers) =>
         journey match {
-          case Right(_)                     =>
+          case Right(_) =>
             Redirect(controllers.returns.routes.TaskListController.taskList())
 
           case Left(startingNewDraftReturn) =>
             answers match {
-              case _: IncompleteMultipleDisposalsTriageAnswers      =>
+              case _: IncompleteMultipleDisposalsTriageAnswers =>
                 Redirect(
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
@@ -1404,7 +1404,7 @@ class MultipleDisposalsTriageController @Inject() (
     f: (SessionData, JourneyState, MultipleDisposalsTriageAnswers) => Future[Result]
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((_, s: StartingToAmendReturn))                                 =>
+      case Some((_, s: StartingToAmendReturn)) =>
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
 
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t), _, _))) =>
@@ -1426,7 +1426,7 @@ class MultipleDisposalsTriageController @Inject() (
           ) =>
         f(session, Right(r -> Left(mi)), mi.triageAnswers)
 
-      case _                                                                   =>
+      case _ =>
         Redirect(
           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController
             .start()
@@ -1473,18 +1473,17 @@ class MultipleDisposalsTriageController @Inject() (
   ): Either[StartingNewDraftReturn, FillingOutReturn] =
     currentState.bimap(
       _.copy(newReturnTriageAnswers = Left(newAnswers)),
-      {
-        case (r, d) =>
-          val newFillingOutReturn = r.copy(draftReturn =
-            modifyDraftReturn(d).fold(
-              _.copy(triageAnswers = newAnswers),
-              _.copy(triageAnswers = newAnswers)
-            )
+      { case (r, d) =>
+        val newFillingOutReturn = r.copy(draftReturn =
+          modifyDraftReturn(d).fold(
+            _.copy(triageAnswers = newAnswers),
+            _.copy(triageAnswers = newAnswers)
           )
+        )
 
-          if (forceDisplayGainOrLossAfterReliefsForAmends)
-            newFillingOutReturn.withForceDisplayGainOrLossAfterReliefsForAmends
-          else newFillingOutReturn
+        if (forceDisplayGainOrLossAfterReliefsForAmends)
+          newFillingOutReturn.withForceDisplayGainOrLossAfterReliefsForAmends
+        else newFillingOutReturn
       }
     )
 
@@ -1514,8 +1513,8 @@ class MultipleDisposalsTriageController @Inject() (
   )(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val personalRepresentativeDetails = state.fold(
       PersonalRepresentativeDetails.fromStartingNewDraftReturn,
-      {
-        case (fillingOutReturn, _) => PersonalRepresentativeDetails.fromDraftReturn(fillingOutReturn.draftReturn)
+      { case (fillingOutReturn, _) =>
+        PersonalRepresentativeDetails.fromDraftReturn(fillingOutReturn.draftReturn)
       }
     )
 

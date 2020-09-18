@@ -56,10 +56,14 @@
         </h5>
       } else {
         <h5 id="leftToPay-@sentReturn.submissionId">
-          <span class="caption">@messages("returns.list.leftToPay")</span>
-          <strong class="bold">
-            @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding().inPounds())
-          </strong>
+          @if(sentReturn.isRecentlyAmended){
+            <span class="caption">@messages("returns.list.updating-payment-details")</span>
+          }else{
+            <span class="caption">@messages("returns.list.leftToPay")</span>
+            <strong class="bold">
+              @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding().inPounds())
+            </strong>
+          }
         </h5>
         @if(!totalOutstanding.isZero) {
           <h5>

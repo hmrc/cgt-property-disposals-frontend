@@ -112,7 +112,7 @@ class SupportingEvidenceController @Inject() (
           f(s, r, IncompleteSupportingEvidenceAnswers.empty)
         )(f(s, r, _))
 
-      case _                                   => Redirect(controllers.routes.StartController.start())
+      case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def commonDisplayBehaviour[A, P : Writeable, R](
@@ -307,7 +307,7 @@ class SupportingEvidenceController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, answers) =>
         answers match {
-          case _: CompleteSupportingEvidenceAnswers                   =>
+          case _: CompleteSupportingEvidenceAnswers =>
             Redirect(routes.SupportingEvidenceController.checkYourAnswers())
 
           case incompleteAnswers: IncompleteSupportingEvidenceAnswers =>
@@ -536,7 +536,7 @@ class SupportingEvidenceController @Inject() (
           routes.SupportingEvidenceController.supportingEvidenceExpired()
         )
 
-      case IncompleteSupportingEvidenceAnswers(None, _, _)                                          =>
+      case IncompleteSupportingEvidenceAnswers(None, _, _) =>
         Redirect(
           routes.SupportingEvidenceController
             .doYouWantToUploadSupportingEvidence()
@@ -636,7 +636,7 @@ class SupportingEvidenceController @Inject() (
               }
             )
 
-          case _                                                                      =>
+          case _ =>
             Redirect(routes.SupportingEvidenceController.checkYourAnswers())
         }
       }

@@ -82,10 +82,9 @@ class InsufficientConfidenceLevelController @Inject() (
 
   def doYouHaveNINO(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request: RequestWithSessionData[AnyContent] =>
-      withInsufficientConfidenceLevelUser {
-        case TryingToGetIndividualsFootprint(hasNino, _, _, _) =>
-          val form = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
-          Ok(doYouHaveANinoPage(form))
+      withInsufficientConfidenceLevelUser { case TryingToGetIndividualsFootprint(hasNino, _, _, _) =>
+        val form = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
+        Ok(doYouHaveANinoPage(form))
       }
     }
 
@@ -104,7 +103,7 @@ class InsufficientConfidenceLevelController @Inject() (
                   )
                 )
               ).map {
-                case Left(e)  =>
+                case Left(e) =>
                   logger.warn(
                     "Could not update session after has NINO page submit",
                     e
@@ -134,21 +133,20 @@ class InsufficientConfidenceLevelController @Inject() (
 
   def doYouHaveAnSaUtr(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withInsufficientConfidenceLevelUser {
-        case TryingToGetIndividualsFootprint(hasNino, hasSaUtr, _, _) =>
-          hasNino.fold(
-            SeeOther(
-              routes.InsufficientConfidenceLevelController.doYouHaveNINO().url
+      withInsufficientConfidenceLevelUser { case TryingToGetIndividualsFootprint(hasNino, hasSaUtr, _, _) =>
+        hasNino.fold(
+          SeeOther(
+            routes.InsufficientConfidenceLevelController.doYouHaveNINO().url
+          )
+        ) { _ =>
+          val form = hasSaUtr.fold(hasSaUtrForm)(hasSaUtrForm.fill)
+          Ok(
+            doYouHaveAnSaUtrPage(
+              form,
+              routes.InsufficientConfidenceLevelController.doYouHaveNINO()
             )
-          ) { _ =>
-            val form = hasSaUtr.fold(hasSaUtrForm)(hasSaUtrForm.fill)
-            Ok(
-              doYouHaveAnSaUtrPage(
-                form,
-                routes.InsufficientConfidenceLevelController.doYouHaveNINO()
-              )
-            )
-          }
+          )
+        }
       }
     }
 
@@ -179,7 +177,7 @@ class InsufficientConfidenceLevelController @Inject() (
                     )
                   )
                 ).map {
-                  case Left(e)  =>
+                  case Left(e) =>
                     logger.warn(
                       "Could not update session after has SAUTR page submit",
                       e
@@ -224,7 +222,7 @@ class InsufficientConfidenceLevelController @Inject() (
                   )
               )
 
-          case _                         =>
+          case _ =>
             Redirect(
               routes.InsufficientConfidenceLevelController.doYouHaveNINO()
             )
@@ -282,28 +280,27 @@ class InsufficientConfidenceLevelController @Inject() (
                     handleNameMatchServiceError(e)
 
                 },
-                {
-                  case (_, maybeCgtReference) =>
-                    Redirect(
-                      maybeCgtReference.fold(
-                        controllers.routes.StartController.start()
-                      ) { cgtReference =>
-                        auditService.sendEvent(
-                          "accessWithWrongGGAccount",
-                          WrongGGAccountEvent(
-                            Some(cgtReference.value),
-                            insufficientConfidenceLevel.ggCredId.value
-                          ),
-                          "access-with-wrong-gg-account"
-                        )
-                        routes.SubscriptionController
-                          .alreadySubscribedWithDifferentGGAccount()
-                      }
-                    )
+                { case (_, maybeCgtReference) =>
+                  Redirect(
+                    maybeCgtReference.fold(
+                      controllers.routes.StartController.start()
+                    ) { cgtReference =>
+                      auditService.sendEvent(
+                        "accessWithWrongGGAccount",
+                        WrongGGAccountEvent(
+                          Some(cgtReference.value),
+                          insufficientConfidenceLevel.ggCredId.value
+                        ),
+                        "access-with-wrong-gg-account"
+                      )
+                      routes.SubscriptionController
+                        .alreadySubscribedWithDifferentGGAccount()
+                    }
+                  )
                 }
               )
 
-          case _                         =>
+          case _ =>
             Redirect(
               routes.InsufficientConfidenceLevelController.doYouHaveNINO()
             )
@@ -358,19 +355,18 @@ class InsufficientConfidenceLevelController @Inject() (
                                  ggCredId,
                                  previousUnsuccessfulAttempt
                                )
-                               .subflatMap {
-                                 case (bpr, cgtReference) =>
-                                   if (bpr.name.isLeft)
-                                     Left(
-                                       NameMatchServiceError
-                                         .BackendError(
-                                           Error(
-                                             "Found BPR for trust but expected one for an individual"
-                                           )
+                               .subflatMap { case (bpr, cgtReference) =>
+                                 if (bpr.name.isLeft)
+                                   Left(
+                                     NameMatchServiceError
+                                       .BackendError(
+                                         Error(
+                                           "Found BPR for trust but expected one for an individual"
                                          )
-                                     )
-                                   else
-                                     Right(bpr -> cgtReference)
+                                       )
+                                   )
+                                 else
+                                   Right(bpr -> cgtReference)
                                }
       _                   <- EitherT(
                                updateSession(sessionStore, request)(
@@ -402,7 +398,7 @@ class InsufficientConfidenceLevelController @Inject() (
     nameMatchError: NameMatchServiceError[IndividualSautrNameMatchDetails]
   )(implicit request: RequestWithSessionData[_]): Result =
     nameMatchError match {
-      case NameMatchServiceError.BackendError(error)                   =>
+      case NameMatchServiceError.BackendError(error) =>
         logger.warn("Could not get BPR with entered SA UTR", error)
         // errorHandler.errorResult()
         errorHandler.tmpErrorResult(request.userType)
@@ -418,7 +414,7 @@ class InsufficientConfidenceLevelController @Inject() (
           )
         )
 
-      case NameMatchServiceError.TooManyUnsuccessfulAttempts()         =>
+      case NameMatchServiceError.TooManyUnsuccessfulAttempts() =>
         Redirect(routes.InsufficientConfidenceLevelController.tooManyAttempts())
     }
 
@@ -460,12 +456,11 @@ object InsufficientConfidenceLevelController {
         "saUtr"     -> SAUTR.mapping,
         "firstName" -> IndividualName.mapping,
         "lastName"  -> IndividualName.mapping
-      ) {
-        case (sautr, firstName, lastName) =>
-          IndividualSautrNameMatchDetails(
-            IndividualName(firstName, lastName),
-            sautr
-          )
+      ) { case (sautr, firstName, lastName) =>
+        IndividualSautrNameMatchDetails(
+          IndividualName(firstName, lastName),
+          sautr
+        )
       } { IndividualSautrNameMatchDetails =>
         Some(
           (

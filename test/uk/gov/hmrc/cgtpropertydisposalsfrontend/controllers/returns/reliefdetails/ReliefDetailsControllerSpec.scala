@@ -262,58 +262,58 @@ class ReliefDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "not completed the relief detail section" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithReliefDetailsAnswers(
-                    IncompleteReliefDetailsAnswers.empty.copy(
-                      privateResidentsRelief = Some(AmountInPence.fromPounds(12.34))
-                    ),
-                    userType,
-                    individualUserType
-                  )._1
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    sessionWithReliefDetailsAnswers(
+                      IncompleteReliefDetailsAnswers.empty.copy(
+                        privateResidentsRelief = Some(AmountInPence.fromPounds(12.34))
+                      ),
+                      userType,
+                      individualUserType
+                    )._1
+                  )
+                }
+
+                val userKey   = userMessageKey(individualUserType, userType)
+                val poaMsgKey = periodOfAdminMsgKey(individualUserType)
+
+                checkPageIsDisplayed(
+                  performAction(),
+                  messageFromMessageKey(s"$key$userKey$poaMsgKey.title"),
+                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
                 )
-              }
-
-              val userKey   = userMessageKey(individualUserType, userType)
-              val poaMsgKey = periodOfAdminMsgKey(individualUserType)
-
-              checkPageIsDisplayed(
-                performAction(),
-                messageFromMessageKey(s"$key$userKey$poaMsgKey.title"),
-                doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
-              )
+            }
           }
-        }
 
         "the user has answered the question before but has " +
           "completed the relief detail section" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithReliefDetailsAnswers(
-                    sample[CompleteReliefDetailsAnswers]
-                      .copy(privateResidentsRelief = AmountInPence.fromPounds(12.34)),
-                    userType,
-                    individualUserType
-                  )._1
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    sessionWithReliefDetailsAnswers(
+                      sample[CompleteReliefDetailsAnswers]
+                        .copy(privateResidentsRelief = AmountInPence.fromPounds(12.34)),
+                      userType,
+                      individualUserType
+                    )._1
+                  )
+                }
+
+                val userKey   = userMessageKey(individualUserType, userType)
+                val poaMsgKey = periodOfAdminMsgKey(individualUserType)
+
+                checkPageIsDisplayed(
+                  performAction(),
+                  messageFromMessageKey(s"$key$userKey$poaMsgKey.title"),
+                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
                 )
-              }
-
-              val userKey   = userMessageKey(individualUserType, userType)
-              val poaMsgKey = periodOfAdminMsgKey(individualUserType)
-
-              checkPageIsDisplayed(
-                performAction(),
-                messageFromMessageKey(s"$key$userKey$poaMsgKey.title"),
-                doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
-              )
+            }
           }
-        }
 
       }
 
@@ -502,70 +502,70 @@ class ReliefDetailsControllerSpec
 
         "the user hasn't ever answered the relief details question " +
           "and the draft return and session data has been successfully updated" in {
-          val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) =
-            "0" -> 10d
-          val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
-            reliefDetailsAnswers = None
-          )
-          val newDraftReturn =
-            updateDraftReturn(
-              oldDraftReturn,
-              IncompleteReliefDetailsAnswers.empty.copy(
-                privateResidentsRelief = Some(AmountInPence.fromPounds(newPrivateResidentsReliefValue))
-              ),
-              isFurtherOrAmendReturn = true
+            val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) =
+              "0" -> 10d
+            val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
+              reliefDetailsAnswers = None
             )
-
-          testSuccessfulUpdatesAfterSubmit(
-            performAction(
-              Seq(
-                key      -> newPrivateResidentsRelief,
-                valueKey -> newPrivateResidentsReliefValue.toString
+            val newDraftReturn =
+              updateDraftReturn(
+                oldDraftReturn,
+                IncompleteReliefDetailsAnswers.empty.copy(
+                  privateResidentsRelief = Some(AmountInPence.fromPounds(newPrivateResidentsReliefValue))
+                ),
+                isFurtherOrAmendReturn = true
               )
-            ),
-            oldDraftReturn,
-            newDraftReturn
-          )
-        }
+
+            testSuccessfulUpdatesAfterSubmit(
+              performAction(
+                Seq(
+                  key      -> newPrivateResidentsRelief,
+                  valueKey -> newPrivateResidentsReliefValue.toString
+                )
+              ),
+              oldDraftReturn,
+              newDraftReturn
+            )
+          }
 
         "the user has not answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
 
-          val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) =
-            "0" -> 1d
-          val oldAnswers = sample[IncompleteReliefDetailsAnswers]
-            .copy(privateResidentsRelief = None)
+            val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) =
+              "0" -> 1d
+            val oldAnswers = sample[IncompleteReliefDetailsAnswers]
+              .copy(privateResidentsRelief = None)
 
-          val oldDraftReturn = sample[DraftSingleDisposalReturn]
-            .copy(reliefDetailsAnswers = Some(oldAnswers))
+            val oldDraftReturn = sample[DraftSingleDisposalReturn]
+              .copy(reliefDetailsAnswers = Some(oldAnswers))
 
-          val lettingsRelief =
-            if (oldDraftReturn.triageAnswers.isPeriodOfAdmin) Some(AmountInPence.zero)
-            else None
+            val lettingsRelief =
+              if (oldDraftReturn.triageAnswers.isPeriodOfAdmin) Some(AmountInPence.zero)
+              else None
 
-          val newDraftReturn =
-            updateDraftReturn(
-              oldDraftReturn,
-              oldAnswers.copy(
-                privateResidentsRelief = Some(
-                  AmountInPence.fromPounds(newPrivateResidentsReliefValue)
+            val newDraftReturn =
+              updateDraftReturn(
+                oldDraftReturn,
+                oldAnswers.copy(
+                  privateResidentsRelief = Some(
+                    AmountInPence.fromPounds(newPrivateResidentsReliefValue)
+                  ),
+                  lettingsRelief = lettingsRelief
                 ),
-                lettingsRelief = lettingsRelief
-              ),
-              isFurtherOrAmendReturn = true
-            )
-
-          testSuccessfulUpdatesAfterSubmit(
-            performAction(
-              Seq(
-                key      -> newPrivateResidentsRelief,
-                valueKey -> newPrivateResidentsReliefValue.toString
+                isFurtherOrAmendReturn = true
               )
-            ),
-            oldDraftReturn,
-            newDraftReturn
-          )
-        }
+
+            testSuccessfulUpdatesAfterSubmit(
+              performAction(
+                Seq(
+                  key      -> newPrivateResidentsRelief,
+                  valueKey -> newPrivateResidentsReliefValue.toString
+                )
+              ),
+              oldDraftReturn,
+              newDraftReturn
+            )
+          }
 
         "not update the draft return or the session data" when {
 
@@ -704,59 +704,59 @@ class ReliefDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "not completed the relief detail section" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeForLettingsRelief) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithReliefDetailsAnswers(
-                    IncompleteReliefDetailsAnswers.empty.copy(
-                      privateResidentsRelief = Some(AmountInPence.fromPounds(1.34)),
-                      lettingsRelief = Some(AmountInPence.fromPounds(12.34))
-                    ),
-                    userType,
-                    individualUserType
-                  )._1
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeForLettingsRelief) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    sessionWithReliefDetailsAnswers(
+                      IncompleteReliefDetailsAnswers.empty.copy(
+                        privateResidentsRelief = Some(AmountInPence.fromPounds(1.34)),
+                        lettingsRelief = Some(AmountInPence.fromPounds(12.34))
+                      ),
+                      userType,
+                      individualUserType
+                    )._1
+                  )
+                }
+
+                val userKey = userMessageKey(individualUserType, userType)
+
+                checkPageIsDisplayed(
+                  performAction(),
+                  messageFromMessageKey(s"$key$userKey.title"),
+                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
                 )
-              }
-
-              val userKey = userMessageKey(individualUserType, userType)
-
-              checkPageIsDisplayed(
-                performAction(),
-                messageFromMessageKey(s"$key$userKey.title"),
-                doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
-              )
+            }
           }
-        }
 
         "the user has answered the question before but has " +
           "completed the relief detail section" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeForLettingsRelief) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithReliefDetailsAnswers(
-                    sample[CompleteReliefDetailsAnswers].copy(
-                      privateResidentsRelief = AmountInPence.fromPounds(1.34),
-                      lettingsRelief = AmountInPence.fromPounds(12.34)
-                    ),
-                    userType,
-                    individualUserType
-                  )._1
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeForLettingsRelief) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    sessionWithReliefDetailsAnswers(
+                      sample[CompleteReliefDetailsAnswers].copy(
+                        privateResidentsRelief = AmountInPence.fromPounds(1.34),
+                        lettingsRelief = AmountInPence.fromPounds(12.34)
+                      ),
+                      userType,
+                      individualUserType
+                    )._1
+                  )
+                }
+
+                val userKey = userMessageKey(individualUserType, userType)
+
+                checkPageIsDisplayed(
+                  performAction(),
+                  messageFromMessageKey(s"$key$userKey.title"),
+                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
                 )
-              }
-
-              val userKey = userMessageKey(individualUserType, userType)
-
-              checkPageIsDisplayed(
-                performAction(),
-                messageFromMessageKey(s"$key$userKey.title"),
-                doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
-              )
+            }
           }
-        }
 
       }
 
@@ -1013,71 +1013,32 @@ class ReliefDetailsControllerSpec
 
         "the user has not answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val currentAnswers = sample[IncompleteReliefDetailsAnswers].copy(
-            privateResidentsRelief = Some(AmountInPence(Long.MaxValue)),
-            lettingsRelief = None
-          )
-
-          val newLettingsRelief = 2d
-
-          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-            disposalDate = sample[DisposalDate].copy(
-              taxYear = sample[TaxYear].copy(
-                maxLettingsReliefAmount = maxLettingsReliefValue
-              )
+            val currentAnswers = sample[IncompleteReliefDetailsAnswers].copy(
+              privateResidentsRelief = Some(AmountInPence(Long.MaxValue)),
+              lettingsRelief = None
             )
-          )
 
-          val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
-            triageAnswers = triageAnswers,
-            reliefDetailsAnswers = Some(currentAnswers)
-          )
-          val newDraftReturn = updateDraftReturn(
-            oldDraftReturn,
-            currentAnswers.copy(
-              lettingsRelief = Some(AmountInPence.fromPounds(newLettingsRelief))
-            ),
-            isFurtherOrAmendReturn = true
-          )
-
-          testSuccessfulUpdatesAfterSubmit(
-            performAction(
-              Seq(key -> "0", valueKey -> newLettingsRelief.toString)
-            ),
-            oldDraftReturn,
-            newDraftReturn
-          )
-        }
-
-        "the user has answered all of the relief details questions " +
-          "and the draft return and session data has been successfully updated" in {
-          forAll { c: CompleteReliefDetailsAnswers =>
-            val currentAnswers    =
-              c.copy(
-                privateResidentsRelief = AmountInPence(Long.MaxValue),
-                lettingsRelief = AmountInPence.fromPounds(1d)
-              )
             val newLettingsRelief = 2d
-            val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers].copy(
+
+            val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
               disposalDate = sample[DisposalDate].copy(
                 taxYear = sample[TaxYear].copy(
                   maxLettingsReliefAmount = maxLettingsReliefValue
                 )
               )
             )
-            val oldDraftReturn    = sample[DraftSingleDisposalReturn].copy(
-              reliefDetailsAnswers = Some(currentAnswers),
-              triageAnswers = triageAnswers
-            )
 
-            val newDraftReturn =
-              updateDraftReturn(
-                oldDraftReturn,
-                currentAnswers.copy(
-                  lettingsRelief = AmountInPence.fromPounds(newLettingsRelief)
-                ),
-                isFurtherOrAmendReturn = true
-              )
+            val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
+              triageAnswers = triageAnswers,
+              reliefDetailsAnswers = Some(currentAnswers)
+            )
+            val newDraftReturn = updateDraftReturn(
+              oldDraftReturn,
+              currentAnswers.copy(
+                lettingsRelief = Some(AmountInPence.fromPounds(newLettingsRelief))
+              ),
+              isFurtherOrAmendReturn = true
+            )
 
             testSuccessfulUpdatesAfterSubmit(
               performAction(
@@ -1087,7 +1048,46 @@ class ReliefDetailsControllerSpec
               newDraftReturn
             )
           }
-        }
+
+        "the user has answered all of the relief details questions " +
+          "and the draft return and session data has been successfully updated" in {
+            forAll { c: CompleteReliefDetailsAnswers =>
+              val currentAnswers    =
+                c.copy(
+                  privateResidentsRelief = AmountInPence(Long.MaxValue),
+                  lettingsRelief = AmountInPence.fromPounds(1d)
+                )
+              val newLettingsRelief = 2d
+              val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers].copy(
+                disposalDate = sample[DisposalDate].copy(
+                  taxYear = sample[TaxYear].copy(
+                    maxLettingsReliefAmount = maxLettingsReliefValue
+                  )
+                )
+              )
+              val oldDraftReturn    = sample[DraftSingleDisposalReturn].copy(
+                reliefDetailsAnswers = Some(currentAnswers),
+                triageAnswers = triageAnswers
+              )
+
+              val newDraftReturn =
+                updateDraftReturn(
+                  oldDraftReturn,
+                  currentAnswers.copy(
+                    lettingsRelief = AmountInPence.fromPounds(newLettingsRelief)
+                  ),
+                  isFurtherOrAmendReturn = true
+                )
+
+              testSuccessfulUpdatesAfterSubmit(
+                performAction(
+                  Seq(key -> "0", valueKey -> newLettingsRelief.toString)
+                ),
+                oldDraftReturn,
+                newDraftReturn
+              )
+            }
+          }
       }
 
       "not update the draft return or the session data" when {
@@ -1256,61 +1256,61 @@ class ReliefDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "not completed the relief detail section" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithReliefDetailsAnswers(
-                    IncompleteReliefDetailsAnswers.empty.copy(
-                      privateResidentsRelief = Some(AmountInPence.fromPounds(11.34)),
-                      lettingsRelief = Some(AmountInPence.fromPounds(12.34)),
-                      otherReliefs = Some(otherReliefs)
-                    ),
-                    userType,
-                    individualUserType
-                  )._1
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    sessionWithReliefDetailsAnswers(
+                      IncompleteReliefDetailsAnswers.empty.copy(
+                        privateResidentsRelief = Some(AmountInPence.fromPounds(11.34)),
+                        lettingsRelief = Some(AmountInPence.fromPounds(12.34)),
+                        otherReliefs = Some(otherReliefs)
+                      ),
+                      userType,
+                      individualUserType
+                    )._1
+                  )
+                }
+
+                val userKey = userMessageKey(individualUserType, userType)
+
+                checkPageIsDisplayed(
+                  performAction(),
+                  messageFromMessageKey(s"$key$userKey.title"),
+                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "13.34"
                 )
-              }
-
-              val userKey = userMessageKey(individualUserType, userType)
-
-              checkPageIsDisplayed(
-                performAction(),
-                messageFromMessageKey(s"$key$userKey.title"),
-                doc => doc.select(s"#$valueKey").attr("value") shouldBe "13.34"
-              )
+            }
           }
-        }
 
         "the user has answered the question before but has " +
           "completed the relief detail section" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithReliefDetailsAnswers(
-                    sample[CompleteReliefDetailsAnswers].copy(
-                      privateResidentsRelief = AmountInPence.fromPounds(1.34),
-                      lettingsRelief = AmountInPence.fromPounds(12.34),
-                      otherReliefs = Some(otherReliefs)
-                    ),
-                    userType,
-                    individualUserType
-                  )._1
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    sessionWithReliefDetailsAnswers(
+                      sample[CompleteReliefDetailsAnswers].copy(
+                        privateResidentsRelief = AmountInPence.fromPounds(1.34),
+                        lettingsRelief = AmountInPence.fromPounds(12.34),
+                        otherReliefs = Some(otherReliefs)
+                      ),
+                      userType,
+                      individualUserType
+                    )._1
+                  )
+                }
+
+                val userKey = userMessageKey(individualUserType, userType)
+
+                checkPageIsDisplayed(
+                  performAction(),
+                  messageFromMessageKey(s"$key$userKey.title"),
+                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "13.34"
                 )
-              }
-
-              val userKey = userMessageKey(individualUserType, userType)
-
-              checkPageIsDisplayed(
-                performAction(),
-                messageFromMessageKey(s"$key$userKey.title"),
-                doc => doc.select(s"#$valueKey").attr("value") shouldBe "13.34"
-              )
+            }
           }
-        }
 
       }
 
@@ -1625,69 +1625,27 @@ class ReliefDetailsControllerSpec
 
         "the user has not answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val currentAnswers  = sample[IncompleteReliefDetailsAnswers].copy(
-            privateResidentsRelief = Some(AmountInPence.zero),
-            lettingsRelief = Some(AmountInPence.zero),
-            otherReliefs = None
-          )
-          val newOtherReliefs =
-            OtherReliefs("ReliefName", AmountInPence.fromPounds(3d))
-          val updatedAnswers  = currentAnswers.copy(
-            otherReliefs = Some(newOtherReliefs)
-          )
-
-          val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
-            reliefDetailsAnswers = Some(currentAnswers),
-            yearToDateLiabilityAnswers = Some(sample[YearToDateLiabilityAnswers])
-          )
-          val newDraftReturn =
-            oldDraftReturn.copy(
-              reliefDetailsAnswers = Some(updatedAnswers),
-              exemptionAndLossesAnswers = None,
-              yearToDateLiabilityAnswers = None,
-              supportingEvidenceAnswers = None
+            val currentAnswers  = sample[IncompleteReliefDetailsAnswers].copy(
+              privateResidentsRelief = Some(AmountInPence.zero),
+              lettingsRelief = Some(AmountInPence.zero),
+              otherReliefs = None
             )
-
-          testSuccessfulUpdatesAfterSubmit(
-            performAction(
-              Seq(
-                "otherReliefs"       -> "0",
-                "otherReliefsName"   -> newOtherReliefs.name,
-                "otherReliefsAmount" -> newOtherReliefs.amount
-                  .inPounds()
-                  .toString
-              )
-            ),
-            oldDraftReturn,
-            newDraftReturn
-          )
-
-        }
-
-        "the user has answered all of the relief details questions " +
-          "and the draft return and session data has been successfully updated" in {
-          forAll { c: CompleteReliefDetailsAnswers =>
-            val otherReliefs    =
-              OtherReliefs("ReliefName1", AmountInPence.fromPounds(1d))
             val newOtherReliefs =
-              OtherReliefs("ReliefName2", AmountInPence.fromPounds(2d))
-
-            val currentAnswers = c.copy(
-              lettingsRelief = AmountInPence.zero,
-              otherReliefs = Some(otherReliefs)
+              OtherReliefs("ReliefName", AmountInPence.fromPounds(3d))
+            val updatedAnswers  = currentAnswers.copy(
+              otherReliefs = Some(newOtherReliefs)
             )
-            val updatedAnswers =
-              currentAnswers.copy(otherReliefs = Some(newOtherReliefs))
+
             val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
-              reliefDetailsAnswers = Some(currentAnswers)
+              reliefDetailsAnswers = Some(currentAnswers),
+              yearToDateLiabilityAnswers = Some(sample[YearToDateLiabilityAnswers])
             )
             val newDraftReturn =
               oldDraftReturn.copy(
                 reliefDetailsAnswers = Some(updatedAnswers),
                 exemptionAndLossesAnswers = None,
-                yearToDateLiabilityAnswers = oldDraftReturn.yearToDateLiabilityAnswers.flatMap(
-                  _.unsetAllButIncomeDetails()
-                )
+                yearToDateLiabilityAnswers = None,
+                supportingEvidenceAnswers = None
               )
 
             testSuccessfulUpdatesAfterSubmit(
@@ -1703,8 +1661,50 @@ class ReliefDetailsControllerSpec
               oldDraftReturn,
               newDraftReturn
             )
+
           }
-        }
+
+        "the user has answered all of the relief details questions " +
+          "and the draft return and session data has been successfully updated" in {
+            forAll { c: CompleteReliefDetailsAnswers =>
+              val otherReliefs    =
+                OtherReliefs("ReliefName1", AmountInPence.fromPounds(1d))
+              val newOtherReliefs =
+                OtherReliefs("ReliefName2", AmountInPence.fromPounds(2d))
+
+              val currentAnswers = c.copy(
+                lettingsRelief = AmountInPence.zero,
+                otherReliefs = Some(otherReliefs)
+              )
+              val updatedAnswers =
+                currentAnswers.copy(otherReliefs = Some(newOtherReliefs))
+              val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
+                reliefDetailsAnswers = Some(currentAnswers)
+              )
+              val newDraftReturn =
+                oldDraftReturn.copy(
+                  reliefDetailsAnswers = Some(updatedAnswers),
+                  exemptionAndLossesAnswers = None,
+                  yearToDateLiabilityAnswers = oldDraftReturn.yearToDateLiabilityAnswers.flatMap(
+                    _.unsetAllButIncomeDetails()
+                  )
+                )
+
+              testSuccessfulUpdatesAfterSubmit(
+                performAction(
+                  Seq(
+                    "otherReliefs"       -> "0",
+                    "otherReliefsName"   -> newOtherReliefs.name,
+                    "otherReliefsAmount" -> newOtherReliefs.amount
+                      .inPounds()
+                      .toString
+                  )
+                ),
+                oldDraftReturn,
+                newDraftReturn
+              )
+            }
+          }
 
       }
 

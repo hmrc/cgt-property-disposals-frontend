@@ -102,14 +102,14 @@ object AddressJourneyType {
       }
     def captionMessageKey(): String =
       a match {
-        case _: Onboarding                               => "subscription.caption"
-        case _: ManagingSubscription                     => "account.caption"
-        case f: FillingOutReturnAddressJourney           =>
+        case _: Onboarding                     => "subscription.caption"
+        case _: ManagingSubscription           => "account.caption"
+        case f: FillingOutReturnAddressJourney =>
           f.draftReturn.fold(
             _ => "returns.property-details.multipleDisposals.caption",
             _ => "returns.property-address.singleDisposal.caption"
           )
-        case c: EnteringCompanyDetails                   =>
+        case c: EnteringCompanyDetails         =>
           c.draftReturn.fold(
             _ => "returns.company-details.multipleIndirectDisposals.caption",
             _ => "companyDetails.caption"

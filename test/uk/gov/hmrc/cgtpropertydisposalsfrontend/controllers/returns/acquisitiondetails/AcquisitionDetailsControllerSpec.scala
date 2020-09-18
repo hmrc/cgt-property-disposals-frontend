@@ -31,16 +31,18 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
@@ -51,10 +53,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -64,8 +62,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
 
 import scala.concurrent.Future
 
@@ -141,7 +141,7 @@ class AcquisitionDetailsControllerSpec
         case PersonalRepresentativeInPeriodOfAdmin =>
           representeeAnswers.map(_.fold(_ => false, _.dateOfDeath.isDefined)).getOrElse(false)
 
-        case _                                     =>
+        case _ =>
           true
       }
 
@@ -158,7 +158,7 @@ class AcquisitionDetailsControllerSpec
         case _: StartingToAmendReturn =>
           true
 
-        case _                        => false
+        case _ => false
       }
     )
 
@@ -933,25 +933,24 @@ class AcquisitionDetailsControllerSpec
                 Seq(key -> "2") -> completeAnswers.copy(acquisitionMethod = AcquisitionMethod.Gifted),
                 Seq(key -> "3", otherKey -> "other things") -> completeAnswers
                   .copy(acquisitionMethod = AcquisitionMethod.Other("other things"))
-              ).foreach {
-                case (data, answers) =>
-                  inSequence {
-                    mockAuthWithNoRetrievals()
-                    mockGetSession(
-                      sessionWithState(
-                        answers,
-                        sample[AssetType],
-                        sample[Boolean],
-                        userType,
-                        individualUserType
-                      )._1
-                    )
-                  }
-
-                  checkIsRedirect(
-                    performAction(data: _*),
-                    routes.AcquisitionDetailsController.checkYourAnswers()
+              ).foreach { case (data, answers) =>
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    sessionWithState(
+                      answers,
+                      sample[AssetType],
+                      sample[Boolean],
+                      userType,
+                      individualUserType
+                    )._1
                   )
+                }
+
+                checkIsRedirect(
+                  performAction(data: _*),
+                  routes.AcquisitionDetailsController.checkYourAnswers()
+                )
               }
           }
         }
@@ -1755,91 +1754,89 @@ class AcquisitionDetailsControllerSpec
         )
 
         "the price submitted is valid and the journey was incomplete" in {
-          scenarios.foreach {
-            case (formData, expectedAmountInPence) =>
-              withClue(
-                s"For form data $formData and expected amount in pence $expectedAmountInPence: "
-              ) {
-                val (session, journey, draftReturn) = sessionWithState(
-                  None,
-                  Some(AssetType.Residential),
-                  Some(false),
-                  UserType.Individual,
-                  PersonalRepresentativeInPeriodOfAdmin,
-                  Some(sample[DisposalDate]),
-                  Some(representeeAnswers),
-                  isAmend = true
-                )
-                val updatedDraftReturn              = commonUpdateDraftReturn(
-                  draftReturn,
-                  IncompleteAcquisitionDetailsAnswers.empty.copy(
-                    acquisitionMethod = Some(AcquisitionMethod.Other("period of admin")),
-                    acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
-                    acquisitionPrice = Some(expectedAmountInPence)
-                  ),
-                  journey
-                )
+          scenarios.foreach { case (formData, expectedAmountInPence) =>
+            withClue(
+              s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+            ) {
+              val (session, journey, draftReturn) = sessionWithState(
+                None,
+                Some(AssetType.Residential),
+                Some(false),
+                UserType.Individual,
+                PersonalRepresentativeInPeriodOfAdmin,
+                Some(sample[DisposalDate]),
+                Some(representeeAnswers),
+                isAmend = true
+              )
+              val updatedDraftReturn              = commonUpdateDraftReturn(
+                draftReturn,
+                IncompleteAcquisitionDetailsAnswers.empty.copy(
+                  acquisitionMethod = Some(AcquisitionMethod.Other("period of admin")),
+                  acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
+                  acquisitionPrice = Some(expectedAmountInPence)
+                ),
+                journey
+              )
 
-                val updatedJourney =
-                  journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
-                val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
+              val updatedJourney =
+                journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
+              val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
 
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(session)
-                  mockStoreDraftReturn(updatedJourney)(Right(()))
-                  mockStoreSession(updatedSession)(Right(()))
-                }
-
-                checkIsRedirect(
-                  performAction(formData: _*),
-                  routes.AcquisitionDetailsController.checkYourAnswers()
-                )
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(updatedJourney)(Right(()))
+                mockStoreSession(updatedSession)(Right(()))
               }
+
+              checkIsRedirect(
+                performAction(formData: _*),
+                routes.AcquisitionDetailsController.checkYourAnswers()
+              )
+            }
           }
         }
 
         "the price submitted is valid and the journey was complete" in {
-          scenarios.foreach {
-            case (formData, expectedAmountInPence) =>
-              withClue(
-                s"For form data $formData and expected amount in pence $expectedAmountInPence: "
-              ) {
-                val answers                         =
-                  sample[CompleteAcquisitionDetailsAnswers].copy(
-                    acquisitionDate = AcquisitionDate(dateOfDeath.value),
-                    rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
-                  )
-                val (session, journey, draftReturn) = sessionWithState(
-                  answers,
-                  AssetType.Residential,
-                  true,
-                  UserType.Agent,
-                  PersonalRepresentativeInPeriodOfAdmin,
-                  representeeAnswers = Some(representeeAnswers)
+          scenarios.foreach { case (formData, expectedAmountInPence) =>
+            withClue(
+              s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+            ) {
+              val answers                         =
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = AcquisitionDate(dateOfDeath.value),
+                  rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
                 )
-                val updatedDraftReturn              = commonUpdateDraftReturn(
-                  draftReturn,
-                  answers.copy(
-                    acquisitionPrice = expectedAmountInPence
-                  ),
-                  journey
-                )
-                val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
-                val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
+              val (session, journey, draftReturn) = sessionWithState(
+                answers,
+                AssetType.Residential,
+                true,
+                UserType.Agent,
+                PersonalRepresentativeInPeriodOfAdmin,
+                representeeAnswers = Some(representeeAnswers)
+              )
+              val updatedDraftReturn              = commonUpdateDraftReturn(
+                draftReturn,
+                answers.copy(
+                  acquisitionPrice = expectedAmountInPence
+                ),
+                journey
+              )
+              val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+              val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(session)
-                  mockStoreDraftReturn(updatedJourney)(Right(()))
-                  mockStoreSession(updatedSession)(Right(()))
-                }
-
-                checkIsRedirect(
-                  performAction(formData: _*),
-                  routes.AcquisitionDetailsController.checkYourAnswers()
-                )
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(updatedJourney)(Right(()))
+                mockStoreSession(updatedSession)(Right(()))
               }
+
+              checkIsRedirect(
+                performAction(formData: _*),
+                routes.AcquisitionDetailsController.checkYourAnswers()
+              )
+            }
           }
         }
 
@@ -2839,48 +2836,47 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was incomplete" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              scenarios.foreach {
-                case (formData, expectedAmountInPence) =>
-                  withClue(
-                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
-                  ) {
-                    val answers                         =
-                      IncompleteAcquisitionDetailsAnswers.empty.copy(
-                        acquisitionDate = Some(acquisitionDate),
-                        acquisitionPrice = Some(sample[AmountInPence])
-                      )
-                    val (session, journey, draftReturn) = sessionWithState(
-                      answers,
-                      AssetType.Residential,
-                      true,
-                      userType,
-                      individualUserType
+              scenarios.foreach { case (formData, expectedAmountInPence) =>
+                withClue(
+                  s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                ) {
+                  val answers                         =
+                    IncompleteAcquisitionDetailsAnswers.empty.copy(
+                      acquisitionDate = Some(acquisitionDate),
+                      acquisitionPrice = Some(sample[AmountInPence])
                     )
-                    val updatedDraftReturn              = commonUpdateDraftReturn(
-                      draftReturn,
-                      answers.copy(
-                        rebasedAcquisitionPrice = Some(expectedAmountInPence),
-                        acquisitionPrice = Some(expectedAmountInPence),
-                        shouldUseRebase = Some(true)
-                      ),
-                      journey
-                    )
+                  val (session, journey, draftReturn) = sessionWithState(
+                    answers,
+                    AssetType.Residential,
+                    true,
+                    userType,
+                    individualUserType
+                  )
+                  val updatedDraftReturn              = commonUpdateDraftReturn(
+                    draftReturn,
+                    answers.copy(
+                      rebasedAcquisitionPrice = Some(expectedAmountInPence),
+                      acquisitionPrice = Some(expectedAmountInPence),
+                      shouldUseRebase = Some(true)
+                    ),
+                    journey
+                  )
 
-                    val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
-                    val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
+                  val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+                  val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
 
-                    inSequence {
-                      mockAuthWithNoRetrievals()
-                      mockGetSession(session)
-                      mockStoreDraftReturn(updatedJourney)(Right(()))
-                      mockStoreSession(updatedSession)(Right(()))
-                    }
-
-                    checkIsRedirect(
-                      performAction(formData: _*),
-                      routes.AcquisitionDetailsController.checkYourAnswers()
-                    )
+                  inSequence {
+                    mockAuthWithNoRetrievals()
+                    mockGetSession(session)
+                    mockStoreDraftReturn(updatedJourney)(Right(()))
+                    mockStoreSession(updatedSession)(Right(()))
                   }
+
+                  checkIsRedirect(
+                    performAction(formData: _*),
+                    routes.AcquisitionDetailsController.checkYourAnswers()
+                  )
+                }
               }
           }
         }
@@ -2888,49 +2884,48 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was complete" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (_: UserType, individualUserType: IndividualUserType) =>
-              scenarios.foreach {
-                case (formData, expectedAmountInPence) =>
-                  withClue(
-                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
-                  ) {
-                    val answers                         =
-                      sample[CompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate = acquisitionDate,
-                        rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
-                      )
-                    val (session, journey, draftReturn) = sessionWithState(
-                      answers,
-                      AssetType.Residential,
-                      true,
-                      UserType.Individual,
-                      individualUserType,
-                      isAmend = true
+              scenarios.foreach { case (formData, expectedAmountInPence) =>
+                withClue(
+                  s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                ) {
+                  val answers                         =
+                    sample[CompleteAcquisitionDetailsAnswers].copy(
+                      acquisitionDate = acquisitionDate,
+                      rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
                     )
-                    val updatedDraftReturn              = commonUpdateDraftReturn(
-                      draftReturn,
-                      answers.copy(
-                        rebasedAcquisitionPrice = Some(expectedAmountInPence),
-                        acquisitionPrice = expectedAmountInPence,
-                        shouldUseRebase = true
-                      ),
-                      journey
-                    )
-                    val updatedJourney                  =
-                      journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
-                    val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
+                  val (session, journey, draftReturn) = sessionWithState(
+                    answers,
+                    AssetType.Residential,
+                    true,
+                    UserType.Individual,
+                    individualUserType,
+                    isAmend = true
+                  )
+                  val updatedDraftReturn              = commonUpdateDraftReturn(
+                    draftReturn,
+                    answers.copy(
+                      rebasedAcquisitionPrice = Some(expectedAmountInPence),
+                      acquisitionPrice = expectedAmountInPence,
+                      shouldUseRebase = true
+                    ),
+                    journey
+                  )
+                  val updatedJourney                  =
+                    journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
+                  val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
-                    inSequence {
-                      mockAuthWithNoRetrievals()
-                      mockGetSession(session)
-                      mockStoreDraftReturn(updatedJourney)(Right(()))
-                      mockStoreSession(updatedSession)(Right(()))
-                    }
-
-                    checkIsRedirect(
-                      performAction(formData: _*),
-                      routes.AcquisitionDetailsController.checkYourAnswers()
-                    )
+                  inSequence {
+                    mockAuthWithNoRetrievals()
+                    mockGetSession(session)
+                    mockStoreDraftReturn(updatedJourney)(Right(()))
+                    mockStoreSession(updatedSession)(Right(()))
                   }
+
+                  checkIsRedirect(
+                    performAction(formData: _*),
+                    routes.AcquisitionDetailsController.checkYourAnswers()
+                  )
+                }
               }
           }
         }
@@ -3511,44 +3506,43 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was incomplete" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              scenarios.foreach {
-                case (formData, expectedAmountInPence) =>
-                  withClue(
-                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
-                  ) {
-                    val answers                         =
-                      IncompleteAcquisitionDetailsAnswers.empty.copy(
-                        acquisitionDate = Some(acquisitionDate),
-                        acquisitionPrice = Some(sample[AmountInPence]),
-                        rebasedAcquisitionPrice = Some(sample[AmountInPence])
-                      )
-                    val (session, journey, draftReturn) = sessionWithState(
-                      answers,
-                      AssetType.Residential,
-                      true,
-                      userType,
-                      individualUserType
+              scenarios.foreach { case (formData, expectedAmountInPence) =>
+                withClue(
+                  s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                ) {
+                  val answers                         =
+                    IncompleteAcquisitionDetailsAnswers.empty.copy(
+                      acquisitionDate = Some(acquisitionDate),
+                      acquisitionPrice = Some(sample[AmountInPence]),
+                      rebasedAcquisitionPrice = Some(sample[AmountInPence])
                     )
-                    val updatedDraftReturn              = commonUpdateDraftReturn(
-                      draftReturn,
-                      answers.copy(improvementCosts = Some(expectedAmountInPence)),
-                      journey
-                    )
-                    val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
-                    val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
+                  val (session, journey, draftReturn) = sessionWithState(
+                    answers,
+                    AssetType.Residential,
+                    true,
+                    userType,
+                    individualUserType
+                  )
+                  val updatedDraftReturn              = commonUpdateDraftReturn(
+                    draftReturn,
+                    answers.copy(improvementCosts = Some(expectedAmountInPence)),
+                    journey
+                  )
+                  val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+                  val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
-                    inSequence {
-                      mockAuthWithNoRetrievals()
-                      mockGetSession(session)
-                      mockStoreDraftReturn(updatedJourney)(Right(()))
-                      mockStoreSession(updatedSession)(Right(()))
-                    }
-
-                    checkIsRedirect(
-                      performAction(formData: _*),
-                      routes.AcquisitionDetailsController.checkYourAnswers()
-                    )
+                  inSequence {
+                    mockAuthWithNoRetrievals()
+                    mockGetSession(session)
+                    mockStoreDraftReturn(updatedJourney)(Right(()))
+                    mockStoreSession(updatedSession)(Right(()))
                   }
+
+                  checkIsRedirect(
+                    performAction(formData: _*),
+                    routes.AcquisitionDetailsController.checkYourAnswers()
+                  )
+                }
               }
           }
         }
@@ -3556,47 +3550,46 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was complete" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              scenarios.foreach {
-                case (formData, expectedAmountInPence) =>
-                  withClue(
-                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
-                  ) {
+              scenarios.foreach { case (formData, expectedAmountInPence) =>
+                withClue(
+                  s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                ) {
 
-                    val answers                         = sample[CompleteAcquisitionDetailsAnswers]
-                      .copy(
-                        acquisitionDate = acquisitionDate,
-                        rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-                        improvementCosts = AmountInPence(expectedAmountInPence.value + 1L)
-                      )
-                    val (session, journey, draftReturn) = sessionWithState(
-                      answers,
-                      AssetType.Residential,
-                      true,
-                      userType,
-                      individualUserType,
-                      isAmend = true
+                  val answers                         = sample[CompleteAcquisitionDetailsAnswers]
+                    .copy(
+                      acquisitionDate = acquisitionDate,
+                      rebasedAcquisitionPrice = Some(sample[AmountInPence]),
+                      improvementCosts = AmountInPence(expectedAmountInPence.value + 1L)
                     )
-                    val updatedDraftReturn              = commonUpdateDraftReturn(
-                      draftReturn,
-                      answers.copy(improvementCosts = expectedAmountInPence),
-                      journey
-                    )
-                    val updatedJourney                  =
-                      journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
-                    val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
+                  val (session, journey, draftReturn) = sessionWithState(
+                    answers,
+                    AssetType.Residential,
+                    true,
+                    userType,
+                    individualUserType,
+                    isAmend = true
+                  )
+                  val updatedDraftReturn              = commonUpdateDraftReturn(
+                    draftReturn,
+                    answers.copy(improvementCosts = expectedAmountInPence),
+                    journey
+                  )
+                  val updatedJourney                  =
+                    journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
+                  val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
-                    inSequence {
-                      mockAuthWithNoRetrievals()
-                      mockGetSession(session)
-                      mockStoreDraftReturn(updatedJourney)(Right(()))
-                      mockStoreSession(updatedSession)(Right(()))
-                    }
-
-                    checkIsRedirect(
-                      performAction(formData: _*),
-                      routes.AcquisitionDetailsController.checkYourAnswers()
-                    )
+                  inSequence {
+                    mockAuthWithNoRetrievals()
+                    mockGetSession(session)
+                    mockStoreDraftReturn(updatedJourney)(Right(()))
+                    mockStoreSession(updatedSession)(Right(()))
                   }
+
+                  checkIsRedirect(
+                    performAction(formData: _*),
+                    routes.AcquisitionDetailsController.checkYourAnswers()
+                  )
+                }
               }
           }
         }
@@ -4174,46 +4167,45 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was incomplete" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              scenarios.foreach {
-                case (formData, expectedAmountInPence) =>
-                  withClue(
-                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
-                  ) {
-                    val answers                         =
-                      IncompleteAcquisitionDetailsAnswers.empty.copy(
-                        improvementCosts = Some(sample[AmountInPence]),
-                        acquisitionDate = Some(sample[AcquisitionDate])
-                      )
-                    val (session, journey, draftReturn) = sessionWithState(
-                      answers,
-                      sample[AssetType],
-                      sample[Boolean],
-                      userType,
-                      individualUserType,
-                      isAmend = true
+              scenarios.foreach { case (formData, expectedAmountInPence) =>
+                withClue(
+                  s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                ) {
+                  val answers                         =
+                    IncompleteAcquisitionDetailsAnswers.empty.copy(
+                      improvementCosts = Some(sample[AmountInPence]),
+                      acquisitionDate = Some(sample[AcquisitionDate])
                     )
-                    val updatedDraftReturn              = commonUpdateDraftReturn(
-                      draftReturn,
-                      answers.copy(acquisitionFees = Some(expectedAmountInPence)),
-                      journey
-                    )
+                  val (session, journey, draftReturn) = sessionWithState(
+                    answers,
+                    sample[AssetType],
+                    sample[Boolean],
+                    userType,
+                    individualUserType,
+                    isAmend = true
+                  )
+                  val updatedDraftReturn              = commonUpdateDraftReturn(
+                    draftReturn,
+                    answers.copy(acquisitionFees = Some(expectedAmountInPence)),
+                    journey
+                  )
 
-                    val updatedJourney =
-                      journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
-                    val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
+                  val updatedJourney =
+                    journey.copy(draftReturn = updatedDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
+                  val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
 
-                    inSequence {
-                      mockAuthWithNoRetrievals()
-                      mockGetSession(session)
-                      mockStoreDraftReturn(updatedJourney)(Right(()))
-                      mockStoreSession(updatedSession)(Right(()))
-                    }
-
-                    checkIsRedirect(
-                      performAction(formData: _*),
-                      routes.AcquisitionDetailsController.checkYourAnswers()
-                    )
+                  inSequence {
+                    mockAuthWithNoRetrievals()
+                    mockGetSession(session)
+                    mockStoreDraftReturn(updatedJourney)(Right(()))
+                    mockStoreSession(updatedSession)(Right(()))
                   }
+
+                  checkIsRedirect(
+                    performAction(formData: _*),
+                    routes.AcquisitionDetailsController.checkYourAnswers()
+                  )
+                }
               }
           }
         }
@@ -4221,41 +4213,40 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was complete" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              scenarios.foreach {
-                case (formData, expectedAmountInPence) =>
-                  withClue(
-                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
-                  ) {
-                    val answers                         =
-                      sample[CompleteAcquisitionDetailsAnswers]
-                        .copy(acquisitionFees = AmountInPence(expectedAmountInPence.value + 1L))
-                    val (session, journey, draftReturn) = sessionWithState(
-                      answers,
-                      sample[AssetType],
-                      sample[Boolean],
-                      userType,
-                      individualUserType
-                    )
-                    val updatedDraftReturn              = commonUpdateDraftReturn(
-                      draftReturn,
-                      answers.copy(acquisitionFees = expectedAmountInPence),
-                      journey
-                    )
-                    val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
-                    val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
+              scenarios.foreach { case (formData, expectedAmountInPence) =>
+                withClue(
+                  s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                ) {
+                  val answers                         =
+                    sample[CompleteAcquisitionDetailsAnswers]
+                      .copy(acquisitionFees = AmountInPence(expectedAmountInPence.value + 1L))
+                  val (session, journey, draftReturn) = sessionWithState(
+                    answers,
+                    sample[AssetType],
+                    sample[Boolean],
+                    userType,
+                    individualUserType
+                  )
+                  val updatedDraftReturn              = commonUpdateDraftReturn(
+                    draftReturn,
+                    answers.copy(acquisitionFees = expectedAmountInPence),
+                    journey
+                  )
+                  val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+                  val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
-                    inSequence {
-                      mockAuthWithNoRetrievals()
-                      mockGetSession(session)
-                      mockStoreDraftReturn(updatedJourney)(Right(()))
-                      mockStoreSession(updatedSession)(Right(()))
-                    }
-
-                    checkIsRedirect(
-                      performAction(formData: _*),
-                      routes.AcquisitionDetailsController.checkYourAnswers()
-                    )
+                  inSequence {
+                    mockAuthWithNoRetrievals()
+                    mockGetSession(session)
+                    mockStoreDraftReturn(updatedJourney)(Right(()))
+                    mockStoreSession(updatedSession)(Right(()))
                   }
+
+                  checkIsRedirect(
+                    performAction(formData: _*),
+                    routes.AcquisitionDetailsController.checkYourAnswers()
+                  )
+                }
               }
           }
 
@@ -5026,41 +5017,40 @@ class AcquisitionDetailsControllerSpec
                       TimeUtils.govDisplayFormat(date)
                     )
                   )
-                ).foreach {
-                  case (method, expectedTitle) =>
-                    withClue(s"For $method and $expectedTitle") {
-                      val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
-                        method,
-                        AcquisitionDate(date),
-                        sample[AmountInPence],
-                        Some(sample[AmountInPence]),
-                        sample[AmountInPence],
-                        sample[AmountInPence],
-                        false
-                      )
-                      val assetType     = AssetType.NonResidential
-                      inSequence {
-                        mockAuthWithNoRetrievals()
-                        mockGetSession(
-                          sessionWithState(
-                            nonUkRebasing,
-                            assetType,
-                            false,
-                            userType,
-                            individualUserType
-                          )._1
-                        )
-                      }
-
-                      checkPageIsDisplayed(
-                        performAction(),
-                        messageFromMessageKey("acquisitionDetails.cya.title"),
-                        doc =>
-                          doc
-                            .select("#acquisitionPrice-question")
-                            .text() shouldBe expectedTitle
+                ).foreach { case (method, expectedTitle) =>
+                  withClue(s"For $method and $expectedTitle") {
+                    val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
+                      method,
+                      AcquisitionDate(date),
+                      sample[AmountInPence],
+                      Some(sample[AmountInPence]),
+                      sample[AmountInPence],
+                      sample[AmountInPence],
+                      false
+                    )
+                    val assetType     = AssetType.NonResidential
+                    inSequence {
+                      mockAuthWithNoRetrievals()
+                      mockGetSession(
+                        sessionWithState(
+                          nonUkRebasing,
+                          assetType,
+                          false,
+                          userType,
+                          individualUserType
+                        )._1
                       )
                     }
+
+                    checkPageIsDisplayed(
+                      performAction(),
+                      messageFromMessageKey("acquisitionDetails.cya.title"),
+                      doc =>
+                        doc
+                          .select("#acquisitionPrice-question")
+                          .text() shouldBe expectedTitle
+                    )
+                  }
                 }
             }
           }

@@ -445,68 +445,67 @@ class CommonTriageQuestionsControllerSpec
             List(
               IndividualUserType.Self,
               IndividualUserType.PersonalRepresentative
-            ).zipWithIndex.foreach {
-              case (value, index) =>
-                val (session, journey) =
-                  sessionDataWithStartingNewDraftReturn(
-                    Right(
-                      IncompleteSingleDisposalTriageAnswers.empty
-                    ),
-                    Right(sample[IndividualName])
-                  )
+            ).zipWithIndex.foreach { case (value, index) =>
+              val (session, journey) =
+                sessionDataWithStartingNewDraftReturn(
+                  Right(
+                    IncompleteSingleDisposalTriageAnswers.empty
+                  ),
+                  Right(sample[IndividualName])
+                )
 
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(
-                    session.copy(
-                      userType = Some(UserType.Agent),
-                      journeyStatus = Some(
-                        journey.copy(
-                          agentReferenceNumber = Some(sample[AgentReferenceNumber]),
-                          newReturnTriageAnswers = Right(
-                            IncompleteSingleDisposalTriageAnswers.empty.copy(
-                              individualUserType = Some(value)
-                            )
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  session.copy(
+                    userType = Some(UserType.Agent),
+                    journeyStatus = Some(
+                      journey.copy(
+                        agentReferenceNumber = Some(sample[AgentReferenceNumber]),
+                        newReturnTriageAnswers = Right(
+                          IncompleteSingleDisposalTriageAnswers.empty.copy(
+                            individualUserType = Some(value)
                           )
                         )
                       )
                     )
                   )
-                }
-
-                checkPageIsDisplayed(
-                  performAction(),
-                  messageFromMessageKey("who-are-you-reporting-for.title"),
-                  { doc =>
-                    doc
-                      .select("#content > article > form")
-                      .attr(
-                        "action"
-                      ) shouldBe routes.CommonTriageQuestionsController
-                      .whoIsIndividualRepresentingSubmit()
-                      .url
-
-                    doc
-                      .select(s"#individualUserType-$index")
-                      .attr("checked")                 shouldBe "checked"
-                    doc
-                      .select("#individualUserType > div:nth-child(2) > label")
-                      .text()                          shouldBe messageFromMessageKey(
-                      s"individualUserType.agent.${IndividualUserType.Self}"
-                    )
-                    doc
-                      .select("#individualUserType > div:nth-child(3) > label")
-                      .html()                          shouldBe messageFromMessageKey(
-                      s"individualUserType.agent.${IndividualUserType.PersonalRepresentative}"
-                    )
-                    doc.body().text() shouldNot include(
-                      messageFromMessageKey(
-                        s"individualUserType.${IndividualUserType.Capacitor}"
-                      )
-                    )
-                    doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.continue")
-                  }
                 )
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("who-are-you-reporting-for.title"),
+                { doc =>
+                  doc
+                    .select("#content > article > form")
+                    .attr(
+                      "action"
+                    ) shouldBe routes.CommonTriageQuestionsController
+                    .whoIsIndividualRepresentingSubmit()
+                    .url
+
+                  doc
+                    .select(s"#individualUserType-$index")
+                    .attr("checked")                 shouldBe "checked"
+                  doc
+                    .select("#individualUserType > div:nth-child(2) > label")
+                    .text()                          shouldBe messageFromMessageKey(
+                    s"individualUserType.agent.${IndividualUserType.Self}"
+                  )
+                  doc
+                    .select("#individualUserType > div:nth-child(3) > label")
+                    .html()                          shouldBe messageFromMessageKey(
+                    s"individualUserType.agent.${IndividualUserType.PersonalRepresentative}"
+                  )
+                  doc.body().text() shouldNot include(
+                    messageFromMessageKey(
+                      s"individualUserType.${IndividualUserType.Capacitor}"
+                    )
+                  )
+                  doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.continue")
+                }
+              )
             }
           }
 
@@ -1012,70 +1011,69 @@ class CommonTriageQuestionsControllerSpec
             List(
               (IndividualUserType.Self, "agent"),
               (IndividualUserType.PersonalRepresentative, "personalRep")
-            ).zipWithIndex.foreach {
-              case (value, _) =>
-                val (session, journey) =
-                  sessionDataWithStartingNewDraftReturn(
-                    Right(
-                      IncompleteSingleDisposalTriageAnswers.empty
-                    ),
-                    Right(sample[IndividualName])
-                  )
+            ).zipWithIndex.foreach { case (value, _) =>
+              val (session, journey) =
+                sessionDataWithStartingNewDraftReturn(
+                  Right(
+                    IncompleteSingleDisposalTriageAnswers.empty
+                  ),
+                  Right(sample[IndividualName])
+                )
 
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(
-                    session.copy(
-                      userType = Some(UserType.Agent),
-                      journeyStatus = Some(
-                        journey.copy(
-                          agentReferenceNumber = Some(sample[AgentReferenceNumber]),
-                          newReturnTriageAnswers = Right(
-                            IncompleteSingleDisposalTriageAnswers.empty.copy(
-                              individualUserType = Some(value._1)
-                            )
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  session.copy(
+                    userType = Some(UserType.Agent),
+                    journeyStatus = Some(
+                      journey.copy(
+                        agentReferenceNumber = Some(sample[AgentReferenceNumber]),
+                        newReturnTriageAnswers = Right(
+                          IncompleteSingleDisposalTriageAnswers.empty.copy(
+                            individualUserType = Some(value._1)
                           )
                         )
                       )
                     )
                   )
-                }
-
-                checkPageIsDisplayed(
-                  performAction(),
-                  messageFromMessageKey("further-returns.help.title"),
-                  { doc =>
-                    doc
-                      .select("#content > article > form")
-                      .attr(
-                        "action"
-                      ) shouldBe routes.CommonTriageQuestionsController
-                      .furtherReturnHelpSubmit()
-                      .url
-
-                    doc
-                      .select("#warning")
-                      .text()                          shouldBe messageFromMessageKey(
-                      "further-returns.help.warning"
-                    )
-                    doc
-                      .select("#content > article > p:nth-child(4)")
-                      .html()                          shouldBe messageFromMessageKey(
-                      "further-returns.help.listHeading"
-                    )
-                    doc
-                      .select("#content > article > ul > li:nth-child(1)")
-                      .html()                          shouldBe messageFromMessageKey(
-                      s"further-returns.${value._2}.help.l1"
-                    )
-                    doc
-                      .select("#content > article > ul > li:nth-child(2)")
-                      .html()                          shouldBe messageFromMessageKey(
-                      "further-returns.help.l2"
-                    )
-                    doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.continue")
-                  }
                 )
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("further-returns.help.title"),
+                { doc =>
+                  doc
+                    .select("#content > article > form")
+                    .attr(
+                      "action"
+                    ) shouldBe routes.CommonTriageQuestionsController
+                    .furtherReturnHelpSubmit()
+                    .url
+
+                  doc
+                    .select("#warning")
+                    .text()                          shouldBe messageFromMessageKey(
+                    "further-returns.help.warning"
+                  )
+                  doc
+                    .select("#content > article > p:nth-child(4)")
+                    .html()                          shouldBe messageFromMessageKey(
+                    "further-returns.help.listHeading"
+                  )
+                  doc
+                    .select("#content > article > ul > li:nth-child(1)")
+                    .html()                          shouldBe messageFromMessageKey(
+                    s"further-returns.${value._2}.help.l1"
+                  )
+                  doc
+                    .select("#content > article > ul > li:nth-child(2)")
+                    .html()                          shouldBe messageFromMessageKey(
+                    "further-returns.help.l2"
+                  )
+                  doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.continue")
+                }
+              )
             }
           }
 
@@ -1184,121 +1182,121 @@ class CommonTriageQuestionsControllerSpec
 
         "the user is on the single disposal journey, selected 'self' individual user type and" +
           "has already answered the question" in {
-          val sessionData      = sessionDataWithFillingOutReturn(
-            IncompleteSingleDisposalTriageAnswers.empty.copy(
-              individualUserType = Some(IndividualUserType.Self),
-              hasConfirmedSingleDisposal = true
+            val sessionData      = sessionDataWithFillingOutReturn(
+              IncompleteSingleDisposalTriageAnswers.empty.copy(
+                individualUserType = Some(IndividualUserType.Self),
+                hasConfirmedSingleDisposal = true
+              )
             )
-          )
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionData._1
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionData._1
+              )
+            }
+            val expectedBacklink =
+              if (sessionData._2.isFurtherOrAmendReturn.contains(true))
+                routes.CommonTriageQuestionsController.furtherReturnHelp().url
+              else routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("numberOfProperties.main.title"),
+              { doc =>
+                doc
+                  .select("#back")
+                  .attr("href")    shouldBe expectedBacklink
+                doc
+                  .select("#content > article > form")
+                  .attr("action")  shouldBe routes.CommonTriageQuestionsController
+                  .howManyPropertiesSubmit()
+                  .url
+                doc
+                  .select("#numberOfProperties-0")
+                  .attr("checked") shouldBe "checked"
+              }
             )
           }
-          val expectedBacklink =
-            if (sessionData._2.isFurtherOrAmendReturn.contains(true))
-              routes.CommonTriageQuestionsController.furtherReturnHelp().url
-            else routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("numberOfProperties.main.title"),
-            { doc =>
-              doc
-                .select("#back")
-                .attr("href")    shouldBe expectedBacklink
-              doc
-                .select("#content > article > form")
-                .attr("action")  shouldBe routes.CommonTriageQuestionsController
-                .howManyPropertiesSubmit()
-                .url
-              doc
-                .select("#numberOfProperties-0")
-                .attr("checked") shouldBe "checked"
-            }
-          )
-        }
 
         "the user is on the single disposal journey, selected 'capacitor' individual user type and" +
           "has already answered the question" in {
-          val sessionData      = sessionDataWithFillingOutReturn(
-            IncompleteSingleDisposalTriageAnswers.empty.copy(
-              individualUserType = Some(IndividualUserType.Capacitor),
-              hasConfirmedSingleDisposal = true
+            val sessionData      = sessionDataWithFillingOutReturn(
+              IncompleteSingleDisposalTriageAnswers.empty.copy(
+                individualUserType = Some(IndividualUserType.Capacitor),
+                hasConfirmedSingleDisposal = true
+              )
             )
-          )
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionData._1
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionData._1
+              )
+            }
+            val isFurtherReturn  = sessionData._2.asInstanceOf[FillingOutReturn].isFurtherOrAmendReturn
+            val expectedBacklink =
+              if (isFurtherReturn.contains(true)) routes.CommonTriageQuestionsController.furtherReturnHelp()
+              else representeeRoutes.RepresenteeController.checkYourAnswers()
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("numberOfProperties.main.title"),
+              { doc =>
+                doc
+                  .select("#back")
+                  .attr(
+                    "href"
+                  )                shouldBe expectedBacklink.url
+                doc
+                  .select("#content > article > form")
+                  .attr("action")  shouldBe routes.CommonTriageQuestionsController
+                  .howManyPropertiesSubmit()
+                  .url
+                doc
+                  .select("#numberOfProperties-0")
+                  .attr("checked") shouldBe "checked"
+              }
             )
           }
-          val isFurtherReturn  = sessionData._2.asInstanceOf[FillingOutReturn].isFurtherOrAmendReturn
-          val expectedBacklink =
-            if (isFurtherReturn.contains(true)) routes.CommonTriageQuestionsController.furtherReturnHelp()
-            else representeeRoutes.RepresenteeController.checkYourAnswers()
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("numberOfProperties.main.title"),
-            { doc =>
-              doc
-                .select("#back")
-                .attr(
-                  "href"
-                )                shouldBe expectedBacklink.url
-              doc
-                .select("#content > article > form")
-                .attr("action")  shouldBe routes.CommonTriageQuestionsController
-                .howManyPropertiesSubmit()
-                .url
-              doc
-                .select("#numberOfProperties-0")
-                .attr("checked") shouldBe "checked"
-            }
-          )
-        }
 
         "the user is on the single disposal journey, selected 'personal representative' individual user type and" +
           "has already answered the question" in {
-          val sessionData      = sessionDataWithFillingOutReturn(
-            IncompleteSingleDisposalTriageAnswers.empty.copy(
-              individualUserType = Some(IndividualUserType.PersonalRepresentative),
-              hasConfirmedSingleDisposal = true
+            val sessionData      = sessionDataWithFillingOutReturn(
+              IncompleteSingleDisposalTriageAnswers.empty.copy(
+                individualUserType = Some(IndividualUserType.PersonalRepresentative),
+                hasConfirmedSingleDisposal = true
+              )
             )
-          )
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionData._1
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionData._1
+              )
+            }
+            val expectedBacklink =
+              if (sessionData._2.isFurtherOrAmendReturn.contains(true))
+                routes.CommonTriageQuestionsController.furtherReturnHelp()
+              else returns.representee.routes.RepresenteeController.checkYourAnswers()
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("numberOfProperties.main.title"),
+              { doc =>
+                doc
+                  .select("#back")
+                  .attr(
+                    "href"
+                  )                shouldBe expectedBacklink.url
+                doc
+                  .select("#content > article > form")
+                  .attr("action")  shouldBe routes.CommonTriageQuestionsController
+                  .howManyPropertiesSubmit()
+                  .url
+                doc
+                  .select("#numberOfProperties-0")
+                  .attr("checked") shouldBe "checked"
+              }
             )
           }
-          val expectedBacklink =
-            if (sessionData._2.isFurtherOrAmendReturn.contains(true))
-              routes.CommonTriageQuestionsController.furtherReturnHelp()
-            else returns.representee.routes.RepresenteeController.checkYourAnswers()
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("numberOfProperties.main.title"),
-            { doc =>
-              doc
-                .select("#back")
-                .attr(
-                  "href"
-                )                shouldBe expectedBacklink.url
-              doc
-                .select("#content > article > form")
-                .attr("action")  shouldBe routes.CommonTriageQuestionsController
-                .howManyPropertiesSubmit()
-                .url
-              doc
-                .select("#numberOfProperties-0")
-                .attr("checked") shouldBe "checked"
-            }
-          )
-        }
 
         "the user is on the multiple disposals journey" in {
           inSequence {
@@ -1334,68 +1332,68 @@ class CommonTriageQuestionsControllerSpec
 
         "the user is on the single disposals journey and has completed the triage section " +
           "it has not started a saved a draft return yet" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                Right(sample[CompleteSingleDisposalTriageAnswers]),
-                Right(sample[IndividualName])
-              )._1
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(sample[CompleteSingleDisposalTriageAnswers]),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("numberOfProperties.main.title"),
+              { doc =>
+                doc
+                  .select("#back")
+                  .attr("href")    shouldBe routes.SingleDisposalsTriageController
+                  .checkYourAnswers()
+                  .url
+                doc
+                  .select("#content > article > form")
+                  .attr("action")  shouldBe routes.CommonTriageQuestionsController
+                  .howManyPropertiesSubmit()
+                  .url
+                doc
+                  .select("#numberOfProperties-0")
+                  .attr("checked") shouldBe "checked"
+              }
             )
           }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("numberOfProperties.main.title"),
-            { doc =>
-              doc
-                .select("#back")
-                .attr("href")    shouldBe routes.SingleDisposalsTriageController
-                .checkYourAnswers()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action")  shouldBe routes.CommonTriageQuestionsController
-                .howManyPropertiesSubmit()
-                .url
-              doc
-                .select("#numberOfProperties-0")
-                .attr("checked") shouldBe "checked"
-            }
-          )
-        }
 
         "the user is on the single disposals journey and has completed the triage section " +
           "it hsa not started and has saved a draft return yet" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithFillingOutReturn(
-                sample[CompleteSingleDisposalTriageAnswers]
-              )._1
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  sample[CompleteSingleDisposalTriageAnswers]
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("numberOfProperties.main.title"),
+              { doc =>
+                doc
+                  .select("#back")
+                  .attr("href")    shouldBe routes.SingleDisposalsTriageController
+                  .checkYourAnswers()
+                  .url
+                doc
+                  .select("#content > article > form")
+                  .attr("action")  shouldBe routes.CommonTriageQuestionsController
+                  .howManyPropertiesSubmit()
+                  .url
+                doc
+                  .select("#numberOfProperties-0")
+                  .attr("checked") shouldBe "checked"
+              }
             )
           }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("numberOfProperties.main.title"),
-            { doc =>
-              doc
-                .select("#back")
-                .attr("href")    shouldBe routes.SingleDisposalsTriageController
-                .checkYourAnswers()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action")  shouldBe routes.CommonTriageQuestionsController
-                .howManyPropertiesSubmit()
-                .url
-              doc
-                .select("#numberOfProperties-0")
-                .attr("checked") shouldBe "checked"
-            }
-          )
-        }
 
       }
 
@@ -1527,21 +1525,21 @@ class CommonTriageQuestionsControllerSpec
 
           "the user is on a single disposal journey and hasn't answered the question yet and " +
             "they haven't completed the triage section" in {
-            testSuccessfulUpdateStartingNewDraftReturn(
-              performAction("numberOfProperties" -> "0"),
-              Right(
-                IncompleteSingleDisposalTriageAnswers.empty
-              ),
-              Left(sample[TrustName])
-            )(
-              Right(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  hasConfirmedSingleDisposal = true
-                )
-              ),
-              routes.SingleDisposalsTriageController.checkYourAnswers()
-            )
-          }
+              testSuccessfulUpdateStartingNewDraftReturn(
+                performAction("numberOfProperties" -> "0"),
+                Right(
+                  IncompleteSingleDisposalTriageAnswers.empty
+                ),
+                Left(sample[TrustName])
+              )(
+                Right(
+                  IncompleteSingleDisposalTriageAnswers.empty.copy(
+                    hasConfirmedSingleDisposal = true
+                  )
+                ),
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            }
 
           "the user is on a single disposal journey and they haven't completed the triage section" in {
             testSuccessfulUpdateStartingNewDraftReturn(

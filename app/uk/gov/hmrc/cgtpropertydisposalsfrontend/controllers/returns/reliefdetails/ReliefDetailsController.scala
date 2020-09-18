@@ -109,7 +109,7 @@ class ReliefDetailsController @Inject() (
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)
         )(f(s, r, d, _))
 
-      case _                                   => Redirect(controllers.routes.StartController.start())
+      case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def commonDisplayBehaviour[A, P : Writeable, R](
@@ -427,10 +427,9 @@ class ReliefDetailsController @Inject() (
               answers.fold(_.otherReliefs, _.otherReliefs)
             val otherReliefs         = maybeOtherReliefs
               .bimap(
-                {
-                  case (name, amount) =>
-                    OtherReliefsOption
-                      .OtherReliefs(name, AmountInPence.fromPounds(amount))
+                { case (name, amount) =>
+                  OtherReliefsOption
+                    .OtherReliefs(name, AmountInPence.fromPounds(amount))
                 },
                 _ => OtherReliefsOption.NoOtherReliefs
               )
@@ -505,7 +504,7 @@ class ReliefDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndReliefDetailsAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         answers match {
-          case c: CompleteReliefDetailsAnswers                                                =>
+          case c: CompleteReliefDetailsAnswers =>
             Ok(
               checkYouAnswersPage(
                 c,
@@ -514,7 +513,7 @@ class ReliefDetailsController @Inject() (
               )
             )
 
-          case IncompleteReliefDetailsAnswers(None, _, _)                                     =>
+          case IncompleteReliefDetailsAnswers(None, _, _) =>
             Redirect(routes.ReliefDetailsController.privateResidentsRelief())
 
           case IncompleteReliefDetailsAnswers(
@@ -527,10 +526,10 @@ class ReliefDetailsController @Inject() (
           case IncompleteReliefDetailsAnswers(Some(prr), None, _) if prr > AmountInPence.zero =>
             Redirect(routes.ReliefDetailsController.lettingsRelief())
 
-          case IncompleteReliefDetailsAnswers(_, _, None)                                     =>
+          case IncompleteReliefDetailsAnswers(_, _, None) =>
             Redirect(routes.ReliefDetailsController.otherReliefs())
 
-          case IncompleteReliefDetailsAnswers(Some(prr), None, or)                            =>
+          case IncompleteReliefDetailsAnswers(Some(prr), None, or) =>
             completeRelief(
               fillingOutReturn,
               draftReturn,
@@ -539,7 +538,7 @@ class ReliefDetailsController @Inject() (
               or
             )
 
-          case IncompleteReliefDetailsAnswers(Some(prr), Some(lr), or)                        =>
+          case IncompleteReliefDetailsAnswers(Some(prr), Some(lr), or) =>
             completeRelief(fillingOutReturn, draftReturn, prr, lr, or)
         }
       }

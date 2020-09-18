@@ -55,19 +55,18 @@ trait AuthenticatedActionBase[P[_]] extends ActionRefiner[MessagesRequest, P] wi
   override protected def refine[A](
     request: MessagesRequest[A]
   ): Future[Either[Result, P[A]]] =
-    authorisedFunction[A](authorisedFunctions, request).recoverWith {
-      case _: NoActiveSession =>
-        Future.successful(
-          Left(
-            Redirect(
-              signInUrl,
-              Map(
-                "continue" -> Seq(selfBaseUrl + request.uri),
-                "origin"   -> Seq(origin)
-              )
+    authorisedFunction[A](authorisedFunctions, request).recoverWith { case _: NoActiveSession =>
+      Future.successful(
+        Left(
+          Redirect(
+            signInUrl,
+            Map(
+              "continue" -> Seq(selfBaseUrl + request.uri),
+              "origin"   -> Seq(origin)
             )
           )
         )
+      )
     }
 
 }

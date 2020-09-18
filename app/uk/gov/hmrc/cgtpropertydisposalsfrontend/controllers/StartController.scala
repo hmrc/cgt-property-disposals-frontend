@@ -148,67 +148,67 @@ class StartController @Inject() (
     request: RequestWithSessionDataAndRetrievedData[AnyContent]
   ): Future[Result] =
     journeyStatus match {
-      case _: Subscribed                                                                              =>
+      case _: Subscribed =>
         Redirect(
           controllers.accounts.homepage.routes.HomePageController.homepage()
         )
 
-      case AgentWithoutAgentEnrolment                                                                 =>
+      case AgentWithoutAgentEnrolment =>
         Redirect(routes.StartController.agentNoEnrolment())
 
-      case AlreadySubscribedWithDifferentGGAccount(_, _)                                              =>
+      case AlreadySubscribedWithDifferentGGAccount(_, _) =>
         Redirect(
           onboarding.routes.SubscriptionController
             .alreadySubscribedWithDifferentGGAccount()
         )
 
-      case _: SubscriptionStatus.SubscriptionReady                                                    =>
+      case _: SubscriptionStatus.SubscriptionReady =>
         Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
 
-      case _: SubscriptionStatus.TryingToGetIndividualsFootprint                                      =>
+      case _: SubscriptionStatus.TryingToGetIndividualsFootprint =>
         // this is not the first time a person with individual insufficient confidence level has come to start
         Redirect(
           onboarding.routes.InsufficientConfidenceLevelController
             .doYouHaveNINO()
         )
 
-      case _: RegistrationStatus.RegistrationReady                                                    =>
+      case _: RegistrationStatus.RegistrationReady =>
         Redirect(onboarding.routes.RegistrationController.checkYourAnswers())
 
-      case _: RegistrationStatus.IndividualSupplyingInformation                                       =>
+      case _: RegistrationStatus.IndividualSupplyingInformation =>
         Redirect(onboarding.routes.RegistrationController.selectEntityType())
 
-      case _: RegistrationStatus.IndividualMissingEmail                                               =>
+      case _: RegistrationStatus.IndividualMissingEmail =>
         Redirect(
           onboarding.email.routes.RegistrationEnterEmailController.enterEmail()
         )
 
-      case RegistrationStatus.IndividualWantsToRegisterTrust(_)                                       =>
+      case RegistrationStatus.IndividualWantsToRegisterTrust(_) =>
         Redirect(onboarding.routes.RegistrationController.selectEntityType())
 
       case SubscriptionStatus
             .DeterminingIfOrganisationIsTrust(ggCredId, ggEmail, _, _) =>
         handleNonTrustOrganisation(ggCredId, ggEmail)
 
-      case NonGovernmentGatewayJourney                                                                =>
+      case NonGovernmentGatewayJourney =>
         Redirect(routes.StartController.weOnlySupportGG())
 
-      case s: SubscriptionStatus.SubscriptionMissingData                                              =>
+      case s: SubscriptionStatus.SubscriptionMissingData =>
         handleSubscriptionMissingData(s)
 
-      case _: AgentStatus.AgentSupplyingClientDetails                                                 =>
+      case _: AgentStatus.AgentSupplyingClientDetails =>
         Redirect(agents.routes.AgentAccessController.enterClientsCgtRef())
 
       case _: StartingNewDraftReturn | _: FillingOutReturn | _: ViewingReturn | _: SubmitReturnFailed =>
         Redirect(accounts.homepage.routes.HomePageController.homepage())
 
-      case _: JustSubmittedReturn                                                                     =>
+      case _: JustSubmittedReturn =>
         Redirect(
           controllers.returns.routes.CheckAllAnswersAndSubmitController
             .confirmationOfSubmission()
         )
 
-      case _: StartingToAmendReturn                                                                   =>
+      case _: StartingToAmendReturn =>
         Redirect(
           controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
         )
@@ -220,7 +220,7 @@ class StartController @Inject() (
     request: RequestWithSessionDataAndRetrievedData[AnyContent]
   ): Future[Result] =
     retrievedUserType match {
-      case RetrievedUserType.Agent(ggCredId, arn)                       =>
+      case RetrievedUserType.Agent(ggCredId, arn) =>
         val journeyStatusWithRedirect =
           arn.fold[(JourneyStatus, Call)](
             AgentWithoutAgentEnrolment -> routes.StartController
@@ -240,7 +240,7 @@ class StartController @Inject() (
             userType = Some(UserType.Agent)
           )
         ).map {
-          case Left(e)  =>
+          case Left(e) =>
             logger.warn("Could not update session", e)
             errorHandler.errorResult(Some(UserType.Agent))
 
@@ -248,7 +248,7 @@ class StartController @Inject() (
             Redirect(journeyStatusWithRedirect._2)
         }
 
-      case RetrievedUserType.Subscribed(cgtReference, ggCredId)         =>
+      case RetrievedUserType.Subscribed(cgtReference, ggCredId) =>
         handleSubscribedUser(cgtReference, ggCredId)
 
       case RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
@@ -265,16 +265,16 @@ class StartController @Inject() (
           ggCredId
         )
 
-      case i: RetrievedUserType.Individual                              =>
+      case i: RetrievedUserType.Individual =>
         buildIndividualSubscriptionData(i)
 
-      case t: RetrievedUserType.Trust                                   =>
+      case t: RetrievedUserType.Trust =>
         buildTrustSubscriptionData(t)
 
       case RetrievedUserType.OrganisationUnregisteredTrust(_, ggCredId) =>
         handleNonTrustOrganisation(ggCredId, None)
 
-      case u: RetrievedUserType.NonGovernmentGatewayRetrievedUser       =>
+      case u: RetrievedUserType.NonGovernmentGatewayRetrievedUser =>
         handleNonGovernmentGatewayUser(u)
     }
 
@@ -293,7 +293,7 @@ class StartController @Inject() (
         journeyStatus = Some(NonGovernmentGatewayJourney)
       )
     ).map {
-      case Left(e)  =>
+      case Left(e) =>
         logger.warn("Could not update session", e)
         errorHandler.errorResult(request.authenticatedRequest.userType)
 
@@ -380,7 +380,7 @@ class StartController @Inject() (
         )
       )
     ).map {
-      case Left(e)  =>
+      case Left(e) =>
         logger.warn("Could not update session", e)
         errorHandler.errorResult(request.authenticatedRequest.userType)
 
@@ -398,14 +398,14 @@ class StartController @Inject() (
     request: RequestWithSessionDataAndRetrievedData[AnyContent]
   ): Future[Result] =
     maybeNino match {
-      case None    =>
+      case None =>
         maybeSautr match {
           case Some(sautr) =>
             buildIndividualSubscriptionData(
               Individual(Left(sautr), ggEmail, ggCredId)
             )
 
-          case None        =>
+          case None =>
             val subscriptionStatus =
               SubscriptionStatus
                 .TryingToGetIndividualsFootprint(None, None, ggEmail, ggCredId)
@@ -424,7 +424,7 @@ class StartController @Inject() (
                 )
               )
             ).map {
-              case Left(e)  =>
+              case Left(e) =>
                 logger.warn(
                   "Could not update session with insufficient confidence level",
                   e
@@ -453,12 +453,13 @@ class StartController @Inject() (
   ): Future[Result] = {
     val result =
       for {
-        bprResponse              <- bprService.getBusinessPartnerRecord(
-                                      TrustBusinessPartnerRecordRequest(Right(trust.sautr), None)
-                                    )
+        bprResponse <- bprService.getBusinessPartnerRecord(
+                         TrustBusinessPartnerRecordRequest(Right(trust.sautr), None)
+                       )
 
         bprWithTrustName         <- EitherT.fromEither[Future](
-                                      Either.fromOption(
+                                      Either
+                                        .fromOption(
                                           bprResponse.businessPartnerRecord,
                                           Error("Could not find BPR for trust")
                                         )
@@ -488,29 +489,28 @@ class StartController @Inject() (
                 Left(
                   BuildSubscriptionDataError.DataMissing(bprWithTrustName._1)
                 )
-              ) {
-                case (emailWithSource, addressWithSource) =>
-                  bprResponse.cgtReference.fold[
-                    Either[BuildSubscriptionDataError, SubscriptionDetails]
-                  ](
-                    Right(
-                      SubscriptionDetails(
-                        Left(bprWithTrustName._2),
-                        emailWithSource._1,
-                        addressWithSource._1,
-                        ContactName(bprWithTrustName._2.value),
-                        bprWithTrustName._1.sapNumber,
-                        emailWithSource._2,
-                        addressWithSource._2,
-                        ContactNameSource.DerivedFromBusinessPartnerRecord
-                      )
-                    )
-                  )(cgtReference =>
-                    Left(
-                      BuildSubscriptionDataError
-                        .AlreadySubscribedToCGT(cgtReference)
+              ) { case (emailWithSource, addressWithSource) =>
+                bprResponse.cgtReference.fold[
+                  Either[BuildSubscriptionDataError, SubscriptionDetails]
+                ](
+                  Right(
+                    SubscriptionDetails(
+                      Left(bprWithTrustName._2),
+                      emailWithSource._1,
+                      addressWithSource._1,
+                      ContactName(bprWithTrustName._2.value),
+                      bprWithTrustName._1.sapNumber,
+                      emailWithSource._2,
+                      addressWithSource._2,
+                      ContactNameSource.DerivedFromBusinessPartnerRecord
                     )
                   )
+                )(cgtReference =>
+                  Left(
+                    BuildSubscriptionDataError
+                      .AlreadySubscribedToCGT(cgtReference)
+                  )
+                )
               }
           )
         }
@@ -548,7 +548,7 @@ class StartController @Inject() (
               .alreadySubscribedWithDifferentGGAccount()
           )
 
-        case Right(_)                                        =>
+        case Right(_) =>
           Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
       }
     )
@@ -574,7 +574,7 @@ class StartController @Inject() (
                 .isUk()
             )
 
-          case MissingData.Email   =>
+          case MissingData.Email =>
             Redirect(
               onboarding.email.routes.SubscriptionEnterEmailController
                 .enterEmail()
@@ -652,7 +652,7 @@ class StartController @Inject() (
               .alreadySubscribedWithDifferentGGAccount()
           )
 
-        case Right(_)                                        =>
+        case Right(_) =>
           Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
       }
     )

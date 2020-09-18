@@ -54,25 +54,22 @@ class AccountController @Inject() (
 
   def contactNameUpdated(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSubscribedUser(request) {
-        case _ =>
-          Ok(detailUpdatedPage(SubscriptionDetail.ContactName))
+      withSubscribedUser(request) { case _ =>
+        Ok(detailUpdatedPage(SubscriptionDetail.ContactName))
       }
     }
 
   def contactEmailUpdated(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSubscribedUser(request) {
-        case _ =>
-          Ok(detailUpdatedPage(SubscriptionDetail.Email))
+      withSubscribedUser(request) { case _ =>
+        Ok(detailUpdatedPage(SubscriptionDetail.Email))
       }
     }
 
   def contactAddressUpdated(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withSubscribedUser(request) {
-        case _ =>
-          Ok(detailUpdatedPage(SubscriptionDetail.Address))
+      withSubscribedUser(request) { case _ =>
+        Ok(detailUpdatedPage(SubscriptionDetail.Address))
       }
     }
 

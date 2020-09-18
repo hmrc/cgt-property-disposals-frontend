@@ -79,63 +79,62 @@ class InitialGainOrLossController @Inject() (
 
   def submitInitialGainOrLoss: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAnswers {
-        case (fillingOutReturn, draftReturn, answers) =>
-          val backLink           = getBackLink(answers)
-          val isATrust           = fillingOutReturn.subscribedDetails.isATrust
-          val representativeType =
-            draftReturn.triageAnswers.representativeType()
-          initialGainOrLossForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors =>
-                BadRequest(
-                  initialGainOrLossesPage(
-                    formWithErrors,
-                    backLink,
-                    isATrust,
-                    representativeType,
-                    fillingOutReturn.isAmendReturn
+      withFillingOutReturnAndAnswers { case (fillingOutReturn, draftReturn, answers) =>
+        val backLink           = getBackLink(answers)
+        val isATrust           = fillingOutReturn.subscribedDetails.isATrust
+        val representativeType =
+          draftReturn.triageAnswers.representativeType()
+        initialGainOrLossForm
+          .bindFromRequest()
+          .fold(
+            formWithErrors =>
+              BadRequest(
+                initialGainOrLossesPage(
+                  formWithErrors,
+                  backLink,
+                  isATrust,
+                  representativeType,
+                  fillingOutReturn.isAmendReturn
+                )
+              ),
+            value =>
+              if (answers.map(_.inPounds()).contains(value))
+                Redirect(
+                  routes.InitialGainOrLossController.checkYourAnswers()
+                )
+              else {
+                val updatedDraftReturn =
+                  draftReturn.copy(
+                    initialGainOrLoss = Some(AmountInPence.fromPounds(value)),
+                    reliefDetailsAnswers = draftReturn.reliefDetailsAnswers
+                      .map(_.unsetPrrAndLettingRelief(draftReturn.triageAnswers.isPeriodOfAdmin)),
+                    yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers
+                      .flatMap(_.unsetAllButIncomeDetails())
                   )
-                ),
-              value =>
-                if (answers.map(_.inPounds()).contains(value))
-                  Redirect(
-                    routes.InitialGainOrLossController.checkYourAnswers()
-                  )
-                else {
-                  val updatedDraftReturn =
-                    draftReturn.copy(
-                      initialGainOrLoss = Some(AmountInPence.fromPounds(value)),
-                      reliefDetailsAnswers = draftReturn.reliefDetailsAnswers
-                        .map(_.unsetPrrAndLettingRelief(draftReturn.triageAnswers.isPeriodOfAdmin)),
-                      yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers
-                        .flatMap(_.unsetAllButIncomeDetails())
-                    )
 
-                  val updatedJourney = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
+                val updatedJourney = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
 
-                  val result = for {
-                    _ <- returnsService.storeDraftReturn(updatedJourney)
-                    _ <- EitherT(
-                           updateSession(sessionStore, request)(
-                             _.copy(journeyStatus = Some(updatedJourney))
-                           )
+                val result = for {
+                  _ <- returnsService.storeDraftReturn(updatedJourney)
+                  _ <- EitherT(
+                         updateSession(sessionStore, request)(
+                           _.copy(journeyStatus = Some(updatedJourney))
                          )
-                  } yield ()
+                       )
+                } yield ()
 
-                  result.fold(
-                    { e =>
-                      logger.warn("Could not update draft return", e)
-                      errorHandler.errorResult()
-                    },
-                    _ =>
-                      Redirect(
-                        routes.InitialGainOrLossController.checkYourAnswers()
-                      )
-                  )
-                }
-            )
+                result.fold(
+                  { e =>
+                    logger.warn("Could not update draft return", e)
+                    errorHandler.errorResult()
+                  },
+                  _ =>
+                    Redirect(
+                      routes.InitialGainOrLossController.checkYourAnswers()
+                    )
+                )
+              }
+          )
       }
     }
 
@@ -155,7 +154,7 @@ class InitialGainOrLossController @Inject() (
               )
             )
 
-          case None                                   =>
+          case None =>
             Redirect(
               routes.InitialGainOrLossController.enterInitialGainOrLoss()
             )
@@ -202,7 +201,7 @@ class InitialGainOrLossController @Inject() (
           d.initialGainOrLoss
         )
 
-      case _                              => Redirect(controllers.routes.StartController.start())
+      case _ => Redirect(controllers.routes.StartController.start())
     }
 
 }

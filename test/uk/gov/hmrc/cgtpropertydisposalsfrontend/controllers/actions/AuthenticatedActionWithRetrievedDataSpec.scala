@@ -116,8 +116,8 @@ class AuthenticatedActionWithRetrievedDataSpec
         val retrievalsResult = Future successful (
           new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and
             None and None and None and emptyEnrolments and Some(
-            Credentials("id", providerType)
-          )
+              Credentials("id", providerType)
+            )
         )
 
         mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -416,8 +416,8 @@ class AuthenticatedActionWithRetrievedDataSpec
         val retrievalsResult = Future successful (
           new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and
             None and None and Some("email") and emptyEnrolments and Some(
-            ggCredentials
-          )
+              ggCredentials
+            )
         )
 
         inSequence {
@@ -443,8 +443,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
               and None and None and None and Enrolments(
-              Set(trustEnrolment)
-            ) and Some(ggCredentials)
+                Set(trustEnrolment)
+              ) and Some(ggCredentials)
           )
 
           inSequence {
@@ -477,8 +477,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
               and None and None and Some("email") and Enrolments(
-              Set(trustEnrolment)
-            ) and Some(ggCredentials)
+                Set(trustEnrolment)
+              ) and Some(ggCredentials)
           )
 
           inSequence {
@@ -509,8 +509,8 @@ class AuthenticatedActionWithRetrievedDataSpec
         val retrievalsResult = Future successful (
           new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
             and None and None and Some("") and Enrolments(
-            Set(trustEnrolment)
-          ) and Some(ggCredentials)
+              Set(trustEnrolment)
+            ) and Some(ggCredentials)
         )
 
         inSequence {
@@ -628,8 +628,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           val retrievalsResult = Future successful (
             new ~(L50, Some(AffinityGroup.Individual)) and
               None and None and Some("") and emptyEnrolments and Some(
-              ggCredentials
-            )
+                ggCredentials
+              )
           )
 
           inSequence {

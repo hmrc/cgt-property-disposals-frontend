@@ -46,9 +46,8 @@ class WelshSortingSpec extends WordSpec with Matchers with MockFactory {
           (List("yr same llch", "yr samee llch"), List("yr same llch", "yr samee llch"))
         ).foreach { input =>
           withClue(input) {
-            val list = input._1.sortWith {
-              case (countryName1, countryName2) =>
-                countryName1.isBeforeInWelsh(countryName2)
+            val list = input._1.sortWith { case (countryName1, countryName2) =>
+              countryName1.isBeforeInWelsh(countryName2)
             }
             list shouldBe input._2
           }

@@ -108,48 +108,46 @@ class ViewReturnController @Inject() (
               Redirect(amendRoutes.AmendReturnController.youNeedToCalculate())
           }
         }
-
       }
     }
 
   def payCharge(chargeReference: String): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withViewingReturn() {
-        case ViewingReturn(subscribedDetails, _, _, _, _, returnSummary, _) =>
-          val cgtReference = subscribedDetails.cgtReference
-          val details      =
-            s"(chargeReference, cgtReference, submissionId) = ($chargeReference, $cgtReference, ${returnSummary.submissionId})"
+      withViewingReturn() { case ViewingReturn(subscribedDetails, _, _, _, _, returnSummary, _) =>
+        val cgtReference = subscribedDetails.cgtReference
+        val details      =
+          s"(chargeReference, cgtReference, submissionId) = ($chargeReference, $cgtReference, ${returnSummary.submissionId})"
 
-          returnSummary.charges
-            .find(_.chargeReference === chargeReference)
-            .fold[Future[Result]] {
-              logger.warn(
-                s"Could not find charge with charge reference '$chargeReference' for $details"
+        returnSummary.charges
+          .find(_.chargeReference === chargeReference)
+          .fold[Future[Result]] {
+            logger.warn(
+              s"Could not find charge with charge reference '$chargeReference' for $details"
+            )
+            NotFound
+          } { charge =>
+            paymentsService
+              .startPaymentJourney(
+                cgtReference,
+                Some(charge.chargeReference),
+                charge.amount,
+                homeRoutes.HomePageController.homepage(),
+                routes.ViewReturnController.displayReturn()
               )
-              NotFound
-            } { charge =>
-              paymentsService
-                .startPaymentJourney(
-                  cgtReference,
-                  Some(charge.chargeReference),
-                  charge.amount,
-                  homeRoutes.HomePageController.homepage(),
-                  routes.ViewReturnController.displayReturn()
-                )
-                .fold(
-                  { e =>
-                    logger
-                      .warn(s"Could not start payments journey for $details", e)
-                    errorHandler.errorResult()
-                  },
-                  { paymentsJourney =>
-                    logger.info(
-                      s"Started payments journey with journey id ${paymentsJourney.journeyId} for $details}"
-                    )
-                    Redirect(paymentsJourney.nextUrl)
-                  }
-                )
-            }
+              .fold(
+                { e =>
+                  logger
+                    .warn(s"Could not start payments journey for $details", e)
+                  errorHandler.errorResult()
+                },
+                { paymentsJourney =>
+                  logger.info(
+                    s"Started payments journey with journey id ${paymentsJourney.journeyId} for $details}"
+                  )
+                  Redirect(paymentsJourney.nextUrl)
+                }
+              )
+          }
 
       }
     }
@@ -172,7 +170,7 @@ class ViewReturnController @Inject() (
         )
 
         updateSession(sessionStore, request)(_.copy(journeyStatus = Some(journeyStatus))).flatMap {
-          case Left(e)  =>
+          case Left(e) =>
             logger.warn("Could not update session", e)
             errorHandler.errorResult()
 
@@ -180,7 +178,7 @@ class ViewReturnController @Inject() (
             f(journeyStatus)
         }
 
-      case _                              => Redirect(baseRoutes.StartController.start())
+      case _ => Redirect(baseRoutes.StartController.start())
     }
 
 }

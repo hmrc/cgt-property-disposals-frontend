@@ -101,7 +101,7 @@ class RepresenteeController @Inject() (
         case Some(r: RepresentativeType) =>
           f(r, journey, answers)
 
-        case _                           =>
+        case _ =>
           Redirect(controllers.returns.routes.TaskListController.taskList())
       }
 
@@ -117,7 +117,7 @@ class RepresenteeController @Inject() (
         )
         performAction(individualUserType, Left(startingNewDraftReturn), answers)
 
-      case Some(fillingOutReturn: FillingOutReturn)             =>
+      case Some(fillingOutReturn: FillingOutReturn) =>
         val individualUserType =
           fillingOutReturn.draftReturn
             .triageAnswers()
@@ -129,7 +129,7 @@ class RepresenteeController @Inject() (
           .getOrElse(IncompleteRepresenteeAnswers.empty)
         performAction(individualUserType, Right(fillingOutReturn), answers)
 
-      case _                                                    =>
+      case _ =>
         Redirect(controllers.routes.StartController.start())
     }
   }
@@ -427,7 +427,7 @@ class RepresenteeController @Inject() (
           val ggCredId = journey.fold(_.ggCredId, _.ggCredId)
           withNotTooManyUnsuccessfulNameMatchAttempts(ggCredId) { unsuccessfulNameMatchAttempts =>
             answers.fold(_.name, c => Some(c.name)) match {
-              case None       =>
+              case None =>
                 Redirect(routes.RepresenteeController.checkYourAnswers())
 
               case Some(name) =>
@@ -675,7 +675,7 @@ class RepresenteeController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
         val contactDetails = answers match {
-          case c: CompleteRepresenteeAnswers                                 =>
+          case c: CompleteRepresenteeAnswers =>
             EitherT.pure[Future, Error](c.contactDetails)
 
           case IncompleteRepresenteeAnswers(_, _, _, Some(details), _, _, _) =>
@@ -724,7 +724,7 @@ class RepresenteeController @Inject() (
               _ => Redirect(routes.RepresenteeController.checkYourAnswers())
             )
 
-          case _                                                               => Redirect(routes.RepresenteeController.checkYourAnswers())
+          case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
         }
       }
     }
@@ -801,19 +801,19 @@ class RepresenteeController @Inject() (
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
         answers match {
 
-          case IncompleteRepresenteeAnswers(_, _, _, _, _, _, None)                                     =>
+          case IncompleteRepresenteeAnswers(_, _, _, _, _, _, None) =>
             Redirect(routes.RepresenteeController.isFirstReturn())
 
-          case IncompleteRepresenteeAnswers(None, None, None, None, false, false, Some(false))          =>
+          case IncompleteRepresenteeAnswers(None, None, None, None, false, false, Some(false)) =>
             Redirect(triageRoutes.CommonTriageQuestionsController.furtherReturnHelp())
 
-          case IncompleteRepresenteeAnswers(None, _, _, _, _, _, _)                                     =>
+          case IncompleteRepresenteeAnswers(None, _, _, _, _, _, _) =>
             Redirect(routes.RepresenteeController.enterName())
 
           case IncompleteRepresenteeAnswers(_, _, None, _, _, _, _) if representativeType =!= Capacitor =>
             Redirect(routes.RepresenteeController.enterDateOfDeath())
 
-          case IncompleteRepresenteeAnswers(_, None, _, _, _, _, _)                                     =>
+          case IncompleteRepresenteeAnswers(_, None, _, _, _, _, _) =>
             Redirect(routes.RepresenteeController.enterId())
 
           case IncompleteRepresenteeAnswers(
@@ -875,7 +875,7 @@ class RepresenteeController @Inject() (
                 )
             )
 
-          case completeAnswers: CompleteRepresenteeAnswers                                              =>
+          case completeAnswers: CompleteRepresenteeAnswers =>
             Ok(
               cyaPage(
                 completeAnswers,
@@ -892,11 +892,10 @@ class RepresenteeController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withCapacitorOrPersonalRepresentativeAnswers(request) {
-        case _ =>
-          Redirect(
-            triage.routes.CommonTriageQuestionsController.howManyProperties()
-          )
+      withCapacitorOrPersonalRepresentativeAnswers(request) { case _ =>
+        Redirect(
+          triage.routes.CommonTriageQuestionsController.howManyProperties()
+        )
       }
     }
 
@@ -904,12 +903,12 @@ class RepresenteeController @Inject() (
     nameMatchError: NameMatchServiceError[_]
   )(implicit request: RequestWithSessionData[_]): Result =
     nameMatchError match {
-      case NameMatchServiceError.BackendError(error)           =>
+      case NameMatchServiceError.BackendError(error) =>
         logger
           .warn("Encountered error while trying to perform name match", error)
         errorHandler.errorResult()
 
-      case NameMatchServiceError.NameMatchFailed(u)            =>
+      case NameMatchServiceError.NameMatchFailed(u) =>
         logger.info(
           s"Name match failed: ${u.unsuccessfulAttempts} attempts made out of a maximum ${u.maximumAttempts}"
         )

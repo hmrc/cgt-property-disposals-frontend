@@ -77,8 +77,8 @@ object FormUtils {
       override def unbind(key: String, value: A): Map[String, String] =
         optionsZippedWithIndex
           .find(_._1 === value)
-          .fold(Map.empty[String, String]) {
-            case (_, i) => Map(key -> i.toString)
+          .fold(Map.empty[String, String]) { case (_, i) =>
+            Map(key -> i.toString)
           }
     }
 

@@ -2147,7 +2147,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                     sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
                   )
 
-                case _                            => None
+                case _ => None
               }
               val triageAnswers                =
                 sample[CompleteMultipleDisposalsTriageAnswers]

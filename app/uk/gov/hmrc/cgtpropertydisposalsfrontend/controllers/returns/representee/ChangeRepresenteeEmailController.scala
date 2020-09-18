@@ -82,33 +82,31 @@ class ChangeRepresenteeEmailController @Inject() (
       case Some((sessionData, s: StartingNewDraftReturn)) =>
         Either.fromOption(
           extractAnswersAndContactDetails(s.representeeAnswers)
-            .map {
-              case (answers, contactDetails) =>
-                sessionData -> ChangingRepresenteeEmail(
-                  Left(s),
-                  answers,
-                  contactDetails
-                )
+            .map { case (answers, contactDetails) =>
+              sessionData -> ChangingRepresenteeEmail(
+                Left(s),
+                answers,
+                contactDetails
+              )
             },
           Redirect(controllers.routes.StartController.start())
         )
 
-      case Some((sessionData, f: FillingOutReturn))       =>
+      case Some((sessionData, f: FillingOutReturn)) =>
         Either.fromOption(
           extractAnswersAndContactDetails(
             f.draftReturn.representeeAnswers
-          ).map {
-            case (answers, contactDetails) =>
-              sessionData -> ChangingRepresenteeEmail(
-                Right(f),
-                answers,
-                contactDetails
-              )
+          ).map { case (answers, contactDetails) =>
+            sessionData -> ChangingRepresenteeEmail(
+              Right(f),
+              answers,
+              contactDetails
+            )
           },
           Redirect(controllers.routes.StartController.start())
         )
 
-      case _                                              => Left(Redirect(controllers.routes.StartController.start()))
+      case _ => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def validVerificationCompleteJourney(

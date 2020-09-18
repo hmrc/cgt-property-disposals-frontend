@@ -72,13 +72,13 @@ class EmailVerificationServiceImpl @Inject() (
     connector.verifyEmail(email, name, continueCall, language).subflatMap { response =>
       timer.close()
       response.status match {
-        case CREATED  =>
+        case CREATED =>
           Right(EmailVerificationRequested)
 
         case CONFLICT =>
           Right(EmailAlreadyVerified)
 
-        case other    =>
+        case other =>
           metrics.emailVerificationErrorCounter.inc()
           Left(Error(s"Call to verify email came back with status $other"))
       }

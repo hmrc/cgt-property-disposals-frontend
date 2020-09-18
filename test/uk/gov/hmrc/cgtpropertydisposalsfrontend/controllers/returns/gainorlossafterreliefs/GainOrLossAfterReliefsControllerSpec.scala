@@ -491,82 +491,77 @@ class GainOrLossAfterReliefsControllerSpec
         }
 
         "no option is selected" in {
-          testCasesWithUserKeys.foreach {
-            case (session, userKey) =>
-              withClue(s"For test case '$userKey': ") {
-                testFormError(
-                  session
-                )(
-                  s"gainOrLossAfterReliefs$userKey.title",
-                  s"gainOrLossAfterReliefs$userKey.error.required"
-                )
-              }
+          testCasesWithUserKeys.foreach { case (session, userKey) =>
+            withClue(s"For test case '$userKey': ") {
+              testFormError(
+                session
+              )(
+                s"gainOrLossAfterReliefs$userKey.title",
+                s"gainOrLossAfterReliefs$userKey.error.required"
+              )
+            }
           }
         }
 
         "the amount of gain is invalid" in {
-          testCasesWithUserKeys.foreach {
-            case (session, userKey) =>
-              amountOfMoneyErrorScenarios("gainAfterReliefs")
-                .foreach { scenario =>
-                  withClue(s"For test case '$userKey' and scenario $scenario: ") {
-                    val data = ("gainOrLossAfterReliefs" -> "0") :: scenario.formData
+          testCasesWithUserKeys.foreach { case (session, userKey) =>
+            amountOfMoneyErrorScenarios("gainAfterReliefs")
+              .foreach { scenario =>
+                withClue(s"For test case '$userKey' and scenario $scenario: ") {
+                  val data = ("gainOrLossAfterReliefs" -> "0") :: scenario.formData
 
-                    testFormError(session, data: _*)(
-                      s"gainOrLossAfterReliefs$userKey.title",
-                      scenario.expectedErrorMessageKey
-                    )
-                  }
+                  testFormError(session, data: _*)(
+                    s"gainOrLossAfterReliefs$userKey.title",
+                    scenario.expectedErrorMessageKey
+                  )
                 }
+              }
           }
         }
 
         "the amount of loss is invalid" in {
-          testCasesWithUserKeys.foreach {
-            case (session, userKey) =>
-              amountOfMoneyErrorScenarios("lossAfterReliefs")
-                .foreach { scenario =>
-                  withClue(s"For test case '$userKey' and scenario $scenario: ") {
-                    val data = ("gainOrLossAfterReliefs" -> "1") :: scenario.formData
+          testCasesWithUserKeys.foreach { case (session, userKey) =>
+            amountOfMoneyErrorScenarios("lossAfterReliefs")
+              .foreach { scenario =>
+                withClue(s"For test case '$userKey' and scenario $scenario: ") {
+                  val data = ("gainOrLossAfterReliefs" -> "1") :: scenario.formData
 
-                    testFormError(session, data: _*)(
-                      s"gainOrLossAfterReliefs$userKey.title",
-                      scenario.expectedErrorMessageKey
-                    )
-                  }
+                  testFormError(session, data: _*)(
+                    s"gainOrLossAfterReliefs$userKey.title",
+                    scenario.expectedErrorMessageKey
+                  )
                 }
+              }
           }
         }
 
         "the amount of gain is zero" in {
-          testCasesWithUserKeys.foreach {
-            case (session, userKey) =>
-              withClue(s"For test case '$userKey': ") {
-                testFormError(
-                  session,
-                  "gainOrLossAfterReliefs" -> "0",
-                  "gainAfterReliefs"       -> "0"
-                )(
-                  s"gainOrLossAfterReliefs$userKey.title",
-                  "gainAfterReliefs.error.tooSmall"
-                )
-              }
+          testCasesWithUserKeys.foreach { case (session, userKey) =>
+            withClue(s"For test case '$userKey': ") {
+              testFormError(
+                session,
+                "gainOrLossAfterReliefs" -> "0",
+                "gainAfterReliefs"       -> "0"
+              )(
+                s"gainOrLossAfterReliefs$userKey.title",
+                "gainAfterReliefs.error.tooSmall"
+              )
+            }
           }
         }
 
         "the amount of loss is zero" in {
-          testCasesWithUserKeys.foreach {
-            case (session, userKey) =>
-              withClue(s"For test case '$userKey': ") {
-                testFormError(
-                  session,
-                  "gainOrLossAfterReliefs" -> "1",
-                  "lossAfterReliefs"       -> "0"
-                )(
-                  s"gainOrLossAfterReliefs$userKey.title",
-                  "lossAfterReliefs.error.tooSmall"
-                )
-              }
+          testCasesWithUserKeys.foreach { case (session, userKey) =>
+            withClue(s"For test case '$userKey': ") {
+              testFormError(
+                session,
+                "gainOrLossAfterReliefs" -> "1",
+                "lossAfterReliefs"       -> "0"
+              )(
+                s"gainOrLossAfterReliefs$userKey.title",
+                "lossAfterReliefs.error.tooSmall"
+              )
+            }
           }
         }
       }

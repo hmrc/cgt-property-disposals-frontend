@@ -214,11 +214,10 @@ class SingleDisposalsTriageControllerSpec
       )(
         requiredPreviousAnswers,
         routes.CommonTriageQuestionsController.howManyProperties(),
-        {
-          case (answers, n) =>
-            answers.copy(
-              hasConfirmedSingleDisposal = if (n.contains(NumberOfProperties.One)) true else false
-            )
+        { case (answers, n) =>
+          answers.copy(
+            hasConfirmedSingleDisposal = if (n.contains(NumberOfProperties.One)) true else false
+          )
         }
       )
 
@@ -423,11 +422,10 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectWhenNoPreviousAnswerBehaviour[NumberOfProperties](() => performAction())(
         requiredPreviousAnswers,
         routes.CommonTriageQuestionsController.howManyProperties(),
-        {
-          case (answers, n) =>
-            answers.copy(
-              hasConfirmedSingleDisposal = if (n.contains(NumberOfProperties.One)) true else false
-            )
+        { case (answers, n) =>
+          answers.copy(
+            hasConfirmedSingleDisposal = if (n.contains(NumberOfProperties.One)) true else false
+          )
         }
       )
 
@@ -974,107 +972,107 @@ class SingleDisposalsTriageControllerSpec
 
           "the user has answered some questions but not complete the section and has " +
             "changed their answer from not in the uk to was in the uk" in {
-            val answers = requiredPreviousAnswers.copy(
-              wasAUKResident = Some(false),
-              countryOfResidence = Some(Country("AB")),
-              assetType = Some(AssetType.Residential),
-              disposalMethod = Some(DisposalMethod.Sold)
-            )
-
-            testSuccessfulUpdateStartingNewDraft(
-              performAction,
-              answers,
-              List("wereYouAUKResident" -> "true"),
-              requiredPreviousAnswers.copy(
-                wasAUKResident = Some(true),
-                countryOfResidence = None,
-                assetType = None
-              ),
-              checkIsRedirect(
-                _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+              val answers = requiredPreviousAnswers.copy(
+                wasAUKResident = Some(false),
+                countryOfResidence = Some(Country("AB")),
+                assetType = Some(AssetType.Residential),
+                disposalMethod = Some(DisposalMethod.Sold)
               )
-            )
-          }
+
+              testSuccessfulUpdateStartingNewDraft(
+                performAction,
+                answers,
+                List("wereYouAUKResident" -> "true"),
+                requiredPreviousAnswers.copy(
+                  wasAUKResident = Some(true),
+                  countryOfResidence = None,
+                  assetType = None
+                ),
+                checkIsRedirect(
+                  _,
+                  routes.SingleDisposalsTriageController.checkYourAnswers()
+                )
+              )
+            }
 
           "the user has answered some questions but not complete the section and has " +
             "changed their answer from was in the uk to not in the uk" in {
-            val answers = requiredPreviousAnswers.copy(
-              wasAUKResident = Some(true),
-              countryOfResidence = None,
-              assetType = Some(AssetType.Residential),
-              disposalMethod = Some(DisposalMethod.Sold)
-            )
-
-            testSuccessfulUpdateStartingNewDraft(
-              performAction,
-              answers,
-              List("wereYouAUKResident" -> "false"),
-              requiredPreviousAnswers.copy(
-                wasAUKResident = Some(false),
+              val answers = requiredPreviousAnswers.copy(
+                wasAUKResident = Some(true),
                 countryOfResidence = None,
-                assetType = None
-              ),
-              checkIsRedirect(
-                _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+                assetType = Some(AssetType.Residential),
+                disposalMethod = Some(DisposalMethod.Sold)
               )
-            )
-          }
+
+              testSuccessfulUpdateStartingNewDraft(
+                performAction,
+                answers,
+                List("wereYouAUKResident" -> "false"),
+                requiredPreviousAnswers.copy(
+                  wasAUKResident = Some(false),
+                  countryOfResidence = None,
+                  assetType = None
+                ),
+                checkIsRedirect(
+                  _,
+                  routes.SingleDisposalsTriageController.checkYourAnswers()
+                )
+              )
+            }
 
           "the user has complete the section and has changed their answer from " +
             "not in the uk to was in the uk" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-              disposalMethod = DisposalMethod.Sold
-            )
-            testSuccessfulUpdateStartingNewDraft(
-              performAction,
-              completeAnswers.copy(countryOfResidence = Country("AB")),
-              List("wereYouAUKResident" -> "true"),
-              IncompleteSingleDisposalTriageAnswers(
-                completeAnswers.individualUserType,
-                true,
-                Some(DisposalMethod.Sold),
-                Some(true),
-                None,
-                None,
-                Some(completeAnswers.disposalDate),
-                Some(completeAnswers.completionDate),
-                None
-              ),
-              checkIsRedirect(
-                _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+              val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                disposalMethod = DisposalMethod.Sold
               )
-            )
-          }
+              testSuccessfulUpdateStartingNewDraft(
+                performAction,
+                completeAnswers.copy(countryOfResidence = Country("AB")),
+                List("wereYouAUKResident" -> "true"),
+                IncompleteSingleDisposalTriageAnswers(
+                  completeAnswers.individualUserType,
+                  true,
+                  Some(DisposalMethod.Sold),
+                  Some(true),
+                  None,
+                  None,
+                  Some(completeAnswers.disposalDate),
+                  Some(completeAnswers.completionDate),
+                  None
+                ),
+                checkIsRedirect(
+                  _,
+                  routes.SingleDisposalsTriageController.checkYourAnswers()
+                )
+              )
+            }
 
           "the user has completed the section and has changed their answer from " +
             "was in the uk to not in the uk" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-              disposalMethod = DisposalMethod.Sold
-            )
-            testSuccessfulUpdateStartingNewDraft(
-              performAction,
-              completeAnswers.copy(countryOfResidence = Country.uk),
-              List("wereYouAUKResident" -> "false"),
-              IncompleteSingleDisposalTriageAnswers(
-                completeAnswers.individualUserType,
-                true,
-                Some(DisposalMethod.Sold),
-                Some(false),
-                None,
-                None,
-                Some(completeAnswers.disposalDate),
-                Some(completeAnswers.completionDate),
-                None
-              ),
-              checkIsRedirect(
-                _,
-                routes.SingleDisposalsTriageController.checkYourAnswers()
+              val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                disposalMethod = DisposalMethod.Sold
               )
-            )
-          }
+              testSuccessfulUpdateStartingNewDraft(
+                performAction,
+                completeAnswers.copy(countryOfResidence = Country.uk),
+                List("wereYouAUKResident" -> "false"),
+                IncompleteSingleDisposalTriageAnswers(
+                  completeAnswers.individualUserType,
+                  true,
+                  Some(DisposalMethod.Sold),
+                  Some(false),
+                  None,
+                  None,
+                  Some(completeAnswers.disposalDate),
+                  Some(completeAnswers.completionDate),
+                  None
+                ),
+                checkIsRedirect(
+                  _,
+                  routes.SingleDisposalsTriageController.checkYourAnswers()
+                )
+              )
+            }
 
         }
 
@@ -1483,9 +1481,8 @@ class SingleDisposalsTriageControllerSpec
         requiredPreviousAnswers,
         List("didYouDisposeOfResidentialProperty" -> "true"),
         requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
-        {
-          case (draftReturn, answers) =>
-            draftReturn.copy(triageAnswers = answers)
+        { case (draftReturn, answers) =>
+          draftReturn.copy(triageAnswers = answers)
         }
       )
 
@@ -1726,9 +1723,8 @@ class SingleDisposalsTriageControllerSpec
         requiredPreviousAnswersUkResident,
         routes.SingleDisposalsTriageController
           .didYouDisposeOfAResidentialProperty(),
-        {
-          case (answers, w) =>
-            answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.NonResidential))
+        { case (answers, w) =>
+          answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.NonResidential))
         }
       )
 
@@ -2131,9 +2127,8 @@ class SingleDisposalsTriageControllerSpec
         requiredPreviousAnswers,
         routes.SingleDisposalsTriageController
           .didYouDisposeOfAResidentialProperty(),
-        {
-          case (answers, w) =>
-            answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.NonResidential))
+        { case (answers, w) =>
+          answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.NonResidential))
         }
       )
 
@@ -3656,8 +3651,8 @@ class SingleDisposalsTriageControllerSpec
       )(
         requiredPreviousAnswers,
         routes.SingleDisposalsTriageController.countryOfResidence(),
-        {
-          case (answers, country) => answers.copy(countryOfResidence = country)
+        { case (answers, country) =>
+          answers.copy(countryOfResidence = country)
         }
       )
 
@@ -3847,7 +3842,7 @@ class SingleDisposalsTriageControllerSpec
           initialGainOrLoss = None,
           reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
-            case c: CalculatedYTDAnswers    =>
+            case c: CalculatedYTDAnswers =>
               Some(
                 c.unset(_.hasEstimatedDetails)
                   .unset(_.calculatedTaxDue)
@@ -3885,8 +3880,8 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectWhenNoPreviousAnswerBehaviour[Country](() => performAction())(
         requiredPreviousAnswers,
         routes.SingleDisposalsTriageController.countryOfResidence(),
-        {
-          case (answers, country) => answers.copy(countryOfResidence = country)
+        { case (answers, country) =>
+          answers.copy(countryOfResidence = country)
         }
       )
 
@@ -4544,13 +4539,12 @@ class SingleDisposalsTriageControllerSpec
       behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](() => performAction())(
         requiredPreviousAnswers,
         routes.SingleDisposalsTriageController.assetTypeForNonUkResidents(),
-        {
-          case (answers, w) =>
-            answers.copy(assetType =
-              w.map(
-                if (_) AssetType.Residential else AssetType.IndirectDisposal
-              )
+        { case (answers, w) =>
+          answers.copy(assetType =
+            w.map(
+              if (_) AssetType.Residential else AssetType.IndirectDisposal
             )
+          )
         }
       )
 
@@ -5181,18 +5175,17 @@ class SingleDisposalsTriageControllerSpec
               representee.routes.RepresenteeController.checkYourAnswers(),
               None
             )
-          ).foreach {
-            case Scenario(state, name, expectedRedirect, previousSentReturns) =>
-              withClue(
-                s"For state $state and expected redirect url ${expectedRedirect.url}: "
-              ) {
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(sessionDataWith(state, name, previousSentReturns))
-                }
-
-                checkIsRedirect(performAction(), expectedRedirect)
+          ).foreach { case Scenario(state, name, expectedRedirect, previousSentReturns) =>
+            withClue(
+              s"For state $state and expected redirect url ${expectedRedirect.url}: "
+            ) {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(sessionDataWith(state, name, previousSentReturns))
               }
+
+              checkIsRedirect(performAction(), expectedRedirect)
+            }
           }
 
         "a question has not yet been answered and a draft return has not been created" in {

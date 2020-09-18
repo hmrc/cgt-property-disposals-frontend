@@ -51,7 +51,7 @@ class FurtherReturnGuidanceController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withJourneyState(request) { (_, state) =>
         backLinkMappings.get(back) match {
-          case None           =>
+          case None =>
             logger.warn(s"Could not find back link location for '$back'")
             errorHandler.errorResult()
 
@@ -134,16 +134,16 @@ class FurtherReturnGuidanceController @Inject() (
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((session, s: StartingToAmendReturn))  =>
+      case Some((session, s: StartingToAmendReturn)) =>
         f(session, Left(Left(s)))
 
       case Some((session, s: StartingNewDraftReturn)) =>
         f(session, Left(Right(s)))
 
-      case Some((session, r: FillingOutReturn))       =>
+      case Some((session, r: FillingOutReturn)) =>
         f(session, Right(r))
 
-      case _                                          =>
+      case _ =>
         Redirect(
           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController
             .start()
