@@ -20,12 +20,13 @@ import java.time.{LocalDate, LocalDateTime}
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.{ DeltaCharge, ReturnCharge }
 
 final case class SubmitReturnResponse(
   formBundleId: String,
   processingDate: LocalDateTime,
-  charge: Option[ReturnCharge]
+  charge: Option[ReturnCharge],
+  deltaCharge: Option[DeltaCharge] = None
 )
 
 object SubmitReturnResponse {
@@ -34,6 +35,11 @@ object SubmitReturnResponse {
     chargeReference: String,
     amount: AmountInPence,
     dueDate: LocalDate
+  )
+
+  final case class DeltaCharge(
+    originalCharge: ReturnCharge,
+    deltaCharge: ReturnCharge
   )
 
   implicit val returnChargeFormat: OFormat[ReturnCharge] = Json.format

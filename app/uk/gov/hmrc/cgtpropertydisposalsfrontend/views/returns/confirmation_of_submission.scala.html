@@ -50,6 +50,7 @@
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @isATrust = @{ justSubmittedReturn.subscribedDetails.isATrust }
 @isAmend = @{ justSubmittedReturn.amendReturnData.isDefined }
+@deltaCharge = @{justSubmittedReturn.submissionResponse.deltaCharge }
 
 @completionDate = @{justSubmittedReturn.completeReturn match {
     case CompleteMultipleDisposalsReturn(triageAnswers, _, _, _, _, _, _, _) => triageAnswers.completionDate
@@ -117,7 +118,7 @@
 
 @isLateReturn = @{completionDate.value.plusDays(30L).isBefore(TimeUtils.today)}
 @amendedReturnWithSameCompletionDate = @{ justSubmittedReturn.amendReturnData.exists(_.originalReturn.completeReturn.completionDate === justSubmittedReturn.completeReturn.completionDate) }
-
+@showDueDate = @{!amountOwed.equals(BigDecimal(0)) && !isPeriodOfAdmin}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -190,7 +191,7 @@
             None,
             "property-address-table"
         )
-        @{if(!amountOwed.equals(BigDecimal(0)) && !isPeriodOfAdmin) {
+        @{if(showDueDate && deltaCharge.isEmpty) {
             justSubmittedReturn.submissionResponse.charge.map { charge =>
                 cyaRow(
                     messages(s"$key.taxDue"),
@@ -201,6 +202,54 @@
             }}
         }
     }
+
+  @deltaCharge.map { charges =>
+    <table class="borders">
+      <thead>
+        <tr style="vertical-align:bottom;">
+          <th scope="col"></th>
+          <th scope="col">@messages("confirmationOfSubmission.dateDue")</th>
+          <th scope="col">@messages("confirmationOfSubmission.amount")</th>
+        </tr>
+      </thead>
+      <tbody id="delta-due-dates">
+        <tr>
+          <td>
+            <strong class="bold">
+              @messages(s"$key.chargeLabel")
+            </strong>
+            <br>
+            <span class="caption">
+              @charges.originalCharge.chargeReference
+            </span>
+          </td>
+          <td>
+            @Html(TimeUtils.govDisplayFormat(charges.originalCharge.dueDate))
+          </td>
+          <td>
+            @{formatAmountOfMoneyWithPoundSign(charges.originalCharge.amount.inPounds())}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong class="bold">
+            @messages(s"$key.deltaChargeLabel")
+            </strong>
+            <br>
+            <span class="caption">
+            @charges.deltaCharge.chargeReference
+            </span>
+          </td>
+          <td>
+          @Html(TimeUtils.govDisplayFormat(charges.deltaCharge.dueDate))
+          </td>
+          <td>
+          @{formatAmountOfMoneyWithPoundSign(charges.deltaCharge.amount.inPounds())}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  }
 
   @if(justSubmittedReturn.submissionResponse.charge.isEmpty && isPeriodOfAdmin) {
     <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>

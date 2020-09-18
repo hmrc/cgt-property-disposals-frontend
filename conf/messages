@@ -4099,6 +4099,10 @@ confirmationOfSubmission.returnReference=Return reference number
 confirmationOfSubmission.paymentReference=Payment reference number
 confirmationOfSubmission.propertyAddress=Property address
 confirmationOfSubmission.companyAddress=Company address
+confirmationOfSubmission.dateDue=Date due
+confirmationOfSubmission.amount=Amount
+confirmationOfSubmission.chargeLabel=Tax payment
+confirmationOfSubmission.deltaChargeLabel=Updated tax liability
 
 confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>.
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
