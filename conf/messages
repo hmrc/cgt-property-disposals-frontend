@@ -4094,6 +4094,7 @@ submitReturnError.button=Go to account home
 
 confirmationOfSubmission.title=Return sent
 confirmationOfSubmission.taxOwed=Tax owed
+confirmationOfSubmission.revisedLiability=Updated liability for this return
 confirmationOfSubmission.returnReference=Return reference number
 confirmationOfSubmission.paymentReference=Payment reference number
 confirmationOfSubmission.propertyAddress=Property address

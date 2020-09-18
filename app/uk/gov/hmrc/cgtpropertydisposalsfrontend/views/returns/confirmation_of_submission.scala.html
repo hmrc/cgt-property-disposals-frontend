@@ -49,6 +49,7 @@
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @isATrust = @{ justSubmittedReturn.subscribedDetails.isATrust }
+@isAmend = @{ justSubmittedReturn.amendReturnData.isDefined }
 
 @completionDate = @{justSubmittedReturn.completeReturn match {
     case CompleteMultipleDisposalsReturn(triageAnswers, _, _, _, _, _, _, _) => triageAnswers.completionDate
@@ -135,7 +136,7 @@
     <h1 class="heading-xlarge">@title</h1>
     @if(!isPeriodOfAdmin) {
       <span class="heading-large" style="font-weight: normal;">
-        @messages(s"$key.taxOwed")
+        @messages(s"$key.${if(isAmend) "revisedLiability" else "taxOwed"}")
         <strong style="display:block; font-weight: bold;">
           @{{formatAmountOfMoneyWithPoundSign(amountOwed)}}
         </strong>
