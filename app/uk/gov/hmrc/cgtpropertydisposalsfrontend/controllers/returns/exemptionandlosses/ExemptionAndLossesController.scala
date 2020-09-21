@@ -349,7 +349,6 @@ class ExemptionAndLossesController @Inject() (
                 _.copy(inYearLosses = Some(AmountInPence.fromPounds(inYearLosses))),
                 _.copy(inYearLosses = AmountInPence.fromPounds(inYearLosses))
               )
-
             }
           }
         }
