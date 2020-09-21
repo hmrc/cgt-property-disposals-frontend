@@ -1586,6 +1586,7 @@ class YearToDateLiabilityController @Inject() (
                       draftReturn
                     else {
                       val newAnswers = nonCalculatedAnswers
+                        .unset(_.checkForRepayment)
                         .unset(_.mandatoryEvidence)
                         .unset(_.expiredEvidence)
                         .unset(_.pendingUpscanUpload)
@@ -1895,6 +1896,8 @@ class YearToDateLiabilityController @Inject() (
                 else {
                   val newAnswers =
                     nonCalculatedAnswers
+                      .unset(_.taxDue)
+                      .unset(_.checkForRepayment)
                       .unset(_.mandatoryEvidence)
                       .copy(yearToDateLiability = Some(yearToDateLiability))
 

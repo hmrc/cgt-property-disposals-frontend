@@ -345,10 +345,19 @@ class ExemptionAndLossesController @Inject() (
               _ => Some(()),
               controllers.returns.routes.TaskListController.taskList()
             ) { (inYearLosses, answers) =>
-              answers.fold(
-                _.copy(inYearLosses = Some(AmountInPence.fromPounds(inYearLosses))),
-                _.copy(inYearLosses = AmountInPence.fromPounds(inYearLosses))
-              )
+              if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
+                answers
+                  .unset(_.previousYearsLosses)
+                  .copy(
+                    inYearLosses = Some(AmountInPence.fromPounds(inYearLosses))
+                  )
+              } else {
+                answers.fold(
+                  _.copy(inYearLosses = Some(AmountInPence.fromPounds(inYearLosses))),
+                  _.copy(inYearLosses = AmountInPence.fromPounds(inYearLosses))
+                )
+              }
+
             }
           }
         }

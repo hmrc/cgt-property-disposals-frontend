@@ -5305,7 +5305,7 @@ class YearToDateLiabilityControllerSpec
             None,
             None,
             answers.yearToDateLiability,
-            answers.checkForRepayment
+            None
           )
           val draftReturn         = sample[DraftSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
@@ -5384,7 +5384,7 @@ class YearToDateLiabilityControllerSpec
               None,
               None,
               answers.yearToDateLiability,
-              answers.checkForRepayment
+              None
             )
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
@@ -6440,7 +6440,7 @@ class YearToDateLiabilityControllerSpec
       }
       "redirect to the check your answers page" when {
 
-        "the return is not a first return" in {
+        "the return is not a further return" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -6545,14 +6545,14 @@ class YearToDateLiabilityControllerSpec
         "all updates are successful" in {
           val submittedAnswer = "100"
           val answers         = sample[CompleteNonCalculatedYTDAnswers].copy(
-            yearToDateLiability = Some(AmountInPence(1L)),
-            taxDue = AmountInPence(10L)
+            yearToDateLiability = Some(AmountInPence(1L))
           )
           val newAnswers      = IncompleteNonCalculatedYTDAnswers
             .fromCompleteAnswers(answers)
             .copy(
               yearToDateLiability = Some(AmountInPence(10000L)),
-              taxDue = Some(AmountInPence(10L)),
+              taxDue = None,
+              checkForRepayment = None,
               mandatoryEvidence = None
             )
 
