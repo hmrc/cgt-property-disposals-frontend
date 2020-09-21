@@ -849,6 +849,46 @@ class ExemptionAndLossesControllerSpec
             }
           }
 
+          "the user is on a further return journey" in {
+            val answers                                  =
+              sample[CompleteExemptionAndLossesAnswers]
+                .copy(inYearLosses = AmountInPence(1L))
+            val newAnswers                               = IncompleteExemptionAndLossesAnswers(
+              Some(AmountInPence(2L)),
+              None,
+              Some(answers.annualExemptAmount)
+            )
+            val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalsState(
+              Some(answers),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              Some(IndividualUserType.Self),
+              isFurtherReturn = true
+            )
+            val newDraftReturn                           = draftReturn.copy(
+              exemptionAndLossesAnswers = Some(newAnswers),
+              yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers
+                .flatMap(_.unsetAllButIncomeDetails())
+            )
+            val newFillingOutReturn                      = fillingOutReturn.copy(draftReturn = newDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(newFillingOutReturn)(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newFillingOutReturn)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(
+                key      -> "0",
+                valueKey -> "0.02"
+              ),
+              routes.ExemptionAndLossesController.checkYourAnswers()
+            )
+
+          }
+
         }
 
       }
