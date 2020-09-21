@@ -223,7 +223,7 @@
                 @charges.originalCharge.chargeReference
               </span>
             </td>
-            <td>
+            <td id="original-charge-due-date">
               @Html(TimeUtils.govDisplayFormat(charges.originalCharge.dueDate))
             </td>
             <td>
@@ -240,7 +240,7 @@
               @charges.deltaCharge.chargeReference
               </span>
             </td>
-            <td>
+            <td id="delta-charge-due-date">
             @Html(TimeUtils.govDisplayFormat(charges.deltaCharge.dueDate))
             </td>
             <td>
