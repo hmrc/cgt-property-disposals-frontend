@@ -2171,14 +2171,11 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the disposal date is in the future" in {
-          DateErrorScenario(
-            Some(tomorrow.getDayOfMonth.toString),
-            Some(tomorrow.getMonthValue.toString),
-            Some(tomorrow.getYear.toString),
-            "disposalDate.error.tooFarInFuture"
-          )
-
           test(formData(tomorrow), "disposalDate.error.tooFarInFuture")
+        }
+
+        "the disposal date is before 1st Jan 1900" in {
+          test(formData(LocalDate.of(1899, 12, 31)), "disposalDate.error.before1900")
         }
 
       }
