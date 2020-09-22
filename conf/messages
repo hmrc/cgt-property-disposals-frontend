@@ -3718,14 +3718,6 @@ yearToDateLiability.personalRep.li1=Work out the person’s taxable income.
 yearToDateLiability.personalRep.li2=Work out what basic rate band can be used against the net gain.
 yearToDateLiability.personalRep.li3=Work out the overall Capital Gains Tax liability on the person’s UK property-related disposals.
 
-yearToDateLiability.h2=What is your overall liability for your gains made so far in tax year {0} to {1}?
-yearToDateLiability.agent.h2=What is your client’s overall liability for their gains made so far in tax year {0} to {1}?
-yearToDateLiability.trust.h2=What is the trust’s overall liability for its gains made so far in tax year {0} to {1}?
-yearToDateLiability.capacitor.h2=What is the person’s overall liability for their gains made so far in tax year {0} to {1}?
-yearToDateLiability.personalRep.h2=What is the person’s overall liability for their gains made so far in tax year {0} to {1}?
-yearToDateLiability.personalRepInPeriodOfAdmin.h2=What is the estate’s overall liability for its gains made so far in tax year {0} to {1}?
-yearToDateLiability.personalRepInPeriodOfAdmin.agent.h2=What is your client’s overall liability their gains made so far in tax year {0} to {1}?
-
 yearToDateLiability.link=How to work out your overall Capital Gains Tax liability on your UK property-related disposals
 yearToDateLiability.agent.link=How to work out your client’s overall Capital Gains Tax liability on their UK property-related disposals
 yearToDateLiability.trust.link=How to work out the trust’s overall Capital Gains Tax liability on its UK property-related disposals

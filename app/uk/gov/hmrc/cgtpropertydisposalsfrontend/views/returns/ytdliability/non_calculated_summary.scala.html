@@ -112,7 +112,7 @@
     @if(isFurtherOrAmendReturn.contains(true)) {
         @answers.yearToDateLiability.map { y =>
             @cyaRow(
-                messages(s"yearToDateLiability$userKeyWithSeparatePeriodOfAdmin.h2", taxYearStart, taxYearEnd),
+                messages(s"yearToDateLiability$userKeyWithSeparatePeriodOfAdmin.title", taxYearStart, taxYearEnd),
                 Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(y.inPounds())),
                 Some(cyaChange(messages("yearToDateLiability.cyaChange"), routes.YearToDateLiabilityController.yearToDateLiability().url)),
                 "yearToDateLiability"

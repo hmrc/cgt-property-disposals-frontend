@@ -17,7 +17,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 
 @import cats.instances.string._
 @import cats.syntax.eq._
@@ -76,6 +75,20 @@
         else e.key
     )
 }
+@helpText = {
+    @if(isATrust || representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)){
+            <p>@messages(s"$key$userKey.p1")</p>
+    } else  {
+            <p>@messages(s"$key.p1")</p>
+
+            <ol class="list list-number">
+            <li>@messages(s"$key.li1")</li>
+            <li>@messages(s"$key.li2")</li>
+            <li>@messages(s"$key$userKey.li3")</li>
+            <li>@messages(s"$key.li4")</li>
+            </ol>
+    }
+}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
@@ -87,30 +100,15 @@
 
     @caption(messages("ytdLiability.furtherReturn.caption"))
 
-    @pageHeading(title)
-
-    @if(isATrust || representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)){
-        <p>@messages(s"$key$userKey.p1")</p>
-    } else  {
-        <p>@messages(s"$key.p1")</p>
-
-        <ol class="list list-number">
-            <li>@messages(s"$key.li1")</li>
-            <li>@messages(s"$key.li2")</li>
-            <li>@messages(s"$key$userKey.li3")</li>
-            <li>@messages(s"$key.li4")</li>
-        </ol>
-    }
-
     @formWrapper(routes.YearToDateLiabilityController.yearToDateLiabilitySubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),
             formError = form.error(key),
             hasErrors = form.error(key).nonEmpty,
-            label = Html(s"""<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey.h2", taxYearStartYear, taxYearEndYear)}</h2>"""),
+            label = pageHeading(title),
             labelAsHeading = true,
-            helpText = None,
+            helpText = Some(helpText),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
