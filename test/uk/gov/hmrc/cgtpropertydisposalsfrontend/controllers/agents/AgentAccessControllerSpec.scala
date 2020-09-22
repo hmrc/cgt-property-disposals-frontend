@@ -426,7 +426,8 @@ class AgentAccessControllerSpec
 
         "the value submitted is valid and the agent has permission for the client and the client's " +
           "address is in the uk" in {
-            val ukClientDetails =
+            val validCgtReference = CgtReference("XYCGTP123456789")
+            val ukClientDetails   =
               newClientDetails(validCgtReference, sample[UkAddress])
 
             inSequence {
@@ -449,7 +450,7 @@ class AgentAccessControllerSpec
               )(Right(()))
             }
 
-            val result = performAction("cgtReference" -> validCgtReference.value)
+            val result = performAction("cgtReference" -> "XYC GTP123 4567 89  ")
             checkIsRedirect(
               result,
               routes.AgentAccessController.enterClientsPostcode()
