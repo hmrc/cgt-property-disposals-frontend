@@ -6157,7 +6157,6 @@ class YearToDateLiabilityControllerSpec
           expectedTitleKey: String,
           expectedP1Message: String,
           expectedLi3Key: Option[String],
-          expectedSubtitleKey: String,
           expectedLinkKey: String
         ): Unit = {
           val (taxYearStart, taxYearEnd) =
@@ -6174,19 +6173,12 @@ class YearToDateLiabilityControllerSpec
             { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
 
-              doc.select("#content > article > p:nth-child(4)").html() shouldBe expectedP1Message
+              doc.select("#yearToDateLiability-form-hint > p").html() shouldBe expectedP1Message
 
-              doc.select("#content > article > ol > li:nth-child(3)").text() shouldBe expectedLi3Key
+              doc.select("#yearToDateLiability-form-hint > ol > li:nth-child(3)").text() shouldBe expectedLi3Key
                 .map(messageFromMessageKey(_))
                 .getOrElse("")
 
-              doc
-                .select("#subheading")
-                .text()                  shouldBe messageFromMessageKey(
-                expectedSubtitleKey,
-                taxYearStart,
-                taxYearEnd
-              )
               doc.select("#link").text() shouldBe messageFromMessageKey(expectedLinkKey)
             }
           )
@@ -6214,7 +6206,6 @@ class YearToDateLiabilityControllerSpec
             "yearToDateLiability.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
-            "yearToDateLiability.h2",
             "yearToDateLiability.link"
           )
         }
@@ -6234,7 +6225,6 @@ class YearToDateLiabilityControllerSpec
             "yearToDateLiability.agent.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.agent.li3"),
-            "yearToDateLiability.agent.h2",
             "yearToDateLiability.agent.link"
           )
         }
@@ -6254,7 +6244,6 @@ class YearToDateLiabilityControllerSpec
             "yearToDateLiability.trust.title",
             messageFromMessageKey("yearToDateLiability.trust.p1", viewConfig.trustsAndCgtUrl),
             None,
-            "yearToDateLiability.trust.h2",
             "yearToDateLiability.trust.link"
           )
         }
@@ -6279,7 +6268,6 @@ class YearToDateLiabilityControllerSpec
             "yearToDateLiability.capacitor.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.capacitor.li3"),
-            "yearToDateLiability.capacitor.h2",
             "yearToDateLiability.capacitor.link"
           )
         }
@@ -6304,7 +6292,6 @@ class YearToDateLiabilityControllerSpec
             "yearToDateLiability.personalRep.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.personalRep.li3"),
-            "yearToDateLiability.personalRep.h2",
             "yearToDateLiability.personalRep.link"
           )
         }
@@ -6329,7 +6316,6 @@ class YearToDateLiabilityControllerSpec
             "yearToDateLiability.personalRepInPeriodOfAdmin.title",
             messageFromMessageKey("yearToDateLiability.personalRepInPeriodOfAdmin.p1", viewConfig.trustsAndCgtUrl),
             None,
-            "yearToDateLiability.personalRepInPeriodOfAdmin.h2",
             "yearToDateLiability.personalRepInPeriodOfAdmin.link"
           )
         }
@@ -6357,7 +6343,6 @@ class YearToDateLiabilityControllerSpec
               viewConfig.trustsAndCgtUrl
             ),
             None,
-            "yearToDateLiability.personalRepInPeriodOfAdmin.agent.h2",
             "yearToDateLiability.personalRepInPeriodOfAdmin.agent.link"
           )
         }
@@ -6393,7 +6378,6 @@ class YearToDateLiabilityControllerSpec
             "yearToDateLiability.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
-            "yearToDateLiability.h2",
             "yearToDateLiability.link"
           )
         }
