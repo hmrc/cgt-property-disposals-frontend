@@ -2381,10 +2381,14 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("confirmationOfSubmission.title"),
-            _.select("#delta-charge-due-date").text shouldBe
-              justSubmittedReturn.submissionResponse.deltaCharge
-                .map(d => TimeUtils.govDisplayFormat(d.deltaCharge.dueDate))
-                .getOrElse("")
+            { doc =>
+              doc.select("#delta-charge-due-date").text shouldBe
+                justSubmittedReturn.submissionResponse.deltaCharge
+                  .map(d => TimeUtils.govDisplayFormat(d.deltaCharge.dueDate))
+                  .getOrElse("")
+
+              doc.select("#tax-due-date-table").text shouldBe ""
+            }
           )
         }
 
