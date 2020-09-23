@@ -17,22 +17,44 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.UkResidentReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.NonUkResidentReturn
+@import play.twirl.api.Html
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+@import cats.syntax.eq._
 
 @this(
-  chargeItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.charge_item
+  chargeItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.charge_item,
+  warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
+
 )
 
-@(heading: String, returnSummary: ReturnSummary)(implicit messages: Messages)
+@(heading: String, returnSummary: ReturnSummary, isAgent: Boolean, isATrust: Boolean)(implicit messages: Messages)
+
+@key = @{ "viewReturn" }
+@userKey = @{
+    if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else ""
+}
 
 <h2 class="heading-large">@heading</h2>
+@returnSummary.charges.filter(c => c.chargeType === UkResidentReturn || c.chargeType === NonUkResidentReturn).map { charge =>
+    @warning(messages(s"$key${userKey}.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
+}
+
+@returnSummary.charges.filter(c => c.chargeType === UkResidentReturn || c.chargeType === NonUkResidentReturn).map { _ =>
+    @Html(messages(s"$key${userKey}.warning.subtext"))
+}
+
 <table class="borders payments-table view-return-charges">
   <thead>
     <tr style="vertical-align:bottom;">
-      <th scope="col">@messages("viewReturn.charges.description")</th>
-      <th scope="col">@messages("viewReturn.charges.payBy")</th>
-      <th scope="col">@messages("viewReturn.charges.amount")</th>
-      <th scope="col">@messages("viewReturn.charges.due")</th>
-      <th scope="col">@messages("viewReturn.charges.status")</th>
+      <th scope="col">@messages(s"$key.charges.description")</th>
+      <th scope="col">@messages(s"$key.charges.payBy")</th>
+      <th scope="col">@messages(s"$key.charges.amount")</th>
+      <th scope="col">@messages(s"$key.charges.due")</th>
+      <th scope="col">@messages(s"$key.charges.status")</th>
     </tr>
   </thead>
   <tbody id="returnPaymentDetails-@returnSummary.submissionId">
