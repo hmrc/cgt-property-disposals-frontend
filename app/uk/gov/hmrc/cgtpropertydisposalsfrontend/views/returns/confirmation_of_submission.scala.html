@@ -118,6 +118,7 @@
 @isLateReturn = @{completionDate.value.plusDays(30L).isBefore(TimeUtils.today)}
 @amendedReturnWithSameCompletionDate = @{ justSubmittedReturn.amendReturnData.exists(_.originalReturn.completeReturn.completionDate === justSubmittedReturn.completeReturn.completionDate) }
 @showDueDate = @{!amountOwed.equals(BigDecimal(0)) && !isPeriodOfAdmin}
+@taxOwedLabel = @{if(isAmend) "revisedLiability" else "taxOwed"}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -136,7 +137,7 @@
     <h1 class="heading-xlarge">@title</h1>
     @if(!isPeriodOfAdmin) {
       <span class="heading-large" style="font-weight: normal;">
-        @messages(s"$key.${if(isAmend) "revisedLiability" else "taxOwed"}")
+        @messages(s"$key.$taxOwedLabel")
         <strong style="display:block; font-weight: bold;">
           @{{formatAmountOfMoneyWithPoundSign(amountOwed)}}
         </strong>
