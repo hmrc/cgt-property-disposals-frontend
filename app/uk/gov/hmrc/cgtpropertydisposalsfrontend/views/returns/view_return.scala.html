@@ -28,8 +28,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{NonUkResidentReturn, UkResidentReturn}
-@import cats.syntax.eq._
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -40,7 +38,6 @@
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
     cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
     printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
-    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
     completeReturnSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.complete_return_summary
 )
 
@@ -61,13 +58,6 @@
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @isATrust = @{ subscribedDetails.isATrust }
 
-@userKey = @{
-    if (isAgent) ".agent"
-    else if (isATrust) ".trust"
-    else ""
-}
-
-
 @propertyAddressLabel = @{
 if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     else messages(s"$key.propertyAddress")
@@ -85,14 +75,6 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
   @returnHeading(title, returnSummary, subscribedDetails, request.userType)
   
   @printLink(messages(s"$key.printLink"))
-
-  @returnSummary.charges.filter(c => c.chargeType === UkResidentReturn || c.chargeType === NonUkResidentReturn).map { charge =>
-      @warning(messages(s"$key$userKey.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
-  }
-
-  @returnSummary.charges.filter(c => c.chargeType === UkResidentReturn || c.chargeType === NonUkResidentReturn).map { _ =>
-        @Html(messages(s"$key$userKey.warning.subtext"))
-  }
 
     @cyaSection() {
         @cyaRow(
@@ -124,7 +106,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     }
 
     @if(returnSummary.charges.nonEmpty) {
-       @returnCharges(messages(s"$key.charges.heading"), returnSummary)
+       @returnCharges(messages(s"$key.charges.heading"), returnSummary, isAgent, isATrust)
     }
 
     <h2 class="heading-large">
