@@ -49,7 +49,8 @@
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @isATrust = @{ justSubmittedReturn.subscribedDetails.isATrust }
-
+@isAmend = @{ justSubmittedReturn.amendReturnData.isDefined }
+@deltaCharge = @{justSubmittedReturn.submissionResponse.deltaCharge }
 @completionDate = @{justSubmittedReturn.completeReturn match {
     case CompleteMultipleDisposalsReturn(triageAnswers, _, _, _, _, _, _, _) => triageAnswers.completionDate
     case CompleteSingleDisposalReturn(triageAnswers, _, _, _, _, _, _, _, _, _, _, _) =>triageAnswers.completionDate
@@ -116,7 +117,8 @@
 
 @isLateReturn = @{completionDate.value.plusDays(30L).isBefore(TimeUtils.today)}
 @amendedReturnWithSameCompletionDate = @{ justSubmittedReturn.amendReturnData.exists(_.originalReturn.completeReturn.completionDate === justSubmittedReturn.completeReturn.completionDate) }
-
+@showDueDate = @{!amountOwed.equals(BigDecimal(0)) && !isPeriodOfAdmin}
+@taxOwedLabel = @{if(isAmend) "revisedLiability" else "taxOwed"}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -135,7 +137,7 @@
     <h1 class="heading-xlarge">@title</h1>
     @if(!isPeriodOfAdmin) {
       <span class="heading-large" style="font-weight: normal;">
-        @messages(s"$key.taxOwed")
+        @messages(s"$key.$taxOwedLabel")
         <strong style="display:block; font-weight: bold;">
           @{{formatAmountOfMoneyWithPoundSign(amountOwed)}}
         </strong>
@@ -189,7 +191,7 @@
             None,
             "property-address-table"
         )
-        @{if(!amountOwed.equals(BigDecimal(0)) && !isPeriodOfAdmin) {
+        @{if(showDueDate && deltaCharge.isEmpty) {
             justSubmittedReturn.submissionResponse.charge.map { charge =>
                 cyaRow(
                     messages(s"$key.taxDue"),
@@ -200,6 +202,56 @@
             }}
         }
     }
+
+  @if(showDueDate) {
+    @deltaCharge.map { charges =>
+      <table class="borders delta-table">
+        <thead>
+          <tr style="vertical-align:bottom;">
+            <th scope="col" width="50%"></th>
+            <th scope="col">@messages("confirmationOfSubmission.dateDue")</th>
+            <th scope="col">@messages("confirmationOfSubmission.amount")</th>
+          </tr>
+        </thead>
+        <tbody id="delta-due-dates">
+          <tr>
+            <td width="50%">
+              <strong class="bold">
+                @messages(s"$key.chargeLabel")
+              </strong>
+              <br>
+              <span class="caption">
+                @charges.originalCharge.chargeReference
+              </span>
+            </td>
+            <td id="original-charge-due-date">
+              @Html(TimeUtils.govDisplayFormat(charges.originalCharge.dueDate))
+            </td>
+            <td>
+              @{formatAmountOfMoneyWithPoundSign(charges.originalCharge.amount.inPounds())}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong class="bold">
+              @messages(s"$key.deltaChargeLabel")
+              </strong>
+              <br>
+              <span class="caption">
+              @charges.deltaCharge.chargeReference
+              </span>
+            </td>
+            <td id="delta-charge-due-date">
+            @Html(TimeUtils.govDisplayFormat(charges.deltaCharge.dueDate))
+            </td>
+            <td>
+            @{formatAmountOfMoneyWithPoundSign(charges.deltaCharge.amount.inPounds())}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    }
+  }
 
   @if(justSubmittedReturn.submissionResponse.charge.isEmpty && isPeriodOfAdmin) {
     <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
@@ -220,7 +272,7 @@
               <h2 class="heading-medium">@messages(s"$key.capacitor.whatNext")</h2>
 
 
-                @warning(messages(s"$key.capacitor.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
+                @warning(messages(s"$key.capacitor.warning"))
 
                 @if(isLateReturn && !amendedReturnWithSameCompletionDate) {
                     <p id="lfpWarning">@messages(s"$key$userKey.penalty.warning")</p>
@@ -245,7 +297,7 @@
           case None => {
               <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
 
-              @warning(messages(s"$key$userKey.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
+              @warning(messages(s"$key$userKey.warning"))
 
               @if(isLateReturn && !amendedReturnWithSameCompletionDate){
                   <p id="lfpWarning">@messages(s"$key$userKey.penalty.warning")</p>
@@ -259,11 +311,17 @@
               }
 
               <p id="howToPay">@Html(messages(s"$key$userKey.howToPay.p1", charge.chargeReference))</p>
-
-              @if(isATrust && isAgent) {
-                <span class="form-hint">@messages(s"$key.trust.paymentNotice")</span>
+              @if(isAmend) {
+                <p>@messages(s"$key$userKey.gotoViewReturn")</p>
+                <div class="panel panel-border-wide">
+                  <p>@messages(s"$key$userKey.clearingNotice")</p>
+                </div>
               } else {
-                <span class="form-hint">@messages(s"$key$userKey.paymentNotice")</span>
+                @if(isATrust && isAgent) {
+                  <span class="form-hint">@messages(s"$key.trust.paymentNotice")</span>
+                } else {
+                  <span class="form-hint">@messages(s"$key$userKey.paymentNotice")</span>
+                }
               }
 
               @{if (!isAgent) payNowButton }

@@ -88,7 +88,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.{DeltaCharge, ReturnCharge}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.{CompleteCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -125,6 +125,8 @@ class CheckAllAnswersAndSubmitControllerSpec
   lazy val controller = instanceOf[CheckAllAnswersAndSubmitController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
+
+  implicit val messages = MessagesImpl(lang, messagesApi)
 
   val rebasingEligibilityUtil = new RebasingEligibilityUtil()
 
@@ -1848,7 +1850,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                     chargeReference = chargeReference,
                     dueDate = dueDate
                   )
-                )
+                ),
+                deltaCharge = None
               )
               val representeeAnswers = individualUserType match {
                 case Some(_: RepresentativeType) =>
@@ -2134,7 +2137,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                     chargeReference = chargeReference,
                     dueDate = dueDate
                   )
-                )
+                ),
+                deltaCharge = None
               )
               val representeeAnswers           = individualUserType match {
                 case Some(PersonalRepresentative) =>
@@ -2243,7 +2247,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             representeeAnswers = None
           ),
           submissionResponse = sample[SubmitReturnResponse].copy(
-            charge = Some(sample[ReturnCharge])
+            charge = Some(sample[ReturnCharge]),
+            deltaCharge = None
           ),
           amendReturnData = None
         )
@@ -2276,7 +2281,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               representeeAnswers = None
             ),
             submissionResponse = sample[SubmitReturnResponse].copy(
-              charge = Some(sample[ReturnCharge])
+              charge = Some(sample[ReturnCharge]),
+              deltaCharge = None
             ),
             amendReturnData = None
           )
@@ -2307,7 +2313,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               representeeAnswers = None
             ),
             submissionResponse = sample[SubmitReturnResponse].copy(
-              charge = Some(sample[ReturnCharge])
+              charge = Some(sample[ReturnCharge]),
+              deltaCharge = None
             ),
             amendReturnData = Some(
               sample[AmendReturnData].copy(
@@ -2339,6 +2346,54 @@ class CheckAllAnswersAndSubmitControllerSpec
         }
       }
 
+      "display the delta charge table instead of summary due date" when {
+
+        "an amended return has a delta charge" in {
+          val completionDate      = CompletionDate(LocalDate.now().minusDays(30L))
+          val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+            completeReturn = sample[CompleteSingleDisposalReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                individualUserType = Some(Self),
+                completionDate = completionDate
+              ),
+              representeeAnswers = None
+            ),
+            submissionResponse = sample[SubmitReturnResponse].copy(
+              charge = Some(sample[ReturnCharge]),
+              deltaCharge = Some(
+                DeltaCharge(
+                  originalCharge = sample[ReturnCharge],
+                  deltaCharge = sample[ReturnCharge]
+                )
+              )
+            ),
+            amendReturnData = None
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithJourney(justSubmittedReturn)
+                .copy(userType = Some(UserType.Individual))
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("confirmationOfSubmission.title"),
+            { doc =>
+              doc.select("#delta-charge-due-date").text shouldBe
+                justSubmittedReturn.submissionResponse.deltaCharge
+                  .map(d => TimeUtils.govDisplayFormat(d.deltaCharge.dueDate))
+                  .getOrElse("")
+
+              doc.select("#tax-due-date-table").text shouldBe ""
+            }
+          )
+        }
+
+      }
+
     }
 
     "handling requests to pay a return" must {
@@ -2349,7 +2404,12 @@ class CheckAllAnswersAndSubmitControllerSpec
       def justSubmittedReturnWithCharge(
         charge: Option[ReturnCharge]
       ): JustSubmittedReturn =
-        sample[JustSubmittedReturn].copy(submissionResponse = sample[SubmitReturnResponse].copy(charge = charge))
+        sample[JustSubmittedReturn].copy(submissionResponse =
+          sample[SubmitReturnResponse].copy(
+            charge = charge,
+            deltaCharge = None
+          )
+        )
 
       behave like redirectToStartWhenInvalidJourney(
         performAction,
