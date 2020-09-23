@@ -110,7 +110,7 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
           Some(s.reliefDetails),
           None,
           None,
-          s.initialGainOrLoss,
+          None,
           None,
           None,
           s.gainOrLossAfterReliefs,
@@ -168,7 +168,10 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
       Some(
         AmendReturnData(
           s.originalReturn,
-          s.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
+          s.originalReturn.completeReturn match {
+            case c: CompleteSingleDisposalReturn if c.initialGainOrLoss.isDefined => true
+            case other                                                            => other.gainOrLossAfterReliefs.isDefined
+          }
         )
       )
     )
