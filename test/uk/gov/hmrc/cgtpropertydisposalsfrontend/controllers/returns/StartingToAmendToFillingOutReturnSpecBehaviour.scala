@@ -49,7 +49,8 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
 
       def test(
         completeReturn: CompleteReturn,
-        expectedDraftReturn: DraftReturn
+        expectedDraftReturn: DraftReturn,
+        shouldDisplayGainOrLossAfterReliefs: Boolean
       ): Unit = {
         val startingToAmend = sample[StartingToAmendReturn].copy(
           originalReturn = sample[CompleteReturnWithSummary].copy(completeReturn = completeReturn),
@@ -65,7 +66,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           Some(
             AmendReturnData(
               startingToAmend.originalReturn,
-              startingToAmend.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
+              shouldDisplayGainOrLossAfterReliefs
             )
           )
         )
@@ -97,7 +98,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           LocalDate.now(Clock.systemUTC())
         )
 
-        test(completeReturn, draftReturn)
+        test(completeReturn, draftReturn, completeReturn.gainOrLossAfterReliefs.isDefined)
       }
 
       "given a CompleteSingleDisposal return" in {
@@ -111,14 +112,18 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           Some(completeReturn.reliefDetails),
           None,
           None,
-          completeReturn.initialGainOrLoss,
+          None,
           None,
           None,
           completeReturn.gainOrLossAfterReliefs,
           LocalDate.now(Clock.systemUTC())
         )
 
-        test(completeReturn, draftReturn)
+        test(
+          completeReturn,
+          draftReturn,
+          completeReturn.gainOrLossAfterReliefs.isDefined || completeReturn.initialGainOrLoss.isDefined
+        )
       }
 
       "given a CompleteSingleIndirectDisposal return" in {
@@ -137,7 +142,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           LocalDate.now(Clock.systemUTC())
         )
 
-        test(completeReturn, draftReturn)
+        test(completeReturn, draftReturn, completeReturn.gainOrLossAfterReliefs.isDefined)
       }
 
       "given a CompleteMultipleIndirectDisposal return" in {
@@ -154,7 +159,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           LocalDate.now(Clock.systemUTC())
         )
 
-        test(completeReturn, draftReturn)
+        test(completeReturn, draftReturn, completeReturn.gainOrLossAfterReliefs.isDefined)
       }
 
       "given a CompleteSingleMixedUseDisposal return return" in {
@@ -171,7 +176,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           LocalDate.now(Clock.systemUTC())
         )
 
-        test(completeReturn, draftReturn)
+        test(completeReturn, draftReturn, completeReturn.gainOrLossAfterReliefs.isDefined)
       }
 
     }
