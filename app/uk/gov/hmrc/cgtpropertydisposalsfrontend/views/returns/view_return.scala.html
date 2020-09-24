@@ -76,13 +76,6 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         None
 }
 
-@amendDate = @{
-    returnSummary.lastUpdatedDate match {
-        case Some(date) => Html(TimeUtils.govDisplayFormat(date))
-        case None =>  Html("There's a problem retrieving your return details")
-    }
-}
-
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
   @returnHeading(title, returnSummary, subscribedDetails, request.userType)
@@ -92,7 +85,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     @cyaSection() {
         @cyaRow(
             messages(s"$key.sentToHmrc"),
-            if(returnSummary.isRecentlyAmended){amendDate}else{Html(TimeUtils.govDisplayFormat(returnSummary.submissionDate))},
+            Html(TimeUtils.govDisplayFormat(returnSummary.lastUpdatedDate.getOrElse(returnSummary.submissionDate))),
             None,
             "date-sent-table"
         )

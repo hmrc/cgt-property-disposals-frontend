@@ -54,7 +54,7 @@
             </tr>
             </thead>
             <tbody id="returnPaymentDetails-@returnSummary.submissionId">
-            @{ returnSummary.charges.map(chargeItem(_))}
+            @{ returnSummary.charges.map(chargeItem(_, returnSummary.isRecentlyAmended, returnSummary.deltaCharge))}
             </tbody>
         </table>
     }
