@@ -4254,6 +4254,10 @@ viewReturn.trust.warning.subtext=It takes 3 to 5 days for payments or charges to
 
 viewReturn.changeReturn=Change return
 
+viewReturn.amendment.notice=It takes 24 hours for your outstanding balance to be updated in your account when you update a return. You can make a payment at any time.
+viewReturn.agent.amendment.notice=It takes 24 hours for the outstanding balance to be updated in your client’s account when you update a return. They can make a payment at any time.
+viewReturn.trust.amendment.notice=It takes 24 hours for the outstanding balance to be updated in the trust’s account when you update a return. You can make a payment at any time.
+
 #===================================================
 #  VIEW RETURN PAGES - END
 #===================================================

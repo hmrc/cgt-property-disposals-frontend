@@ -17,25 +17,31 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
+@import play.twirl.api.Html
 
 @this(
-  chargeItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.charge_item
+  chargeItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.charge_item,
+  notice: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
 )
 
-@(heading: String, returnSummary: ReturnSummary)(implicit messages: Messages)
+@(heading: String, userKey : String, returnSummary: ReturnSummary)(implicit messages: Messages)
 
-<h2 class="heading-large">@heading</h2>
-<table class="borders payments-table view-return-charges">
-  <thead>
-    <tr style="vertical-align:bottom;">
-      <th scope="col">@messages("viewReturn.charges.description")</th>
-      <th scope="col">@messages("viewReturn.charges.payBy")</th>
-      <th scope="col">@messages("viewReturn.charges.amount")</th>
-      <th scope="col">@messages("viewReturn.charges.due")</th>
-      <th scope="col">@messages("viewReturn.charges.status")</th>
-    </tr>
-  </thead>
-  <tbody id="returnPaymentDetails-@returnSummary.submissionId">
-    @{ returnSummary.charges.map(chargeItem(_)) }
-  </tbody>
-</table>
+    <h2 class="heading-large">@heading</h2>
+    @if(returnSummary.isRecentlyAmended){
+       @notice(Html(messages(s"$userKey.amendment.notice")))
+    }else{
+        <table class="borders payments-table view-return-charges">
+          <thead>
+            <tr style="vertical-align:bottom;">
+              <th scope="col">@messages("viewReturn.charges.description")</th>
+              <th scope="col">@messages("viewReturn.charges.payBy")</th>
+              <th scope="col">@messages("viewReturn.charges.amount")</th>
+              <th scope="col">@messages("viewReturn.charges.due")</th>
+              <th scope="col">@messages("viewReturn.charges.status")</th>
+            </tr>
+          </thead>
+          <tbody id="returnPaymentDetails-@returnSummary.submissionId">
+            @{ returnSummary.charges.map(chargeItem(_)) }
+          </tbody>
+        </table>
+    }

@@ -189,7 +189,8 @@ class ViewReturnControllerSpec
       val sentReturn = sample[ReturnSummary].copy(
         charges = chargesWithChargeRaiseAndFullPayment,
         mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-        submissionDate = ukResidentReturnSentDate
+        submissionDate = ukResidentReturnSentDate,
+        isRecentlyAmended = false
       )
 
       def validatePaymentsSection(
@@ -264,7 +265,7 @@ class ViewReturnControllerSpec
               subscribedDetails = subscribedDetails
             )
 
-          val viewingReturn =
+          val viewingReturn: ViewingReturn =
             sampleViewingReturn.copy(returnSummary = sentReturn)
 
           inSequence {

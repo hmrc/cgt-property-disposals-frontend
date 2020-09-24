@@ -67,7 +67,6 @@
     else ""
 }
 
-
 @propertyAddressLabel = @{
 if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     else messages(s"$key.propertyAddress")
@@ -124,7 +123,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     }
 
     @if(returnSummary.charges.nonEmpty) {
-       @returnCharges(messages(s"$key.charges.heading"), returnSummary)
+       @returnCharges(messages(s"$key.charges.heading"), s"$key$userKey", returnSummary)
     }
 
     <h2 class="heading-large">

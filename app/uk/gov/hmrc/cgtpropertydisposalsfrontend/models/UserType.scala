@@ -28,6 +28,7 @@ object UserType {
   final case object Organisation extends UserType
   final case object NonGovernmentGatewayUser extends UserType
   final case object Agent extends UserType
+  final case object Trust extends UserType
 
   implicit val eq: Eq[UserType] = Eq.fromUniversalEquals
 
