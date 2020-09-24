@@ -2236,9 +2236,12 @@ class CheckAllAnswersAndSubmitControllerSpec
         }
       }
 
-      "display the late filing penalty warning if the completion date is more than 30 days before today" in {
+      "display the late filing penalty warning for an individual if the completion date is more than 30 days before today" in {
         val completionDate      = CompletionDate(LocalDate.now().minusDays(31L))
         val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+          subscribedDetails = sample[SubscribedDetails].copy(
+            name = Right(sample[IndividualName])
+          ),
           completeReturn = sample[CompleteSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
               individualUserType = Some(Self),
@@ -2265,6 +2268,41 @@ class CheckAllAnswersAndSubmitControllerSpec
           performAction(),
           messageFromMessageKey("confirmationOfSubmission.title"),
           _.select("#lfpWarning").text shouldBe messageFromMessageKey("confirmationOfSubmission.penalty.warning")
+        )
+      }
+
+      "display the late filing penalty warning for a trust if the completion date is more than 30 days before today" in {
+        val completionDate      = CompletionDate(LocalDate.now().minusDays(31L))
+        val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+          subscribedDetails = sample[SubscribedDetails].copy(
+            name = Left(sample[TrustName])
+          ),
+          completeReturn = sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self),
+              completionDate = completionDate
+            ),
+            representeeAnswers = None
+          ),
+          submissionResponse = sample[SubmitReturnResponse].copy(
+            charge = Some(sample[ReturnCharge]),
+            deltaCharge = None
+          ),
+          amendReturnData = None
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithJourney(justSubmittedReturn)
+              .copy(userType = Some(UserType.Organisation))
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("confirmationOfSubmission.title"),
+          _.select("#lfpWarning").text shouldBe messageFromMessageKey("confirmationOfSubmission.trust.penalty.warning")
         )
       }
 
