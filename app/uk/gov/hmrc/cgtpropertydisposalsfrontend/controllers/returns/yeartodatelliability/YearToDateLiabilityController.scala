@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatel
 
 import cats.Eq
 import cats.data.EitherT
+import cats.instances.bigDecimal._
 import cats.instances.future._
 import cats.syntax.either._
 import cats.syntax.eq._
@@ -1052,10 +1053,13 @@ class YearToDateLiabilityController @Inject() (
             draftReturn
           ) { calculatedTaxDue =>
             commonDisplayBehaviour(calculatedAnswers)(
-              form = _.fold(
-                _.taxDue.fold(taxDueForm)(t => taxDueForm.fill(t.inPounds())),
-                c => taxDueForm.fill(c.taxDue.inPounds())
-              )
+              form = { answers =>
+                val form = taxDueForm(calculatedTaxDue)
+                answers.fold(
+                  _.taxDue.fold(form)(t => form.fill(t.inPounds())),
+                  c => form.fill(c.taxDue.inPounds())
+                )
+              }
             )(page =
               taxDuePage(
                 _,
@@ -1155,7 +1159,7 @@ class YearToDateLiabilityController @Inject() (
               draftReturn,
               calculatedAnswers
             )(
-              form = taxDueForm
+              form = taxDueForm(calculatedTaxDue)
             )(page =
               taxDuePage(
                 _,
@@ -2500,15 +2504,46 @@ object YearToDateLiabilityController {
       )(identity)(Some(_))
     )
 
-  val taxDueForm: Form[BigDecimal] =
+  def taxDueForm(calculatedTaxDue: CalculatedTaxDue): Form[BigDecimal] = {
+    val calculatedTaxDueInPounds = calculatedTaxDue.amountOfTaxDue.inPounds()
+    val (outerId, innerId)       = "agreeWithCalculation" -> "taxDue"
+
+    val innerOption = InnerOption { data =>
+      FormUtils
+        .readValue(innerId, data, identity)
+        .flatMap(
+          validateAmountOfMoney(
+            innerId,
+            _ < 0,
+            _ > MoneyUtils.maxAmountOfPounds
+          )(_)
+        )
+        .leftMap(Seq(_))
+    }
+
+    val formatter = ConditionalRadioUtils.formatter(outerId)(
+      List(
+        Right(calculatedTaxDueInPounds),
+        Left(innerOption)
+      )
+    ) { d =>
+      if (d === calculatedTaxDueInPounds)
+        Map(
+          outerId -> "0"
+        )
+      else
+        Map(
+          outerId -> "1",
+          innerId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
+        )
+    }
+
     Form(
       mapping(
-        "taxDue" -> of(
-          MoneyUtils
-            .amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds)
-        )
+        "" -> of(formatter)
       )(identity)(Some(_))
     )
+  }
 
   val taxableGainOrLossForm: Form[BigDecimal] = {
     val (outerId, gainId, lossId) =

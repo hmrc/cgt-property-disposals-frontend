@@ -3777,6 +3777,7 @@ taxDue.error.invalid=Amount of Capital Gains Tax due must be a number, for examp
 taxDue.error.tooSmall=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
 taxDue.error.tooLarge=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
 taxDue.error.tooManyDecimals=Amount of Capital Gains Tax due must have 2 decimal places or less, for example 493 or 2,040.59
+agreeWithCalculation.error.required=Select or enter the amount of Capital Gains Tax due for this return
 
 taxDue.cyaChange=the Capital Gains Tax due for this return
 
