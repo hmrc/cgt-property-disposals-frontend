@@ -4126,8 +4126,8 @@ confirmationOfSubmission.warning=You may be charged interest on late payments.
 confirmationOfSubmission.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
 confirmationOfSubmission.agent.warning=Your client may be charged interest on late payments.
 confirmationOfSubmission.agent.penalty.warning=Your client may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
-confirmationOfSubmission.trust.warning=You may be charged interest on late payments.
-confirmationOfSubmission.trust.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
+confirmationOfSubmission.trust.warning=The trust may be charged interest on late payments.
+confirmationOfSubmission.trust.penalty.warning=The trust may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
 confirmationOfSubmission.capacitor.warning=The person may be charged interest on late payments.
 confirmationOfSubmission.capacitor.penalty.warning=The person may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
 
