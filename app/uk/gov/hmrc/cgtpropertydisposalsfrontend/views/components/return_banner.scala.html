@@ -40,7 +40,11 @@
     </p>
     <h1 class="heading-xlarge">@heading</h1>
   <p>
-    @messages(s"$key.heading.taxOwed")
+      @if(returnSummary.lastUpdatedDate.isDefined){
+        @messages(s"$key.heading.updated-liability")
+      }else{
+        @messages(s"$key.heading.taxOwed")
+      }
     <span class="heading-xlarge" id="heading-tax-owed">
       @{MoneyUtils.formatAmountOfMoneyWithPoundSign(taxOwed.inPounds())}
     </span>

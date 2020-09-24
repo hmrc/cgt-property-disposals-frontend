@@ -21,6 +21,7 @@ import java.time.LocalDate
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.DeltaCharge
 
 final case class ReturnSummary(
   submissionId: String,
@@ -31,7 +32,8 @@ final case class ReturnSummary(
   mainReturnChargeAmount: AmountInPence,
   propertyAddress: Address,
   charges: List[Charge],
-  isRecentlyAmended: Boolean
+  isRecentlyAmended: Boolean,
+  deltaCharge: Option[DeltaCharge]
 )
 
 object ReturnSummary {

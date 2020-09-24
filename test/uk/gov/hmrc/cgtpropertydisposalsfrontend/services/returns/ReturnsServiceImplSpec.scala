@@ -683,7 +683,8 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
                   AmountInPence(123L),
                   LocalDate.of(2000, 1, 1)
                 )
-              )
+              ),
+              None
             )
 
           mockSubmitReturn(submitReturnRequest, Lang("en"))(
@@ -716,6 +717,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             SubmitReturnResponse(
               "bundleId",
               LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(1, 1)),
+              None,
               None
             )
 

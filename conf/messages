@@ -4091,10 +4091,15 @@ submitReturnError.button=Go to account home
 
 confirmationOfSubmission.title=Return sent
 confirmationOfSubmission.taxOwed=Tax owed
+confirmationOfSubmission.revisedLiability=Updated liability for this return
 confirmationOfSubmission.returnReference=Return reference number
 confirmationOfSubmission.paymentReference=Payment reference number
 confirmationOfSubmission.propertyAddress=Property address
 confirmationOfSubmission.companyAddress=Company address
+confirmationOfSubmission.dateDue=Date due
+confirmationOfSubmission.amount=Amount
+confirmationOfSubmission.chargeLabel=Tax payment
+confirmationOfSubmission.deltaChargeLabel=Updated tax liability
 
 confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>.
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
@@ -4117,13 +4122,13 @@ confirmationOfSubmission.capacitor.whatNext=What happens next
 confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=What happens next
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=What happens next
 
-confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
+confirmationOfSubmission.warning=You may be charged interest on late payments.
 confirmationOfSubmission.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
-confirmationOfSubmission.agent.warning=Your client must pay their Capital Gains Tax on UK property by {0}. Your client may be charged interest on late payments.
+confirmationOfSubmission.agent.warning=Your client may be charged interest on late payments.
 confirmationOfSubmission.agent.penalty.warning=Your client may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
-confirmationOfSubmission.trust.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
+confirmationOfSubmission.trust.warning=You may be charged interest on late payments.
 confirmationOfSubmission.trust.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
-confirmationOfSubmission.capacitor.warning=The person must pay their Capital Gains Tax on UK property by {0}. The person may be charged interest on late payments.
+confirmationOfSubmission.capacitor.warning=The person may be charged interest on late payments.
 confirmationOfSubmission.capacitor.penalty.warning=The person may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
 
 confirmationOfSubmission.howToPay.heading=How to pay
@@ -4140,6 +4145,10 @@ confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=HMRC will 
 confirmationOfSubmission.paymentNotice=It takes 3 to 5 days for payments or charges to show in your account.
 confirmationOfSubmission.agent.paymentNotice=It takes 3 to 5 days for payments or charges to show in your client’s account.
 confirmationOfSubmission.trust.paymentNotice=It takes 3 to 5 days for payments or charges to show in the trust’s account. 
+
+confirmationOfSubmission.gotoViewReturn=Go to ‘view your return’ in your account to view any payments or charges due.
+confirmationOfSubmission.trust.gotoViewReturn=Go to ‘view your return’ in the trust’s account to view any payments or charges due.
+confirmationOfSubmission.agent.gotoViewReturn=Go to ‘view your return’ in your client’s account to view any payments or charges due.
 
 confirmationOfSubmission.agent.inset.heading=<strong class="bold">Self Assessment</strong>
 confirmationOfSubmission.trust.inset.heading=<strong class="bold">If the trust needs to send a Self Assessment tax return</strong>
@@ -4162,6 +4171,10 @@ confirmationOfSubmission.personalRep.ifSa.p1=You’ll need to provide details fr
 confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa.p1=You’ll need to provide details from this return in the estate’s Self Assessment tax return.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa.p1=Your client will need to provide details from this return in the estate’s Self Assessment tax return.
 
+confirmationOfSubmission.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your account when you update a return. You can make a payment at any time.
+confirmationOfSubmission.agent.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your client’s account when you update a return. They can make a payment at any time.
+confirmationOfSubmission.trust.clearingNotice=It takes 24 hours for your outstanding balance to be updated in the trust’s account when you update a return. You can make a payment at any time.
+
 confirmationOfSubmission.returnToAccountHome=Go to your <a href="{0}">Capital Gains Tax on UK property account home</a>.
 confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a href="{0}">Capital Gains Tax on UK property account home</a>.
 
@@ -4179,6 +4192,7 @@ confirmationOfSubmission.estateNameLine=Estate: {0}
 
 viewReturn.title=View return
 viewReturn.heading.taxOwed=Tax owed for return
+viewReturn.heading.updated-liability=Updated liability for this return
 viewReturn.heading.reference=Return reference number
 viewReturn.heading.payment.reference=Payment reference number
 viewReturn.printLink=Print or save this page for your records
@@ -4188,6 +4202,7 @@ viewReturn.charges.payBy=Pay by
 viewReturn.charges.amount=Amount
 viewReturn.charges.due=Due
 viewReturn.charges.status=Status
+viewReturn.chargeType.updated-liability=Updated tax liability
 viewReturn.chargeType.UkResidentReturn=Tax payment
 viewReturn.chargeType.NonUkResidentReturn=Tax payment
 viewReturn.chargeType.Interest=Interest on late tax payment
@@ -4257,6 +4272,10 @@ viewReturn.changeReturn=Change return
 viewReturn.amendment.notice=It takes 24 hours for your outstanding balance to be updated in your account when you update a return. You can make a payment at any time.
 viewReturn.agent.amendment.notice=It takes 24 hours for the outstanding balance to be updated in your client’s account when you update a return. They can make a payment at any time.
 viewReturn.trust.amendment.notice=It takes 24 hours for the outstanding balance to be updated in the trust’s account when you update a return. You can make a payment at any time.
+
+viewReturn.amendment.warning=You may be charged interest on late payments.
+viewReturn.agent.amendment.warning=Your client may be charged interest on late payments.
+viewReturn.trust.amendment.warning=The trust may be charged interest on late payments.
 
 #===================================================
 #  VIEW RETURN PAGES - END
