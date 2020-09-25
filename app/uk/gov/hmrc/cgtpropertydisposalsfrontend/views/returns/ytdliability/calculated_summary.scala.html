@@ -92,7 +92,7 @@
     }
 
     @cyaRow(
-        messages("taxDue.title"),
+        messages("taxDue.h2"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
         Some(cyaChange(messages("taxDue.cyaChange"), routes.YearToDateLiabilityController.taxDue().url)),
         "taxDue-value"

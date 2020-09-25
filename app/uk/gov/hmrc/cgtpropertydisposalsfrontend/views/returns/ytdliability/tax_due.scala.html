@@ -31,8 +31,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
@@ -77,18 +76,6 @@
 @taxYear = @{ triageAnswers.disposalDate.taxYear }
 
 @isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
-@isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{
-  representativeType match {
-      case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
-      case Some(Capacitor) => ".capacitor"
-      case None =>
-          if (isAgent) ".agent"
-          else if (isATrust) ".trust"
-          else ""
-  }
-}
 @calculatedTaxDue = @{MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds())}
 
 @options = @{List(
@@ -187,15 +174,14 @@
       </li>
     </ul>
 
-    <p>@{messages(s"$key$userKey.helpText.p1", calculatedTaxDue)}</p>
-    <p>@{messages(s"$key.helpText.p2")}</p>
+    <p>@{Html(messages(s"$key.helpText.p1", calculatedTaxDue))}</p>
     @{if(isATrust) "<p>" + messages(s"$key.helpText.p3") + "</p>" else ""}
 
     @formWrapper(routes.YearToDateLiabilityController.taxDueSubmit(), 'novalidate -> "novalidate") {
 
       @radioGroupConditional(
         fieldId = agreeKey,
-        label = pageHeading(title),
+        label = Html(s"""<h2 class="heading-medium">${messages(s"$key.h2")}</h2>"""),
         selected = selectedIndex,
         error = form.error(agreeKey),
         options = options,
