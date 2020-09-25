@@ -30,11 +30,29 @@
 
 @(heading: String, key : String, returnSummary: ReturnSummary)(implicit messages: Messages)
 
-<h2 class="heading-large">@heading</h2>
+    <h2 class="heading-large">@heading</h2>
 
     @if(returnSummary.isRecentlyAmended){
         @warning(messages(s"${key}.amendment.warning"))
         @notice(Html(messages(s"$key.amendment.notice")))
+        <table class="borders payments-table view-return-charges">
+            <thead>
+            <tr style="vertical-align:bottom;">
+                <th scope="col">@messages("viewReturn.charges.description")</th>
+                <th scope="col">@messages("viewReturn.charges.payBy")</th>
+                <th scope="col">@messages("viewReturn.charges.amount")</th>
+                <th scope="col">@messages("viewReturn.charges.due")</th>
+                <th scope="col">@messages("viewReturn.charges.status")</th>
+            </tr>
+            </thead>
+            <tbody id="returnPaymentDetails-@returnSummary.submissionId">
+                @if(returnSummary.deltaCharge.isDefined){
+                    @{ returnSummary.charges.map(chargeItem(_, returnSummary.isRecentlyAmended))} 
+                }else{
+                    @{ returnSummary.charges.map(chargeItem(_, returnSummary.isRecentlyAmended))}
+                }
+            </tbody>
+        </table>
     }else{
         @returnSummary.charges.filter(c => c.chargeType === UkResidentReturn || c.chargeType === NonUkResidentReturn).map { charge =>
             @warning(messages(s"${key}.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
@@ -54,7 +72,7 @@
             </tr>
             </thead>
             <tbody id="returnPaymentDetails-@returnSummary.submissionId">
-            @{ returnSummary.charges.map(chargeItem(_, returnSummary.isRecentlyAmended, returnSummary.deltaCharge))}
+            @{ returnSummary.charges.map(chargeItem(_, returnSummary.isRecentlyAmended))}
             </tbody>
         </table>
     }

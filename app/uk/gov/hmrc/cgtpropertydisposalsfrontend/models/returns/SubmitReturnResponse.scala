@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import java.time.{LocalDate, LocalDateTime}
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge, ChargeType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.{DeltaCharge, ReturnCharge}
 
 final case class SubmitReturnResponse(
@@ -36,6 +36,17 @@ object SubmitReturnResponse {
     amount: AmountInPence,
     dueDate: LocalDate
   )
+
+  object ReturnCharge {
+    def toCharge(chargeType: ChargeType, returnCharge: ReturnCharge): Charge =
+      Charge(
+        chargeType,
+        returnCharge.chargeReference,
+        returnCharge.amount,
+        returnCharge.dueDate,
+        List.empty
+      )
+  }
 
   final case class DeltaCharge(
     originalCharge: ReturnCharge,

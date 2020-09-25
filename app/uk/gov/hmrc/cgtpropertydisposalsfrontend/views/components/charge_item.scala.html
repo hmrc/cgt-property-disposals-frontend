@@ -22,11 +22,10 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.Payment
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.DeltaCharge
 
 @this()
 
-@(charge: Charge, isAnAmend : Boolean, deltaCharge : Option[DeltaCharge])(implicit messages: Messages)
+@(charge: Charge, isAnAmend : Boolean)(implicit messages: Messages)
 
     @makePaymentDetailsHtml(paymentItemSubKey : String, paymentItemValue: String, amount:BigDecimal, clearingDate: LocalDate) = {
         <li>
@@ -50,96 +49,35 @@
     }
 
     @if(isAnAmend){
-        @if(deltaCharge.isDefined){
-            <tr class="no-border charge">
-                <td>
-                    <strong class="bold">
-                        @messages(s"viewReturn.chargeType.${charge.chargeType.toString}")
-                    </strong>
-                    <br>
-                    <span class="caption">
-                            @{charge.chargeReference}
-                          </span>
-                </td>
-                <td>
-                    @{TimeUtils.govShortDisplayFormat(charge.dueDate)}
-                </td>
-                <td>
-                    @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.amount.inPounds())}
-                </td>
-                <td>
-                    <strong class="bold">
-                        @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.totalOutstanding().inPounds())}
-                    </strong>
-                </td>
-                <td>
-                    @if(charge.totalOutstanding().isZero) {
+        <tr class="no-border charge">
+            <td>
+                <strong class="bold">
+                    @messages(s"viewReturn.amend.chargeType.${charge.chargeType.toString}")
+                </strong>
+                <br>
+                <span class="caption">
+                    @{charge.chargeReference}
+                </span>
+            </td>
+            <td>
+                @{TimeUtils.govShortDisplayFormat(charge.dueDate)}
+            </td>
+            <td>
+                @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.amount.inPounds())}
+            </td>
+            <td>
+                <strong class="bold">
+                    @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.totalOutstanding().inPounds())}
+                </strong>
+            </td>
+            <td>
+                @if(charge.totalOutstanding().isZero) {
                     @messages("viewReturn.charge.status.paid")
-                    } else {
+                } else {
                     @Html(messages("viewReturn.charge.status.payNow", routes.ViewReturnController.payCharge(charge.chargeReference)))
-                    }
-                </td>
-            </tr>
-            <tr class="no-border charge">
-                <td>
-                    <strong class="bold">
-                        @messages(s"viewReturn.amend.chargeType.${charge.chargeType.toString}")
-                    </strong>
-                    <br>
-                    <span class="caption">
-                            @{charge.chargeReference}
-                          </span>
-                </td>
-                <td>
-                    @{TimeUtils.govShortDisplayFormat(charge.dueDate)}
-                </td>
-                <td>
-                    @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.amount.inPounds())}
-                </td>
-                <td>
-                    <strong class="bold">
-                        @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.totalOutstanding().inPounds())}
-                    </strong>
-                </td>
-                <td>
-                    @if(charge.totalOutstanding().isZero) {
-                    @messages("viewReturn.charge.status.paid")
-                    } else {
-                    @Html(messages("viewReturn.charge.status.payNow", routes.ViewReturnController.payCharge(charge.chargeReference)))
-                    }
-                </td>
-            </tr>
-        }else{
-            <tr class="no-border charge">
-                <td>
-                    <strong class="bold">
-                        @messages(s"viewReturn.amend.chargeType.${charge.chargeType.toString}")
-                    </strong>
-                    <br>
-                    <span class="caption">
-                            @{charge.chargeReference}
-                          </span>
-                </td>
-                <td>
-                    @{TimeUtils.govShortDisplayFormat(charge.dueDate)}
-                </td>
-                <td>
-                    @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.amount.inPounds())}
-                </td>
-                <td>
-                    <strong class="bold">
-                        @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.totalOutstanding().inPounds())}
-                    </strong>
-                </td>
-                <td>
-                    @if(charge.totalOutstanding().isZero) {
-                    @messages("viewReturn.charge.status.paid")
-                    } else {
-                    @Html(messages("viewReturn.charge.status.payNow", routes.ViewReturnController.payCharge(charge.chargeReference)))
-                    }
-                </td>
-            </tr>
-        }
+                }
+            </td>
+        </tr>
     }else{
       <tr class="no-border charge">
         <td>
