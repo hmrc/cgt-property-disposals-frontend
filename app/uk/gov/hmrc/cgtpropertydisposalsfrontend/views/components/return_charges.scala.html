@@ -18,7 +18,6 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType
-@import play.twirl.api.Html
 @import cats.syntax.eq._
 
 @this(
@@ -38,8 +37,12 @@
 @hasDelta = @{returnSummary.charges.exists(p => p.chargeType === ChargeType.DeltaCharge)}
 
 <h2 class="heading-large">@heading</h2>
+
 @warning(messages(s"$key$userKey.warning"))
-@Html(messages(s"$key$userKey.warning.subtext"))
+
+<p>
+  @messages(s"$key$userKey.warning.subtext")
+</p>
 
 <table class="borders payments-table view-return-charges">
   <thead>
