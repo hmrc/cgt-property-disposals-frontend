@@ -33,9 +33,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOut
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftReturn, DraftSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{GlarCalculatorEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -52,6 +55,7 @@ class GainOrLossAfterReliefsController @Inject() (
   uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   gainOrLossAfterReliefsPage: views.html.returns.gainorlossafterreliefs.gain_or_loss_after_reliefs,
+  val glarCalculatorEligibilityUtil: GlarCalculatorEligibilityUtil,
   checkYourAnswersPage: views.html.returns.gainorlossafterreliefs.check_your_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -65,18 +69,25 @@ class GainOrLossAfterReliefsController @Inject() (
   def enterGainOrLossAfterReliefs(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAnswers { (fillingOutReturn, draftReturn, answer) =>
-        Ok(
-          gainOrLossAfterReliefsPage(
-            answer.fold(gainOrLossAfterReliefsForm)(value => gainOrLossAfterReliefsForm.fill(value.inPounds())),
-            answer.fold(controllers.returns.routes.TaskListController.taskList())(_ =>
-              routes.GainOrLossAfterReliefsController.checkYourAnswers()
-            ),
-            fillingOutReturn.subscribedDetails.isATrust,
-            draftReturn.representativeType(),
-            draftReturn.triageAnswers().isLeft,
-            fillingOutReturn.isAmendReturn
+        glarCalculatorEligibilityUtil
+          .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
+          .fold(
+            _ => InternalServerError,
+            includeBreakdown =>
+              Ok(
+                gainOrLossAfterReliefsPage(
+                  answer.fold(gainOrLossAfterReliefsForm)(value => gainOrLossAfterReliefsForm.fill(value.inPounds())),
+                  answer.fold(controllers.returns.routes.TaskListController.taskList())(_ =>
+                    routes.GainOrLossAfterReliefsController.checkYourAnswers()
+                  ),
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  draftReturn.representativeType(),
+                  draftReturn.triageAnswers().isLeft,
+                  fillingOutReturn.isAmendReturn,
+                  if (includeBreakdown) buildGlarBreakdown(fillingOutReturn.draftReturn) else None
+                )
+              )
           )
-        )
       }
     }
 
@@ -87,18 +98,25 @@ class GainOrLossAfterReliefsController @Inject() (
           .bindFromRequest()
           .fold(
             formWithErrors =>
-              BadRequest(
-                gainOrLossAfterReliefsPage(
-                  formWithErrors,
-                  answer.fold(controllers.returns.routes.TaskListController.taskList())(_ =>
-                    routes.GainOrLossAfterReliefsController.checkYourAnswers()
-                  ),
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType(),
-                  draftReturn.triageAnswers().isLeft,
-                  fillingOutReturn.isAmendReturn
-                )
-              ),
+              glarCalculatorEligibilityUtil
+                .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
+                .fold(
+                  _ => InternalServerError,
+                  includeBreakdown =>
+                    BadRequest(
+                      gainOrLossAfterReliefsPage(
+                        formWithErrors,
+                        answer.fold(controllers.returns.routes.TaskListController.taskList())(_ =>
+                          routes.GainOrLossAfterReliefsController.checkYourAnswers()
+                        ),
+                        fillingOutReturn.subscribedDetails.isATrust,
+                        draftReturn.representativeType(),
+                        draftReturn.triageAnswers().isLeft,
+                        fillingOutReturn.isAmendReturn,
+                        if (includeBreakdown) buildGlarBreakdown(draftReturn) else None
+                      )
+                    )
+                ),
             value =>
               if (answer.map(_.inPounds()).contains(value))
                 Redirect(
@@ -223,6 +241,37 @@ class GainOrLossAfterReliefsController @Inject() (
 }
 
 object GainOrLossAfterReliefsController {
+
+  def buildGlarBreakdown(draftReturn: DraftReturn) =
+    draftReturn match {
+      case DraftSingleDisposalReturn(
+            _,
+            _,
+            _,
+            Some(disposalDetailsAnswers: CompleteDisposalDetailsAnswers),
+            Some(acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers),
+            Some(reliefDetailsAnswers: CompleteReliefDetailsAnswers),
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _
+          ) =>
+        Some(
+          CalculatedGlarBreakdown(
+            disposalFees = disposalDetailsAnswers.disposalFees,
+            disposalPrice = disposalDetailsAnswers.disposalPrice,
+            acquisitionPrice = acquisitionDetailsAnswers.acquisitionPrice,
+            acquisitionCosts = acquisitionDetailsAnswers.acquisitionFees,
+            improvementCosts = acquisitionDetailsAnswers.improvementCosts,
+            privateResidentReliefs = reliefDetailsAnswers.privateResidentsRelief,
+            lettingRelief = reliefDetailsAnswers.lettingsRelief
+          )
+        )
+      case _ => None
+    }
 
   val gainOrLossAfterReliefsForm: Form[BigDecimal] = {
     val (outerId, gainId, lossId) = ("gainOrLossAfterReliefs", "gainAfterReliefs", "lossAfterReliefs")

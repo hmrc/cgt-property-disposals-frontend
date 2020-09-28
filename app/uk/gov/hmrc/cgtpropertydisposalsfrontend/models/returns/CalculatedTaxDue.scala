@@ -47,6 +47,30 @@ sealed trait CalculatedTaxDue extends Product with Serializable {
   val taxableGainOrNetLoss: AmountInPence
   val amountOfTaxDue: AmountInPence
 }
+final case class CalculatedGlarBreakdown(
+  acquisitionPrice: AmountInPence,
+  acquisitionCosts: AmountInPence,
+  disposalPrice: AmountInPence,
+  disposalFees: AmountInPence,
+  privateResidentReliefs: AmountInPence,
+  lettingRelief: AmountInPence,
+  improvementCosts: AmountInPence
+) {
+
+  val propertyDisposalAmountLessCosts = disposalPrice.inPounds() + disposalFees.inPounds()
+
+  val propertyAcquisitionAmountPlusCosts =
+    acquisitionPrice.inPounds() + improvementCosts.inPounds() + acquisitionCosts.inPounds()
+
+  val totalReliefs = privateResidentReliefs.inPounds() + lettingRelief.inPounds()
+
+  val initialGainOrLoss = propertyDisposalAmountLessCosts - propertyAcquisitionAmountPlusCosts
+
+  val gainOrLossAfterReliefs = initialGainOrLoss - totalReliefs
+
+  val isGain = gainOrLossAfterReliefs >= 0
+
+}
 
 object CalculatedTaxDue {
 

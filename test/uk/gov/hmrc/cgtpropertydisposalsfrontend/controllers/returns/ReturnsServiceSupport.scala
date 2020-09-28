@@ -22,6 +22,8 @@ import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisplayReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -45,6 +47,22 @@ trait ReturnsServiceSupport { this: ControllerSpec =>
         _: Request[_]
       ))
       .expects(fillingOutReturn, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockDisplayReturn(
+    cgtReference: CgtReference,
+    submissionId: String
+  )(
+    result: Either[Error, DisplayReturn]
+  ) =
+    (mockReturnsService
+      .displayReturn(
+        _: CgtReference,
+        _: String
+      )(
+        _: HeaderCarrier
+      ))
+      .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](result))
 
 }

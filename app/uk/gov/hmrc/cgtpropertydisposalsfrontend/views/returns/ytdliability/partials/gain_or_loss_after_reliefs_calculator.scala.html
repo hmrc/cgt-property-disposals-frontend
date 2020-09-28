@@ -1,0 +1,159 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+
+@this(
+    calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+)
+
+@(
+        propertyAcquisitionAmount: AmountInPence,
+        acquisitionCosts: AmountInPence,
+        propertyDisposalAmount: AmountInPence,
+        disposalCosts: AmountInPence,
+        privateResidentReliefs: AmountInPence,
+        lettingRelief: AmountInPence,
+        improvementCosts: AmountInPence
+
+)(implicit messages: Messages)
+
+@propertyDisposalAmountLessCosts = @{propertyDisposalAmount.inPounds() + disposalCosts.inPounds()}
+@propertyAcquisitionAmountPlusCosts = @{propertyAcquisitionAmount.inPounds() + improvementCosts.inPounds() + acquisitionCosts.inPounds()}
+@totalReliefs = @{privateResidentReliefs.inPounds() + lettingRelief.inPounds()}
+
+@initialGainOrLoss = @{propertyDisposalAmountLessCosts - propertyAcquisitionAmountPlusCosts}
+@inititalGainOrLossLabel = @{if(initialGainOrLoss < 0) s" (${messages("generic.loss")})"  else s" (${messages("generic.gain")})"}
+
+@gainOrLossAfterReflief = @{initialGainOrLoss - totalReliefs}
+@gainOrLossAfterReliefLabel = @{if(gainOrLossAfterReflief < 0) s" (${messages("generic.loss")})"  else s" (${messages("generic.gain")})"}
+
+
+
+
+    @calcSum(
+        List(
+            SumPartDisplay(
+                label = messages("calculator.disposalPrice"),
+                operator = None,
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(propertyDisposalAmount.inPounds())
+            ),
+            SumPartDisplay(
+                label = messages("calculator.disposalFees"),
+                operator = Some("-"),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalCosts.inPounds())
+            )
+        ),
+            SumPartDisplay(
+                label = messages("calculator.total.disposalAmount"),
+                operator = Some("="),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(propertyDisposalAmountLessCosts),
+                total = true
+            ),
+    )
+    @calcSum(
+        List(
+            SumPartDisplay(
+                label = messages("calculator.acquisitionPrice"),
+                operator = None,
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(propertyAcquisitionAmount.inPounds())
+            ),
+            SumPartDisplay(
+                label = messages("calculator.improvementCosts"),
+                operator = Some("+"),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(improvementCosts.inPounds())
+            ),
+            SumPartDisplay(
+                label = messages("calculator.acquisitionFees"),
+                operator = Some("+"),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(acquisitionCosts.abs().inPounds())
+            )
+        ),
+        SumPartDisplay(
+            label = messages("calculator.total.acquisitionAmount"),
+            operator = Some("="),
+            amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(propertyAcquisitionAmountPlusCosts),
+            total = true
+        )
+    )
+    @calcSum(
+        List(
+            SumPartDisplay(
+                label = messages("calculator.total.disposalAmount"),
+                operator = None,
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(propertyDisposalAmountLessCosts)
+            ),
+            SumPartDisplay(
+                label = messages("calculator.total.acquisitionAmount"),
+                operator = Some("-"),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(propertyAcquisitionAmountPlusCosts)
+            )
+        ),
+            SumPartDisplay(
+                label = messages("calculator.total.initialGainOrLoss"),
+                operator = Some("="),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(initialGainOrLoss) + inititalGainOrLossLabel,
+                total = true
+            )
+    )
+
+    @calcSum(
+        List(
+            SumPartDisplay(
+                label = messages("calculator.privateResidenceRelief"),
+                operator = None,
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(privateResidentReliefs.inPounds())
+            ),
+            SumPartDisplay(
+                label = messages("calculator.lettingRelief"),
+                operator = Some("+"),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(lettingRelief.inPounds())
+            )
+        ),
+            SumPartDisplay(
+                label = messages("calculator.total.reliefs"),
+                operator = Some("="),
+                total = true,
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(totalReliefs)
+            )
+    )
+
+
+    @calcSum(
+        List(
+            SumPartDisplay(
+                label = messages("calculator.total.initialGainOrLoss"),
+                operator = None,
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(initialGainOrLoss)
+            ),
+            SumPartDisplay(
+                label = messages("calculator.total.reliefs"),
+                operator = Some("-"),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(totalReliefs)
+            )
+        ),
+            SumPartDisplay(
+                label = messages("calculator.total.gainOrLossAfterReliefs"),
+                operator = Some("="),
+                total = true,
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(gainOrLossAfterReflief) + gainOrLossAfterReliefLabel
+            )
+    )
+

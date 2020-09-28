@@ -28,6 +28,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedGlarBreakdown
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -38,7 +40,9 @@ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
 unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional
+radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
+gainOrLossAfterReliefsCalculator: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_or_loss_after_reliefs_calculator,
+details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(
@@ -47,7 +51,8 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isMultipleDisposal: Boolean,
-    isAmend: Boolean
+    isAmend: Boolean,
+    glarCalulatorInput: Option[CalculatedGlarBreakdown]
 )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{ "gainOrLossAfterReliefs" }
@@ -150,16 +155,41 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
 
     @pageHeading(title)
 
+  @{glarCalulatorInput match {
+      case Some(value) => <div>
+      We have worked out that your gain or loss after reliefs is a {if(value.isGain) messages("generic.gain") else messages("generic.loss") } of
+      {MoneyUtils.formatAmountOfMoneyWithPoundSign(value.gainOrLossAfterReliefs.abs)}
 
-    <p>@messages(s"$key.p1")</p>
+      </div>
+      case _ => ""
+  }}
 
-  <ol class="list list-number">
-      <li>@messages(s"$key$multipleDisposalKey.li1")</li>
-      <li>@messages(s"$key.li2")</li>
-      <li>@messages(s"$key.li3")</li>
-      <li>@messages(s"$key$multipleDisposalKey.li4")</li>
-      <li>@messages(s"$key.li5")</li>
-  </ol>
+  @{glarCalulatorInput match {
+          case Some(calculatedValues) =>  {
+              details(
+                  messages("calculator.showWorkings"),
+                  gainOrLossAfterReliefsCalculator(
+                      calculatedValues.acquisitionPrice,
+                      calculatedValues.acquisitionCosts,
+                      calculatedValues.disposalPrice,
+                      calculatedValues.disposalFees,
+                      calculatedValues.privateResidentReliefs,
+                      calculatedValues.lettingRelief,
+                      calculatedValues.improvementCosts
+                  ),
+                  Some(messages(s"$key.assistive.gainOrLossAfterReliefs")) )
+          }
+          case _ =>
+                  <p>{messages(s"$key.p1")}</p>
+                  <ol class="list list-number">
+                    <li>{messages(s"$key$multipleDisposalKey.li1")}</li>
+                    <li>{messages(s"$key.li2")}</li>
+                    <li>{messages(s"$key.li3")}</li>
+                    <li>{messages(s"$key$multipleDisposalKey.li4")}</li>
+                    <li>{messages(s"$key.li5")}</li>
+                  </ol>
+      }
+  }
 
     @formWrapper(routes.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefsSubmit(), 'novalidate -> "novalidate") {
       @radioGroupConditional(
