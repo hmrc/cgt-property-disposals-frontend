@@ -25,7 +25,9 @@
 
 @this()
 
-@(charge: Charge, isAmend: Boolean)(implicit messages: Messages)
+@(charge: Charge, isAmend: Boolean, hasDelta: Boolean)(implicit messages: Messages)
+
+@amendKey = @{if(isAmend && !hasDelta) ".amend" else ""}
 
     @makePaymentDetailsHtml(paymentItemSubKey : String, paymentItemValue: String, amount:BigDecimal, clearingDate: LocalDate) = {
         <li>
@@ -51,7 +53,7 @@
   <tr class="no-border charge">
     <td>
       <strong class="bold">
-        @messages(s"viewReturn.chargeType.${charge.chargeType.toString}")
+        @messages(s"viewReturn$amendKey.chargeType.${charge.chargeType.toString}")
       </strong>
       <br>
       <span class="caption">

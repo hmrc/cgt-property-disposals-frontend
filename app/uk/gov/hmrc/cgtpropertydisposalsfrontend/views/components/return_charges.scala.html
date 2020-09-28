@@ -17,10 +17,8 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.UkResidentReturn
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.NonUkResidentReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import cats.syntax.eq._
 
 @this(
@@ -37,6 +35,7 @@
     else if (isATrust) ".trust"
     else ""
 }
+@hasDelta = @{returnSummary.charges.exists(p => p.chargeType === ChargeType.DeltaCharge)}
 
 <h2 class="heading-large">@heading</h2>
 @warning(messages(s"$key$userKey.warning"))
@@ -53,6 +52,6 @@
     </tr>
   </thead>
   <tbody id="returnPaymentDetails-@returnSummary.submissionId">
-    @{ returnSummary.charges.map(c => chargeItem(c, returnSummary.lastUpdatedDate.isDefined)) }
+    @{ returnSummary.charges.map(c => chargeItem(c, returnSummary.lastUpdatedDate.isDefined, hasDelta)) }
   </tbody>
 </table>
