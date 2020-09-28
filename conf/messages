@@ -4197,6 +4197,7 @@ confirmationOfSubmission.estateNameLine=Estate: {0}
 
 viewReturn.title=View return
 viewReturn.heading.taxOwed=Tax owed for return
+viewReturn.amend.heading.taxOwed=Updated liability for this return
 viewReturn.heading.reference=Return reference number
 viewReturn.heading.payment.reference=Payment reference number
 viewReturn.printLink=Print or save this page for your records
@@ -4207,15 +4208,26 @@ viewReturn.charges.amount=Amount
 viewReturn.charges.due=Due
 viewReturn.charges.status=Status
 viewReturn.chargeType.UkResidentReturn=Tax payment
+viewReturn.amend.chargeType.UkResidentReturn=Updated tax liability
 viewReturn.chargeType.NonUkResidentReturn=Tax payment
+viewReturn.amend.chargeType.NonUkResidentReturn=Updated tax liability
+viewReturn.chargeType.DeltaCharge=Updated tax liability
 viewReturn.chargeType.Interest=Interest on late tax payment
+viewReturn.amend.chargeType.Interest=Interest on late tax payment
 viewReturn.chargeType.LateFilingPenalty=Penalty - late return
+viewReturn.amend.chargeType.LateFilingPenalty=Penalty - late return
 viewReturn.chargeType.SixMonthLateFilingPenalty=Penalty - return 6 months late
+viewReturn.amend.chargeType.SixMonthLateFilingPenalty=Penalty - return 6 months late
 viewReturn.chargeType.TwelveMonthLateFilingPenalty=Penalty - return 12 months late
+viewReturn.amend.chargeType.TwelveMonthLateFilingPenalty=Penalty - return 12 months late
 viewReturn.chargeType.LatePaymentPenalty=Penalty - late tax payment
+viewReturn.amend.chargeType.LatePaymentPenalty=Penalty - late tax payment
 viewReturn.chargeType.SixMonthLatePaymentPenalty=Penalty - payment 6 months late
+viewReturn.amend.chargeType.SixMonthLatePaymentPenalty=Penalty - payment 6 months late
 viewReturn.chargeType.TwelveMonthLatePaymentPenalty=Penalty - payment 12 months late
+viewReturn.amend.chargeType.TwelveMonthLatePaymentPenalty=Penalty - payment 12 months late
 viewReturn.chargeType.PenaltyInterest=Interest on penalties paid late
+viewReturn.amend.chargeType.PenaltyInterest=Interest on penalties paid late
 viewReturn.charge.status.paid=Paid
 viewReturn.charge.status.payNow=<a href="{0}">Pay now</a>
 viewReturn.charge.paymentMethod.BACS=Bacs payment received
@@ -4262,13 +4274,17 @@ viewReturn.summaryHeading=Your return
 viewReturn.hasAttachments=Uploaded files and documents
 viewReturn.hasAttachments.p1=One or more documents uploaded
 
-viewReturn.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
-viewReturn.agent.warning=Your client must pay their Capital Gains Tax on UK property by {0}. Your client may be charged interest on late payments.
-viewReturn.trust.warning=The trust must pay their Capital Gains Tax on UK property by {0}. The trust may be charged interest on late payments.
+viewReturn.warning=You may be charged interest on late payments.
+viewReturn.agent.warning=Your client may be charged interest on late payments.
+viewReturn.trust.warning=The trust may be charged interest on late payments.
 
 viewReturn.warning.subtext=It takes 3 to 5 days for payments or charges to show in your account.
 viewReturn.agent.warning.subtext=It takes 3 to 5 days for payments or charges to show in your client’s account.
 viewReturn.trust.warning.subtext=It takes 3 to 5 days for payments or charges to show in the trust’s account.
+
+viewReturn.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your account when you update a return. You can make a payment at any time.
+viewReturn.agent.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your client’s account when you update a return. They can make a payment at any time.
+viewReturn.trust.clearingNotice=It takes 24 hours for your outstanding balance to be updated in the trust’s account when you update a return. You can make a payment at any time.
 
 viewReturn.changeReturn=Change return
 
