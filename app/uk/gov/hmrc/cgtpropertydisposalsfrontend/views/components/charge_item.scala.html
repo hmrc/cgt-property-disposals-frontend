@@ -25,7 +25,7 @@
 
 @this()
 
-@(charge: Charge)(implicit messages: Messages)
+@(charge: Charge, isAmend: Boolean)(implicit messages: Messages)
 
     @makePaymentDetailsHtml(paymentItemSubKey : String, paymentItemValue: String, amount:BigDecimal, clearingDate: LocalDate) = {
         <li>

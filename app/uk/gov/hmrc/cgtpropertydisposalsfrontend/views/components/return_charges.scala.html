@@ -39,13 +39,8 @@
 }
 
 <h2 class="heading-large">@heading</h2>
-@returnSummary.charges.filter(c => c.chargeType === UkResidentReturn || c.chargeType === NonUkResidentReturn).map { charge =>
-    @warning(messages(s"$key${userKey}.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
-}
-
-@returnSummary.charges.filter(c => c.chargeType === UkResidentReturn || c.chargeType === NonUkResidentReturn).map { _ =>
-    @Html(messages(s"$key${userKey}.warning.subtext"))
-}
+@warning(messages(s"$key$userKey.warning"))
+@Html(messages(s"$key$userKey.warning.subtext"))
 
 <table class="borders payments-table view-return-charges">
   <thead>
@@ -58,6 +53,6 @@
     </tr>
   </thead>
   <tbody id="returnPaymentDetails-@returnSummary.submissionId">
-    @{ returnSummary.charges.map(chargeItem(_)) }
+    @{ returnSummary.charges.map(c => chargeItem(c, returnSummary.lastUpdatedDate.isDefined)) }
   </tbody>
 </table>

@@ -30,15 +30,17 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
-    addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
-    returnHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_banner,
-    returnCharges: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_charges,
-    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
-    completeReturnSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.complete_return_summary
+  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+  addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+  returnHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_banner,
+  returnCharges: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_charges,
+  cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+  cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+  printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+  completeReturnSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.complete_return_summary,
+  insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel,
+  warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @(
@@ -57,6 +59,7 @@
 @key= @{ "viewReturn" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @isATrust = @{ subscribedDetails.isATrust }
+@userKey = @{if(isAgent) ".agent" else if(isATrust) ".trust" else ""}
 
 @propertyAddressLabel = @{
 if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
@@ -105,8 +108,13 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         )
     }
 
-    @if(returnSummary.charges.nonEmpty) {
-       @returnCharges(messages(s"$key.charges.heading"), returnSummary, isAgent, isATrust)
+    @if(returnSummary.isRecentlyAmended) {
+      @warning(messages(s"$key$userKey.warning"))
+      @insetPanel(Html(messages(s"$key$userKey.clearingNotice")))
+    } else {
+      @if(returnSummary.charges.nonEmpty) {
+        @returnCharges(messages(s"$key.charges.heading"), returnSummary, isAgent, isATrust)
+      }
     }
 
     <h2 class="heading-large">

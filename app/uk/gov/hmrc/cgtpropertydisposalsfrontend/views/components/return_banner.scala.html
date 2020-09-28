@@ -29,6 +29,7 @@
 @name = @{subscribedDetails.name.fold(_.value, e => e.firstName + " " + e.lastName)}
 @reference = @{if(taxOwed.isPositive) subscribedDetails.cgtReference.value else returnSummary.submissionId}
 @key = @{"viewReturn"}
+@amendKey = @{if(returnSummary.lastUpdatedDate.isDefined) ".amend" else ""}
 
 <div class="govuk-box-highlight govuk-box-highlight--status">
     <p id="user-details-name">
@@ -40,7 +41,7 @@
     </p>
     <h1 class="heading-xlarge">@heading</h1>
   <p>
-    @messages(s"$key.heading.taxOwed")
+    @messages(s"$key$amendKey.heading.taxOwed")
     <span class="heading-xlarge" id="heading-tax-owed">
       @{MoneyUtils.formatAmountOfMoneyWithPoundSign(taxOwed.inPounds())}
     </span>

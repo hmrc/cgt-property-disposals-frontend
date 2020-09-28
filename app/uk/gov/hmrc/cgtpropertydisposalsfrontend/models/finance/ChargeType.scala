@@ -26,6 +26,8 @@ object ChargeType {
 
   final case object UkResidentReturn extends ChargeType
   final case object NonUkResidentReturn extends ChargeType
+  final case object UkResidentReturnDelta extends ChargeType
+  final case object NonUkResidentReturnDelta extends ChargeType
   final case object Interest extends ChargeType
   final case object LateFilingPenalty extends ChargeType
   final case object SixMonthLateFilingPenalty extends ChargeType
