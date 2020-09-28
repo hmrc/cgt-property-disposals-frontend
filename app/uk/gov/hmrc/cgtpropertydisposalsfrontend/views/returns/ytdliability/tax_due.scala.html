@@ -30,9 +30,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
@@ -51,7 +50,8 @@
     taxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.taxable_gain_workings,
     taxOwedWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.tax_owed_workings,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
-    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
+    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+    radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional
 )
 
 @(form: Form[BigDecimal],
@@ -70,22 +70,47 @@
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @key = @{ "taxDue" }
+@agreeKey = @{ "agreeWithCalculation" }
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @taxYear = @{ triageAnswers.disposalDate.taxYear }
 
 @isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
-@isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{
-  representativeType match {
-      case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
-      case Some(Capacitor) => ".capacitor"
-      case None =>
-          if (isAgent) ".agent"
-          else if (isATrust) ".trust"
-          else ""
-  }
+@calculatedTaxDue = @{MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds())}
+
+@options = @{List(
+  RadioOption(
+    label = calculatedTaxDue,
+    content = None,
+    optionHelpText = None
+  ),
+  RadioOption(
+    label = messages(s"$agreeKey.other.label"),
+    content = Some(unitInput(
+      fieldId = key,
+      value = form.data.getOrElse(key, ""),
+      formError = form.error(key),
+      hasErrors = form.error(key).nonEmpty,
+      label = Html(messages(s"$key.label")),
+      labelClass = None,
+      labelAsHeading = false,
+      extraContent = None,
+      autoComplete = AutoCompleteType.On,
+      inputClass = Some("small"),
+      aspect = "left",
+      unit = "£",
+      assistiveText = messages("unit-input.assistive.pounds")
+    )),
+    optionHelpText = None
+  )
+
+)}
+
+@selectedIndex = @{
+  form.data.get(agreeKey).map({
+    case "0" => 0
+    case _ => 1
+  })
 }
 
 @mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
@@ -149,30 +174,21 @@
       </li>
     </ul>
 
-    @formWrapper(routes.YearToDateLiabilityController.taxDueSubmit(), 'novalidate -> "novalidate") {
-        @unitInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            formError = form.error(key),
-            hasErrors = form.error(key).nonEmpty,
-            label = Html(title),
-            labelClass = Some("govuk-label--m"),
-            labelAsHeading = false,
-            extraContent = Some(Html(
-              s"""
-                | <p>${messages(s"$key$userKey.helpText.p1", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds()))}</p>
-                | <p>${messages(s"$key.helpText.p2")}</p>
-                | ${if(isATrust) "<p>" + messages(s"$key.helpText.p3") + "</p>" else ""}
-                |""".stripMargin
-            )),
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds")
-        )
+    <p>@{Html(messages(s"$key.helpText.p1", calculatedTaxDue))}</p>
+    @{if(isATrust) "<p>" + messages(s"$key.helpText.p3") + "</p>" else ""}
 
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+    @formWrapper(routes.YearToDateLiabilityController.taxDueSubmit(), 'novalidate -> "novalidate") {
+
+      @radioGroupConditional(
+        fieldId = agreeKey,
+        label = Html(s"""<h2 class="heading-medium">${messages(s"$key.h2")}</h2>"""),
+        selected = selectedIndex,
+        error = form.error(agreeKey),
+        options = options,
+        helpText = None
+      )
+
+      @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @if(isATrust) {

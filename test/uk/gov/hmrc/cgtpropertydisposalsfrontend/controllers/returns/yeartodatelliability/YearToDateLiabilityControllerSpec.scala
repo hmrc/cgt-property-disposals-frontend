@@ -2508,7 +2508,7 @@ class YearToDateLiabilityControllerSpec
         behave like unsuccessfulUpdateBehaviour(
           journey,
           newJourney,
-          () => performAction("taxDue" -> "£1.23")
+          () => performAction("agreeWithCalculation" -> "1", "taxDue" -> "£1.23")
         )
       }
 
@@ -2606,12 +2606,22 @@ class YearToDateLiabilityControllerSpec
           )
         )
 
-        "the data submitted is invalid" in {
+        "the user does not select any option" in {
+          testFormError()(
+            "agreeWithCalculation.error.required"
+          )("taxDue.title")(
+            performAction,
+            currentSession
+          )
+        }
+
+        "the user does not agree with the calculation and the data submitted is invalid" in {
           AmountOfMoneyErrorScenarios
             .amountOfMoneyErrorScenarios("taxDue")
             .foreach { scenario =>
               withClue(s"For $scenario: ") {
-                testFormError(scenario.formData: _*)(
+                val formData = ("agreeWithCalculation" -> "1") :: scenario.formData
+                testFormError(formData: _*)(
                   scenario.expectedErrorMessageKey
                 )("taxDue.title")(
                   performAction,
@@ -2629,15 +2639,16 @@ class YearToDateLiabilityControllerSpec
         "all updates are successful and" when {
 
           "the journey was incomplete" in {
-            val disposalDate = sample[DisposalDate]
+            val disposalDate     = sample[DisposalDate]
+            val calculatedTaxDue = sample[CalculatedTaxDue]
 
             val answers     = IncompleteCalculatedYTDAnswers(
               Some(AmountInPence(1L)),
               Some(AmountInPence(2L)),
               Some(true),
-              Some(sample[CalculatedTaxDue]),
-              Some(AmountInPence(123L)),
-              Some(sample[MandatoryEvidence]),
+              Some(calculatedTaxDue),
+              None,
+              None,
               None,
               None
             )
@@ -2650,14 +2661,14 @@ class YearToDateLiabilityControllerSpec
             val updatedDraftReturn = draftReturn.copy(
               yearToDateLiabilityAnswers = Some(
                 answers.copy(
-                  taxDue = Some(AmountInPence(101L)),
+                  taxDue = Some(calculatedTaxDue.amountOfTaxDue),
                   mandatoryEvidence = None
                 )
               )
             )
 
             testSuccessfulUpdatesAfterSubmit(
-              performAction("taxDue" -> "1.01"),
+              performAction("agreeWithCalculation" -> "0"),
               draftReturn,
               updatedDraftReturn
             )
@@ -2696,7 +2707,7 @@ class YearToDateLiabilityControllerSpec
             )
 
             testSuccessfulUpdatesAfterSubmit(
-              performAction("taxDue" -> "£1,234.56"),
+              performAction("agreeWithCalculation" -> "1", "taxDue" -> "£1,234.56"),
               draftReturn,
               updatedDraftReturn
             )

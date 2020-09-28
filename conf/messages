@@ -3749,7 +3749,8 @@ yearToDateLiabilityGuidance.personalRep.title=Work out the person’s overall Ca
 yearToDateLiabilityGuidance.personalRepInPeriodOfAdmin.title=Work out the estate’s overall Capital Gains Tax liability on their UK property-related disposals
 
 
-taxDue.title=Enter the Capital Gains Tax due for this return
+taxDue.title=Tell us how much Capital Gains Tax is due for this return
+taxDue.h2=How much Capital Gains Tax is due for this return?
 taxDue.p1=We used the details that were entered into this return to work out the amount of Capital Gains Tax due.
 taxDue.p2=You may need to enter these figures when you complete future returns.
 taxDue.printLink=Print or save a copy of this page
@@ -3763,7 +3764,7 @@ taxDue.taxableGain=Taxable gain
 taxDue.assistive.taxableGain=for taxable gain
 taxDue.amountOfTaxDue=Capital Gains Tax due for this return
 taxDue.assistive.amountOfTaxDue=for Capital Gains Tax due for this return
-taxDue.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
+taxDue.helpText.p1=Based on the details you entered <strong class="bold">{0}</strong> is due in Capital Gains Tax on UK property for this return. If you disagree with this figure, you’ll need to enter another amount and upload a file later showing your workings.
 taxDue.agent.helpText.p1=If your client agrees with these workings enter <strong class="bold">{0}</strong>.
 taxDue.trust.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
 taxDue.capacitor.helpText.p1=If the person agrees with these workings enter <strong class="bold">{0}</strong>.
@@ -3777,6 +3778,10 @@ taxDue.error.invalid=Amount of Capital Gains Tax due must be a number, for examp
 taxDue.error.tooSmall=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
 taxDue.error.tooLarge=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
 taxDue.error.tooManyDecimals=Amount of Capital Gains Tax due must have 2 decimal places or less, for example 493 or 2,040.59
+agreeWithCalculation.error.required=Select or enter the amount of Capital Gains Tax due for this return
+agreeWithCalculation.error.invalid=Select or enter the amount of Capital Gains Tax due for this return
+agreeWithCalculation.other.label=Other amount
+taxDue.label=Amount of Capital Gains Tax due
 
 taxDue.cyaChange=the Capital Gains Tax due for this return
 
