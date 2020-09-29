@@ -4916,8 +4916,7 @@ class YearToDateLiabilityControllerSpec
             yearToDateLiability: AmountInPence,
             previousYearToDateLiability: AmountInPence,
             taxDue: AmountInPence,
-            userType: UserType,
-            expectedP1Key: String
+            userType: UserType
           ): Unit = {
             val sessionData = SessionData.empty.copy(
               userType = Some(userType),
@@ -4977,12 +4976,7 @@ class YearToDateLiabilityControllerSpec
                 doc.select("#content > article > dl > div:nth-child(2) > dd").text() shouldBe s"${MoneyUtils
                   .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
 
-                doc.select("#content > article > dl > div.sum-total > dd").text() shouldBe s"= $formattedTaxDue"
-
-                doc.select("#content > article > p:nth-child(6)").text() shouldBe messageFromMessageKey(
-                  expectedP1Key,
-                  formattedTaxDue
-                )
+                doc.select("#content > article > dl > div.sum-total > dd").text() shouldBe formattedTaxDue
 
                 doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
@@ -4996,8 +4990,7 @@ class YearToDateLiabilityControllerSpec
               AmountInPence(1000L),
               AmountInPence(3000L),
               AmountInPence.zero,
-              UserType.Individual,
-              "nonCalculatedTaxDue.furtherReturn.checkTaxDue.p1"
+              UserType.Individual
             )
 
           }
@@ -5007,8 +5000,7 @@ class YearToDateLiabilityControllerSpec
               AmountInPence(3000L),
               AmountInPence(1000L),
               AmountInPence(4000L),
-              UserType.Agent,
-              "nonCalculatedTaxDue.furtherReturn.checkTaxDue.agent.p1"
+              UserType.Agent
             )
           }
 
@@ -5017,8 +5009,7 @@ class YearToDateLiabilityControllerSpec
               AmountInPence(1000L),
               AmountInPence(1000L),
               AmountInPence(2000L),
-              UserType.Organisation,
-              "nonCalculatedTaxDue.furtherReturn.checkTaxDue.trust.p1"
+              UserType.Organisation
             )
           }
 
