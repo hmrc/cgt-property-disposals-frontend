@@ -3865,9 +3865,9 @@ nonCalculatedTaxDue.amendReturn.checkTaxDue.table.label1=Overall liability so fa
 nonCalculatedTaxDue.amendReturn.checkTaxDue.table.label2=Previous liability reported through this service
 nonCalculatedTaxDue.amendReturn.checkTaxDue.table.label3=Updated Capital Gains Tax liability for this return
 
-nonCalculatedTaxDue.furtherReturn.checkTaxDue.p1=Based on the details you entered, we have worked out that you now owe {0} in Capacitor Gains Tax.
-nonCalculatedTaxDue.furtherReturn.checkTaxDue.agent.p1=Based on the details you entered, we have worked out that your client now owes {0} in Capacitor Gains Tax.
-nonCalculatedTaxDue.furtherReturn.checkTaxDue.trust.p1=Based on the details you entered, we have worked out that the trust now owes {0} in Capacitor Gains Tax.
+nonCalculatedTaxDue.furtherReturn.checkTaxDue.p1=Based on the details you entered, we have worked out that you now owe {0} in Capital Gains Tax.
+nonCalculatedTaxDue.furtherReturn.checkTaxDue.agent.p1=Based on the details you entered, we have worked out that your client now owes {0} in Capital Gains Tax.
+nonCalculatedTaxDue.furtherReturn.checkTaxDue.trust.p1=Based on the details you entered, we have worked out that the trust now owes {0} in Capital Gains Tax.
 
 nonCalculatedTaxDue.furtherReturn.checkTaxDue.p2=If you do not agree with this amount you’ll need to ‘go back’ and amend the details in this return.
 
