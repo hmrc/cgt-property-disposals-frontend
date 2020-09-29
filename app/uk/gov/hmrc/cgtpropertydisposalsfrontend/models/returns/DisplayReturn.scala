@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, OFormat}
 
 final case class DisplayReturn(
   completeReturn: CompleteReturn,
-  isFirstReturn: Boolean
+  returnType: ReturnType
 )
 
 object DisplayReturn {

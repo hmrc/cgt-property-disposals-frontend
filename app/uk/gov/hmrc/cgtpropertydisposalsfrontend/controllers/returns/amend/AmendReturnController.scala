@@ -122,7 +122,7 @@ class AmendReturnController @Inject() (
             journey.subscribedDetails,
             journey.originalReturn.completeReturn.representativeType(),
             journey.originalReturn.completeReturn.isIndirectDisposal(),
-            Some(!journey.originalReturn.isFirstReturn),
+            Some(journey.originalReturn.returnType.isFurtherOrAmendReturn),
             routes.AmendReturnController.youNeedToCalculate()
           )
         )

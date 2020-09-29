@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary, ReturnType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -50,7 +50,7 @@
     subscribedDetails: SubscribedDetails,
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
-    isFurtherOrAmendedReturn: Option[Boolean]
+    returnType: ReturnType
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("viewReturn.title")}
@@ -75,7 +75,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
-  @returnHeading(title, returnSummary, subscribedDetails, request.userType)
+  @returnHeading(title, returnSummary, subscribedDetails, request.userType, returnType)
   
   @printLink(messages(s"$key.printLink"))
 
@@ -113,7 +113,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
       @insetPanel(Html(messages(s"$key$userKey.clearingNotice")))
     } else {
       @if(returnSummary.charges.nonEmpty) {
-        @returnCharges(messages(s"$key.charges.heading"), returnSummary, isAgent, isATrust)
+        @returnCharges(messages(s"$key.charges.heading"), returnSummary, returnType, isAgent, isATrust)
       }
     }
 
@@ -129,7 +129,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         subscribedDetails,
         representativeType,
         isIndirectDisposal,
-        isFurtherOrAmendedReturn,
+        Some(returnType.isFurtherOrAmendReturn),
         returnSummaryClass = Some("return-summary")
     )
 

@@ -19,17 +19,17 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, ReturnType}
 
 @this()
 
-@(heading: String, returnSummary: ReturnSummary, subscribedDetails: SubscribedDetails, userType: Option[UserType])(implicit messages: Messages)
+@(heading: String, returnSummary: ReturnSummary, subscribedDetails: SubscribedDetails, userType: Option[UserType], returnType: ReturnType)(implicit messages: Messages)
 
 @taxOwed = @{returnSummary.mainReturnChargeAmount.withFloorZero}
 @name = @{subscribedDetails.name.fold(_.value, e => e.firstName + " " + e.lastName)}
 @reference = @{if(taxOwed.isPositive) subscribedDetails.cgtReference.value else returnSummary.submissionId}
 @key = @{"viewReturn"}
-@amendKey = @{if(returnSummary.lastUpdatedDate.isDefined) ".amend" else ""}
+@amendKey = @{if(returnType.isAmendReturn) ".amend" else ""}
 
 <div class="govuk-box-highlight govuk-box-highlight--status">
     <p id="user-details-name">

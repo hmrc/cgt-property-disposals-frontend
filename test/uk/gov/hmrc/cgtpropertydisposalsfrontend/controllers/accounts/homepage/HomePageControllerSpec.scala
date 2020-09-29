@@ -1241,7 +1241,7 @@ class HomePageControllerSpec
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
           sample[CompleteSingleDisposalReturn],
-          false,
+          sample[ReturnType],
           sample[ReturnSummary].copy(isRecentlyAmended = false),
           Some(PreviousReturnData(subscribed.sentReturns, None))
         )
@@ -1789,7 +1789,7 @@ class HomePageControllerSpec
 
           val completeReturn = sample[CompleteSingleDisposalReturn]
 
-          val displayReturn = DisplayReturn(completeReturn, false)
+          val displayReturn = DisplayReturn(completeReturn, ReturnType.FurtherReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1818,7 +1818,7 @@ class HomePageControllerSpec
           val completeReturn = sample[CompleteSingleDisposalReturn].copy(
             yearToDateLiabilityAnswers = Right(sample[CompleteCalculatedYTDAnswers].copy(taxDue = taxDue))
           )
-          val displayReturn  = DisplayReturn(completeReturn, false)
+          val displayReturn  = DisplayReturn(completeReturn, ReturnType.FurtherReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1837,7 +1837,7 @@ class HomePageControllerSpec
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
                     completeReturn,
-                    false,
+                    ReturnType.FurtherReturn,
                     returnSummary,
                     Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue)))
                   )
@@ -1858,7 +1858,7 @@ class HomePageControllerSpec
           val completeReturn = sample[CompleteSingleDisposalReturn].copy(
             yearToDateLiabilityAnswers = Right(sample[CompleteCalculatedYTDAnswers].copy(taxDue = taxDue))
           )
-          val displayReturn  = DisplayReturn(completeReturn, false)
+          val displayReturn  = DisplayReturn(completeReturn, ReturnType.FirstReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1877,7 +1877,7 @@ class HomePageControllerSpec
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
                     completeReturn,
-                    false,
+                    ReturnType.FirstReturn,
                     returnSummary,
                     Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue)))
                   )
@@ -2021,7 +2021,7 @@ class HomePageControllerSpec
 
       testCases.foreach { case (description, completeReturn) =>
         withClue(s"For $description: ") {
-          val displayReturn       = DisplayReturn(completeReturn, false)
+          val displayReturn       = DisplayReturn(completeReturn, ReturnType.FirstReturn)
           val latestReturnSummary = sample[ReturnSummary].copy(
             lastUpdatedDate = Some(latestDate),
             isRecentlyAmended = false

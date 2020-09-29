@@ -839,7 +839,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
         "the response body can be parsed and converted" in {
           val completeReturn: CompleteReturn =
             sample[CompleteSingleDisposalReturn]
-          val displayReturn                  = DisplayReturn(completeReturn, false)
+          val displayReturn                  = DisplayReturn(completeReturn, ReturnType.FurtherReturn)
           mockDisplayReturn(cgtReference, submissionId)(
             Right(HttpResponse(200, Json.toJson(displayReturn), Map[String, Seq[String]]().empty))
           )
