@@ -51,6 +51,7 @@
         representativeType: Option[RepresentativeType],
         isIndirectDisposal: Boolean,
         isFurtherOrAmendReturn: Option[Boolean],
+        isAmend: Boolean,
         returnSummaryClass: Option[String] = None
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
@@ -112,6 +113,7 @@
                 subscribedDetails.isATrust,
                 representativeType,
                 isFurtherOrAmendReturn,
+                isAmend,
                 s.triageAnswers.disposalDate.taxYear,
                 hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails
             ),
@@ -157,6 +159,7 @@
             subscribedDetails.isATrust,
             representativeType,
             isFurtherOrAmendReturn,
+            isAmend,
             m.triageAnswers.taxYear,
             hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails
         )
@@ -211,6 +214,7 @@
             subscribedDetails.isATrust,
             representativeType,
             isFurtherOrAmendReturn,
+            isAmend,
             s.triageAnswers.disposalDate.taxYear,
             hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails
         )
@@ -253,6 +257,7 @@
             subscribedDetails.isATrust,
             representativeType,
             isFurtherOrAmendReturn,
+            isAmend,
             multipleIndirect.triageAnswers.taxYear,
             hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails
         )
@@ -288,6 +293,7 @@
             subscribedDetails.isATrust,
             representativeType,
             isFurtherOrAmendReturn,
+            isAmend,
             singleMixedUse.triageAnswers.disposalDate.taxYear,
             hideEstimatesQuestion = !completeReturn.hasEstimatedDetails
         )

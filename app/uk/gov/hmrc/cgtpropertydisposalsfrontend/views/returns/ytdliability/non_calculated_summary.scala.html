@@ -40,6 +40,7 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isFurtherOrAmendReturn: Option[Boolean],
+    isAmend: Boolean,
     taxYear: TaxYear,
     hideEstimatesQuestion: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages)
@@ -65,7 +66,15 @@
 }
 
 @multipleKey = @{if(isMultiple) ".multiple" else ""}
-@furtherReturnKey = @{if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else "" }
+@furtherReturnKey = @{
+  if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn"
+  else ""
+}
+@checkTaxDueKey = @{
+  if(isAmend) ".amendReturn.checkTaxDue"
+  else if (isFurtherOrAmendReturn.contains(true)) ".furtherReturn.checkTaxDue"
+  else ""
+}
 
 @taxableGainOrLossLabelWithAmount = @{
     if(answers.taxableGainOrLoss > AmountInPence.zero)
@@ -121,7 +130,7 @@
     }
 
     @cyaRow(
-        messages(s"nonCalculatedTaxDue$furtherReturnKey.title"),
+        messages(s"nonCalculatedTaxDue$checkTaxDueKey.title"),
         Html( MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
         Some(cyaChange(messages(s"nonCalculatedTaxDue$furtherReturnKey.cyaChange"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
         "nonCalculatedTaxDue-value"

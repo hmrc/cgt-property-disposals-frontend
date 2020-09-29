@@ -62,7 +62,7 @@
 
 @returnTypeKey = @{ if(isAmendReturn) ".amendReturn" else ".furtherReturn" }
 
-@title = @{messages(s"$key.furtherReturn.checkTaxDue.title")}
+@title = @{messages(s"$key$returnTypeKey.checkTaxDue.title")}
 
 @formattedTaxDue = @{
     val taxOwed = taxOwedOnOriginalReturn.getOrElse(AmountInPence.zero)

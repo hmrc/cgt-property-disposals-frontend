@@ -4966,7 +4966,7 @@ class YearToDateLiabilityControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("nonCalculatedTaxDue.furtherReturn.checkTaxDue.title"),
+              messageFromMessageKey("nonCalculatedTaxDue.amendReturn.checkTaxDue.title"),
               { doc =>
                 val formattedTaxDue = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDue.inPounds())
 
