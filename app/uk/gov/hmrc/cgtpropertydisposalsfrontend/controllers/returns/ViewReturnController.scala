@@ -62,7 +62,7 @@ class ViewReturnController @Inject() (
               _,
               _,
               sentReturn,
-              isFirstReturn,
+              returnType,
               returnSummary,
               _
             ) =>
@@ -74,7 +74,7 @@ class ViewReturnController @Inject() (
               subscribedDetails,
               sentReturn.representativeType,
               sentReturn.isIndirectDisposal,
-              Some(!isFirstReturn)
+              returnType
             )
           )
       }
@@ -93,9 +93,9 @@ class ViewReturnController @Inject() (
             CompleteReturnWithSummary(
               viewingReturn.completeReturn,
               viewingReturn.returnSummary,
-              viewingReturn.isFirstReturn
+              viewingReturn.returnType
             ),
-            viewingReturn.isFirstReturn,
+            viewingReturn.returnType.isFirstReturn,
             viewingReturn.previousSentReturns,
             None
           )
@@ -164,7 +164,7 @@ class ViewReturnController @Inject() (
           s.ggCredId,
           s.agentReferenceNumber,
           s.originalReturn.completeReturn,
-          s.originalReturn.isFirstReturn,
+          s.originalReturn.returnType,
           s.originalReturn.summary,
           s.previousSentReturns
         )

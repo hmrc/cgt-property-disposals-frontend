@@ -201,7 +201,7 @@ class HomePageController @Inject() (
                                           CompleteReturnWithSummary(
                                             sentReturn.completeReturn,
                                             returnSummary,
-                                            sentReturn.isFirstReturn
+                                            sentReturn.returnType
                                           )
                                         )
                                       )
@@ -214,7 +214,7 @@ class HomePageController @Inject() (
                                                 subscribed.ggCredId,
                                                 subscribed.agentReferenceNumber,
                                                 sentReturn.completeReturn,
-                                                sentReturn.isFirstReturn,
+                                                sentReturn.returnType,
                                                 returnSummary,
                                                 Some(PreviousReturnData(subscribed.sentReturns, previousYtdLiability))
                                               )

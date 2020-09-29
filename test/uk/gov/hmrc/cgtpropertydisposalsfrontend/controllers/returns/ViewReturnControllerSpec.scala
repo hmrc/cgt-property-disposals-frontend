@@ -63,7 +63,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DateOfDeath, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DateOfDeath, ReturnSummary, ReturnType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
@@ -327,7 +327,8 @@ class ViewReturnControllerSpec
             .copy(
               completeReturn = completeSingleDisposalReturn,
               agentReferenceNumber = setAgentReferenceNumber(userType),
-              subscribedDetails = subscribedDetails
+              subscribedDetails = subscribedDetails,
+              returnType = ReturnType.FirstReturn
             )
 
           val viewingReturn =
@@ -434,7 +435,8 @@ class ViewReturnControllerSpec
             .copy(
               completeReturn = completeSingleDisposalReturn,
               agentReferenceNumber = setAgentReferenceNumber(userType),
-              subscribedDetails = subscribedDetails
+              subscribedDetails = subscribedDetails,
+              returnType = ReturnType.AmendedReturn
             )
 
           val viewingReturn =
@@ -553,7 +555,8 @@ class ViewReturnControllerSpec
             .copy(
               completeReturn = completeMultipleDisposalsReturn,
               agentReferenceNumber = setAgentReferenceNumber(userType),
-              subscribedDetails = subscribedDetails
+              subscribedDetails = subscribedDetails,
+              returnType = ReturnType.FirstReturn
             )
 
           val viewingReturn =
@@ -673,7 +676,8 @@ class ViewReturnControllerSpec
             .copy(
               completeReturn = completeMultipleIndirectDisposalsReturn,
               agentReferenceNumber = setAgentReferenceNumber(userType),
-              subscribedDetails = subscribedDetails
+              subscribedDetails = subscribedDetails,
+              returnType = ReturnType.FirstReturn
             )
 
           val viewingReturn =
@@ -872,7 +876,7 @@ class ViewReturnControllerSpec
             journey.ggCredId,
             journey.agentReferenceNumber,
             journey.originalReturn.completeReturn,
-            journey.originalReturn.isFirstReturn,
+            journey.originalReturn.returnType,
             journey.originalReturn.summary,
             journey.previousSentReturns
           )
