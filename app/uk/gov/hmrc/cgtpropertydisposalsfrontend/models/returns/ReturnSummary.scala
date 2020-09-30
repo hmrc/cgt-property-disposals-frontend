@@ -42,7 +42,7 @@ object ReturnSummary {
       AmountInPence(r.charges.map(_.amount.withFloorZero.value).sum)
 
     def totalPaid(): AmountInPence =
-      AmountInPence(r.charges.map(_.totalPaid().value).sum)
+      AmountInPence(r.charges.map(_.totalPaid().withFloorZero.value).sum)
 
     def totalOutstanding(): AmountInPence = totalCharges() -- totalPaid()
 

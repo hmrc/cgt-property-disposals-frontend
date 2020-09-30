@@ -16,17 +16,24 @@
 
 @import play.api.i18n.Messages
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, ReturnType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType
 @import cats.syntax.eq._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.Charge
 
 @this(
   chargeItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.charge_item,
-  warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-
+  warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(heading: String, returnSummary: ReturnSummary, returnType: ReturnType, isAgent: Boolean, isATrust: Boolean)(implicit messages: Messages)
+@(
+        heading: String,
+        positiveCharges: List[Charge],
+        submissionId: String,
+        returnType: ReturnType,
+        isAgent: Boolean,
+        isATrust: Boolean
+)(implicit messages: Messages)
 
 @key = @{ "viewReturn" }
 @userKey = @{
@@ -34,27 +41,30 @@
     else if (isATrust) ".trust"
     else ""
 }
-@hasDelta = @{returnSummary.charges.exists(p => p.chargeType === ChargeType.DeltaCharge)}
+@hasDelta = @{positiveCharges.exists(p => p.chargeType === ChargeType.DeltaCharge)}
 
-<h2 class="heading-large">@heading</h2>
+  <h2 class="heading-large">@heading</h2>
 
-@warning(messages(s"$key$userKey.warning"))
+  @warning(messages(s"$key$userKey.warning"))
 
-<p>
+  <p>
   @messages(s"$key$userKey.warning.subtext")
-</p>
+  </p>
 
-<table class="borders payments-table view-return-charges">
-  <thead>
-    <tr style="vertical-align:bottom;">
-      <th scope="col">@messages(s"$key.charges.description")</th>
-      <th scope="col">@messages(s"$key.charges.payBy")</th>
-      <th scope="col">@messages(s"$key.charges.amount")</th>
-      <th scope="col">@messages(s"$key.charges.due")</th>
-      <th scope="col">@messages(s"$key.charges.status")</th>
-    </tr>
-  </thead>
-  <tbody id="returnPaymentDetails-@returnSummary.submissionId">
-    @{ returnSummary.charges.map(c => chargeItem(c, returnType.isAmendReturn, hasDelta)) }
-  </tbody>
-</table>
+  <table class="borders payments-table view-return-charges">
+    <thead>
+      <tr style="vertical-align: bottom;">
+        <th scope="col">@messages(s"$key.charges.description")</th>
+        <th scope="col">@messages(s"$key.charges.payBy")</th>
+        <th scope="col">@messages(s"$key.charges.amount")</th>
+        <th scope="col">@messages(s"$key.charges.due")</th>
+        <th scope="col">@messages(s"$key.charges.status")</th>
+      </tr>
+    </thead>
+    <tbody id="returnPaymentDetails-@submissionId">
+    @{
+      positiveCharges.map(c => chargeItem(c, returnType.isAmendReturn, hasDelta))
+    }
+    </tbody>
+  </table>
+
