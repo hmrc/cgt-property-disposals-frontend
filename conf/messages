@@ -3704,7 +3704,6 @@ yearToDateLiability.p1=To do this you’ll need to:
 yearToDateLiability.li1=Work out your taxable income.
 yearToDateLiability.li2=Work out what basic rate band can be used against the net gain.
 yearToDateLiability.li3=Work out your overall Capital Gains Tax liability on your UK property-related disposals.
-yearToDateLiability.li4=If the amount is less than zero enter zero.
 
 yearToDateLiability.agent.li1=Work out your client’s taxable income.
 yearToDateLiability.agent.li2=Work out what basic rate band can be used against the net gain.
