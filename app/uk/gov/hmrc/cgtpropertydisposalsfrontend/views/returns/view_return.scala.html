@@ -55,6 +55,7 @@
 
 @title = @{messages("viewReturn.title")}
 @amountOwed = @{returnSummary.mainReturnChargeAmount}
+@positiveCharges = @{returnSummary.charges.filter(c => c.amount.isPositive)}
 
 @key= @{ "viewReturn" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -112,8 +113,15 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
       @warning(messages(s"$key$userKey.warning"))
       @insetPanel(Html(messages(s"$key$userKey.clearingNotice")))
     } else {
-      @if(returnSummary.charges.nonEmpty) {
-        @returnCharges(messages(s"$key.charges.heading"), returnSummary, returnType, isAgent, isATrust)
+      @if(positiveCharges.nonEmpty) {
+        @returnCharges(
+          messages(s"$key.charges.heading"),
+          positiveCharges,
+          returnSummary.submissionId,
+          returnType,
+          isAgent,
+          isATrust
+        )
       }
     }
 
