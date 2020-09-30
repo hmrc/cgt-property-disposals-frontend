@@ -81,7 +81,7 @@ object JourneyStatus {
   object Subscribed {
     implicit class SubscribedOps(private val s: Subscribed) extends AnyVal {
       def totalLeftToPay(): AmountInPence =
-        AmountInPence(s.sentReturns.map(_.totalOutstanding.value).sum)
+        AmountInPence(s.sentReturns.map(_.totalOutstanding.withFloorZero.value).sum)
     }
   }
 
