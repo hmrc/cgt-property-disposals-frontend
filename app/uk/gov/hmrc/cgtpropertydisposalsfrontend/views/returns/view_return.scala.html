@@ -130,6 +130,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         representativeType,
         isIndirectDisposal,
         Some(returnType.isFurtherOrAmendReturn),
+        returnType.isAmendReturn,
         returnSummaryClass = Some("return-summary")
     )
 

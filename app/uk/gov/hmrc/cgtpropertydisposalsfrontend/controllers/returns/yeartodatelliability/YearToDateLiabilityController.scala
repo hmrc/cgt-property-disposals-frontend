@@ -1614,7 +1614,18 @@ class YearToDateLiabilityController @Inject() (
     if (nonCalculatedAnswers.fold(_.yearToDateLiability, c => c.yearToDateLiability).isEmpty)
       Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
     else {
-      val taxDue = (yearToDateLiability -- previousYearToDateLiability: AmountInPence).withFloorZero
+      val taxOwedOnOriginalReturn = fillingOutReturn.amendReturnData
+        .map(
+          _.originalReturn.completeReturn.fold(
+            _.yearToDateLiabilityAnswers.taxDue,
+            _.yearToDateLiabilityAnswers.fold(_.taxDue, _.taxDue),
+            _.yearToDateLiabilityAnswers.taxDue,
+            _.yearToDateLiabilityAnswers.taxDue,
+            _.yearToDateLiabilityAnswers.taxDue
+          )
+        )
+      val taxOwed                 = taxOwedOnOriginalReturn.getOrElse(AmountInPence.zero)
+      val taxDue                  = (taxOwed ++ (yearToDateLiability -- previousYearToDateLiability): AmountInPence).withFloorZero
       if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue))
         Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
       else {
@@ -2235,6 +2246,7 @@ class YearToDateLiabilityController @Inject() (
                 fillingOutReturn.subscribedDetails.isATrust,
                 draftReturn.representativeType,
                 fillingOutReturn.isFurtherOrAmendReturn,
+                fillingOutReturn.isAmendReturn,
                 taxYear,
                 fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)
               )
@@ -2255,6 +2267,7 @@ class YearToDateLiabilityController @Inject() (
             fillingOutReturn.subscribedDetails.isATrust,
             draftReturn.representativeType,
             fillingOutReturn.isFurtherOrAmendReturn,
+            fillingOutReturn.isAmendReturn,
             taxYear,
             fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)
           )

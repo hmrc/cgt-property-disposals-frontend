@@ -3853,9 +3853,9 @@ nonCalculatedTaxDue.error.tooManyDecimals=The amount of Capital Gains Tax due mu
 nonCalculatedTaxDue.cyaChange=the amount of Capital Gains Tax due for this return
 
 nonCalculatedTaxDue.furtherReturn.checkTaxDue.title=Amount of Capital Gains Tax now due for this return
+nonCalculatedTaxDue.amendReturn.checkTaxDue.title=Updated Capital Gains Tax liability for this return
 
-nonCalculatedTaxDue.furtherReturn.checkTaxDue.h2=Capital Gains Tax liability on UK residential property
-nonCalculatedTaxDue.amendReturn.checkTaxDue.h2=Capital Gains Tax liability on UK property
+nonCalculatedTaxDue.checkTaxDue.h2=Capital Gains Tax liability on UK property-related disposals
 
 nonCalculatedTaxDue.furtherReturn.checkTaxDue.table.label1=Overall liability so far this tax year
 nonCalculatedTaxDue.furtherReturn.checkTaxDue.table.label2=Liability for previous returns

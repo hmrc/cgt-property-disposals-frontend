@@ -62,7 +62,7 @@
 
 @returnTypeKey = @{ if(isAmendReturn) ".amendReturn" else ".furtherReturn" }
 
-@title = @{messages(s"$key.furtherReturn.checkTaxDue.title")}
+@title = @{messages(s"$key$returnTypeKey.checkTaxDue.title")}
 
 @formattedTaxDue = @{
     val taxOwed = taxOwedOnOriginalReturn.getOrElse(AmountInPence.zero)
@@ -78,7 +78,7 @@
 
     @pageHeading(title)
 
-    <h2 class="heading-medium">@messages(s"$key$returnTypeKey.checkTaxDue.h2")</h2>
+    <h2 class="heading-medium">@messages(s"$key.checkTaxDue.h2")</h2>
 
     @calcSum(
         List(
@@ -95,13 +95,15 @@
         ),
         SumPartDisplay(
             label = messages(s"$key$returnTypeKey.checkTaxDue.table.label3"),
-            operator = Some("="),
+            operator = if(isAmendReturn) None else Some("="),
             amount = formattedTaxDue,
             total = true
         )
     )
 
-    <p>@messages(s"$key.furtherReturn.checkTaxDue$userKey.p1", formattedTaxDue)</p>
+    @if(!isAmendReturn) {
+      <p>@messages(s"$key.furtherReturn.checkTaxDue$userKey.p1", formattedTaxDue)</p>
+    }
 
     <p>@messages(s"$key.furtherReturn.checkTaxDue.p2")</p>
 
