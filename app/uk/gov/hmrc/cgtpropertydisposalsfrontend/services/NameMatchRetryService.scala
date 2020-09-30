@@ -28,9 +28,9 @@ import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.EitherOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{NameMatchServiceError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{BusinessPartnerRecordNameMatchAttemptEvent, BusinessPartnerRecordNameMatchAuditDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{BusinessPartnerRecordNameMatchAttemptEvent, BusinessPartnerRecordNameMatchAuditDetails, NameMatchAccountLocked}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualRepresenteeNameMatchDetails, IndividualSautrNameMatchDetails, TrustNameMatchDetails}
@@ -49,6 +49,9 @@ trait NameMatchRetryService {
 
   def getNumberOfUnsuccessfulAttempts[A <: NameMatchDetails : Reads](
     ggCredId: GGCredId
+  )(implicit
+    hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, NameMatchServiceError[A], Option[
     UnsuccessfulNameMatchAttempts[A]
   ]]
@@ -109,6 +112,9 @@ class NameMatchRetryServiceImpl @Inject() (
 
   def getNumberOfUnsuccessfulAttempts[A <: NameMatchDetails : Reads](
     ggCredId: GGCredId
+  )(implicit
+    hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, NameMatchServiceError[A], Option[
     UnsuccessfulNameMatchAttempts[A]
   ]] =
@@ -118,9 +124,10 @@ class NameMatchRetryServiceImpl @Inject() (
         _.fold[Either[NameMatchServiceError[A], Option[
           UnsuccessfulNameMatchAttempts[A]
         ]]](Right(None))((unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]) =>
-          if (unsuccessfulAttempts.unsuccessfulAttempts >= maxUnsuccessfulAttempts)
+          if (unsuccessfulAttempts.unsuccessfulAttempts >= maxUnsuccessfulAttempts) {
+            auditTooManyAttempts(unsuccessfulAttempts)
             Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
-          else
+          } else
             Right(Some(unsuccessfulAttempts))
         )
       }
@@ -338,6 +345,54 @@ class NameMatchRetryServiceImpl @Inject() (
             )
           )
     }
+
+  private def auditTooManyAttempts[A <: NameMatchDetails](
+    details: UnsuccessfulNameMatchAttempts[A]
+  )(implicit
+    hc: HeaderCarrier,
+    request: Request[_]
+  ): Unit = {
+    def eventWithoutId(name: Either[TrustName, IndividualName]) = NameMatchAccountLocked(
+      details.unsuccessfulAttempts,
+      details.maximumAttempts,
+      name.map(_.firstName).toOption,
+      name.map(_.lastName).toOption,
+      name.swap.map(_.value).toOption,
+      None,
+      None,
+      None,
+      None
+    )
+
+    val auditEvent = details.lastDetailsTried match {
+      case n: IndividualSautrNameMatchDetails =>
+        eventWithoutId(Right(n.name)).copy(sautr = Some(n.sautr.value))
+
+      case t: TrustNameMatchDetails =>
+        eventWithoutId(Left(t.name)).copy(trn = Some(t.trn.value))
+
+      case r: IndividualRepresenteeNameMatchDetails =>
+        r.id match {
+          case RepresenteeNino(nino)   =>
+            eventWithoutId(Right(r.name)).copy(nino = Some(nino.value))
+          case RepresenteeSautr(sautr) =>
+            eventWithoutId(Right(r.name)).copy(sautr = Some(sautr.value))
+
+          case RepresenteeCgtReference(cgtRef) =>
+            eventWithoutId(Right(r.name)).copy(cgtReference = Some(cgtRef.value))
+
+          case RepresenteeReferenceId.NoReferenceId =>
+            eventWithoutId(Right(r.name))
+        }
+
+    }
+
+    auditService.sendEvent(
+      "NameMatchAccountLocked",
+      auditEvent,
+      "name-match-account-locked"
+    )
+  }
 
   def handleCgtAccountNameMatch[A <: NameMatchDetails : Writes](
     cgtReference: CgtReference,

@@ -1327,7 +1327,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           completeFillingOutReturnNoRepresentee.agentReferenceNumber,
           completeFillingOutReturnNoRepresentee.isFurtherOrAmendReturn.contains(true),
           B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes()))),
-          completeFillingOutReturnNoRepresentee.amendReturnData.map(_.originalReturn.summary.submissionId)
+          completeFillingOutReturnNoRepresentee.amendReturnData
         )
       }
 
@@ -1371,9 +1371,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           completeFillingOutReturnWithRepresenteeWithNoReference.agentReferenceNumber,
           completeFillingOutReturnWithRepresenteeWithNoReference.isFurtherOrAmendReturn.contains(true),
           B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes()))),
-          completeFillingOutReturnWithRepresenteeWithNoReference.amendReturnData.map(
-            _.originalReturn.summary.submissionId
-          )
+          completeFillingOutReturnWithRepresenteeWithNoReference.amendReturnData
         )
       }
 

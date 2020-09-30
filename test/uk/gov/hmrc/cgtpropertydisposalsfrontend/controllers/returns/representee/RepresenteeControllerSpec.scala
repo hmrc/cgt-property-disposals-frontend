@@ -162,13 +162,15 @@ class RepresenteeControllerSpec
       UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
     ]]
   ) =
-    (mockNameMatchRetryService
-      .getNumberOfUnsuccessfulAttempts[IndividualRepresenteeNameMatchDetails](
-        _: GGCredId
-      )(
-        _: Reads[IndividualRepresenteeNameMatchDetails]
-      ))
-      .expects(ggCredId, *)
+    (
+      mockNameMatchRetryService
+        .getNumberOfUnsuccessfulAttempts[IndividualRepresenteeNameMatchDetails](_: GGCredId)(
+          _: Reads[IndividualRepresenteeNameMatchDetails],
+          _: HeaderCarrier,
+          _: Request[_]
+        )
+      )
+      .expects(ggCredId, *, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockNameMatch(
