@@ -352,6 +352,6 @@
         )
     }
 
- @exitSurveyLink(viewConfig.returnsExitSurveyUrl)
+ @exitSurveyLink(if(isAmend) viewConfig.amendsExitSurveyUrl else viewConfig.returnsExitSurveyUrl)
 
 }
