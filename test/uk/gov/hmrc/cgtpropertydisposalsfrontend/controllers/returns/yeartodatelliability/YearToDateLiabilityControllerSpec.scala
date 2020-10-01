@@ -4286,7 +4286,7 @@ class YearToDateLiabilityControllerSpec
             test(
               "taxableGainOrLoss" -> "0",
               "taxableGain"       -> "0"
-            )("taxableGain.multiple.error.tooSmall")
+            )("taxableGain.error.tooSmall")
           }
 
           "the amount of loss is invalid" in {
@@ -4304,7 +4304,7 @@ class YearToDateLiabilityControllerSpec
             test(
               "taxableGainOrLoss" -> "1",
               "netLoss"           -> "0"
-            )("netLoss.multiple.error.tooSmall")
+            )("netLoss.error.tooSmall")
           }
         }
 

@@ -71,7 +71,12 @@
 @multipleKey = @{if(isMultiple) ".multiple" else ""}
 @title = @{messages(s"$key$userKey$multipleKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
+@customErrorKey = @{
+  form.errors.headOption.map(e =>
+    if(e.key === key) s"$key$userKey$multipleKey"
+    else s"${e.key}"
+  )
+}
 @options = @{List(
     RadioOption(
         label = messages(s"$key$userKey.gain.label"),
@@ -120,13 +125,6 @@
     })
 }
 
-@customErrorKey = @{
-  form.errors.headOption.map(e =>
-    if(e.key === key) s"$key$userKey$multipleKey"
-    else s"${e.key}"
-  )
-}
-
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
     @backLinkComponent(backLink)
@@ -145,7 +143,7 @@
             error = form.error(key),
             options = options,
             helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-            customErrorKey = Some(s"$customErrorKey")
+            customErrorKey = customErrorKey
         )
 
         @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
