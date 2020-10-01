@@ -3339,6 +3339,68 @@ class RepresenteeControllerSpec
 
     }
 
+    "handling requests to display the too many mane match attempts page" must {
+
+      def performAction(): Future[Result] = controller.tooManyNameMatchAttempts()(FakeRequest())
+
+      val (session, journey, _) =
+        sessionWithFillingOutReturn(
+          sample[IncompleteRepresenteeAnswers].copy(
+            name = Some(sample[IndividualName]),
+            id = Some(sample[RepresenteeReferenceId]),
+            isFirstReturn = Some(true),
+            dateOfDeath = Some(sample[DateOfDeath])
+          ),
+          PersonalRepresentative
+        )
+
+      val ggCredId = journey.ggCredId
+
+      "show an error page" when {
+
+        "there is an error getting the number of previous name match attempts" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetPreviousNameMatchAttempts(ggCredId)(
+              Left(NameMatchServiceError.BackendError(Error("")))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "redirect to the enter name page if user has not made too many name match attempts" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockGetPreviousNameMatchAttempts(ggCredId)(
+            Right(None)
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.RepresenteeController.enterName())
+      }
+
+      "show the page" when {
+
+        "the user has made too many attempts" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetPreviousNameMatchAttempts(ggCredId)(
+              Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
+            )
+          }
+
+          checkPageIsDisplayed(performAction(), messageFromMessageKey("representeeTooManyNameMatchFailures.title"))
+        }
+      }
+
+    }
+
   }
 
   def testFormError(
