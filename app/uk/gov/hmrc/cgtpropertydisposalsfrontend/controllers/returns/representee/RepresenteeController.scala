@@ -498,7 +498,19 @@ class RepresenteeController @Inject() (
 
   def tooManyNameMatchAttempts(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withCapacitorOrPersonalRepresentativeAnswers(request)((_, _, _) => Ok(tooManyNameMatchFailuresPage()))
+      withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, _) =>
+        nameMatchRetryService
+          .getNumberOfUnsuccessfulAttempts[IndividualRepresenteeNameMatchDetails](
+            journey.fold(_.ggCredId, _.ggCredId)
+          )
+          .foldF[Result](
+            {
+              case NameMatchServiceError.TooManyUnsuccessfulAttempts() => Ok(tooManyNameMatchFailuresPage())
+              case other                                               => handleNameMatchServiceError(other)
+            },
+            _ => Redirect(routes.RepresenteeController.enterName())
+          )
+      }
     }
 
   def enterDateOfDeath(): Action[AnyContent] =
