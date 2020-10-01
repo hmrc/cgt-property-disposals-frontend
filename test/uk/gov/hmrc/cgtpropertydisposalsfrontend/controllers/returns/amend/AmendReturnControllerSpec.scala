@@ -21,7 +21,8 @@ import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.{Call, Result}
+import play.api.libs.json.Writes
+import play.api.mvc.{Call, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -31,14 +32,21 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionand
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes.{InitialGainOrLossController => initialGainorLossRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes.{YearToDateLiabilityController => ytdRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingToAmendReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, UUIDGenerator}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.CancelAmendReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class AmendReturnControllerSpec
     extends ControllerSpec
@@ -50,16 +58,30 @@ class AmendReturnControllerSpec
 
   val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
+  val mockAuditService: AuditService = mock[AuditService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[UUIDGenerator].toInstance(mockUUIDGenerator)
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator),
+      bind[AuditService].toInstance(mockAuditService)
     )
 
   lazy val controller = instanceOf[AmendReturnController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
+
+  def mockAuditCancelAmendReturn(auditEvent: CancelAmendReturn): Unit =
+    (mockAuditService
+      .sendEvent(_: String, _: CancelAmendReturn, _: String)(
+        _: ExecutionContext,
+        _: HeaderCarrier,
+        _: Writes[CancelAmendReturn],
+        _: Request[_]
+      ))
+      .expects("CancelAmendReturn", auditEvent, "cancel-amend-return", *, *, *, *)
+      .returning(())
 
   "AmendReturnController" when {
 
@@ -108,6 +130,15 @@ class AmendReturnControllerSpec
       def performAction(back: String): Future[Result] =
         controller.confirmCancel(back)(FakeRequest())
 
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(AmendReturnController.ConfirmCancelBackLocations.calculateAmounts),
+        {
+          case _: StartingToAmendReturn => true
+          case f: FillingOutReturn      => f.amendReturnData.isDefined
+          case _                        => false
+        }
+      )
+
       "show an error page" when {
 
         "the back location is not understood" in {
@@ -129,7 +160,11 @@ class AmendReturnControllerSpec
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty)
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(sample[StartingToAmendReturn])
+              )
+            )
           }
 
           checkPageIsDisplayed(
@@ -188,12 +223,25 @@ class AmendReturnControllerSpec
       def performAction(formData: (String, String)*)(back: String): Future[Result] =
         controller.confirmCancelSubmit(back)(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction()(AmendReturnController.ConfirmCancelBackLocations.calculateAmounts),
+        {
+          case _: StartingToAmendReturn => true
+          case f: FillingOutReturn      => f.amendReturnData.isDefined
+          case _                        => false
+        }
+      )
+
       "show an error page" when {
 
         "the back location is not understood" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty)
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(sample[StartingToAmendReturn])
+              )
+            )
           }
 
           checkIsTechnicalErrorPage(performAction()("abc"))
@@ -203,7 +251,16 @@ class AmendReturnControllerSpec
 
       "display a form error" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
+        def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(sample[StartingToAmendReturn])
+              )
+            )
+          }
+
           checkPageIsDisplayed(
             performAction(data: _*)(AmendReturnController.ConfirmCancelBackLocations.checkAnswers),
             messageFromMessageKey("confirmCancelAmendReturn.title"),
@@ -220,22 +277,13 @@ class AmendReturnControllerSpec
             },
             BAD_REQUEST
           )
+        }
 
         "nothing is submitted" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty)
-          }
-
           test()("confirmCancelAmendReturn.error.required")
         }
 
         "the value submitted is not understood" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty)
-          }
-
           test("confirmCancelAmendReturn" -> "123")("confirmCancelAmendReturn.error.required")
         }
 
@@ -243,18 +291,64 @@ class AmendReturnControllerSpec
 
       "redirect to the correct page" when {
 
-        "the user confirms they want to cancel" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty)
+        "the user confirms they want to cancel and" when {
+
+          "they were starting to amend a return" in {
+            val auditEvent    = CancelAmendReturn("cgtRef", "submissionId", Some("agentRef"))
+            val journeyStatus = sample[StartingToAmendReturn].copy(
+              subscribedDetails = sample[SubscribedDetails].copy(cgtReference = CgtReference(auditEvent.cgtReference)),
+              originalReturn = sample[CompleteReturnWithSummary].copy(summary =
+                sample[ReturnSummary].copy(
+                  submissionId = auditEvent.submissionId
+                )
+              ),
+              agentReferenceNumber = auditEvent.agentReferenceNumber.map(AgentReferenceNumber(_))
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(SessionData.empty.copy(journeyStatus = Some(journeyStatus)))
+              mockAuditCancelAmendReturn(auditEvent)
+            }
+
+            checkIsRedirect(
+              performAction("confirmCancelAmendReturn" -> "true")(
+                AmendReturnController.ConfirmCancelBackLocations.calculateAmounts
+              ),
+              controllers.returns.routes.ViewReturnController.displayReturn()
+            )
           }
 
-          checkIsRedirect(
-            performAction("confirmCancelAmendReturn" -> "true")(
-              AmendReturnController.ConfirmCancelBackLocations.calculateAmounts
-            ),
-            controllers.returns.routes.ViewReturnController.displayReturn()
-          )
+          "they were amending a return" in {
+            val auditEvent    = CancelAmendReturn("cgtRef", "submissionId", Some("agentRef"))
+            val journeyStatus = sample[FillingOutReturn].copy(
+              subscribedDetails = sample[SubscribedDetails].copy(cgtReference = CgtReference(auditEvent.cgtReference)),
+              amendReturnData = Some(
+                sample[AmendReturnData].copy(
+                  originalReturn = sample[CompleteReturnWithSummary].copy(summary =
+                    sample[ReturnSummary].copy(
+                      submissionId = auditEvent.submissionId
+                    )
+                  )
+                )
+              ),
+              agentReferenceNumber = auditEvent.agentReferenceNumber.map(AgentReferenceNumber(_))
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(SessionData.empty.copy(journeyStatus = Some(journeyStatus)))
+              mockAuditCancelAmendReturn(auditEvent)
+            }
+
+            checkIsRedirect(
+              performAction("confirmCancelAmendReturn" -> "true")(
+                AmendReturnController.ConfirmCancelBackLocations.calculateAmounts
+              ),
+              controllers.returns.routes.ViewReturnController.displayReturn()
+            )
+          }
+
         }
 
         "the user doesn't want to cancel" in {
@@ -262,7 +356,11 @@ class AmendReturnControllerSpec
             withClue(s"For back key '$backKey' and back location '${backLink.url}': ") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(SessionData.empty)
+                mockGetSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(sample[StartingToAmendReturn])
+                  )
+                )
               }
 
               checkIsRedirect(

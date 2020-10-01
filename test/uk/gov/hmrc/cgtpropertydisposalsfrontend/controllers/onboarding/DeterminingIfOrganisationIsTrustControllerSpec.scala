@@ -89,11 +89,15 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
     ]]
   ) =
-    (mockBprNameMatchService
-      .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](_: GGCredId)(
-        _: Reads[TrustNameMatchDetails]
-      ))
-      .expects(ggCredId, *)
+    (
+      mockBprNameMatchService
+        .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](_: GGCredId)(
+          _: Reads[TrustNameMatchDetails],
+          _: HeaderCarrier,
+          _: Request[_]
+        )
+      )
+      .expects(ggCredId, *, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockAttemptNameMatch(

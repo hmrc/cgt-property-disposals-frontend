@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, DraftReturnId, GGCredId, SAUTR, SapNumber}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, DraftReturnId, GGCredId, NINO, SAUTR, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference
 
 object IdGen extends GenUtils {
@@ -26,6 +26,8 @@ object IdGen extends GenUtils {
   implicit val cgtReferenceArb: Gen[CgtReference] = gen[CgtReference]
 
   implicit val ggCredIdGen: Gen[GGCredId] = gen[GGCredId]
+
+  implicit val ninoGen: Gen[NINO] = gen[NINO]
 
   implicit val sautrGen: Gen[SAUTR] = gen[SAUTR]
 

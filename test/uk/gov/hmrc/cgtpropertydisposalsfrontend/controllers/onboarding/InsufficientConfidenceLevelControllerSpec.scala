@@ -85,10 +85,12 @@ class InsufficientConfidenceLevelControllerSpec
         .getNumberOfUnsuccessfulAttempts[IndividualSautrNameMatchDetails](
           _: GGCredId
         )(
-          _: Reads[IndividualSautrNameMatchDetails]
+          _: Reads[IndividualSautrNameMatchDetails],
+          _: HeaderCarrier,
+          _: Request[_]
         )
       )
-      .expects(ggCredId, *)
+      .expects(ggCredId, *, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockAttemptNameMatch(
