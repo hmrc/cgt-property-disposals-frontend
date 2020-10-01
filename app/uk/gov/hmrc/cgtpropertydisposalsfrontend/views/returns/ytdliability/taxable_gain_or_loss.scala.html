@@ -19,6 +19,8 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
+@import cats.syntax.eq._
+@import cats.instances.string._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -69,7 +71,12 @@
 @multipleKey = @{if(isMultiple) ".multiple" else ""}
 @title = @{messages(s"$key$userKey$multipleKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
+@customErrorKey = @{
+  form.errors.headOption.map(e =>
+    if(e.key === key) s"$key$userKey$multipleKey"
+    else s"${e.key}"
+  )
+}
 @options = @{List(
     RadioOption(
         label = messages(s"$key$userKey.gain.label"),
@@ -118,13 +125,12 @@
     })
 }
 
-
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form, None, s"$userKey$multipleKey")
+        @errorSummary(form, customErrorKey = customErrorKey)
     }
 
     @caption(messages("ytdLiability.caption"))
@@ -137,7 +143,7 @@
             error = form.error(key),
             options = options,
             helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-            customErrorKey = Some(s"$key$userKey$multipleKey")
+            customErrorKey = customErrorKey
         )
 
         @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
