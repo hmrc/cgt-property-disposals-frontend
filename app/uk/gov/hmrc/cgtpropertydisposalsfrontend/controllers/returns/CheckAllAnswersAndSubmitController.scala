@@ -310,6 +310,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                 _,
                 draftReturn: DraftSingleDisposalReturn,
                 _,
+                _,
                 _
               )
             )
@@ -328,6 +329,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                 _,
                 _,
                 draftReturn: DraftMultipleDisposalsReturn,
+                _,
                 _,
                 _
               )
@@ -348,6 +350,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                 _,
                 draftReturn: DraftSingleIndirectDisposalReturn,
                 _,
+                _,
                 _
               )
             )
@@ -367,6 +370,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                 _,
                 draftReturn: DraftMultipleIndirectDisposalsReturn,
                 _,
+                _,
                 _
               )
             )
@@ -385,6 +389,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                 _,
                 _,
                 draftReturn: DraftSingleMixedUseDisposalReturn,
+                _,
                 _,
                 _
               )

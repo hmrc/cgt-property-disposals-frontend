@@ -22,6 +22,8 @@ import cats.instances.list._
 import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
@@ -38,7 +40,8 @@ import scala.concurrent.{ExecutionContext, Future}
 trait GlarCalculatorEligibilityUtil {
 
   def isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn: FillingOutReturn)(implicit
-    hc: HeaderCarrier
+    hc: HeaderCarrier,
+    request: RequestWithSessionData[_]
   ): EitherT[Future, Error, Boolean]
 
 }
@@ -48,15 +51,16 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
   returnsService: ReturnsService,
   servicesConfig: ServicesConfig
 )(implicit ec: ExecutionContext)
-    extends GlarCalculatorEligibilityUtil {
+    extends GlarCalculatorEligibilityUtil
+    with SessionUpdates {
 
-  val amendAndFurtherReturnCalculationsEnabled = servicesConfig.getBoolean("glar-calculator.enabled")
+  val amendAndFurtherReturnCalculationsEnabled =
+    servicesConfig.getBoolean("amend-and-further-returns-calculator.enabled")
 
   def isEligibleForFurtherReturnOrAmendCalculation(
     fillingOutReturn: FillingOutReturn
-  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, Error, Boolean] = {
+  )(implicit headerCarrier: HeaderCarrier, request: RequestWithSessionData[_]): EitherT[Future, Error, Boolean] = {
 
-    @SuppressWarnings(Array("org.wartremover.warts.Any"))
     def isEligible(
       fillingOutReturn: FillingOutReturn,
       completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
@@ -73,7 +77,13 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
 
       val currentReturnIsEligible = eligibleAssetType && noOtherReliefs && underPreviousReturnLimit && isSelf
 
-      if (currentReturnIsEligible) {
+      if (
+        fillingOutReturn.previousReturnsImplyEligilityForFurtherReturnCalculation.contains(
+          true
+        ) && currentReturnIsEligible
+      ) {
+        EitherT.right(Future(true))
+      } else if (currentReturnIsEligible) {
         val submissionIdsOfPreviousReturns = fillingOutReturn.previousSentReturns
           .map(e => e.summaries)
           .getOrElse(List.empty)
@@ -91,11 +101,13 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
             })
         }
 
-        results.sequence.map { r =>
-          r.forall(e => e)
+        results.sequence[EitherT[Future, Error, *], Boolean].map { e =>
+          e.forall(identity)
         }
 
-      } else EitherT.right(Future(false))
+      } else {
+        EitherT.right(Future(false))
+      }
     }
 
     fillingOutReturn match {
@@ -119,10 +131,10 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
               _
             ),
             _,
+            _,
             _
           ) if amendAndFurtherReturnCalculationsEnabled =>
-        val bb = isEligible(fillingOutReturn, triageAnswers, reliefDetailsAnswers)
-        bb
+        isEligible(fillingOutReturn, triageAnswers, reliefDetailsAnswers)
 
       case _ => EitherT.right(Future(false))
     }

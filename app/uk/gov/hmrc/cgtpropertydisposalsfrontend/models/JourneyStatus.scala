@@ -98,12 +98,13 @@ object JourneyStatus {
   ) extends JourneyStatus
 
   final case class FillingOutReturn(
-    subscribedDetails: SubscribedDetails,
-    ggCredId: GGCredId,
-    agentReferenceNumber: Option[AgentReferenceNumber],
-    draftReturn: DraftReturn,
-    previousSentReturns: Option[PreviousReturnData],
-    amendReturnData: Option[AmendReturnData]
+                                     subscribedDetails: SubscribedDetails,
+                                     ggCredId: GGCredId,
+                                     agentReferenceNumber: Option[AgentReferenceNumber],
+                                     draftReturn: DraftReturn,
+                                     previousSentReturns: Option[PreviousReturnData],
+                                     amendReturnData: Option[AmendReturnData],
+                                     previousReturnsImplyEligilityForFurtherReturnCalculation: Option[Boolean] = None
   ) extends JourneyStatus
 
   object FillingOutReturn {

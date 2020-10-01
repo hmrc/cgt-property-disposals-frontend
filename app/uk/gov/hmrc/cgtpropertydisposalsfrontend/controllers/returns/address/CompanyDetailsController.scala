@@ -100,6 +100,7 @@ class CompanyDetailsController @Inject() (
                 _,
                 i: DraftSingleIndirectDisposalReturn,
                 _,
+                _,
                 _
               )
             )
@@ -121,6 +122,7 @@ class CompanyDetailsController @Inject() (
                 _,
                 _,
                 i: DraftMultipleIndirectDisposalsReturn,
+                _,
                 _,
                 _
               )

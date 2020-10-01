@@ -4732,6 +4732,8 @@ gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Tell us if the person
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Tell us if the estate made a gain on the disposals in this return after reliefs were subtracted
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Tell us if your client, or the estate made a gain on the disposals in this return after reliefs were subtracted
 
+gainOrLossAfterReliefs.calculatorHeading=We have worked out that your gain or loss after reliefs is a {0} of {1}
+
 gainOrLossAfterReliefs.p1=To do this, you’ll need to:
 
 gainOrLossAfterReliefs.li1=Start with the proceeds of the disposal.

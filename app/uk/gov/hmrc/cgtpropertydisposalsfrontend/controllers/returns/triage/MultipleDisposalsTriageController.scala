@@ -1413,7 +1413,7 @@ class MultipleDisposalsTriageController @Inject() (
       case Some(
             (
               session,
-              r @ FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn, _, _)
+              r @ FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn, _, _, _)
             )
           ) =>
         f(session, Right(r -> Right(m)), m.triageAnswers)
@@ -1421,7 +1421,7 @@ class MultipleDisposalsTriageController @Inject() (
       case Some(
             (
               session,
-              r @ FillingOutReturn(_, _, _, mi: DraftMultipleIndirectDisposalsReturn, _, _)
+              r @ FillingOutReturn(_, _, _, mi: DraftMultipleIndirectDisposalsReturn, _, _, _)
             )
           ) =>
         f(session, Right(r -> Left(mi)), mi.triageAnswers)

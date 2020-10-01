@@ -68,7 +68,7 @@ final case class CalculatedGlarBreakdown(
 
   val gainOrLossAfterReliefs = initialGainOrLoss - totalReliefs
 
-  val isGain = gainOrLossAfterReliefs >= 0
+  val isGain = gainOrLossAfterReliefs >= 1
 
 }
 

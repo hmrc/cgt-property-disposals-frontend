@@ -133,11 +133,11 @@ class MultipleDisposalsTriageControllerSpec
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean =
     journeyStatus match {
-      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft             => true
-      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn, _, _)         => true
-      case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _, _) => true
-      case _: StartingToAmendReturn                                                 => true
-      case _                                                                        => false
+      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft                => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn, _, _, _)         => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _, _, _) => true
+      case _: StartingToAmendReturn                                                    => true
+      case _                                                                           => false
     }
 
   def setIndividualUserType(

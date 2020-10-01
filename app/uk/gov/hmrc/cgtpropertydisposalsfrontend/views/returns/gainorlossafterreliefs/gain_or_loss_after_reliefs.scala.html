@@ -156,11 +156,12 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     @pageHeading(title)
 
   @{glarCalulatorInput match {
-      case Some(value) => <div>
-      We have worked out that your gain or loss after reliefs is a {if(value.isGain) messages("generic.gain") else messages("generic.loss") } of
-      {MoneyUtils.formatAmountOfMoneyWithPoundSign(value.gainOrLossAfterReliefs.abs)}
+      case Some(value) => messages(
+          s"$key.calculatorHeading",
+          if(value.isGain) messages("generic.gain") else messages("generic.loss"),
+          MoneyUtils.formatAmountOfMoneyWithPoundSign(value.gainOrLossAfterReliefs.abs)
+      )
 
-      </div>
       case _ => ""
   }}
 

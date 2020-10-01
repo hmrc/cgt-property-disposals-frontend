@@ -88,7 +88,9 @@ class MixedUsePropertyDetailsController @Inject() (
         implicit val r: RequestWithSessionData[_] = request
         Left(convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator))
 
-      case Some((sessionData, f @ FillingOutReturn(_, _, _, draftReturn: DraftSingleMixedUseDisposalReturn, _, _))) =>
+      case Some(
+            (sessionData, f @ FillingOutReturn(_, _, _, draftReturn: DraftSingleMixedUseDisposalReturn, _, _, _))
+          ) =>
         val answers = draftReturn.mixedUsePropertyDetailsAnswers
           .getOrElse(IncompleteMixedUsePropertyDetailsAnswers.empty)
         Right(

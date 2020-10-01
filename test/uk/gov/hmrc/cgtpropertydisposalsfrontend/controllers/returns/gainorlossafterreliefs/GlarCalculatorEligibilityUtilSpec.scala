@@ -249,7 +249,7 @@ class GlarCalculatorEligibilityUtilFlagNotEnabledSpec
     )
 
   override lazy val additionalConfig = Configuration(
-    "glar-calculator.enabled" -> false
+    "amend-and-further-returns-calculator.enabled" -> false
   )
 
   override val overrideBindings = List[GuiceableModule](

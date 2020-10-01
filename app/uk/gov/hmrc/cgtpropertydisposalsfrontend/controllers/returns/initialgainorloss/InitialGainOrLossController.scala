@@ -192,6 +192,7 @@ class InitialGainOrLossController @Inject() (
               _,
               d: DraftSingleDisposalReturn,
               _,
+              _,
               _
             )
           ) =>

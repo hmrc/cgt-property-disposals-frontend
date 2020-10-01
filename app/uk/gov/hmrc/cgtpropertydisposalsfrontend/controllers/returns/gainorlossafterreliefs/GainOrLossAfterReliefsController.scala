@@ -72,8 +72,19 @@ class GainOrLossAfterReliefsController @Inject() (
         glarCalculatorEligibilityUtil
           .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
           .fold(
-            _ => InternalServerError,
-            includeBreakdown =>
+            err => {
+              logger.warn("Could not check for calculation eligibility", err)
+              errorHandler.errorResult()
+            },
+            includeBreakdown => {
+              if (
+                !fillingOutReturn.previousReturnsImplyEligilityForFurtherReturnCalculation.contains(includeBreakdown)
+              ) {
+                val updatedJourney = fillingOutReturn
+                  .copy(previousReturnsImplyEligilityForFurtherReturnCalculation = Some(includeBreakdown))
+                returnsService.storeDraftReturn(updatedJourney)
+                EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+              }
               Ok(
                 gainOrLossAfterReliefsPage(
                   answer.fold(gainOrLossAfterReliefsForm)(value => gainOrLossAfterReliefsForm.fill(value.inPounds())),
@@ -87,6 +98,7 @@ class GainOrLossAfterReliefsController @Inject() (
                   if (includeBreakdown) buildGlarBreakdown(fillingOutReturn.draftReturn) else None
                 )
               )
+            }
           )
       }
     }
@@ -101,7 +113,10 @@ class GainOrLossAfterReliefsController @Inject() (
               glarCalculatorEligibilityUtil
                 .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
                 .fold(
-                  _ => InternalServerError,
+                  err => {
+                    logger.warn("Could not check for calculation eligibility", err)
+                    errorHandler.errorResult()
+                  },
                   includeBreakdown =>
                     BadRequest(
                       gainOrLossAfterReliefsPage(
@@ -225,6 +240,7 @@ class GainOrLossAfterReliefsController @Inject() (
               _,
               _,
               d,
+              _,
               _,
               _
             )

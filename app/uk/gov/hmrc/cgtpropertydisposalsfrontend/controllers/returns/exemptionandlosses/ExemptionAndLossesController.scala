@@ -80,7 +80,7 @@ class ExemptionAndLossesController @Inject() (
       case Some((_, s: StartingToAmendReturn)) =>
         markUnmetDependency(s, sessionStore, errorHandler)
 
-      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) if r.isFurtherOrAmendReturn.contains(true) =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _, _))) if r.isFurtherOrAmendReturn.contains(true) =>
         val answers = d
           .fold(
             _.exemptionAndLossesAnswers,
@@ -96,7 +96,7 @@ class ExemptionAndLossesController @Inject() (
           )
         f(s, r, d, answers)
 
-      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _, _))) =>
         val answers = d
           .fold(
             _.exemptionAndLossesAnswers,
