@@ -142,8 +142,24 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @title = @{
     messages(s"$key$userKey$multipleDisposalKey.title")
 }
+  @glar = @{
+      glarCalulatorInput match {
+          case Some(value) =>  MoneyUtils.formatAmountOfMoneyWithoutPoundSign(value.gainOrLossAfterReliefs)
+          case None => ""
+      }}
+@label = @{if(glarCalulatorInput.isEmpty) {
+    Html(s"""<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>""")
+} else {
+    Html(
+        s"""
+           |<div>
+           |<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>
+           |<p>${messages(s"$key.calculated.prompt", glar)}</p>
+           |</div>"""
+           .stripMargin)
+}}
 
-@mainTemplate(title = title, userType = request.userType) {
+    @mainTemplate(title = title, userType = request.userType) {
 
     @backLinkComponent(backLink)
 
@@ -165,7 +181,8 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
       case _ => ""
   }}
 
-  @{glarCalulatorInput match {
+    <div>
+    @{glarCalulatorInput match {
           case Some(calculatedValues) =>  {
               details(
                   messages("calculator.showWorkings"),
@@ -191,13 +208,15 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
                   </ol>
       }
   }
+    </div>
+
 
     @formWrapper(routes.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefsSubmit(), 'novalidate -> "novalidate") {
       @radioGroupConditional(
         fieldId = key,
-        label = Html(s"""<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>"""),
         selected = selectedIndex,
         error = form.error(key),
+        label = label,
         options = options,
         customErrorKey = customErrorKey,
         helpText = None

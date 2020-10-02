@@ -19,9 +19,11 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossa
 import cats.data.EitherT
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
+import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.Result
+import play.api.mvc.{MessagesRequest, Result}
+import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
@@ -37,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sam
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
 import play.api.test.Helpers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedRequest, RequestWithSessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
@@ -51,7 +54,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{GlarCalculatorEligibilityUtil, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibility, GlarCalculatorEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -81,7 +84,15 @@ class GlarCalculatorEligibilityUtilSpec
     "glar-calculator.enabled" -> true
   )
 
-  lazy val service = instanceOf[GlarCalculatorEligibilityUtil]
+  lazy val service                          = instanceOf[GlarCalculatorEligibilityUtil]
+  implicit val headerCarrier: HeaderCarrier = mock[HeaderCarrier]
+  val message                               = mock[MessagesApi]
+  implicit val requestWithSessionData       = RequestWithSessionData(
+    None,
+    AuthenticatedRequest(
+      new MessagesRequest(FakeRequest(), message)
+    )
+  )
 
   override val overrideBindings = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
@@ -109,7 +120,8 @@ class GlarCalculatorEligibilityUtilSpec
       )
     val journey     = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
-      previousSentReturns = previousSentReturns
+      previousSentReturns = previousSentReturns,
+      previousReturnsImplyEligilityForFurtherReturnCalculation = None
     )
 
     (
@@ -122,21 +134,22 @@ class GlarCalculatorEligibilityUtilSpec
     )
   }
 
-  implicit val headerCarrier: HeaderCarrier = mock[HeaderCarrier]
-
-  def performAction(fillingOutReturn: FillingOutReturn): EitherT[Future, Error, Boolean] =
-    service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)(headerCarrier)
+  def performAction(fillingOutReturn: FillingOutReturn): EitherT[Future, Error, FurtherReturnEligibility] =
+    service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
 
   "GainOrLossAfterReliefsGlarCalculatorEnabledController" when {
 
     "handling eligibility request to display the gain or loss after reliefs page" must {
 
-      def test(session: (SessionData, FillingOutReturn, DraftSingleDisposalReturn), isEligible: Boolean) = {
+      def test(
+        session: (SessionData, FillingOutReturn, DraftSingleDisposalReturn),
+        expected: FurtherReturnEligibility
+      ) = {
         val result = await(performAction(session._2).value)
         result.isRight shouldBe true
         result match {
           case Left(_)      => fail()
-          case Right(value) => value shouldBe isEligible
+          case Right(value) => value shouldBe expected
         }
       }
 
@@ -145,26 +158,26 @@ class GlarCalculatorEligibilityUtilSpec
         "user not eligible" when {
 
           "Current return has other reliefs" in {
-            test(eligableSession(otherRefliefs = Some(sample[OtherReliefs])), false)
+            test(eligableSession(otherRefliefs = Some(sample[OtherReliefs])), FurtherReturnEligibility(false, None))
           }
 
           "More than 10 previous returns" in {
             val tooManyPreviousReturns = eligableSession(previousSentReturns =
               Some(sample[PreviousReturnData].copy(summaries = List.fill(11)(sample[ReturnSummary])))
             )
-            test(tooManyPreviousReturns, false)
+            test(tooManyPreviousReturns, FurtherReturnEligibility(false, None))
           }
 
           "Current return not self" in {
             val isCapacitor = eligableSession(individualUserType = Some(Capacitor))
-            test(isCapacitor, false)
+            test(isCapacitor, FurtherReturnEligibility(false, None))
 
             val isPersonalRep = eligableSession(individualUserType = Some(PersonalRepresentative))
-            test(isPersonalRep, false)
+            test(isPersonalRep, FurtherReturnEligibility(false, None))
 
             val isPersonalRepInPeriodOfAdmin =
               eligableSession(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin))
-            test(isPersonalRepInPeriodOfAdmin, false)
+            test(isPersonalRepInPeriodOfAdmin, FurtherReturnEligibility(false, None))
           }
         }
       }
@@ -185,41 +198,45 @@ class GlarCalculatorEligibilityUtilSpec
         "user eligible" when {
           "under limit and displays OK" in {
             val returns = List.fill(9)(sample[ReturnSummary])
-            val a       = eligableSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
+            val session =
+              eligableSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
             inSequence {
               returns.map { r =>
-                mockDisplayReturn(a._2.subscribedDetails.cgtReference, r.submissionId)(Right(genDisplayReturn()))
+                mockDisplayReturn(session._2.subscribedDetails.cgtReference, r.submissionId)(Right(genDisplayReturn()))
               }
             }
-            test(a, true)
+            test(session, FurtherReturnEligibility(true, Some(true)))
           }
         }
 
         "user not eligible" when {
-          "under limit but asset type incorrect" in {
+
+          "under limit but previous returns asset type incorrect" in {
             val returns = List.fill(9)(sample[ReturnSummary])
-            val a       = eligableSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
+            val session =
+              eligableSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
             inSequence {
               returns.map { r =>
-                mockDisplayReturn(a._2.subscribedDetails.cgtReference, r.submissionId)(
+                mockDisplayReturn(session._2.subscribedDetails.cgtReference, r.submissionId)(
                   Right(genDisplayReturn(assetType = IndirectDisposal))
                 )
               }
             }
-            test(a, false)
+            test(session, FurtherReturnEligibility(true, Some(false)))
           }
 
-          "under limit but contains other reliefs" in {
+          "under limit but previous returns contains other reliefs" in {
             val returns = List.fill(9)(sample[ReturnSummary])
-            val a       = eligableSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
+            val session =
+              eligableSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
             inSequence {
               returns.map { r =>
-                mockDisplayReturn(a._2.subscribedDetails.cgtReference, r.submissionId)(
+                mockDisplayReturn(session._2.subscribedDetails.cgtReference, r.submissionId)(
                   Right(genDisplayReturn(otherReliefs = Some(sample[OtherReliefs])))
                 )
               }
             }
-            test(a, false)
+            test(session, FurtherReturnEligibility(true, Some(false)))
           }
         }
       }
@@ -294,20 +311,30 @@ class GlarCalculatorEligibilityUtilFlagNotEnabledSpec
   lazy val service = instanceOf[GlarCalculatorEligibilityUtil]
 
   implicit val headerCarrier: HeaderCarrier = mock[HeaderCarrier]
+  val message                               = mock[MessagesApi]
+  implicit val requestWithSessionData       = RequestWithSessionData(
+    None,
+    AuthenticatedRequest(
+      new MessagesRequest(FakeRequest(), message)
+    )
+  )
 
-  def performAction(fillingOutReturn: FillingOutReturn): EitherT[Future, Error, Boolean] =
+  def performAction(fillingOutReturn: FillingOutReturn): EitherT[Future, Error, FurtherReturnEligibility] =
     service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
 
   "GainOrLossAfterReliefsGlarCalculatorEnabledController" when {
 
     "handling eligibility request to display the gain or loss after reliefs page" must {
 
-      def test(session: (SessionData, FillingOutReturn, DraftSingleDisposalReturn), isEligible: Boolean) = {
+      def test(
+        session: (SessionData, FillingOutReturn, DraftSingleDisposalReturn),
+        eligibility: FurtherReturnEligibility
+      ) = {
         val result = await(performAction(session._2).value)
         result.isRight shouldBe true
         result match {
           case Left(_)      => fail()
-          case Right(value) => value shouldBe isEligible
+          case Right(value) => value shouldBe eligibility
         }
       }
 
@@ -317,7 +344,7 @@ class GlarCalculatorEligibilityUtilFlagNotEnabledSpec
           "under limit and displays OK" in {
             val returns = List.fill(9)(sample[ReturnSummary])
             val a       = eligableSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
-            test(a, false)
+            test(a, FurtherReturnEligibility(false, None))
           }
         }
       }

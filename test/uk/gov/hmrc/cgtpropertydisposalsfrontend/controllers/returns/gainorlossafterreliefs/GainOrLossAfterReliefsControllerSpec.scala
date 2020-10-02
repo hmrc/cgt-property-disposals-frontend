@@ -30,9 +30,10 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{GlarEligibilityUtilSupport, ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Trust
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
@@ -43,17 +44,23 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, IndividualUserType, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, IndividualUserType, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibility, GlarCalculatorEligibilityUtil, ReturnsService}
 
 import scala.concurrent.Future
 
@@ -62,6 +69,7 @@ class GainOrLossAfterReliefsControllerSpec
     with AuthSupport
     with SessionSupport
     with ReturnsServiceSupport
+    with GlarEligibilityUtilSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
@@ -86,7 +94,8 @@ class GainOrLossAfterReliefsControllerSpec
     bind[AuthConnector].toInstance(mockAuthConnector),
     bind[SessionStore].toInstance(mockSessionStore),
     bind[ReturnsService].toInstance(mockReturnsService),
-    bind[UUIDGenerator].toInstance(mockUUIDGenerator)
+    bind[UUIDGenerator].toInstance(mockUUIDGenerator),
+    bind[GlarCalculatorEligibilityUtil].toInstance(mockGlarCalculatorEligibility)
   )
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
@@ -157,10 +166,10 @@ class GainOrLossAfterReliefsControllerSpec
     userType: UserType = Individual,
     subscribedDetails: SubscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
     isMultipleDisposal: Boolean = false
-  ): SessionData =
+  ): (SessionData, FillingOutReturn, DraftReturn) =
     if (isMultipleDisposal)
-      sessionWithMultipleDisposalsState(gainOrLossAfterReliefs, individualUserType, userType, subscribedDetails)._1
-    else sessionWithSingleDisposalState(gainOrLossAfterReliefs, individualUserType, userType, subscribedDetails)._1
+      sessionWithMultipleDisposalsState(gainOrLossAfterReliefs, individualUserType, userType, subscribedDetails)
+    else sessionWithSingleDisposalState(gainOrLossAfterReliefs, individualUserType, userType, subscribedDetails)
 
   def individualSesssion(gainOrLossAfterReliefs: Option[AmountInPence] = None, isMultipleDisposal: Boolean = false) =
     session(gainOrLossAfterReliefs, isMultipleDisposal = isMultipleDisposal)
@@ -228,10 +237,10 @@ class GainOrLossAfterReliefsControllerSpec
         mockUUIDGenerator
       )
 
-      "display the page" when {
+      "display the page when calculator disabled" when {
 
         def test(
-          sessionData: SessionData,
+          sessionData: (SessionData, FillingOutReturn, DraftReturn),
           expectedTitleKey: String,
           expectedBackLink: Call,
           expectedOuterLabelUserKey: String,
@@ -240,7 +249,8 @@ class GainOrLossAfterReliefsControllerSpec
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionData)
+            mockGetSession(sessionData._1)
+            mockEligibilityCheck(sessionData._2)(Right(FurtherReturnEligibility(false, None)))
           }
           checkPageIsDisplayed(
             performAction(),
@@ -266,7 +276,7 @@ class GainOrLossAfterReliefsControllerSpec
 
               doc.select("#subheading").text() shouldBe messageFromMessageKey(expectedH2Key)
 
-              doc.select("#content > article > ol > li:nth-child(1)").text() shouldBe messageFromMessageKey(
+              doc.select("#content > article > div > ol > li:nth-child(1)").text() shouldBe messageFromMessageKey(
                 expectedLi1Key
               )
 
@@ -441,6 +451,147 @@ class GainOrLossAfterReliefsControllerSpec
 
       }
 
+      "when calculator enabled " must {
+        def test(
+          sessionData: (SessionData, FillingOutReturn, DraftReturn),
+          expectedTitleKey: String,
+          expectedBackLink: Call,
+          expectedOuterLabelUserKey: String,
+          expectedH2Key: String
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData._1)
+            mockEligibilityCheck(sessionData._2)(Right(FurtherReturnEligibility(true, None)))
+          }
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(expectedTitleKey),
+            { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+
+              doc.select("#content > article > span").text() shouldBe messageFromMessageKey(
+                "gainOrLossAfterReliefs.caption"
+              )
+
+              doc.select("#gainOrLossAfterReliefs > div:nth-child(2) > label").text() shouldBe messageFromMessageKey(
+                s"gainOrLossAfterReliefs.gain$expectedOuterLabelUserKey.outerLabel"
+              )
+
+              doc.select("#gainOrLossAfterReliefs > div:nth-child(4) > label").text() shouldBe messageFromMessageKey(
+                s"gainOrLossAfterReliefs.loss$expectedOuterLabelUserKey.outerLabel"
+              )
+
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(1) > :nth-child(1) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.disposalPrice")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(1) > :nth-child(2) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.disposalFees")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(1) > :nth-child(3) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.total.disposalAmount")
+
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(2) > :nth-child(1) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.acquisitionPrice")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(2) > :nth-child(2) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.improvementCosts")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(2) > :nth-child(3) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.acquisitionFees")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(2) > :nth-child(4) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.total.acquisitionAmount")
+
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(3) > :nth-child(1) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.total.disposalAmount")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(3) > :nth-child(2) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.total.acquisitionAmount")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(3) > :nth-child(3) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.total.initialGainOrLoss")
+
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(4) > :nth-child(1) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.privateResidenceRelief")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(4) > :nth-child(2) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.lettingRelief")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(4) > :nth-child(3) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.total.reliefs")
+
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(5) > :nth-child(1) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.total.initialGainOrLoss")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(5) > :nth-child(2) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.total.reliefs")
+              doc
+                .select("#content > article > div > details > div > dl:nth-child(5) > :nth-child(3) > .cya-question")
+                .text() shouldBe messageFromMessageKey("calculator.total.gainOrLossAfterReliefs")
+
+              doc.select("#subheading").text() shouldBe messageFromMessageKey(expectedH2Key)
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.GainOrLossAfterReliefsController
+                .enterGainOrLossAfterReliefsSubmit()
+                .url
+            }
+          )
+        }
+
+        "the user is on a single disposal journey and" when {
+          def validCalculatorState(
+            userType: UserType,
+            individualUserType: IndividualUserType
+          ): (SessionData, FillingOutReturn, DraftReturn) = {
+            val draftReturn = sample[DraftSingleDisposalReturn]
+              .copy(
+                gainOrLossAfterReliefs = Some(AmountInPence(1000)),
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                  individualUserType = Some(individualUserType)
+                ),
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false)),
+                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+                reliefDetailsAnswers = Some(sample[CompleteReliefDetailsAnswers]),
+                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers])
+              )
+            val journey     = sample[FillingOutReturn].copy(
+              draftReturn = draftReturn,
+              subscribedDetails = sample[SubscribedDetails]
+                .copy(name = if (userType === Trust) Left(sample[TrustName]) else Right(sample[IndividualName])),
+              previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None))
+            )
+
+            (
+              SessionData.empty.copy(
+                journeyStatus = Some(journey),
+                userType = Some(userType)
+              ),
+              journey,
+              draftReturn
+            )
+          }
+
+          "the user is an individual doing the return for themselves" in {
+            test(
+              validCalculatorState(Individual, Self),
+              "gainOrLossAfterReliefs.title",
+              routes.GainOrLossAfterReliefsController.checkYourAnswers(),
+              "",
+              "gainOrLossAfterReliefs.h2"
+            )
+          }
+
+        }
+      }
+
     }
 
     "handling submitted answers to gain or loss after reliefs" must {
@@ -467,6 +618,7 @@ class GainOrLossAfterReliefsControllerSpec
 
         def testFormError(
           sessionData: SessionData,
+          fillingOutReturn: FillingOutReturn,
           data: (String, String)*
         )(
           pageTitleKey: String,
@@ -475,6 +627,7 @@ class GainOrLossAfterReliefsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
+            mockEligibilityCheck(fillingOutReturn)(Right(FurtherReturnEligibility(false, None)))
           }
 
           checkPageIsDisplayed(
@@ -494,7 +647,8 @@ class GainOrLossAfterReliefsControllerSpec
           testCasesWithUserKeys.foreach { case (session, userKey) =>
             withClue(s"For test case '$userKey': ") {
               testFormError(
-                session
+                session._1,
+                session._2
               )(
                 s"gainOrLossAfterReliefs$userKey.title",
                 s"gainOrLossAfterReliefs$userKey.error.required"
@@ -510,7 +664,7 @@ class GainOrLossAfterReliefsControllerSpec
                 withClue(s"For test case '$userKey' and scenario $scenario: ") {
                   val data = ("gainOrLossAfterReliefs" -> "0") :: scenario.formData
 
-                  testFormError(session, data: _*)(
+                  testFormError(session._1, session._2, data: _*)(
                     s"gainOrLossAfterReliefs$userKey.title",
                     scenario.expectedErrorMessageKey
                   )
@@ -526,7 +680,7 @@ class GainOrLossAfterReliefsControllerSpec
                 withClue(s"For test case '$userKey' and scenario $scenario: ") {
                   val data = ("gainOrLossAfterReliefs" -> "1") :: scenario.formData
 
-                  testFormError(session, data: _*)(
+                  testFormError(session._1, session._2, data: _*)(
                     s"gainOrLossAfterReliefs$userKey.title",
                     scenario.expectedErrorMessageKey
                   )
@@ -539,7 +693,8 @@ class GainOrLossAfterReliefsControllerSpec
           testCasesWithUserKeys.foreach { case (session, userKey) =>
             withClue(s"For test case '$userKey': ") {
               testFormError(
-                session,
+                session._1,
+                session._2,
                 "gainOrLossAfterReliefs" -> "0",
                 "gainAfterReliefs"       -> "0"
               )(
@@ -554,7 +709,8 @@ class GainOrLossAfterReliefsControllerSpec
           testCasesWithUserKeys.foreach { case (session, userKey) =>
             withClue(s"For test case '$userKey': ") {
               testFormError(
-                session,
+                session._1,
+                session._2,
                 "gainOrLossAfterReliefs" -> "1",
                 "lossAfterReliefs"       -> "0"
               )(
@@ -746,7 +902,7 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is an individual doing the return for themselves" in {
           test(
-            individualSesssion(Some(AmountInPence(600L)), isMultipleDisposal = true),
+            individualSesssion(Some(AmountInPence(600L)), isMultipleDisposal = true)._1,
             "gainOrLossAfterReliefs.multipleDisposals.h2",
             "gainOrLossAfterReliefs.gain.outerLabel",
             Some("gainOrLossAfterReliefs.gain.innerLabel"),
@@ -756,7 +912,7 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is an agent of an individual" in {
           test(
-            agentSession(Some(AmountInPence(-600L))),
+            agentSession(Some(AmountInPence(-600L)))._1,
             "gainOrLossAfterReliefs.agent.h2",
             "gainOrLossAfterReliefs.loss.notSelf.outerLabel",
             Some("gainOrLossAfterReliefs.loss.innerLabel"),
@@ -766,7 +922,7 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is a trust" in {
           test(
-            trustSession(Some(AmountInPence(0L))),
+            trustSession(Some(AmountInPence(0L)))._1,
             "gainOrLossAfterReliefs.trust.h2",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,
@@ -776,7 +932,7 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is a capacitor" in {
           test(
-            capacitorSession(Some(AmountInPence(0L))),
+            capacitorSession(Some(AmountInPence(0L)))._1,
             "gainOrLossAfterReliefs.capacitor.h2",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,
@@ -786,7 +942,7 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is a personal rep" in {
           test(
-            personalRepSession(Some(AmountInPence(0L)), isMultipleDisposal = true),
+            personalRepSession(Some(AmountInPence(0L)), isMultipleDisposal = true)._1,
             "gainOrLossAfterReliefs.personalRep.multipleDisposals.h2",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,
@@ -796,7 +952,7 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is a personal rep in period of admin" in {
           test(
-            periodOfAdminSession(Some(AmountInPence(0L))),
+            periodOfAdminSession(Some(AmountInPence(0L)))._1,
             "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.h2",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,
@@ -806,7 +962,7 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is a agent of a personal rep in period of admin" in {
           test(
-            agentOfPeriodOfAdminSession(Some(AmountInPence(0L))),
+            agentOfPeriodOfAdminSession(Some(AmountInPence(0L)))._1,
             "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.h2",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,

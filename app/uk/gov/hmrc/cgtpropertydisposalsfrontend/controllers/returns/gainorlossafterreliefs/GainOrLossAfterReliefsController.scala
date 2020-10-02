@@ -66,6 +66,7 @@ class GainOrLossAfterReliefsController @Inject() (
 
   import GainOrLossAfterReliefsController._
 
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   def enterGainOrLossAfterReliefs(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAnswers { (fillingOutReturn, draftReturn, answer) =>
@@ -76,14 +77,23 @@ class GainOrLossAfterReliefsController @Inject() (
               logger.warn("Could not check for calculation eligibility", err)
               errorHandler.errorResult()
             },
-            includeBreakdown => {
-              if (
-                !fillingOutReturn.previousReturnsImplyEligilityForFurtherReturnCalculation.contains(includeBreakdown)
-              ) {
-                val updatedJourney = fillingOutReturn
-                  .copy(previousReturnsImplyEligilityForFurtherReturnCalculation = Some(includeBreakdown))
-                returnsService.storeDraftReturn(updatedJourney)
-                EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+            furtherReturnEligibility => {
+              furtherReturnEligibility.previousReturnsImplyEligibility match {
+                case Some(previousReturnsImplyEligibility)
+                    if !fillingOutReturn.previousReturnsImplyEligilityForFurtherReturnCalculation
+                      .contains(previousReturnsImplyEligibility) =>
+                  val updatedJourney = fillingOutReturn.copy(previousReturnsImplyEligilityForFurtherReturnCalculation =
+                    Some(previousReturnsImplyEligibility)
+                  )
+                  for {
+                    _ <- returnsService.storeDraftReturn(updatedJourney)
+                    _ <- EitherT(
+                           updateSession(sessionStore, request)(
+                             _.copy(journeyStatus = Some(updatedJourney))
+                           )
+                         )
+                  } yield ()
+                case _ => ()
               }
               Ok(
                 gainOrLossAfterReliefsPage(
@@ -95,7 +105,9 @@ class GainOrLossAfterReliefsController @Inject() (
                   draftReturn.representativeType(),
                   draftReturn.triageAnswers().isLeft,
                   fillingOutReturn.isAmendReturn,
-                  if (includeBreakdown) buildGlarBreakdown(fillingOutReturn.draftReturn) else None
+                  if (furtherReturnEligibility.isEligible)
+                    buildGlarBreakdown(fillingOutReturn.draftReturn)
+                  else None
                 )
               )
             }
@@ -128,7 +140,7 @@ class GainOrLossAfterReliefsController @Inject() (
                         draftReturn.representativeType(),
                         draftReturn.triageAnswers().isLeft,
                         fillingOutReturn.isAmendReturn,
-                        if (includeBreakdown) buildGlarBreakdown(draftReturn) else None
+                        if (includeBreakdown.isEligible) buildGlarBreakdown(draftReturn) else None
                       )
                     )
                 ),

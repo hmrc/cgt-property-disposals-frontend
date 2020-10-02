@@ -42,9 +42,11 @@ trait GlarCalculatorEligibilityUtil {
   def isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn: FillingOutReturn)(implicit
     hc: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, Boolean]
+  ): EitherT[Future, Error, FurtherReturnEligibility]
 
 }
+
+final case class FurtherReturnEligibility(isEligible: Boolean, previousReturnsImplyEligibility: Option[Boolean])
 
 @Singleton
 class GlarCalculatorEligibilityUtilImpl @Inject() (
@@ -59,13 +61,16 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
 
   def isEligibleForFurtherReturnOrAmendCalculation(
     fillingOutReturn: FillingOutReturn
-  )(implicit headerCarrier: HeaderCarrier, request: RequestWithSessionData[_]): EitherT[Future, Error, Boolean] = {
+  )(implicit
+    headerCarrier: HeaderCarrier,
+    request: RequestWithSessionData[_]
+  ): EitherT[Future, Error, FurtherReturnEligibility] = {
 
     def isEligible(
       fillingOutReturn: FillingOutReturn,
       completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
       reliefDetailsAnswers: CompleteReliefDetailsAnswers
-    ): EitherT[Future, Error, Boolean] = {
+    ): EitherT[Future, Error, FurtherReturnEligibility] = {
       val eligibleAssetType =
         completeSingleDisposalTriageAnswers.assetType === Residential || completeSingleDisposalTriageAnswers.assetType === NonResidential
 
@@ -82,7 +87,7 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
           true
         ) && currentReturnIsEligible
       ) {
-        EitherT.right(Future(true))
+        EitherT.right(Future(FurtherReturnEligibility(true, Some(true))))
       } else if (currentReturnIsEligible) {
         val submissionIdsOfPreviousReturns = fillingOutReturn.previousSentReturns
           .map(e => e.summaries)
@@ -102,11 +107,11 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
         }
 
         results.sequence[EitherT[Future, Error, *], Boolean].map { e =>
-          e.forall(identity)
+          FurtherReturnEligibility(true, Some(e.forall(identity)))
         }
 
       } else {
-        EitherT.right(Future(false))
+        EitherT.right(Future(FurtherReturnEligibility(false, None)))
       }
     }
 
@@ -136,7 +141,7 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
           ) if amendAndFurtherReturnCalculationsEnabled =>
         isEligible(fillingOutReturn, triageAnswers, reliefDetailsAnswers)
 
-      case _ => EitherT.right(Future(false))
+      case _ => EitherT.right(Future(FurtherReturnEligibility(false, None)))
     }
 
   }
