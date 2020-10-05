@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.scalamock.scalatest.MockFactory
 import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
@@ -30,7 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait ReturnsServiceSupport { this: ControllerSpec =>
+trait ReturnsServiceSupport { this: MockFactory =>
 
   val mockReturnsService: ReturnsService = mock[ReturnsService]
 

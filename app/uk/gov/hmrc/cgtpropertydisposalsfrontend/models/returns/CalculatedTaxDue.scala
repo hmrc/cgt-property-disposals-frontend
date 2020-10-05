@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
 
 final case class AmountInPenceWithSource(
   amount: AmountInPence,
@@ -47,6 +48,7 @@ sealed trait CalculatedTaxDue extends Product with Serializable {
   val taxableGainOrNetLoss: AmountInPence
   val amountOfTaxDue: AmountInPence
 }
+
 final case class CalculatedGlarBreakdown(
   acquisitionPrice: AmountInPence,
   acquisitionCosts: AmountInPence,
@@ -54,7 +56,8 @@ final case class CalculatedGlarBreakdown(
   disposalFees: AmountInPence,
   privateResidentReliefs: AmountInPence,
   lettingRelief: AmountInPence,
-  improvementCosts: AmountInPence
+  improvementCosts: AmountInPence,
+  assetType: Either[NonResidential.type, Residential.type]
 ) {
 
   val propertyDisposalAmountLessCosts = disposalPrice.inPounds() + disposalFees.inPounds()

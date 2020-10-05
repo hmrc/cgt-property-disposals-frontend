@@ -30,14 +30,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, Error, FormUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibility, GlarCalculatorEligibilityUtil, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibility, FurtherReturnEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -54,7 +54,7 @@ class GainOrLossAfterReliefsController @Inject() (
   uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   gainOrLossAfterReliefsPage: views.html.returns.gainorlossafterreliefs.gain_or_loss_after_reliefs,
-  val glarCalculatorEligibilityUtil: GlarCalculatorEligibilityUtil,
+  val glarCalculatorEligibilityUtil: FurtherReturnEligibilityUtil,
   checkYourAnswersPage: views.html.returns.gainorlossafterreliefs.check_your_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -71,19 +71,16 @@ class GainOrLossAfterReliefsController @Inject() (
         val result = for {
           furtherReturnEligibility <-
             glarCalculatorEligibilityUtil.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
-          updatedJourney            = fillingOutReturn.copy(previousReturnsImplyEligilityForFurtherReturnCalculation =
+          updatedJourney            = fillingOutReturn.copy(previousReturnsImplyEligibilityForFurtherReturnCalculation =
                                         furtherReturnEligibility match {
                                           case FurtherReturnEligibility.Eligible(_)                                 => Some(true)
                                           case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
                                             previousReturnsImplyEligibility
                                         }
                                       )
-          shouldUpdate              = shouldUpdateFurtherReturnEligibility(fillingOutReturn, furtherReturnEligibility)
-          _                        <- if (shouldUpdate) returnsService.storeDraftReturn(updatedJourney)
-                                      else EitherT.pure[Future, uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error](())
-          _                        <- if (shouldUpdate)
+          _                        <- if (shouldUpdateFurtherReturnEligibility(fillingOutReturn, furtherReturnEligibility))
                                         EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
-                                      else EitherT.pure[Future, uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error](())
+                                      else EitherT.pure[Future, Error](())
         } yield furtherReturnEligibility
 
         result.fold[Result](
@@ -115,13 +112,13 @@ class GainOrLossAfterReliefsController @Inject() (
   private def shouldUpdateFurtherReturnEligibility(
     fillingOutReturn: FillingOutReturn,
     furtherReturnEligibility: FurtherReturnEligibility
-  ) = {
+  ): Boolean = {
     import cats.instances.option._
     furtherReturnEligibility match {
       case FurtherReturnEligibility.Eligible(_)                                 =>
-        fillingOutReturn.previousReturnsImplyEligilityForFurtherReturnCalculation.contains(false)
+        !fillingOutReturn.previousReturnsImplyEligibilityForFurtherReturnCalculation.contains(true)
       case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
-        fillingOutReturn.previousReturnsImplyEligilityForFurtherReturnCalculation =!= previousReturnsImplyEligibility
+        fillingOutReturn.previousReturnsImplyEligibilityForFurtherReturnCalculation =!= previousReturnsImplyEligibility
     }
   }
   def enterGainOrLossAfterReliefsSubmit: Action[AnyContent] =

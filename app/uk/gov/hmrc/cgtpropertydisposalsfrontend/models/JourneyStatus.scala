@@ -104,7 +104,7 @@ object JourneyStatus {
     draftReturn: DraftReturn,
     previousSentReturns: Option[PreviousReturnData],
     amendReturnData: Option[AmendReturnData],
-    previousReturnsImplyEligilityForFurtherReturnCalculation: Option[Boolean] = None
+    previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = None
   ) extends JourneyStatus
 
   object FillingOutReturn {
