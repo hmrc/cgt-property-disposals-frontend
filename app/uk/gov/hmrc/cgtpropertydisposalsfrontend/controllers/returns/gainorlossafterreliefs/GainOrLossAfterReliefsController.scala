@@ -19,6 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossa
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
+import cats.syntax.eq._
+import cats.instances.boolean._
 import com.google.inject.Inject
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
@@ -33,12 +35,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOut
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftReturn, DraftSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{GlarCalculatorEligibilityUtil, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibility, GlarCalculatorEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -66,55 +65,65 @@ class GainOrLossAfterReliefsController @Inject() (
 
   import GainOrLossAfterReliefsController._
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
-  def enterGainOrLossAfterReliefs(): Action[AnyContent] =
+  def enterGainOrLossAfterReliefs(): Action[AnyContent]     =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAnswers { (fillingOutReturn, draftReturn, answer) =>
-        glarCalculatorEligibilityUtil
-          .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
-          .fold(
-            err => {
-              logger.warn("Could not check for calculation eligibility", err)
-              errorHandler.errorResult()
-            },
-            furtherReturnEligibility => {
-              furtherReturnEligibility.previousReturnsImplyEligibility match {
-                case Some(previousReturnsImplyEligibility)
-                    if !fillingOutReturn.previousReturnsImplyEligilityForFurtherReturnCalculation
-                      .contains(previousReturnsImplyEligibility) =>
-                  val updatedJourney = fillingOutReturn.copy(previousReturnsImplyEligilityForFurtherReturnCalculation =
-                    Some(previousReturnsImplyEligibility)
-                  )
-                  for {
-                    _ <- returnsService.storeDraftReturn(updatedJourney)
-                    _ <- EitherT(
-                           updateSession(sessionStore, request)(
-                             _.copy(journeyStatus = Some(updatedJourney))
-                           )
-                         )
-                  } yield ()
-                case _ => ()
-              }
-              Ok(
-                gainOrLossAfterReliefsPage(
-                  answer.fold(gainOrLossAfterReliefsForm)(value => gainOrLossAfterReliefsForm.fill(value.inPounds())),
-                  answer.fold(controllers.returns.routes.TaskListController.taskList())(_ =>
-                    routes.GainOrLossAfterReliefsController.checkYourAnswers()
-                  ),
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType(),
-                  draftReturn.triageAnswers().isLeft,
-                  fillingOutReturn.isAmendReturn,
-                  if (furtherReturnEligibility.isEligible)
-                    buildGlarBreakdown(fillingOutReturn.draftReturn)
-                  else None
-                )
+        val result = for {
+          furtherReturnEligibility <-
+            glarCalculatorEligibilityUtil.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
+          updatedJourney            = fillingOutReturn.copy(previousReturnsImplyEligilityForFurtherReturnCalculation =
+                                        furtherReturnEligibility match {
+                                          case FurtherReturnEligibility.Eligible(_)                                 => Some(true)
+                                          case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
+                                            previousReturnsImplyEligibility
+                                        }
+                                      )
+          shouldUpdate              = shouldUpdateFurtherReturnEligibility(fillingOutReturn, furtherReturnEligibility)
+          _                        <- if (shouldUpdate) returnsService.storeDraftReturn(updatedJourney)
+                                      else EitherT.pure[Future, uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error](())
+          _                        <- if (shouldUpdate)
+                                        EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+                                      else EitherT.pure[Future, uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error](())
+        } yield furtherReturnEligibility
+
+        result.fold[Result](
+          { e =>
+            logger.warn("Could no check for calculation eligibility", e)
+            errorHandler.errorResult()
+          },
+          furtherReturnEligibility =>
+            Ok(
+              gainOrLossAfterReliefsPage(
+                answer.fold(gainOrLossAfterReliefsForm)(value => gainOrLossAfterReliefsForm.fill(value.inPounds())),
+                answer.fold(controllers.returns.routes.TaskListController.taskList())(_ =>
+                  routes.GainOrLossAfterReliefsController.checkYourAnswers()
+                ),
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.representativeType(),
+                draftReturn.triageAnswers().isLeft,
+                fillingOutReturn.isAmendReturn,
+                furtherReturnEligibility match {
+                  case FurtherReturnEligibility.Eligible(calculation) => Some(calculation)
+                  case FurtherReturnEligibility.Ineligible(_)         => None
+                }
               )
-            }
-          )
+            )
+        )
       }
     }
 
+  private def shouldUpdateFurtherReturnEligibility(
+    fillingOutReturn: FillingOutReturn,
+    furtherReturnEligibility: FurtherReturnEligibility
+  ) = {
+    import cats.instances.option._
+    furtherReturnEligibility match {
+      case FurtherReturnEligibility.Eligible(_)                                 =>
+        fillingOutReturn.previousReturnsImplyEligilityForFurtherReturnCalculation.contains(false)
+      case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
+        fillingOutReturn.previousReturnsImplyEligilityForFurtherReturnCalculation =!= previousReturnsImplyEligibility
+    }
+  }
   def enterGainOrLossAfterReliefsSubmit: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAnswers { case (fillingOutReturn, draftReturn, answer) =>
@@ -129,7 +138,7 @@ class GainOrLossAfterReliefsController @Inject() (
                     logger.warn("Could not check for calculation eligibility", err)
                     errorHandler.errorResult()
                   },
-                  includeBreakdown =>
+                  eligibility =>
                     BadRequest(
                       gainOrLossAfterReliefsPage(
                         formWithErrors,
@@ -140,7 +149,10 @@ class GainOrLossAfterReliefsController @Inject() (
                         draftReturn.representativeType(),
                         draftReturn.triageAnswers().isLeft,
                         fillingOutReturn.isAmendReturn,
-                        if (includeBreakdown.isEligible) buildGlarBreakdown(draftReturn) else None
+                        eligibility match {
+                          case FurtherReturnEligibility.Eligible(calculation) => Some(calculation)
+                          case FurtherReturnEligibility.Ineligible(_)         => None
+                        }
                       )
                     )
                 ),
@@ -269,37 +281,6 @@ class GainOrLossAfterReliefsController @Inject() (
 }
 
 object GainOrLossAfterReliefsController {
-
-  def buildGlarBreakdown(draftReturn: DraftReturn) =
-    draftReturn match {
-      case DraftSingleDisposalReturn(
-            _,
-            _,
-            _,
-            Some(disposalDetailsAnswers: CompleteDisposalDetailsAnswers),
-            Some(acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers),
-            Some(reliefDetailsAnswers: CompleteReliefDetailsAnswers),
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            _
-          ) =>
-        Some(
-          CalculatedGlarBreakdown(
-            disposalFees = disposalDetailsAnswers.disposalFees,
-            disposalPrice = disposalDetailsAnswers.disposalPrice,
-            acquisitionPrice = acquisitionDetailsAnswers.acquisitionPrice,
-            acquisitionCosts = acquisitionDetailsAnswers.acquisitionFees,
-            improvementCosts = acquisitionDetailsAnswers.improvementCosts,
-            privateResidentReliefs = reliefDetailsAnswers.privateResidentsRelief,
-            lettingRelief = reliefDetailsAnswers.lettingsRelief
-          )
-        )
-      case _ => None
-    }
 
   val gainOrLossAfterReliefsForm: Form[BigDecimal] = {
     val (outerId, gainId, lossId) = ("gainOrLossAfterReliefs", "gainAfterReliefs", "lossAfterReliefs")

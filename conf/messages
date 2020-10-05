@@ -4717,20 +4717,20 @@ representee.cyaChange.isFirstReturn=if this is the first return in this tax year
 gainOrLossAfterReliefs.caption=Gain or loss after reliefs
 
 gainOrLossAfterReliefs.title=Enter your gain or loss after reliefs
-gainOrLossAfterReliefs.agent.title=Enter your client's gain or loss after reliefs
-gainOrLossAfterReliefs.trust.title=Enter the trust's gain or loss after reliefs
-gainOrLossAfterReliefs.capacitor.title=Enter the person's gain or loss after reliefs
-gainOrLossAfterReliefs.personalRep.title=Enter the person's gain or loss after reliefs
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Enter the estate's gain or loss after reliefs
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Enter your client's gain or loss after reliefs
+gainOrLossAfterReliefs.agent.title=Enter your client’s gain or loss after reliefs
+gainOrLossAfterReliefs.trust.title=Enter the trust’s gain or loss after reliefs
+gainOrLossAfterReliefs.capacitor.title=Enter the person’s gain or loss after reliefs
+gainOrLossAfterReliefs.personalRep.title=Enter the person’s gain or loss after reliefs
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Enter the estate’s gain or loss after reliefs
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Enter your client’s gain or loss after reliefs
 
 gainOrLossAfterReliefs.multipleDisposals.title=Enter your gain or loss after reliefs on the disposals in this return
-gainOrLossAfterReliefs.agent.multipleDisposals.title=Enter your client's gain or loss after reliefs on the disposals in this return
-gainOrLossAfterReliefs.trust.multipleDisposals.title=Enter the trust's gain or loss after reliefs on the disposals in this return
-gainOrLossAfterReliefs.capacitor.multipleDisposals.title=Enter the person's gain or loss after reliefs on the disposals in this return
-gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Enter the person's gain or loss after reliefs on the disposals in this return
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Enter the estate's gain or loss after reliefs on the disposals in this return
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Enter your client's gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.agent.multipleDisposals.title=Enter your client’s gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.trust.multipleDisposals.title=Enter the trust’s gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.capacitor.multipleDisposals.title=Enter the person’s gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Enter the person’s gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Enter the estate’s gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Enter your client’s gain or loss after reliefs on the disposals in this return
 
 gainOrLossAfterReliefs.calculatorHeading=We used the details that were entered in this return to work out your gain or loss after reliefs were subtracted.
 

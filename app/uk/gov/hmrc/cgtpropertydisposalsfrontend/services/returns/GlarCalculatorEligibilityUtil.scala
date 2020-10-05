@@ -26,12 +26,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftReturn, DraftSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -46,7 +49,12 @@ trait GlarCalculatorEligibilityUtil {
 
 }
 
-final case class FurtherReturnEligibility(isEligible: Boolean, previousReturnsImplyEligibility: Option[Boolean])
+sealed trait FurtherReturnEligibility
+
+object FurtherReturnEligibility {
+  final case class Eligible(calculation: CalculatedGlarBreakdown) extends FurtherReturnEligibility
+  final case class Ineligible(previousReturnsImplyEligibility: Option[Boolean]) extends FurtherReturnEligibility
+}
 
 @Singleton
 class GlarCalculatorEligibilityUtilImpl @Inject() (
@@ -58,6 +66,7 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
 
   val amendAndFurtherReturnCalculationsEnabled =
     servicesConfig.getBoolean("amend-and-further-returns-calculator.enabled")
+  val maxPreviousReturns                       = servicesConfig.getInt("amend-and-further-returns-calculator.max-previous-returns")
 
   def isEligibleForFurtherReturnOrAmendCalculation(
     fillingOutReturn: FillingOutReturn
@@ -76,7 +85,8 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
 
       val noOtherReliefs = reliefDetailsAnswers.otherReliefs.isEmpty
 
-      val underPreviousReturnLimit = fillingOutReturn.previousSentReturns.exists(_.summaries.length <= 10)
+      val underPreviousReturnLimit =
+        fillingOutReturn.previousSentReturns.exists(_.summaries.length <= maxPreviousReturns)
 
       val isSelf = completeSingleDisposalTriageAnswers.individualUserType.contains(Self)
 
@@ -87,7 +97,11 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
           true
         ) && currentReturnIsEligible
       ) {
-        EitherT.right(Future(FurtherReturnEligibility(true, Some(true))))
+        EitherT.right(
+          Future(
+            GlarCalculatorEligibilityUtil.buildEligibilityWithGlarBreakdown(fillingOutReturn.draftReturn, Some(true))
+          )
+        )
       } else if (currentReturnIsEligible) {
         val submissionIdsOfPreviousReturns = fillingOutReturn.previousSentReturns
           .map(e => e.summaries)
@@ -107,11 +121,15 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
         }
 
         results.sequence[EitherT[Future, Error, *], Boolean].map { e =>
-          FurtherReturnEligibility(true, Some(e.forall(identity)))
+          if (e.forall(identity)) {
+            GlarCalculatorEligibilityUtil.buildEligibilityWithGlarBreakdown(fillingOutReturn.draftReturn, Some(true))
+          } else {
+            Ineligible(Some(false))
+          }
         }
 
       } else {
-        EitherT.right(Future(FurtherReturnEligibility(false, None)))
+        EitherT.right(Future(Ineligible(fillingOutReturn.previousReturnsImplyEligilityForFurtherReturnCalculation)))
       }
     }
 
@@ -141,9 +159,45 @@ class GlarCalculatorEligibilityUtilImpl @Inject() (
           ) if amendAndFurtherReturnCalculationsEnabled =>
         isEligible(fillingOutReturn, triageAnswers, reliefDetailsAnswers)
 
-      case _ => EitherT.right(Future(FurtherReturnEligibility(false, None)))
+      case _ => EitherT.right(Future(Ineligible(Some(false))))
     }
 
   }
 
+}
+object GlarCalculatorEligibilityUtil {
+
+  def buildEligibilityWithGlarBreakdown(
+    draftReturn: DraftReturn,
+    previousWasEligible: Option[Boolean]
+  ): FurtherReturnEligibility =
+    draftReturn match {
+      case DraftSingleDisposalReturn(
+            _,
+            _,
+            _,
+            Some(disposalDetailsAnswers: CompleteDisposalDetailsAnswers),
+            Some(acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers),
+            Some(reliefDetailsAnswers: CompleteReliefDetailsAnswers),
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _
+          ) =>
+        Eligible(
+          CalculatedGlarBreakdown(
+            disposalFees = disposalDetailsAnswers.disposalFees,
+            disposalPrice = disposalDetailsAnswers.disposalPrice,
+            acquisitionPrice = acquisitionDetailsAnswers.acquisitionPrice,
+            acquisitionCosts = acquisitionDetailsAnswers.acquisitionFees,
+            improvementCosts = acquisitionDetailsAnswers.improvementCosts,
+            privateResidentReliefs = reliefDetailsAnswers.privateResidentsRelief,
+            lettingRelief = reliefDetailsAnswers.lettingsRelief
+          )
+        )
+      case _ => Ineligible(previousWasEligible)
+    }
 }

@@ -57,10 +57,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, IndividualUserType, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, IndividualUserType, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibility, GlarCalculatorEligibilityUtil, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{GlarCalculatorEligibilityUtil, ReturnsService}
 
 import scala.concurrent.Future
 
@@ -117,7 +118,8 @@ class GainOrLossAfterReliefsControllerSpec
     val journey     = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
-      previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None))
+      previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
+      previousReturnsImplyEligilityForFurtherReturnCalculation = Some(false)
     )
 
     (
@@ -147,7 +149,8 @@ class GainOrLossAfterReliefsControllerSpec
     val journey     = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
-      previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None))
+      previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
+      previousReturnsImplyEligilityForFurtherReturnCalculation = Some(false)
     )
 
     (
@@ -237,7 +240,7 @@ class GainOrLossAfterReliefsControllerSpec
         mockUUIDGenerator
       )
 
-      "display the page when calculator disabled" when {
+      "display the page when not eligable for calculation" when {
 
         def test(
           sessionData: (SessionData, FillingOutReturn, DraftReturn),
@@ -250,7 +253,7 @@ class GainOrLossAfterReliefsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData._1)
-            mockEligibilityCheck(sessionData._2)(Right(FurtherReturnEligibility(false, None)))
+            mockEligibilityCheck(sessionData._2)(Right(Ineligible(Some(false))))
           }
           checkPageIsDisplayed(
             performAction(),
@@ -451,7 +454,7 @@ class GainOrLossAfterReliefsControllerSpec
 
       }
 
-      "when calculator enabled " must {
+      "when eligible for calculation" must {
         def test(
           sessionData: (SessionData, FillingOutReturn, DraftReturn),
           expectedTitleKey: String,
@@ -462,7 +465,21 @@ class GainOrLossAfterReliefsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData._1)
-            mockEligibilityCheck(sessionData._2)(Right(FurtherReturnEligibility(true, None)))
+            mockEligibilityCheck(sessionData._2)(
+              Right(
+                Eligible(
+                  CalculatedGlarBreakdown(
+                    AmountInPence(0),
+                    AmountInPence(0),
+                    AmountInPence(0),
+                    AmountInPence(0),
+                    AmountInPence(0),
+                    AmountInPence(0),
+                    AmountInPence(0)
+                  )
+                )
+              )
+            )
           }
           checkPageIsDisplayed(
             performAction(),
@@ -566,7 +583,8 @@ class GainOrLossAfterReliefsControllerSpec
               draftReturn = draftReturn,
               subscribedDetails = sample[SubscribedDetails]
                 .copy(name = if (userType === Trust) Left(sample[TrustName]) else Right(sample[IndividualName])),
-              previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None))
+              previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
+              previousReturnsImplyEligilityForFurtherReturnCalculation = Some(true)
             )
 
             (
@@ -627,7 +645,7 @@ class GainOrLossAfterReliefsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockEligibilityCheck(fillingOutReturn)(Right(FurtherReturnEligibility(false, None)))
+            mockEligibilityCheck(fillingOutReturn)(Right(Ineligible(Some(false))))
           }
 
           checkPageIsDisplayed(

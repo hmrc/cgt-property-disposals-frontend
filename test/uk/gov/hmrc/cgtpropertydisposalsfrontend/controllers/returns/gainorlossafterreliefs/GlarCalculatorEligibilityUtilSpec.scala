@@ -54,6 +54,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibility, GlarCalculatorEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -113,10 +114,24 @@ class GlarCalculatorEligibilityUtilSpec
       .copy(
         triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
           .copy(individualUserType = individualUserType, assetType = assetType),
-        disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+        disposalDetailsAnswers = Some(
+          sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence(0), disposalFees = AmountInPence(0))
+        ),
         gainOrLossAfterReliefs = gainOrLossAfterReliefs,
-        acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
-        reliefDetailsAnswers = Some(sample[CompleteReliefDetailsAnswers].copy(otherReliefs = otherRefliefs))
+        acquisitionDetailsAnswers = Some(
+          sample[CompleteAcquisitionDetailsAnswers].copy(
+            acquisitionFees = AmountInPence(0),
+            acquisitionPrice = AmountInPence(0),
+            improvementCosts = AmountInPence(0)
+          )
+        ),
+        reliefDetailsAnswers = Some(
+          sample[CompleteReliefDetailsAnswers].copy(
+            otherReliefs = otherRefliefs,
+            privateResidentsRelief = AmountInPence(0),
+            lettingsRelief = AmountInPence(0)
+          )
+        )
       )
     val journey     = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
@@ -158,26 +173,26 @@ class GlarCalculatorEligibilityUtilSpec
         "user not eligible" when {
 
           "Current return has other reliefs" in {
-            test(eligableSession(otherRefliefs = Some(sample[OtherReliefs])), FurtherReturnEligibility(false, None))
+            test(eligableSession(otherRefliefs = Some(sample[OtherReliefs])), Ineligible(None))
           }
 
           "More than 10 previous returns" in {
             val tooManyPreviousReturns = eligableSession(previousSentReturns =
               Some(sample[PreviousReturnData].copy(summaries = List.fill(11)(sample[ReturnSummary])))
             )
-            test(tooManyPreviousReturns, FurtherReturnEligibility(false, None))
+            test(tooManyPreviousReturns, Ineligible(None))
           }
 
           "Current return not self" in {
             val isCapacitor = eligableSession(individualUserType = Some(Capacitor))
-            test(isCapacitor, FurtherReturnEligibility(false, None))
+            test(isCapacitor, Ineligible(None))
 
             val isPersonalRep = eligableSession(individualUserType = Some(PersonalRepresentative))
-            test(isPersonalRep, FurtherReturnEligibility(false, None))
+            test(isPersonalRep, Ineligible(None))
 
             val isPersonalRepInPeriodOfAdmin =
               eligableSession(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin))
-            test(isPersonalRepInPeriodOfAdmin, FurtherReturnEligibility(false, None))
+            test(isPersonalRepInPeriodOfAdmin, Ineligible(None))
           }
         }
       }
@@ -205,7 +220,20 @@ class GlarCalculatorEligibilityUtilSpec
                 mockDisplayReturn(session._2.subscribedDetails.cgtReference, r.submissionId)(Right(genDisplayReturn()))
               }
             }
-            test(session, FurtherReturnEligibility(true, Some(true)))
+            test(
+              session,
+              Eligible(
+                CalculatedGlarBreakdown(
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  AmountInPence(0)
+                )
+              )
+            )
           }
         }
 
@@ -222,7 +250,7 @@ class GlarCalculatorEligibilityUtilSpec
                 )
               }
             }
-            test(session, FurtherReturnEligibility(true, Some(false)))
+            test(session, Ineligible(Some(false)))
           }
 
           "under limit but previous returns contains other reliefs" in {
@@ -236,7 +264,7 @@ class GlarCalculatorEligibilityUtilSpec
                 )
               }
             }
-            test(session, FurtherReturnEligibility(true, Some(false)))
+            test(session, Ineligible(Some(false)))
           }
         }
       }
@@ -344,7 +372,7 @@ class GlarCalculatorEligibilityUtilFlagNotEnabledSpec
           "under limit and displays OK" in {
             val returns = List.fill(9)(sample[ReturnSummary])
             val a       = eligableSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
-            test(a, FurtherReturnEligibility(false, None))
+            test(a, Ineligible(Some(false)))
           }
         }
       }
