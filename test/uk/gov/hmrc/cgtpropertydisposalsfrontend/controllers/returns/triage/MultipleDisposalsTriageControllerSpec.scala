@@ -172,7 +172,7 @@ class MultipleDisposalsTriageControllerSpec
           Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
         else None
       },
-      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None))
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None, None))
     )
     SessionData.empty.copy(
       journeyStatus = Some(startingNewDraftReturn),
@@ -211,7 +211,7 @@ class MultipleDisposalsTriageControllerSpec
       agentReferenceNumber =
         if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
         else None,
-      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None)),
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None, None)),
       amendReturnData = amendReturnData
     )
     val session            = SessionData.empty.copy(

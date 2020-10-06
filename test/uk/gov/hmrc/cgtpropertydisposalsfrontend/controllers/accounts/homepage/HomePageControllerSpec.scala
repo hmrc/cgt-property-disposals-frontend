@@ -1216,7 +1216,7 @@ class HomePageControllerSpec
           subscribed.agentReferenceNumber,
           Right(sample[IncompleteSingleDisposalTriageAnswers]),
           None,
-          Some(PreviousReturnData(subscribed.sentReturns, None))
+          Some(PreviousReturnData(subscribed.sentReturns, None, None))
         )
 
         val fillingOurReturn    = FillingOutReturn(
@@ -1224,7 +1224,7 @@ class HomePageControllerSpec
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
           sample[DraftSingleDisposalReturn],
-          Some(PreviousReturnData(subscribed.sentReturns, None)),
+          Some(PreviousReturnData(subscribed.sentReturns, None, None)),
           None
         )
         val justSubmittedReturn = JustSubmittedReturn(
@@ -1243,7 +1243,7 @@ class HomePageControllerSpec
           sample[CompleteSingleDisposalReturn],
           sample[ReturnType],
           sample[ReturnSummary].copy(isRecentlyAmended = false),
-          Some(PreviousReturnData(subscribed.sentReturns, None))
+          Some(PreviousReturnData(subscribed.sentReturns, None, None))
         )
 
         val submitReturnFailed = SubmitReturnFailed(
@@ -1421,7 +1421,7 @@ class HomePageControllerSpec
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
                     None,
-                    Some(PreviousReturnData(List.empty, None))
+                    Some(PreviousReturnData(List.empty, None, None))
                   )
                 )
               )
@@ -1455,7 +1455,7 @@ class HomePageControllerSpec
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
                     None,
-                    Some(PreviousReturnData(List.empty, None))
+                    Some(PreviousReturnData(List.empty, None, None))
                   )
                 )
               )
@@ -1492,7 +1492,7 @@ class HomePageControllerSpec
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
                     None,
-                    Some(PreviousReturnData(List.empty, None))
+                    Some(PreviousReturnData(List.empty, None, None))
                   )
                 )
               )
@@ -1533,7 +1533,7 @@ class HomePageControllerSpec
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
                     None,
-                    Some(PreviousReturnData(sentReturns, None))
+                    Some(PreviousReturnData(sentReturns, None, None))
                   )
                 )
               )
@@ -1584,7 +1584,8 @@ class HomePageControllerSpec
             Some(
               PreviousReturnData(
                 subscribed.sentReturns,
-                previousYearToDate
+                previousYearToDate,
+                None
               )
             )
           ),
@@ -1654,7 +1655,7 @@ class HomePageControllerSpec
         subscribed.ggCredId,
         subscribed.agentReferenceNumber,
         draftReturn,
-        Some(PreviousReturnData(List.empty, None)),
+        Some(PreviousReturnData(List.empty, None, None)),
         None
       )
 
@@ -1711,7 +1712,7 @@ class HomePageControllerSpec
             subscribed.ggCredId,
             subscribed.agentReferenceNumber,
             draftReturn,
-            Some(PreviousReturnData(subscribed.sentReturns, previousYearToDate)),
+            Some(PreviousReturnData(subscribed.sentReturns, previousYearToDate, None)),
             None
           ),
         controllers.returns.routes.TaskListController.taskList()
@@ -1839,7 +1840,7 @@ class HomePageControllerSpec
                     completeReturn,
                     ReturnType.FurtherReturn,
                     returnSummary,
-                    Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue)))
+                    Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue), None))
                   )
                 )
               )
@@ -1879,7 +1880,7 @@ class HomePageControllerSpec
                     completeReturn,
                     ReturnType.FirstReturn,
                     returnSummary,
-                    Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue)))
+                    Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue), None))
                   )
                 )
               )

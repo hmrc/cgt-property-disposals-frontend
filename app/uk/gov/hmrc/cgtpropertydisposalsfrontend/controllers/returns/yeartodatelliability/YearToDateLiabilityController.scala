@@ -1455,7 +1455,7 @@ class YearToDateLiabilityController @Inject() (
 
           case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
             (fillingOutReturn.previousSentReturns, fillingOutReturn.draftReturn.representativeType()) match {
-              case (Some(PreviousReturnData(_, Some(previousYtd))), None) =>
+              case (Some(PreviousReturnData(_, Some(previousYtd), _)), None) =>
                 nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability) match {
                   case None =>
                     Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1537,7 +1537,7 @@ class YearToDateLiabilityController @Inject() (
 
           case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
             (fillingOutReturn.previousSentReturns, fillingOutReturn.draftReturn.representativeType()) match {
-              case (Some(PreviousReturnData(_, Some(previousYtd))), None) =>
+              case (Some(PreviousReturnData(_, Some(previousYtd), _)), None) =>
                 nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability) match {
                   case None =>
                     Redirect(routes.YearToDateLiabilityController.checkYourAnswers())

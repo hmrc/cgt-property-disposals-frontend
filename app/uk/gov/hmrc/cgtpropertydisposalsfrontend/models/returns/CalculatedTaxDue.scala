@@ -18,7 +18,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.PreviousReturnData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
 
 final case class AmountInPenceWithSource(
   amount: AmountInPence,
@@ -46,6 +48,33 @@ sealed trait CalculatedTaxDue extends Product with Serializable {
   val gainOrLossAfterLosses: AmountInPence
   val taxableGainOrNetLoss: AmountInPence
   val amountOfTaxDue: AmountInPence
+}
+
+final case class CalculatedGlarBreakdown(
+  acquisitionPrice: AmountInPence,
+  acquisitionCosts: AmountInPence,
+  disposalPrice: AmountInPence,
+  disposalFees: AmountInPence,
+  privateResidentReliefs: AmountInPence,
+  lettingRelief: AmountInPence,
+  improvementCosts: AmountInPence,
+  assetType: Either[NonResidential.type, Residential.type],
+  previousReturnData: PreviousReturnData
+) {
+
+  val propertyDisposalAmountLessCosts = disposalPrice.inPounds() + disposalFees.inPounds()
+
+  val propertyAcquisitionAmountPlusCosts =
+    acquisitionPrice.inPounds() + improvementCosts.inPounds() + acquisitionCosts.inPounds()
+
+  val totalReliefs = privateResidentReliefs.inPounds() + lettingRelief.inPounds()
+
+  val initialGainOrLoss = propertyDisposalAmountLessCosts - propertyAcquisitionAmountPlusCosts
+
+  val gainOrLossAfterReliefs = initialGainOrLoss - totalReliefs
+
+  val isGain: Boolean = gainOrLossAfterReliefs > 0
+
 }
 
 object CalculatedTaxDue {

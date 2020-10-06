@@ -4595,21 +4595,23 @@ representee.cyaChange.isFirstReturn=if this is the first return in this tax year
 
 gainOrLossAfterReliefs.caption=Gain or loss after reliefs
 
-gainOrLossAfterReliefs.title=Tell us if you made a gain on the disposal after reliefs were subtracted
-gainOrLossAfterReliefs.agent.title=Tell us if your client made a gain on the disposal after reliefs were subtracted
-gainOrLossAfterReliefs.trust.title=Tell us if the trust made a gain on the disposal after reliefs were subtracted
-gainOrLossAfterReliefs.capacitor.title=Tell us if the person made a gain on the disposal after reliefs were subtracted
-gainOrLossAfterReliefs.personalRep.title=Tell us if the person made a gain on the disposal after reliefs were subtracted
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Tell us if the estate made a gain on the disposal after reliefs were subtracted
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Tell us if your client, or the estate made a gain on the disposal after reliefs were subtracted
+gainOrLossAfterReliefs.title=Enter your gain or loss after reliefs
+gainOrLossAfterReliefs.agent.title=Enter your client’s gain or loss after reliefs
+gainOrLossAfterReliefs.trust.title=Enter the trust’s gain or loss after reliefs
+gainOrLossAfterReliefs.capacitor.title=Enter the person’s gain or loss after reliefs
+gainOrLossAfterReliefs.personalRep.title=Enter the person’s gain or loss after reliefs
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Enter the estate’s gain or loss after reliefs
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Enter your client’s gain or loss after reliefs
 
-gainOrLossAfterReliefs.multipleDisposals.title=Tell us if you made a gain on the disposals in this return after reliefs were subtracted
-gainOrLossAfterReliefs.agent.multipleDisposals.title=Tell us if your client made a gain on the disposals in this return after reliefs were subtracted
-gainOrLossAfterReliefs.trust.multipleDisposals.title=Tell us if the trust made a gain on the disposals in this return after reliefs were subtracted
-gainOrLossAfterReliefs.capacitor.multipleDisposals.title=Tell us if the person made a gain on the disposals in this return after reliefs were subtracted
-gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Tell us if the person made a gain on the disposals in this return after reliefs were subtracted
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Tell us if the estate made a gain on the disposals in this return after reliefs were subtracted
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Tell us if your client, or the estate made a gain on the disposals in this return after reliefs were subtracted
+gainOrLossAfterReliefs.multipleDisposals.title=Enter your gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.agent.multipleDisposals.title=Enter your client’s gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.trust.multipleDisposals.title=Enter the trust’s gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.capacitor.multipleDisposals.title=Enter the person’s gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Enter the person’s gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Enter the estate’s gain or loss after reliefs on the disposals in this return
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Enter your client’s gain or loss after reliefs on the disposals in this return
+
+gainOrLossAfterReliefs.calculatorHeading=We used the details that were entered in this return to work out your gain or loss after reliefs were subtracted.
 
 gainOrLossAfterReliefs.p1=To do this, you’ll need to:
 
@@ -4638,6 +4640,7 @@ gainOrLossAfterReliefs.personalRep.multipleDisposals.h2=Did the person make a ga
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.h2=Did the estate make a gain on the disposals in this return after reliefs were subtracted?
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.h2=Did your client make a gain on the disposals in this return after reliefs were subtracted?
 
+gainOrLossAfterReliefs.calculated.prompt=Enter a gain of <strong class="bold">{0}</strong> if you agree with the working
 gainOrLossAfterReliefs.gain.outerLabel=Yes, I made a gain
 gainOrLossAfterReliefs.loss.outerLabel=No, I made a loss
 gainOrLossAfterReliefs.noLossOrGain.outerLabel=I made no gain or loss after reliefs
@@ -4679,6 +4682,7 @@ lossAfterReliefs.error.tooSmall=The loss amount must be more than 0
 
 gainOrLossAfterReliefs.cya.title=Check your answers
 gainOrLossAfterReliefs.cyaChange=whether a gain, a loss, or no gain or loss was made after reliefs
+gainOrLossAfterReliefs.assistive.gainOrLossAfterReliefs=for gain or loss after reliefs
 
 #===================================================
 #  GAIN OR LOSS AFTER RELIEFS PAGES - END

@@ -146,7 +146,7 @@
   }
 
     @completeReturn match {
-        case s: CompleteSingleDisposalReturn => {
+    case s: CompleteSingleDisposalReturn => {
      @representeeSection(s.representeeAnswers)
 
      <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
@@ -250,7 +250,7 @@
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, isATrust, representativeType, isFurtherOrAmendReturn)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = true, isMultiple = false, isATrust, representativeType, isFurtherOrAmendReturn, fillingOutReturn.isAmendReturn, s.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion),
+        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = true, isMultiple = false, isATrust, representativeType, isFurtherOrAmendReturn, fillingOutReturn.isAmendReturn, s.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion)
 
         <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
         @supportingEvidenceSummary(s.supportingDocumentAnswers)

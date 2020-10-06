@@ -235,7 +235,8 @@ object JourneyStatus {
 
   final case class PreviousReturnData(
     summaries: List[ReturnSummary],
-    previousYearToDate: Option[AmountInPence]
+    previousYearToDate: Option[AmountInPence],
+    previousReturnsImplyEligibilityForCalculation: Option[Boolean]
   )
 
   object PreviousReturnData {

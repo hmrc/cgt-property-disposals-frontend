@@ -378,7 +378,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             val completeFillingOutReturn = sample[FillingOutReturn].copy(
               draftReturn = completeDraftReturn,
-              previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]))),
+              previousSentReturns =
+                Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]), None)),
               amendReturnData = None
             )
 
@@ -430,7 +431,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             val completeFillingOutReturn = sample[FillingOutReturn].copy(
               draftReturn = completeDraftReturn,
-              previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]))),
+              previousSentReturns =
+                Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]), None)),
               amendReturnData = Some(
                 sample[AmendReturnData].copy(
                   originalReturn = sample[CompleteReturnWithSummary].copy(

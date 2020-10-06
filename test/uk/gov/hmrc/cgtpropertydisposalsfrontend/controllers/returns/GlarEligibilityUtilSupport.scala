@@ -18,51 +18,31 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalamock.scalatest.MockFactory
-import play.api.mvc.Request
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisplayReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibility, FurtherReturnEligibilityUtil}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait ReturnsServiceSupport { this: MockFactory =>
+trait GlarEligibilityUtilSupport { this: ControllerSpec =>
 
-  val mockReturnsService: ReturnsService = mock[ReturnsService]
+  val mockGlarCalculatorEligibility: FurtherReturnEligibilityUtil = mock[FurtherReturnEligibilityUtil]
 
-  def mockStoreDraftReturn(
+  def mockEligibilityCheck(
     fillingOutReturn: FillingOutReturn
   )(
-    result: Either[Error, Unit]
+    result: Either[Error, FurtherReturnEligibility]
   ) =
-    (mockReturnsService
-      .storeDraftReturn(
+    (mockGlarCalculatorEligibility
+      .isEligibleForFurtherReturnOrAmendCalculation(
         _: FillingOutReturn
-      )(
-        _: HeaderCarrier,
-        _: Request[_]
-      ))
-      .expects(fillingOutReturn, *, *)
-      .returning(EitherT.fromEither[Future](result))
-
-  def mockDisplayReturn(
-    cgtReference: CgtReference,
-    submissionId: String
-  )(
-    result: Either[Error, DisplayReturn]
-  ) =
-    (mockReturnsService
-      .displayReturn(
-        _: CgtReference,
-        _: String
       )(
         _: HeaderCarrier
       ))
-      .expects(cgtReference, submissionId, *)
+      .expects(fillingOutReturn, *)
       .returning(EitherT.fromEither[Future](result))
 
 }
