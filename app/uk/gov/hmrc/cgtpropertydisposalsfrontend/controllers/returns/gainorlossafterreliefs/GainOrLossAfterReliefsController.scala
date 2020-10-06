@@ -65,22 +65,26 @@ class GainOrLossAfterReliefsController @Inject() (
 
   import GainOrLossAfterReliefsController._
 
-  def enterGainOrLossAfterReliefs(): Action[AnyContent]     =
+  def enterGainOrLossAfterReliefs(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAnswers { (fillingOutReturn, draftReturn, answer) =>
         val result = for {
           furtherReturnEligibility <-
             glarCalculatorEligibilityUtil.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
-          updatedJourney            = fillingOutReturn.copy(previousReturnsImplyEligibilityForFurtherReturnCalculation =
-                                        furtherReturnEligibility match {
-                                          case FurtherReturnEligibility.Eligible(_)                                 => Some(true)
-                                          case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
-                                            previousReturnsImplyEligibility
-                                        }
-                                      )
-          _                        <- if (shouldUpdateFurtherReturnEligibility(fillingOutReturn, furtherReturnEligibility))
+          _                        <- if (shouldUpdateFurtherReturnEligibility(fillingOutReturn, furtherReturnEligibility)) {
+                                        val updatedJourney = fillingOutReturn.copy(previousSentReturns =
+                                          fillingOutReturn.previousSentReturns.map(
+                                            _.copy(
+                                              previousReturnsImplyEligibilityForCalculation = furtherReturnEligibility match {
+                                                case FurtherReturnEligibility.Eligible(_)                                 => Some(true)
+                                                case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
+                                                  previousReturnsImplyEligibility
+                                              }
+                                            )
+                                          )
+                                        )
                                         EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
-                                      else EitherT.pure[Future, Error](())
+                                      } else EitherT.pure[Future, Error](())
         } yield furtherReturnEligibility
 
         result.fold[Result](
@@ -114,13 +118,17 @@ class GainOrLossAfterReliefsController @Inject() (
     furtherReturnEligibility: FurtherReturnEligibility
   ): Boolean = {
     import cats.instances.option._
+
+    val existingValue = fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation)
+
     furtherReturnEligibility match {
       case FurtherReturnEligibility.Eligible(_)                                 =>
-        !fillingOutReturn.previousReturnsImplyEligibilityForFurtherReturnCalculation.contains(true)
+        !existingValue.contains(true)
       case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
-        fillingOutReturn.previousReturnsImplyEligibilityForFurtherReturnCalculation =!= previousReturnsImplyEligibility
+        existingValue =!= previousReturnsImplyEligibility
     }
   }
+
   def enterGainOrLossAfterReliefsSubmit: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAnswers { case (fillingOutReturn, draftReturn, answer) =>
@@ -261,7 +269,6 @@ class GainOrLossAfterReliefsController @Inject() (
               _,
               _,
               d,
-              _,
               _,
               _
             )

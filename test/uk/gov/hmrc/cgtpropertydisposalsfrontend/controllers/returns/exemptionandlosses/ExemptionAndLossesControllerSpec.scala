@@ -182,7 +182,8 @@ class ExemptionAndLossesControllerSpec
     )
 
     val journey = sampleFillingOutReturn(draftReturn, userType).copy(
-      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None,
+      previousSentReturns =
+        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)) else None,
       amendReturnData = None
     )
 
@@ -231,7 +232,8 @@ class ExemptionAndLossesControllerSpec
     )
 
     val journey = sampleFillingOutReturn(draftReturn, userType).copy(
-      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None,
+      previousSentReturns =
+        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)) else None,
       amendReturnData = None
     )
 
@@ -308,7 +310,8 @@ class ExemptionAndLossesControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
       agentReferenceNumber = setAgentReferenceNumber(userType),
-      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None,
+      previousSentReturns =
+        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)) else None,
       amendReturnData = None
     )
 

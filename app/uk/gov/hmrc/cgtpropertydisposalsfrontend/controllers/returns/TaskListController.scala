@@ -74,7 +74,7 @@ class TaskListController @Inject() (
   def taskList(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
-        case Some(f @ FillingOutReturn(_, _, _, draftReturn, _, _, _)) =>
+        case Some(f @ FillingOutReturn(_, _, _, draftReturn, _, _)) =>
           handleExpiredFiles(draftReturn, f).fold(
             { e =>
               logger.warn("Could not handle expired files", e)

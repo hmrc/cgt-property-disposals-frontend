@@ -103,8 +103,7 @@ object JourneyStatus {
     agentReferenceNumber: Option[AgentReferenceNumber],
     draftReturn: DraftReturn,
     previousSentReturns: Option[PreviousReturnData],
-    amendReturnData: Option[AmendReturnData],
-    previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = None
+    amendReturnData: Option[AmendReturnData]
   ) extends JourneyStatus
 
   object FillingOutReturn {
@@ -236,7 +235,8 @@ object JourneyStatus {
 
   final case class PreviousReturnData(
     summaries: List[ReturnSummary],
-    previousYearToDate: Option[AmountInPence]
+    previousYearToDate: Option[AmountInPence],
+    previousReturnsImplyEligibilityForCalculation: Option[Boolean]
   )
 
   object PreviousReturnData {

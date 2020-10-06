@@ -80,10 +80,10 @@ class CompanyDetailsControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case FillingOutReturn(_, _, _, _: DraftSingleIndirectDisposalReturn, _, _, _)    => true
-        case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _, _, _) => true
-        case _: StartingToAmendReturn                                                    => true
-        case _                                                                           => false
+        case FillingOutReturn(_, _, _, _: DraftSingleIndirectDisposalReturn, _, _)    => true
+        case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _, _) => true
+        case _: StartingToAmendReturn                                                 => true
+        case _                                                                        => false
       }
     )
 

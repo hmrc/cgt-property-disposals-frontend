@@ -86,7 +86,7 @@ class ReliefDetailsController @Inject() (
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
           ) if d.triageAnswers.isPeriodOfAdmin() =>
         d.reliefDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)
@@ -103,7 +103,7 @@ class ReliefDetailsController @Inject() (
         )
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
           ) =>
         d.reliefDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)

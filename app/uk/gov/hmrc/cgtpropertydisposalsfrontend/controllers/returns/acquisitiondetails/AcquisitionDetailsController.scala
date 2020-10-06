@@ -123,7 +123,7 @@ class AcquisitionDetailsController @Inject() (
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
           ) =>
         d.acquisitionDetailsAnswers.fold[Future[Result]](
           defaultAnswers(d.triageAnswers, d.representeeAnswers, isIndirectDisposal = false).fold[Future[Result]](
@@ -139,7 +139,6 @@ class AcquisitionDetailsController @Inject() (
                 _,
                 _,
                 d: DraftSingleIndirectDisposalReturn,
-                _,
                 _,
                 _
               )

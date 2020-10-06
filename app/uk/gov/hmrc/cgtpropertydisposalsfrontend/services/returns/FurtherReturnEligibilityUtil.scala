@@ -74,15 +74,17 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
   )(implicit
     headerCarrier: HeaderCarrier
   ): EitherT[Future, Error, FurtherReturnEligibility] =
-    if (!amendAndFurtherReturnCalculationsEnabled) {
+    if (!amendAndFurtherReturnCalculationsEnabled)
       EitherT.pure(Ineligible(None))
-    } else
+    else
       eligibleGlarCalculation(fillingOutReturn) match {
         case None =>
-          EitherT.pure(Ineligible(fillingOutReturn.previousReturnsImplyEligibilityForFurtherReturnCalculation))
+          EitherT.pure(
+            Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
+          )
 
         case Some(glarBreakdown) =>
-          fillingOutReturn.previousReturnsImplyEligibilityForFurtherReturnCalculation match {
+          glarBreakdown.previousReturnData.previousReturnsImplyEligibilityForCalculation match {
             case Some(true) =>
               EitherT.pure(Eligible(glarBreakdown))
 
@@ -90,10 +92,7 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
               EitherT.pure(Ineligible(Some(false)))
 
             case None =>
-              val submissionIdsOfPreviousReturns = fillingOutReturn.previousSentReturns
-                .map(e => e.summaries)
-                .getOrElse(List.empty)
-                .map(e => e.submissionId)
+              val submissionIdsOfPreviousReturns = glarBreakdown.previousReturnData.summaries.map(_.submissionId)
 
               val results: List[EitherT[Future, Error, Boolean]] = submissionIdsOfPreviousReturns.map {
                 returnsService
@@ -121,21 +120,24 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
   private def eligibleGlarCalculation(
     fillingOutReturn: FillingOutReturn
   ): Option[CalculatedGlarBreakdown] =
-    fillingOutReturn.draftReturn match {
-      case DraftSingleDisposalReturn(
-            _,
-            triageAnswers: CompleteSingleDisposalTriageAnswers,
-            _,
-            Some(disposalDetailsAnswers: CompleteDisposalDetailsAnswers),
-            Some(acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers),
-            Some(reliefDetailsAnswers: CompleteReliefDetailsAnswers),
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            _
+    (fillingOutReturn.draftReturn, fillingOutReturn.previousSentReturns) match {
+      case (
+            DraftSingleDisposalReturn(
+              _,
+              triageAnswers: CompleteSingleDisposalTriageAnswers,
+              _,
+              Some(disposalDetailsAnswers: CompleteDisposalDetailsAnswers),
+              Some(acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers),
+              Some(reliefDetailsAnswers: CompleteReliefDetailsAnswers),
+              _,
+              _,
+              _,
+              _,
+              _,
+              _,
+              _
+            ),
+            Some(previousReturnData)
           ) =>
         val eligibleAssetType =
           triageAnswers.assetType match {
@@ -148,8 +150,7 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
           case None            => None
           case Some(assetType) =>
             val noOtherReliefs           = reliefDetailsAnswers.otherReliefs.isEmpty
-            val underPreviousReturnLimit =
-              fillingOutReturn.previousSentReturns.exists(_.summaries.length <= maxPreviousReturns)
+            val underPreviousReturnLimit = previousReturnData.summaries.length <= maxPreviousReturns
             val isSelf                   = triageAnswers.individualUserType.contains(Self)
             val currentReturnIsEligible  = noOtherReliefs && underPreviousReturnLimit && isSelf
 
@@ -163,7 +164,8 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
                   improvementCosts = acquisitionDetailsAnswers.improvementCosts,
                   privateResidentReliefs = reliefDetailsAnswers.privateResidentsRelief,
                   lettingRelief = reliefDetailsAnswers.lettingsRelief,
-                  assetType = assetType
+                  assetType = assetType,
+                  previousReturnData = previousReturnData
                 )
               )
             else None

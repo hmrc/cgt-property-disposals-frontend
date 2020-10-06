@@ -133,11 +133,11 @@ class MultipleDisposalsTriageControllerSpec
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean =
     journeyStatus match {
-      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft                => true
-      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn, _, _, _)         => true
-      case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _, _, _) => true
-      case _: StartingToAmendReturn                                                    => true
-      case _                                                                           => false
+      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft             => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn, _, _)         => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _, _) => true
+      case _: StartingToAmendReturn                                                 => true
+      case _                                                                        => false
     }
 
   def setIndividualUserType(
@@ -172,7 +172,7 @@ class MultipleDisposalsTriageControllerSpec
           Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
         else None
       },
-      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None))
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None, None))
     )
     SessionData.empty.copy(
       journeyStatus = Some(startingNewDraftReturn),
@@ -211,7 +211,7 @@ class MultipleDisposalsTriageControllerSpec
       agentReferenceNumber =
         if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
         else None,
-      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None)),
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None, None)),
       amendReturnData = amendReturnData
     )
     val session            = SessionData.empty.copy(

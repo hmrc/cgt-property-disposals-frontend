@@ -1710,7 +1710,7 @@ class SingleDisposalsTriageController @Inject() (
       case Some(
             (
               session,
-              r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _, _)
+              r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _)
             )
           ) =>
         f(session, Right(Right(d) -> r), populateDisposalMethodInPeriodOfAdmin(d.triageAnswers))
@@ -1723,7 +1723,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 d: DraftSingleIndirectDisposalReturn,
-                _,
                 _,
                 _
               )
@@ -1739,7 +1738,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 d: DraftSingleMixedUseDisposalReturn,
-                _,
                 _,
                 _
               )

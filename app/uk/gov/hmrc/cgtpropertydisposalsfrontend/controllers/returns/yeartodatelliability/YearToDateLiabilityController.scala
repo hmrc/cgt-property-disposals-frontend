@@ -126,7 +126,7 @@ class YearToDateLiabilityController @Inject() (
         )(y => f(s, r, y))
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
           ) =>
         d.yearToDateLiabilityAnswers match {
           case Some(y) => f(s, r, y)
@@ -153,7 +153,7 @@ class YearToDateLiabilityController @Inject() (
         }
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftMultipleDisposalsReturn, _, _, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftMultipleDisposalsReturn, _, _))
           ) =>
         d.yearToDateLiabilityAnswers.fold[Future[Result]](
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
@@ -167,7 +167,6 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 d: DraftSingleIndirectDisposalReturn,
-                _,
                 _,
                 _
               )
@@ -186,7 +185,6 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 d: DraftMultipleIndirectDisposalsReturn,
                 _,
-                _,
                 _
               )
             )
@@ -203,7 +201,6 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 d: DraftSingleMixedUseDisposalReturn,
-                _,
                 _,
                 _
               )
@@ -1458,7 +1455,7 @@ class YearToDateLiabilityController @Inject() (
 
           case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
             (fillingOutReturn.previousSentReturns, fillingOutReturn.draftReturn.representativeType()) match {
-              case (Some(PreviousReturnData(_, Some(previousYtd))), None) =>
+              case (Some(PreviousReturnData(_, Some(previousYtd), _)), None) =>
                 nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability) match {
                   case None =>
                     Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1540,7 +1537,7 @@ class YearToDateLiabilityController @Inject() (
 
           case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
             (fillingOutReturn.previousSentReturns, fillingOutReturn.draftReturn.representativeType()) match {
-              case (Some(PreviousReturnData(_, Some(previousYtd))), None) =>
+              case (Some(PreviousReturnData(_, Some(previousYtd), _)), None) =>
                 nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability) match {
                   case None =>
                     Redirect(routes.YearToDateLiabilityController.checkYourAnswers())

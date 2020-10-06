@@ -123,9 +123,13 @@ class GainOrLossAfterReliefsControllerSpec
     val journey     = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
-      previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
-      previousReturnsImplyEligibilityForFurtherReturnCalculation =
-        previousReturnsImplyEligibilityForFurtherReturnCalculation
+      previousSentReturns = Some(
+        PreviousReturnData(
+          List(sample[ReturnSummary]),
+          None,
+          previousReturnsImplyEligibilityForFurtherReturnCalculation
+        )
+      )
     )
 
     (
@@ -156,9 +160,13 @@ class GainOrLossAfterReliefsControllerSpec
     val journey     = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
-      previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
-      previousReturnsImplyEligibilityForFurtherReturnCalculation =
-        previousReturnsImplyEligibilityForFurtherReturnCalculation
+      previousSentReturns = Some(
+        PreviousReturnData(
+          List(sample[ReturnSummary]),
+          None,
+          previousReturnsImplyEligibilityForFurtherReturnCalculation
+        )
+      )
     )
 
     (
@@ -530,12 +538,12 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is eligible for a calculation and" when {
           def test(
-            sessionData: (SessionData, FillingOutReturn, DraftReturn),
+            sessionData: (SessionData, FillingOutReturn, DraftReturn, PreviousReturnData),
             expectedTitleKey: String,
             expectedBackLink: Call,
             expectedOuterLabelUserKey: String,
             expectedH2Key: String,
-            expectSessionStorage: Option[SessionData] = None
+            expectedUpdatedSession: Option[SessionData] = None
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -543,11 +551,21 @@ class GainOrLossAfterReliefsControllerSpec
               mockEligibilityCheck(sessionData._2)(
                 Right(
                   Eligible(
-                    sample[CalculatedGlarBreakdown]
+                    CalculatedGlarBreakdown(
+                      AmountInPence(0),
+                      AmountInPence(0),
+                      AmountInPence(0),
+                      AmountInPence(0),
+                      AmountInPence(0),
+                      AmountInPence(0),
+                      AmountInPence(0),
+                      Right(AssetType.Residential),
+                      sessionData._4
+                    )
                   )
                 )
               )
-              expectSessionStorage.map { s =>
+              expectedUpdatedSession.map { s =>
                 mockStoreSession(s)(Right(()))
               }
             }
@@ -637,8 +655,8 @@ class GainOrLossAfterReliefsControllerSpec
             def validCalculatorState(
               userType: UserType,
               individualUserType: IndividualUserType,
-              previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(true)
-            ): (SessionData, FillingOutReturn, DraftReturn) = {
+              previousReturnData: PreviousReturnData
+            ): (SessionData, FillingOutReturn, DraftReturn, PreviousReturnData) = {
               val draftReturn = sample[DraftSingleDisposalReturn]
                 .copy(
                   gainOrLossAfterReliefs = Some(AmountInPence(1000)),
@@ -654,9 +672,7 @@ class GainOrLossAfterReliefsControllerSpec
                 draftReturn = draftReturn,
                 subscribedDetails = sample[SubscribedDetails]
                   .copy(name = if (userType === Trust) Left(sample[TrustName]) else Right(sample[IndividualName])),
-                previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
-                previousReturnsImplyEligibilityForFurtherReturnCalculation =
-                  previousReturnsImplyEligibilityForFurtherReturnCalculation
+                previousSentReturns = Some(previousReturnData)
               )
 
               (
@@ -665,13 +681,16 @@ class GainOrLossAfterReliefsControllerSpec
                   userType = Some(userType)
                 ),
                 journey,
-                draftReturn
+                draftReturn,
+                previousReturnData
               )
             }
 
             "the user is an individual doing the return for themselves" in {
+              val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, Some(true))
+
               test(
-                validCalculatorState(Individual, Self),
+                validCalculatorState(Individual, Self, previousReturnData),
                 "gainOrLossAfterReliefs.title",
                 routes.GainOrLossAfterReliefsController.checkYourAnswers(),
                 "",
@@ -680,23 +699,23 @@ class GainOrLossAfterReliefsControllerSpec
             }
 
             "there is no value for previousReturnsImplyEligibilityForFurtherReturnCalculation in session" in {
-              val state                 = validCalculatorState(Individual, Self, None)
-              val expectedJourneyStatus = state._1.journeyStatus match {
-                case Some(value) =>
-                  value match {
-                    case f: FillingOutReturn =>
-                      f.copy(previousReturnsImplyEligibilityForFurtherReturnCalculation = Some(true))
-                    case _                   => fail()
-                  }
-                case None        => fail()
-              }
+              val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None)
+
+              val state                = validCalculatorState(Individual, Self, previousReturnData)
+              val updatedJourneyStatus = state._2.copy(previousSentReturns =
+                Some(
+                  previousReturnData.copy(
+                    previousReturnsImplyEligibilityForCalculation = Some(true)
+                  )
+                )
+              )
               test(
                 state,
                 "gainOrLossAfterReliefs.title",
                 routes.GainOrLossAfterReliefsController.checkYourAnswers(),
                 "",
                 "gainOrLossAfterReliefs.h2",
-                Some(state._1.copy(journeyStatus = Some(expectedJourneyStatus)))
+                Some(state._1.copy(journeyStatus = Some(updatedJourneyStatus)))
               )
             }
           }
@@ -708,8 +727,10 @@ class GainOrLossAfterReliefsControllerSpec
       "show an error page" when {
 
         "there is an error determining eligibility for calculation" in {
+          val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None)
+
           val fillingOutReturn =
-            sample[FillingOutReturn].copy(previousReturnsImplyEligibilityForFurtherReturnCalculation = Some(true))
+            sample[FillingOutReturn].copy(previousSentReturns = Some(previousReturnData))
           val sessionData      =
             (SessionData.empty.copy(Some(fillingOutReturn)), fillingOutReturn, sample[DraftSingleDisposalReturn])
           inSequence {
@@ -721,8 +742,10 @@ class GainOrLossAfterReliefsControllerSpec
         }
 
         "updating the session is not successful" in {
+          val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None)
+
           val fillingOutReturn =
-            sample[FillingOutReturn].copy(previousReturnsImplyEligibilityForFurtherReturnCalculation = None)
+            sample[FillingOutReturn].copy(previousSentReturns = Some(previousReturnData))
           val sessionData      =
             (SessionData.empty.copy(Some(fillingOutReturn)), fillingOutReturn, sample[DraftSingleDisposalReturn])
           inSequence {
@@ -731,7 +754,15 @@ class GainOrLossAfterReliefsControllerSpec
             mockEligibilityCheck(sessionData._2)(Right(Eligible(sample[CalculatedGlarBreakdown])))
             mockStoreSession(
               sessionData._1.copy(journeyStatus =
-                Some(fillingOutReturn.copy(previousReturnsImplyEligibilityForFurtherReturnCalculation = Some(true)))
+                Some(
+                  fillingOutReturn.copy(previousSentReturns =
+                    Some(
+                      previousReturnData.copy(
+                        previousReturnsImplyEligibilityForCalculation = Some(true)
+                      )
+                    )
+                  )
+                )
               )
             )(
               Left(Error("Error updating session"))

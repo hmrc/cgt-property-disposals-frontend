@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.PreviousReturnData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
 
@@ -57,7 +58,8 @@ final case class CalculatedGlarBreakdown(
   privateResidentReliefs: AmountInPence,
   lettingRelief: AmountInPence,
   improvementCosts: AmountInPence,
-  assetType: Either[NonResidential.type, Residential.type]
+  assetType: Either[NonResidential.type, Residential.type],
+  previousReturnData: PreviousReturnData
 ) {
 
   val propertyDisposalAmountLessCosts = disposalPrice.inPounds() + disposalFees.inPounds()

@@ -139,26 +139,26 @@ trait ChangeRepresenteeContactAddressControllerSpec
             if isDefinedAndContainsContactDetails(representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, s: DraftSingleDisposalReturn, _, _, _)
+        case FillingOutReturn(_, _, _, s: DraftSingleDisposalReturn, _, _)
             if isDefinedAndContainsContactDetails(s.representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn, _, _, _)
+        case FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn, _, _)
             if isDefinedAndContainsContactDetails(m.representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, i: DraftSingleIndirectDisposalReturn, _, _, _)
+        case FillingOutReturn(_, _, _, i: DraftSingleIndirectDisposalReturn, _, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn, _, _, _)
+        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn, _, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn, _, _, _)
+        case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn, _, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
-        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn, _, _, _)
+        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn, _, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
         case _ => false

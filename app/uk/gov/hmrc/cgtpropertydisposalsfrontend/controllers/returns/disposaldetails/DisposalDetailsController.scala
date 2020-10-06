@@ -88,7 +88,7 @@ class DisposalDetailsController @Inject() (
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _, _))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
           ) =>
         d.disposalDetailsAnswers
           .fold[Future[Result]](
@@ -103,7 +103,6 @@ class DisposalDetailsController @Inject() (
                 _,
                 _,
                 d: DraftSingleIndirectDisposalReturn,
-                _,
                 _,
                 _
               )

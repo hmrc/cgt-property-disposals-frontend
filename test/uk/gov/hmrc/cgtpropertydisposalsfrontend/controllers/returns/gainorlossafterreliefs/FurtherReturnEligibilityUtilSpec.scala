@@ -115,8 +115,7 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
       )
     val journey     = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
-      previousSentReturns = previousSentReturns,
-      previousReturnsImplyEligibilityForFurtherReturnCalculation = None
+      previousSentReturns = previousSentReturns
     )
 
     (
@@ -208,10 +207,14 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
         }
 
         "there are more than the configured maximum of previous returns" in new TestEnvironment() {
-          val tooManyPreviousReturns = eligibleSession(previousSentReturns =
-            Some(sample[PreviousReturnData].copy(summaries = List.fill(maxPreviousReturns + 1)(sample[ReturnSummary])))
+          val previousReturnData     = sample[PreviousReturnData].copy(
+            summaries = List.fill(maxPreviousReturns + 1)(sample[ReturnSummary]),
+            previousReturnsImplyEligibilityForCalculation = None
           )
-          test(tooManyPreviousReturns, Ineligible(None))(service)
+          val tooManyPreviousReturns = eligibleSession(previousSentReturns = Some(previousReturnData))
+          test(tooManyPreviousReturns, Ineligible(previousReturnData.previousReturnsImplyEligibilityForCalculation))(
+            service
+          )
         }
 
         "the current return's user type is Capacitor" in new TestEnvironment() {
@@ -236,9 +239,11 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
         }
 
         "there is a previous return with an ineligible asset type" in new TestEnvironment() {
-          val returns = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
-          val session =
-            eligibleSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
+          val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          val previousReturnData =
+            sample[PreviousReturnData].copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None)
+          val session            =
+            eligibleSession(previousSentReturns = Some(previousReturnData))
           inSequence {
             returns.foreach { r =>
               mockDisplayReturn(session._2.subscribedDetails.cgtReference, r.submissionId)(
@@ -250,9 +255,11 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
         }
 
         "there is previous returns which contains other reliefs" in new TestEnvironment() {
-          val returns = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
-          val session =
-            eligibleSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
+          val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          val previousReturnData =
+            sample[PreviousReturnData].copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None)
+          val session            =
+            eligibleSession(previousSentReturns = Some(previousReturnData))
           inSequence {
             returns.map { r =>
               mockDisplayReturn(session._2.subscribedDetails.cgtReference, r.submissionId)(
@@ -267,11 +274,13 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
       "return an eligible response" when {
 
         "under limit and displays OK" in new TestEnvironment() {
-          val returns = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
-          val session =
-            eligibleSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
+          val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          val previousReturnData =
+            sample[PreviousReturnData].copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None)
+          val session            =
+            eligibleSession(previousSentReturns = Some(previousReturnData))
           inSequence {
-            returns.map { r =>
+            returns.foreach { r =>
               mockDisplayReturn(session._2.subscribedDetails.cgtReference, r.submissionId)(Right(genDisplayReturn()))
             }
           }
@@ -286,7 +295,8 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
                 AmountInPence(0),
                 AmountInPence(0),
                 AmountInPence(0),
-                Right(Residential)
+                Right(Residential),
+                previousReturnData
               )
             )
           )(service)
