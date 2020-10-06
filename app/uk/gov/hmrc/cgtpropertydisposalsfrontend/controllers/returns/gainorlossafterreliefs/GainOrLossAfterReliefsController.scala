@@ -89,7 +89,7 @@ class GainOrLossAfterReliefsController @Inject() (
 
         result.fold[Result](
           { e =>
-            logger.warn("Could no check for calculation eligibility", e)
+            logger.warn("Could not check for calculation eligibility", e)
             errorHandler.errorResult()
           },
           furtherReturnEligibility =>

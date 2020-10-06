@@ -63,10 +63,10 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
     extends FurtherReturnEligibilityUtil
     with SessionUpdates {
 
-  val amendAndFurtherReturnCalculationsEnabled: Boolean =
+  private val amendAndFurtherReturnCalculationsEnabled: Boolean =
     configuration.underlying.getBoolean("amend-and-further-returns-calculator.enabled")
 
-  val maxPreviousReturns: Int =
+  private val maxPreviousReturns: Int =
     configuration.underlying.getInt("amend-and-further-returns-calculator.max-previous-returns")
 
   def isEligibleForFurtherReturnOrAmendCalculation(
