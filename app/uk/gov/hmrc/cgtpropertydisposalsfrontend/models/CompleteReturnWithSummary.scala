@@ -17,12 +17,12 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary, ReturnType}
 
 final case class CompleteReturnWithSummary(
   completeReturn: CompleteReturn,
   summary: ReturnSummary,
-  isFirstReturn: Boolean
+  returnType: ReturnType
 )
 
 object CompleteReturnWithSummary {

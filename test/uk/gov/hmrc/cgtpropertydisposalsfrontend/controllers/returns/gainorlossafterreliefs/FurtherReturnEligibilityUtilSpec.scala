@@ -128,7 +128,7 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
         triageAnswers = completeReturn.triageAnswers.copy(assetType = assetType),
         reliefDetails = completeReturn.reliefDetails.copy(otherReliefs = otherReliefs)
       ),
-      false
+      ReturnType.FurtherReturn
     )
   }
 

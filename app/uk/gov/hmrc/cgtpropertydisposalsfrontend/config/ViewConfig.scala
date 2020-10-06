@@ -148,6 +148,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
   val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
+  val amendsExitSurveyUrl: String     = "/feedback/CGTPD-AMEND"
   val ggCreateAccountUrl: String      =
     "/bas-gateway?" +
       "accountType=individual&" +

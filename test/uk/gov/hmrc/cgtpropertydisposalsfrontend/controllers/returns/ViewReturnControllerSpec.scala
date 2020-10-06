@@ -53,7 +53,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{StartingTo
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.govShortDisplayFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{DeltaCharge, PenaltyInterest, UkResidentReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.DirectDebit
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
@@ -63,7 +63,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DateOfDeath, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DateOfDeath, ReturnSummary, ReturnType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
@@ -151,13 +151,14 @@ class ViewReturnControllerSpec
       def performAction(): Future[Result] =
         controller.displayReturn()(FakeRequest())
 
-      val ukResidentMainReturnChargeAmount: AmountInPence = AmountInPence(10000)
-      val ukResidentReturnSentDate: LocalDate             = LocalDate.now()
-      val ukResidentMainReturnChargeDueDate: LocalDate    =
+      val ukResidentMainReturnChargeAmount: AmountInPence  = AmountInPence(10000)
+      val ukResidentDeltaReturnChargeAmount: AmountInPence = AmountInPence(1000)
+      val ukResidentReturnSentDate: LocalDate              = LocalDate.now()
+      val ukResidentMainReturnChargeDueDate: LocalDate     =
         LocalDate.now().plusMonths(1)
-
-      val penaltyInterestChargeAmount: AmountInPence    = AmountInPence(10000)
-      val penaltyInterestChargeAmountDueDate: LocalDate =
+      val ukResidentDeltaChargeDueDate: LocalDate          = LocalDate.of(2022, 1, 31)
+      val penaltyInterestChargeAmount: AmountInPence       = AmountInPence(10000)
+      val penaltyInterestChargeAmountDueDate: LocalDate    =
         LocalDate.now().plusMonths(2)
 
       val penaltyInterestCharge = sample[Charge].copy(
@@ -183,13 +184,35 @@ class ViewReturnControllerSpec
         payments = List(fullPaymentForUkResidentReturnCharge)
       )
 
+      val ukResidentReturnDeltaChargeNoPayment = sample[Charge].copy(
+        chargeType = DeltaCharge,
+        amount = ukResidentDeltaReturnChargeAmount,
+        dueDate = ukResidentDeltaChargeDueDate,
+        payments = List.empty
+      )
+
       val chargesWithChargeRaiseAndFullPayment =
         List(ukResidentReturnChargeFullPayment, penaltyInterestCharge)
 
+      val chargesWithDeltaChargeAndPartialPayment =
+        List(ukResidentReturnChargeFullPayment, ukResidentReturnDeltaChargeNoPayment)
+
+      val mainChargeAmountWithDelta = ukResidentMainReturnChargeAmount ++ ukResidentDeltaReturnChargeAmount
+
       val sentReturn = sample[ReturnSummary].copy(
         charges = chargesWithChargeRaiseAndFullPayment,
+        lastUpdatedDate = None,
         mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-        submissionDate = ukResidentReturnSentDate
+        submissionDate = ukResidentReturnSentDate,
+        isRecentlyAmended = false
+      )
+
+      val sentAmendedReturn = sample[ReturnSummary].copy(
+        charges = chargesWithDeltaChargeAndPartialPayment,
+        lastUpdatedDate = Some(LocalDate.now().plusMonths(2)),
+        mainReturnChargeAmount = mainChargeAmountWithDelta,
+        submissionDate = ukResidentReturnSentDate,
+        isRecentlyAmended = false
       )
 
       def validatePaymentsSection(
@@ -233,6 +256,49 @@ class ViewReturnControllerSpec
         paymentDetails(10) shouldBe "Pay now"
       }
 
+      def validatePaymentsSectionWithDelta(
+        document: Document,
+        viewingReturn: ViewingReturn
+      ): Unit = {
+        val paymentDetails = document
+          .select(
+            s"#returnPaymentDetails-${viewingReturn.returnSummary.submissionId} > tr > td"
+          )
+          .eachText()
+          .asScala
+
+        paymentDetails.headOption.getOrElse(sys.error("Error")) should startWith(
+          messageFromMessageKey("viewReturn.chargeType.UkResidentReturn")
+        )
+        paymentDetails(1)                                     shouldBe govShortDisplayFormat(
+          ukResidentMainReturnChargeDueDate
+        )
+        paymentDetails(2)                                     shouldBe formatAmountOfMoneyWithPoundSign(
+          ukResidentMainReturnChargeAmount.inPounds()
+        )
+        paymentDetails(3)                                     shouldBe formatAmountOfMoneyWithPoundSign(
+          ukResidentMainReturnChargeAmount
+            .inPounds() - fullPaymentForUkResidentReturnCharge.amount.inPounds()
+        )
+        paymentDetails(4)                                     shouldBe messageFromMessageKey("viewReturn.charge.status.paid")
+
+        paymentDetails(5) shouldBe s"${formatAmountOfMoneyWithPoundSign(
+          fullPaymentForUkResidentReturnCharge.amount.inPounds()
+        )} ${messageFromMessageKey("viewReturn.charge.paymentMethod.DirectDebit")} ${messageFromMessageKey("generic.on")} ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
+
+        paymentDetails(6)    should startWith(messageFromMessageKey("viewReturn.chargeType.DeltaCharge"))
+        paymentDetails(7)  shouldBe govShortDisplayFormat(
+          ukResidentDeltaChargeDueDate
+        )
+        paymentDetails(8)  shouldBe formatAmountOfMoneyWithPoundSign(
+          ukResidentDeltaReturnChargeAmount.inPounds()
+        )
+        paymentDetails(9)  shouldBe formatAmountOfMoneyWithPoundSign(
+          ukResidentDeltaReturnChargeAmount.inPounds()
+        )
+        paymentDetails(10) shouldBe "Pay now"
+      }
+
       behave like journeyStatusBehaviour(performAction)
 
       val address = sample[UkAddress].copy(
@@ -261,7 +327,8 @@ class ViewReturnControllerSpec
             .copy(
               completeReturn = completeSingleDisposalReturn,
               agentReferenceNumber = setAgentReferenceNumber(userType),
-              subscribedDetails = subscribedDetails
+              subscribedDetails = subscribedDetails,
+              returnType = ReturnType.FirstReturn
             )
 
           val viewingReturn =
@@ -350,6 +417,124 @@ class ViewReturnControllerSpec
 
       }
 
+      "display the page for an amendment with delta charge" in {
+
+        forAll(acceptedUserTypeGen, completeSingleDisposalReturnGen) { (userType, c) =>
+          val subscribedDetails = sample[SubscribedDetails].copy(
+            name = setNameForUserType(userType)
+          )
+
+          val completeSingleDisposalReturn = c.copy(
+            triageAnswers = c.triageAnswers.copy(individualUserType = None),
+            propertyAddress = address,
+            representeeAnswers = None,
+            gainOrLossAfterReliefs = None
+          )
+
+          val sampleViewingReturn = sample[ViewingReturn]
+            .copy(
+              completeReturn = completeSingleDisposalReturn,
+              agentReferenceNumber = setAgentReferenceNumber(userType),
+              subscribedDetails = subscribedDetails,
+              returnType = ReturnType.AmendedReturn
+            )
+
+          val viewingReturn =
+            sampleViewingReturn.copy(returnSummary = sentAmendedReturn)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(viewingReturn),
+                userType = Some(userType)
+              )
+            )
+          }
+
+          val result   = performAction()
+          val document = Jsoup.parse(contentAsString(result))
+
+          document
+            .select("#date-sent-table-question")
+            .text()                                         shouldBe "Return sent to HMRC"
+          document.select("#date-sent-table-answer").text() shouldBe TimeUtils
+            .govDisplayFormat(
+              sentAmendedReturn.submissionDate
+            )
+          document
+            .select("#property-address-table-question")
+            .text()                                         shouldBe "Property address"
+          document
+            .select("#property-address-table-answer")
+            .text()                                         shouldBe "123 fake street, abc123"
+          document
+            .select("#return-reference-table-question")
+            .text()                                         shouldBe "Return reference number"
+          document
+            .select("#return-reference-table-answer")
+            .text()                                         shouldBe sentAmendedReturn.submissionId
+
+          document
+            .select(
+              "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1"
+            )
+            .text() shouldBe messageFromMessageKey(
+            "viewReturn.title"
+          )
+
+          document
+            .select(
+              "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > p"
+            )
+            .text() should include(
+            messageFromMessageKey(
+              "viewReturn.amend.heading.taxOwed"
+            )
+          )
+
+          val isAgent  = userType === UserType.Agent
+          val isATrust = subscribedDetails.isATrust
+
+          val time    = extractDueDate(viewingReturn)
+          val userKey = deriveUserKey(isAgent, isATrust)
+          document.select("#warning").text()          shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
+          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
+            document
+              .select("#heading-reference")
+              .text()                                 shouldBe viewingReturn.subscribedDetails.cgtReference.value
+          else
+            document
+              .select("#heading-reference")
+              .text()                                 shouldBe viewingReturn.returnSummary.submissionId
+          document.select("#heading-tax-owed").text() shouldBe MoneyUtils
+            .formatAmountOfMoneyWithPoundSign(
+              viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero
+                .inPounds()
+            )
+
+          document.select("#amend-link-1").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
+          document.select("#amend-link-2").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
+          validatePaymentsSectionWithDelta(document, viewingReturn)
+
+          validateSingleDisposalCheckAllYourAnswersSections(
+            document,
+            completeSingleDisposalReturn,
+            Some(userType),
+            rebasingUtil.isUk(completeSingleDisposalReturn),
+            rebasingUtil.isEligibleForRebase(completeSingleDisposalReturn),
+            viewingReturn.subscribedDetails.isATrust,
+            completeSingleDisposalReturn.triageAnswers.assetType,
+            isFurtherOrAmendReturn = true,
+            !completeSingleDisposalReturn.yearToDateLiabilityAnswers.fold(_.hasEstimatedDetails, _.hasEstimatedDetails)
+          )
+
+        }
+
+      }
+
       "display the page for a multiple disposals journey" in {
 
         forAll(acceptedUserTypeGen, completeMultipleDisposalsReturnGen) { (userType, c) =>
@@ -370,7 +555,8 @@ class ViewReturnControllerSpec
             .copy(
               completeReturn = completeMultipleDisposalsReturn,
               agentReferenceNumber = setAgentReferenceNumber(userType),
-              subscribedDetails = subscribedDetails
+              subscribedDetails = subscribedDetails,
+              returnType = ReturnType.FirstReturn
             )
 
           val viewingReturn =
@@ -490,7 +676,8 @@ class ViewReturnControllerSpec
             .copy(
               completeReturn = completeMultipleIndirectDisposalsReturn,
               agentReferenceNumber = setAgentReferenceNumber(userType),
-              subscribedDetails = subscribedDetails
+              subscribedDetails = subscribedDetails,
+              returnType = ReturnType.FirstReturn
             )
 
           val viewingReturn =
@@ -689,7 +876,7 @@ class ViewReturnControllerSpec
             journey.ggCredId,
             journey.agentReferenceNumber,
             journey.originalReturn.completeReturn,
-            journey.originalReturn.isFirstReturn,
+            journey.originalReturn.returnType,
             journey.originalReturn.summary,
             journey.previousSentReturns
           )

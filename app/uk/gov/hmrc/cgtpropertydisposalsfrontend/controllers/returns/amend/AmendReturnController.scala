@@ -33,9 +33,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingToAmendReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AmendReturnData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.CancelAmendReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{amend => pages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -48,6 +51,7 @@ class AmendReturnController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   uuidGenerator: UUIDGenerator,
+  auditService: AuditService,
   cc: MessagesControllerComponents,
   rebasingEligibilityUtil: RebasingEligibilityUtil,
   youNeedToCalculatePage: pages.you_need_to_calculate,
@@ -69,46 +73,59 @@ class AmendReturnController @Inject() (
     }
 
   def confirmCancel(back: String): Action[AnyContent] =
-    authenticatedActionWithSessionData { implicit request =>
+    authenticatedActionWithSessionData.async { implicit request =>
       confirmCancelBackLinkMappings.get(back) match {
         case None =>
           logger.warn(s"Could not get back link location for '$back'")
           errorHandler.errorResult()
 
         case Some(backLink) =>
-          Ok(
-            confirmCancelPage(
-              confirmCancelForm,
-              backLink,
-              routes.AmendReturnController.confirmCancelSubmit(back)
+          withStartingToAmendOrFillingOutReturn(request) { _ =>
+            Ok(
+              confirmCancelPage(
+                confirmCancelForm,
+                backLink,
+                routes.AmendReturnController.confirmCancelSubmit(back)
+              )
             )
-          )
+          }
       }
     }
 
   def confirmCancelSubmit(back: String): Action[AnyContent] =
-    authenticatedActionWithSessionData { implicit request =>
+    authenticatedActionWithSessionData.async { implicit request =>
       confirmCancelBackLinkMappings.get(back) match {
         case None =>
           logger.warn(s"Could not get back link location for '$back'")
           errorHandler.errorResult()
 
         case Some(backLink) =>
-          confirmCancelForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors =>
-                BadRequest(
-                  confirmCancelPage(formWithErrors, backLink, routes.AmendReturnController.confirmCancelSubmit(back))
-                ),
-              { cancel =>
-                val redirectTo =
-                  if (cancel) controllers.returns.routes.ViewReturnController.displayReturn()
-                  else backLink
+          withStartingToAmendOrFillingOutReturn(request) { journeyState =>
+            confirmCancelForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    confirmCancelPage(formWithErrors, backLink, routes.AmendReturnController.confirmCancelSubmit(back))
+                  ),
+                { cancel =>
+                  val redirectTo =
+                    if (cancel) {
+                      val auditEvent = CancelAmendReturn(
+                        journeyState
+                          .fold(_.subscribedDetails.cgtReference.value, _._1.subscribedDetails.cgtReference.value),
+                        journeyState
+                          .fold(_.originalReturn.summary.submissionId, _._2.originalReturn.summary.submissionId),
+                        journeyState.fold(_.agentReferenceNumber.map(_.value), _._1.agentReferenceNumber.map(_.value))
+                      )
+                      auditService.sendEvent("CancelAmendReturn", auditEvent, "cancel-amend-return")
+                      controllers.returns.routes.ViewReturnController.displayReturn()
+                    } else backLink
 
-                Redirect(redirectTo)
-              }
-            )
+                  Redirect(redirectTo)
+                }
+              )
+          }
       }
     }
 
@@ -122,7 +139,7 @@ class AmendReturnController @Inject() (
             journey.subscribedDetails,
             journey.originalReturn.completeReturn.representativeType(),
             journey.originalReturn.completeReturn.isIndirectDisposal(),
-            Some(!journey.originalReturn.isFirstReturn),
+            Some(journey.originalReturn.returnType.isFurtherOrAmendReturn),
             routes.AmendReturnController.youNeedToCalculate()
           )
         )
@@ -197,6 +214,15 @@ class AmendReturnController @Inject() (
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(s: StartingToAmendReturn) => f(s)
       case _                              => Redirect(controllers.routes.StartController.start())
+    }
+
+  private def withStartingToAmendOrFillingOutReturn(
+    request: RequestWithSessionData[_]
+  )(f: Either[StartingToAmendReturn, (FillingOutReturn, AmendReturnData)] => Future[Result]): Future[Result] =
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(s: StartingToAmendReturn)                                   => f(Left(s))
+      case Some(r @ FillingOutReturn(_, _, _, _, _, Some(amendReturnData))) => f(Right(r -> amendReturnData))
+      case _                                                                => Redirect(controllers.routes.StartController.start())
     }
 
 }

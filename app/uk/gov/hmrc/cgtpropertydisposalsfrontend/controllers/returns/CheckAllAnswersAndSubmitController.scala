@@ -184,7 +184,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
           fillingOutReturn.agentReferenceNumber,
           fillingOutReturn.isFurtherOrAmendReturn.contains(true),
           cyaPageB64Html,
-          fillingOutReturn.amendReturnData.map(_.originalReturn.summary.submissionId)
+          fillingOutReturn.amendReturnData
         ),
         language
       )

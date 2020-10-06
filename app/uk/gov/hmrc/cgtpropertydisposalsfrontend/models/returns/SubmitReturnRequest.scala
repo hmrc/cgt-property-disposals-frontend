@@ -30,7 +30,7 @@ final case class SubmitReturnRequest(
   agentReferenceNumber: Option[AgentReferenceNumber],
   isFurtherReturn: Boolean,
   checkYourAnswerPageHtml: B64Html,
-  originalReturnFormBundleId: Option[String]
+  amendReturnData: Option[AmendReturnData]
 )
 
 object SubmitReturnRequest {

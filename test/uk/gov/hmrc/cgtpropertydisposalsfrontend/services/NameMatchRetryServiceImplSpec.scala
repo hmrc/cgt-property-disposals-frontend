@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchAuditDetails.{IndividualNameWithNinoAuditDetails, IndividualNameWithSaUtrAuditDetails, TrustNameWithTrnAuditDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{BusinessPartnerRecordNameMatchAttemptEvent, BusinessPartnerRecordNameMatchAuditDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{BusinessPartnerRecordNameMatchAttemptEvent, BusinessPartnerRecordNameMatchAuditDetails, NameMatchAccountLocked}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualRepresenteeNameMatchDetails, IndividualSautrNameMatchDetails, TrustNameMatchDetails}
@@ -83,6 +83,25 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
     mockAuditService,
     config
   )
+
+  def mockSendNameMatchAccountLockedEvent(
+    event: NameMatchAccountLocked
+  ): Unit =
+    (
+      mockAuditService
+        .sendEvent(
+          _: String,
+          _: NameMatchAccountLocked,
+          _: String
+        )(
+          _: ExecutionContext,
+          _: HeaderCarrier,
+          _: Writes[NameMatchAccountLocked],
+          _: Request[_]
+        )
+      )
+      .expects("NameMatchAccountLocked", event, "name-match-account-locked", *, *, *, *)
+      .returning(())
 
   def mockSendBprNameMatchAttemptEvent(
     attemptsMade: Int,
@@ -280,18 +299,32 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
         "a number can be found and it's equal to the configured maximum" in {
           val nameMatchDetails = sample[TrustNameMatchDetails]
+          val auditEvent       = NameMatchAccountLocked(
+            maxRetries,
+            maxRetries,
+            None,
+            None,
+            Some(nameMatchDetails.name.value),
+            None,
+            None,
+            None,
+            Some(nameMatchDetails.trn.value)
+          )
 
-          mockGetNumberOfUnsccessfulAttempts(ggCredId)(
-            Right(
-              Some(
-                UnsuccessfulNameMatchAttempts(
-                  maxRetries,
-                  maxRetries,
-                  nameMatchDetails
+          inSequence {
+            mockGetNumberOfUnsccessfulAttempts(ggCredId)(
+              Right(
+                Some(
+                  UnsuccessfulNameMatchAttempts(
+                    maxRetries,
+                    maxRetries,
+                    nameMatchDetails
+                  )
                 )
               )
             )
-          )
+            mockSendNameMatchAccountLockedEvent(auditEvent)
+          }
 
           testIsErrorOfType[
             TrustNameMatchDetails,
@@ -302,28 +335,103 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
         }
 
         "a number can be found and it's greater than the configured maximum" in {
-          val nameMatchDetails = sample[IndividualRepresenteeNameMatchDetails]
+          val attemptsMade                               = maxRetries + 1
+          val (nino, sautr, cgtReference)                = (sample[NINO], sample[SAUTR], sample[CgtReference])
+          val representeeCgtRefNameMatchnameMatchDetails =
+            sample[IndividualRepresenteeNameMatchDetails].copy(id = RepresenteeCgtReference(cgtReference))
+          val representeeNinoNameMatchDetails            =
+            sample[IndividualRepresenteeNameMatchDetails].copy(id = RepresenteeNino(nino))
+          val representeeSautrNameMatchDetails           =
+            sample[IndividualRepresenteeNameMatchDetails].copy(id = RepresenteeSautr(sautr))
+          val representeeNoIdNameMatchDetails            =
+            sample[IndividualRepresenteeNameMatchDetails].copy(id = RepresenteeReferenceId.NoReferenceId)
+          val individualSautrNameMatch                   =
+            sample[IndividualSautrNameMatchDetails].copy(sautr = sautr)
 
-          mockGetNumberOfUnsccessfulAttempts(ggCredId)(
-            Right(
-              Some(
-                UnsuccessfulNameMatchAttempts(
-                  maxRetries + 1,
-                  maxRetries,
-                  nameMatchDetails
-                )
-              )
+          val testCases = List[(NameMatchDetails, NameMatchAccountLocked)](
+            representeeCgtRefNameMatchnameMatchDetails -> NameMatchAccountLocked(
+              attemptsMade,
+              maxRetries,
+              Some(representeeCgtRefNameMatchnameMatchDetails.name.firstName),
+              Some(representeeCgtRefNameMatchnameMatchDetails.name.lastName),
+              None,
+              Some(cgtReference.value),
+              None,
+              None,
+              None
+            ),
+            representeeNinoNameMatchDetails            -> NameMatchAccountLocked(
+              attemptsMade,
+              maxRetries,
+              Some(representeeNinoNameMatchDetails.name.firstName),
+              Some(representeeNinoNameMatchDetails.name.lastName),
+              None,
+              None,
+              None,
+              Some(nino.value),
+              None
+            ),
+            representeeSautrNameMatchDetails           -> NameMatchAccountLocked(
+              attemptsMade,
+              maxRetries,
+              Some(representeeSautrNameMatchDetails.name.firstName),
+              Some(representeeSautrNameMatchDetails.name.lastName),
+              None,
+              None,
+              Some(sautr.value),
+              None,
+              None
+            ),
+            representeeNoIdNameMatchDetails            -> NameMatchAccountLocked(
+              attemptsMade,
+              maxRetries,
+              Some(representeeNoIdNameMatchDetails.name.firstName),
+              Some(representeeNoIdNameMatchDetails.name.lastName),
+              None,
+              None,
+              None,
+              None,
+              None
+            ),
+            individualSautrNameMatch                   -> NameMatchAccountLocked(
+              attemptsMade,
+              maxRetries,
+              Some(individualSautrNameMatch.name.firstName),
+              Some(individualSautrNameMatch.name.lastName),
+              None,
+              None,
+              Some(sautr.value),
+              None,
+              None
             )
           )
 
-          testIsErrorOfType[
-            IndividualRepresenteeNameMatchDetails,
-            NameMatchServiceError.TooManyUnsuccessfulAttempts
-          ](
-            service.getNumberOfUnsuccessfulAttempts(ggCredId)
-          )
-        }
+          testCases.foreach { case (nameMatchDetails, auditEvent) =>
+            withClue(s"For name match details $nameMatchDetails: ") {
+              inSequence {
+                mockGetNumberOfUnsccessfulAttempts(ggCredId)(
+                  Right(
+                    Some(
+                      UnsuccessfulNameMatchAttempts(
+                        maxRetries + 1,
+                        maxRetries,
+                        nameMatchDetails
+                      )
+                    )
+                  )
+                )
+                mockSendNameMatchAccountLockedEvent(auditEvent)
+              }
 
+              testIsErrorOfType[
+                IndividualRepresenteeNameMatchDetails,
+                NameMatchServiceError.TooManyUnsuccessfulAttempts
+              ](
+                service.getNumberOfUnsuccessfulAttempts(ggCredId)
+              )
+            }
+          }
+        }
       }
 
     }

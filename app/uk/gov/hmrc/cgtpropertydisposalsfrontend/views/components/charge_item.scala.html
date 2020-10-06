@@ -25,7 +25,9 @@
 
 @this()
 
-@(charge: Charge)(implicit messages: Messages)
+@(charge: Charge, isAmend: Boolean, hasDelta: Boolean)(implicit messages: Messages)
+
+@amendKey = @{if(isAmend && !hasDelta) ".amend" else ""}
 
     @makePaymentDetailsHtml(paymentItemSubKey : String, paymentItemValue: String, amount:BigDecimal, clearingDate: LocalDate) = {
         <li>
@@ -51,7 +53,7 @@
   <tr class="no-border charge">
     <td>
       <strong class="bold">
-        @messages(s"viewReturn.chargeType.${charge.chargeType.toString}")
+        @messages(s"viewReturn$amendKey.chargeType.${charge.chargeType.toString}")
       </strong>
       <br>
       <span class="caption">
@@ -62,15 +64,15 @@
       @{TimeUtils.govShortDisplayFormat(charge.dueDate)}
     </td>
     <td>
-      @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.amount.inPounds())}
+      @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.amount.withFloorZero.inPounds())}
     </td>
     <td>
       <strong class="bold">
-        @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.totalOutstanding().inPounds())}
+        @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.totalOutstanding().withFloorZero.inPounds())}
       </strong>
     </td>
     <td>
-      @if(charge.totalOutstanding().isZero) {
+      @if(charge.totalOutstanding().withFloorZero.isZero) {
         @messages("viewReturn.charge.status.paid")
       } else {
         @Html(messages("viewReturn.charge.status.payNow", routes.ViewReturnController.payCharge(charge.chargeReference)))

@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class DisplayReturn(
-  completeReturn: CompleteReturn,
-  returnType: ReturnType
+final case class NameMatchAccountLocked(
+  attemptsMade: Int,
+  maxAttempts: Int,
+  firstName: Option[String],
+  lastName: Option[String],
+  trustName: Option[String],
+  cgtReference: Option[String],
+  sautr: Option[String],
+  nino: Option[String],
+  trn: Option[String]
 )
 
-object DisplayReturn {
-  implicit val format: OFormat[DisplayReturn] = Json.format[DisplayReturn]
+object NameMatchAccountLocked {
+  implicit val format: OFormat[NameMatchAccountLocked] =
+    Json.format[NameMatchAccountLocked]
 }

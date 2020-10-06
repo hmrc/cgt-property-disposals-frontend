@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, OWrites}
 
-final case class DisplayReturn(
-  completeReturn: CompleteReturn,
-  returnType: ReturnType
-)
+final case class CancelAmendReturn(cgtReference: String, submissionId: String, agentReferenceNumber: Option[String])
 
-object DisplayReturn {
-  implicit val format: OFormat[DisplayReturn] = Json.format[DisplayReturn]
+object CancelAmendReturn {
+
+  implicit val writes: OWrites[CancelAmendReturn] =
+    Json.writes[CancelAmendReturn]
 }

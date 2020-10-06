@@ -3320,80 +3320,12 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.gain.label=Yes, the estate made an 
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.gain.label=Yes, the estate made an overall gain
 
 taxableGain.label=Amount of overall gain
+
 taxableGain.error.required=Enter the amount of overall gain
-taxableGain.multiple.error.required=Enter the amount of overall gain
-taxableGain.agent.error.required=Enter the amount of overall gain
-taxableGain.agent.multiple.error.required=Enter the amount of overall gain
-taxableGain.trust.error.required=Enter the amount of overall gain
-taxableGain.trust.multiple.error.required=Enter the amount of overall gain
-taxableGain.capacitor.error.required=Enter the amount of overall gain
-taxableGain.capacitor.multiple.error.required=Enter the amount of overall gain
-taxableGain.personalRep.error.required=Enter the amount of overall gain
-taxableGain.personalRep.multiple.error.required=Enter the amount of overall gain
-taxableGain.personalRepInPeriodOfAdmin.error.required=Enter the amount of overall gain
-taxableGain.personalRepInPeriodOfAdmin.multiple.error.required=Enter the amount of overall gain
-taxableGain.personalRepInPeriodOfAdmin.agent.error.required=Enter the amount of overall gain
-taxableGain.personalRepInPeriodOfAdmin.agent.multiple.error.required=Enter the amount of overall gain
-
 taxableGain.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.agent.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.agent.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.trust.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.trust.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.capacitor.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.capacitor.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.personalRep.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.personalRep.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.personalRepInPeriodOfAdmin.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.personalRepInPeriodOfAdmin.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.personalRepInPeriodOfAdmin.agent.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-taxableGain.personalRepInPeriodOfAdmin.agent.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
-
 taxableGain.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.agent.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.agent.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.trust.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.trust.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.capacitor.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.capacitor.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRep.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRep.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRepInPeriodOfAdmin.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRepInPeriodOfAdmin.agent.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRepInPeriodOfAdmin.agent.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
-
 taxableGain.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.agent.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.agent.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.trust.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.trust.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.capacitor.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.capacitor.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRep.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRep.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRepInPeriodOfAdmin.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRepInPeriodOfAdmin.agent.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-taxableGain.personalRepInPeriodOfAdmin.agent.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-
 taxableGain.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.agent.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.agent.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.trust.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.trust.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.capacitor.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.capacitor.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.personalRep.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.personalRep.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.personalRepInPeriodOfAdmin.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-taxableGain.personalRepInPeriodOfAdmin.agent.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 taxableGainOrLoss.loss.label=No, I made an overall loss
 taxableGainOrLoss.agent.loss.label=No, my client made an overall loss
@@ -3406,79 +3338,10 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.loss.label=No, the estate mad
 netLoss.label=Amount of overall loss
 
 netLoss.error.required=Enter the amount of overall loss
-netLoss.multiple.error.required=Enter the amount of overall loss
-netLoss.agent.error.required=Enter the amount of overall loss
-netLoss.agent.multiple.error.required=Enter the amount of overall loss
-netLoss.trust.error.required=Enter the amount of overall loss
-netLoss.trust.multiple.error.required=Enter the amount of overall loss
-netLoss.capacitor.error.required=Enter the amount of overall loss
-netLoss.capacitor.multiple.error.required=Enter the amount of overall loss
-netLoss.personalRep.error.required=Enter the amount of overall loss
-netLoss.personalRep.multiple.error.required=Enter the amount of overall loss
-netLoss.personalRepInPeriodOfAdmin.error.required=Enter the amount of overall loss
-netLoss.personalRepInPeriodOfAdmin.multiple.error.required=Enter the amount of overall loss
-netLoss.personalRepInPeriodOfAdmin.agent.error.required=Enter the amount of overall loss
-netLoss.personalRepInPeriodOfAdmin.agent.multiple.error.required=Enter the amount of overall loss
-
 netLoss.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.agent.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.agent.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.trust.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.trust.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.capacitor.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.capacitor.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.personalRep.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.personalRep.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.personalRepInPeriodOfAdmin.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.personalRepInPeriodOfAdmin.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.personalRepInPeriodOfAdmin.agent.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.personalRepInPeriodOfAdmin.agent.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
-
 netLoss.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.agent.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.agent.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.trust.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.trust.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.capacitor.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.capacitor.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRep.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRep.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRepInPeriodOfAdmin.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRepInPeriodOfAdmin.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRepInPeriodOfAdmin.agent.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRepInPeriodOfAdmin.agent.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
-
 netLoss.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.agent.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.agent.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.trust.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.trust.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.capacitor.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.capacitor.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRep.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRep.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRepInPeriodOfAdmin.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRepInPeriodOfAdmin.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRepInPeriodOfAdmin.agent.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-netLoss.personalRepInPeriodOfAdmin.agent.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
-
 netLoss.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.agent.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.agent.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.trust.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.trust.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.capacitor.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.capacitor.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.personalRep.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.personalRep.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.personalRepInPeriodOfAdmin.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.personalRepInPeriodOfAdmin.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
-netLoss.personalRepInPeriodOfAdmin.agent.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
@@ -3774,9 +3637,9 @@ taxDue.helpText.p3=If the trust is for vulnerable beneficiaries, you’ll need t
 taxDue.trustDetails.label=Help for trusts for vulnerable beneficiaries
 taxDue.trustDetails.content=Trusts for vulnerable beneficiaries get special tax treatment. The workings out on this page do not apply to this type of trust. Find out how to <a href="{0}" target="_blank">work out the amount of Capital Gains Tax due (opens in a new window)</a> for this type of trust.
 taxDue.error.required=Enter the amount of Capital Gains Tax due for this return
-taxDue.error.invalid=Amount of Capital Gains Tax due must be a number, for example 493 or 2,040.59
-taxDue.error.tooSmall=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
-taxDue.error.tooLarge=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
+taxDue.error.invalid=Amount of Capital Gains Tax due must be an amount of money, for example 493 or 2,040.59
+taxDue.error.tooSmall=Amount of Capital Gains Tax due must be an amount of money between 0 and 50,000,000,000
+taxDue.error.tooLarge=Amount of Capital Gains Tax due must be an amount of money between 0 and 50,000,000,000
 taxDue.error.tooManyDecimals=Amount of Capital Gains Tax due must have 2 decimal places or less, for example 493 or 2,040.59
 agreeWithCalculation.error.required=Select or enter the amount of Capital Gains Tax due for this return
 agreeWithCalculation.error.invalid=Select or enter the amount of Capital Gains Tax due for this return
@@ -3853,9 +3716,9 @@ nonCalculatedTaxDue.error.tooManyDecimals=The amount of Capital Gains Tax due mu
 nonCalculatedTaxDue.cyaChange=the amount of Capital Gains Tax due for this return
 
 nonCalculatedTaxDue.furtherReturn.checkTaxDue.title=Amount of Capital Gains Tax now due for this return
+nonCalculatedTaxDue.amendReturn.checkTaxDue.title=Updated Capital Gains Tax liability for this return
 
-nonCalculatedTaxDue.furtherReturn.checkTaxDue.h2=Capital Gains Tax liability on UK residential property
-nonCalculatedTaxDue.amendReturn.checkTaxDue.h2=Capital Gains Tax liability on UK property
+nonCalculatedTaxDue.checkTaxDue.h2=Capital Gains Tax liability on UK property-related disposals
 
 nonCalculatedTaxDue.furtherReturn.checkTaxDue.table.label1=Overall liability so far this tax year
 nonCalculatedTaxDue.furtherReturn.checkTaxDue.table.label2=Liability for previous returns
@@ -3865,9 +3728,9 @@ nonCalculatedTaxDue.amendReturn.checkTaxDue.table.label1=Overall liability so fa
 nonCalculatedTaxDue.amendReturn.checkTaxDue.table.label2=Previous liability reported through this service
 nonCalculatedTaxDue.amendReturn.checkTaxDue.table.label3=Updated Capital Gains Tax liability for this return
 
-nonCalculatedTaxDue.furtherReturn.checkTaxDue.p1=Based on the details you entered, we have worked out that you now owe {0} in Capacitor Gains Tax.
-nonCalculatedTaxDue.furtherReturn.checkTaxDue.agent.p1=Based on the details you entered, we have worked out that your client now owes {0} in Capacitor Gains Tax.
-nonCalculatedTaxDue.furtherReturn.checkTaxDue.trust.p1=Based on the details you entered, we have worked out that the trust now owes {0} in Capacitor Gains Tax.
+nonCalculatedTaxDue.furtherReturn.checkTaxDue.p1=Based on the details you entered, we have worked out that you now owe {0} in Capital Gains Tax.
+nonCalculatedTaxDue.furtherReturn.checkTaxDue.agent.p1=Based on the details you entered, we have worked out that your client now owes {0} in Capital Gains Tax.
+nonCalculatedTaxDue.furtherReturn.checkTaxDue.trust.p1=Based on the details you entered, we have worked out that the trust now owes {0} in Capital Gains Tax.
 
 nonCalculatedTaxDue.furtherReturn.checkTaxDue.p2=If you do not agree with this amount you’ll need to ‘go back’ and amend the details in this return.
 
@@ -4197,6 +4060,7 @@ confirmationOfSubmission.estateNameLine=Estate: {0}
 
 viewReturn.title=View return
 viewReturn.heading.taxOwed=Tax owed for return
+viewReturn.amend.heading.taxOwed=Updated liability for this return
 viewReturn.heading.reference=Return reference number
 viewReturn.heading.payment.reference=Payment reference number
 viewReturn.printLink=Print or save this page for your records
@@ -4207,15 +4071,26 @@ viewReturn.charges.amount=Amount
 viewReturn.charges.due=Due
 viewReturn.charges.status=Status
 viewReturn.chargeType.UkResidentReturn=Tax payment
+viewReturn.amend.chargeType.UkResidentReturn=Updated tax liability
 viewReturn.chargeType.NonUkResidentReturn=Tax payment
+viewReturn.amend.chargeType.NonUkResidentReturn=Updated tax liability
+viewReturn.chargeType.DeltaCharge=Updated tax liability
 viewReturn.chargeType.Interest=Interest on late tax payment
+viewReturn.amend.chargeType.Interest=Interest on late tax payment
 viewReturn.chargeType.LateFilingPenalty=Penalty - late return
+viewReturn.amend.chargeType.LateFilingPenalty=Penalty - late return
 viewReturn.chargeType.SixMonthLateFilingPenalty=Penalty - return 6 months late
+viewReturn.amend.chargeType.SixMonthLateFilingPenalty=Penalty - return 6 months late
 viewReturn.chargeType.TwelveMonthLateFilingPenalty=Penalty - return 12 months late
+viewReturn.amend.chargeType.TwelveMonthLateFilingPenalty=Penalty - return 12 months late
 viewReturn.chargeType.LatePaymentPenalty=Penalty - late tax payment
+viewReturn.amend.chargeType.LatePaymentPenalty=Penalty - late tax payment
 viewReturn.chargeType.SixMonthLatePaymentPenalty=Penalty - payment 6 months late
+viewReturn.amend.chargeType.SixMonthLatePaymentPenalty=Penalty - payment 6 months late
 viewReturn.chargeType.TwelveMonthLatePaymentPenalty=Penalty - payment 12 months late
+viewReturn.amend.chargeType.TwelveMonthLatePaymentPenalty=Penalty - payment 12 months late
 viewReturn.chargeType.PenaltyInterest=Interest on penalties paid late
+viewReturn.amend.chargeType.PenaltyInterest=Interest on penalties paid late
 viewReturn.charge.status.paid=Paid
 viewReturn.charge.status.payNow=<a href="{0}">Pay now</a>
 viewReturn.charge.paymentMethod.BACS=Bacs payment received
@@ -4262,13 +4137,17 @@ viewReturn.summaryHeading=Your return
 viewReturn.hasAttachments=Uploaded files and documents
 viewReturn.hasAttachments.p1=One or more documents uploaded
 
-viewReturn.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
-viewReturn.agent.warning=Your client must pay their Capital Gains Tax on UK property by {0}. Your client may be charged interest on late payments.
-viewReturn.trust.warning=The trust must pay their Capital Gains Tax on UK property by {0}. The trust may be charged interest on late payments.
+viewReturn.warning=You may be charged interest on late payments.
+viewReturn.agent.warning=Your client may be charged interest on late payments.
+viewReturn.trust.warning=The trust may be charged interest on late payments.
 
 viewReturn.warning.subtext=It takes 3 to 5 days for payments or charges to show in your account.
 viewReturn.agent.warning.subtext=It takes 3 to 5 days for payments or charges to show in your client’s account.
 viewReturn.trust.warning.subtext=It takes 3 to 5 days for payments or charges to show in the trust’s account.
+
+viewReturn.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your account when you update a return. You can make a payment at any time.
+viewReturn.agent.clearingNotice=It takes 24 hours for the outstanding balance to be updated in your client’s account when you update a return. They can make a payment at any time.
+viewReturn.trust.clearingNotice=It takes 24 hours for the outstanding balance to be updated in the trust’s account when you update a return. You can make a payment at any time.
 
 viewReturn.changeReturn=Change return
 
