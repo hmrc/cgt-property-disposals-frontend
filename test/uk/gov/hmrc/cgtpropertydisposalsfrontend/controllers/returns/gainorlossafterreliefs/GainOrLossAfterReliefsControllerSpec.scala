@@ -36,17 +36,18 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOut
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Trust
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CalculatedGlarBreakdownGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -57,11 +58,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CalculatedGlarBreakdown, DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, IndividualUserType, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibilityUtil, ReturnsService}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -90,6 +92,8 @@ class GainOrLossAfterReliefsControllerSpec
   lazy val controller = instanceOf[GainOrLossAfterReliefsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+
+  implicit val hc: HeaderCarrier = mock[HeaderCarrier]
 
   override val overrideBindings = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
@@ -530,7 +534,8 @@ class GainOrLossAfterReliefsControllerSpec
             expectedTitleKey: String,
             expectedBackLink: Call,
             expectedOuterLabelUserKey: String,
-            expectedH2Key: String
+            expectedH2Key: String,
+            expectSessionStorage: Option[SessionData] = None
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -538,19 +543,13 @@ class GainOrLossAfterReliefsControllerSpec
               mockEligibilityCheck(sessionData._2)(
                 Right(
                   Eligible(
-                    CalculatedGlarBreakdown(
-                      AmountInPence(0),
-                      AmountInPence(0),
-                      AmountInPence(0),
-                      AmountInPence(0),
-                      AmountInPence(0),
-                      AmountInPence(0),
-                      AmountInPence(0),
-                      Right(AssetType.Residential)
-                    )
+                    sample[CalculatedGlarBreakdown]
                   )
                 )
               )
+              expectSessionStorage.map { s =>
+                mockStoreSession(s)(Right(()))
+              }
             }
             checkPageIsDisplayed(
               performAction(),
@@ -637,7 +636,8 @@ class GainOrLossAfterReliefsControllerSpec
           "the user is on a single disposal journey and" when {
             def validCalculatorState(
               userType: UserType,
-              individualUserType: IndividualUserType
+              individualUserType: IndividualUserType,
+              previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(true)
             ): (SessionData, FillingOutReturn, DraftReturn) = {
               val draftReturn = sample[DraftSingleDisposalReturn]
                 .copy(
@@ -655,7 +655,8 @@ class GainOrLossAfterReliefsControllerSpec
                 subscribedDetails = sample[SubscribedDetails]
                   .copy(name = if (userType === Trust) Left(sample[TrustName]) else Right(sample[IndividualName])),
                 previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
-                previousReturnsImplyEligibilityForFurtherReturnCalculation = Some(true)
+                previousReturnsImplyEligibilityForFurtherReturnCalculation =
+                  previousReturnsImplyEligibilityForFurtherReturnCalculation
               )
 
               (
@@ -679,7 +680,24 @@ class GainOrLossAfterReliefsControllerSpec
             }
 
             "there is no value for previousReturnsImplyEligibilityForFurtherReturnCalculation in session" in {
-              //TODO: write test
+              val state                 = validCalculatorState(Individual, Self, None)
+              val expectedJourneyStatus = state._1.journeyStatus match {
+                case Some(value) =>
+                  value match {
+                    case f: FillingOutReturn =>
+                      f.copy(previousReturnsImplyEligibilityForFurtherReturnCalculation = Some(true))
+                    case _                   => fail()
+                  }
+                case None        => fail()
+              }
+              test(
+                state,
+                "gainOrLossAfterReliefs.title",
+                routes.GainOrLossAfterReliefsController.checkYourAnswers(),
+                "",
+                "gainOrLossAfterReliefs.h2",
+                Some(state._1.copy(journeyStatus = Some(expectedJourneyStatus)))
+              )
             }
           }
 
@@ -690,11 +708,36 @@ class GainOrLossAfterReliefsControllerSpec
       "show an error page" when {
 
         "there is an error determining eligibility for calculation" in {
-          //TODO: write test
+          val fillingOutReturn =
+            sample[FillingOutReturn].copy(previousReturnsImplyEligibilityForFurtherReturnCalculation = Some(true))
+          val sessionData      =
+            (SessionData.empty.copy(Some(fillingOutReturn)), fillingOutReturn, sample[DraftSingleDisposalReturn])
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData._1)
+            mockEligibilityCheck(sessionData._2)(Left(Error("Error on eligibility check")))
+          }
+          checkIsTechnicalErrorPage(performAction())
         }
 
         "updating the session is not successful" in {
-          //TODO: write test
+          val fillingOutReturn =
+            sample[FillingOutReturn].copy(previousReturnsImplyEligibilityForFurtherReturnCalculation = None)
+          val sessionData      =
+            (SessionData.empty.copy(Some(fillingOutReturn)), fillingOutReturn, sample[DraftSingleDisposalReturn])
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData._1)
+            mockEligibilityCheck(sessionData._2)(Right(Eligible(sample[CalculatedGlarBreakdown])))
+            mockStoreSession(
+              sessionData._1.copy(journeyStatus =
+                Some(fillingOutReturn.copy(previousReturnsImplyEligibilityForFurtherReturnCalculation = Some(true)))
+              )
+            )(
+              Left(Error("Error updating session"))
+            )
+          }
+          checkIsTechnicalErrorPage(performAction())
         }
 
       }

@@ -34,14 +34,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusG
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnEligibility.{Eligible, Ineligible}
@@ -75,29 +75,42 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
     userType: UserType = Individual,
     assetType: AssetType = Residential,
     previousSentReturns: Option[PreviousReturnData] = None,
-    otherReliefs: Option[OtherReliefs] = None
+    otherReliefs: Option[OtherReliefs] = None,
+    withCompleteAcquisitionDetails: Boolean = true,
+    withCompleteReliefDetails: Boolean = true,
+    withCompleteTriageDetails: Boolean = true,
+    withCompleteDisposalDetails: Boolean = true
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn]
       .copy(
-        triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-          .copy(individualUserType = individualUserType, assetType = assetType),
+        triageAnswers = if (withCompleteTriageDetails) {
+          sample[CompleteSingleDisposalTriageAnswers]
+            .copy(individualUserType = individualUserType, assetType = assetType)
+        } else sample[IncompleteSingleDisposalTriageAnswers],
         disposalDetailsAnswers = Some(
-          sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence(0), disposalFees = AmountInPence(0))
+          if (withCompleteDisposalDetails) {
+            sample[CompleteDisposalDetailsAnswers]
+              .copy(disposalPrice = AmountInPence(0), disposalFees = AmountInPence(0))
+          } else sample[IncompleteDisposalDetailsAnswers]
         ),
         gainOrLossAfterReliefs = gainOrLossAfterReliefs,
         acquisitionDetailsAnswers = Some(
-          sample[CompleteAcquisitionDetailsAnswers].copy(
-            acquisitionFees = AmountInPence(0),
-            acquisitionPrice = AmountInPence(0),
-            improvementCosts = AmountInPence(0)
-          )
+          if (withCompleteAcquisitionDetails) {
+            sample[CompleteAcquisitionDetailsAnswers].copy(
+              acquisitionFees = AmountInPence(0),
+              acquisitionPrice = AmountInPence(0),
+              improvementCosts = AmountInPence(0)
+            )
+          } else sample[IncompleteAcquisitionDetailsAnswers]
         ),
         reliefDetailsAnswers = Some(
-          sample[CompleteReliefDetailsAnswers].copy(
-            otherReliefs = otherReliefs,
-            privateResidentsRelief = AmountInPence(0),
-            lettingsRelief = AmountInPence(0)
-          )
+          if (withCompleteReliefDetails) {
+            sample[CompleteReliefDetailsAnswers].copy(
+              otherReliefs = otherReliefs,
+              privateResidentsRelief = AmountInPence(0),
+              lettingsRelief = AmountInPence(0)
+            )
+          } else sample[IncompleteReliefDetailsAnswers]
         )
       )
     val journey     = sample[FillingOutReturn].copy(
@@ -134,7 +147,7 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
     "handling requests to check eligibility for further return calculations" must {
 
       def test(
-        session: (SessionData, FillingOutReturn, DraftSingleDisposalReturn),
+        session: (SessionData, FillingOutReturn, DraftReturn),
         expected: FurtherReturnEligibility
       )(service: FurtherReturnEligibilityUtil) =
         await(service.isEligibleForFurtherReturnOrAmendCalculation(session._2).value) shouldBe Right(expected)
@@ -144,27 +157,50 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
         "the current return is eligible but the calculation has been disabled in config" in new TestEnvironment(
           calculationEnabled = false
         ) {
-          //TODO: write test
+          val returns = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          val session =
+            eligibleSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
+          test(session, Ineligible(None))(service)
         }
 
-        "the return isn't a non-indirect non-mixed-use single disposal return" in new TestEnvironment() {
-          //TODO: write test
+        "the return is multiple disposal return" in new TestEnvironment() {
+          val session             = eligibleSession()
+          val multipleDraftReturn = (session._1, session._2, sample[DraftMultipleDisposalsReturn])
+          test(multipleDraftReturn, Ineligible(None))(service)
+        }
+
+        "the return is single mixed use disposal return" in new TestEnvironment() {
+          val session              = eligibleSession()
+          val singleMixedUseReturn = (session._1, session._2, sample[DraftSingleMixedUseDisposalReturn])
+          test(singleMixedUseReturn, Ineligible(None))(service)
+        }
+
+        "the return is mixed use single indirect return" in new TestEnvironment() {
+          val session              = eligibleSession()
+          val singleIndirectReturn = (session._1, session._2, sample[DraftSingleIndirectDisposalReturn])
+          test(singleIndirectReturn, Ineligible(None))(service)
+        }
+
+        "the return is mixed use multiple indirect return" in new TestEnvironment() {
+          val session                = eligibleSession()
+          val multipleIndirectReturn = (session._1, session._2, sample[DraftMultipleIndirectDisposalsReturn])
+          test(multipleIndirectReturn, Ineligible(None))(service)
         }
 
         "the triage section isn't complete" in new TestEnvironment() {
-          //TODO: write test
+          test(eligibleSession(withCompleteTriageDetails = false), Ineligible(None))(service)
         }
 
         "the disposal details section is not complete" in new TestEnvironment() {
-          //TODO: write test
+          test(eligibleSession(withCompleteDisposalDetails = false), Ineligible(None))(service)
         }
 
         "the acquisition details section is not complete" in new TestEnvironment() {
-          //TODO: write test
+          test(eligibleSession(withCompleteAcquisitionDetails = false), Ineligible(None))(service)
         }
 
         "the relief details section is not complete" in new TestEnvironment() {
-          //TODO: write test
+          test(eligibleSession(withCompleteReliefDetails = false), Ineligible(None))(service)
         }
 
         "Current return has other reliefs" in new TestEnvironment() {
@@ -194,7 +230,9 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
         }
 
         "there is no IndividualUserType in the current return" in new TestEnvironment() {
-          //TODO: test
+          test(eligibleSession(individualUserType = None), Ineligible(None))(
+            service
+          )
         }
 
         "there is a previous return with an ineligible asset type" in new TestEnvironment() {
@@ -228,19 +266,8 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
 
       "return an eligible response" when {
 
-        def genDisplayReturn(assetType: AssetType = Residential, otherReliefs: Option[OtherReliefs] = None) = {
-          val completeReturn = sample[CompleteSingleDisposalReturn]
-          DisplayReturn(
-            completeReturn.copy(
-              triageAnswers = completeReturn.triageAnswers.copy(assetType = assetType),
-              reliefDetails = completeReturn.reliefDetails.copy(otherReliefs = otherReliefs)
-            ),
-            false
-          )
-        }
-
         "under limit and displays OK" in new TestEnvironment() {
-          val returns = List.fill(9)(sample[ReturnSummary])
+          val returns = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
           val session =
             eligibleSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
           inSequence {
@@ -268,4 +295,5 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
       }
     }
   }
+
 }

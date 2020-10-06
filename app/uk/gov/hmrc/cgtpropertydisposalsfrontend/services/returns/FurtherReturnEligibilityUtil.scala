@@ -74,46 +74,49 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
   )(implicit
     headerCarrier: HeaderCarrier
   ): EitherT[Future, Error, FurtherReturnEligibility] =
-    eligibleGlarCalculation(fillingOutReturn) match {
-      case None =>
-        EitherT.pure(Ineligible(fillingOutReturn.previousReturnsImplyEligibilityForFurtherReturnCalculation))
+    if (!amendAndFurtherReturnCalculationsEnabled) {
+      EitherT.pure(Ineligible(None))
+    } else
+      eligibleGlarCalculation(fillingOutReturn) match {
+        case None =>
+          EitherT.pure(Ineligible(fillingOutReturn.previousReturnsImplyEligibilityForFurtherReturnCalculation))
 
-      case Some(glarBreakdown) =>
-        fillingOutReturn.previousReturnsImplyEligibilityForFurtherReturnCalculation match {
-          case Some(true) =>
-            EitherT.pure(Eligible(glarBreakdown))
+        case Some(glarBreakdown) =>
+          fillingOutReturn.previousReturnsImplyEligibilityForFurtherReturnCalculation match {
+            case Some(true) =>
+              EitherT.pure(Eligible(glarBreakdown))
 
-          case Some(false) =>
-            EitherT.pure(Ineligible(Some(false)))
+            case Some(false) =>
+              EitherT.pure(Ineligible(Some(false)))
 
-          case None =>
-            val submissionIdsOfPreviousReturns = fillingOutReturn.previousSentReturns
-              .map(e => e.summaries)
-              .getOrElse(List.empty)
-              .map(e => e.submissionId)
+            case None =>
+              val submissionIdsOfPreviousReturns = fillingOutReturn.previousSentReturns
+                .map(e => e.summaries)
+                .getOrElse(List.empty)
+                .map(e => e.submissionId)
 
-            val results: List[EitherT[Future, Error, Boolean]] = submissionIdsOfPreviousReturns.map {
-              returnsService
-                .displayReturn(fillingOutReturn.subscribedDetails.cgtReference, _)
-                .map(_.completeReturn match {
-                  case c: CompleteSingleDisposalReturn =>
-                    val assetTypeCheck   = c.triageAnswers.assetType === glarBreakdown.assetType.merge
-                    val otherReliefCheck = c.reliefDetails.otherReliefs.isEmpty
-                    assetTypeCheck && otherReliefCheck
-                  case _                               => false
-                })
-            }
+              val results: List[EitherT[Future, Error, Boolean]] = submissionIdsOfPreviousReturns.map {
+                returnsService
+                  .displayReturn(fillingOutReturn.subscribedDetails.cgtReference, _)
+                  .map(_.completeReturn match {
+                    case c: CompleteSingleDisposalReturn =>
+                      val assetTypeCheck   = c.triageAnswers.assetType === glarBreakdown.assetType.merge
+                      val otherReliefCheck = c.reliefDetails.otherReliefs.isEmpty
+                      assetTypeCheck && otherReliefCheck
+                    case _                               => false
+                  })
+              }
 
-            results.sequence[EitherT[Future, Error, *], Boolean].map { e =>
-              if (e.forall(identity))
-                Eligible(glarBreakdown)
-              else
-                Ineligible(Some(false))
-            }
+              results.sequence[EitherT[Future, Error, *], Boolean].map { e =>
+                if (e.forall(identity))
+                  Eligible(glarBreakdown)
+                else
+                  Ineligible(Some(false))
+              }
 
-        }
+          }
 
-    }
+      }
 
   private def eligibleGlarCalculation(
     fillingOutReturn: FillingOutReturn
