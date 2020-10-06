@@ -75,15 +75,19 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
     headerCarrier: HeaderCarrier
   ): EitherT[Future, Error, FurtherReturnEligibility] =
     if (!amendAndFurtherReturnCalculationsEnabled)
-      EitherT.pure(Ineligible(None))
+      EitherT.pure(
+        Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
+      )
     else
       eligibleGlarCalculation(fillingOutReturn) match {
-        case None =>
+        case Left(e) => EitherT.leftT(e)
+
+        case Right(None) =>
           EitherT.pure(
             Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
           )
 
-        case Some(glarBreakdown) =>
+        case Right(Some(glarBreakdown)) =>
           glarBreakdown.previousReturnData.previousReturnsImplyEligibilityForCalculation match {
             case Some(true) =>
               EitherT.pure(Eligible(glarBreakdown))
@@ -94,17 +98,18 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
             case None =>
               val submissionIdsOfPreviousReturns = glarBreakdown.previousReturnData.summaries.map(_.submissionId)
 
-              val results: List[EitherT[Future, Error, Boolean]] = submissionIdsOfPreviousReturns.map {
-                returnsService
-                  .displayReturn(fillingOutReturn.subscribedDetails.cgtReference, _)
-                  .map(_.completeReturn match {
-                    case c: CompleteSingleDisposalReturn =>
-                      val assetTypeCheck   = c.triageAnswers.assetType === glarBreakdown.assetType.merge
-                      val otherReliefCheck = c.reliefDetails.otherReliefs.isEmpty
-                      assetTypeCheck && otherReliefCheck
-                    case _                               => false
-                  })
-              }
+              val results: List[EitherT[Future, Error, Boolean]] =
+                submissionIdsOfPreviousReturns.map {
+                  returnsService
+                    .displayReturn(fillingOutReturn.subscribedDetails.cgtReference, _)
+                    .map(_.completeReturn match {
+                      case c: CompleteSingleDisposalReturn =>
+                        val assetTypeCheck   = c.triageAnswers.assetType === glarBreakdown.assetType.merge
+                        val otherReliefCheck = c.reliefDetails.otherReliefs.isEmpty
+                        assetTypeCheck && otherReliefCheck
+                      case _                               => false
+                    })
+                }
 
               results.sequence[EitherT[Future, Error, *], Boolean].map { e =>
                 if (e.forall(identity))
@@ -119,60 +124,69 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
 
   private def eligibleGlarCalculation(
     fillingOutReturn: FillingOutReturn
-  ): Option[CalculatedGlarBreakdown] =
-    (fillingOutReturn.draftReturn, fillingOutReturn.previousSentReturns) match {
-      case (
-            DraftSingleDisposalReturn(
-              _,
-              triageAnswers: CompleteSingleDisposalTriageAnswers,
-              _,
-              Some(disposalDetailsAnswers: CompleteDisposalDetailsAnswers),
-              Some(acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers),
-              Some(reliefDetailsAnswers: CompleteReliefDetailsAnswers),
-              _,
-              _,
-              _,
-              _,
-              _,
-              _,
-              _
-            ),
-            Some(previousReturnData)
+  ): Either[Error, Option[CalculatedGlarBreakdown]] =
+    fillingOutReturn.draftReturn match {
+      case DraftSingleDisposalReturn(
+            _,
+            triageAnswers: CompleteSingleDisposalTriageAnswers,
+            _,
+            Some(disposalDetailsAnswers: CompleteDisposalDetailsAnswers),
+            Some(acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers),
+            Some(reliefDetailsAnswers: CompleteReliefDetailsAnswers),
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _
           ) =>
-        val eligibleAssetType =
-          triageAnswers.assetType match {
-            case NonResidential => Some(Left(NonResidential))
-            case Residential    => Some(Right(Residential))
-            case _              => None
+        if (!triageAnswers.individualUserType.contains(Self))
+          Right(None)
+        else
+          fillingOutReturn.previousSentReturns match {
+            case None =>
+              Left(Error("Could not find previous return data for individual further or amend return"))
+
+            case Some(previousReturnData) =>
+              val eligibleAssetType =
+                triageAnswers.assetType match {
+                  case NonResidential => Some(Left(NonResidential))
+                  case Residential    => Some(Right(Residential))
+                  case _              => None
+                }
+
+              val result = eligibleAssetType match {
+                case None            => None
+                case Some(assetType) =>
+                  val noOtherReliefs           = reliefDetailsAnswers.otherReliefs.isEmpty
+                  val underPreviousReturnLimit = previousReturnData.summaries.length <= maxPreviousReturns
+                  val currentReturnIsEligible  = noOtherReliefs && underPreviousReturnLimit
+
+                  if (currentReturnIsEligible)
+                    Some(
+                      CalculatedGlarBreakdown(
+                        disposalFees = disposalDetailsAnswers.disposalFees,
+                        disposalPrice = disposalDetailsAnswers.disposalPrice,
+                        acquisitionPrice = acquisitionDetailsAnswers.acquisitionPrice,
+                        acquisitionCosts = acquisitionDetailsAnswers.acquisitionFees,
+                        improvementCosts = acquisitionDetailsAnswers.improvementCosts,
+                        privateResidentReliefs = reliefDetailsAnswers.privateResidentsRelief,
+                        lettingRelief = reliefDetailsAnswers.lettingsRelief,
+                        assetType = assetType,
+                        previousReturnData = previousReturnData
+                      )
+                    )
+                  else None
+              }
+
+              Right(result)
           }
 
-        eligibleAssetType match {
-          case None            => None
-          case Some(assetType) =>
-            val noOtherReliefs           = reliefDetailsAnswers.otherReliefs.isEmpty
-            val underPreviousReturnLimit = previousReturnData.summaries.length <= maxPreviousReturns
-            val isSelf                   = triageAnswers.individualUserType.contains(Self)
-            val currentReturnIsEligible  = noOtherReliefs && underPreviousReturnLimit && isSelf
+      case _: DraftSingleDisposalReturn =>
+        Left(Error("Insufficient data in DraftSingleDisposalReturn to determine eligibility for calculation"))
 
-            if (currentReturnIsEligible)
-              Some(
-                CalculatedGlarBreakdown(
-                  disposalFees = disposalDetailsAnswers.disposalFees,
-                  disposalPrice = disposalDetailsAnswers.disposalPrice,
-                  acquisitionPrice = acquisitionDetailsAnswers.acquisitionPrice,
-                  acquisitionCosts = acquisitionDetailsAnswers.acquisitionFees,
-                  improvementCosts = acquisitionDetailsAnswers.improvementCosts,
-                  privateResidentReliefs = reliefDetailsAnswers.privateResidentsRelief,
-                  lettingRelief = reliefDetailsAnswers.lettingsRelief,
-                  assetType = assetType,
-                  previousReturnData = previousReturnData
-                )
-              )
-            else None
-
-        }
-
-      case _ => None
+      case _ => Right(None)
     }
 
 }

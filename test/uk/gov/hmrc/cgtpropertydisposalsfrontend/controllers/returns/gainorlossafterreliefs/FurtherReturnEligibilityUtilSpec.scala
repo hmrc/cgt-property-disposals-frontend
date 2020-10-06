@@ -22,8 +22,8 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
@@ -43,7 +43,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibility, FurtherReturnEligibilityUtil, FurtherReturnEligibilityUtilImpl}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -69,18 +68,19 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
     val service = new FurtherReturnEligibilityUtilImpl(mockReturnsService, config)
   }
 
-  def eligibleSession(
+  def eligibleFillingOutReturn(
     gainOrLossAfterReliefs: Option[AmountInPence] = None,
     individualUserType: Option[IndividualUserType] = Some(Self),
-    userType: UserType = Individual,
     assetType: AssetType = Residential,
-    previousSentReturns: Option[PreviousReturnData] = None,
+    previousSentReturns: Option[PreviousReturnData] = Some(
+      sample[PreviousReturnData].copy(previousReturnsImplyEligibilityForCalculation = None)
+    ),
     otherReliefs: Option[OtherReliefs] = None,
     withCompleteAcquisitionDetails: Boolean = true,
     withCompleteReliefDetails: Boolean = true,
     withCompleteTriageDetails: Boolean = true,
     withCompleteDisposalDetails: Boolean = true
-  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+  ): FillingOutReturn = {
     val draftReturn = sample[DraftSingleDisposalReturn]
       .copy(
         triageAnswers = if (withCompleteTriageDetails) {
@@ -113,19 +113,12 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
           } else sample[IncompleteReliefDetailsAnswers]
         )
       )
-    val journey     = sample[FillingOutReturn].copy(
+
+    sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       previousSentReturns = previousSentReturns
     )
 
-    (
-      SessionData.empty.copy(
-        journeyStatus = Some(journey),
-        userType = Some(userType)
-      ),
-      journey,
-      draftReturn
-    )
   }
 
   def genDisplayReturn(assetType: AssetType = Residential, otherReliefs: Option[OtherReliefs] = None) = {
@@ -146,64 +139,82 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
     "handling requests to check eligibility for further return calculations" must {
 
       def test(
-        session: (SessionData, FillingOutReturn, DraftReturn),
+        fillingOutReturn: FillingOutReturn,
         expected: FurtherReturnEligibility
       )(service: FurtherReturnEligibilityUtil) =
-        await(service.isEligibleForFurtherReturnOrAmendCalculation(session._2).value) shouldBe Right(expected)
+        await(service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn).value) shouldBe Right(expected)
 
       "return an ineligible response" when {
 
         "the current return is eligible but the calculation has been disabled in config" in new TestEnvironment(
           calculationEnabled = false
         ) {
-          val returns = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
-          val session =
-            eligibleSession(previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = returns)))
-          test(session, Ineligible(None))(service)
+          val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          val previousReturnData = sample[PreviousReturnData].copy(summaries = returns)
+          val fillingOutReturn   =
+            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
+          test(fillingOutReturn, Ineligible(previousReturnData.previousReturnsImplyEligibilityForCalculation))(service)
         }
 
         "the return is multiple disposal return" in new TestEnvironment() {
-          val session             = eligibleSession()
-          val multipleDraftReturn = (session._1, session._2, sample[DraftMultipleDisposalsReturn])
-          test(multipleDraftReturn, Ineligible(None))(service)
+          val previousReturnData = sample[PreviousReturnData]
+
+          test(
+            sample[FillingOutReturn]
+              .copy(draftReturn = sample[DraftMultipleDisposalsReturn], previousSentReturns = Some(previousReturnData)),
+            Ineligible(previousReturnData.previousReturnsImplyEligibilityForCalculation)
+          )(
+            service
+          )
         }
 
         "the return is single mixed use disposal return" in new TestEnvironment() {
-          val session              = eligibleSession()
-          val singleMixedUseReturn = (session._1, session._2, sample[DraftSingleMixedUseDisposalReturn])
-          test(singleMixedUseReturn, Ineligible(None))(service)
+          val previousReturnData = sample[PreviousReturnData]
+
+          test(
+            sample[FillingOutReturn]
+              .copy(
+                draftReturn = sample[DraftSingleMixedUseDisposalReturn],
+                previousSentReturns = Some(previousReturnData)
+              ),
+            Ineligible(previousReturnData.previousReturnsImplyEligibilityForCalculation)
+          )(
+            service
+          )
         }
 
         "the return is mixed use single indirect return" in new TestEnvironment() {
-          val session              = eligibleSession()
-          val singleIndirectReturn = (session._1, session._2, sample[DraftSingleIndirectDisposalReturn])
-          test(singleIndirectReturn, Ineligible(None))(service)
+          val previousReturnData = sample[PreviousReturnData]
+
+          test(
+            sample[FillingOutReturn]
+              .copy(
+                draftReturn = sample[DraftSingleIndirectDisposalReturn],
+                previousSentReturns = Some(previousReturnData)
+              ),
+            Ineligible(previousReturnData.previousReturnsImplyEligibilityForCalculation)
+          )(
+            service
+          )
         }
 
         "the return is mixed use multiple indirect return" in new TestEnvironment() {
-          val session                = eligibleSession()
-          val multipleIndirectReturn = (session._1, session._2, sample[DraftMultipleIndirectDisposalsReturn])
-          test(multipleIndirectReturn, Ineligible(None))(service)
-        }
+          val previousReturnData = sample[PreviousReturnData]
 
-        "the triage section isn't complete" in new TestEnvironment() {
-          test(eligibleSession(withCompleteTriageDetails = false), Ineligible(None))(service)
-        }
-
-        "the disposal details section is not complete" in new TestEnvironment() {
-          test(eligibleSession(withCompleteDisposalDetails = false), Ineligible(None))(service)
-        }
-
-        "the acquisition details section is not complete" in new TestEnvironment() {
-          test(eligibleSession(withCompleteAcquisitionDetails = false), Ineligible(None))(service)
-        }
-
-        "the relief details section is not complete" in new TestEnvironment() {
-          test(eligibleSession(withCompleteReliefDetails = false), Ineligible(None))(service)
+          test(
+            sample[FillingOutReturn]
+              .copy(
+                draftReturn = sample[DraftMultipleIndirectDisposalsReturn],
+                previousSentReturns = Some(previousReturnData)
+              ),
+            Ineligible(previousReturnData.previousReturnsImplyEligibilityForCalculation)
+          )(
+            service
+          )
         }
 
         "Current return has other reliefs" in new TestEnvironment() {
-          test(eligibleSession(otherReliefs = Some(sample[OtherReliefs])), Ineligible(None))(service)
+          test(eligibleFillingOutReturn(otherReliefs = Some(sample[OtherReliefs])), Ineligible(None))(service)
         }
 
         "there are more than the configured maximum of previous returns" in new TestEnvironment() {
@@ -211,29 +222,32 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
             summaries = List.fill(maxPreviousReturns + 1)(sample[ReturnSummary]),
             previousReturnsImplyEligibilityForCalculation = None
           )
-          val tooManyPreviousReturns = eligibleSession(previousSentReturns = Some(previousReturnData))
+          val tooManyPreviousReturns = eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
           test(tooManyPreviousReturns, Ineligible(previousReturnData.previousReturnsImplyEligibilityForCalculation))(
             service
           )
         }
 
         "the current return's user type is Capacitor" in new TestEnvironment() {
-          test(eligibleSession(individualUserType = Some(Capacitor)), Ineligible(None))(service)
+          test(eligibleFillingOutReturn(individualUserType = Some(Capacitor)), Ineligible(None))(service)
         }
 
         "the current return's user type is PersonalRepresentative" in new TestEnvironment() {
 
-          test(eligibleSession(individualUserType = Some(PersonalRepresentative)), Ineligible(None))(service)
+          test(eligibleFillingOutReturn(individualUserType = Some(PersonalRepresentative)), Ineligible(None))(service)
         }
 
         "the current return's user type is PersonalRepresentativeInPeriodOfAdmin" in new TestEnvironment() {
-          test(eligibleSession(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)), Ineligible(None))(
+          test(
+            eligibleFillingOutReturn(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+            Ineligible(None)
+          )(
             service
           )
         }
 
         "there is no IndividualUserType in the current return" in new TestEnvironment() {
-          test(eligibleSession(individualUserType = None), Ineligible(None))(
+          test(eligibleFillingOutReturn(individualUserType = None), Ineligible(None))(
             service
           )
         }
@@ -242,32 +256,32 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
           val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
           val previousReturnData =
             sample[PreviousReturnData].copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None)
-          val session            =
-            eligibleSession(previousSentReturns = Some(previousReturnData))
+          val fillingOutReturn   =
+            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
           inSequence {
             returns.foreach { r =>
-              mockDisplayReturn(session._2.subscribedDetails.cgtReference, r.submissionId)(
+              mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, r.submissionId)(
                 Right(genDisplayReturn(assetType = IndirectDisposal))
               )
             }
           }
-          test(session, Ineligible(Some(false)))(service)
+          test(fillingOutReturn, Ineligible(Some(false)))(service)
         }
 
         "there is previous returns which contains other reliefs" in new TestEnvironment() {
           val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
           val previousReturnData =
             sample[PreviousReturnData].copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None)
-          val session            =
-            eligibleSession(previousSentReturns = Some(previousReturnData))
+          val fillingOutReturn   =
+            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
           inSequence {
             returns.map { r =>
-              mockDisplayReturn(session._2.subscribedDetails.cgtReference, r.submissionId)(
+              mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, r.submissionId)(
                 Right(genDisplayReturn(otherReliefs = Some(sample[OtherReliefs])))
               )
             }
           }
-          test(session, Ineligible(Some(false)))(service)
+          test(fillingOutReturn, Ineligible(Some(false)))(service)
         }
       }
 
@@ -277,15 +291,17 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
           val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
           val previousReturnData =
             sample[PreviousReturnData].copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None)
-          val session            =
-            eligibleSession(previousSentReturns = Some(previousReturnData))
+          val fillingOutReturn   =
+            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
           inSequence {
             returns.foreach { r =>
-              mockDisplayReturn(session._2.subscribedDetails.cgtReference, r.submissionId)(Right(genDisplayReturn()))
+              mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, r.submissionId)(
+                Right(genDisplayReturn())
+              )
             }
           }
           test(
-            session,
+            fillingOutReturn,
             Eligible(
               CalculatedGlarBreakdown(
                 AmountInPence(0),
@@ -303,6 +319,76 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
         }
 
       }
+
+      "return an error" when {
+
+        "the triage section isn't complete in a DraftSingleDisposalReturn" in new TestEnvironment() {
+          val result = service.isEligibleForFurtherReturnOrAmendCalculation(
+            eligibleFillingOutReturn(
+              withCompleteTriageDetails = false,
+              previousSentReturns = Some(sample[PreviousReturnData])
+            )
+          )
+          await(result.value) shouldBe a[Left[_, _]]
+        }
+
+        "the disposal details section is not complete in a DraftSingleDisposalReturn" in new TestEnvironment() {
+          val result = service.isEligibleForFurtherReturnOrAmendCalculation(
+            eligibleFillingOutReturn(
+              withCompleteTriageDetails = false,
+              previousSentReturns = Some(sample[PreviousReturnData])
+            )
+          )
+          await(result.value) shouldBe a[Left[_, _]]
+        }
+
+        "the acquisition details section is not complete in a DraftSingleDisposalReturn" in new TestEnvironment() {
+          val result = service.isEligibleForFurtherReturnOrAmendCalculation(
+            eligibleFillingOutReturn(
+              withCompleteAcquisitionDetails = false,
+              previousSentReturns = Some(sample[PreviousReturnData])
+            )
+          )
+          await(result.value) shouldBe a[Left[_, _]]
+        }
+
+        "the relief details section is not complete in a DraftSingleDisposalReturn" in new TestEnvironment() {
+          val result = service.isEligibleForFurtherReturnOrAmendCalculation(
+            eligibleFillingOutReturn(
+              withCompleteReliefDetails = false,
+              previousSentReturns = Some(sample[PreviousReturnData])
+            )
+          )
+          await(result.value) shouldBe a[Left[_, _]]
+        }
+
+        "there is no previous return data for an individual" in new TestEnvironment() {
+          val fillingOutReturn = eligibleFillingOutReturn(previousSentReturns = None)
+          val result           = service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
+          await(result.value) shouldBe a[Left[_, _]]
+        }
+
+        "there is an error getting details of a previously sent return" in new TestEnvironment() {
+          val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          val previousReturnData =
+            sample[PreviousReturnData].copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None)
+          val fillingOutReturn   =
+            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
+
+          inSequence {
+            returns.foreach { r =>
+              mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, r.submissionId)(
+                Left(Error(""))
+              )
+            }
+          }
+
+          val result = service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
+          await(result.value) shouldBe a[Left[_, _]]
+        }
+
+      }
+
     }
   }
 
