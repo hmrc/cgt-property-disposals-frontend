@@ -1494,8 +1494,8 @@ multipleIndirectDisposalsDisposalPrice.helpText=This is the amount the shares we
 multipleIndirectDisposalsDisposalPrice.error.required=Enter the disposal value of the shares
 multipleIndirectDisposalsDisposalPrice.error.invalid=The disposal value of the shares must be an amount of money, like 160,000 or 23,040.50
 multipleIndirectDisposalsDisposalPrice.error.tooManyDecimals=The disposal value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-multipleIndirectDisposalsDisposalPrice.error.tooLarge=The disposal value of the shares must be an amount of money between 1 and 50,000,000,000
-multipleIndirectDisposalsDisposalPrice.error.tooSmall=The disposal value of the shares must be an amount of money between 1 and 50,000,000,000
+multipleIndirectDisposalsDisposalPrice.error.tooLarge=The disposal value of the shares must be an amount of money between 0 and 50,000,000,000
+multipleIndirectDisposalsDisposalPrice.error.tooSmall=The disposal value of the shares must be an amount of money between 0 and 50,000,000,000
 
 multipleIndirectDisposalsAcquisitionPrice.title=What was the acquisition value of the shares?
 multipleIndirectDisposalsAcquisitionPrice.helpText=This is the amount paid to buy the shares, or their market value if they were inherited or received as a gift. You should add on any acquisition costs, for example, stock broker’s fees.
@@ -1503,8 +1503,8 @@ multipleIndirectDisposalsAcquisitionPrice.helpText=This is the amount paid to bu
 multipleIndirectDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the shares
 multipleIndirectDisposalsAcquisitionPrice.error.invalid=The acquisition value of the shares must be an amount of money, like 160,000 or 23,040.50
 multipleIndirectDisposalsAcquisitionPrice.error.tooManyDecimals=The acquisition value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-multipleIndirectDisposalsAcquisitionPrice.error.tooLarge=The acquisition value of the shares must be an amount of money between 1 and 50,000,000,000
-multipleIndirectDisposalsAcquisitionPrice.error.tooSmall=The acquisition value of the shares must be an amount of money between 1 and 50,000,000,000
+multipleIndirectDisposalsAcquisitionPrice.error.tooLarge=The acquisition value of the shares must be an amount of money between 0 and 50,000,000,000
+multipleIndirectDisposalsAcquisitionPrice.error.tooSmall=The acquisition value of the shares must be an amount of money between 0 and 50,000,000,000
 
 returns.company-address.cya.title=Check your answers
 
@@ -1656,32 +1656,32 @@ disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.invalid=The proce
 disposalPrice.capacitor.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.capacitor.indirect.Gifted.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 
-disposalPrice.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.agent.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.agent.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.trust.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.trust.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.capacitor.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.capacitor.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRep.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRep.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+disposalPrice.Gifted.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+disposalPrice.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.agent.Gifted.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+disposalPrice.agent.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.trust.Gifted.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+disposalPrice.trust.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.capacitor.Gifted.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+disposalPrice.capacitor.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRep.Gifted.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRep.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.tooSmall=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.tooSmall=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
 
 
-disposalPrice.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.agent.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.agent.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.trust.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.trust.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.capacitor.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.capacitor.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRep.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRep.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+disposalPrice.Gifted.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+disposalPrice.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.agent.Gifted.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+disposalPrice.agent.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.trust.Gifted.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+disposalPrice.trust.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.capacitor.Gifted.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+disposalPrice.capacitor.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRep.Gifted.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRep.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.tooLarge=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.tooLarge=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
 
 disposalPrice.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.indirect.Gifted.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -1748,31 +1748,31 @@ disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.invalid=The pr
 disposalPrice.capacitor.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.capacitor.indirect.SoldOther.error.invalid=How much the person got when they sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
 
-disposalPrice.SoldOther.error.tooSmall=How much you sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.indirect.SoldOther.error.tooSmall=How much you got when you sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.agent.SoldOther.error.tooSmall=How much your client sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.agent.indirect.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.trust.SoldOther.error.tooSmall=How much the trust sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.trust.indirect.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRep.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRep.indirect.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.capacitor.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.capacitor.indirect.SoldOther.error.tooSmall=How much the person got when they sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+disposalPrice.SoldOther.error.tooSmall=How much you sold the property for must be an amount of money between 0 and 50,000,000,000
+disposalPrice.indirect.SoldOther.error.tooSmall=How much you got when you sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.agent.SoldOther.error.tooSmall=How much your client sold the property for must be an amount of money between 0 and 50,000,000,000
+disposalPrice.agent.indirect.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 0 and 50,000,000,000
+disposalPrice.trust.SoldOther.error.tooSmall=How much the trust sold the property for must be an amount of money between 0 and 50,000,000,000
+disposalPrice.trust.indirect.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRep.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRep.indirect.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 0 and 50,000,000,000
+disposalPrice.capacitor.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 0 and 50,000,000,000
+disposalPrice.capacitor.indirect.SoldOther.error.tooSmall=How much the person got when they sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRepInPeriodOfAdmin.SoldOther.error.tooSmall=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.tooSmall=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
 
-disposalPrice.SoldOther.error.tooLarge=How much you sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.indirect.SoldOther.error.tooLarge=How much you got when you sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.agent.SoldOther.error.tooLarge=How much your client sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.agent.indirect.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.trust.SoldOther.error.tooLarge=How much the trust sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.trust.indirect.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRep.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRep.indirect.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.capacitor.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.capacitor.indirect.SoldOther.error.tooLarge=How much the person got when they sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+disposalPrice.SoldOther.error.tooLarge=How much you sold the property for must be an amount of money between 0 and 50,000,000,000
+disposalPrice.indirect.SoldOther.error.tooLarge=How much you got when you sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.agent.SoldOther.error.tooLarge=How much your client sold the property for must be an amount of money between 0 and 50,000,000,000
+disposalPrice.agent.indirect.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 0 and 50,000,000,000
+disposalPrice.trust.SoldOther.error.tooLarge=How much the trust sold the property for must be an amount of money between 0 and 50,000,000,000
+disposalPrice.trust.indirect.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRep.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRep.indirect.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 0 and 50,000,000,000
+disposalPrice.capacitor.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 0 and 50,000,000,000
+disposalPrice.capacitor.indirect.SoldOther.error.tooLarge=How much the person got when they sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRepInPeriodOfAdmin.SoldOther.error.tooLarge=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
+disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.tooLarge=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
 
 
 disposalPrice.SoldOther.error.tooManyDecimals=How much you sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -1850,11 +1850,11 @@ disposalFees.agent.error.tooSmall=How much your client paid for the additional d
 disposalFees.agent.indirect.error.tooSmall=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
 disposalFees.trust.error.tooSmall=How much the trust paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.trust.indirect.error.tooSmall=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
-disposalFees.personalRep.error.tooSmall=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.personalRep.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.personalRep.indirect.error.tooSmall=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
-disposalFees.personalRepInPeriodOfAdmin.error.tooSmall=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.personalRepInPeriodOfAdmin.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.personalRepInPeriodOfAdmin.indirect.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
-disposalFees.capacitor.error.tooSmall=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.capacitor.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.capacitor.indirect.error.tooSmall=The person’s additional costs when they sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
 
 disposalFees.error.tooLarge=How much you paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
@@ -1863,11 +1863,11 @@ disposalFees.agent.error.tooLarge=How much your client paid for the additional d
 disposalFees.agent.indirect.error.tooLarge=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
 disposalFees.trust.error.tooLarge=How much the trust paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.trust.indirect.error.tooLarge=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
-disposalFees.personalRep.error.tooLarge=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.personalRep.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.personalRep.indirect.error.tooLarge=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
-disposalFees.personalRepInPeriodOfAdmin.error.tooLarge=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.personalRepInPeriodOfAdmin.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.personalRepInPeriodOfAdmin.indirect.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
-disposalFees.capacitor.error.tooLarge=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.capacitor.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.capacitor.indirect.error.tooLarge=The person’s additional costs when they sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
 
 disposalFees.error.tooManyDecimals=How much you paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -2220,29 +2220,29 @@ acquisitionPriceBought.trust.indirect.error.invalid=The acquisition amount must 
 acquisitionPriceBought.capacitor.indirect.error.invalid=How much the person paid for the shares must be an amount of money, like 160,000 or 23,040.50
 acquisitionPriceBought.personalRep.indirect.error.invalid=How much the person paid for the shares must be an amount of money, like 160,000 or 23,040.50
 
-acquisitionPriceBought.error.tooSmall=How much you paid for the property must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.agent.error.tooSmall=How much your client paid for the property must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.trust.error.tooSmall=How much the trust paid for the property must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.capacitor.error.tooSmall=How much the person paid for the property must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.personalRep.error.tooSmall=The market value of the property must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.error.tooSmall=How much you paid for the property must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.agent.error.tooSmall=How much your client paid for the property must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.trust.error.tooSmall=How much the trust paid for the property must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.capacitor.error.tooSmall=How much the person paid for the property must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.personalRep.error.tooSmall=The market value of the property must be an amount of money between 0 and 50,000,000,000
 
-acquisitionPriceBought.indirect.error.tooSmall=How much you paid for the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.agent.indirect.error.tooSmall=The acquisition amount must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.trust.indirect.error.tooSmall=The acquisition amount must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.capacitor.indirect.error.tooSmall=How much the person paid for the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.personalRep.indirect.error.tooSmall=How much the person paid for the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.indirect.error.tooSmall=How much you paid for the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.agent.indirect.error.tooSmall=The acquisition amount must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.trust.indirect.error.tooSmall=The acquisition amount must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.capacitor.indirect.error.tooSmall=How much the person paid for the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.personalRep.indirect.error.tooSmall=How much the person paid for the shares must be an amount of money between 0 and 50,000,000,000
 
-acquisitionPriceBought.error.tooLarge=How much you paid for the property must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.agent.error.tooLarge=How much your client paid for the property must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.trust.error.tooLarge=How much the trust paid for the property must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.capacitor.error.tooLarge=How much the person paid for the property must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.personalRep.error.tooLarge=The market value of the property must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.error.tooLarge=How much you paid for the property must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.agent.error.tooLarge=How much your client paid for the property must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.trust.error.tooLarge=How much the trust paid for the property must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.capacitor.error.tooLarge=How much the person paid for the property must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.personalRep.error.tooLarge=The market value of the property must be an amount of money between 0 and 50,000,000,000
 
-acquisitionPriceBought.indirect.error.tooLarge=How much you paid for the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.agent.indirect.error.tooLarge=The acquisition amount must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.trust.indirect.error.tooLarge=The acquisition amount must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.capacitor.indirect.error.tooLarge=How much the person paid for the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceBought.personalRep.indirect.error.tooLarge=How much the person paid for the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.indirect.error.tooLarge=How much you paid for the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.agent.indirect.error.tooLarge=The acquisition amount must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.trust.indirect.error.tooLarge=The acquisition amount must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.capacitor.indirect.error.tooLarge=How much the person paid for the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceBought.personalRep.indirect.error.tooLarge=How much the person paid for the shares must be an amount of money between 0 and 50,000,000,000
 
 acquisitionPriceBought.error.tooManyDecimals=How much you paid for the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 acquisitionPriceBought.agent.error.tooManyDecimals=How much your client paid for the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -2304,29 +2304,29 @@ acquisitionPriceNotBought.trust.indirect.error.invalid=The market value of the s
 acquisitionPriceNotBought.capacitor.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 acquisitionPriceNotBought.personalRep.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 
-acquisitionPriceNotBought.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.agent.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.trust.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.capacitor.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.personalRep.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.agent.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.trust.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.capacitor.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.personalRep.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
 
-acquisitionPriceNotBought.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.agent.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.trust.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.capacitor.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.personalRep.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.indirect.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.agent.indirect.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.trust.indirect.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.capacitor.indirect.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.personalRep.indirect.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
 
-acquisitionPriceNotBought.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.agent.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.trust.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.capacitor.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.personalRep.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.agent.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.trust.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.capacitor.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.personalRep.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
 
-acquisitionPriceNotBought.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.agent.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.trust.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.capacitor.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-acquisitionPriceNotBought.personalRep.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.indirect.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.agent.indirect.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.trust.indirect.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.capacitor.indirect.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+acquisitionPriceNotBought.personalRep.indirect.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
 
 acquisitionPriceNotBought.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 acquisitionPriceNotBought.agent.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -2384,8 +2384,8 @@ improvementCosts.capacitor.error.invalid=Select yes if there were any improvemen
 improvementCosts.personalRep.error.invalid=Select yes if there were any improvement costs
 
 improvementCostsValue.error.invalid=The amount spent on improvements must be an amount of money, like 160,000 or 23,040.50
-improvementCostsValue.error.tooSmall=The amount spent on improvements must be an amount of money between 1 and 50,000,000,000
-improvementCostsValue.error.tooLarge=The amount spent on improvements must be an amount of money between 1 and 50,000,000,000
+improvementCostsValue.error.tooSmall=The amount spent on improvements must be an amount of money between 0 and 50,000,000,000
+improvementCostsValue.error.tooLarge=The amount spent on improvements must be an amount of money between 0 and 50,000,000,000
 improvementCostsValue.error.tooManyDecimals=The amount spent on improvements must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 improvementCostsValue.error.required=Enter the amount spent on improvements
 improvementCostsValue.label=Amount spent on improvements
@@ -2504,15 +2504,15 @@ rebaseAcquisitionPrice.personalRep.helpText=You can provide a valuation from a s
 rebaseAcquisitionPrice.label=Property’s market value on {0}
 rebaseAcquisitionPrice.error.required=Enter the property’s market value on {0}
 rebaseAcquisitionPrice.error.invalid=The property’s market value must be an amount of money, like 160,000 or 23,040.50
-rebaseAcquisitionPrice.error.tooSmall=The property’s market value must be an amount of money between 1 and 50,000,000,000
-rebaseAcquisitionPrice.error.tooLarge=The property’s market value must be an amount of money between 1 and 50,000,000,000
+rebaseAcquisitionPrice.error.tooSmall=The property’s market value must be an amount of money between 0 and 50,000,000,000
+rebaseAcquisitionPrice.error.tooLarge=The property’s market value must be an amount of money between 0 and 50,000,000,000
 rebaseAcquisitionPrice.error.tooManyDecimals=The property’s market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 rebaseAcquisitionPrice.dropdown.header=Why you need to enter this amount
 
 rebaseAcquisitionPrice.indirect.error.required=Enter the market value of the shares on {0}
 rebaseAcquisitionPrice.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
-rebaseAcquisitionPrice.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-rebaseAcquisitionPrice.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+rebaseAcquisitionPrice.indirect.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+rebaseAcquisitionPrice.indirect.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
 rebaseAcquisitionPrice.indirect.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.5
 
 rebaseAcquisitionPrice.dropdown.p1=You owned the property on or before {0}.
@@ -2558,14 +2558,14 @@ periodOfAdminMarketValue.personalRepInPeriodOfAdmin.indirect.helpText=You can pr
 periodOfAdminMarketValue.label=Property’s market value on {0}
 periodOfAdminMarketValue.error.required=Enter the market value of the property on {0}
 periodOfAdminMarketValue.error.invalid=The property’s market value must be an amount of money, like 160,000 or 23,040.50
-periodOfAdminMarketValue.error.tooSmall=The property’s market value must be an amount of money between 1 and 50,000,000,000
-periodOfAdminMarketValue.error.tooLarge=The property’s market value must be an amount of money between 1 and 50,000,000,000
+periodOfAdminMarketValue.error.tooSmall=The property’s market value must be an amount of money between 0 and 50,000,000,000
+periodOfAdminMarketValue.error.tooLarge=The property’s market value must be an amount of money between 0 and 50,000,000,000
 periodOfAdminMarketValue.error.tooManyDecimals=The property’s market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 periodOfAdminMarketValue.indirect.error.required=Enter the market value of the shares on {0}
 periodOfAdminMarketValue.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
-periodOfAdminMarketValue.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-periodOfAdminMarketValue.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+periodOfAdminMarketValue.indirect.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
+periodOfAdminMarketValue.indirect.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
 periodOfAdminMarketValue.indirect.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.5
 periodOfAdminMarketValue.cyaChange=the market value of the property on {0}
 
@@ -2721,21 +2721,21 @@ privateResidentsReliefValue.personalRep.error.required=Enter the amount of Priva
 privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.required=Enter the amount of Private Residence Relief being claimed
 privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.required=Enter the amount of Private Residence Relief being claimed
 
-privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.agent.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.trust.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.capacitor.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.personalRep.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.agent.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.trust.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.capacitor.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.personalRep.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
 
-privateResidentsReliefValue.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.agent.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.trust.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.capacitor.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.personalRep.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
-privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.agent.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.trust.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.capacitor.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.personalRep.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 0 and 50,000,000,000
 
 privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 privateResidentsReliefValue.agent.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
@@ -2779,8 +2779,8 @@ lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculat
 lettingsReliefValue.label=Amount of Letting Relief
 
 lettingsReliefValue.error.required=Enter an amount of Letting Relief, like 108 or 2,940.54
-lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be an amount of money between 1 and 50,000,000,000
-lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be an amount of money between 1 and 50,000,000,000
+lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be an amount of money between 0 and 50,000,000,000
+lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be an amount of money between 0 and 50,000,000,000
 lettingsReliefValue.error.invalid=Amount of Letting Relief must be an amount of money, like 108 or 2,940.54
 lettingsReliefValue.error.tooManyDecimals=Amount of Letting Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
 lettingsReliefValue.error.amountOverLimit=Amount of Letting Relief must be an amount of money between 1 and {0}
@@ -3600,7 +3600,7 @@ yearToDateLiability.personalRepInPeriodOfAdmin.agent.error.required=Enter your c
 yearToDateLiability.error.invalid=The overall Capital Gains Tax liability must be an amount of money, like 1,500 or 7,300.50
 yearToDateLiability.error.tooManyDecimals=The overall Capital Gains Tax liability must be 2 decimal places or less, for example 160,000 or 23,040.50
 yearToDateLiability.error.tooSmall=The overall Capital Gains Tax liability must be 0 or more
-yearToDateLiability.error.tooLarge=The overall Capital Gains Tax liability must be between 1 and 50,000,000,000.00
+yearToDateLiability.error.tooLarge=The overall Capital Gains Tax liability must be between 0 and 50,000,000,000.00
 
 yearToDateLiability.cyaChange=the overall Capital Gains Tax liability
 
@@ -4012,7 +4012,7 @@ confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=HMRC will 
 
 confirmationOfSubmission.paymentNotice=It takes 3 to 5 days for payments or charges to show in your account.
 confirmationOfSubmission.agent.paymentNotice=It takes 3 to 5 days for payments or charges to show in your client’s account.
-confirmationOfSubmission.trust.paymentNotice=It takes 3 to 5 days for payments or charges to show in the trust’s account. 
+confirmationOfSubmission.trust.paymentNotice=It takes 3 to 5 days for payments or charges to show in the trust’s account.
 
 confirmationOfSubmission.gotoViewReturn=Go to ‘view your return’ in your account to view any payments or charges due.
 confirmationOfSubmission.trust.gotoViewReturn=Go to ‘view your return’ in the trust’s account to view any payments or charges due.
@@ -4199,16 +4199,16 @@ multipleDisposalsDisposalPrice.capacitor.error.tooLarge=The disposal value must 
 multipleDisposalsDisposalPrice.personalRep.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.trust.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.agent.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooLarge=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
 
 multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.capacitor.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.personalRep.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.trust.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.agent.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooSmall=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
 
 multipleDisposalsDisposalPrice.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.capacitor.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -4381,8 +4381,8 @@ singleMixedUseDisposalsDisposalPrice.link=What are disposal costs?
 singleMixedUseDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
 singleMixedUseDisposalsDisposalPrice.error.required=Enter the disposal value of the property
 singleMixedUseDisposalsDisposalPrice.error.invalid=The disposal value of the property must be an amount of money, like 160,000 or 23,040.50
-singleMixedUseDisposalsDisposalPrice.error.tooLarge=The disposal value of the property must be an amount of money between 1 and 50,000,000,000
-singleMixedUseDisposalsDisposalPrice.error.tooSmall=The disposal value of the property must be an amount of money between 1 and 50,000,000,000
+singleMixedUseDisposalsDisposalPrice.error.tooLarge=The disposal value of the property must be an amount of money between 0 and 50,000,000,000
+singleMixedUseDisposalsDisposalPrice.error.tooSmall=The disposal value of the property must be an amount of money between 0 and 50,000,000,000
 singleMixedUseDisposalsDisposalPrice.error.tooManyDecimals=The disposal value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 singleMixedUseDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
@@ -4422,20 +4422,20 @@ singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details
 
 singleMixedUseDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property
 singleMixedUseDisposalsAcquisitionPrice.error.invalid=The acquisition value of the property must be an amount of money, like 160,000 or 23,040.50
-singleMixedUseDisposalsAcquisitionPrice.error.tooLarge=The acquisition value of the property must be an amount of money between 1 and 50,000,000,000
-singleMixedUseDisposalsAcquisitionPrice.error.tooSmall=The acquisition value of the property must be an amount of money between 1 and 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.error.tooLarge=The acquisition value of the property must be an amount of money between 0 and 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.error.tooSmall=The acquisition value of the property must be an amount of money between 0 and 50,000,000,000
 singleMixedUseDisposalsAcquisitionPrice.error.tooManyDecimals=The acquisition value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.required=Enter the market value of the property
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.invalid=The market value of the property must be an amount of money, like 160,000 or 23,040.50
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooLarge=The market value of the property must be an amount of money between 1 and 50,000,000,000
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooSmall=The market value of the property must be an amount of money between 1 and 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooLarge=The market value of the property must be an amount of money between 0 and 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooSmall=The market value of the property must be an amount of money between 0 and 50,000,000,000
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooManyDecimals=The market value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.required=Enter the market value of the property
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.invalid=The market value of the property must be an amount of money, like 160,000 or 23,040.50
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=The market value of the property must be an amount of money between 1 and 50,000,000,000
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The market value of the property must be an amount of money between 1 and 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=The market value of the property must be an amount of money between 0 and 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The market value of the property must be an amount of money between 0 and 50,000,000,000
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=The market value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 
