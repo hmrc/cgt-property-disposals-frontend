@@ -62,18 +62,20 @@ final case class CalculatedGlarBreakdown(
   previousReturnData: PreviousReturnData
 ) {
 
-  val propertyDisposalAmountLessCosts = disposalPrice ++ disposalFees
+  val gainOrLossAfterReliefs: AmountInPence = {
+    val propertyDisposalAmountLessCosts = disposalPrice ++ disposalFees
 
-  val propertyAcquisitionAmountPlusCosts =
-    acquisitionPrice ++ improvementCosts ++ acquisitionCosts
+    val propertyAcquisitionAmountPlusCosts =
+      acquisitionPrice ++ improvementCosts ++ acquisitionCosts
 
-  val totalReliefs = privateResidentReliefs ++ lettingRelief
+    val totalReliefs = privateResidentReliefs ++ lettingRelief
 
-  val initialGainOrLoss = propertyDisposalAmountLessCosts -- propertyAcquisitionAmountPlusCosts
+    val initialGainOrLoss = propertyDisposalAmountLessCosts -- propertyAcquisitionAmountPlusCosts
 
-  val gainOrLossAfterReliefs = initialGainOrLoss -- totalReliefs
+    initialGainOrLoss -- totalReliefs
+  }
 
-  val isGain = gainOrLossAfterReliefs.isPositive
+  val isGain: Boolean = gainOrLossAfterReliefs.isPositive
 
 }
 

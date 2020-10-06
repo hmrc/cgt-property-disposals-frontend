@@ -175,7 +175,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
       case Some(value) => messages(
           s"$key.calculatorHeading",
           if(value.isGain) messages("generic.gain") else messages("generic.loss"),
-          MoneyUtils.formatAmountOfMoneyWithPoundSign(value.gainOrLossAfterReliefs.abs)
+          MoneyUtils.formatAmountOfMoneyWithPoundSign(value.gainOrLossAfterReliefs.abs.inPounds())
       )
 
       case _ => ""
