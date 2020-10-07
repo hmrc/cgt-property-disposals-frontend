@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonRes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.NoOtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftSingleDisposalReturn}
@@ -134,7 +135,7 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
                   .map(_.completeReturn match {
                     case c: CompleteSingleDisposalReturn =>
                       val assetTypeCheck   = c.triageAnswers.assetType === glarBreakdown.assetType.merge
-                      val otherReliefCheck = c.reliefDetails.otherReliefs.isEmpty
+                      val otherReliefCheck = c.reliefDetails.otherReliefs.contains(NoOtherReliefs)
                       assetTypeCheck && otherReliefCheck
                     case _                               => false
                   })
@@ -188,7 +189,7 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
               val result = eligibleAssetType match {
                 case None            => None
                 case Some(assetType) =>
-                  val noOtherReliefs           = reliefDetailsAnswers.otherReliefs.isEmpty
+                  val noOtherReliefs           = reliefDetailsAnswers.otherReliefs.contains(NoOtherReliefs)
                   val underPreviousReturnLimit = previousReturnData.summaries.length <= maxPreviousReturns
                   val currentReturnIsEligible  = noOtherReliefs && underPreviousReturnLimit
 
