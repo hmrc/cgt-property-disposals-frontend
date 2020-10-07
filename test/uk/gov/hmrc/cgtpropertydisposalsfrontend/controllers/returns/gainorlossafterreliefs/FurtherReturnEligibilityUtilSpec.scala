@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{Indire
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -76,7 +76,7 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
       sample[PreviousReturnData].copy(previousReturnsImplyEligibilityForCalculation = None)
     ),
     amendReturnData: Option[AmendReturnData] = None,
-    otherReliefs: Option[OtherReliefs] = None,
+    otherReliefs: Option[OtherReliefsOption] = Some(NoOtherReliefs),
     withCompleteAcquisitionDetails: Boolean = true,
     withCompleteReliefDetails: Boolean = true,
     withCompleteTriageDetails: Boolean = true,
@@ -123,7 +123,10 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
 
   }
 
-  def genDisplayReturn(assetType: AssetType = Residential, otherReliefs: Option[OtherReliefs] = None) = {
+  def genDisplayReturn(
+    assetType: AssetType = Residential,
+    otherReliefs: Option[OtherReliefsOption] = Some(NoOtherReliefs)
+  ) = {
     val completeReturn = sample[CompleteSingleDisposalReturn]
     DisplayReturn(
       completeReturn.copy(
