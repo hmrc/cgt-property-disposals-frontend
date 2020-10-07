@@ -44,7 +44,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusG
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CalculatedGlarBreakdownGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
@@ -542,8 +541,7 @@ class GainOrLossAfterReliefsControllerSpec
             expectedTitleKey: String,
             expectedBackLink: Call,
             expectedOuterLabelUserKey: String,
-            expectedH2Key: String,
-            expectedUpdatedSession: Option[SessionData] = None
+            expectedH2Key: String
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -565,9 +563,6 @@ class GainOrLossAfterReliefsControllerSpec
                   )
                 )
               )
-              expectedUpdatedSession.map { s =>
-                mockStoreSession(s)(Right(()))
-              }
             }
             checkPageIsDisplayed(
               performAction(),
@@ -701,21 +696,14 @@ class GainOrLossAfterReliefsControllerSpec
             "there is no value for previousReturnsImplyEligibilityForFurtherReturnCalculation in session" in {
               val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None)
 
-              val state                = validCalculatorState(Individual, Self, previousReturnData)
-              val updatedJourneyStatus = state._2.copy(previousSentReturns =
-                Some(
-                  previousReturnData.copy(
-                    previousReturnsImplyEligibilityForCalculation = Some(true)
-                  )
-                )
-              )
+              val state = validCalculatorState(Individual, Self, previousReturnData)
+
               test(
                 state,
                 "gainOrLossAfterReliefs.title",
                 routes.GainOrLossAfterReliefsController.checkYourAnswers(),
                 "",
-                "gainOrLossAfterReliefs.h2",
-                Some(state._1.copy(journeyStatus = Some(updatedJourneyStatus)))
+                "gainOrLossAfterReliefs.h2"
               )
             }
           }
@@ -737,36 +725,6 @@ class GainOrLossAfterReliefsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData._1)
             mockEligibilityCheck(sessionData._2)(Left(Error("Error on eligibility check")))
-          }
-          checkIsTechnicalErrorPage(performAction())
-        }
-
-        "updating the session is not successful" in {
-          val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None)
-
-          val fillingOutReturn =
-            sample[FillingOutReturn].copy(previousSentReturns = Some(previousReturnData))
-          val sessionData      =
-            (SessionData.empty.copy(Some(fillingOutReturn)), fillingOutReturn, sample[DraftSingleDisposalReturn])
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionData._1)
-            mockEligibilityCheck(sessionData._2)(Right(Eligible(sample[CalculatedGlarBreakdown])))
-            mockStoreSession(
-              sessionData._1.copy(journeyStatus =
-                Some(
-                  fillingOutReturn.copy(previousSentReturns =
-                    Some(
-                      previousReturnData.copy(
-                        previousReturnsImplyEligibilityForCalculation = Some(true)
-                      )
-                    )
-                  )
-                )
-              )
-            )(
-              Left(Error("Error updating session"))
-            )
           }
           checkIsTechnicalErrorPage(performAction())
         }

@@ -25,6 +25,7 @@ import cats.syntax.traverse._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
@@ -35,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -44,7 +46,8 @@ import scala.concurrent.{ExecutionContext, Future}
 trait FurtherReturnEligibilityUtil {
 
   def isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn: FillingOutReturn)(implicit
-    hc: HeaderCarrier
+    hc: HeaderCarrier,
+    request: RequestWithSessionData[_]
   ): EitherT[Future, Error, FurtherReturnEligibility]
 
 }
@@ -59,7 +62,8 @@ object FurtherReturnEligibility {
 @Singleton
 class FurtherReturnEligibilityUtilImpl @Inject() (
   returnsService: ReturnsService,
-  configuration: Configuration
+  configuration: Configuration,
+  sessionStore: SessionStore
 )(implicit ec: ExecutionContext)
     extends FurtherReturnEligibilityUtil
     with SessionUpdates {
@@ -73,57 +77,79 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
   def isEligibleForFurtherReturnOrAmendCalculation(
     fillingOutReturn: FillingOutReturn
   )(implicit
-    headerCarrier: HeaderCarrier
+    headerCarrier: HeaderCarrier,
+    request: RequestWithSessionData[_]
   ): EitherT[Future, Error, FurtherReturnEligibility] =
-    if (!amendAndFurtherReturnCalculationsEnabled)
-      EitherT.pure(
-        Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
-      )
-    else
-      eligibleGlarCalculation(fillingOutReturn) match {
-        case Left(e) => EitherT.leftT(e)
+    for {
+      eligibility   <- determineEligibility(fillingOutReturn)
+      updatedJourney = fillingOutReturn.copy(
+                         previousSentReturns = fillingOutReturn.previousSentReturns.map {
+                           _.copy(
+                             previousReturnsImplyEligibilityForCalculation = eligibility match {
+                               case FurtherReturnEligibility.Eligible(_)                                 => Some(true)
+                               case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
+                                 previousReturnsImplyEligibility
+                             }
+                           )
+                         }
+                       )
+      _             <- if (updatedJourney === fillingOutReturn) EitherT.pure[Future, Error](())
+                       else EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+    } yield eligibility
 
-        case Right(None) =>
-          EitherT.pure(
-            Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
-          )
+  def determineEligibility(
+    fillingOutReturn: FillingOutReturn
+  )(implicit
+    headerCarrier: HeaderCarrier
+  ): EitherT[Future, Error, FurtherReturnEligibility] = if (!amendAndFurtherReturnCalculationsEnabled)
+    EitherT.pure(
+      Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
+    )
+  else
+    eligibleGlarCalculation(fillingOutReturn) match {
+      case Left(e) => EitherT.leftT(e)
 
-        case Right(Some(glarBreakdown)) =>
-          glarBreakdown.previousReturnData.previousReturnsImplyEligibilityForCalculation match {
-            case Some(true) =>
-              EitherT.pure(Eligible(glarBreakdown))
+      case Right(None) =>
+        EitherT.pure(
+          Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
+        )
 
-            case Some(false) =>
-              EitherT.pure(Ineligible(Some(false)))
+      case Right(Some(glarBreakdown)) =>
+        glarBreakdown.previousReturnData.previousReturnsImplyEligibilityForCalculation match {
+          case Some(true) =>
+            EitherT.pure(Eligible(glarBreakdown))
 
-            case None =>
-              val submissionIdsOfPreviousReturns = glarBreakdown.previousReturnData.summaries
-                .map(_.submissionId)
-                .filterNot(id => fillingOutReturn.amendReturnData.exists(_.originalReturn.summary.submissionId === id))
+          case Some(false) =>
+            EitherT.pure(Ineligible(Some(false)))
 
-              val results: List[EitherT[Future, Error, Boolean]] =
-                submissionIdsOfPreviousReturns.map {
-                  returnsService
-                    .displayReturn(fillingOutReturn.subscribedDetails.cgtReference, _)
-                    .map(_.completeReturn match {
-                      case c: CompleteSingleDisposalReturn =>
-                        val assetTypeCheck   = c.triageAnswers.assetType === glarBreakdown.assetType.merge
-                        val otherReliefCheck = c.reliefDetails.otherReliefs.isEmpty
-                        assetTypeCheck && otherReliefCheck
-                      case _                               => false
-                    })
-                }
+          case None =>
+            val submissionIdsOfPreviousReturns = glarBreakdown.previousReturnData.summaries
+              .map(_.submissionId)
+              .filterNot(id => fillingOutReturn.amendReturnData.exists(_.originalReturn.summary.submissionId === id))
 
-              results.sequence[EitherT[Future, Error, *], Boolean].map { e =>
-                if (e.forall(identity))
-                  Eligible(glarBreakdown)
-                else
-                  Ineligible(Some(false))
+            val results: List[EitherT[Future, Error, Boolean]] =
+              submissionIdsOfPreviousReturns.map {
+                returnsService
+                  .displayReturn(fillingOutReturn.subscribedDetails.cgtReference, _)
+                  .map(_.completeReturn match {
+                    case c: CompleteSingleDisposalReturn =>
+                      val assetTypeCheck   = c.triageAnswers.assetType === glarBreakdown.assetType.merge
+                      val otherReliefCheck = c.reliefDetails.otherReliefs.isEmpty
+                      assetTypeCheck && otherReliefCheck
+                    case _                               => false
+                  })
               }
 
-          }
+            results.sequence[EitherT[Future, Error, *], Boolean].map { e =>
+              if (e.forall(identity))
+                Eligible(glarBreakdown)
+              else
+                Ineligible(Some(false))
+            }
 
-      }
+        }
+
+    }
 
   private def eligibleGlarCalculation(
     fillingOutReturn: FillingOutReturn

@@ -19,8 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossa
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
-import cats.syntax.eq._
-import cats.instances.boolean._
 import com.google.inject.Inject
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
@@ -30,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, Error, FormUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
@@ -68,66 +66,33 @@ class GainOrLossAfterReliefsController @Inject() (
   def enterGainOrLossAfterReliefs(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAnswers { (fillingOutReturn, draftReturn, answer) =>
-        val result = for {
-          furtherReturnEligibility <-
-            glarCalculatorEligibilityUtil.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
-          _                        <- if (shouldUpdateFurtherReturnEligibility(fillingOutReturn, furtherReturnEligibility)) {
-                                        val updatedJourney = fillingOutReturn.copy(previousSentReturns =
-                                          fillingOutReturn.previousSentReturns.map(
-                                            _.copy(
-                                              previousReturnsImplyEligibilityForCalculation = furtherReturnEligibility match {
-                                                case FurtherReturnEligibility.Eligible(_)                                 => Some(true)
-                                                case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
-                                                  previousReturnsImplyEligibility
-                                              }
-                                            )
-                                          )
-                                        )
-                                        EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
-                                      } else EitherT.pure[Future, Error](())
-        } yield furtherReturnEligibility
-
-        result.fold[Result](
-          { e =>
-            logger.warn("Could not check for calculation eligibility", e)
-            errorHandler.errorResult()
-          },
-          furtherReturnEligibility =>
-            Ok(
-              gainOrLossAfterReliefsPage(
-                answer.fold(gainOrLossAfterReliefsForm)(value => gainOrLossAfterReliefsForm.fill(value.inPounds())),
-                answer.fold(controllers.returns.routes.TaskListController.taskList())(_ =>
-                  routes.GainOrLossAfterReliefsController.checkYourAnswers()
-                ),
-                fillingOutReturn.subscribedDetails.isATrust,
-                draftReturn.representativeType(),
-                draftReturn.triageAnswers().isLeft,
-                fillingOutReturn.isAmendReturn,
-                furtherReturnEligibility match {
-                  case FurtherReturnEligibility.Eligible(calculation) => Some(calculation)
-                  case FurtherReturnEligibility.Ineligible(_)         => None
-                }
+        glarCalculatorEligibilityUtil
+          .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
+          .fold[Result](
+            { e =>
+              logger.warn("Could not check for calculation eligibility", e)
+              errorHandler.errorResult()
+            },
+            furtherReturnEligibility =>
+              Ok(
+                gainOrLossAfterReliefsPage(
+                  answer.fold(gainOrLossAfterReliefsForm)(value => gainOrLossAfterReliefsForm.fill(value.inPounds())),
+                  answer.fold(controllers.returns.routes.TaskListController.taskList())(_ =>
+                    routes.GainOrLossAfterReliefsController.checkYourAnswers()
+                  ),
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  draftReturn.representativeType(),
+                  draftReturn.triageAnswers().isLeft,
+                  fillingOutReturn.isAmendReturn,
+                  furtherReturnEligibility match {
+                    case FurtherReturnEligibility.Eligible(calculation) => Some(calculation)
+                    case FurtherReturnEligibility.Ineligible(_)         => None
+                  }
+                )
               )
-            )
-        )
+          )
       }
     }
-
-  private def shouldUpdateFurtherReturnEligibility(
-    fillingOutReturn: FillingOutReturn,
-    furtherReturnEligibility: FurtherReturnEligibility
-  ): Boolean = {
-    import cats.instances.option._
-
-    val existingValue = fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation)
-
-    furtherReturnEligibility match {
-      case FurtherReturnEligibility.Eligible(_)                                 =>
-        !existingValue.contains(true)
-      case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
-        existingValue =!= previousReturnsImplyEligibility
-    }
-  }
 
   def enterGainOrLossAfterReliefsSubmit: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
