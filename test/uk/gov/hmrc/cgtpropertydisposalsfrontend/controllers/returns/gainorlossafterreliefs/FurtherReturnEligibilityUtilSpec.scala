@@ -22,7 +22,7 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
@@ -75,6 +75,7 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
     previousSentReturns: Option[PreviousReturnData] = Some(
       sample[PreviousReturnData].copy(previousReturnsImplyEligibilityForCalculation = None)
     ),
+    amendReturnData: Option[AmendReturnData] = None,
     otherReliefs: Option[OtherReliefs] = None,
     withCompleteAcquisitionDetails: Boolean = true,
     withCompleteReliefDetails: Boolean = true,
@@ -116,7 +117,8 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
 
     sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
-      previousSentReturns = previousSentReturns
+      previousSentReturns = previousSentReturns,
+      amendReturnData = amendReturnData
     )
 
   }
@@ -317,6 +319,53 @@ class FurtherReturnEligibilityUtilSpec extends WordSpec with Matchers with MockF
             )
           )(service)
         }
+
+        "in an amend return journey the original return makes the user ineligible but the " +
+          "rest of the returns are eligible" in new TestEnvironment() {
+            val (originalReturn, otherReturn) = sample[ReturnSummary] -> sample[ReturnSummary]
+
+            val previousReturnData =
+              sample[PreviousReturnData].copy(
+                summaries = List(originalReturn, otherReturn),
+                previousReturnsImplyEligibilityForCalculation = None
+              )
+            val fillingOutReturn   =
+              eligibleFillingOutReturn(
+                previousSentReturns = Some(previousReturnData),
+                amendReturnData = Some(
+                  sample[AmendReturnData].copy(
+                    originalReturn = sample[CompleteReturnWithSummary].copy(
+                      summary = sample[ReturnSummary].copy(
+                        submissionId = originalReturn.submissionId
+                      )
+                    )
+                  )
+                )
+              )
+
+            // display return API will not be called for the original return
+            mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, otherReturn.submissionId)(
+              Right(genDisplayReturn())
+            )
+
+            test(
+              fillingOutReturn,
+              Eligible(
+                CalculatedGlarBreakdown(
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  AmountInPence(0),
+                  Right(Residential),
+                  previousReturnData
+                )
+              )
+            )(service)
+
+          }
 
       }
 

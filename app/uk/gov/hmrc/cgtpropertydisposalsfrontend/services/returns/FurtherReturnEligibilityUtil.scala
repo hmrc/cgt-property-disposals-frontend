@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.list._
+import cats.instances.string._
 import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
@@ -96,7 +97,9 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
               EitherT.pure(Ineligible(Some(false)))
 
             case None =>
-              val submissionIdsOfPreviousReturns = glarBreakdown.previousReturnData.summaries.map(_.submissionId)
+              val submissionIdsOfPreviousReturns = glarBreakdown.previousReturnData.summaries
+                .map(_.submissionId)
+                .filterNot(id => fillingOutReturn.amendReturnData.exists(_.originalReturn.summary.submissionId === id))
 
               val results: List[EitherT[Future, Error, Boolean]] =
                 submissionIdsOfPreviousReturns.map {
