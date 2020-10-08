@@ -21,8 +21,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 final case class TaxableGainOrLossCalculation(
   taxableGainOrLoss: AmountInPence,
+  previousYearLosses: AmountInPence,
   totalLosses: AmountInPence,
-  gainOrLossAfterLosses: AmountInPence,
+  gainOrLossAfterInYearLosses: AmountInPence,
+  gainOrLossAfterAllLosses: AmountInPence,
   previousReturnCalculationData: List[FurtherReturnCalculationData]
 )
 
