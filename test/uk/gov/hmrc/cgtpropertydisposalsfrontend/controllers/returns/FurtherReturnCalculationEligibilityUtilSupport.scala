@@ -28,9 +28,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait FurtherReturnEligibilityUtilSupport { this: ControllerSpec =>
+trait FurtherReturnCalculationEligibilityUtilSupport { this: ControllerSpec =>
 
-  val mockFurtherReturnEligibilityUtil: FurtherReturnCalculationEligibilityUtil =
+  val mockFurtherReturnCalculationEligibilityUtil: FurtherReturnCalculationEligibilityUtil =
     mock[FurtherReturnCalculationEligibilityUtil]
 
   def mockFurthereturnCalculationEligibilityCheck(
@@ -38,13 +38,15 @@ trait FurtherReturnEligibilityUtilSupport { this: ControllerSpec =>
   )(
     result: Either[Error, FurtherReturnCalcuationEligibility]
   ) =
-    (mockFurtherReturnEligibilityUtil
-      .isEligibleForFurtherReturnOrAmendCalculation(
-        _: FillingOutReturn
-      )(
-        _: HeaderCarrier,
-        _: RequestWithSessionData[_]
-      ))
+    (
+      mockFurtherReturnCalculationEligibilityUtil
+        .isEligibleForFurtherReturnOrAmendCalculation(
+          _: FillingOutReturn
+        )(
+          _: HeaderCarrier,
+          _: RequestWithSessionData[_]
+        )
+      )
       .expects(fillingOutReturn, *, *)
       .returning(EitherT.fromEither[Future](result))
 

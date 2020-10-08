@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{FurtherReturnEligibilityUtilSupport, ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{FurtherReturnCalculationEligibilityUtilSupport, ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Trust
@@ -71,7 +71,7 @@ class GainOrLossAfterReliefsControllerSpec
     with AuthSupport
     with SessionSupport
     with ReturnsServiceSupport
-    with FurtherReturnEligibilityUtilSupport
+    with FurtherReturnCalculationEligibilityUtilSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
@@ -99,7 +99,7 @@ class GainOrLossAfterReliefsControllerSpec
     bind[SessionStore].toInstance(mockSessionStore),
     bind[ReturnsService].toInstance(mockReturnsService),
     bind[UUIDGenerator].toInstance(mockUUIDGenerator),
-    bind[FurtherReturnCalculationEligibilityUtil].toInstance(mockFurtherReturnEligibilityUtil)
+    bind[FurtherReturnCalculationEligibilityUtil].toInstance(mockFurtherReturnCalculationEligibilityUtil)
   )
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
