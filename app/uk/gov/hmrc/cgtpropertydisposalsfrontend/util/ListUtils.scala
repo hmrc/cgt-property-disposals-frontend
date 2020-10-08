@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
-import play.api.libs.json.{Json, OFormat}
+object ListUtils {
 
-final case class UpscanUploadMeta(
-  reference: String,
-  uploadRequest: UploadRequest
-)
+  implicit class ListOps[A](private val l: List[A]) extends AnyVal {
+    def partitionWith[B, C](f: A => Either[B, C]): (List[B], List[C]) =
+      l.foldLeft(List.empty[B] -> List.empty[C]) { case (acc, curr) =>
+        f(curr).fold(
+          b => (b :: acc._1) -> acc._2,
+          c => acc._1 -> (c :: acc._2)
+        )
+      }
+  }
 
-object UpscanUploadMeta {
-  implicit val format: OFormat[UpscanUploadMeta] = Json.format[UpscanUploadMeta]
 }

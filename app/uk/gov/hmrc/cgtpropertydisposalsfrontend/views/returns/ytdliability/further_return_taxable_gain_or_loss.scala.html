@@ -27,7 +27,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, TaxableGainOrLossCalculation}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 @this(
@@ -49,9 +49,9 @@
         isATrust: Boolean,
         representativeType: Option[RepresentativeType],
         taxYear: TaxYear,
-        isAmend: Boolean
+        isAmend: Boolean,
+        taxableGainOrLossCalculation: Option[TaxableGainOrLossCalculation]
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-
 @key = @{ "taxableGainOrLoss" }
 @gainKey = @{ "taxableGain" }
 @lossKey = @{ "netLoss" }
@@ -145,6 +145,8 @@
     @caption(messages("ytdLiability.furtherReturn.caption"))
 
     @pageHeading(title)
+
+   @taxableGainOrLossCalculation
 
     <p>@messages(s"$key$userKey.furtherReturn.p1", taxYearStart, taxYearEnd)</p>
 

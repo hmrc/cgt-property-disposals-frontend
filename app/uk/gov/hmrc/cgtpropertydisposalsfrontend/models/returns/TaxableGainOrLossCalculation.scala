@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedGlarBreakdown
+final case class TaxableGainOrLossCalculation(
+  taxableGainOrLoss: AmountInPence,
+  totalLosses: AmountInPence,
+  gainOrLossAfterLosses: AmountInPence,
+  previousReturnCalculationData: List[FurtherReturnCalculationData]
+)
 
-object CalculatedGlarBreakdownGen extends GenUtils {
+object TaxableGainOrLossCalculation {
 
-  implicit val calculatedGlarBreakdownGen: Gen[CalculatedGlarBreakdown] =
-    gen[CalculatedGlarBreakdown]
+  implicit val format: OFormat[TaxableGainOrLossCalculation] = Json.format
 
 }

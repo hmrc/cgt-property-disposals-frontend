@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 final case class DraftReturnId(value: String) extends AnyVal
 
 object DraftReturnId {
-  implicit val format = Json.format[DraftReturnId]
+  implicit val format: OFormat[DraftReturnId] = Json.format[DraftReturnId]
 }

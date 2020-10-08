@@ -25,7 +25,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue, TaxableGainOrLossCalculation, TaxableGainOrLossCalculationRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -37,6 +37,10 @@ trait CgtCalculationService {
   def calculateTaxDue(
     request: CalculateCgtTaxDueRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue]
+
+  def calculateTaxableGainOrLoss(
+    request: TaxableGainOrLossCalculationRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, TaxableGainOrLossCalculation]
 
 }
 
@@ -56,7 +60,23 @@ class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector)(implicit
       else
         Left(
           Error(
-            s"Call to calulate cgt tax due came back with status ${response.status}"
+            s"Call to calculate cgt tax due came back with status ${response.status}"
+          )
+        )
+    }
+
+  def calculateTaxableGainOrLoss(
+    request: TaxableGainOrLossCalculationRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, TaxableGainOrLossCalculation] =
+    connector.calculateTaxableGainOrLoss(request).subflatMap { response =>
+      if (response.status === OK)
+        response
+          .parseJSON[TaxableGainOrLossCalculation]()
+          .leftMap(Error(_))
+      else
+        Left(
+          Error(
+            s"Call to calculate taxable gain or loss came back with status ${response.status}"
           )
         )
     }

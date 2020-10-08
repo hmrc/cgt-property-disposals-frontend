@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{GlarEligibilityUtilSupport, ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{FurtherReturnEligibilityUtilSupport, ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Trust
@@ -60,8 +60,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnEligibility.{Eligible, Ineligible}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibilityUtil, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalcuationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -71,7 +71,7 @@ class GainOrLossAfterReliefsControllerSpec
     with AuthSupport
     with SessionSupport
     with ReturnsServiceSupport
-    with GlarEligibilityUtilSupport
+    with FurtherReturnEligibilityUtilSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
@@ -99,7 +99,7 @@ class GainOrLossAfterReliefsControllerSpec
     bind[SessionStore].toInstance(mockSessionStore),
     bind[ReturnsService].toInstance(mockReturnsService),
     bind[UUIDGenerator].toInstance(mockUUIDGenerator),
-    bind[FurtherReturnEligibilityUtil].toInstance(mockGlarCalculatorEligibility)
+    bind[FurtherReturnCalculationEligibilityUtil].toInstance(mockFurtherReturnEligibilityUtil)
   )
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
@@ -126,7 +126,8 @@ class GainOrLossAfterReliefsControllerSpec
         PreviousReturnData(
           List(sample[ReturnSummary]),
           None,
-          previousReturnsImplyEligibilityForFurtherReturnCalculation
+          previousReturnsImplyEligibilityForFurtherReturnCalculation,
+          None
         )
       )
     )
@@ -163,7 +164,8 @@ class GainOrLossAfterReliefsControllerSpec
         PreviousReturnData(
           List(sample[ReturnSummary]),
           None,
-          previousReturnsImplyEligibilityForFurtherReturnCalculation
+          previousReturnsImplyEligibilityForFurtherReturnCalculation,
+          None
         )
       )
     )
@@ -333,7 +335,7 @@ class GainOrLossAfterReliefsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData._1)
-              mockEligibilityCheck(sessionData._2)(Right(Ineligible(Some(false))))
+              mockFurthereturnCalculationEligibilityCheck(sessionData._2)(Right(Ineligible(Some(false))))
             }
             checkPageIsDisplayed(
               performAction(),
@@ -546,7 +548,7 @@ class GainOrLossAfterReliefsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData._1)
-              mockEligibilityCheck(sessionData._2)(
+              mockFurthereturnCalculationEligibilityCheck(sessionData._2)(
                 Right(
                   Eligible(
                     CalculatedGlarBreakdown(
@@ -556,10 +558,9 @@ class GainOrLossAfterReliefsControllerSpec
                       AmountInPence(0),
                       AmountInPence(0),
                       AmountInPence(0),
-                      AmountInPence(0),
-                      Right(AssetType.Residential),
-                      sessionData._4
-                    )
+                      AmountInPence(0)
+                    ),
+                    List.empty
                   )
                 )
               )
@@ -682,7 +683,7 @@ class GainOrLossAfterReliefsControllerSpec
             }
 
             "the user is an individual doing the return for themselves" in {
-              val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, Some(true))
+              val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, Some(true), None)
 
               test(
                 validCalculatorState(Individual, Self, previousReturnData),
@@ -694,7 +695,7 @@ class GainOrLossAfterReliefsControllerSpec
             }
 
             "there is no value for previousReturnsImplyEligibilityForFurtherReturnCalculation in session" in {
-              val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None)
+              val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None, None)
 
               val state = validCalculatorState(Individual, Self, previousReturnData)
 
@@ -715,7 +716,7 @@ class GainOrLossAfterReliefsControllerSpec
       "show an error page" when {
 
         "there is an error determining eligibility for calculation" in {
-          val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None)
+          val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None, None)
 
           val fillingOutReturn =
             sample[FillingOutReturn].copy(previousSentReturns = Some(previousReturnData))
@@ -724,7 +725,7 @@ class GainOrLossAfterReliefsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData._1)
-            mockEligibilityCheck(sessionData._2)(Left(Error("Error on eligibility check")))
+            mockFurthereturnCalculationEligibilityCheck(sessionData._2)(Left(Error("Error on eligibility check")))
           }
           checkIsTechnicalErrorPage(performAction())
         }
@@ -766,7 +767,7 @@ class GainOrLossAfterReliefsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockEligibilityCheck(fillingOutReturn)(Right(Ineligible(Some(false))))
+            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(Some(false))))
           }
 
           checkPageIsDisplayed(

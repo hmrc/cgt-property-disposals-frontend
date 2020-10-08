@@ -116,7 +116,7 @@ class SingleDisposalsTriageControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       newReturnTriageAnswers = Right(singleDisposalTriageAnswers),
       representeeAnswers = representeeAnswers,
-      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None, None))
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None, None, None))
     )
 
     val sessionData = SessionData.empty.copy(
@@ -140,7 +140,7 @@ class SingleDisposalsTriageControllerSpec
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
-      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None, None)),
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None, None, None)),
       amendReturnData = amendReturnData
     )
 

@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{FurtherReturnEligibilityUtilSupport, ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
@@ -40,6 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, M
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
@@ -62,7 +63,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalcuationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibilityUtil, ReturnsService}
 
 import scala.concurrent.Future
 
@@ -73,13 +75,15 @@ class ExemptionAndLossesControllerSpec
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
-    with StartingToAmendToFillingOutReturnSpecBehaviour {
+    with StartingToAmendToFillingOutReturnSpecBehaviour
+    with FurtherReturnEligibilityUtilSupport {
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[FurtherReturnCalculationEligibilityUtil].toInstance(mockFurtherReturnEligibilityUtil)
     )
 
   lazy val controller = instanceOf[ExemptionAndLossesController]
@@ -183,7 +187,7 @@ class ExemptionAndLossesControllerSpec
 
     val journey = sampleFillingOutReturn(draftReturn, userType).copy(
       previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)) else None,
+        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
       amendReturnData = None
     )
 
@@ -233,7 +237,7 @@ class ExemptionAndLossesControllerSpec
 
     val journey = sampleFillingOutReturn(draftReturn, userType).copy(
       previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)) else None,
+        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
       amendReturnData = None
     )
 
@@ -311,7 +315,7 @@ class ExemptionAndLossesControllerSpec
       subscribedDetails = subscribedDetails,
       agentReferenceNumber = setAgentReferenceNumber(userType),
       previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)) else None,
+        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
       amendReturnData = None
     )
 
@@ -538,17 +542,17 @@ class ExemptionAndLossesControllerSpec
 
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
+              val (session, fillingOutReturn, _) = sessionWithSingleDisposalsState(
+                None,
+                Some(disposalDate),
+                userType,
+                Some(individualUserType),
+                isFurtherReturn = true
+              )
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithSingleDisposalsState(
-                    None,
-                    Some(disposalDate),
-                    userType,
-                    Some(individualUserType),
-                    isFurtherReturn = true
-                  )._1
-                )
+                mockGetSession(session)
+                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
               }
 
               val userKey = userMessageKey(individualUserType, userType)
@@ -575,6 +579,27 @@ class ExemptionAndLossesControllerSpec
               )
           }
 
+        }
+
+      }
+
+      "show an error page" when {
+
+        "the user is on a further return journey and there is a problem checking their eligibility for a calculatino" in {
+          val (session, fillingOutReturn, _) = sessionWithSingleDisposalsState(
+            None,
+            Some(sample[DisposalDate]),
+            UserType.Individual,
+            Some(Self),
+            isFurtherReturn = true
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
         }
 
       }
@@ -852,17 +877,14 @@ class ExemptionAndLossesControllerSpec
             }
           }
 
-          "the user is on a further return journey" in {
-            val answers                                  =
-              sample[CompleteExemptionAndLossesAnswers]
-                .copy(inYearLosses = AmountInPence(1L))
+          "the user is on a further return journey and they are not eligible for a further return calculation" in {
             val newAnswers                               = IncompleteExemptionAndLossesAnswers(
               Some(AmountInPence(2L)),
               None,
-              Some(answers.annualExemptAmount)
+              Some(AmountInPence.zero)
             )
             val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalsState(
-              Some(answers),
+              None,
               Some(sample[DisposalDate]),
               UserType.Individual,
               Some(IndividualUserType.Self),
@@ -878,6 +900,45 @@ class ExemptionAndLossesControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
+              mockStoreDraftReturn(newFillingOutReturn)(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newFillingOutReturn)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(
+                key      -> "0",
+                valueKey -> "0.02"
+              ),
+              routes.ExemptionAndLossesController.checkYourAnswers()
+            )
+
+          }
+
+          "the user is on a further return journey and they are eligible for a further return calculation" in {
+            val newAnswers                               = IncompleteExemptionAndLossesAnswers(
+              Some(AmountInPence(2L)),
+              None,
+              None
+            )
+            val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalsState(
+              None,
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              Some(IndividualUserType.Self),
+              isFurtherReturn = true
+            )
+            val newDraftReturn                           = draftReturn.copy(
+              exemptionAndLossesAnswers = Some(newAnswers),
+              yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers
+                .flatMap(_.unsetAllButIncomeDetails())
+            )
+            val newFillingOutReturn                      = fillingOutReturn.copy(draftReturn = newDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
               mockStoreDraftReturn(newFillingOutReturn)(Right(()))
               mockStoreSession(session.copy(journeyStatus = Some(newFillingOutReturn)))(Right(()))
             }

@@ -31,7 +31,7 @@ object UpscanCallBack {
   ) extends UpscanCallBack
 
   object UpscanSuccess {
-    implicit val format = Json.format[UpscanSuccess]
+    implicit val format: OFormat[UpscanSuccess] = Json.format[UpscanSuccess]
   }
 
   final case class UpscanFailure(
@@ -41,7 +41,7 @@ object UpscanCallBack {
   ) extends UpscanCallBack
 
   object UpscanFailure {
-    implicit val format = Json.format[UpscanFailure]
+    implicit val format: OFormat[UpscanFailure] = Json.format[UpscanFailure]
   }
 
   implicit class UpscanSuccessOps(private val u: UpscanSuccess) extends AnyVal {

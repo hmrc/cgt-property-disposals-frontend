@@ -23,12 +23,13 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, MessagesRequest, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedRequest, RequestWithSessionData}
@@ -379,7 +380,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             val completeFillingOutReturn = sample[FillingOutReturn].copy(
               draftReturn = completeDraftReturn,
               previousSentReturns =
-                Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]), None)),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]), None, None)),
               amendReturnData = None
             )
 
@@ -432,7 +433,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             val completeFillingOutReturn = sample[FillingOutReturn].copy(
               draftReturn = completeDraftReturn,
               previousSentReturns =
-                Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]), None)),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]), None, None)),
               amendReturnData = Some(
                 sample[AmendReturnData].copy(
                   originalReturn = sample[CompleteReturnWithSummary].copy(
@@ -1302,16 +1303,16 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
       lazy val submitReturnRequest = {
-        val cyaPge                          = instanceOf[views.html.returns.check_all_answers]
-        implicit val requestWithSessionData =
+        val cyaPge                                                     = instanceOf[views.html.returns.check_all_answers]
+        implicit val requestWithSessionData: RequestWithSessionData[_] =
           RequestWithSessionData(
             None,
             AuthenticatedRequest(
               new MessagesRequest(FakeRequest(), messagesApi)
             )
           )
-        implicit val config                 = viewConfig
-        implicit val messages               = MessagesImpl(Lang.apply("en"), messagesApi)
+        implicit val config: ViewConfig                                = viewConfig
+        implicit val messages: MessagesImpl                            = MessagesImpl(Lang.apply("en"), messagesApi)
 
         val cyaPageHtml =
           cyaPge(
@@ -1337,17 +1338,17 @@ class CheckAllAnswersAndSubmitControllerSpec
         representeeCgtReference: RepresenteeCgtReference,
         hideEstimatesQuestion: Boolean
       ) = {
-        val cyaPge                          = instanceOf[views.html.returns.check_all_answers]
-        implicit val requestWithSessionData =
+        val cyaPge                                                     = instanceOf[views.html.returns.check_all_answers]
+        implicit val requestWithSessionData: RequestWithSessionData[_] =
           RequestWithSessionData(
             None,
             AuthenticatedRequest(
               new MessagesRequest(FakeRequest(), messagesApi)
             )
           )
-        implicit val config                 = viewConfig
-        implicit val messages               = MessagesImpl(Lang.apply("en"), messagesApi)
-        val mockedCompleteReturn            = CompleteSingleDisposalReturn
+        implicit val config: ViewConfig                                = viewConfig
+        implicit val messages: Messages                                = MessagesImpl(Lang.apply("en"), messagesApi)
+        val mockedCompleteReturn                                       = CompleteSingleDisposalReturn
           .fromDraftReturn(
             completeDraftReturnRepresenteWithNoReference
               .copy(representeeAnswers =

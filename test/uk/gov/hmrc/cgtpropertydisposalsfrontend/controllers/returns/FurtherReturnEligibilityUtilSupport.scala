@@ -22,22 +22,23 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnEligibility, FurtherReturnEligibilityUtil}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalcuationEligibility, FurtherReturnCalculationEligibilityUtil}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait GlarEligibilityUtilSupport { this: ControllerSpec =>
+trait FurtherReturnEligibilityUtilSupport { this: ControllerSpec =>
 
-  val mockGlarCalculatorEligibility: FurtherReturnEligibilityUtil = mock[FurtherReturnEligibilityUtil]
+  val mockFurtherReturnEligibilityUtil: FurtherReturnCalculationEligibilityUtil =
+    mock[FurtherReturnCalculationEligibilityUtil]
 
-  def mockEligibilityCheck(
+  def mockFurthereturnCalculationEligibilityCheck(
     fillingOutReturn: FillingOutReturn
   )(
-    result: Either[Error, FurtherReturnEligibility]
+    result: Either[Error, FurtherReturnCalcuationEligibility]
   ) =
-    (mockGlarCalculatorEligibility
+    (mockFurtherReturnEligibilityUtil
       .isEligibleForFurtherReturnOrAmendCalculation(
         _: FillingOutReturn
       )(

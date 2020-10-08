@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 final case class UploadRequest(
   href: String,
@@ -24,5 +24,5 @@ final case class UploadRequest(
 )
 
 object UploadRequest {
-  implicit val format = Json.format[UploadRequest]
+  implicit val format: OFormat[UploadRequest] = Json.format[UploadRequest]
 }

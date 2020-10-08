@@ -239,7 +239,7 @@ class YearToDateLiabilityControllerSpec
       ),
       draftReturn = draftReturn,
       previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)) else None,
+        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
       amendReturnData = None
     )
     (
@@ -287,7 +287,7 @@ class YearToDateLiabilityControllerSpec
       ),
       draftReturn = draftReturn,
       previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)) else None,
+        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
       amendReturnData = None
     )
     (
@@ -340,7 +340,8 @@ class YearToDateLiabilityControllerSpec
       ),
       draftReturn = draftReturn,
       previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]), None))
+        if (isFurtherReturn)
+          Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]), None, None))
         else None,
       amendReturnData = amendReturnData
     )
@@ -390,7 +391,7 @@ class YearToDateLiabilityControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
       draftReturn = draftReturn,
       previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)) else None,
+        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
       amendReturnData = amendReturnData
     )
     (
@@ -3677,8 +3678,9 @@ class YearToDateLiabilityControllerSpec
           )
           val journey     = sample[FillingOutReturn].copy(
             draftReturn = draftReturn,
-            previousSentReturns =
-              Some(PreviousReturnData(if (isFurtherReturn) List(sample[ReturnSummary]) else List.empty, None, None)),
+            previousSentReturns = Some(
+              PreviousReturnData(if (isFurtherReturn) List(sample[ReturnSummary]) else List.empty, None, None, None)
+            ),
             amendReturnData = None
           )
 

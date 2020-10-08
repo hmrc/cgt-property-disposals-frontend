@@ -84,7 +84,7 @@ class CommonTriageQuestionsController @Inject() (
 
   import CommonTriageQuestionsController._
 
-  val newCompletionDateUsedFlag = servicesConfig.getBoolean("amend-returns.enabled")
+  private val newCompletionDateUsedFlag: Boolean = servicesConfig.getBoolean("amend-returns.enabled")
 
   private def isIndividual(
     state: Either[StartingNewDraftReturn, FillingOutReturn]

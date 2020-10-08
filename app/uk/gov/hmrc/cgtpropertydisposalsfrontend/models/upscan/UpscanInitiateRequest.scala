@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 final case class UpscanInitiateRequest(
   callbackUrl: String,
@@ -27,5 +27,5 @@ final case class UpscanInitiateRequest(
 )
 
 object UpscanInitiateRequest {
-  implicit val format = Json.format[UpscanInitiateRequest]
+  implicit val format: OFormat[UpscanInitiateRequest] = Json.format[UpscanInitiateRequest]
 }

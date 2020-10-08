@@ -38,7 +38,7 @@ object TimeUtils {
 
   val clock: Clock = Clock.systemUTC()
 
-  val minimumDate = LocalDate.of(1900, 1, 1)
+  val minimumDate: LocalDate = LocalDate.of(1900, 1, 1)
 
   def today(): LocalDate = LocalDate.now(clock)
 

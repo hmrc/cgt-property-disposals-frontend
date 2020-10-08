@@ -37,7 +37,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, M
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, ExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalcuationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{exemptionandlosses => pages}
@@ -54,6 +55,7 @@ class ExemptionAndLossesController @Inject() (
   returnsService: ReturnsService,
   cc: MessagesControllerComponents,
   val config: Configuration,
+  furtherReturnCalculationEligibilityUtil: FurtherReturnCalculationEligibilityUtil,
   inYearLossesPage: pages.in_year_losses,
   furtherReturnInYearLossesPage: pages.further_return_in_year_losses,
   previousYearsLossesPage: pages.previous_years_losses,
@@ -81,30 +83,33 @@ class ExemptionAndLossesController @Inject() (
         markUnmetDependency(s, sessionStore, errorHandler)
 
       case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) if r.isFurtherOrAmendReturn.contains(true) =>
-        val answers = d
-          .fold(
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers
+        furtherReturnCalculationEligibilityUtil
+          .isEligibleForFurtherReturnOrAmendCalculation(r)
+          .foldF(
+            { e =>
+              logger.warn("Could not check for further return calculation eligibility", e)
+              errorHandler.errorResult()
+            },
+            {
+              case _: Ineligible =>
+                val answers = d.exemptionAndLossesAnswers
+                  .getOrElse(
+                    IncompleteExemptionAndLossesAnswers.empty.copy(
+                      annualExemptAmount = Some(AmountInPence.zero)
+                    )
+                  )
+                f(s, r, d, answers)
+
+              case _: Eligible =>
+                val answers = d.exemptionAndLossesAnswers
+                  .getOrElse(IncompleteExemptionAndLossesAnswers.empty)
+                f(s, r, d, answers)
+
+            }
           )
-          .getOrElse(
-            IncompleteExemptionAndLossesAnswers.empty.copy(
-              annualExemptAmount = Some(AmountInPence.zero)
-            )
-          )
-        f(s, r, d, answers)
 
       case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) =>
-        val answers = d
-          .fold(
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers
-          )
+        val answers = d.exemptionAndLossesAnswers
           .getOrElse(IncompleteExemptionAndLossesAnswers.empty)
         f(s, r, d, answers)
 

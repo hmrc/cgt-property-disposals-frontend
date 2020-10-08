@@ -28,7 +28,7 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest, TaxableGainOrLossCalculationRequest}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -71,6 +71,10 @@ trait ReturnsConnector {
     request: CalculateCgtTaxDueRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 
+  def calculateTaxableGainOrLoss(
+    request: TaxableGainOrLossCalculationRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+
   def taxYear(date: LocalDate)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
@@ -85,16 +89,18 @@ class ReturnsConnectorImpl @Inject() (
   ec: ExecutionContext
 ) extends ReturnsConnector {
 
-  val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals")
+  private val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals")
 
-  def getDraftReturnsUrl(cgtReference: CgtReference): String =
+  private def getDraftReturnsUrl(cgtReference: CgtReference): String =
     s"$baseUrl/draft-returns/${cgtReference.value}"
 
-  val deleteDraftReturnsUrl: String = s"$baseUrl/draft-returns/delete"
+  private val deleteDraftReturnsUrl: String = s"$baseUrl/draft-returns/delete"
 
-  val submitReturnUrl: String = s"$baseUrl/return"
+  private val submitReturnUrl: String = s"$baseUrl/return"
 
-  val calculateCgtTaxDueUrl: String = s"$baseUrl/calculate-tax-due"
+  private val calculateCgtTaxDueUrl: String = s"$baseUrl/calculate-tax-due"
+
+  private val calculateTaxableGainOrLossUrl: String = s"$baseUrl/calculate-taxable-gain-or-loss"
 
   override def storeDraftReturn(
     draftReturn: DraftReturn,
@@ -191,6 +197,18 @@ class ReturnsConnectorImpl @Inject() (
     EitherT[Future, Error, HttpResponse](
       http
         .POST[CalculateCgtTaxDueRequest, HttpResponse](calculateCgtTaxDueUrl, request)
+        .map(Right(_))
+        .recover { case NonFatal(e) =>
+          Left(Error(e))
+        }
+    )
+
+  def calculateTaxableGainOrLoss(
+    request: TaxableGainOrLossCalculationRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+    EitherT[Future, Error, HttpResponse](
+      http
+        .POST[TaxableGainOrLossCalculationRequest, HttpResponse](calculateTaxableGainOrLossUrl, request)
         .map(Right(_))
         .recover { case NonFatal(e) =>
           Left(Error(e))
