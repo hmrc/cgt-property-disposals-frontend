@@ -142,13 +142,13 @@
       case _ =>
           Html(
             s"""
-           |<p>messages(s"$key$userKey.furtherReturn.p1", taxYearStart, taxYearEnd)</p>
-           |<p>messages(s"$key.furtherReturn.p2")</p>
+           |<p>${messages(s"$key$userKey.furtherReturn.p1", taxYearStart, taxYearEnd)}</p>
+           |<p>${messages(s"$key.furtherReturn.p2")}</p>
            |<ol class="list list-number">
-           |<li>messages(s"$key.furtherReturn.li1")</li>
-           |<li>messages(s"$key.furtherReturn.li2")</li>
-           |<li>messages(s"$key.furtherReturn.li3")</li>
-           |<li>messages(s"$key$userKey.furtherReturn.li4")</li>
+           |<li>${messages(s"$key.furtherReturn.li1")}</li>
+           |<li>${messages(s"$key.furtherReturn.li2")}</li>
+           |<li>${messages(s"$key$userKey.furtherReturn.li4")}</li>
+           |<li>${messages(s"$key.furtherReturn.li3")}</li>
            |</ol>
             """.stripMargin)
     }
