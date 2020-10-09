@@ -142,22 +142,31 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @title = @{
     messages(s"$key$userKey$multipleDisposalKey.title")
 }
-  @glar = @{
-      glarCalulatorInput match {
-          case Some(value) =>  MoneyUtils.formatAmountOfMoneyWithoutPoundSign(value.gainOrLossAfterReliefs)
-          case None => ""
-      }}
-@label = @{if(glarCalulatorInput.isEmpty) {
-    Html(s"""<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>""")
-} else {
-    Html(
-        s"""
-           |<div>
-           |<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>
-           |<p>${messages(s"$key.calculated.prompt", glar)}</p>
-           |</div>"""
-           .stripMargin)
-}}
+
+@label = @{
+    glarCalulatorInput match {
+        case Some(calculation) =>
+          val glar = calculation.gainOrLossAfterReliefs
+          val prompt =
+              if(glar > 0)
+                  messages(s"$key.calculated.gain.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs))
+              else if(glar < 0)
+                  messages(s"$key.calculated.loss.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs.abs))
+              else
+                  messages(s"$key.calculated.noGainOrLoss.prompt")
+
+            Html(
+                s"""
+                |<div>
+                |<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>
+                |<p>$prompt</p>
+                |</div>"""
+                .stripMargin)
+
+        case None =>
+            Html(s"""<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>""")
+    }
+}
 
     @mainTemplate(title = title, userType = request.userType) {
 
@@ -171,20 +180,11 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
     @pageHeading(title)
 
-  @{glarCalulatorInput match {
-      case Some(value) => messages(
-          s"$key.calculatorHeading",
-          if(value.isGain) messages("generic.gain") else messages("generic.loss"),
-          MoneyUtils.formatAmountOfMoneyWithPoundSign(value.gainOrLossAfterReliefs.abs)
-      )
-
-      case _ => ""
-  }}
-
     <div>
-    @{glarCalulatorInput match {
+    @glarCalulatorInput match {
           case Some(calculatedValues) =>  {
-              details(
+            <p>@messages(s"$key.calculatorHeading")</p>
+              @details(
                   messages("calculator.showWorkings"),
                   gainOrLossAfterReliefsCalculator(
                       calculatedValues.acquisitionPrice,
@@ -195,19 +195,20 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
                       calculatedValues.lettingRelief,
                       calculatedValues.improvementCosts
                   ),
-                  Some(messages(s"$key.assistive.gainOrLossAfterReliefs")) )
+                  Some(messages(s"$key.assistive.gainOrLossAfterReliefs"))
+              )
           }
-          case _ =>
-                  <p>{messages(s"$key.p1")}</p>
-                  <ol class="list list-number">
-                    <li>{messages(s"$key$multipleDisposalKey.li1")}</li>
-                    <li>{messages(s"$key.li2")}</li>
-                    <li>{messages(s"$key.li3")}</li>
-                    <li>{messages(s"$key$multipleDisposalKey.li4")}</li>
-                    <li>{messages(s"$key.li5")}</li>
-                  </ol>
-      }
-  }
+          case _ => {
+              <p>@messages(s"$key.p1")</p>
+              <ol class="list list-number">
+                  <li>@messages(s"$key$multipleDisposalKey.li1")</li>
+                  <li>@messages(s"$key.li2")</li>
+                  <li>@messages(s"$key.li3")</li>
+                  <li>@messages(s"$key$multipleDisposalKey.li4")</li>
+                  <li>@messages(s"$key.li5")</li>
+              </ol>
+          }
+    }
     </div>
 
 
