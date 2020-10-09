@@ -42,7 +42,8 @@
         unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
         radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-        furtherReturnTaxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.further_return_taxable_gain_workings
+        furtherReturnTaxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.further_return_taxable_gain_workings,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(
@@ -135,10 +136,14 @@
 
 @taxYearStart = @{ taxYear.startDateInclusive.getYear.toString }
 @taxYearEnd = @{ taxYear.endDateExclusive.getYear.toString }
-@calcOrHelpText = @{
+@calcOrGuidance = @{
     taxableGainOrLossCalculation match {
       case Some(c) =>
-        furtherReturnTaxableGainWorkings(c._1, c._2)
+          Html(
+           s"""
+           |<p>${messages(s"$key.calculated.furtherReturn.p1", taxYearStart, taxYearEnd)}</p>
+           |${details(messages("calculator.showWorkings"), furtherReturnTaxableGainWorkings(c._1, c._2), Some(messages(s"$key.assistive.taxableGain")))}
+            """.stripMargin)
       case _ =>
           Html(
             s"""
@@ -166,7 +171,7 @@
 
     @pageHeading(title)
 
-    @calcOrHelpText
+    @calcOrGuidance
 
     @formWrapper(routes.YearToDateLiabilityController.taxableGainOrLossSubmit(), 'novalidate -> "novalidate") {
         @radioGroupConditional(
@@ -179,11 +184,13 @@
             customErrorKey = customErrorKey
         )
 
-        <p>
-            <a href="@{triage.routes.FurtherReturnGuidanceController.taxableGainGuidance()}" id="link">
+        @if(taxableGainOrLossCalculation.isEmpty) {
+            <p>
+                <a href="@{triage.routes.FurtherReturnGuidanceController.taxableGainGuidance()}" id="link">
                 @messages(s"$key$userKey.furtherReturn.link")
-            </a>
-        </p>
+                </a>
+            </p>
+        }
 
         @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
