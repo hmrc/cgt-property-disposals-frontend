@@ -3942,7 +3942,8 @@ class YearToDateLiabilityControllerSpec
               TaxableGainOrLossCalculationRequest(
                 eligible.previousReturnCalculationData,
                 gainOrLossAfterReliefs,
-                exemptionAndLossesAnswers
+                exemptionAndLossesAnswers,
+                eligible.currentReturnAddress
               )
             )(Left(Error("")))
           }
@@ -4367,7 +4368,8 @@ class YearToDateLiabilityControllerSpec
                 TaxableGainOrLossCalculationRequest(
                   eligible.previousReturnCalculationData,
                   gainOrLossAfterReliefs,
-                  exemptionAndLossesAnswers
+                  exemptionAndLossesAnswers,
+                  eligible.currentReturnAddress
                 )
               )(Right(calculation))
             }

@@ -29,6 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
@@ -62,7 +63,8 @@ object FurtherReturnCalcuationEligibility {
 
   final case class Eligible(
     calculation: CalculatedGlarBreakdown,
-    previousReturnCalculationData: List[FurtherReturnCalculationData]
+    previousReturnCalculationData: List[FurtherReturnCalculationData],
+    currentReturnAddress: UkAddress
   ) extends FurtherReturnCalcuationEligibility
 
   final case class Ineligible(previousReturnsImplyEligibility: Option[Boolean])
@@ -140,10 +142,10 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
           Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
         )
 
-      case Right(Some(EligibleData(glarBreakdown, assetType, previousReturnData))) =>
+      case Right(Some(EligibleData(glarBreakdown, assetType, previousReturnData, address))) =>
         (previousReturnData.previousReturnsImplyEligibilityForCalculation, previousReturnData.calculationData) match {
           case (Some(true), Some(previousReturnCalculationData)) =>
-            EitherT.pure(Eligible(glarBreakdown, previousReturnCalculationData))
+            EitherT.pure(Eligible(glarBreakdown, previousReturnCalculationData, address))
 
           case (Some(false), _) =>
             EitherT.pure(Ineligible(Some(false)))
@@ -180,7 +182,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
               val (ineligibleResults, eligibleResults) = results.partitionWith(Either.fromOption(_, ()))
 
               if (ineligibleResults.isEmpty)
-                Eligible(glarBreakdown, eligibleResults)
+                Eligible(glarBreakdown, eligibleResults, address)
               else
                 Ineligible(Some(false))
 
@@ -197,7 +199,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
       case DraftSingleDisposalReturn(
             _,
             triageAnswers: CompleteSingleDisposalTriageAnswers,
-            _,
+            Some(address),
             Some(disposalDetailsAnswers: CompleteDisposalDetailsAnswers),
             Some(acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers),
             Some(reliefDetailsAnswers: CompleteReliefDetailsAnswers),
@@ -240,7 +242,8 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
                           reliefDetailsAnswers
                         ),
                         assetType,
-                        previousReturnData
+                        previousReturnData,
+                        address
                       )
                     )
                   else None
@@ -277,7 +280,8 @@ object FurtherReturnCalculationEligibilityUtilImpl {
   private final case class EligibleData(
     glarBreakdown: CalculatedGlarBreakdown,
     assetType: Either[NonResidential.type, Residential.type],
-    previousSentReturns: PreviousReturnData
+    previousSentReturns: PreviousReturnData,
+    currentReturnAddress: UkAddress
   )
 
 }

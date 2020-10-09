@@ -85,8 +85,8 @@ class GainOrLossAfterReliefsController @Inject() (
                   draftReturn.triageAnswers().isLeft,
                   fillingOutReturn.isAmendReturn,
                   furtherReturnEligibility match {
-                    case FurtherReturnCalcuationEligibility.Eligible(calculation, _) => Some(calculation)
-                    case FurtherReturnCalcuationEligibility.Ineligible(_)            => None
+                    case FurtherReturnCalcuationEligibility.Eligible(calculation, _, _) => Some(calculation)
+                    case FurtherReturnCalcuationEligibility.Ineligible(_)               => None
                   }
                 )
               )
@@ -120,8 +120,8 @@ class GainOrLossAfterReliefsController @Inject() (
                         draftReturn.triageAnswers().isLeft,
                         fillingOutReturn.isAmendReturn,
                         eligibility match {
-                          case FurtherReturnCalcuationEligibility.Eligible(calculation, _) => Some(calculation)
-                          case FurtherReturnCalcuationEligibility.Ineligible(_)            => None
+                          case FurtherReturnCalcuationEligibility.Eligible(calculation, _, _) => Some(calculation)
+                          case FurtherReturnCalcuationEligibility.Ineligible(_)               => None
                         }
                       )
                     )

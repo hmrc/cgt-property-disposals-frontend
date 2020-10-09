@@ -93,7 +93,8 @@ class FurtherReturnCalculationEligibilityUtilSpec
     withCompleteAcquisitionDetails: Boolean = true,
     withCompleteReliefDetails: Boolean = true,
     withCompleteTriageDetails: Boolean = true,
-    withCompleteDisposalDetails: Boolean = true
+    withCompleteDisposalDetails: Boolean = true,
+    address: Option[UkAddress] = Some(sample[UkAddress])
   ): FillingOutReturn = {
     val draftReturn = sample[DraftSingleDisposalReturn]
       .copy(
@@ -101,6 +102,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           sample[CompleteSingleDisposalTriageAnswers]
             .copy(individualUserType = individualUserType, assetType = assetType)
         } else sample[IncompleteSingleDisposalTriageAnswers],
+        propertyAddress = address,
         disposalDetailsAnswers = Some(
           if (withCompleteDisposalDetails) {
             sample[CompleteDisposalDetailsAnswers]
@@ -386,6 +388,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
       "return an eligible response" when {
 
         "under limit and displays OK" in new TestEnvironment() {
+          val currentReturnAddress         = sample[UkAddress]
           val (address1, address2)         = sample[UkAddress]     -> sample[UkAddress]
           val (return1, return2)           = sample[ReturnSummary] -> sample[ReturnSummary]
           val previousReturnData           =
@@ -396,7 +399,10 @@ class FurtherReturnCalculationEligibilityUtilSpec
                 calculationData = None
               )
           val fillingOutReturn             =
-            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
+            eligibleFillingOutReturn(
+              previousSentReturns = Some(previousReturnData),
+              address = Some(currentReturnAddress)
+            )
           val sessionData                  = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
           val furtherRetrunCalculationData =
             List(
@@ -467,15 +473,16 @@ class FurtherReturnCalculationEligibilityUtilSpec
                 AmountInPence(0),
                 AmountInPence(0)
               ),
-              furtherRetrunCalculationData
+              furtherRetrunCalculationData,
+              currentReturnAddress
             )
           )(service)
         }
 
         "in an amend return journey the original return makes the user ineligible but the " +
           "rest of the returns are eligible" in new TestEnvironment() {
-            val address                       = sample[UkAddress]
-            val (originalReturn, otherReturn) = sample[ReturnSummary] -> sample[ReturnSummary]
+            val (currentReturnAddress, previousReturnAddress) = sample[UkAddress]     -> sample[UkAddress]
+            val (originalReturn, otherReturn)                 = sample[ReturnSummary] -> sample[ReturnSummary]
 
             val previousReturnData           =
               sample[PreviousReturnData].copy(
@@ -494,13 +501,14 @@ class FurtherReturnCalculationEligibilityUtilSpec
                       )
                     )
                   )
-                )
+                ),
+                address = Some(currentReturnAddress)
               )
             val sessionData                  = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
             val furtherReturnCalculationData =
               List(
                 FurtherReturnCalculationData(
-                  address,
+                  previousReturnAddress,
                   AmountInPence(99L)
                 )
               )
@@ -510,7 +518,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
               mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, otherReturn.submissionId)(
                 Right(
                   genDisplayReturn(
-                    address = address,
+                    address = previousReturnAddress,
                     gainOrLossAfterReliefs = Some(AmountInPence(99L))
                   )
                 )
@@ -544,7 +552,8 @@ class FurtherReturnCalculationEligibilityUtilSpec
                   AmountInPence(0),
                   AmountInPence(0)
                 ),
-                furtherReturnCalculationData
+                furtherReturnCalculationData,
+                currentReturnAddress
               )
             )(service)
 
@@ -599,6 +608,16 @@ class FurtherReturnCalculationEligibilityUtilSpec
           testError(
             eligibleFillingOutReturn(
               withCompleteReliefDetails = false,
+              previousSentReturns = Some(sample[PreviousReturnData])
+            ),
+            service
+          )
+        }
+
+        "there is no property address in the current return" in new TestEnvironment() {
+          testError(
+            eligibleFillingOutReturn(
+              address = None,
               previousSentReturns = Some(sample[PreviousReturnData])
             ),
             service

@@ -1331,14 +1331,15 @@ class YearToDateLiabilityController @Inject() (
       eligibility     <-
         furtherReturnCalculationEligibilityUtil.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
       calculation     <- eligibility match {
-                           case _: Ineligible                              => EitherT.pure[Future, Error](None)
-                           case Eligible(_, previousReturnCalculationData) =>
+                           case _: Ineligible                                       => EitherT.pure[Future, Error](None)
+                           case Eligible(_, previousReturnCalculationData, address) =>
                              cgtCalculationService
                                .calculateTaxableGainOrLoss(
                                  TaxableGainOrLossCalculationRequest(
                                    previousReturnCalculationData = previousReturnCalculationData,
                                    requiredAnswers._1,
-                                   requiredAnswers._2
+                                   requiredAnswers._2,
+                                   address
                                  )
                                )
                                .map(Some(_))
