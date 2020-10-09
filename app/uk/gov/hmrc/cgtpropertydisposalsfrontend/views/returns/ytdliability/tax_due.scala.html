@@ -46,7 +46,6 @@
     calcRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_row,
     initialGainOrLossWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.initial_gain_or_loss_workings,
     gainOrLossAfterReliefsWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_or_loss_after_reliefs_workings,
-    gainAfterLossesWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_after_losses_workings,
     taxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.taxable_gain_workings,
     taxOwedWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.tax_owed_workings,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
@@ -146,15 +145,7 @@
           Some(messages(s"$key.assistive.gainOrLossAfterReliefs"))
         )
       </li>
-      @if(!calculatedTax.initialGainOrLoss.amount.isNegative) {
-        <li>
-          @calcRow(calculatedTax.gainOrLossAfterLosses, messages(s"$key.gainAfterLosses"), showGainType = true)
-          @details(
-            messages("calculator.showWorkings"),
-            gainAfterLossesWorkings(exemptionsAndLossesDetails, calculatedTax),
-            Some(messages(s"$key.assistive.gainAfterLosses"))
-          )
-        </li>
+      @if(!calculatedTax.gainOrLossAfterReliefs.isNegative) {
         <li>
           @calcRow(calculatedTax.taxableGainOrNetLoss, messages(s"$key.taxableGain"), showGainType = true)
           @details(

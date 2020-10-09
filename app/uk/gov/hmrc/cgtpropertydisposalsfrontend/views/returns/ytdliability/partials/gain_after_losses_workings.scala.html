@@ -32,7 +32,7 @@
 )(implicit messages: Messages)
 
 @gainAfterInYearLosses = @{
-  calculatedTax.gainOrLossAfterReliefs.--(exemptionsAndLossesDetails.inYearLosses)
+  calculatedTax.gainOrLossAfterInYearLosses
 }
 
 @noGainAfterInYearLosses = @{
@@ -47,8 +47,8 @@
   if(gainAfterInYearLosses.isNegative) s" (${messages("generic.loss")})" else if (!gainAfterInYearLosses.isZero) s" (${messages("generic.gain")})" else ""
 }
 
-@gainAfterLossesType = @{
-  if(calculatedTax.gainOrLossAfterLosses.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.gainOrLossAfterLosses.isZero) s" (${messages("generic.gain")})" else ""
+@yearPositionType = @{
+  if(calculatedTax.yearPosition.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.yearPosition.isZero) s" (${messages("generic.gain")})" else ""
 }
 
 @if(noGainAfterInYearLosses) {
@@ -115,7 +115,7 @@
     SumPartDisplay(
       label = messages("calculator.total.gainAfterLosses"),
       operator = Some("="),
-      amount = formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterLosses.abs().inPounds()) + gainAfterLossesType,
+      amount = formatAmountOfMoneyWithPoundSign(calculatedTax.yearPosition.abs().inPounds()) + yearPositionType,
       total = true
     )
   )

@@ -31,32 +31,42 @@
     calculatedTax: CalculatedTaxDue
 )(implicit messages: Messages)
 
+@gainAfterInYearLosses = @{
+  calculatedTax.gainOrLossAfterInYearLosses
+}
+
+@noGainAfterInYearLosses = @{
+  gainAfterInYearLosses.isNegative | gainAfterInYearLosses.isZero
+}
+
 @glarGainType = @{
   if(calculatedTax.gainOrLossAfterReliefs.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.gainOrLossAfterReliefs.isZero) s" (${messages("generic.gain")})" else ""
+}
+
+@inYearLossesGainType = @{
+  if(gainAfterInYearLosses.isNegative) s" (${messages("generic.loss")})" else if (!gainAfterInYearLosses.isZero) s" (${messages("generic.gain")})" else ""
+}
+
+@yearPositionType = @{
+  if(calculatedTax.yearPosition.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.yearPosition.isZero) s" (${messages("generic.gain")})" else ""
 }
 
 @taxableGainType = @{
   if(calculatedTax.taxableGainOrNetLoss.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.taxableGainOrNetLoss.isZero) s" (${messages("generic.gain")})" else ""
 }
 
-@if(calculatedTax.gainOrLossAfterLosses.isZero) {
-  <p>
-    <em>
-      @messages("calculator.cannotApplyAEA")
-    </em>
-  </p>
-} else {
+@if(noGainAfterInYearLosses) {
   @calcSum(
     List(
       SumPartDisplay(
-        label = messages("calculator.total.gainAfterLosses"),
+        label = messages("calculator.total.gainOrLossAfterReliefs"),
         operator = None,
-        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterLosses.abs().inPounds()) + glarGainType
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterReliefs.abs().inPounds()) + glarGainType
       ),
       SumPartDisplay(
-        label = messages("calculator.annualExemptAmount"),
+        label = messages("calculator.inYearLosses"),
         operator = Some("-"),
-        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.annualExemptAmount.inPounds())
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.inYearLosses.inPounds())
       )
     ),
     SumPartDisplay(
@@ -66,4 +76,85 @@
       total = true
     )
   )
+  <p>
+    <em>
+    @messages("calculator.cannotApplyAEA")
+    </em>
+  </p>
+  <p>
+    <em>
+    @messages("calculator.cannotUsePrevYearsLosses")
+    </em>
+  </p>
+} else {
+  @calcSum(
+    List(
+      SumPartDisplay(
+        label = messages("calculator.total.gainOrLossAfterReliefs"),
+        operator = None,
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterReliefs.abs().inPounds()) + glarGainType
+      ),
+      SumPartDisplay(
+        label = messages("calculator.inYearLosses"),
+        operator = Some("-"),
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.inYearLosses.inPounds())
+      )
+    ),
+    SumPartDisplay(
+      label = messages("calculator.total.gainAfterInYearLosses"),
+      operator = Some("="),
+      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterReliefs.--(exemptionsAndLossesDetails.inYearLosses).abs().inPounds()) + inYearLossesGainType,
+      total = true
+    )
+  )
+
+  @calcSum(
+    List(
+      SumPartDisplay(
+        label = messages("calculator.total.gainAfterInYearLosses"),
+        operator = None,
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterInYearLosses.abs().inPounds()) + inYearLossesGainType
+      ),
+      SumPartDisplay(
+        label = messages("calculator.annualExemptAmount"),
+        operator = Some("-"),
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.annualExemptAmount.inPounds())
+      )
+    ),
+    SumPartDisplay(
+      label = messages("calculator.total.yearPosition"),
+      operator = Some("="),
+      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.yearPosition.abs().inPounds()) + yearPositionType,
+      total = true
+    )
+  )
+
+@if(calculatedTax.yearPosition.isZero) {
+  <p>
+    <em>
+    @messages("calculator.cannotUsePrevYearsLosses")
+    </em>
+  </p>
+} else {
+  @calcSum(
+    List(
+      SumPartDisplay(
+        label = messages("calculator.total.yearPosition"),
+        operator = None,
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.yearPosition.abs().inPounds()) + yearPositionType
+      ),
+      SumPartDisplay(
+        label = messages("calculator.prevYearLosses"),
+        operator = Some("-"),
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.previousYearsLosses.inPounds())
+      )
+    ),
+    SumPartDisplay(
+      label = messages("calculator.total.taxableGain"),
+      operator = Some("="),
+      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.taxableGainOrNetLoss.abs().inPounds()) + taxableGainType,
+      total = true
+    )
+  )
+}
 }

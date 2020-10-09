@@ -3671,9 +3671,10 @@ calculator.total.gainOrLossAfterReliefs=Gain or loss after reliefs
 
 calculator.inYearLosses=Losses from this tax year
 calculator.total.gainAfterInYearLosses=Gain after losses from this tax year
-calculator.cannotUsePrevYearsLosses=You cannot use losses from previous tax years in this return. This is because there is no gain after applying losses from this tax year.
+calculator.cannotUsePrevYearsLosses=You cannot use losses from previous tax years in this return. This is because there is no gain.
 calculator.prevYearLosses=Losses from previous tax years
 calculator.total.gainAfterLosses=Gain after all losses
+calculator.total.yearPosition=Year position
 
 calculator.cannotApplyAEA=You cannot use any of the Annual Exempt Amount. This is because there is no gain.
 calculator.annualExemptAmount=Amount of Annual Exempt Amount used
