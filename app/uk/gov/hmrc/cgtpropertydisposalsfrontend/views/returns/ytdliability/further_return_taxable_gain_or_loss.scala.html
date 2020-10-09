@@ -26,6 +26,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, TaxableGainOrLossCalculation}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
@@ -50,7 +51,7 @@
         representativeType: Option[RepresentativeType],
         taxYear: TaxYear,
         isAmend: Boolean,
-        taxableGainOrLossCalculation: Option[TaxableGainOrLossCalculation]
+        taxableGainOrLossCalculation: Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "taxableGainOrLoss" }
 @gainKey = @{ "taxableGain" }

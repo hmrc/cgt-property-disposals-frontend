@@ -1314,7 +1314,7 @@ class YearToDateLiabilityController @Inject() (
   private def getFurtherReturnCalculationData(fillingOutReturn: FillingOutReturn)(implicit
     hc: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, Option[TaxableGainOrLossCalculation]] =
+  ): EitherT[Future, Error, Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]] =
     for {
       requiredAnswers <-
         EitherT.fromEither(
@@ -1344,15 +1344,15 @@ class YearToDateLiabilityController @Inject() (
                                )
                                .map(Some(_))
                          }
-    } yield calculation
+    } yield calculation -> requiredAnswers._2
 
   private def getTaxableGainOrLossPage(fillingOutReturn: FillingOutReturn, taxYear: TaxYear)(implicit
     hc: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, (Form[BigDecimal], Call) => play.twirl.api.Html] =
+  ): EitherT[Future, Error, (Form[BigDecimal], Call) => play.twirl.api.Html]                           =
     if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
       getFurtherReturnCalculationData(fillingOutReturn)
-        .map { calculation =>
+        .map { case calculationWithLossesAndExemptionAnswers =>
           furtherReturnsTaxableGainOrLossPage(
             _,
             _,
@@ -1360,7 +1360,7 @@ class YearToDateLiabilityController @Inject() (
             fillingOutReturn.draftReturn.representativeType(),
             taxYear,
             fillingOutReturn.isAmendReturn,
-            calculation
+            calculationWithLossesAndExemptionAnswers
           )
         }
     } else
