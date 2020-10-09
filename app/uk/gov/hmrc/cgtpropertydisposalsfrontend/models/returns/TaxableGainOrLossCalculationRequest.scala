@@ -22,7 +22,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 
 final case class TaxableGainOrLossCalculationRequest(
-  previousReturnCalculationData: List[FurtherReturnCalculationData],
+  calculationData: List[FurtherReturnCalculationData],
   gainOrLossAfterReliefs: AmountInPence,
   exemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
   address: UkAddress

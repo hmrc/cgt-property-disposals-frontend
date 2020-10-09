@@ -3353,7 +3353,7 @@ taxableGainOrLoss.personalRep.furtherReturn.title=Tell us if the person made a n
 taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Tell us if the estate made a net gain or loss
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.title=Tell us if your client made a net gain or loss
 
-taxableGainOrLoss.calculated.p1=We used the details that were entered in this return to work out your net gain on the property disposals that you are paying tax on in tax year {0} to {1}.
+taxableGainOrLoss.calculated.furtherReturn.p1=We used the details that were entered in this return to work out your net gain on the property disposals that you are paying tax on in tax year {0} to {1}.
 taxableGainOrLoss.furtherReturn.p1=You’ll need to work out if you made a net gain or loss on the UK property-related disposals you are paying tax on in the {0} to {1} tax year.
 taxableGainOrLoss.agent.furtherReturn.p1=You’ll need to work out if your client made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
 taxableGainOrLoss.trust.furtherReturn.p1=You’ll need to work out if the trust made a net gain or loss on the UK property-related disposals it is paying tax on in the {0} to {1} tax year.

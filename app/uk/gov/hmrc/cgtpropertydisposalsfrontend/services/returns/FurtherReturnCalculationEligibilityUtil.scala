@@ -233,7 +233,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
                   val underPreviousReturnLimit = previousReturnData.summaries.length <= maxPreviousReturns
                   val currentReturnIsEligible  = noOtherReliefs && underPreviousReturnLimit
 
-                  if (currentReturnIsEligible)
+                  if (currentReturnIsEligible | noOtherReliefs)
                     Some(
                       EligibleData(
                         calculatedGlarBreakdown(

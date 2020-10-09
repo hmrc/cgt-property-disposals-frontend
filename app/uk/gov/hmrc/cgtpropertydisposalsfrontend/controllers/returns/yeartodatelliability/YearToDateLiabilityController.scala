@@ -1336,7 +1336,7 @@ class YearToDateLiabilityController @Inject() (
                              cgtCalculationService
                                .calculateTaxableGainOrLoss(
                                  TaxableGainOrLossCalculationRequest(
-                                   previousReturnCalculationData = previousReturnCalculationData,
+                                   calculationData = previousReturnCalculationData,
                                    requiredAnswers._1,
                                    requiredAnswers._2,
                                    address
