@@ -4643,7 +4643,10 @@ gainOrLossAfterReliefs.personalRep.multipleDisposals.h2=Did the person make a ga
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.h2=Did the estate make a gain on the disposals in this return after reliefs were subtracted?
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.h2=Did your client make a gain on the disposals in this return after reliefs were subtracted?
 
-gainOrLossAfterReliefs.calculated.prompt=Enter a gain of <strong class="bold">{0}</strong> if you agree with the working
+gainOrLossAfterReliefs.calculated.gain.prompt=Enter a gain of <strong class="bold">{0}</strong> if you agree with these workings.
+gainOrLossAfterReliefs.calculated.loss.prompt=Enter a loss of <strong class="bold">{0}</strong> if you agree with these workings.
+gainOrLossAfterReliefs.calculated.noGainOrLoss.prompt=Select ‘I made no gain or loss’ if you agree with these workings.
+
 gainOrLossAfterReliefs.gain.outerLabel=Yes, I made a gain
 gainOrLossAfterReliefs.loss.outerLabel=No, I made a loss
 gainOrLossAfterReliefs.noLossOrGain.outerLabel=I made no gain or loss after reliefs
