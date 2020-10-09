@@ -41,7 +41,8 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
         unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional
+        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
+        furtherReturnTaxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.further_return_taxable_gain_workings
 )
 
 @(
@@ -134,6 +135,24 @@
 
 @taxYearStart = @{ taxYear.startDateInclusive.getYear.toString }
 @taxYearEnd = @{ taxYear.endDateExclusive.getYear.toString }
+@calcOrHelpText = @{
+    taxableGainOrLossCalculation match {
+      case Some(c) =>
+        furtherReturnTaxableGainWorkings(c._1, c._2)
+      case _ =>
+          Html(
+            s"""
+           |<p>messages(s"$key$userKey.furtherReturn.p1", taxYearStart, taxYearEnd)</p>
+           |<p>messages(s"$key.furtherReturn.p2")</p>
+           |<ol class="list list-number">
+           |<li>messages(s"$key.furtherReturn.li1")</li>
+           |<li>messages(s"$key.furtherReturn.li2")</li>
+           |<li>messages(s"$key.furtherReturn.li3")</li>
+           |<li>messages(s"$key$userKey.furtherReturn.li4")</li>
+           |</ol>
+            """.stripMargin)
+    }
+}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
@@ -147,18 +166,7 @@
 
     @pageHeading(title)
 
-   @taxableGainOrLossCalculation
-
-    <p>@messages(s"$key$userKey.furtherReturn.p1", taxYearStart, taxYearEnd)</p>
-
-    <p>@messages(s"$key.furtherReturn.p2")</p>
-
-    <ol class="list list-number">
-        <li>@messages(s"$key.furtherReturn.li1")</li>
-        <li>@messages(s"$key.furtherReturn.li2")</li>
-        <li>@messages(s"$key.furtherReturn.li3")</li>
-        <li>@messages(s"$key$userKey.furtherReturn.li4")</li>
-    </ol>
+    @calcOrHelpText
 
     @formWrapper(routes.YearToDateLiabilityController.taxableGainOrLossSubmit(), 'novalidate -> "novalidate") {
         @radioGroupConditional(

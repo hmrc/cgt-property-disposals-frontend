@@ -1,0 +1,155 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxableGainOrLossCalculation
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
+
+@this(
+        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+)
+
+@(
+        calculatedTax: TaxableGainOrLossCalculation,
+        exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers
+)(implicit messages: Messages)
+
+@gainAfterInYearLosses = @{
+  calculatedTax.gainOrLossAfterInYearLosses
+}
+
+@noGainAfterInYearLosses = @{
+  gainAfterInYearLosses.isNegative | gainAfterInYearLosses.isZero
+}
+
+@inYearLossesGainType = @{
+  if(gainAfterInYearLosses.isNegative) s" (${messages("generic.loss")})" else if (!gainAfterInYearLosses.isZero) s" (${messages("generic.gain")})" else ""
+}
+
+@yearPositionType = @{
+  if(calculatedTax.yearPosition.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.yearPosition.isZero) s" (${messages("generic.gain")})" else ""
+}
+
+@taxableGainType = @{
+  if(calculatedTax.taxableGainOrLoss.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.taxableGainOrLoss.isZero) s" (${messages("generic.gain")})" else ""
+}
+
+@if(noGainAfterInYearLosses) {
+  @calcSum(
+    List(
+      SumPartDisplay(
+        label = messages("calculator.total.gainsAfterReliefs"),
+        operator = None,
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.totalGainsAfterReliefs.inPounds())
+      ),
+      SumPartDisplay(
+        label = messages("calculator.inYearLosses"),
+        operator = Some("-"),
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.inYearLosses.inPounds())
+      )
+    ),
+    SumPartDisplay(
+      label = messages("calculator.total.taxableGain"),
+      operator = Some("="),
+      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.taxableGainOrLoss.abs().inPounds()) + taxableGainType,
+      total = true
+    )
+  )
+  <p>
+    <em>
+    @messages("calculator.cannotApplyAEA")
+    </em>
+  </p>
+  <p>
+    <em>
+    @messages("calculator.cannotUsePrevYearsLosses")
+    </em>
+  </p>
+} else {
+  @calcSum(
+    List(
+      SumPartDisplay(
+        label = messages("calculator.total.gainsAfterReliefs"),
+        operator = None,
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.totalGainsAfterReliefs.inPounds())
+      ),
+      SumPartDisplay(
+        label = messages("calculator.inYearLosses"),
+        operator = Some("-"),
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.inYearLosses.inPounds())
+      )
+    ),
+    SumPartDisplay(
+      label = messages("calculator.total.gainAfterInYearLosses"),
+      operator = Some("="),
+      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterInYearLosses.abs().inPounds()) + inYearLossesGainType,
+      total = true
+    )
+  )
+
+  @calcSum(
+    List(
+      SumPartDisplay(
+        label = messages("calculator.total.gainAfterInYearLosses"),
+        operator = None,
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterInYearLosses.abs().inPounds()) + inYearLossesGainType
+      ),
+      SumPartDisplay(
+        label = messages("calculator.annualExemptAmount"),
+        operator = Some("-"),
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.annualExemptAmount.inPounds())
+      )
+    ),
+    SumPartDisplay(
+      label = messages("calculator.total.yearPosition"),
+      operator = Some("="),
+      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.yearPosition.abs().inPounds()) + yearPositionType,
+      total = true
+    )
+  )
+
+  @if(calculatedTax.yearPosition.isZero) {
+    <p>
+      <em>
+      @messages("calculator.cannotUsePrevYearsLosses")
+      </em>
+    </p>
+  } else {
+    @calcSum(
+      List(
+        SumPartDisplay(
+          label = messages("calculator.total.yearPosition"),
+          operator = None,
+          amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.yearPosition.abs().inPounds()) + yearPositionType
+        ),
+        SumPartDisplay(
+          label = messages("calculator.prevYearLosses"),
+          operator = Some("-"),
+          amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.previousYearsLosses.inPounds())
+        )
+      ),
+      SumPartDisplay(
+        label = messages("calculator.total.taxableGain"),
+        operator = Some("="),
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.taxableGainOrLoss.abs().inPounds()) + taxableGainType,
+        total = true
+      )
+    )
+  }
+}
