@@ -109,7 +109,7 @@
             SumPartDisplay(
                 label = messages("calculator.total.initialGainOrLoss"),
                 operator = Some("="),
-                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(initialGainOrLoss) + inititalGainOrLossLabel,
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(initialGainOrLoss.abs) + inititalGainOrLossLabel,
                 total = true
             )
     )
@@ -153,7 +153,7 @@
                 label = messages("calculator.total.gainOrLossAfterReliefs"),
                 operator = Some("="),
                 total = true,
-                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(gainOrLossAfterReflief) + gainOrLossAfterReliefLabel
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(gainOrLossAfterReflief.abs) + gainOrLossAfterReliefLabel
             )
     )
 
