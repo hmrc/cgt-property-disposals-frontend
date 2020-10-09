@@ -1344,7 +1344,7 @@ class YearToDateLiabilityController @Inject() (
                                )
                                .map(Some(_))
                          }
-    } yield calculation -> requiredAnswers._2
+    } yield calculation.map(_ -> requiredAnswers._2)
 
   private def getTaxableGainOrLossPage(fillingOutReturn: FillingOutReturn, taxYear: TaxYear)(implicit
     hc: HeaderCarrier,
@@ -1352,7 +1352,7 @@ class YearToDateLiabilityController @Inject() (
   ): EitherT[Future, Error, (Form[BigDecimal], Call) => play.twirl.api.Html]                           =
     if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
       getFurtherReturnCalculationData(fillingOutReturn)
-        .map { case calculationWithLossesAndExemptionAnswers =>
+        .map { calculationWithLossesAndExemptionAnswers =>
           furtherReturnsTaxableGainOrLossPage(
             _,
             _,
