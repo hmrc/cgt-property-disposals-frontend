@@ -21,7 +21,6 @@
 
 @import cats.instances.string._
 @import cats.syntax.eq._
-@import cats.syntax.order._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -31,7 +30,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedGlarBreakdown
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -150,10 +148,10 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
         case Some(calculation) =>
           val glar = calculation.gainOrLossAfterReliefs
           val prompt =
-              if(glar > AmountInPence.zero)
-                  messages(s"$key.calculated.gain.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs))
-              else if(glar < AmountInPence.zero)
-                  messages(s"$key.calculated.loss.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs.abs))
+              if(glar.isPositive)
+                  messages(s"$key.calculated.gain.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs.inPounds()))
+              else if(glar.isNegative)
+                  messages(s"$key.calculated.loss.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs.abs().inPounds()))
               else
                   messages(s"$key.calculated.noGainOrLoss.prompt")
 
