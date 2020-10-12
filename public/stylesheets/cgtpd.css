@@ -727,7 +727,7 @@ details dl.govuk-check-your-answers {
     border-bottom: none;
 }
 
-@media only screen and (max-width: 641px) {
+@media only screen and (max-width: 700px) {
 
     table, thead, tbody, th, td, tr, .mobile-only {
         display: block;
@@ -898,9 +898,13 @@ details dl.govuk-check-your-answers {
         width: 75%;
         float: left;
     }
+
+}
+
+@media (min-width: 701px) {
     .govuk-check-your-answers.cya-questions-long .sum-part > .cya-question,
     .govuk-check-your-answers.cya-questions-long .sum-total > .cya-question {
-        width: 75%;
-        max-width: 75%;
+        width: 66%;
+        max-width: 66%;
     }
 }

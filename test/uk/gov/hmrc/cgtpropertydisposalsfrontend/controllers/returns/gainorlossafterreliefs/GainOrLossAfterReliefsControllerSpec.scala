@@ -35,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Trust
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
@@ -103,6 +104,8 @@ class GainOrLossAfterReliefsControllerSpec
   )
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
+
+  val currentReturnAddress: Address.UkAddress = Address.UkAddress("line 1", None, None, None, Postcode("ABC D12"))
 
   def sessionWithSingleDisposalState(
     gainOrLossAfterReliefs: Option[AmountInPence],
@@ -560,7 +563,8 @@ class GainOrLossAfterReliefsControllerSpec
                       AmountInPence(0),
                       AmountInPence(0)
                     ),
-                    List.empty
+                    List.empty,
+                    currentReturnAddress
                   )
                 )
               )
