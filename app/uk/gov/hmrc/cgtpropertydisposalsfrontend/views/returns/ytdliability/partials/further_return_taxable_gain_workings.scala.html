@@ -51,10 +51,10 @@
 }
 
 @calcSum(
-  calculatedTax.calculationData.map { g =>
+  calculatedTax.calculationData.zipWithIndex.map { case (g, index) =>
     SumPartDisplay(
-      label = g.address.getAddressLines.headOption.getOrElse(""),
-      operator = None,
+      label = g.address.line1,
+      operator = if(index > 0) Some("+") else None,
       amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(g.gainOrLossAfterReliefs.inPounds())
     )
   },
