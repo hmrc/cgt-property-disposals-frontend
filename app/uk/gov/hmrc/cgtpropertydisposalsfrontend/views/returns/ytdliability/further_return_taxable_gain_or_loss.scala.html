@@ -30,6 +30,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, TaxableGainOrLossCalculation}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -158,6 +159,22 @@
             """.stripMargin)
     }
 }
+@extraContent = @{
+    taxableGainOrLossCalculation match {
+        case Some(c) =>
+            val netGain = c._1.taxableGainOrLoss
+            val prompt =
+                if(netGain.isPositive)
+                    messages(s"$key.calculated.gain.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(netGain.inPounds()))
+                else if(netGain.isNegative)
+                    messages(s"$key.calculated.loss.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(netGain.abs().inPounds()))
+                else
+                    messages(s"$key.calculated.noGainOrLoss.prompt")
+
+            Some(Html(s"""<p>$prompt</p>""".stripMargin))
+        case _ => None
+    }
+}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
@@ -181,7 +198,8 @@
             error = form.error(key),
             options = options,
             helpText = None,
-            customErrorKey = customErrorKey
+            customErrorKey = customErrorKey,
+            extraContent = extraContent
         )
 
         @if(taxableGainOrLossCalculation.isEmpty) {
@@ -194,7 +212,6 @@
 
         @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
-
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
 

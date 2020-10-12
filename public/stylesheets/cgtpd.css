@@ -641,14 +641,12 @@ details dl.govuk-check-your-answers {
 .govuk-check-your-answers.cya-questions-long .sum-total > .cya-question,
 .govuk-check-your-answers.cya-questions-long .sum-total > .cya-change {
     font-weight: bold;
-    font-size: 16px;
     max-width: 50%;
 }
 
 .govuk-check-your-answers.cya-questions-long .sum-part > .cya-question,
 .govuk-check-your-answers.cya-questions-long .sum-part > .cya-change {
     font-weight: normal;
-    font-size: 16px;
     max-width: 50%;
 }
 

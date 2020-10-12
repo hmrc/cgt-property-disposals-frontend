@@ -3327,6 +3327,10 @@ taxableGain.error.tooSmall=Overall gain must be an amount of money between 0 and
 taxableGain.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
+taxableGainOrLoss.calculated.gain.prompt=Enter a gain of <strong class="bold">{0}</strong> if you agree with these workings.
+taxableGainOrLoss.calculated.loss.prompt=Enter a loss of <strong class="bold">{0}</strong> if you agree with these workings.
+taxableGainOrLoss.calculated.noGainOrLoss.prompt=Select ‘I made no gain or loss’ if you agree with these workings.
+
 taxableGainOrLoss.loss.label=No, I made an overall loss
 taxableGainOrLoss.agent.loss.label=No, my client made an overall loss
 taxableGainOrLoss.trust.loss.label=No, the trust made an overall loss
