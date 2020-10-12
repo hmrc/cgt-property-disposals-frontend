@@ -50,6 +50,22 @@
   if(calculatedTax.taxableGainOrLoss.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.taxableGainOrLoss.isZero) s" (${messages("generic.gain")})" else ""
 }
 
+@calcSum(
+  calculatedTax.calculationData.map { g =>
+    SumPartDisplay(
+      label = g.address.getAddressLines.headOption.getOrElse(""),
+      operator = None,
+      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(g.gainOrLossAfterReliefs.inPounds())
+    )
+  },
+  SumPartDisplay(
+    label = messages("calculator.total.gainsAfterReliefs"),
+    operator = Some("="),
+    amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.totalGainsAfterReliefs.inPounds()),
+    total = true
+  )
+)
+
 @if(noGainAfterInYearLosses) {
   @calcSum(
     List(
