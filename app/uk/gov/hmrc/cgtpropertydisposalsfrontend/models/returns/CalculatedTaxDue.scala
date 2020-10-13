@@ -71,7 +71,13 @@ final case class CalculatedGlarBreakdown(
 
   val initialGainOrLoss = propertyDisposalAmountLessCosts - propertyAcquisitionAmountPlusCosts
 
-  val gainOrLossAfterReliefs = initialGainOrLoss - totalReliefs
+  val gainOrLossAfterReliefs: BigDecimal =
+    if (initialGainOrLoss > 0)
+      (initialGainOrLoss - totalReliefs).max(0)
+    else if (initialGainOrLoss < 0)
+      (initialGainOrLoss + totalReliefs).min(0)
+    else
+      0
 
   val isGain: Boolean = gainOrLossAfterReliefs > 0
 
