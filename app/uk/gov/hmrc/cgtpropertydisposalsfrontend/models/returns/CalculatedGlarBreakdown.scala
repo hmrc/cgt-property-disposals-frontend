@@ -40,7 +40,13 @@ object CalculatedGlarBreakdown {
       val totalReliefs: AmountInPence = c.privateResidentReliefs ++ c.lettingRelief
 
       val initialGainOrLoss: AmountInPence = propertyDisposalAmountLessCosts -- propertyAcquisitionAmountPlusCosts
-      initialGainOrLoss -- totalReliefs
+
+      if (initialGainOrLoss.isPositive)
+        (initialGainOrLoss -- totalReliefs).withFloorZero
+      else if (initialGainOrLoss.isNegative)
+        (initialGainOrLoss ++ totalReliefs).withCeilingZero
+      else
+        AmountInPence.zero
     }
 
     def isGain: Boolean = gainOrLossAfterReliefs.isPositive
