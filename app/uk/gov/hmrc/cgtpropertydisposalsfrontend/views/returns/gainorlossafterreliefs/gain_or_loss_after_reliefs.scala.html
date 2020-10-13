@@ -179,15 +179,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             <p>@messages(s"$key.calculatorHeading")</p>
               @details(
                   messages("calculator.showWorkings"),
-                  gainOrLossAfterReliefsCalculator(
-                      calculatedValues.acquisitionPrice,
-                      calculatedValues.acquisitionCosts,
-                      calculatedValues.disposalPrice,
-                      calculatedValues.disposalFees,
-                      calculatedValues.privateResidentReliefs,
-                      calculatedValues.lettingRelief,
-                      calculatedValues.improvementCosts
-                  ),
+                  gainOrLossAfterReliefsCalculator(calculatedValues),
                   Some(messages(s"$key.assistive.gainOrLossAfterReliefs"))
               )
           }
