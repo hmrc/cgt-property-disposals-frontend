@@ -408,7 +408,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
             List(
               FurtherReturnCalculationData(
                 address2,
-                AmountInPence(-49L)
+                AmountInPence(0L)
               ),
               FurtherReturnCalculationData(
                 address1,
