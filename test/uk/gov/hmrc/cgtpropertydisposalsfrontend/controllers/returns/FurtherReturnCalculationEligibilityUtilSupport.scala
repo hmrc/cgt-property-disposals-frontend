@@ -22,7 +22,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalcuationEligibility, FurtherReturnCalculationEligibilityUtil}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,7 +36,7 @@ trait FurtherReturnCalculationEligibilityUtilSupport { this: ControllerSpec =>
   def mockFurthereturnCalculationEligibilityCheck(
     fillingOutReturn: FillingOutReturn
   )(
-    result: Either[Error, FurtherReturnCalcuationEligibility]
+    result: Either[Error, FurtherReturnCalculationEligibility]
   ) =
     (
       mockFurtherReturnCalculationEligibilityUtil

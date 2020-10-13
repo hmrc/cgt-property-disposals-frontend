@@ -51,8 +51,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalcuationEligibility.{Eligible, Ineligible}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalcuationEligibility, FurtherReturnCalculationEligibilityUtil, FurtherReturnCalculationEligibilityUtilImpl}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, FurtherReturnCalculationEligibilityUtilImpl}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -175,7 +175,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
       def testWithSession(
         fillingOutReturn: FillingOutReturn,
         sessionData: SessionData,
-        expected: FurtherReturnCalcuationEligibility
+        expected: FurtherReturnCalculationEligibility
       )(service: FurtherReturnCalculationEligibilityUtil) = {
         implicit val request: RequestWithSessionData[_] = requestWithSessionData(sessionData)
         await(service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn).value) shouldBe Right(expected)
@@ -183,7 +183,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
 
       def test(
         fillingOutReturn: FillingOutReturn,
-        expected: FurtherReturnCalcuationEligibility
+        expected: FurtherReturnCalculationEligibility
       )(service: FurtherReturnCalculationEligibilityUtil) =
         testWithSession(fillingOutReturn, SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)), expected)(
           service

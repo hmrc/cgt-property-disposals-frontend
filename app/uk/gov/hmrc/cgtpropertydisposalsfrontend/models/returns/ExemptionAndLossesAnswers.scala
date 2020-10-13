@@ -80,6 +80,11 @@ object ExemptionAndLossesAnswers {
         fold(identity, IncompleteExemptionAndLossesAnswers.fromCompleteAnswers)
       )
 
+    def isEmpty: Boolean = a match {
+      case IncompleteExemptionAndLossesAnswers(None, None, None) => true
+      case _                                                     => false
+    }
+
   }
 
   implicit val eq: Eq[ExemptionAndLossesAnswers] = Eq.fromUniversalEquals

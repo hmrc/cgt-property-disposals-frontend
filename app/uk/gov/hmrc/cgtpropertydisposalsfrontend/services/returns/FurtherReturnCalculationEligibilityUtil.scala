@@ -40,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftSingleDisposalReturn, FurtherReturnCalculationData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalcuationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibilityUtilImpl.EligibleData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ListUtils._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -53,24 +53,24 @@ trait FurtherReturnCalculationEligibilityUtil {
   def isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn: FillingOutReturn)(implicit
     hc: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, FurtherReturnCalcuationEligibility]
+  ): EitherT[Future, Error, FurtherReturnCalculationEligibility]
 
 }
 
-sealed trait FurtherReturnCalcuationEligibility
+sealed trait FurtherReturnCalculationEligibility
 
-object FurtherReturnCalcuationEligibility {
+object FurtherReturnCalculationEligibility {
 
   final case class Eligible(
     calculation: CalculatedGlarBreakdown,
     previousReturnCalculationData: List[FurtherReturnCalculationData],
     currentReturnAddress: UkAddress
-  ) extends FurtherReturnCalcuationEligibility
+  ) extends FurtherReturnCalculationEligibility
 
   final case class Ineligible(previousReturnsImplyEligibility: Option[Boolean])
-      extends FurtherReturnCalcuationEligibility
+      extends FurtherReturnCalculationEligibility
 
-  implicit class FurtherReturnEligibilityOps(private val f: FurtherReturnCalcuationEligibility) extends AnyVal {
+  implicit class FurtherReturnEligibilityOps(private val f: FurtherReturnCalculationEligibility) extends AnyVal {
     def isEligible: Boolean = f match {
       case _: Eligible   => true
       case _: Ineligible => false
@@ -100,20 +100,20 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
   )(implicit
     headerCarrier: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, FurtherReturnCalcuationEligibility] =
+  ): EitherT[Future, Error, FurtherReturnCalculationEligibility] =
     for {
       eligibility   <- determineEligibility(fillingOutReturn)
       updatedJourney =
         fillingOutReturn.copy(
           previousSentReturns = fillingOutReturn.previousSentReturns.map { p =>
             eligibility match {
-              case e: FurtherReturnCalcuationEligibility.Eligible =>
+              case e: FurtherReturnCalculationEligibility.Eligible =>
                 p.copy(
                   previousReturnsImplyEligibilityForCalculation = Some(true),
                   calculationData = Some(e.previousReturnCalculationData)
                 )
 
-              case FurtherReturnCalcuationEligibility.Ineligible(previousReturnsImplyEligibility) =>
+              case FurtherReturnCalculationEligibility.Ineligible(previousReturnsImplyEligibility) =>
                 p.copy(
                   previousReturnsImplyEligibilityForCalculation = previousReturnsImplyEligibility,
                   calculationData = None
@@ -125,11 +125,11 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
                        else EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
     } yield eligibility
 
-  def determineEligibility(
+  private def determineEligibility(
     fillingOutReturn: FillingOutReturn
   )(implicit
     headerCarrier: HeaderCarrier
-  ): EitherT[Future, Error, FurtherReturnCalcuationEligibility] = if (!amendAndFurtherReturnCalculationsEnabled)
+  ): EitherT[Future, Error, FurtherReturnCalculationEligibility] = if (!amendAndFurtherReturnCalculationsEnabled)
     EitherT.pure(
       Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
     )
@@ -233,7 +233,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
                   val underPreviousReturnLimit = previousReturnData.summaries.length <= maxPreviousReturns
                   val currentReturnIsEligible  = noOtherReliefs && underPreviousReturnLimit
 
-                  if (currentReturnIsEligible | noOtherReliefs)
+                  if (currentReturnIsEligible && noOtherReliefs)
                     Some(
                       EligibleData(
                         calculatedGlarBreakdown(

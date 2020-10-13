@@ -63,7 +63,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalcuationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibilityUtil, ReturnsService}
 
 import scala.concurrent.Future
@@ -2033,18 +2033,21 @@ class ExemptionAndLossesControllerSpec
 
       def getSessionJourneyAndDraftReturn(
         userType: UserType,
-        individualUserType: IndividualUserType
+        individualUserType: IndividualUserType,
+        isFurtherReturn: Boolean
       ): (SessionData, SessionData, FillingOutReturn, DraftReturn) = {
-        val (session, journey, draftReturn) = sessionWithSingleDisposalState(
-          allQuestionsAnswered,
-          sample[DisposalDate],
+        val (session, journey, draftReturn) = sessionWithSingleDisposalsState(
+          Some(allQuestionsAnswered),
+          Some(sample[DisposalDate]),
           userType,
-          Some(individualUserType)
+          Some(individualUserType),
+          isFurtherReturn
         )
-        val updatedDraftReturn              = draftReturn.copy(
+
+        val updatedDraftReturn = draftReturn.copy(
           exemptionAndLossesAnswers = Some(completeAnswers)
         )
-        val updatedSession                  = session.copy(
+        val updatedSession     = session.copy(
           journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
         )
 
@@ -2141,7 +2144,7 @@ class ExemptionAndLossesControllerSpec
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val (session, _, journey, updatedDraftReturn) =
-                  getSessionJourneyAndDraftReturn(userType, individualUserType)
+                  getSessionJourneyAndDraftReturn(userType, individualUserType, isFurtherReturn = false)
                 val updatedJourney                            = journey.copy(draftReturn = updatedDraftReturn)
 
                 inSequence {
@@ -2158,7 +2161,7 @@ class ExemptionAndLossesControllerSpec
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val (session, updatedSession, journey, updatedDraftReturn) =
-                  getSessionJourneyAndDraftReturn(userType, individualUserType)
+                  getSessionJourneyAndDraftReturn(userType, individualUserType, isFurtherReturn = false)
                 val updatedJourney                                         = journey.copy(draftReturn = updatedDraftReturn)
 
                 inSequence {
@@ -2178,68 +2181,26 @@ class ExemptionAndLossesControllerSpec
 
       "display the page" when {
 
-        "display the page" when {
-
-          "the user has already answered all the questions" in {
-            forAll { (completeAnswers: CompleteExemptionAndLossesAnswers) =>
-              forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-                (userType: UserType, individualUserType: IndividualUserType) =>
-                  val (session, journey, draftReturn) =
-                    sessionWithSingleDisposalState(
-                      allQuestionsAnswered,
-                      sample[DisposalDate],
-                      userType,
-                      Some(individualUserType)
-                    )
-
-                  val updatedDraftReturn = draftReturn
-                    .copy(exemptionAndLossesAnswers = Some(completeAnswers))
-                  val updatedSession     =
-                    session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-
-                  inSequence {
-                    mockAuthWithNoRetrievals()
-                    mockGetSession(updatedSession)
-                  }
-
-                  val isAnAgent = userType === UserType.Agent
-
-                  checkPageIsDisplayed(
-                    performAction(),
-                    messageFromMessageKey("exemptionsAndLosses.cya.title"),
-                    { doc =>
-                      validateExemptionAndLossesCheckYourAnswersPage(
-                        completeAnswers,
-                        doc,
-                        journey.subscribedDetails.isATrust,
-                        isAnAgent,
-                        individualUserType
-                      )
-                      doc
-                        .select("#content > article > form")
-                        .attr(
-                          "action"
-                        ) shouldBe routes.ExemptionAndLossesController
-                        .checkYourAnswersSubmit()
-                        .url
-                    }
-                  )
-              }
-            }
-          }
-
-          "the user has just answered all the questions and all updates are successful" in {
+        "the user has already answered all the questions" in {
+          forAll { (completeAnswers: CompleteExemptionAndLossesAnswers) =>
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
-                val (session, updatedSession, journey, updatedDraftReturn) =
-                  getSessionJourneyAndDraftReturn(userType, individualUserType)
-                val updatedJourney                                         = journey.copy(draftReturn = updatedDraftReturn)
+                val (session, journey, draftReturn) =
+                  sessionWithSingleDisposalState(
+                    allQuestionsAnswered,
+                    sample[DisposalDate],
+                    userType,
+                    Some(individualUserType)
+                  )
+
+                val updatedDraftReturn = draftReturn
+                  .copy(exemptionAndLossesAnswers = Some(completeAnswers))
+                val updatedSession     =
+                  session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(session)
-                  mockStoreDraftReturn(updatedJourney)(Right(()))
-                  mockStoreSession(updatedSession)(Right(()))
+                  mockGetSession(updatedSession)
                 }
 
                 val isAnAgent = userType === UserType.Agent
@@ -2253,7 +2214,8 @@ class ExemptionAndLossesControllerSpec
                       doc,
                       journey.subscribedDetails.isATrust,
                       isAnAgent,
-                      individualUserType
+                      individualUserType,
+                      showAnnualExemptAmount = true
                     )
                     doc
                       .select("#content > article > form")
@@ -2266,32 +2228,113 @@ class ExemptionAndLossesControllerSpec
                 )
             }
           }
+        }
 
-          "the user wishes to use in year losses" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                val (_, updatedSession, _, _) =
-                  getSessionJourneyAndDraftReturn(userType, individualUserType)
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(updatedSession)
+        "the user has just answered all the questions and all updates are successful" in {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              val (session, updatedSession, journey, updatedDraftReturn) =
+                getSessionJourneyAndDraftReturn(userType, individualUserType, isFurtherReturn = true)
+              val updatedJourney                                         = journey.copy(draftReturn = updatedDraftReturn)
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
+                mockStoreDraftReturn(updatedJourney)(Right(()))
+                mockStoreSession(updatedSession)(Right(()))
+              }
+
+              val isAnAgent = userType === UserType.Agent
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("exemptionsAndLosses.cya.title"),
+                { doc =>
+                  validateExemptionAndLossesCheckYourAnswersPage(
+                    completeAnswers,
+                    doc,
+                    journey.subscribedDetails.isATrust,
+                    isAnAgent,
+                    individualUserType,
+                    showAnnualExemptAmount = false
+                  )
+                  doc
+                    .select("#content > article > form")
+                    .attr(
+                      "action"
+                    ) shouldBe routes.ExemptionAndLossesController
+                    .checkYourAnswersSubmit()
+                    .url
                 }
-
-                checkPageIsDisplayed(
-                  performAction(),
-                  messageFromMessageKey("exemptionsAndLosses.cya.title"),
-                  doc =>
-                    doc
-                      .select("#content > article > form")
-                      .attr(
-                        "action"
-                      ) shouldBe routes.ExemptionAndLossesController
-                      .checkYourAnswersSubmit()
-                      .url
-                )
-            }
+              )
           }
+        }
 
+        "the user is on a further return journey where they are eligible for a calulation" in {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              val (session, updatedSession, journey, updatedDraftReturn) =
+                getSessionJourneyAndDraftReturn(userType, individualUserType, isFurtherReturn = true)
+              val updatedJourney                                         = journey.copy(draftReturn = updatedDraftReturn)
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Eligible]))
+                mockStoreDraftReturn(updatedJourney)(Right(()))
+                mockStoreSession(updatedSession)(Right(()))
+              }
+
+              val isAnAgent = userType === UserType.Agent
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("exemptionsAndLosses.cya.title"),
+                { doc =>
+                  validateExemptionAndLossesCheckYourAnswersPage(
+                    completeAnswers,
+                    doc,
+                    journey.subscribedDetails.isATrust,
+                    isAnAgent,
+                    individualUserType,
+                    showAnnualExemptAmount = true
+                  )
+                  doc
+                    .select("#content > article > form")
+                    .attr(
+                      "action"
+                    ) shouldBe routes.ExemptionAndLossesController
+                    .checkYourAnswersSubmit()
+                    .url
+                }
+              )
+          }
+        }
+
+        "the user wishes to use in year losses" in {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              val (_, updatedSession, _, _) =
+                getSessionJourneyAndDraftReturn(userType, individualUserType, isFurtherReturn = false)
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(updatedSession)
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("exemptionsAndLosses.cya.title"),
+                doc =>
+                  doc
+                    .select("#content > article > form")
+                    .attr(
+                      "action"
+                    ) shouldBe routes.ExemptionAndLossesController
+                    .checkYourAnswersSubmit()
+                    .url
+              )
+          }
         }
 
       }
@@ -2454,7 +2497,7 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     isATrust: Boolean,
     isAnAgent: Boolean,
     individualUserType: IndividualUserType,
-    isFurtherOrAmendReturn: Boolean = false
+    showAnnualExemptAmount: Boolean
   ): Unit = {
 
     if (completeExemptionAndLossesAnswers.inYearLosses.isZero)
@@ -2479,7 +2522,7 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       )
     }
 
-    if (isFurtherOrAmendReturn)
+    if (!showAnnualExemptAmount)
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe ""
@@ -2512,12 +2555,13 @@ object ExemptionAndLossesControllerSpec extends Matchers {
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of your Capital Gains Tax Annual Exempt Amount do you want to use?"
 
-    if (!isFurtherOrAmendReturn)
-      doc
-        .select("#annualExemptAmount-answer")
-        .text   shouldBe formatAmountOfMoneyWithPoundSign(
-        completeExemptionAndLossesAnswers.annualExemptAmount.inPounds()
-      )
+    doc
+      .select("#annualExemptAmount-answer")
+      .text     shouldBe (
+      if (showAnnualExemptAmount)
+        formatAmountOfMoneyWithPoundSign(completeExemptionAndLossesAnswers.annualExemptAmount.inPounds())
+      else ""
+    )
   }
 
 }
