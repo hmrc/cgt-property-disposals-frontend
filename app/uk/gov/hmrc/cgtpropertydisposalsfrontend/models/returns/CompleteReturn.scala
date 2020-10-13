@@ -42,6 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 sealed trait CompleteReturn extends Product with Serializable {
   val representeeAnswers: Option[CompleteRepresenteeAnswers]
   val gainOrLossAfterReliefs: Option[AmountInPence]
+  val exemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers
 }
 
 object CompleteReturn {
@@ -110,7 +111,9 @@ object CompleteReturn {
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
     hasAttachments: Boolean
-  ) extends CompleteReturn
+  ) extends CompleteReturn {
+    val exemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers = exemptionsAndLossesDetails
+  }
 
   object CompleteSingleDisposalReturn {
 
@@ -210,7 +213,9 @@ object CompleteReturn {
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
     hasAttachments: Boolean
-  ) extends CompleteReturn
+  ) extends CompleteReturn {
+    val exemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers = exemptionsAndLossesDetails
+  }
 
   object CompleteSingleIndirectDisposalReturn {
 
@@ -261,7 +266,10 @@ object CompleteReturn {
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
     hasAttachments: Boolean
-  ) extends CompleteReturn
+  ) extends CompleteReturn {
+    val exemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers = exemptionsAndLossesDetails
+
+  }
 
   object CompleteMultipleIndirectDisposalReturn {
 
@@ -308,7 +316,9 @@ object CompleteReturn {
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
     hasAttachments: Boolean
-  ) extends CompleteReturn
+  ) extends CompleteReturn {
+    val exemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers = exemptionsAndLossesDetails
+  }
 
   object CompleteSingleMixedUseDisposalReturn {
 

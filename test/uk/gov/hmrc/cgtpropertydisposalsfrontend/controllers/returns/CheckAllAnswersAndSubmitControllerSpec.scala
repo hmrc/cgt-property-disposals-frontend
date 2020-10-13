@@ -1286,7 +1286,11 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       val completeFillingOutReturnWithRepresenteeWithNoReference =
         sample[FillingOutReturn]
-          .copy(draftReturn = completeDraftReturnRepresenteWithNoReference, amendReturnData = None)
+          .copy(
+            draftReturn = completeDraftReturnRepresenteWithNoReference,
+            amendReturnData = None,
+            previousSentReturns = None
+          )
 
       val completeFillingOutReturnNoRepresentee =
         completeFillingOutReturnWithRepresenteeWithNoReference.copy(draftReturn = completeDraftReturnNoRepresentee)
@@ -1320,7 +1324,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             instanceOf[RebasingEligibilityUtil],
             completeFillingOutReturnNoRepresentee,
             showSubmissionDetails = true,
-            hideEstimatesQuestion = false
+            hideEstimatesQuestion = false,
+            None
           ).toString
 
         SubmitReturnRequest(
@@ -1364,7 +1369,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             instanceOf[RebasingEligibilityUtil],
             completeFillingOutReturnWithRepresenteeWithNoReference,
             showSubmissionDetails = true,
-            hideEstimatesQuestion = hideEstimatesQuestion
+            hideEstimatesQuestion = hideEstimatesQuestion,
+            None
           ).toString
 
         SubmitReturnRequest(
