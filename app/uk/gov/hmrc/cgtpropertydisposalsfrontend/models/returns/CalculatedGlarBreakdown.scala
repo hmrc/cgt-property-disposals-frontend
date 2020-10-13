@@ -32,7 +32,7 @@ object CalculatedGlarBreakdown {
 
   implicit class CalculatedGlarBreakdownOps(private val c: CalculatedGlarBreakdown) extends AnyVal {
     def gainOrLossAfterReliefs: AmountInPence = {
-      val propertyDisposalAmountLessCosts: AmountInPence = c.disposalPrice ++ c.disposalFees
+      val propertyDisposalAmountLessCosts: AmountInPence = c.disposalPrice -- c.disposalFees
 
       val propertyAcquisitionAmountPlusCosts: AmountInPence =
         c.acquisitionPrice ++ c.improvementCosts ++ c.acquisitionCosts
