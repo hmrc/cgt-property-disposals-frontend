@@ -2,7 +2,8 @@ import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import wartremover.{Wart, wartremoverErrors, wartremoverExcluded}
+import wartremover.Wart
+import wartremover.WartRemover.autoImport.{wartremoverErrors, wartremoverExcluded}
 
 val appName = "cgt-property-disposals-frontend"
 

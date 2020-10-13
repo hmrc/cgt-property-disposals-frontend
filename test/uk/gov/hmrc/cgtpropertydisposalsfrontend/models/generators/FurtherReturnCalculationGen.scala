@@ -18,12 +18,22 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, TaxableGainOrLossCalculation, TaxableGainOrLossCalculationRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedGlarBreakdown
-
-object CalculatedGlarBreakdownGen extends GenUtils {
+object FurtherReturnCalculationGen extends GenUtils {
 
   implicit val calculatedGlarBreakdownGen: Gen[CalculatedGlarBreakdown] =
     gen[CalculatedGlarBreakdown]
+
+  implicit val eligibleGen: Gen[Eligible] = gen[Eligible]
+
+  implicit val ineligibleGen: Gen[Ineligible] = gen[Ineligible]
+
+  implicit val taxableGainOrLossCalculationRequestGen: Gen[TaxableGainOrLossCalculationRequest] =
+    gen[TaxableGainOrLossCalculationRequest]
+
+  implicit val taxableGainOrLossCalculationGen: Gen[TaxableGainOrLossCalculation] =
+    gen[TaxableGainOrLossCalculation]
 
 }

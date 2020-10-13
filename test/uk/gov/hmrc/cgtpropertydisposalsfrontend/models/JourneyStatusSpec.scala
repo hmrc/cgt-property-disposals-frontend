@@ -69,7 +69,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
 
             fillingOutReturn(
               Left(sample[TrustName]),
-              Some(PreviousReturnData(List.empty, None, None)),
+              Some(PreviousReturnData(List.empty, None, None, None)),
               sample[DraftReturn]
             ).isFurtherOrAmendReturn shouldBe Some(false)
           }
@@ -77,7 +77,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
           "the user has previously sent returns" in {
             fillingOutReturn(
               Left(sample[TrustName]),
-              Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)),
+              Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)),
               sample[DraftReturn]
             ).isFurtherOrAmendReturn shouldBe Some(true)
           }
@@ -89,7 +89,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
           "the user has not said who they are completing the return for" in {
             fillingOutReturn(
               Right(sample[IndividualName]),
-              Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)),
+              Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)),
               sample[DraftSingleDisposalReturn].copy(
                 triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
               )
@@ -114,7 +114,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
 
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(PreviousReturnData(List.empty, None, None)),
+                Some(PreviousReturnData(List.empty, None, None, None)),
                 draftReturn
               ).isFurtherOrAmendReturn shouldBe Some(false)
             }
@@ -122,7 +122,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             "the user has previously sent returns" in {
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)),
                 draftReturn
               ).isFurtherOrAmendReturn shouldBe Some(true)
             }
@@ -141,7 +141,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             "the user has not said if this is the first return for the person yet" in {
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)),
                 draftReturn.copy(
                   representeeAnswers = None
                 )
@@ -149,7 +149,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
 
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)),
                 draftReturn.copy(
                   representeeAnswers = Some(
                     sample[IncompleteRepresenteeAnswers].copy(
@@ -163,7 +163,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             "the user has said this is the first return for the person" in {
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)),
                 draftReturn.copy(
                   representeeAnswers = Some(
                     sample[IncompleteRepresenteeAnswers].copy(
@@ -177,7 +177,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             "the user has said this is not the first return for the person" in {
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None)),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)),
                 draftReturn.copy(
                   representeeAnswers = Some(
                     sample[CompleteRepresenteeAnswers].copy(

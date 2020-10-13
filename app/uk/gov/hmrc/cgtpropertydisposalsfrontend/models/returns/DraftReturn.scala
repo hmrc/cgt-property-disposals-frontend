@@ -32,6 +32,7 @@ sealed trait DraftReturn extends Product with Serializable {
   val gainOrLossAfterReliefs: Option[AmountInPence]
   val yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers]
   val representeeAnswers: Option[RepresenteeAnswers]
+  val exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers]
 }
 
 final case class DraftSingleDisposalReturn(

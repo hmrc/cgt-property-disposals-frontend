@@ -143,28 +143,21 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     messages(s"$key$userKey$multipleDisposalKey.title")
 }
 
-@label = @{
+@extraContent = @{
     glarCalulatorInput match {
         case Some(calculation) =>
           val glar = calculation.gainOrLossAfterReliefs
           val prompt =
-              if(glar > 0)
-                  messages(s"$key.calculated.gain.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs))
-              else if(glar < 0)
-                  messages(s"$key.calculated.loss.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs.abs))
+              if(glar.isPositive)
+                  messages(s"$key.calculated.gain.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs.inPounds()))
+              else if(glar.isNegative)
+                  messages(s"$key.calculated.loss.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs.abs().inPounds()))
               else
                   messages(s"$key.calculated.noGainOrLoss$outerLabelUserKey.prompt")
 
-            Html(
-                s"""
-                |<div>
-                |<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>
-                |<p>$prompt</p>
-                |</div>"""
-                .stripMargin)
+          Some(Html(s"""<p>$prompt</p>""".stripMargin))
 
-        case None =>
-            Html(s"""<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>""")
+        case None => None
     }
 }
 
@@ -186,15 +179,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             <p>@messages(s"$key.calculatorHeading")</p>
               @details(
                   messages("calculator.showWorkings"),
-                  gainOrLossAfterReliefsCalculator(
-                      calculatedValues.acquisitionPrice,
-                      calculatedValues.acquisitionCosts,
-                      calculatedValues.disposalPrice,
-                      calculatedValues.disposalFees,
-                      calculatedValues.privateResidentReliefs,
-                      calculatedValues.lettingRelief,
-                      calculatedValues.improvementCosts
-                  ),
+                  gainOrLossAfterReliefsCalculator(calculatedValues),
                   Some(messages(s"$key.assistive.gainOrLossAfterReliefs"))
               )
           }
@@ -211,16 +196,16 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     }
     </div>
 
-
     @formWrapper(routes.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefsSubmit(), 'novalidate -> "novalidate") {
       @radioGroupConditional(
         fieldId = key,
         selected = selectedIndex,
         error = form.error(key),
-        label = label,
+        label = Html(s"""<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>"""),
         options = options,
         customErrorKey = customErrorKey,
-        helpText = None
+        helpText = None,
+        extraContent = extraContent
       )
 
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))

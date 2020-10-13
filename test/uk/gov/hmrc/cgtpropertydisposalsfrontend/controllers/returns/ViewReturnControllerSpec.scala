@@ -410,7 +410,8 @@ class ViewReturnControllerSpec
             viewingReturn.subscribedDetails.isATrust,
             completeSingleDisposalReturn.triageAnswers.assetType,
             isFurtherOrAmendReturn = false,
-            !completeSingleDisposalReturn.yearToDateLiabilityAnswers.fold(_.hasEstimatedDetails, _.hasEstimatedDetails)
+            !completeSingleDisposalReturn.yearToDateLiabilityAnswers.fold(_.hasEstimatedDetails, _.hasEstimatedDetails),
+            showAnnualExemptAmount = true
           )
 
         }
@@ -528,7 +529,9 @@ class ViewReturnControllerSpec
             viewingReturn.subscribedDetails.isATrust,
             completeSingleDisposalReturn.triageAnswers.assetType,
             isFurtherOrAmendReturn = true,
-            !completeSingleDisposalReturn.yearToDateLiabilityAnswers.fold(_.hasEstimatedDetails, _.hasEstimatedDetails)
+            !completeSingleDisposalReturn.yearToDateLiabilityAnswers.fold(_.hasEstimatedDetails, _.hasEstimatedDetails),
+            showAnnualExemptAmount =
+              completeSingleDisposalReturn.exemptionsAndLossesDetails.annualExemptAmount.isPositive
           )
 
         }
@@ -649,7 +652,8 @@ class ViewReturnControllerSpec
             Some(userType),
             subscribedDetails.isATrust,
             isFurtherOrAmendReturn = false,
-            !completeMultipleDisposalsReturn.yearToDateLiabilityAnswers.hasEstimatedDetails
+            !completeMultipleDisposalsReturn.yearToDateLiabilityAnswers.hasEstimatedDetails,
+            showAnnualExemptAmount = true
           )
         }
 
@@ -764,7 +768,8 @@ class ViewReturnControllerSpec
             Some(userType),
             subscribedDetails.isATrust,
             isFurtherOrAmendReturn = false,
-            !completeMultipleIndirectDisposalsReturn.yearToDateLiabilityAnswers.hasEstimatedDetails
+            !completeMultipleIndirectDisposalsReturn.yearToDateLiabilityAnswers.hasEstimatedDetails,
+            showAnnualExemptAmount = true
           )
         }
 

@@ -94,7 +94,7 @@ trait AddressController[A <: AddressJourneyType] {
   ): Future[Result] =
     validJourney(request).map[Future[Result]](f.tupled).merge
 
-  def showExitPage() =
+  def showExitPage(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       Ok(exitPage(isUkCall))
     }

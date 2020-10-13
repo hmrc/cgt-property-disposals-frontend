@@ -28,10 +28,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest, TaxableGainOrLossCalculationRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -144,6 +145,17 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       behave like connectorBehaviour(
         mockPost(expectedUrl, Seq.empty, request),
         () => connector.calculateTaxDue(request)
+      )
+    }
+
+    "handling requests to calculate taxable gain or loss" must {
+
+      val request     = sample[TaxableGainOrLossCalculationRequest]
+      val expectedUrl = s"http://host:123/calculate-taxable-gain-or-loss"
+
+      behave like connectorBehaviour(
+        mockPost(expectedUrl, Seq.empty, request),
+        () => connector.calculateTaxableGainOrLoss(request)
       )
     }
 

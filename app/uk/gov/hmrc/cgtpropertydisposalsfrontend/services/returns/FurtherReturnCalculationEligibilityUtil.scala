@@ -20,6 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.list._
 import cats.instances.string._
+import cats.syntax.either._
 import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
@@ -27,7 +28,8 @@ import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
@@ -36,37 +38,55 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.NoOtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftSingleDisposalReturn, FurtherReturnCalculationData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibilityUtilImpl.EligibleData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ListUtils._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[FurtherReturnEligibilityUtilImpl])
-trait FurtherReturnEligibilityUtil {
+@ImplementedBy(classOf[FurtherReturnCalculationEligibilityUtilImpl])
+trait FurtherReturnCalculationEligibilityUtil {
 
   def isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn: FillingOutReturn)(implicit
     hc: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, FurtherReturnEligibility]
+  ): EitherT[Future, Error, FurtherReturnCalculationEligibility]
 
 }
 
-sealed trait FurtherReturnEligibility
+sealed trait FurtherReturnCalculationEligibility
 
-object FurtherReturnEligibility {
-  final case class Eligible(calculation: CalculatedGlarBreakdown) extends FurtherReturnEligibility
-  final case class Ineligible(previousReturnsImplyEligibility: Option[Boolean]) extends FurtherReturnEligibility
+object FurtherReturnCalculationEligibility {
+
+  final case class Eligible(
+    calculation: CalculatedGlarBreakdown,
+    previousReturnCalculationData: List[FurtherReturnCalculationData],
+    currentReturnAddress: UkAddress
+  ) extends FurtherReturnCalculationEligibility
+
+  final case class Ineligible(previousReturnsImplyEligibility: Option[Boolean])
+      extends FurtherReturnCalculationEligibility
+
+  implicit class FurtherReturnEligibilityOps(private val f: FurtherReturnCalculationEligibility) extends AnyVal {
+    def isEligible: Boolean = f match {
+      case _: Eligible   => true
+      case _: Ineligible => false
+    }
+
+  }
+
 }
 
 @Singleton
-class FurtherReturnEligibilityUtilImpl @Inject() (
+class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
   returnsService: ReturnsService,
   configuration: Configuration,
   sessionStore: SessionStore
 )(implicit ec: ExecutionContext)
-    extends FurtherReturnEligibilityUtil
+    extends FurtherReturnCalculationEligibilityUtil
     with SessionUpdates {
 
   private val amendAndFurtherReturnCalculationsEnabled: Boolean =
@@ -80,29 +100,36 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
   )(implicit
     headerCarrier: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, FurtherReturnEligibility] =
+  ): EitherT[Future, Error, FurtherReturnCalculationEligibility] =
     for {
       eligibility   <- determineEligibility(fillingOutReturn)
-      updatedJourney = fillingOutReturn.copy(
-                         previousSentReturns = fillingOutReturn.previousSentReturns.map {
-                           _.copy(
-                             previousReturnsImplyEligibilityForCalculation = eligibility match {
-                               case FurtherReturnEligibility.Eligible(_)                                 => Some(true)
-                               case FurtherReturnEligibility.Ineligible(previousReturnsImplyEligibility) =>
-                                 previousReturnsImplyEligibility
-                             }
-                           )
-                         }
-                       )
+      updatedJourney =
+        fillingOutReturn.copy(
+          previousSentReturns = fillingOutReturn.previousSentReturns.map { p =>
+            eligibility match {
+              case e: FurtherReturnCalculationEligibility.Eligible =>
+                p.copy(
+                  previousReturnsImplyEligibilityForCalculation = Some(true),
+                  calculationData = Some(e.previousReturnCalculationData)
+                )
+
+              case FurtherReturnCalculationEligibility.Ineligible(previousReturnsImplyEligibility) =>
+                p.copy(
+                  previousReturnsImplyEligibilityForCalculation = previousReturnsImplyEligibility,
+                  calculationData = None
+                )
+            }
+          }
+        )
       _             <- if (updatedJourney === fillingOutReturn) EitherT.pure[Future, Error](())
                        else EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
     } yield eligibility
 
-  def determineEligibility(
+  private def determineEligibility(
     fillingOutReturn: FillingOutReturn
   )(implicit
     headerCarrier: HeaderCarrier
-  ): EitherT[Future, Error, FurtherReturnEligibility] = if (!amendAndFurtherReturnCalculationsEnabled)
+  ): EitherT[Future, Error, FurtherReturnCalculationEligibility] = if (!amendAndFurtherReturnCalculationsEnabled)
     EitherT.pure(
       Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
     )
@@ -115,37 +142,50 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
           Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
         )
 
-      case Right(Some(glarBreakdown)) =>
-        glarBreakdown.previousReturnData.previousReturnsImplyEligibilityForCalculation match {
-          case Some(true) =>
-            EitherT.pure(Eligible(glarBreakdown))
+      case Right(Some(EligibleData(glarBreakdown, assetType, previousReturnData, address))) =>
+        (previousReturnData.previousReturnsImplyEligibilityForCalculation, previousReturnData.calculationData) match {
+          case (Some(true), Some(previousReturnCalculationData)) =>
+            EitherT.pure(Eligible(glarBreakdown, previousReturnCalculationData, address))
 
-          case Some(false) =>
+          case (Some(false), _) =>
             EitherT.pure(Ineligible(Some(false)))
 
-          case None =>
-            val submissionIdsOfPreviousReturns = glarBreakdown.previousReturnData.summaries
+          case _ =>
+            val submissionIdsOfPreviousReturns = previousReturnData.summaries
               .map(_.submissionId)
               .filterNot(id => fillingOutReturn.amendReturnData.exists(_.originalReturn.summary.submissionId === id))
 
-            val results: List[EitherT[Future, Error, Boolean]] =
+            val results: List[EitherT[Future, Error, Option[FurtherReturnCalculationData]]] =
               submissionIdsOfPreviousReturns.map {
                 returnsService
                   .displayReturn(fillingOutReturn.subscribedDetails.cgtReference, _)
                   .map(_.completeReturn match {
                     case c: CompleteSingleDisposalReturn =>
-                      val assetTypeCheck   = c.triageAnswers.assetType === glarBreakdown.assetType.merge
+                      val assetTypeCheck   = c.triageAnswers.assetType === assetType.merge
                       val otherReliefCheck = c.reliefDetails.otherReliefs.contains(NoOtherReliefs)
-                      assetTypeCheck && otherReliefCheck
-                    case _                               => false
+
+                      if (assetTypeCheck && otherReliefCheck) {
+                        val gainOrLossAfterReliefs = c.gainOrLossAfterReliefs.getOrElse(
+                          calculatedGlarBreakdown(
+                            c.disposalDetails,
+                            c.acquisitionDetails,
+                            c.reliefDetails
+                          ).gainOrLossAfterReliefs
+                        )
+                        Some(FurtherReturnCalculationData(c.propertyAddress, gainOrLossAfterReliefs))
+                      } else None
+                    case _                               => None
                   })
               }
 
-            results.sequence[EitherT[Future, Error, *], Boolean].map { e =>
-              if (e.forall(identity))
-                Eligible(glarBreakdown)
+            results.sequence[EitherT[Future, Error, *], Option[FurtherReturnCalculationData]].map { results =>
+              val (ineligibleResults, eligibleResults) = results.partitionWith(Either.fromOption(_, ()))
+
+              if (ineligibleResults.isEmpty)
+                Eligible(glarBreakdown, eligibleResults, address)
               else
                 Ineligible(Some(false))
+
             }
 
         }
@@ -154,12 +194,12 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
 
   private def eligibleGlarCalculation(
     fillingOutReturn: FillingOutReturn
-  ): Either[Error, Option[CalculatedGlarBreakdown]] =
+  ): Either[Error, Option[EligibleData]] =
     fillingOutReturn.draftReturn match {
       case DraftSingleDisposalReturn(
             _,
             triageAnswers: CompleteSingleDisposalTriageAnswers,
-            _,
+            Some(address),
             Some(disposalDetailsAnswers: CompleteDisposalDetailsAnswers),
             Some(acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers),
             Some(reliefDetailsAnswers: CompleteReliefDetailsAnswers),
@@ -193,18 +233,17 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
                   val underPreviousReturnLimit = previousReturnData.summaries.length <= maxPreviousReturns
                   val currentReturnIsEligible  = noOtherReliefs && underPreviousReturnLimit
 
-                  if (currentReturnIsEligible)
+                  if (currentReturnIsEligible && noOtherReliefs)
                     Some(
-                      CalculatedGlarBreakdown(
-                        disposalFees = disposalDetailsAnswers.disposalFees,
-                        disposalPrice = disposalDetailsAnswers.disposalPrice,
-                        acquisitionPrice = acquisitionDetailsAnswers.acquisitionPrice,
-                        acquisitionCosts = acquisitionDetailsAnswers.acquisitionFees,
-                        improvementCosts = acquisitionDetailsAnswers.improvementCosts,
-                        privateResidentReliefs = reliefDetailsAnswers.privateResidentsRelief,
-                        lettingRelief = reliefDetailsAnswers.lettingsRelief,
-                        assetType = assetType,
-                        previousReturnData = previousReturnData
+                      EligibleData(
+                        calculatedGlarBreakdown(
+                          disposalDetailsAnswers,
+                          acquisitionDetailsAnswers,
+                          reliefDetailsAnswers
+                        ),
+                        assetType,
+                        previousReturnData,
+                        address
                       )
                     )
                   else None
@@ -218,5 +257,31 @@ class FurtherReturnEligibilityUtilImpl @Inject() (
 
       case _ => Right(None)
     }
+
+  private def calculatedGlarBreakdown(
+    disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
+    acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers,
+    reliefDetailsAnswers: CompleteReliefDetailsAnswers
+  ): CalculatedGlarBreakdown =
+    CalculatedGlarBreakdown(
+      disposalFees = disposalDetailsAnswers.disposalFees,
+      disposalPrice = disposalDetailsAnswers.disposalPrice,
+      acquisitionPrice = acquisitionDetailsAnswers.acquisitionPrice,
+      acquisitionCosts = acquisitionDetailsAnswers.acquisitionFees,
+      improvementCosts = acquisitionDetailsAnswers.improvementCosts,
+      privateResidentReliefs = reliefDetailsAnswers.privateResidentsRelief,
+      lettingRelief = reliefDetailsAnswers.lettingsRelief
+    )
+
+}
+
+object FurtherReturnCalculationEligibilityUtilImpl {
+
+  private final case class EligibleData(
+    glarBreakdown: CalculatedGlarBreakdown,
+    assetType: Either[NonResidential.type, Residential.type],
+    previousSentReturns: PreviousReturnData,
+    currentReturnAddress: UkAddress
+  )
 
 }

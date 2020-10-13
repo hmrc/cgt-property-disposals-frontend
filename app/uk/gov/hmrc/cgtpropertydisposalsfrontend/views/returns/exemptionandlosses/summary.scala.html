@@ -39,7 +39,8 @@
     disposalDate: DisposalDate,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isFurtherOrAmendReturn: Option[Boolean]
+    isFurtherOrAmendReturn: Option[Boolean],
+        showAnnualExemptAmount: Boolean
 )(implicit messages: Messages, request: RequestWithSessionData[_])
 
 @furtherReturnKey = @{ if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else "" }
@@ -147,7 +148,7 @@
     )
   }
 
-  @if(!isFurtherOrAmendReturn.contains(true)){
+  @if(showAnnualExemptAmount){
     @cyaRow(
       messages(s"$annualExemptAmountKey$userKey.title"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.annualExemptAmount.inPounds())),

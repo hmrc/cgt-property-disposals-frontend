@@ -3326,6 +3326,10 @@ taxableGain.error.invalid=Overall gain must be an amount of money, like 4,820.54
 taxableGain.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGainOrLoss.assistive.taxableGain=for overall gain amount
+taxableGainOrLoss.calculated.gain.prompt=Enter a gain of <strong class="bold">{0}</strong> if you agree with these workings.
+taxableGainOrLoss.calculated.loss.prompt=Enter a loss of <strong class="bold">{0}</strong> if you agree with these workings.
+taxableGainOrLoss.calculated.noGainOrLoss.prompt=Select ‘I made no gain or loss’ if you agree with these workings.
 
 taxableGainOrLoss.loss.label=No, I made an overall loss
 taxableGainOrLoss.agent.loss.label=No, my client made an overall loss
@@ -3353,6 +3357,7 @@ taxableGainOrLoss.personalRep.furtherReturn.title=Tell us if the person made a n
 taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Tell us if the estate made a net gain or loss
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.title=Tell us if your client made a net gain or loss
 
+taxableGainOrLoss.calculated.furtherReturn.p1=We used the details that were entered in this return to work out your net gain on the property disposals that you are paying tax on in tax year {0} to {1}.
 taxableGainOrLoss.furtherReturn.p1=You’ll need to work out if you made a net gain or loss on the UK property-related disposals you are paying tax on in the {0} to {1} tax year.
 taxableGainOrLoss.agent.furtherReturn.p1=You’ll need to work out if your client made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
 taxableGainOrLoss.trust.furtherReturn.p1=You’ll need to work out if the trust made a net gain or loss on the UK property-related disposals it is paying tax on in the {0} to {1} tax year.
@@ -3671,9 +3676,11 @@ calculator.total.gainOrLossAfterReliefs=Gain or loss after reliefs
 
 calculator.inYearLosses=Losses from this tax year
 calculator.total.gainAfterInYearLosses=Gain after losses from this tax year
-calculator.cannotUsePrevYearsLosses=You cannot use losses from previous tax years in this return. This is because there is no gain after applying losses from this tax year.
+calculator.cannotUsePrevYearsLosses=You cannot use losses from previous tax years in this return. This is because there is no gain.
 calculator.prevYearLosses=Losses from previous tax years
 calculator.total.gainAfterLosses=Gain after all losses
+calculator.total.yearPosition=Year position
+calculator.total.gainsAfterReliefs=All gains after reliefs
 
 calculator.cannotApplyAEA=You cannot use any of the Annual Exempt Amount. This is because there is no gain.
 calculator.annualExemptAmount=Amount of Annual Exempt Amount used

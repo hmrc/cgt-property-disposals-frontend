@@ -37,7 +37,8 @@
     disposalDate: DisposalDate,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isFurtherOrAmendReturn: Option[Boolean]
+    isFurtherOrAmendReturn: Option[Boolean],
+    showAnnualExemptAmount: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{
@@ -48,7 +49,7 @@
 
     @pageHeading(title, Some(messages("exemptionAndLosses.caption")))
 
-    @summary(answers, disposalDate, isATrust, representativeType, isFurtherOrAmendReturn)
+    @summary(answers, disposalDate, isATrust, representativeType, isFurtherOrAmendReturn, showAnnualExemptAmount)
 
     @formWrapper(routes.ExemptionAndLossesController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

@@ -26,9 +26,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, TaxableGainOrLossCalculation}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -40,7 +42,9 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
         unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional
+        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
+        furtherReturnTaxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.further_return_taxable_gain_workings,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(
@@ -49,9 +53,9 @@
         isATrust: Boolean,
         representativeType: Option[RepresentativeType],
         taxYear: TaxYear,
-        isAmend: Boolean
+        isAmend: Boolean,
+        taxableGainOrLossCalculation: Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-
 @key = @{ "taxableGainOrLoss" }
 @gainKey = @{ "taxableGain" }
 @lossKey = @{ "netLoss" }
@@ -133,6 +137,44 @@
 
 @taxYearStart = @{ taxYear.startDateInclusive.getYear.toString }
 @taxYearEnd = @{ taxYear.endDateExclusive.getYear.toString }
+@calcOrGuidance = @{
+    taxableGainOrLossCalculation match {
+      case Some(c) =>
+          Html(
+           s"""
+           |<p>${messages(s"$key.calculated.furtherReturn.p1", taxYearStart, taxYearEnd)}</p>
+           |${details(messages("calculator.showWorkings"), furtherReturnTaxableGainWorkings(c._1, c._2), Some(messages(s"$key.assistive.taxableGain")))}
+            """.stripMargin)
+      case _ =>
+          Html(
+            s"""
+           |<p>${messages(s"$key$userKey.furtherReturn.p1", taxYearStart, taxYearEnd)}</p>
+           |<p>${messages(s"$key.furtherReturn.p2")}</p>
+           |<ol class="list list-number">
+           |<li>${messages(s"$key.furtherReturn.li1")}</li>
+           |<li>${messages(s"$key.furtherReturn.li2")}</li>
+           |<li>${messages(s"$key$userKey.furtherReturn.li4")}</li>
+           |<li>${messages(s"$key.furtherReturn.li3")}</li>
+           |</ol>
+            """.stripMargin)
+    }
+}
+@extraContent = @{
+    taxableGainOrLossCalculation match {
+        case Some(c) =>
+            val netGain = c._1.taxableGainOrLoss
+            val prompt =
+                if(netGain.isPositive)
+                    messages(s"$key.calculated.gain.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(netGain.inPounds()))
+                else if(netGain.isNegative)
+                    messages(s"$key.calculated.loss.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(netGain.abs().inPounds()))
+                else
+                    messages(s"$key.calculated.noGainOrLoss.prompt")
+
+            Some(Html(s"""<p>$prompt</p>""".stripMargin))
+        case _ => None
+    }
+}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
@@ -146,16 +188,7 @@
 
     @pageHeading(title)
 
-    <p>@messages(s"$key$userKey.furtherReturn.p1", taxYearStart, taxYearEnd)</p>
-
-    <p>@messages(s"$key.furtherReturn.p2")</p>
-
-    <ol class="list list-number">
-        <li>@messages(s"$key.furtherReturn.li1")</li>
-        <li>@messages(s"$key.furtherReturn.li2")</li>
-        <li>@messages(s"$key.furtherReturn.li3")</li>
-        <li>@messages(s"$key$userKey.furtherReturn.li4")</li>
-    </ol>
+    @calcOrGuidance
 
     @formWrapper(routes.YearToDateLiabilityController.taxableGainOrLossSubmit(), 'novalidate -> "novalidate") {
         @radioGroupConditional(
@@ -165,18 +198,20 @@
             error = form.error(key),
             options = options,
             helpText = None,
-            customErrorKey = customErrorKey
+            customErrorKey = customErrorKey,
+            extraContent = extraContent
         )
 
-        <p>
-            <a href="@{triage.routes.FurtherReturnGuidanceController.taxableGainGuidance()}" id="link">
+        @if(taxableGainOrLossCalculation.isEmpty) {
+            <p>
+                <a href="@{triage.routes.FurtherReturnGuidanceController.taxableGainGuidance()}" id="link">
                 @messages(s"$key$userKey.furtherReturn.link")
-            </a>
-        </p>
+                </a>
+            </p>
+        }
 
         @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
-
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
 

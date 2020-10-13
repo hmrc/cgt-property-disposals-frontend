@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
+import java.util.function.Predicate
+
 import cats.Eq
 import julienrf.json.derived
 import play.api.data.Forms.{nonEmptyText, number, of, optional, text, mapping => formMapping}
@@ -29,7 +31,7 @@ sealed trait Address extends Product with Serializable
 
 object Address {
 
-  val addressLineRegexPredicate = "^[A-Za-z0-9 \\-,.&'/]{0,35}$".r.pattern.asPredicate()
+  val addressLineRegexPredicate: Predicate[String] = "^[A-Za-z0-9 \\-,.&'/]{0,35}$".r.pattern.asPredicate()
 
   final case class UkAddress(
     line1: String,

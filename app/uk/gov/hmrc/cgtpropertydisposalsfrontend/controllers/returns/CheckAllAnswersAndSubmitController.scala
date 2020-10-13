@@ -21,7 +21,7 @@ import java.util.Base64
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.i18n.Lang
+import play.api.i18n.{Lang, Messages}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.Subscription
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
@@ -55,6 +55,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
   paymentsService: PaymentsService,
+  furtherReturnCalculationEligibilityUtil: FurtherReturnCalculationEligibilityUtil,
   cc: MessagesControllerComponents,
   checkAllAnswersPage: pages.check_all_answers,
   confirmationOfSubmissionPage: pages.confirmation_of_submission,
@@ -67,20 +68,43 @@ class CheckAllAnswersAndSubmitController @Inject() (
     with SessionUpdates
     with Logging {
 
-  val explicitEnglishMessage = messagesApi.preferred(Seq(Lang("en")))
+  private val explicitEnglishMessage: Messages = messagesApi.preferred(Seq(Lang("en")))
+
+  private def withFurtherReturnCalculationEligibilityCheck(fillingOutReturn: FillingOutReturn)(
+    f: Option[FurtherReturnCalculationEligibility] => Future[Result]
+  )(implicit r: RequestWithSessionData[_]): Future[Result] = {
+    val furtherReturnCalculationEligibilityCheck =
+      if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
+        furtherReturnCalculationEligibilityUtil
+          .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
+          .map(Some(_))
+      else
+        EitherT.pure(None)
+
+    furtherReturnCalculationEligibilityCheck.foldF(
+      { e =>
+        logger.warn("Could not check eligibility for further return calulation", e)
+        errorHandler.errorResult()
+      },
+      f
+    )
+  }
 
   def checkAllAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCompleteDraftReturn(request) { (_, fillingOutReturn, completeReturn) =>
-        Ok(
-          checkAllAnswersPage(
-            completeReturn,
-            rebasingEligibilityUtil,
-            fillingOutReturn,
-            false,
-            fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)
+        withFurtherReturnCalculationEligibilityCheck(fillingOutReturn) { furtherOrAmendReturnCalculationEligibility =>
+          Ok(
+            checkAllAnswersPage(
+              completeReturn,
+              rebasingEligibilityUtil,
+              fillingOutReturn,
+              showSubmissionDetails = false,
+              fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer),
+              furtherOrAmendReturnCalculationEligibility
+            )
           )
-        )
+        }
       }
     }
 
@@ -88,81 +112,84 @@ class CheckAllAnswersAndSubmitController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withCompleteDraftReturn(request) { (_, fillingOutReturn, completeReturn) =>
         withGeneratedCGTReference(completeReturn) { updatedCompleteReturn =>
-          val cyaPageB64Html =
-            B64Html(
-              new String(
-                Base64.getEncoder.encode(
-                  checkAllAnswersPage(
-                    updatedCompleteReturn,
-                    rebasingEligibilityUtil,
-                    fillingOutReturn,
-                    true,
-                    fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)
-                  )(request, explicitEnglishMessage, viewConfig)
-                    .toString()
-                    .getBytes
+          withFurtherReturnCalculationEligibilityCheck(fillingOutReturn) { furtherOrAmendReturnCalculationEligibility =>
+            val cyaPageB64Html =
+              B64Html(
+                new String(
+                  Base64.getEncoder.encode(
+                    checkAllAnswersPage(
+                      updatedCompleteReturn,
+                      rebasingEligibilityUtil,
+                      fillingOutReturn,
+                      showSubmissionDetails = true,
+                      fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer),
+                      furtherOrAmendReturnCalculationEligibility
+                    )(request, explicitEnglishMessage, viewConfig)
+                      .toString()
+                      .getBytes
+                  )
                 )
               )
-            )
 
-          val result =
-            for {
-              response        <- EitherT.liftF(
-                                   submitReturn(
-                                     updatedCompleteReturn,
-                                     fillingOutReturn,
-                                     cyaPageB64Html,
-                                     request.authenticatedRequest.request.messages.lang
-                                   )
-                                 )
-              newJourneyStatus = response match {
-                                   case _: SubmitReturnError =>
-                                     SubmitReturnFailed(
-                                       fillingOutReturn.subscribedDetails,
-                                       fillingOutReturn.ggCredId,
-                                       fillingOutReturn.agentReferenceNumber
-                                     )
-                                   case SubmitReturnSuccess(
-                                         submitReturnResponse
-                                       ) =>
-                                     JustSubmittedReturn(
-                                       fillingOutReturn.subscribedDetails,
-                                       fillingOutReturn.ggCredId,
-                                       fillingOutReturn.agentReferenceNumber,
+            val result =
+              for {
+                response        <- EitherT.liftF(
+                                     submitReturn(
                                        updatedCompleteReturn,
-                                       submitReturnResponse,
-                                       fillingOutReturn.amendReturnData
+                                       fillingOutReturn,
+                                       cyaPageB64Html,
+                                       request.authenticatedRequest.request.messages.lang
                                      )
-                                 }
-              _               <- EitherT(
-                                   updateSession(sessionStore, request)(
-                                     _.copy(journeyStatus = Some(newJourneyStatus))
                                    )
-                                 )
-            } yield response
+                newJourneyStatus = response match {
+                                     case _: SubmitReturnError =>
+                                       SubmitReturnFailed(
+                                         fillingOutReturn.subscribedDetails,
+                                         fillingOutReturn.ggCredId,
+                                         fillingOutReturn.agentReferenceNumber
+                                       )
+                                     case SubmitReturnSuccess(
+                                           submitReturnResponse
+                                         ) =>
+                                       JustSubmittedReturn(
+                                         fillingOutReturn.subscribedDetails,
+                                         fillingOutReturn.ggCredId,
+                                         fillingOutReturn.agentReferenceNumber,
+                                         updatedCompleteReturn,
+                                         submitReturnResponse,
+                                         fillingOutReturn.amendReturnData
+                                       )
+                                   }
+                _               <- EitherT(
+                                     updateSession(sessionStore, request)(
+                                       _.copy(journeyStatus = Some(newJourneyStatus))
+                                     )
+                                   )
+              } yield response
 
-          result.fold(
-            { e =>
-              logger.warn("Error while trying to update session", e)
-              errorHandler.errorResult()
-            },
-            {
-              case SubmitReturnError(e) =>
-                logger.warn(s"Could not submit return}", e)
-                Redirect(
-                  routes.CheckAllAnswersAndSubmitController.submissionError()
-                )
+            result.fold(
+              { e =>
+                logger.warn("Error while trying to update session", e)
+                errorHandler.errorResult()
+              },
+              {
+                case SubmitReturnError(e) =>
+                  logger.warn(s"Could not submit return}", e)
+                  Redirect(
+                    routes.CheckAllAnswersAndSubmitController.submissionError()
+                  )
 
-              case SubmitReturnSuccess(r) =>
-                logger.info(
-                  s"Successfully submitted return with submission id ${r.formBundleId}"
-                )
-                Redirect(
-                  routes.CheckAllAnswersAndSubmitController
-                    .confirmationOfSubmission()
-                )
-            }
-          )
+                case SubmitReturnSuccess(r) =>
+                  logger.info(
+                    s"Successfully submitted return with submission id ${r.formBundleId}"
+                  )
+                  Redirect(
+                    routes.CheckAllAnswersAndSubmitController
+                      .confirmationOfSubmission()
+                  )
+              }
+            )
+          }
         }
       }
     }

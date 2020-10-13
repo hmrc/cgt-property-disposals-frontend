@@ -158,7 +158,8 @@ class TaskListControllerSpec
         withClue(s"For draft return $draftReturn: ") {
           val fillingOutReturn = sample[FillingOutReturn].copy(
             draftReturn = removeEvidence(draftReturn),
-            previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence]), None)),
+            previousSentReturns =
+              previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence]), None, None)),
             amendReturnData = amendReturnData
           )
 
@@ -212,7 +213,7 @@ class TaskListControllerSpec
       ): Unit = {
         val fillingOutReturn = sample[FillingOutReturn].copy(
           draftReturn = removeEvidence(draftReturn),
-          previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence]), None)),
+          previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence]), None, None)),
           amendReturnData = amendReturnData
         )
 

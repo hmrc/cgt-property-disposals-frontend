@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
-final case class UpscanUploadMeta(
-  reference: String,
-  uploadRequest: UploadRequest
+final case class TaxableGainOrLossCalculation(
+  taxableGainOrLoss: AmountInPence,
+  previousYearLosses: AmountInPence,
+  gainOrLossAfterInYearLosses: AmountInPence,
+  yearPosition: AmountInPence,
+  calculationData: List[FurtherReturnCalculationData],
+  totalGainsAfterReliefs: AmountInPence
 )
 
-object UpscanUploadMeta {
-  implicit val format: OFormat[UpscanUploadMeta] = Json.format[UpscanUploadMeta]
+object TaxableGainOrLossCalculation {
+
+  implicit val format: OFormat[TaxableGainOrLossCalculation] = Json.format
+
 }

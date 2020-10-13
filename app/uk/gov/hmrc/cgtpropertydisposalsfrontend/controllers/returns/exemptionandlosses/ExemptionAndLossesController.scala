@@ -37,7 +37,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, M
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, ExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{exemptionandlosses => pages}
@@ -54,6 +55,7 @@ class ExemptionAndLossesController @Inject() (
   returnsService: ReturnsService,
   cc: MessagesControllerComponents,
   val config: Configuration,
+  furtherReturnCalculationEligibilityUtil: FurtherReturnCalculationEligibilityUtil,
   inYearLossesPage: pages.in_year_losses,
   furtherReturnInYearLossesPage: pages.further_return_in_year_losses,
   previousYearsLossesPage: pages.previous_years_losses,
@@ -80,31 +82,31 @@ class ExemptionAndLossesController @Inject() (
       case Some((_, s: StartingToAmendReturn)) =>
         markUnmetDependency(s, sessionStore, errorHandler)
 
-      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) if r.isFurtherOrAmendReturn.contains(true) =>
-        val answers = d
-          .fold(
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers
+      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _)))
+          if r.isFurtherOrAmendReturn.contains(true) & d.exemptionAndLossesAnswers.forall(_.isEmpty) =>
+        furtherReturnCalculationEligibilityUtil
+          .isEligibleForFurtherReturnOrAmendCalculation(r)
+          .foldF(
+            { e =>
+              logger.warn("Could not check for further return calculation eligibility", e)
+              errorHandler.errorResult()
+            },
+            {
+              case _: Ineligible =>
+                val answers = IncompleteExemptionAndLossesAnswers.empty.copy(
+                  annualExemptAmount = Some(AmountInPence.zero)
+                )
+
+                f(s, r, d, answers)
+
+              case _: Eligible =>
+                f(s, r, d, IncompleteExemptionAndLossesAnswers.empty)
+
+            }
           )
-          .getOrElse(
-            IncompleteExemptionAndLossesAnswers.empty.copy(
-              annualExemptAmount = Some(AmountInPence.zero)
-            )
-          )
-        f(s, r, d, answers)
 
       case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) =>
-        val answers = d
-          .fold(
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers,
-            _.exemptionAndLossesAnswers
-          )
+        val answers = d.exemptionAndLossesAnswers
           .getOrElse(IncompleteExemptionAndLossesAnswers.empty)
         f(s, r, d, answers)
 
@@ -538,76 +540,92 @@ class ExemptionAndLossesController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
-          answers match {
-            case c: CompleteExemptionAndLossesAnswers =>
-              Ok(
-                checkYourAnswersPage(
-                  c,
-                  disposalDate,
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType,
-                  fillingOutReturn.isFurtherOrAmendReturn
-                )
-              )
+          val furtherReturnCalculationEligibilityCheck =
+            if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
+              furtherReturnCalculationEligibilityUtil
+                .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
+                .map(Some(_))
+            else
+              EitherT.pure(None)
 
-            case IncompleteExemptionAndLossesAnswers(None, _, _) =>
-              Redirect(routes.ExemptionAndLossesController.inYearLosses())
-
-            case IncompleteExemptionAndLossesAnswers(_, None, _) =>
-              Redirect(
-                routes.ExemptionAndLossesController.previousYearsLosses()
-              )
-
-            case IncompleteExemptionAndLossesAnswers(_, _, None) =>
-              Redirect(
-                routes.ExemptionAndLossesController.annualExemptAmount()
-              )
-
-            case IncompleteExemptionAndLossesAnswers(
-                  Some(i),
-                  Some(p),
-                  Some(a)
-                ) =>
-              val completeAnswers = CompleteExemptionAndLossesAnswers(i, p, a)
-              val newDraftReturn  =
-                draftReturn.fold(
-                  _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
-                  _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
-                  _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
-                  _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
-                  _.copy(exemptionAndLossesAnswers = Some(completeAnswers))
-                )
-
-              val newJourney = fillingOutReturn.copy(draftReturn = newDraftReturn)
-
-              val result = for {
-                _ <- returnsService.storeDraftReturn(newJourney)
-                _ <- EitherT(
-                       updateSession(sessionStore, request)(
-                         _.copy(journeyStatus = Some(newJourney))
-                       )
-                     )
-              } yield ()
-
-              result.fold(
-                { e =>
-                  logger.warn("Could not update the session", e)
-                  errorHandler.errorResult()
-                },
-                _ =>
+          furtherReturnCalculationEligibilityCheck.foldF(
+            { e =>
+              logger.warn("Could not check eligibility for further return calulation", e)
+              errorHandler.errorResult()
+            },
+            furtherOrAmendReturnCalculationEligibility =>
+              answers match {
+                case c: CompleteExemptionAndLossesAnswers =>
                   Ok(
                     checkYourAnswersPage(
-                      completeAnswers,
+                      c,
                       disposalDate,
                       fillingOutReturn.subscribedDetails.isATrust,
                       draftReturn.representativeType,
-                      fillingOutReturn.isFurtherOrAmendReturn
+                      fillingOutReturn.isFurtherOrAmendReturn,
+                      furtherOrAmendReturnCalculationEligibility.forall(_.isEligible)
                     )
                   )
-              )
-          }
-        }
 
+                case IncompleteExemptionAndLossesAnswers(None, _, _) =>
+                  Redirect(routes.ExemptionAndLossesController.inYearLosses())
+
+                case IncompleteExemptionAndLossesAnswers(_, None, _) =>
+                  Redirect(
+                    routes.ExemptionAndLossesController.previousYearsLosses()
+                  )
+
+                case IncompleteExemptionAndLossesAnswers(_, _, None) =>
+                  Redirect(
+                    routes.ExemptionAndLossesController.annualExemptAmount()
+                  )
+
+                case IncompleteExemptionAndLossesAnswers(
+                      Some(i),
+                      Some(p),
+                      Some(a)
+                    ) =>
+                  val completeAnswers = CompleteExemptionAndLossesAnswers(i, p, a)
+                  val newDraftReturn  =
+                    draftReturn.fold(
+                      _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
+                      _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
+                      _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
+                      _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
+                      _.copy(exemptionAndLossesAnswers = Some(completeAnswers))
+                    )
+
+                  val newJourney = fillingOutReturn.copy(draftReturn = newDraftReturn)
+
+                  val result = for {
+                    _ <- returnsService.storeDraftReturn(newJourney)
+                    _ <- EitherT(
+                           updateSession(sessionStore, request)(
+                             _.copy(journeyStatus = Some(newJourney))
+                           )
+                         )
+                  } yield ()
+
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not update the session", e)
+                      errorHandler.errorResult()
+                    },
+                    _ =>
+                      Ok(
+                        checkYourAnswersPage(
+                          completeAnswers,
+                          disposalDate,
+                          fillingOutReturn.subscribedDetails.isATrust,
+                          draftReturn.representativeType,
+                          fillingOutReturn.isFurtherOrAmendReturn,
+                          furtherOrAmendReturnCalculationEligibility.forall(_.isEligible)
+                        )
+                      )
+                  )
+              }
+          )
+        }
       }
     }
 

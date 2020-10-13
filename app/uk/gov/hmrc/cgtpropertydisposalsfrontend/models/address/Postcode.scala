@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
+import java.util.function.Predicate
+
 import play.api.data.Forms.nonEmptyText
 import play.api.data.Mapping
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
@@ -26,7 +28,7 @@ final case class Postcode(value: String) extends AnyVal
 
 object Postcode {
 
-  val postcodeRegexPredicate =
+  val postcodeRegexPredicate: Predicate[String] =
     "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,3}$".r.pattern
       .asPredicate()
 

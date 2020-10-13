@@ -26,9 +26,10 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue, TaxableGainOrLossCalculation, TaxableGainOrLossCalculationRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -49,6 +50,14 @@ class CgtCalculationServiceImplSpec
   )(response: Either[Error, HttpResponse]) =
     (mockReturnsConnector
       .calculateTaxDue(_: CalculateCgtTaxDueRequest)(_: HeaderCarrier))
+      .expects(request, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockCalculateTaxableGainOrLoss(
+    request: TaxableGainOrLossCalculationRequest
+  )(response: Either[Error, HttpResponse]) =
+    (mockReturnsConnector
+      .calculateTaxableGainOrLoss(_: TaxableGainOrLossCalculationRequest)(_: HeaderCarrier))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -96,6 +105,53 @@ class CgtCalculationServiceImplSpec
 
           await(service.calculateTaxDue(request).value) shouldBe Right(
             calculatedTaxDue
+          )
+        }
+
+      }
+
+    }
+
+    "handling requests to calculate taxable gain or loss" must {
+
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      val request = sample[TaxableGainOrLossCalculationRequest]
+
+      "return an error" when {
+
+        "there is an error making the http call" in {
+          mockCalculateTaxableGainOrLoss(request)(Left(Error("")))
+
+          await(service.calculateTaxableGainOrLoss(request).value).isLeft shouldBe true
+        }
+
+        "the http call comes back with a status other than 200" in {
+          mockCalculateTaxableGainOrLoss(request)(Right(HttpResponse(500, emptyJsonBody)))
+
+          await(service.calculateTaxableGainOrLoss(request).value).isLeft shouldBe true
+        }
+
+        "the http call comes back with status 200 but the body cannot be parsed" in {
+          mockCalculateTaxableGainOrLoss(request)(
+            Right(HttpResponse(200, JsString("hello"), Map[String, Seq[String]]().empty))
+          )
+
+          await(service.calculateTaxableGainOrLoss(request).value).isLeft shouldBe true
+        }
+      }
+
+      "return the calculation" when {
+
+        "the call is successful and the response body can be parsed" in {
+          val calculation = sample[TaxableGainOrLossCalculation]
+
+          mockCalculateTaxableGainOrLoss(request)(
+            Right(HttpResponse(200, Json.toJson(calculation), Map[String, Seq[String]]().empty))
+          )
+
+          await(service.calculateTaxableGainOrLoss(request).value) shouldBe Right(
+            calculation
           )
         }
 

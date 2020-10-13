@@ -31,26 +31,34 @@
     helpText: Option[Html] = None,
     error: Option[FormError] = None,
     selected: Option[Int] = None,
-    customErrorKey: Option[String] = None
+    customErrorKey: Option[String] = None,
+    extraContent: Option[Html] = None
 )(implicit messages: Messages)
 
 @classes = @{if(error.nonEmpty) "form-group form-group-error" else "form-group" }
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
+@extraContentKey = @{s"${{fieldId}}-extra-content"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
+@extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
 @errorIdWithError = @{error.map(errorId -> _)}
 @describedByKeys = @{
-  List(hintIdWithHintText.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 <div class="@classes">
   <fieldset id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
     <legend>
       @label
     </legend>
+    @extraContentIdWithContent.map { case (id, text) =>
+      <div id="@id">
+        @text
+      </div>
+    }
     @hintIdWithHintText.map { case (id, text) =>
-    <span id="@id" class="form-hint">
-    @text
-    </span>
+      <span id="@id" class="form-hint">
+        @text
+      </span>
     }
     @errorIdWithError.map { case (id, e) =>
       @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${e.message}", e.args: _*))

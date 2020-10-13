@@ -108,6 +108,7 @@ class HomePageController @Inject() (
                                                 PreviousReturnData(
                                                   subscribed.sentReturns,
                                                   previousYtdLiability,
+                                                  None,
                                                   None
                                                 )
                                               )
@@ -157,6 +158,7 @@ class HomePageController @Inject() (
                                                   PreviousReturnData(
                                                     subscribed.sentReturns,
                                                     previousYtdLiability,
+                                                    None,
                                                     None
                                                   )
                                                 ),
@@ -218,7 +220,7 @@ class HomePageController @Inject() (
                                                 sentReturn.completeReturn,
                                                 sentReturn.returnType,
                                                 returnSummary,
-                                                Some(PreviousReturnData(subscribed.sentReturns, previousYtdLiability, None))
+                                                Some(PreviousReturnData(subscribed.sentReturns, previousYtdLiability, None, None))
                                               )
                                             )
                                           )

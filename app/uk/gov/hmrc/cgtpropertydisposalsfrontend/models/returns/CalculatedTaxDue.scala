@@ -18,9 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.PreviousReturnData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
 
 final case class AmountInPenceWithSource(
   amount: AmountInPence,
@@ -42,45 +40,12 @@ sealed trait CalculatedTaxDue extends Product with Serializable {
   val disposalAmountLessCosts: AmountInPence
   val acquisitionAmountPlusCosts: AmountInPence
   val initialGainOrLoss: AmountInPenceWithSource
+  val gainOrLossAfterInYearLosses: AmountInPence
   val totalReliefs: AmountInPence
   val gainOrLossAfterReliefs: AmountInPence
-  val totalLosses: AmountInPence
-  val gainOrLossAfterLosses: AmountInPence
+  val yearPosition: AmountInPence
   val taxableGainOrNetLoss: AmountInPence
   val amountOfTaxDue: AmountInPence
-}
-
-final case class CalculatedGlarBreakdown(
-  acquisitionPrice: AmountInPence,
-  acquisitionCosts: AmountInPence,
-  disposalPrice: AmountInPence,
-  disposalFees: AmountInPence,
-  privateResidentReliefs: AmountInPence,
-  lettingRelief: AmountInPence,
-  improvementCosts: AmountInPence,
-  assetType: Either[NonResidential.type, Residential.type],
-  previousReturnData: PreviousReturnData
-) {
-
-  val propertyDisposalAmountLessCosts = disposalPrice.inPounds() - disposalFees.inPounds()
-
-  val propertyAcquisitionAmountPlusCosts =
-    acquisitionPrice.inPounds() + improvementCosts.inPounds() + acquisitionCosts.inPounds()
-
-  val totalReliefs = privateResidentReliefs.inPounds() + lettingRelief.inPounds()
-
-  val initialGainOrLoss = propertyDisposalAmountLessCosts - propertyAcquisitionAmountPlusCosts
-
-  val gainOrLossAfterReliefs: BigDecimal =
-    if (initialGainOrLoss > 0)
-      (initialGainOrLoss - totalReliefs).max(0)
-    else if (initialGainOrLoss < 0)
-      (initialGainOrLoss + totalReliefs).min(0)
-    else
-      0
-
-  val isGain: Boolean = gainOrLossAfterReliefs > 0
-
 }
 
 object CalculatedTaxDue {
@@ -89,10 +54,10 @@ object CalculatedTaxDue {
     disposalAmountLessCosts: AmountInPence,
     acquisitionAmountPlusCosts: AmountInPence,
     initialGainOrLoss: AmountInPenceWithSource,
+    gainOrLossAfterInYearLosses: AmountInPence,
     totalReliefs: AmountInPence,
     gainOrLossAfterReliefs: AmountInPence,
-    totalLosses: AmountInPence,
-    gainOrLossAfterLosses: AmountInPence,
+    yearPosition: AmountInPence,
     taxableGainOrNetLoss: AmountInPence,
     amountOfTaxDue: AmountInPence
   ) extends CalculatedTaxDue
@@ -101,10 +66,10 @@ object CalculatedTaxDue {
     disposalAmountLessCosts: AmountInPence,
     acquisitionAmountPlusCosts: AmountInPence,
     initialGainOrLoss: AmountInPenceWithSource,
+    gainOrLossAfterInYearLosses: AmountInPence,
     totalReliefs: AmountInPence,
     gainOrLossAfterReliefs: AmountInPence,
-    totalLosses: AmountInPence,
-    gainOrLossAfterLosses: AmountInPence,
+    yearPosition: AmountInPence,
     taxableGainOrNetLoss: AmountInPence,
     taxableIncome: AmountInPence,
     taxDueAtLowerRate: TaxableAmountOfMoney,

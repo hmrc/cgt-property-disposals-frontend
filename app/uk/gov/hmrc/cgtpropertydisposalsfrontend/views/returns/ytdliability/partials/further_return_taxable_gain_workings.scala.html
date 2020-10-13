@@ -17,18 +17,17 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxableGainOrLossCalculation
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 
 @this(
-    calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
 )
 
-
 @(
-    exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
-    calculatedTax: CalculatedTaxDue
+        calculatedTax: TaxableGainOrLossCalculation,
+        exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers
 )(implicit messages: Messages)
 
 @gainAfterInYearLosses = @{
@@ -37,10 +36,6 @@
 
 @noGainAfterInYearLosses = @{
   gainAfterInYearLosses.isNegative | gainAfterInYearLosses.isZero
-}
-
-@glarGainType = @{
-  if(calculatedTax.gainOrLossAfterReliefs.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.gainOrLossAfterReliefs.isZero) s" (${messages("generic.gain")})" else ""
 }
 
 @inYearLossesGainType = @{
@@ -52,16 +47,32 @@
 }
 
 @taxableGainType = @{
-  if(calculatedTax.taxableGainOrNetLoss.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.taxableGainOrNetLoss.isZero) s" (${messages("generic.gain")})" else ""
+  if(calculatedTax.taxableGainOrLoss.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.taxableGainOrLoss.isZero) s" (${messages("generic.gain")})" else ""
 }
+
+@calcSum(
+  calculatedTax.calculationData.zipWithIndex.map { case (g, index) =>
+    SumPartDisplay(
+      label = g.address.line1,
+      operator = if(index > 0) Some("+") else None,
+      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(g.gainOrLossAfterReliefs.inPounds())
+    )
+  },
+  SumPartDisplay(
+    label = messages("calculator.total.gainsAfterReliefs"),
+    operator = Some("="),
+    amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.totalGainsAfterReliefs.inPounds()),
+    total = true
+  )
+)
 
 @if(noGainAfterInYearLosses) {
   @calcSum(
     List(
       SumPartDisplay(
-        label = messages("calculator.total.gainOrLossAfterReliefs"),
+        label = messages("calculator.total.gainsAfterReliefs"),
         operator = None,
-        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterReliefs.abs().inPounds()) + glarGainType
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.totalGainsAfterReliefs.inPounds())
       ),
       SumPartDisplay(
         label = messages("calculator.inYearLosses"),
@@ -72,7 +83,7 @@
     SumPartDisplay(
       label = messages("calculator.total.taxableGain"),
       operator = Some("="),
-      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.taxableGainOrNetLoss.abs().inPounds()) + taxableGainType,
+      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.taxableGainOrLoss.abs().inPounds()) + taxableGainType,
       total = true
     )
   )
@@ -90,9 +101,9 @@
   @calcSum(
     List(
       SumPartDisplay(
-        label = messages("calculator.total.gainOrLossAfterReliefs"),
+        label = messages("calculator.total.gainsAfterReliefs"),
         operator = None,
-        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterReliefs.abs().inPounds()) + glarGainType
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.totalGainsAfterReliefs.inPounds())
       ),
       SumPartDisplay(
         label = messages("calculator.inYearLosses"),
@@ -103,7 +114,7 @@
     SumPartDisplay(
       label = messages("calculator.total.gainAfterInYearLosses"),
       operator = Some("="),
-      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterReliefs.--(exemptionsAndLossesDetails.inYearLosses).abs().inPounds()) + inYearLossesGainType,
+      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.gainOrLossAfterInYearLosses.abs().inPounds()) + inYearLossesGainType,
       total = true
     )
   )
@@ -129,32 +140,32 @@
     )
   )
 
-@if(calculatedTax.yearPosition.isZero) {
-  <p>
-    <em>
-    @messages("calculator.cannotUsePrevYearsLosses")
-    </em>
-  </p>
-} else {
-  @calcSum(
-    List(
-      SumPartDisplay(
-        label = messages("calculator.total.yearPosition"),
-        operator = None,
-        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.yearPosition.abs().inPounds()) + yearPositionType
+  @if(calculatedTax.yearPosition.isZero) {
+    <p>
+      <em>
+      @messages("calculator.cannotUsePrevYearsLosses")
+      </em>
+    </p>
+  } else {
+    @calcSum(
+      List(
+        SumPartDisplay(
+          label = messages("calculator.total.yearPosition"),
+          operator = None,
+          amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.yearPosition.abs().inPounds()) + yearPositionType
+        ),
+        SumPartDisplay(
+          label = messages("calculator.prevYearLosses"),
+          operator = Some("-"),
+          amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.previousYearsLosses.inPounds())
+        )
       ),
       SumPartDisplay(
-        label = messages("calculator.prevYearLosses"),
-        operator = Some("-"),
-        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(exemptionsAndLossesDetails.previousYearsLosses.inPounds())
+        label = messages("calculator.total.taxableGain"),
+        operator = Some("="),
+        amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.taxableGainOrLoss.abs().inPounds()) + taxableGainType,
+        total = true
       )
-    ),
-    SumPartDisplay(
-      label = messages("calculator.total.taxableGain"),
-      operator = Some("="),
-      amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.taxableGainOrNetLoss.abs().inPounds()) + taxableGainType,
-      total = true
     )
-  )
-}
+  }
 }

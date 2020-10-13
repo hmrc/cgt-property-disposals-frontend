@@ -35,7 +35,7 @@ object ReturnType {
       case _           => true
     }
 
-    def isAmendReturn = r match {
+    def isAmendReturn: Boolean = r match {
       case AmendedReturn => true
       case _             => false
     }
