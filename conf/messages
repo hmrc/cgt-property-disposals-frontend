@@ -4649,7 +4649,8 @@ gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.h2=Did
 
 gainOrLossAfterReliefs.calculated.gain.prompt=Enter a gain of <strong class="bold">{0}</strong> if you agree with these workings.
 gainOrLossAfterReliefs.calculated.loss.prompt=Enter a loss of <strong class="bold">{0}</strong> if you agree with these workings.
-gainOrLossAfterReliefs.calculated.noGainOrLoss.prompt=Select ‘I made no gain or loss’ if you agree with these workings.
+gainOrLossAfterReliefs.calculated.noGainOrLoss.prompt=Select <strong class="bold">‘I made no gain or loss after reliefs’</strong> if you agree with these workings.
+gainOrLossAfterReliefs.calculated.noGainOrLoss.notSelf.prompt=Select <strong class="bold">‘They made no gain or loss after reliefs’</strong> if you agree with these workings.
 
 gainOrLossAfterReliefs.gain.outerLabel=Yes, I made a gain
 gainOrLossAfterReliefs.loss.outerLabel=No, I made a loss

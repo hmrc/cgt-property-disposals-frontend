@@ -153,7 +153,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
               else if(glar.isNegative)
                   messages(s"$key.calculated.loss.prompt", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.gainOrLossAfterReliefs.abs().inPounds()))
               else
-                  messages(s"$key.calculated.noGainOrLoss.prompt")
+                  messages(s"$key.calculated.noGainOrLoss$outerLabelUserKey.prompt")
 
           Some(Html(s"""<p>$prompt</p>""".stripMargin))
 
