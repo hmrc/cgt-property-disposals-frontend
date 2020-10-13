@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.valida
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalcuationEligibility, FurtherReturnCalculationEligibilityUtil, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -85,8 +85,8 @@ class GainOrLossAfterReliefsController @Inject() (
                   draftReturn.triageAnswers().isLeft,
                   fillingOutReturn.isAmendReturn,
                   furtherReturnEligibility match {
-                    case FurtherReturnCalcuationEligibility.Eligible(calculation, _, _) => Some(calculation)
-                    case FurtherReturnCalcuationEligibility.Ineligible(_)               => None
+                    case FurtherReturnCalculationEligibility.Eligible(calculation, _, _) => Some(calculation)
+                    case FurtherReturnCalculationEligibility.Ineligible(_)               => None
                   }
                 )
               )
@@ -120,8 +120,8 @@ class GainOrLossAfterReliefsController @Inject() (
                         draftReturn.triageAnswers().isLeft,
                         fillingOutReturn.isAmendReturn,
                         eligibility match {
-                          case FurtherReturnCalcuationEligibility.Eligible(calculation, _, _) => Some(calculation)
-                          case FurtherReturnCalcuationEligibility.Ineligible(_)               => None
+                          case FurtherReturnCalculationEligibility.Eligible(calculation, _, _) => Some(calculation)
+                          case FurtherReturnCalculationEligibility.Ineligible(_)               => None
                         }
                       )
                     )

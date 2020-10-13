@@ -32,7 +32,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeNino
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeSautr
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalcuationEligibility
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -70,7 +70,7 @@
     fillingOutReturn: FillingOutReturn,
     showSubmissionDetails: Boolean,
     hideEstimatesQuestion: Boolean,
-    furtherOrAmendReturnCalculationEligibility: Option[FurtherReturnCalcuationEligibility]
+    furtherOrAmendReturnCalculationEligibility: Option[FurtherReturnCalculationEligibility]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @subscribedDetails = @{ fillingOutReturn.subscribedDetails }

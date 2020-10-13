@@ -61,7 +61,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalcuationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -579,11 +579,11 @@ class GainOrLossAfterReliefsControllerSpec
                   "gainOrLossAfterReliefs.caption"
                 )
 
-                doc.select("#gainOrLossAfterReliefs > div:nth-child(2) > label").text() shouldBe messageFromMessageKey(
+                doc.select("#gainOrLossAfterReliefs > div:nth-child(3) > label").text() shouldBe messageFromMessageKey(
                   s"gainOrLossAfterReliefs.gain$expectedOuterLabelUserKey.outerLabel"
                 )
 
-                doc.select("#gainOrLossAfterReliefs > div:nth-child(4) > label").text() shouldBe messageFromMessageKey(
+                doc.select("#gainOrLossAfterReliefs > div:nth-child(5) > label").text() shouldBe messageFromMessageKey(
                   s"gainOrLossAfterReliefs.loss$expectedOuterLabelUserKey.outerLabel"
                 )
 

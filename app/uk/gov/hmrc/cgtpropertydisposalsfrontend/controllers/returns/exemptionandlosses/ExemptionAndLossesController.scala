@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, M
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, ExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalcuationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -82,7 +82,8 @@ class ExemptionAndLossesController @Inject() (
       case Some((_, s: StartingToAmendReturn)) =>
         markUnmetDependency(s, sessionStore, errorHandler)
 
-      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _))) if r.isFurtherOrAmendReturn.contains(true) =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d, _, _)))
+          if r.isFurtherOrAmendReturn.contains(true) & d.exemptionAndLossesAnswers.forall(_.isEmpty) =>
         furtherReturnCalculationEligibilityUtil
           .isEligibleForFurtherReturnOrAmendCalculation(r)
           .foldF(
@@ -92,18 +93,14 @@ class ExemptionAndLossesController @Inject() (
             },
             {
               case _: Ineligible =>
-                val answers = d.exemptionAndLossesAnswers
-                  .getOrElse(
-                    IncompleteExemptionAndLossesAnswers.empty.copy(
-                      annualExemptAmount = Some(AmountInPence.zero)
-                    )
-                  )
+                val answers = IncompleteExemptionAndLossesAnswers.empty.copy(
+                  annualExemptAmount = Some(AmountInPence.zero)
+                )
+
                 f(s, r, d, answers)
 
               case _: Eligible =>
-                val answers = d.exemptionAndLossesAnswers
-                  .getOrElse(IncompleteExemptionAndLossesAnswers.empty)
-                f(s, r, d, answers)
+                f(s, r, d, IncompleteExemptionAndLossesAnswers.empty)
 
             }
           )

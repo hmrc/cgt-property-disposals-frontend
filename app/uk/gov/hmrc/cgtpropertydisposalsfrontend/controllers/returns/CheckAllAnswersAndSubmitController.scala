@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.Subscription
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalcuationEligibility, FurtherReturnCalculationEligibilityUtil, PaymentsService, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
@@ -71,7 +71,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
   private val explicitEnglishMessage: Messages = messagesApi.preferred(Seq(Lang("en")))
 
   private def withFurtherReturnCalculationEligibilityCheck(fillingOutReturn: FillingOutReturn)(
-    f: Option[FurtherReturnCalcuationEligibility] => Future[Result]
+    f: Option[FurtherReturnCalculationEligibility] => Future[Result]
   )(implicit r: RequestWithSessionData[_]): Future[Result] = {
     val furtherReturnCalculationEligibilityCheck =
       if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))

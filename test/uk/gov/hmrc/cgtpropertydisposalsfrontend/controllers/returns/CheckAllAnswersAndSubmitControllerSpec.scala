@@ -56,6 +56,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
@@ -96,7 +97,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -108,7 +110,8 @@ class CheckAllAnswersAndSubmitControllerSpec
     with AuthSupport
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with FurtherReturnCalculationEligibilityUtilSupport {
 
   val mockReturnsService = mock[ReturnsService]
 
@@ -120,7 +123,8 @@ class CheckAllAnswersAndSubmitControllerSpec
       bind[SessionStore].toInstance(mockSessionStore),
       bind[ReturnsService].toInstance(mockReturnsService),
       bind[PaymentsService].toInstance(mockPaymentsService),
-      bind[SubscriptionService].toInstance(mockSubscriptionService)
+      bind[SubscriptionService].toInstance(mockSubscriptionService),
+      bind[FurtherReturnCalculationEligibilityUtil].toInstance(mockFurtherReturnCalculationEligibilityUtil)
     )
 
   lazy val controller = instanceOf[CheckAllAnswersAndSubmitController]
@@ -279,17 +283,21 @@ class CheckAllAnswersAndSubmitControllerSpec
 
           def test(
             sessionData: SessionData,
+            fillingOutReturn: FillingOutReturn,
             completeReturn: CompleteSingleDisposalReturn,
             expectedTitleKey: String,
             userType: Option[UserType],
             isATrust: Boolean,
-            isFurtherOrAmendReturn: Boolean,
             hideEstimatesQuestion: Boolean,
+            furtherReturnCalculationEligibility: Option[FurtherReturnCalculationEligibility],
             extraChecks: Document => Unit = _ => ()
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData)
+              furtherReturnCalculationEligibility.foreach(eligibility =>
+                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligibility))
+              )
             }
 
             checkPageIsDisplayed(
@@ -304,8 +312,9 @@ class CheckAllAnswersAndSubmitControllerSpec
                   rebasingEligibilityUtil.isEligibleForRebase(completeReturn),
                   isATrust,
                   completeReturn.triageAnswers.assetType,
-                  isFurtherOrAmendReturn,
-                  hideEstimatesQuestion
+                  furtherReturnCalculationEligibility.isDefined,
+                  hideEstimatesQuestion,
+                  furtherReturnCalculationEligibility.forall(_.isEligible)
                 )
                 doc
                   .select("#back")
@@ -327,12 +336,13 @@ class CheckAllAnswersAndSubmitControllerSpec
           "the return is complete" in {
             test(
               sessionWithJourney(completeFillingOutReturn),
+              completeFillingOutReturn,
               completeReturn,
               "checkAllAnswers.title",
               None,
               completeFillingOutReturn.subscribedDetails.isATrust,
-              isFurtherOrAmendReturn = false,
               hideEstimatesQuestion = false,
+              furtherReturnCalculationEligibility = None,
               extraChecks = { doc =>
                 doc.select("#cancelButton").isEmpty shouldBe true
                 doc
@@ -386,12 +396,13 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             test(
               sessionWithJourney(completeFillingOutReturn),
+              completeFillingOutReturn,
               completeReturn,
               "checkAllAnswers.title",
               None,
               completeFillingOutReturn.subscribedDetails.isATrust,
-              isFurtherOrAmendReturn = true,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              furtherReturnCalculationEligibility = Some(sample[Eligible])
             )
           }
 
@@ -451,12 +462,13 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             test(
               sessionWithJourney(completeFillingOutReturn),
+              completeFillingOutReturn,
               completeReturn,
               "checkAllAnswers.amend.title",
               None,
               completeFillingOutReturn.subscribedDetails.isATrust,
-              isFurtherOrAmendReturn = true,
               hideEstimatesQuestion = true,
+              furtherReturnCalculationEligibility = Some(sample[Ineligible]),
               extraChecks = { doc =>
                 doc.select("#cancelButton").attr("href")    shouldBe controllers.returns.amend.routes.AmendReturnController
                   .confirmCancel(
@@ -473,22 +485,25 @@ class CheckAllAnswersAndSubmitControllerSpec
             val subscribedDetails = sample[SubscribedDetails].copy(
               name = setNameForUserType(userType)
             )
+            val fillingOutReturn  = completeFillingOutReturn.copy(
+              agentReferenceNumber = setAgentReferenceNumber(userType),
+              subscribedDetails = subscribedDetails,
+              amendReturnData = None,
+              previousSentReturns = None
+            )
 
             test(
               sessionWithJourney(
-                completeFillingOutReturn.copy(
-                  agentReferenceNumber = setAgentReferenceNumber(userType),
-                  subscribedDetails = subscribedDetails,
-                  amendReturnData = None
-                ),
+                fillingOutReturn,
                 userType = userType
               ).copy(userType = Some(userType)),
+              fillingOutReturn,
               completeReturn,
               "checkAllAnswers.title",
               Some(userType),
               subscribedDetails.isATrust,
-              isFurtherOrAmendReturn = false,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              furtherReturnCalculationEligibility = None
             )
           }
 
@@ -598,7 +613,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             userType: Option[UserType],
             isATrust: Boolean,
             isFurtherOrAmendReturn: Boolean,
-            hideEstimatesQuestion: Boolean
+            hideEstimatesQuestion: Boolean,
+            showAnnualExemptAmount: Boolean
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -615,7 +631,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   userType,
                   isATrust,
                   isFurtherOrAmendReturn,
-                  hideEstimatesQuestion
+                  hideEstimatesQuestion,
+                  showAnnualExemptAmount
                 )
                 doc
                   .select("#back")
@@ -640,7 +657,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               None,
               completeFillingOutReturn.subscribedDetails.isATrust,
               isFurtherOrAmendReturn = false,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              showAnnualExemptAmount = true
             )
           }
 
@@ -662,7 +680,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               Some(userType),
               subscribedDetails.isATrust,
               isFurtherOrAmendReturn = false,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              showAnnualExemptAmount = true
             )
           }
 
@@ -771,7 +790,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             userType: Option[UserType],
             isATrust: Boolean,
             isFurtherOrAmendReturn: Boolean,
-            hideEstimatesQuestion: Boolean
+            hideEstimatesQuestion: Boolean,
+            showAnnualExemptAmount: Boolean
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -795,7 +815,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   isATrust,
                   IndirectDisposal,
                   isFurtherOrAmendReturn,
-                  hideEstimatesQuestion
+                  hideEstimatesQuestion,
+                  showAnnualExemptAmount
                 )
                 doc
                   .select("#back")
@@ -820,7 +841,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               None,
               completeFillingOutReturn.subscribedDetails.isATrust,
               isFurtherOrAmendReturn = false,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              showAnnualExemptAmount = true
             )
           }
 
@@ -842,7 +864,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               Some(userType),
               subscribedDetails.isATrust,
               isFurtherOrAmendReturn = false,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              showAnnualExemptAmount = true
             )
           }
 
@@ -949,7 +972,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             userType: Option[UserType],
             isATrust: Boolean,
             isFurtherOrAmendReturn: Boolean,
-            hideEstimatesQuestion: Boolean
+            hideEstimatesQuestion: Boolean,
+            showAnnualExemptAmount: Boolean
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -966,7 +990,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   userType,
                   isATrust,
                   isFurtherOrAmendReturn,
-                  hideEstimatesQuestion
+                  hideEstimatesQuestion,
+                  showAnnualExemptAmount
                 )
                 doc
                   .select("#back")
@@ -991,7 +1016,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               None,
               completeFillingOutReturn.subscribedDetails.isATrust,
               isFurtherOrAmendReturn = false,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              showAnnualExemptAmount = true
             )
           }
 
@@ -1013,7 +1039,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               Some(userType),
               subscribedDetails.isATrust,
               isFurtherOrAmendReturn = false,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              showAnnualExemptAmount = true
             )
           }
         }
@@ -1119,7 +1146,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             userType: Option[UserType],
             isATrust: Boolean,
             isFurtherOrAmendReturn: Boolean,
-            hideEstimatesQuestion: Boolean
+            hideEstimatesQuestion: Boolean,
+            showAnnualExemptAmount: Boolean
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1136,7 +1164,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   userType,
                   isATrust,
                   isFurtherOrAmendReturn,
-                  hideEstimatesQuestion
+                  hideEstimatesQuestion,
+                  showAnnualExemptAmount
                 )
                 doc
                   .select("#back")
@@ -1161,7 +1190,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               None,
               completeFillingOutReturn.subscribedDetails.isATrust,
               isFurtherOrAmendReturn = false,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              showAnnualExemptAmount = true
             )
           }
 
@@ -1183,7 +1213,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               Some(userType),
               subscribedDetails.isATrust,
               isFurtherOrAmendReturn = false,
-              hideEstimatesQuestion = false
+              hideEstimatesQuestion = false,
+              showAnnualExemptAmount = true
             )
           }
         }
@@ -1280,7 +1311,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       val completeDraftReturnRepresenteWithNoReference =
         completeDraftReturnNoRepresentee.copy(
-          representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(id = NoReferenceId)),
+          representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(id = NoReferenceId, isFirstReturn = true)),
           triageAnswers = completeReturn.triageAnswers.copy(individualUserType = Some(PersonalRepresentative))
         )
 
@@ -2776,7 +2807,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     isATrust: Boolean,
     assetType: AssetType,
     isFurtherOrAmendReturn: Boolean,
-    hideEstimatesQuestion: Boolean
+    hideEstimatesQuestion: Boolean,
+    showAnnualExemptAmount: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
 
     completeReturn.representeeAnswers.foreach(
@@ -2833,7 +2865,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
         isATrust,
         userType.contains(UserType.Agent),
         individualUserType,
-        isFurtherOrAmendReturn
+        showAnnualExemptAmount
       )
       completeReturn.yearToDateLiabilityAnswers.fold(
         validateNonCalculatedYearToDateLiabilityPage(
@@ -2855,7 +2887,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     userType: Option[UserType],
     isATrust: Boolean,
     isFurtherOrAmendReturn: Boolean,
-    hideEstimatesQuestion: Boolean
+    hideEstimatesQuestion: Boolean,
+    showAnnualExemptAmount: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     completeReturn.representeeAnswers.foreach(
       RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
@@ -2878,7 +2911,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
         doc,
         isATrust,
         userType.contains(UserType.Agent),
-        individualUserType
+        individualUserType,
+        showAnnualExemptAmount
       )
       validateNonCalculatedYearToDateLiabilityPage(
         completeReturn.yearToDateLiabilityAnswers,
@@ -2900,7 +2934,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     isATrust: Boolean,
     assetType: AssetType,
     isFurtherOrAmendReturn: Boolean,
-    hideEstimatesQuestion: Boolean
+    hideEstimatesQuestion: Boolean,
+    showAnnualExemptAmount: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
 
     completeReturn.representeeAnswers.foreach(
@@ -2934,7 +2969,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
         isATrust,
         userType.contains(UserType.Agent),
         individualUserType,
-        isFurtherOrAmendReturn
+        showAnnualExemptAmount
       )
 
       validateNonCalculatedYearToDateLiabilityPage(
@@ -2954,7 +2989,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     userType: Option[UserType],
     isATrust: Boolean,
     isFurtherOrAmendReturn: Boolean,
-    hideEstimatesQuestion: Boolean
+    hideEstimatesQuestion: Boolean,
+    showAnnualExemptAmount: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     completeReturn.representeeAnswers.foreach(
       RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
@@ -2972,7 +3008,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
         doc,
         isATrust,
         userType.contains(UserType.Agent),
-        individualUserType
+        individualUserType,
+        showAnnualExemptAmount
       )
       validateNonCalculatedYearToDateLiabilityPage(
         completeReturn.yearToDateLiabilityAnswers,
@@ -2992,7 +3029,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     userType: Option[UserType],
     isATrust: Boolean,
     isFurtherOrAmendReturn: Boolean,
-    hideEstimatesQuestion: Boolean
+    hideEstimatesQuestion: Boolean,
+    showAnnualExemptAmount: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     completeReturn.representeeAnswers.foreach(
       RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
@@ -3010,7 +3048,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
         doc,
         isATrust,
         userType.contains(UserType.Agent),
-        individualUserType
+        individualUserType,
+        showAnnualExemptAmount
       )
     }
     validateNonCalculatedYearToDateLiabilityPage(
