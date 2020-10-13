@@ -35,7 +35,7 @@
 
 )(implicit messages: Messages)
 
-@propertyDisposalAmountLessCosts = @{propertyDisposalAmount.inPounds() + disposalCosts.inPounds()}
+@propertyDisposalAmountLessCosts = @{propertyDisposalAmount.inPounds() - disposalCosts.inPounds()}
 @propertyAcquisitionAmountPlusCosts = @{propertyAcquisitionAmount.inPounds() + improvementCosts.inPounds() + acquisitionCosts.inPounds()}
 @totalReliefs = @{privateResidentReliefs.inPounds() + lettingRelief.inPounds()}
 
