@@ -2060,6 +2060,7 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] = controller.taxDue()(FakeRequest())
 
       val disposalDate              = sample[DisposalDate]
+      val address                   = sample[UkAddress]
       val disposalDetailsAnswers    = sample[CompleteDisposalDetailsAnswers]
       val acquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
       val reliefDetailsAnswers      = sample[CompleteReliefDetailsAnswers]
@@ -2075,6 +2076,7 @@ class YearToDateLiabilityControllerSpec
           .copy(individualUserType = individualUserType, disposalDate = disposalDate)
         val draftReturn   = sample[DraftSingleDisposalReturn].copy(
           triageAnswers = triageAnswers,
+          propertyAddress = Some(address),
           disposalDetailsAnswers = Some(disposalDetailsAnswers),
           acquisitionDetailsAnswers = Some(acquisitionDetailsAnswers),
           reliefDetailsAnswers = Some(reliefDetailsAnswers),
@@ -2093,6 +2095,7 @@ class YearToDateLiabilityControllerSpec
       ) =
         CalculateCgtTaxDueRequest(
           triageAnswers,
+          address,
           disposalDetailsAnswers,
           acquisitionDetailsAnswers,
           reliefDetailsAnswers,
@@ -7405,6 +7408,13 @@ class YearToDateLiabilityControllerSpec
         test(
           draftReturn
             .copy(triageAnswers = sample[IncompleteSingleDisposalTriageAnswers])
+        )
+      }
+
+      "there is no property address" in {
+        test(
+          draftReturn
+            .copy(propertyAddress = None)
         )
       }
 

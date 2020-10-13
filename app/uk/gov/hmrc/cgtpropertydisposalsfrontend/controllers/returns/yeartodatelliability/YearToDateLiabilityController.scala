@@ -36,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
@@ -219,6 +220,7 @@ class YearToDateLiabilityController @Inject() (
   private def withCalculatedTaxDue(
     answers: CalculatedYTDAnswers,
     triageAnswers: CompleteSingleDisposalTriageAnswers,
+    address: UkAddress,
     disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
     acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers,
     reliefDetailsAnswers: CompleteReliefDetailsAnswers,
@@ -249,6 +251,7 @@ class YearToDateLiabilityController @Inject() (
                                       .calculateTaxDue(
                                         CalculateCgtTaxDueRequest(
                                           triageAnswers,
+                                          address,
                                           disposalDetailsAnswers,
                                           acquisitionDetailsAnswers,
                                           reliefDetailsAnswers,
@@ -292,6 +295,7 @@ class YearToDateLiabilityController @Inject() (
   private def withCompleteJourneys(draftReturn: DraftSingleDisposalReturn)(
     f: (
       CompleteSingleDisposalTriageAnswers,
+      UkAddress,
       CompleteDisposalDetailsAnswers,
       CompleteAcquisitionDetailsAnswers,
       CompleteReliefDetailsAnswers,
@@ -300,6 +304,7 @@ class YearToDateLiabilityController @Inject() (
   ): Future[Result] =
     (
       draftReturn.triageAnswers,
+      draftReturn.propertyAddress,
       draftReturn.disposalDetailsAnswers,
       draftReturn.acquisitionDetailsAnswers,
       draftReturn.reliefDetailsAnswers,
@@ -307,12 +312,13 @@ class YearToDateLiabilityController @Inject() (
     ) match {
       case (
             t: CompleteSingleDisposalTriageAnswers,
+            Some(u: UkAddress),
             Some(d: CompleteDisposalDetailsAnswers),
             Some(a: CompleteAcquisitionDetailsAnswers),
             Some(r: CompleteReliefDetailsAnswers),
             Some(e: CompleteExemptionAndLossesAnswers)
           ) =>
-        f(t, d, a, r, e)
+        f(t, u, d, a, r, e)
 
       case _ =>
         Redirect(controllers.returns.routes.TaskListController.taskList())
@@ -1036,6 +1042,7 @@ class YearToDateLiabilityController @Inject() (
       withCompleteJourneys(draftReturn) {
         (
           triage,
+          address,
           disposalDetails,
           acquisitionDetails,
           reliefDetails,
@@ -1044,6 +1051,7 @@ class YearToDateLiabilityController @Inject() (
           withCalculatedTaxDue(
             calculatedAnswers,
             triage,
+            address,
             disposalDetails,
             acquisitionDetails,
             reliefDetails,
@@ -1138,6 +1146,7 @@ class YearToDateLiabilityController @Inject() (
       withCompleteJourneys(draftReturn) {
         (
           triage,
+          address,
           disposalDetails,
           acquisitionDetails,
           reliefDetails,
@@ -1146,6 +1155,7 @@ class YearToDateLiabilityController @Inject() (
           withCalculatedTaxDue(
             calculatedAnswers,
             triage,
+            address,
             disposalDetails,
             acquisitionDetails,
             reliefDetails,
