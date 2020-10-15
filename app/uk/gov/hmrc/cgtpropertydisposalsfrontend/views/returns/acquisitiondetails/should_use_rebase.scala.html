@@ -46,7 +46,7 @@
  case AssetType.IndirectDisposal => ".indirect"
  case _ => ""
 }}
-@rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate.minusDays(1))}
+@rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate)}
 @title = @{messages(s"$key$assetTypeKey.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 

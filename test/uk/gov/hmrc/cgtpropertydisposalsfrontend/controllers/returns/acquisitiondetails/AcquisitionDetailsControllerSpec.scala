@@ -2386,7 +2386,6 @@ class AcquisitionDetailsControllerSpec
                       acquisitionDate = Some(
                         AcquisitionDate(
                           RebasingCutoffDates.nonUkResidentsResidentialProperty
-                            .minusDays(1)
                         )
                       ),
                       acquisitionPrice = None
@@ -2420,14 +2419,14 @@ class AcquisitionDetailsControllerSpec
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
                   acquisitionDate = Some(
                     AcquisitionDate(
-                      RebasingCutoffDates.ukResidents.minusDays(1)
+                      RebasingCutoffDates.ukResidents.minusDays(1L)
                     )
                   ),
                   acquisitionPrice = Some(sample[AmountInPence]),
                   acquisitionMethod = Some(AcquisitionMethod.Bought)
                 ),
                 assetType,
-                true,
+                wasUkResident = true,
                 userType,
                 individualUserType,
                 isAmend = isAmend
@@ -2439,7 +2438,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               s"rebaseAcquisitionPrice${assetTypeMessageKey(assetType)}.title",
-              TimeUtils.govDisplayFormat(ukResidents.minusDays(1))
+              TimeUtils.govDisplayFormat(ukResidents)
             ),
             { doc =>
               doc
@@ -2493,7 +2492,7 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                false,
+                wasUkResident = false,
                 userType,
                 individualUserType,
                 isAmend = isAmend
@@ -2506,7 +2505,7 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
               TimeUtils.govDisplayFormat(
-                nonUkResidentsResidentialProperty.minusDays(1)
+                nonUkResidentsResidentialProperty
               )
             ),
             { doc =>
@@ -2554,7 +2553,7 @@ class AcquisitionDetailsControllerSpec
                 sample[CompleteAcquisitionDetailsAnswers]
                   .copy(acquisitionDate = acquisitionDate),
                 AssetType.Residential,
-                true,
+                wasUkResident = true,
                 userType,
                 individualUserType,
                 isAmend = isAmend
@@ -2566,7 +2565,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              TimeUtils.govDisplayFormat(ukResidents.minusDays(1))
+              TimeUtils.govDisplayFormat(ukResidents)
             ),
             { doc =>
               doc
@@ -2605,7 +2604,7 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = Some(AmountInPence(1L))
                 ),
                 assetType,
-                true,
+                wasUkResident = true,
                 userType,
                 individualUserType
               )._1
@@ -2618,7 +2617,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               expectedTitleKey,
-              TimeUtils.govDisplayFormat(ukResidents.minusDays(1))
+              TimeUtils.govDisplayFormat(ukResidents)
             ),
             doc =>
               doc
@@ -2679,7 +2678,7 @@ class AcquisitionDetailsControllerSpec
                       acquisitionPrice = None
                     ),
                     AssetType.NonResidential,
-                    false,
+                    wasUkResident = false,
                     userType,
                     individualUserType
                   )._1
@@ -2710,14 +2709,14 @@ class AcquisitionDetailsControllerSpec
                 sample[CompleteAcquisitionDetailsAnswers]
                   .copy(acquisitionDate = acquisitionDate),
                 AssetType.Residential,
-                true,
+                wasUkResident = true,
                 userType,
                 individualUserType
               )._1
             )
           }
 
-          val formattedRebaseDate = TimeUtils.govDisplayFormat(ukResidents.minusDays(1))
+          val formattedRebaseDate = TimeUtils.govDisplayFormat(ukResidents)
           checkPageIsDisplayed(
             performAction(data: _*),
             messageFromMessageKey(
@@ -2962,7 +2961,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = Some(AcquisitionDate(ukResidents)),
+                      acquisitionDate = Some(AcquisitionDate(ukResidents.plusDays(1L))),
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -2984,7 +2983,7 @@ class AcquisitionDetailsControllerSpec
 
       "redirect to the rebased acquisition price page" when {
 
-        "the user does meet the rebasing criteria and the user has not supplied an acquisition price yet" in {
+        "the user does meet the rebasing criteria and the user has not supplied a rebased acquisition price yet" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
@@ -2992,7 +2991,9 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
+                      acquisitionMethod = Some(AcquisitionMethod.Bought),
                       acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                      acquisitionPrice = Some(AmountInPence(100L)),
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -3073,9 +3074,9 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = Some(AcquisitionDate(ukResidents)),
+                      acquisitionDate = Some(AcquisitionDate(ukResidents.plusDays(1L))),
                       acquisitionPrice = Some(sample[AmountInPence]),
-                      rebasedAcquisitionPrice = Some(sample[AmountInPence])
+                      rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
                     true,
@@ -3158,8 +3159,8 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = AcquisitionDate(ukResidents),
-                      rebasedAcquisitionPrice = Some(sample[AmountInPence])
+                      acquisitionDate = AcquisitionDate(ukResidents.plusDays(1L)),
+                      rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
                     true,
@@ -3306,7 +3307,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = Some(AcquisitionDate(ukResidents)),
+                      acquisitionDate = Some(AcquisitionDate(ukResidents.plusDays(1L))),
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -4293,7 +4294,7 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(
                   "shouldUseRebase.title",
                   TimeUtils.govDisplayFormat(
-                    nonUkResidentsResidentialProperty.minusDays(1)
+                    nonUkResidentsResidentialProperty
                   )
                 )
               )
@@ -4313,7 +4314,7 @@ class AcquisitionDetailsControllerSpec
                       shouldUseRebase = Some(true)
                     ),
                     AssetType.NonResidential,
-                    false,
+                    wasUkResident = false,
                     userType,
                     individualUserType
                   )._1
@@ -4325,7 +4326,7 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(
                   "shouldUseRebase.title",
                   TimeUtils.govDisplayFormat(
-                    nonUkResidentsNonResidentialProperty.minusDays(1)
+                    nonUkResidentsNonResidentialProperty
                   )
                 ),
                 doc => doc.select("#shouldUseRebase-true").attr("checked") shouldBe "checked"
@@ -4347,7 +4348,7 @@ class AcquisitionDetailsControllerSpec
                       improvementCosts = Some(sample[AmountInPence])
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )._1
@@ -4380,7 +4381,7 @@ class AcquisitionDetailsControllerSpec
       "show a form error for non residential non uk" when {
 
         val date: String = TimeUtils.govDisplayFormat(
-          nonUkResidentsNonResidentialProperty.minusDays(1)
+          nonUkResidentsNonResidentialProperty
         )
 
         def test(
@@ -4400,7 +4401,7 @@ class AcquisitionDetailsControllerSpec
                   )
                 ),
               NonResidential,
-              false,
+              wasUkResident = false,
               userType,
               individualUserType,
               disposalDate
@@ -4420,7 +4421,7 @@ class AcquisitionDetailsControllerSpec
 
       "show a form error for residential non uk" when {
         val date: String = TimeUtils.govDisplayFormat(
-          nonUkResidentsResidentialProperty.minusDays(1)
+          nonUkResidentsResidentialProperty
         )
 
         def test(
@@ -4434,7 +4435,7 @@ class AcquisitionDetailsControllerSpec
             performAction,
             sessionWithState(
               sample[CompleteAcquisitionDetailsAnswers]
-                .copy(acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.minusDays(1))),
+                .copy(acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty)),
               Residential,
               false,
               userType,
@@ -4619,7 +4620,6 @@ class AcquisitionDetailsControllerSpec
                       acquisitionDate = Some(
                         AcquisitionDate(
                           RebasingCutoffDates.nonUkResidentsResidentialProperty
-                            .minusDays(1L)
                         )
                       ),
                       rebasedAcquisitionPrice = None

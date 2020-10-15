@@ -72,7 +72,7 @@ class RebasingEligibilityUtil {
     if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
       None
     else
-      Some(getRebasingCutOffDate(assetType, wasUkResident)).filter(acquisitionDate.value.isBefore)
+      Some(getRebasingCutOffDate(assetType, wasUkResident)).filter(acquisitionDate.value.minusDays(1L).isBefore)
 
   def getRebasingCutOffDate(
     completeReturn: CompleteSingleDisposalReturn

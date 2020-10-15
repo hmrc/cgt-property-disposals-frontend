@@ -20,10 +20,10 @@ import java.time.LocalDate
 
 object RebasingCutoffDates {
 
-  val ukResidents: LocalDate = LocalDate.of(1982, 4, 1)
+  val ukResidents: LocalDate = LocalDate.of(1982, 3, 31)
 
-  val nonUkResidentsResidentialProperty: LocalDate = LocalDate.of(2015, 4, 6)
+  val nonUkResidentsResidentialProperty: LocalDate = LocalDate.of(2015, 4, 5)
 
-  val nonUkResidentsNonResidentialProperty: LocalDate = LocalDate.of(2019, 4, 6)
+  val nonUkResidentsNonResidentialProperty: LocalDate = LocalDate.of(2019, 4, 5)
 
 }

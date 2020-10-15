@@ -67,7 +67,7 @@
 
 @rebasingKey = @{if(canRebase && answers.shouldUseRebase) ".rebased" else ""}
 @acquisitionDate = @{TimeUtils.govDisplayFormat(answers.acquisitionDate.value)}
-@rebasingDate = @{TimeUtils.govDisplayFormat(cutoffDate.minusDays(1))}
+@rebasingDate = @{TimeUtils.govDisplayFormat(cutoffDate)}
 
 @acquisitionMethodAndPriceTitle = @{
   answers.acquisitionMethod match {
