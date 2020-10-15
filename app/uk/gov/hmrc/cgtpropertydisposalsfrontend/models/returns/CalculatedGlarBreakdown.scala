@@ -31,20 +31,19 @@ final case class CalculatedGlarBreakdown(
 object CalculatedGlarBreakdown {
 
   implicit class CalculatedGlarBreakdownOps(private val c: CalculatedGlarBreakdown) extends AnyVal {
-    def propertyDisposalAmountLessCosts: AmountInPence = c.disposalPrice -- c.disposalFees
+    def propertyDisposalAmountLessCosts: AmountInPence    = c.disposalPrice -- c.disposalFees
     def propertyAcquisitionAmountPlusCosts: AmountInPence =
       c.acquisitionPrice ++ c.improvementCosts ++ c.acquisitionCosts
-    def totalReliefs: AmountInPence = c.privateResidentReliefs ++ c.lettingRelief
-    def initialGainOrLoss: AmountInPence = propertyDisposalAmountLessCosts -- propertyAcquisitionAmountPlusCosts
+    def totalReliefs: AmountInPence                       = c.privateResidentReliefs ++ c.lettingRelief
+    def initialGainOrLoss: AmountInPence                  = propertyDisposalAmountLessCosts -- propertyAcquisitionAmountPlusCosts
 
-    def gainOrLossAfterReliefs: AmountInPence = {
+    def gainOrLossAfterReliefs: AmountInPence =
       if (initialGainOrLoss.isPositive)
         (initialGainOrLoss -- totalReliefs).withFloorZero
       else if (initialGainOrLoss.isNegative)
         (initialGainOrLoss ++ totalReliefs).withCeilingZero
       else
         AmountInPence.zero
-    }
 
     def isGain: Boolean = gainOrLossAfterReliefs.isPositive
 
