@@ -73,7 +73,7 @@
     case _ => ""
 }}
 
-@rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate.minusDays(1))}
+@rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate)}
 @title = @{messages(s"$key$assetTypeKey.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -108,7 +108,7 @@
     @if(assetTypeKey.isEmpty) {
         @details(messages(s"$key.dropdown.header"),
             Html(s"""|
-            |<p> ${messages(s"$key$userKey.dropdown.p1", TimeUtils.govDisplayFormat(rebaseCutOffDate))} </p>
+            |<p> ${messages(s"$key$userKey.dropdown.p1", rebaseCutOffDateDisplayString)} </p>
             |<p> ${messages(s"$key$userKey.dropdown.p2")} </p>
             |<p> ${messages(s"$key.dropdown.p3")} </p>
             |<p> ${Html(messages(s"$key.dropdown.p4", appConfig.marketValue))} </p>
@@ -117,7 +117,7 @@
         } else {
             @details(messages(s"$key.dropdown.header"),
             Html(s"""|
-            |<p> ${messages(s"$key$userKey$assetTypeKey.dropdown.p1", TimeUtils.govDisplayFormat(rebaseCutOffDate))} </p>
+            |<p> ${messages(s"$key$userKey$assetTypeKey.dropdown.p1", rebaseCutOffDateDisplayString)} </p>
             |<p> ${messages(s"$key$assetTypeKey.dropdown.p2")} </p>
             |""".stripMargin ))
         }
