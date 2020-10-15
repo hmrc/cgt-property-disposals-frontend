@@ -66,7 +66,18 @@
           else ""
   }
 }
-
+@helpTextUserKey = @{
+  representativeType match {
+    case Some(PersonalRepresentative) => ".personalRep"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) if(!isAgent) => ".personalRepInPeriodOfAdmin"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) if(isAgent) => ".personalRepInPeriodOfAdmin.agent"
+    case Some(Capacitor) => ".capacitor"
+    case None =>
+      if (isATrust) ".trust"
+      else if (isAgent) ".agent"
+      else ""
+  }
+}
 @isPeriodOfAdmin = @{
     representativeType match {
         case Some(PersonalRepresentativeInPeriodOfAdmin) => true
@@ -83,7 +94,7 @@
 @annualExemptAmountForVulnerableString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountNonVulnerableTrust.inPounds()) }
 
 @helpText = @{ Some(Html( messages(
-    s"$key$userKey.helpText",
+    s"$key$helpTextUserKey.helpText",
     taxYear.startDateInclusive.getYear.toString,
     taxYear.endDateExclusive.getYear.toString,
     annualExemptAmountForVulnerableString,
