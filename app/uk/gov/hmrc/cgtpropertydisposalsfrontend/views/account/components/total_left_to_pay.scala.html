@@ -32,26 +32,32 @@
 }
 
 <h2 class="@numberClass">
-  <span class="govuk-caption-xl">
-    @messages("account.totalLeftToPay")
-  </span>
+
     @if(hasRecentlyAmendedReturn){
         @{"£ " + messages("account.balance-updating")}
-    }else{
-        @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay.inPounds())
-    }
+    } else {
 
-  <span class="sub-heading">
-    @messages("account.totalLeftToPay.penalties")
-  </span>
+      <span class="govuk-caption-xl">
+        @messages("account.totalLeftToPay")
+      </span>
+
+      @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay.inPounds())
+
+      <span class="sub-heading clearfix">
+        <span>
+          @messages("account.totalLeftToPay.penalties")
+        </span>
+      </span>
+    }
 </h2>
+
 @if(totalLeftToPay > AmountInPence.zero) {
-  <a href="@homepage.routes.HomePageController.payTotalAmountLeftToPay()">
+  <a aria-describedby="payment-information" href="@homepage.routes.HomePageController.payTotalAmountLeftToPay()">
     @messages("account.make.payment.link")
   </a>
 }
 <p>
-  <span class="caption">
+  <span class="caption" id="payment-information">
     @messages("account.totalLeftToPay.payments")
   </span>
 </p>

@@ -618,8 +618,8 @@ account.agent.prefix=Client:
 account.trust.prefix=Trust:
 account.personalRep.prefix=Person represented:
 account.personalRepInPeriodOfAdmin.prefix=Estate:
-account.home.title=Capital Gains Tax on UK property account home
-
+account.home.title=Capital Gains Tax on UK property account
+account.home.accountName=Account name: {0}
 account.home.subtitle=Account number: {0}
 account.home.left.title=Capital Gains Tax liability
 account.home.left.placeholder=Your total Capital Gains Tax liability for UK property disposals from 6 April 2020 to 5 April 2021.
@@ -650,9 +650,9 @@ account.manageYourDetails.Address.changed=Contact address changed
 account.manageYourDetails.changed.p=We’ll use this to contact you about your Capital Gains Tax on UK property sales or disposals.
 
 returns.list.title=Sent returns
-returns.list.ref=Return ref:
-returns.list.view=View return
-returns.list.viewAndPay=View return and pay
+returns.list.ref=Return reference:
+returns.list.view=View or change return
+returns.list.viewAndPay=View, pay or change return
 returns.list.paymentDue=Payment due
 returns.list.nextPaymentDue=Next payment due
 returns.list.noTaxDue=You did not owe any tax for this return
