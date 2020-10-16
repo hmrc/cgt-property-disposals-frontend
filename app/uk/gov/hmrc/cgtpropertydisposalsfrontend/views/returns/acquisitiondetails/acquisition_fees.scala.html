@@ -80,6 +80,11 @@
 @rebasingKey = @{if(shouldUseRebase.contains(true)) ".rebased" else ""}
 @title = @{messages(s"$key$userKey$assetTypeKey$rebasingKey.title", TimeUtils.govDisplayFormat(rebaseCutOffDate))}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@userErrorKey = @{if(userKey.startsWith(".")) "" else ".individual"}
+@customErrorKey = @{
+  if(form.errors.headOption.map(_.key).contains(key)) Some(s"$key$userErrorKey$assetTypeKey$rebasingKey")
+  else None
+}
 
 @options = @{List(
     RadioOption(
@@ -117,10 +122,10 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form, None, assetTypeKey)
+        @errorSummary(form, customErrorKey = customErrorKey)
     }
 
-@caption(messages("returns.disposal-details.caption"))
+    @caption(messages("acquisitionDetails.caption"))
 
     @formWrapper(routes.AcquisitionDetailsController.acquisitionFeesSubmit(), 'novalidate -> "novalidate") {
         @radioGroupConditional(
@@ -130,7 +135,7 @@
             error = form.error(key),
             options = options,
             helpText = Some(Html(messages(s"$key$userKey$assetTypeKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate)))),
-            customErrorKey = Some(s"$key$assetTypeKey")
+            customErrorKey = customErrorKey
         )
         @if(isATrust) {
           <p>
@@ -143,7 +148,7 @@
             summary = messages(s"$key.details.header"),
             content = Html(
               s"""
-                | <p>${messages(s"$key$userKey.details.p1", TimeUtils.govDisplayFormat(rebaseCutOffDate))}</p>
+                | <p>${messages(s"$key$assetTypeKey$userKey.details.p1", TimeUtils.govDisplayFormat(rebaseCutOffDate))}</p>
                 | <p>${messages(s"$key$assetTypeKey.details.p2")}</p>
                 | <p>${messages(s"$key${if(!wasUkResident) ".non-resident" else ""}.details.p3", appConfig.nonResidentsRebasingUrl)}</p>
                 |""".stripMargin
