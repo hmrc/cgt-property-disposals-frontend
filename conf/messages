@@ -2478,6 +2478,8 @@ acquisitionFees.rebased.cyaChange=if there were any additional rebasing costs
 
 acquisitionFees.error.required=Select yes if there are additional costs
 acquisitionFees.error.invalid=Select yes if there are additional costs
+acquisitionFees.individual.error.required=Select yes if there are additional costs
+acquisitionFees.individual.error.invalid=Select yes if there are additional costs
 acquisitionFees.indirect.error.required=Select yes if there were any additional costs
 acquisitionFees.indirect.error.invalid=Select yes if there were any additional costs
 acquisitionFees.individual.indirect.error.required=Select yes if you want to claim any additional costs you paid when you got the shares

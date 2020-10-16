@@ -4032,9 +4032,10 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
             (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val userKey      = userMessageKey(individualUserType, userType)
+              val userErrorKey = if (userKey.startsWith(".")) "" else ".individual"
               val assetTypeKey = assetTypeMessageKey(assetType)
               test()(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
-                s"$key$assetTypeKey.error.required"
+                s"$key$userErrorKey$assetTypeKey.error.required"
               )
           }
         }
@@ -4044,8 +4045,9 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val assetTypeKey = assetTypeMessageKey(assetType)
               val userKey      = userMessageKey(individualUserType, userType)
+              val userErrorKey = if (userKey.startsWith(".")) "" else ".individual"
               test(key -> "2")(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
-                s"$key$assetTypeKey.error.invalid"
+                s"$key$userErrorKey$assetTypeKey.error.invalid"
               )
           }
         }
@@ -4078,7 +4080,7 @@ class AcquisitionDetailsControllerSpec
                 userKey + assetTypeKey,
                 false
               )(
-                s"$valueKey$assetTypeKey.error.tooSmall"
+                s"$valueKey.error.tooSmall"
               )
           }
         }
