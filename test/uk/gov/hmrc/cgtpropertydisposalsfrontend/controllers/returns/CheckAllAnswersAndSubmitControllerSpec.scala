@@ -1671,30 +1671,67 @@ class CheckAllAnswersAndSubmitControllerSpec
         }
       )
 
-      "confirmation of submission is correct" in {
+      val key             = "confirmationOfSubmission"
+      val noTaxDueRefLine = s"""${messageFromMessageKey(s"$key.returnReference")} form bundle id"""
+      val taxDueRefLine   = s"""${messageFromMessageKey(s"$key.paymentReference")} charge ref"""
+      val submissionLine  = (
+        "sent-date-table",
+        messageFromMessageKey(s"$key.sentToHmrc"),
+        "2 February 2020"
+      )
+      val addressLine     = (
+        "property-address-table",
+        messageFromMessageKey(s"$key.propertyAddress"),
+        "123 fake street, abc123"
+      )
 
-        val noTaxDueRefLine             = "Return reference number form bundle id"
-        val taxDueRefLine               = "Payment reference number charge ref"
-        val submissionLine              =
-          ("sent-date-table", "Return sent to HMRC", "2 February 2020")
-        val addressLine                 = (
-          "property-address-table",
-          "Property address",
-          "123 fake street, abc123"
-        )
-        val returnReferenceWithBundleId = (
-          "return-reference-table",
-          "Return reference number",
-          "form bundle id"
-        )
-        val taxDueDateLine              =
-          ("tax-due-date-table", "Tax due by", "1 January 2020")
+      val companyLine = (
+        "property-address-table",
+        messageFromMessageKey(s"$key.companyAddress"),
+        "Fake Company Name, 123 Fake Street, abc123"
+      )
+
+      val returnReferenceWithBundleId = (
+        "return-reference-table",
+        messageFromMessageKey(s"$key.returnReference"),
+        "form bundle id"
+      )
+      val taxDueDateLine              = (
+        "tax-due-date-table",
+        messageFromMessageKey(s"$key.taxDue"),
+        "1 January 2020"
+      )
+
+      val individualNameLine = (
+        "account-name-table",
+        messageFromMessageKey(s"$key.nameLabel"),
+        "John Doe"
+      )
+
+      val agentNameLine = (
+        "account-name-table",
+        messageFromMessageKey(s"$key.agent.nameLabel"),
+        "John Doe"
+      )
+
+      val trustNameLine = (
+        "account-name-table",
+        messageFromMessageKey(s"$key.trust.nameLabel"),
+        "trust"
+      )
+
+      val personNameLine = (
+        "account-name-table",
+        messageFromMessageKey(s"$key.person.nameLabel"),
+        "John Doe"
+      )
+
+      "confirmation of submission is correct" in {
 
         sealed case class TestScenario(
           description: String,
           userType: UserType,
           taxOwed: AmountInPence,
-          prefix: String,
           submissionLine: String,
           tableLines: List[(String, String, String)],
           name: Either[TrustName, IndividualName],
@@ -1706,9 +1743,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "user with no tax due",
             UserType.Individual,
             AmountInPence(0),
-            "",
             noTaxDueRefLine,
-            List(submissionLine, addressLine),
+            List(individualNameLine, submissionLine, addressLine),
             Right(IndividualName("John", "Doe")),
             Some(Self)
           ),
@@ -1716,9 +1752,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             "user with tax due",
             UserType.Individual,
             AmountInPence(10000),
-            "",
             taxDueRefLine,
             List(
+              individualNameLine,
               submissionLine,
               returnReferenceWithBundleId,
               addressLine,
@@ -1731,9 +1767,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "agent for individual with no tax due",
             UserType.Agent,
             AmountInPence(0),
-            "Client: ",
             noTaxDueRefLine,
-            List(submissionLine, addressLine),
+            List(agentNameLine, submissionLine, addressLine),
             Right(IndividualName("John", "Doe")),
             Some(Self)
           ),
@@ -1741,9 +1776,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             "agent for individual with tax due",
             UserType.Agent,
             AmountInPence(10000),
-            "Client: ",
             taxDueRefLine,
             List(
+              agentNameLine,
               submissionLine,
               returnReferenceWithBundleId,
               addressLine,
@@ -1756,9 +1791,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "organisation with no tax due",
             UserType.Organisation,
             AmountInPence(0),
-            "Trust: ",
             noTaxDueRefLine,
-            List(submissionLine, addressLine),
+            List(trustNameLine, submissionLine, addressLine),
             Left(TrustName("trust")),
             None
           ),
@@ -1766,9 +1800,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             "organisation with tax due",
             UserType.Organisation,
             AmountInPence(10000),
-            "Trust: ",
             taxDueRefLine,
             List(
+              trustNameLine,
               submissionLine,
               returnReferenceWithBundleId,
               addressLine,
@@ -1781,9 +1815,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "capacitor with no tax due",
             UserType.Individual,
             AmountInPence(0),
-            "",
             noTaxDueRefLine,
-            List(submissionLine, addressLine),
+            List(personNameLine, submissionLine, addressLine),
             Right(IndividualName("John", "Doe")),
             Some(Capacitor)
           ),
@@ -1791,9 +1824,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             "capacitor with tax due",
             UserType.Individual,
             AmountInPence(10000),
-            "",
             taxDueRefLine,
             List(
+              personNameLine,
               submissionLine,
               returnReferenceWithBundleId,
               addressLine,
@@ -1806,9 +1839,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             "personal representative with no tax due",
             UserType.Individual,
             AmountInPence(0),
-            "",
             noTaxDueRefLine,
-            List(submissionLine, addressLine),
+            List(
+              personNameLine,
+              submissionLine,
+              addressLine
+            ),
             Right(IndividualName("John", "Doe")),
             Some(PersonalRepresentative)
           ),
@@ -1816,9 +1852,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             "personal representative with tax due",
             UserType.Individual,
             AmountInPence(10000),
-            "",
             taxDueRefLine,
             List(
+              personNameLine,
               submissionLine,
               returnReferenceWithBundleId,
               addressLine,
@@ -1831,9 +1867,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Estate in period of administration with tax due",
             UserType.Individual,
             AmountInPence(10000),
-            "Estate: ",
             noTaxDueRefLine,
             List(
+              personNameLine,
               submissionLine,
               returnReferenceWithBundleId,
               addressLine
@@ -1845,9 +1881,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Agent of estate in period of administration with tax due",
             UserType.Agent,
             AmountInPence(10000),
-            "Client: ",
             noTaxDueRefLine,
             List(
+              personNameLine,
               submissionLine,
               returnReferenceWithBundleId,
               addressLine
@@ -1862,7 +1898,6 @@ class CheckAllAnswersAndSubmitControllerSpec
                 description,
                 userType,
                 taxOwed,
-                namePrefix,
                 reference,
                 expectedTable,
                 name,
@@ -1895,7 +1930,10 @@ class CheckAllAnswersAndSubmitControllerSpec
                 case Some(_: RepresentativeType) =>
                   Some(
                     sample[CompleteRepresenteeAnswers]
-                      .copy(dateOfDeath = Some(sample[DateOfDeath]))
+                      .copy(
+                        dateOfDeath = Some(sample[DateOfDeath]),
+                        name = IndividualName("John", "Doe")
+                      )
                   )
                 case _                           => None
               }
@@ -1931,15 +1969,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 performAction(),
                 messageFromMessageKey("confirmationOfSubmission.title"),
                 { doc =>
-                  val expectedName =
-                    namePrefix + representeeAnswers
-                      .map(_.name.makeSingleName())
-                      .getOrElse(
-                        name.fold(_.value, _.makeSingleName())
-                      )
-
-                  doc.select("#user-details-name").text() shouldBe expectedName
-                  doc.select("#ref-id").text()            shouldBe reference
+                  doc.select("#ref-id").text() shouldBe reference
 
                   expectedTable.map { tableDetails =>
                     doc
@@ -1984,28 +2014,10 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "confirmation of submission is correct for multiple indirect disposal" in {
 
-        val noTaxDueRefLine             = "Return reference number form bundle id"
-        val taxDueRefLine               = "Payment reference number charge ref"
-        val submissionLine              =
-          ("sent-date-table", "Return sent to HMRC", "2 February 2020")
-        val addressLine                 = (
-          "property-address-table",
-          "Company address",
-          "123 fake street, abc123"
-        )
-        val returnReferenceWithBundleId = (
-          "return-reference-table",
-          "Return reference number",
-          "form bundle id"
-        )
-        val taxDueDateLine              =
-          ("tax-due-date-table", "Tax due by", "1 January 2020")
-
         sealed case class TestScenario(
           description: String,
           userType: UserType,
           taxOwed: AmountInPence,
-          prefix: String,
           submissionLine: String,
           tableLines: List[(String, String, String)],
           name: Either[TrustName, IndividualName],
@@ -2017,9 +2029,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "user with no tax due",
             UserType.Individual,
             AmountInPence(0),
-            "",
             noTaxDueRefLine,
-            List(submissionLine, addressLine),
+            List(individualNameLine, submissionLine, companyLine),
             Right(IndividualName("John", "Doe")),
             Some(Self)
           ),
@@ -2027,12 +2038,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             "user with tax due",
             UserType.Individual,
             AmountInPence(10000),
-            "",
             taxDueRefLine,
             List(
+              individualNameLine,
               submissionLine,
               returnReferenceWithBundleId,
-              addressLine,
+              companyLine,
               taxDueDateLine
             ),
             Right(IndividualName("John", "Doe")),
@@ -2042,9 +2053,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "agent for individual with no tax due",
             UserType.Agent,
             AmountInPence(0),
-            "Client: ",
             noTaxDueRefLine,
-            List(submissionLine, addressLine),
+            List(agentNameLine, submissionLine, companyLine),
             Right(IndividualName("John", "Doe")),
             Some(Self)
           ),
@@ -2052,12 +2062,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             "agent for individual with tax due",
             UserType.Agent,
             AmountInPence(10000),
-            "Client: ",
             taxDueRefLine,
             List(
+              agentNameLine,
               submissionLine,
               returnReferenceWithBundleId,
-              addressLine,
+              companyLine,
               taxDueDateLine
             ),
             Right(IndividualName("John", "Doe")),
@@ -2067,9 +2077,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "organisation with no tax due",
             UserType.Organisation,
             AmountInPence(0),
-            "Trust: ",
             noTaxDueRefLine,
-            List(submissionLine, addressLine),
+            List(trustNameLine, submissionLine, companyLine),
             Left(TrustName("trust")),
             None
           ),
@@ -2077,12 +2086,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             "organisation with tax due",
             UserType.Organisation,
             AmountInPence(10000),
-            "Trust: ",
             taxDueRefLine,
             List(
+              trustNameLine,
               submissionLine,
               returnReferenceWithBundleId,
-              addressLine,
+              companyLine,
               taxDueDateLine
             ),
             Left(TrustName("trust")),
@@ -2092,9 +2101,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "capacitor with no tax due",
             UserType.Individual,
             AmountInPence(0),
-            "",
             noTaxDueRefLine,
-            List(submissionLine, addressLine),
+            List(personNameLine, submissionLine, companyLine),
             Right(IndividualName("John", "Doe")),
             Some(Capacitor)
           ),
@@ -2102,12 +2110,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             "capacitor with tax due",
             UserType.Individual,
             AmountInPence(10000),
-            "",
             taxDueRefLine,
             List(
+              personNameLine,
               submissionLine,
               returnReferenceWithBundleId,
-              addressLine,
+              companyLine,
               taxDueDateLine
             ),
             Right(IndividualName("John", "Doe")),
@@ -2117,9 +2125,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "personal representative with no tax due",
             UserType.Individual,
             AmountInPence(0),
-            "",
             noTaxDueRefLine,
-            List(submissionLine, addressLine),
+            List(personNameLine, submissionLine, companyLine),
             Right(IndividualName("John", "Doe")),
             Some(PersonalRepresentative)
           ),
@@ -2127,12 +2134,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             "personal representative with tax due",
             UserType.Individual,
             AmountInPence(10000),
-            "",
             taxDueRefLine,
             List(
+              personNameLine,
               submissionLine,
               returnReferenceWithBundleId,
-              addressLine,
+              companyLine,
               taxDueDateLine
             ),
             Right(IndividualName("John", "Doe")),
@@ -2145,7 +2152,6 @@ class CheckAllAnswersAndSubmitControllerSpec
                 description,
                 userType,
                 taxOwed,
-                namePrefix,
                 reference,
                 expectedTable,
                 name,
@@ -2153,8 +2159,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               ) =>
             withClue(description) {
               val address = sample[UkAddress].copy(
-                line1 = "123 fake street",
-                line2 = None,
+                line1 = "Fake Company Name",
+                line2 = Some("123 Fake Street"),
                 town = None,
                 county = None,
                 postcode = Postcode("abc123")
@@ -2182,11 +2188,17 @@ class CheckAllAnswersAndSubmitControllerSpec
                 case Some(PersonalRepresentative) =>
                   Some(
                     sample[CompleteRepresenteeAnswers]
-                      .copy(dateOfDeath = Some(sample[DateOfDeath]))
+                      .copy(
+                        dateOfDeath = Some(sample[DateOfDeath]),
+                        name = IndividualName("John", "Doe")
+                      )
                   )
                 case Some(Capacitor)              =>
                   Some(
-                    sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+                    sample[CompleteRepresenteeAnswers].copy(
+                      dateOfDeath = None,
+                      name = IndividualName("John", "Doe")
+                    )
                   )
 
                 case _ => None
@@ -2223,15 +2235,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 performAction(),
                 messageFromMessageKey("confirmationOfSubmission.title"),
                 { doc =>
-                  val expectedName =
-                    representeeAnswers
-                      .map(_.name.makeSingleName())
-                      .getOrElse(
-                        namePrefix + name.fold(_.value, _.makeSingleName())
-                      )
-
-                  doc.select("#user-details-name").text() shouldBe expectedName
-                  doc.select("#ref-id").text()            shouldBe reference
+                  doc.select("#ref-id").text() shouldBe reference
 
                   expectedTable.map { tableDetails =>
                     doc
