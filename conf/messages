@@ -539,7 +539,7 @@ enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Trus
 enterTrustName.label=Name of trust
 trustName.error.required=Enter the name of your trust
 trustName.error.tooLong=The name of your trust must be less than 105 characters
-trustName.error.pattern=The trust’s name must only include letters, numbers, commas, spaces, ampersands, apostrophes and hyphens. Do not include colons.
+trustName.error.pattern=The trust’s name must only include letters, numbers, spaces, ampersands, apostrophes and hyphens. Do not include colons.
 
 alreadySubscribedWithDifferentGGAccount.title=You need to sign in with a different Government Gateway account
 alreadySubscribedWithDifferentGGAccount.p=You’ll need to sign in with same Government Gateway user ID you used to create your Capital Gains Tax on UK property account.

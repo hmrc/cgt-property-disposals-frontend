@@ -29,7 +29,7 @@ object TrustName {
 
   val mapping: Mapping[String] = {
     val regexPredicate =
-      "^[a-zA-Z0-9 &,`\\-\\'^]{1,105}$".r.pattern.asPredicate()
+      "^[a-zA-Z0-9 &`\\-\\'^]{1,105}$".r.pattern.asPredicate()
 
     def validateTrustName(s: String): ValidationResult =
       if (s.length > 105) Invalid("error.tooLong")
