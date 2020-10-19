@@ -4147,7 +4147,8 @@ class SingleDisposalsTriageControllerSpec
                 performAction,
                 completeAnswers.copy(
                   disposalMethod = DisposalMethod.Sold,
-                  assetType = AssetType.Residential
+                  assetType = AssetType.Residential,
+                  countryOfResidence = Country("HK")
                 ),
                 List("assetTypeForNonUkResidents" -> "1"),
                 (fillingOutReturn, draftReturn) =>
@@ -4156,7 +4157,8 @@ class SingleDisposalsTriageControllerSpec
                       draftReturn,
                       completeAnswers.copy(
                         disposalMethod = DisposalMethod.Sold,
-                        assetType = AssetType.NonResidential
+                        assetType = AssetType.NonResidential,
+                        countryOfResidence = Country("HK")
                       )
                     )
                   ),
