@@ -2698,6 +2698,102 @@ supporting-evidence.scan-failed.button.tryAgain=Rhowch gynnig arall arni
 #===================================================
 
 #===================================================
+#  VIEW RETURN PAGES - START
+#===================================================
+
+viewReturn.title=Bwrw golwg dros y Ffurflen Dreth
+viewReturn.heading.taxOwed=Treth sy’n ddyledus ar gyfer y Ffurflen Dreth
+viewReturn.amend.heading.taxOwed=Rhwymedigaeth ddiweddaredig ar gyfer y Ffurflen Dreth hon
+viewReturn.heading.reference=Cyfeirnod y Ffurflen Dreth
+viewReturn.heading.payment.reference=Cyfeirnod y taliad
+viewReturn.printLink=Ewch ati i argraffu neu gadw’r dudalen hon ar gyfer eich cofnodion
+viewReturn.charges.heading=Taliadau
+viewReturn.charges.description=Disgrifiad
+viewReturn.charges.payBy=Dyddiad cau ar gyfer talu
+viewReturn.charges.amount=Swm
+viewReturn.charges.due=Yn ddyledus
+viewReturn.charges.status=Statws
+viewReturn.chargeType.UkResidentReturn=Taliad treth
+viewReturn.amend.chargeType.UkResidentReturn=Rhwymedigaeth treth ddiweddaredig
+viewReturn.chargeType.NonUkResidentReturn=Taliad treth
+viewReturn.amend.chargeType.NonUkResidentReturn=Rhwymedigaeth treth ddiweddaredig
+viewReturn.chargeType.DeltaCharge=Rhwymedigaeth treth ddiweddaredig
+viewReturn.chargeType.Interest=Llog ar daliad treth hwyr
+viewReturn.amend.chargeType.Interest=Llog ar daliad treth hwyr
+viewReturn.chargeType.LateFilingPenalty=Cosb – Ffurflen Dreth hwyr
+viewReturn.amend.chargeType.LateFilingPenalty=Cosb – Ffurflen Dreth hwyr
+viewReturn.chargeType.SixMonthLateFilingPenalty=Cosb – Ffurflen Dreth sydd 6 mis yn hwyr
+viewReturn.amend.chargeType.SixMonthLateFilingPenalty=Cosb – Ffurflen Dreth sydd 6 mis yn hwyr
+viewReturn.chargeType.TwelveMonthLateFilingPenalty=Cosb – Ffurflen Dreth sydd 12 mis yn hwyr
+viewReturn.amend.chargeType.TwelveMonthLateFilingPenalty=Cosb – Ffurflen Dreth sydd 12 mis yn hwyr
+viewReturn.chargeType.LatePaymentPenalty=Cosb – taliad treth hwyr
+viewReturn.amend.chargeType.LatePaymentPenalty=Cosb – taliad treth hwyr
+viewReturn.chargeType.SixMonthLatePaymentPenalty=Cosb – taliad sydd 6 mis yn hwyr
+viewReturn.amend.chargeType.SixMonthLatePaymentPenalty=Cosb – taliad sydd 6 mis yn hwyr
+viewReturn.chargeType.TwelveMonthLatePaymentPenalty=Cosb – taliad sydd 12 mis yn hwyr
+viewReturn.amend.chargeType.TwelveMonthLatePaymentPenalty=Cosb – taliad sydd 12 mis yn hwyr
+viewReturn.chargeType.PenaltyInterest=Llog ar gosbau wedi’i dalu’n hwyr
+viewReturn.amend.chargeType.PenaltyInterest=Llog ar gosbau wedi’i dalu’n hwyr
+viewReturn.charge.status.paid=Talwyd
+viewReturn.charge.status.payNow=<a href="{0}">Talwch nawr</a>
+viewReturn.charge.paymentMethod.BACS=taliad Bacs wedi dod i law
+viewReturn.charge.paymentMethod.CHAPS=taliad CHAPS wedi dod i law
+viewReturn.charge.paymentMethod.Cheque=siec wedi dod i law
+viewReturn.charge.paymentMethod.DebitCardByTelephone=taliad cerdyn debyd wedi dod i law
+viewReturn.charge.paymentMethod.CreditCardByTelephone=taliad cerdyn credyd wedi dod i law
+viewReturn.charge.paymentMethod.PTAOnlineWorldpayDebitCardPayment=taliad cerdyn debyd wedi dod i law
+viewReturn.charge.paymentMethod.PTAOnlineWorldpayCreditCardPayment=taliad cerdyn credyd wedi dod i law
+viewReturn.charge.paymentMethod.GIROReceipts=taliad Banc Giro wedi dod i law
+viewReturn.charge.paymentMethod.GIROCredits=taliad Banc Giro wedi dod i law
+viewReturn.charge.paymentMethod.ChequeReceipts=siec wedi dod i law
+viewReturn.charge.paymentMethod.DirectDebit=taliad debyd uniongyrchol wedi dod i law
+viewReturn.charge.paymentMethod.FasterPayment=Taliad Cyflymach wedi dod i law
+viewReturn.charge.paymentMethod.GiroBankReceipts=taliad Banc Giro wedi dod i law
+viewReturn.charge.paymentMethod.GiroBankPostOffice=taliad Banc Giro wedi dod i law
+viewReturn.charge.paymentMethod.Paymaster=taliad PayMaster wedi dod i law
+viewReturn.charge.paymentMethod.BankLodgement=taliad wedi dod i law
+viewReturn.charge.paymentMethod.Incentive=taliad wedi dod i law
+viewReturn.charge.paymentMethod.LocalOfficePayment=taliad wedi dod i law
+viewReturn.charge.paymentMethod.NilDeclarations=taliad wedi dod i law
+viewReturn.charge.paymentMethod.OverpaymentsToDuty=taliad wedi dod i law
+viewReturn.charge.paymentMethod.ReallocationFromOASToDuty=taliad wedi dod i law
+viewReturn.charge.paymentMethod.PaymentNotExpected=taliad wedi dod i law
+viewReturn.charge.paymentMethod.Reallocation=taliad wedi dod i law
+viewReturn.charge.paymentMethod.RepaymentInterestAllocated=taliad wedi dod i law
+viewReturn.charge.paymentMethod.VoluntaryDirectPayments=taliad wedi dod i law
+viewReturn.charge.clearingReason.IncomingPayment=taliad wedi dod i law
+viewReturn.charge.clearingReason.OutgoingPayment=wedi ad-dalu
+viewReturn.charge.clearingReason.WriteOff=wedi dileu
+viewReturn.charge.clearingReason.Reversal=wedi gwrthdroi
+viewReturn.charge.clearingReason.MassWriteOff=wedi dileu
+viewReturn.charge.clearingReason.AutomaticClearing=Roeddech eisoes wedi talu’r arian hwn i CThEM. Symudodd CThEM yr arian hwn i’r cyfrif hwn
+viewReturn.charge.clearingReason.SomeOtherClearingReason=wedi clirio gan gredyd
+viewReturn.charge.display-error=Mae problem wrth ddangos eich manylion talu.
+viewReturn.organisationNameLine=Ymddiriedolaeth: {0}
+viewReturn.agentNameLine=Cleient: {0}
+viewReturn.sentToHmrc=Ffurflen Dreth wedi’i hanfon i CThEM
+viewReturn.returnReference=Cyfeirnod y Ffurflen Dreth
+viewReturn.propertyAddress=Cyfeiriad yr eiddo
+viewReturn.companyAddress=Cyfeiriad y cwmni
+viewReturn.summaryHeading=Eich Ffurflen Dreth
+viewReturn.hasAttachments=Ffeiliau a dogfennau wedi’u huwchlwytho
+viewReturn.hasAttachments.p1=Un neu fwy o ddogfennau wedi’u huwchlwytho
+viewReturn.warning=Efallai y codir llog arnoch am daliadau hwyr.
+viewReturn.agent.warning=Efallai y codir llog ar eich cleient am daliadau hwyr.
+viewReturn.trust.warning=Efallai y codir llog ar yr ymddiriedolaeth am daliadau hwyr.
+viewReturn.warning.subtext=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yn eich cyfrif.
+viewReturn.agent.warning.subtext=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yng nghyfrif eich cleient.
+viewReturn.trust.warning.subtext=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yng nghyfrif yr ymddiriedolaeth.
+viewReturn.clearingNotice=Pan fyddwch yn diweddaru Ffurflen Dreth, bydd yn cymryd 24 awr i’ch balans sy’n weddill gael ei ddiweddaru yn eich cyfrif. Gallwch wneud taliad unrhyw bryd.
+viewReturn.agent.clearingNotice=Pan fyddwch yn diweddaru Ffurflen Dreth, bydd yn cymryd 24 awr i’r balans sy’n weddill gael ei ddiweddaru yng nghyfrif eich cleient. Gall eich cleient wneud taliad unrhyw bryd.
+viewReturn.trust.clearingNotice=Pan fyddwch yn diweddaru Ffurflen Dreth, bydd yn cymryd 24 awr i’r balans sy’n weddill gael ei ddiweddaru yng nghyfrif yr ymddiriedolaeth. Gallwch wneud taliad unrhyw bryd.
+viewReturn.changeReturn=Newid y Ffurflen Dreth
+
+#===================================================
+#  VIEW RETURN PAGES - END
+#===================================================
+
+#===================================================
 # MULTIPLE DISPOSALS EXAMPLE PROPERTY PAGES - START
 #===================================================
 
@@ -3280,6 +3376,45 @@ country.ZW=Zimbabwe
 #  COUNTRIES - END
 #===================================================
 
+#===================================================
+#  AMEND RETURNS - START
+#===================================================
+
+youNeedToCalculate.title=Os hoffech newid y Ffurflen Dreth hon, bydd angen i chi gyfrifo unrhyw symiau rydych yn eu diweddaru
+youNeedToCalculate.warning=Nid ydym yn cyfrifo’r symiau y bydd angen i chi eu nodi. Os byddwch yn newid y Ffurflen Dreth hon, bydd angen i chi gyfrifo’r symiau eich hun.
+youNeedToCalculate.p1=Bydd angen i chi wneud y canlynol:
+youNeedToCalculate.li1=cyfrifo’ch rhwymedigaeth Treth Enillion Cyfalaf ar eich gwarediadau sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth hyd yn hyn
+youNeedToCalculate.li2=uwchlwytho dogfen sy’n dangos sut y gwnaethoch gyfrifo swm y Dreth Enillion Cyfalaf sy’n ddyledus
+youNeedToCalculate.link1=Sut i gyfrifo’r symiau sydd eu hangen ar gyfer y Ffurflen Dreth hon
+youNeedToCalculate.h2=Os oes angen help arnoch
+youNeedToCalculate.link2=<a href="{0}">cysylltu â CThEM</a>.
+confirmCancelAmendReturn.title=A ydych yn siŵr eich bod am ganslo’r newidiadau?
+confirmCancelAmendReturn.helpText=Os byddwch yn canslo a’ch bod wedi gwneud rhai newidiadau, ni fyddant yn cael eu cadw.
+confirmCancelAmendReturn.error.required=Dewiswch ‘Iawn’ os ydych am ganslo
+confirmCancelAmendReturn.error.boolean=Dewiswch ‘Iawn’ os ydych am ganslo
+amendCya.title=Newid eich Ffurflen Dreth
+amendCya.agent.title=Newid Ffurflen Dreth eich cleient
+amendCya.p1=Ar ôl ateb yr holl gwestiynau, byddwch yn gallu cyflwyno’ch Ffurflen Dreth.
+amendCya.printLink=Argraffu neu gadw’r dudalen hon fel PDF
+amendCya.insetText=Ni fyddwch yn gallu cadw a dod yn ôl yn nes ymlaen tra ydych yn newid eich Ffurflen Dreth.
+unmetDependency.x1.title=Yr hyn y bydd angen i chi ei wneud nesaf
+unmetDependency.x2.title=Bydd angen i chi ateb rhai cwestiynau ychwanegol
+unmetDependency.x1.p1=Bydd yn rhaid i chi wneud y canlynol:
+unmetDependency.x1.li1=ateb cwestiynau eraill am y gwarediad – efallai na fyddwch yn gallu nodi’r swm rydych am ei newid yn uniongyrchol
+unmetDependency.x1.li2=cynnwys y swm rydych am ei newid fel rhan o gyfrifiadau eraill y gofynnir i chi eu gwneud nawr
+unmetDependency.x1.li3=cyfrifo swm newydd y dreth sy’n ddyledus
+unmetDependency.x1.li4=uwchlwytho dogfen sy’n dangos sut y cyfrifwyd swm newydd y dreth sy’n ddyledus
+unmetDependency.x2.p1=I wneud y newid hwn, bydd angen i chi hefyd wneud y canlynol:
+unmetDependency.x2.li1=cyfrifo ac yna ateb cwestiynau am unrhyw golledion, yr ennill neu’r golled net a’r rhwymedigaeth gyffredinol ddiweddaredig
+unmetDependency.x2.li2=cyfrifo swm newydd y dreth sy’n ddyledus
+unmetDependency.x2.li3=uwchlwytho dogfen sy’n dangos sut y cyfrifwyd swm newydd y dreth sy’n ddyledus
+disposalDateInDifferentTaxYear.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
+disposalDateInDifferentTaxYear.p1=Mae hyn oherwydd y byddai’r dyddiad cyfnewid contract a nodwyd gennych yn newid y flwyddyn dreth yr oedd y gwarediad ynddi.
+disposalDateInDifferentTaxYear.p2=I newid y manylion hyn, bydd angen i chi <a href=”{0}”>gysylltu â CThEM</a>
+
+#===================================================
+#  AMEND RETURNS - END
+#===================================================
 
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English
