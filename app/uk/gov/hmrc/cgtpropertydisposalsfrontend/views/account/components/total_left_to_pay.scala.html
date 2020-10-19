@@ -31,7 +31,11 @@
   else "regular-number"
 }
 
-<h2 class="@numberClass">
+@pendingClass = @{
+  if(hasRecentlyAmendedReturn) " pending" else ""
+}
+
+<h2 class="@numberClass@pendingClass">
 
     @if(hasRecentlyAmendedReturn){
         @{"£ " + messages("account.balance-updating")}
