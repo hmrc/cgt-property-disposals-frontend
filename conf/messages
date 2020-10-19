@@ -2416,11 +2416,11 @@ acquisitionFees.capacitor.helpText=For example, fees for surveyors or solicitors
 acquisitionFees.personalRep.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, you can only include their share.
 acquisitionFees.personalRepInPeriodOfAdmin.helpText=For example, legal costs in securing the rights to the property.
 
-acquisitionFees.indirect.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
-acquisitionFees.agent.indirect.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share.
-acquisitionFees.trust.indirect.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share.
-acquisitionFees.capacitor.indirect.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, they can only claim their share.
-acquisitionFees.personalRep.indirect.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, you can only include their share.
+acquisitionFees.indirect.helpText=Additional costs might include stock broker’s fees.
+acquisitionFees.agent.indirect.helpText=Additional costs might include stock broker’s fees.
+acquisitionFees.trust.indirect.helpText=Additional costs might include stock broker’s fees.
+acquisitionFees.capacitor.indirect.helpText=Additional costs might include stock broker’s fees.
+acquisitionFees.personalRep.indirect.helpText=Additional costs might include stock broker’s fees.
 acquisitionFees.personalRepInPeriodOfAdmin.indirect.helpText=Additional costs might include stock broker’s fees.
 
 acquisitionFees.rebased.title=Do you want to claim any additional costs you paid when you rebased the property?
@@ -2434,7 +2434,6 @@ acquisitionFees.agent.indirect.rebased.title=Were there any additional costs pai
 acquisitionFees.trust.indirect.rebased.title=Were there any additional costs paid to rebase the shares?
 acquisitionFees.capacitor.indirect.rebased.title=Does the person want to claim any additional costs for working out the value of the shares on {0}?
 acquisitionFees.personalRep.indirect.rebased.title=Does the person want to claim any additional costs for working out the value of the shares on {0}?
-
 
 acquisitionFees.rebased.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share. You cannot claim for any additional costs you paid for when you got the property.
 acquisitionFees.agent.rebased.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share. Your client cannot claim for any additional costs they paid for when they acquired the property.
@@ -2457,13 +2456,19 @@ acquisitionFees.trust.details.p1=The trust owned the property on or before {0}.
 acquisitionFees.capacitor.details.p1=The person owned the property on or before {0}.
 acquisitionFees.personalRep.details.p1=The person owned the property on or before {0}.
 
+acquisitionFees.indirect.details.p1=You owned the shares on or before {0}.
+acquisitionFees.indirect.agent.details.p1=Your client owned the shares on or before {0}.
+acquisitionFees.indirect.trust.details.p1=The trust owned the shares on or before {0}.
+acquisitionFees.indirect.capacitor.details.p1=The person owned the shares on or before {0}.
+acquisitionFees.indirect.personalRep.details.p1=The person owned the shares on or before {0}.
+
 acquisitionFees.details.p2=This means when you work out your Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.agent.details.p2=To work out your client’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.trust.details.p2=To work out the trust’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 
-acquisitionFees.indirect.details.p2=This means when you work out your Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
-acquisitionFees.indirect.agent.p2=To work out your client’s Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
-acquisitionFees.indirect.trust.details.p2=To work out the trust’s Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+acquisitionFees.indirect.details.p2=This means when you work out your Capital Gains Tax, you must use the market value of the shares on that date. This is instead of using the actual purchase or acquisition amount.
+acquisitionFees.indirect.agent.p2=To work out your client’s Capital Gains Tax, you must use the market value of the shares on that date. This is instead of using the actual purchase or acquisition amount.
+acquisitionFees.indirect.trust.details.p2=To work out the trust’s Capital Gains Tax, you must use the market value of the shares on that date. This is instead of using the actual purchase or acquisition amount.
 
 acquisitionFees.details.p3=This process is called rebasing.
 acquisitionFees.non-resident.details.p3=This process is called <a href="{0}" target="_blank">rebasing (opens in a new window)</a>.
@@ -2473,22 +2478,24 @@ acquisitionFees.rebased.cyaChange=if there were any additional rebasing costs
 
 acquisitionFees.error.required=Select yes if there are additional costs
 acquisitionFees.error.invalid=Select yes if there are additional costs
-acquisitionFees.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
+acquisitionFees.individual.error.required=Select yes if there are additional costs
+acquisitionFees.individual.error.invalid=Select yes if there are additional costs
+acquisitionFees.indirect.error.required=Select yes if there were any additional costs
+acquisitionFees.indirect.error.invalid=Select yes if there were any additional costs
+acquisitionFees.individual.indirect.error.required=Select yes if you want to claim any additional costs you paid when you got the shares
+acquisitionFees.individual.indirect.error.invalid=Select yes if you want to claim any additional costs you paid when you got the shares
+acquisitionFees.indirect.rebased.error.required=Select yes if there were any additional costs for working out the value of the shares on {0}
+acquisitionFees.indirect.rebased.error.invalid=Select yes if there were any additional costs for working out the value of the shares on {0}
+acquisitionFees.individual.indirect.rebased.error.required=Select yes if you want to claim any additional costs for working out the value of the shares on {0}
+acquisitionFees.individual.indirect.rebased.error.invalid=Select yes if you want to claim any additional costs for working out the value of the shares on {0}
+
 acquisitionFeesValue.label=Amount of additional costs
+
 acquisitionFeesValue.error.required=Enter how much was paid in additional costs
 acquisitionFeesValue.error.invalid=Additional costs must be an amount of money, like 1,480 or 900.50
 acquisitionFeesValue.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
 acquisitionFeesValue.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
 acquisitionFeesValue.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 1,480 or 900.50
-
-acquisitionFees.indirect.error.required=Select yes if want to claim any additional costs for working out the value of the shares on {0}
-acquisitionFees.indirect.error.invalid=Select yes if want to claim any additional costs for working out the value of the shares on {0}
-acquisitionFees.indirect.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
-acquisitionFeesValue.indirect.error.required=Enter how much was paid in additional costs
-acquisitionFeesValue.indirect.error.invalid=Additional costs must be an amount of money, like 1,480 or 900.50
-acquisitionFeesValue.indirect.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
-acquisitionFeesValue.indirect.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
-acquisitionFeesValue.indirect.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 1,480 or 900.50
 
 acquisitionFeesValue.cyaChange=the amount of additional costs
 
