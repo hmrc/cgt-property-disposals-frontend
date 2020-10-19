@@ -78,6 +78,10 @@ ul+form legend>h2.heading-medium {
     margin-bottom: 0;
 }
 
+.account-due h2.pending {
+    margin-bottom: 35px;
+}
+
 .account-due h2.very-large-number {
     font-size: 27px;
 }
