@@ -470,6 +470,14 @@ class YearToDateLiabilityControllerSpec
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
 
+  def mockCalculateYearToDateLiability(
+    request: YearToDateLiabilityCalculationRequest
+  )(result: Either[Error, YearToDateLiabilityCalculation]) =
+    (mockCgtCalculationService
+      .calculateYearToDateLiability(_: YearToDateLiabilityCalculationRequest)(_: HeaderCarrier))
+      .expects(request, *)
+      .returning(EitherT.fromEither[Future](result))
+
   def mockUpscanInitiate(
     errorRedirectCall: Call,
     successRedirectCall: UploadReference => Call
@@ -6450,7 +6458,8 @@ class YearToDateLiabilityControllerSpec
           expectedP1Message: String,
           expectedLi3Key: Option[String],
           expectedLinkKey: String,
-          expectedCalculationChecks: Option[Document => Unit] = None
+          expectedCalculationChecks: Option[Document => Unit] = None,
+          calculation: Option[(YearToDateLiabilityCalculationRequest, YearToDateLiabilityCalculation)] = None
         ): Unit = {
           val (taxYearStart, taxYearEnd) =
             taxYear.startDateInclusive.getYear.toString -> taxYear.endDateExclusive.getYear.toString
@@ -6459,6 +6468,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligibility))
+            calculation.foreach { case (request, result) => mockCalculateYearToDateLiability(request)(Right(result)) }
           }
 
           checkPageIsDisplayed(
@@ -6715,6 +6725,265 @@ class YearToDateLiabilityControllerSpec
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link"
           )
+        }
+
+        "the user is eligible for a calculation" in {
+          val (taxableGain, estimatedIncome, personalAllowance) =
+            (sample[AmountInPence], sample[AmountInPence], sample[AmountInPence])
+
+          val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers(
+            Some(taxableGain),
+            Some(true),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(estimatedIncome),
+            Some(personalAllowance)
+          )
+
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(Self),
+            disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
+          )
+
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = triageAnswers,
+            yearToDateLiabilityAnswers = Some(requiredPreviousAnswers)
+          )
+
+          val fillingOutReturn = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            agentReferenceNumber = None,
+            subscribedDetails = sample[SubscribedDetails].copy(
+              name = Right(sample[IndividualName])
+            ),
+            previousSentReturns = Some(sample[PreviousReturnData]),
+            amendReturnData = None
+          )
+
+          val session = SessionData.empty.copy(
+            journeyStatus = Some(fillingOutReturn),
+            userType = Some(UserType.Individual)
+          )
+
+          val calculationRequest = YearToDateLiabilityCalculationRequest(
+            triageAnswers,
+            taxableGain,
+            estimatedIncome,
+            personalAllowance,
+            isATrust = false
+          )
+          val calculationResult  = sample[YearToDateLiabilityCalculation]
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
+            taxYear,
+            sample[Eligible],
+            routes.YearToDateLiabilityController.hasEstimatedDetails(),
+            "yearToDateLiability.title",
+            messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
+            Some("yearToDateLiability.li3"),
+            "yearToDateLiability.link",
+            expectedCalculationChecks = Some { doc =>
+              doc.text() should include("Calculation is")
+            },
+            Some(calculationRequest -> calculationResult)
+          )
+        }
+
+      }
+
+      "show an error page" when {
+
+        def state(
+          triageAnswers: SingleDisposalTriageAnswers,
+          taxableGain: Option[AmountInPence],
+          estimatedIncome: Option[AmountInPence],
+          personalAllowance: Option[AmountInPence]
+        ): (SessionData, FillingOutReturn) = {
+          val answers = IncompleteNonCalculatedYTDAnswers(
+            taxableGain,
+            Some(true),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            estimatedIncome,
+            personalAllowance
+          )
+
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = triageAnswers,
+            yearToDateLiabilityAnswers = Some(answers)
+          )
+
+          val fillingOutReturn = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            agentReferenceNumber = None,
+            subscribedDetails = sample[SubscribedDetails].copy(
+              name = Right(sample[IndividualName])
+            ),
+            previousSentReturns = Some(sample[PreviousReturnData]),
+            amendReturnData = None
+          )
+
+          val session = SessionData.empty.copy(
+            journeyStatus = Some(fillingOutReturn),
+            userType = Some(UserType.Individual)
+          )
+
+          session -> fillingOutReturn
+        }
+
+        "there is a problem checking eligibility for a calculation" in {
+          val (session, fillingOutReturn) = state(
+            sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+            Some(sample[AmountInPence]),
+            Some(sample[AmountInPence]),
+            Some(sample[AmountInPence])
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "the user is eligible for a further return calculation and" when {
+
+          "no value for estimated income can be found" in {
+            val (session, fillingOutReturn) = state(
+              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+              Some(sample[AmountInPence]),
+              None,
+              Some(sample[AmountInPence])
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "no value for personal allowance can be found" in {
+            val (session, fillingOutReturn) = state(
+              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+              Some(sample[AmountInPence]),
+              Some(sample[AmountInPence]),
+              None
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+
+          }
+
+          "no value for taxable gain can be found" in {
+            val (session, fillingOutReturn) = state(
+              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+              None,
+              Some(sample[AmountInPence]),
+              Some(sample[AmountInPence])
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "the draft return is not a DraftSingleDisposalReturn" in {
+            val fillingOutReturn = sample[FillingOutReturn].copy(
+              draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self)),
+                yearToDateLiabilityAnswers = Some(
+                  sample[CompleteNonCalculatedYTDAnswers].copy(
+                    estimatedIncome = Some(sample[AmountInPence]),
+                    personalAllowance = Some(sample[AmountInPence])
+                  )
+                )
+              ),
+              previousSentReturns = Some(sample[PreviousReturnData]),
+              amendReturnData = None
+            )
+            val session          = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "the triage section is not complete" in {
+            val (session, fillingOutReturn) = state(
+              sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+              Some(sample[AmountInPence]),
+              Some(sample[AmountInPence]),
+              Some(sample[AmountInPence])
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "there is a problem performing the calculation" in {
+            val (taxableGain, estimatedIncome, personalAllowance) =
+              (sample[AmountInPence], sample[AmountInPence], sample[AmountInPence])
+            val triageAnswers                                     =
+              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
+
+            val calculationRequest = YearToDateLiabilityCalculationRequest(
+              triageAnswers,
+              taxableGain,
+              estimatedIncome,
+              personalAllowance,
+              isATrust = false
+            )
+
+            val (session, fillingOutReturn) = state(
+              triageAnswers,
+              Some(taxableGain),
+              Some(estimatedIncome),
+              Some(personalAllowance)
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockCalculateYearToDateLiability(calculationRequest)(Left(Error("")))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
         }
 
       }
