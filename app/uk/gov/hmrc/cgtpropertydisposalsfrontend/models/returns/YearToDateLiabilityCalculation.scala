@@ -20,6 +20,9 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 final case class YearToDateLiabilityCalculation(
+  taxableGain: AmountInPence,
+  estimatedIncome: AmountInPence,
+  personalAllowance: AmountInPence,
   taxableIncome: AmountInPence,
   lowerBandTax: TaxableAmountOfMoney,
   higherBandTax: TaxableAmountOfMoney,

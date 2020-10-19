@@ -17,6 +17,7 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
+@import play.twirl.api.Html
 
 @import cats.instances.string._
 @import cats.syntax.eq._
@@ -38,7 +39,9 @@
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
     unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    ytdWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.year_to_date_liability_workings,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
 )
 
 @(
@@ -68,7 +71,8 @@
 @taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
 
-@title = @{messages(s"$key$userKey.title", taxYearStartYear, taxYearEndYear)}
+@title = @{messages(s"$key.title")}
+@label = @{messages(s"$key$userKey.title", taxYearStartYear, taxYearEndYear)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @customErrorKey = @{
     form.errors.headOption.map(e =>
@@ -94,43 +98,77 @@
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
+  @backLinkComponent(backLink)
 
-    <p>!!!!!!!!!!!!!!!!!!!! Calculation is @yearToDateLiabilityCalculation !!!!!!!!!!!!!!!!!!!</p>
+  @if(hasErrors) {
+    @errorSummary(form, customErrorKey = customErrorKey)
+  }
 
-    @backLinkComponent(backLink)
+  @caption(messages("ytdLiability.furtherReturn.caption"))
 
-    @if(hasErrors) {
-        @errorSummary(form, customErrorKey = customErrorKey)
-    }
+  @formWrapper(routes.YearToDateLiabilityController.yearToDateLiabilitySubmit(), 'novalidate -> "novalidate") {
 
-    @caption(messages("ytdLiability.furtherReturn.caption"))
+    @if(yearToDateLiabilityCalculation.isDefined) {
+      @pageHeading(messages(s"$key.title"))
 
-    @formWrapper(routes.YearToDateLiabilityController.yearToDateLiabilitySubmit(), 'novalidate -> "novalidate") {
-        @unitInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            formError = form.error(key),
-            hasErrors = form.error(key).nonEmpty,
-            label = pageHeading(title),
-            labelAsHeading = true,
-            helpText = Some(helpText),
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = customErrorKey
+      <p>
+      @messages(s"$key.intro", taxYearStartYear, taxYearEndYear)
+      </p>
+
+      @yearToDateLiabilityCalculation.map { calculation =>
+        @details(
+          messages("calculator.showWorkings"),
+          ytdWorkings(
+            calculation,
+            taxYear,
+            isATrust,
+            isPeriodOfAdmin = representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)),
+          Some(messages(s"$key.assistive.amountOfTaxDue"))
         )
+      }
 
-        <p id="link">
-          <a href="@{triage.routes.FurtherReturnGuidanceController.overallGainGuidance()}">
-            @messages(s"$key$userKey.link")
-          </a>
-        </p>
-
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+      @unitInput(
+        fieldId = key,
+        value = form.data.getOrElse(key, ""),
+        formError = form.error(key),
+        hasErrors = form.error(key).nonEmpty,
+        label = Html(s"""<h2 class="heading-medium">${label}</h2>"""),
+        labelAsHeading = false,
+        helpText = None,
+        autoComplete = AutoCompleteType.On,
+        inputClass = Some("small"),
+        aspect = "left",
+        unit = "£",
+        assistiveText = messages("unit-input.assistive.pounds"),
+        customErrorKey = customErrorKey
+      )
+  } else {
+      @unitInput(
+        fieldId = key,
+        value = form.data.getOrElse(key, ""),
+        formError = form.error(key),
+        hasErrors = form.error(key).nonEmpty,
+        label = pageHeading(label),
+        labelAsHeading = true,
+        helpText = Some(helpText),
+        autoComplete = AutoCompleteType.On,
+        inputClass = Some("small"),
+        aspect = "left",
+        unit = "£",
+        assistiveText = messages("unit-input.assistive.pounds"),
+        customErrorKey = customErrorKey
+      )
+      <p id="link">
+        <a href="@{triage.routes.FurtherReturnGuidanceController.overallGainGuidance()}">
+        @messages(s"$key$userKey.link")
+        </a>
+      </p>
     }
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+    @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+
+  }
+
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }
