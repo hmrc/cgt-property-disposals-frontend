@@ -98,7 +98,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           LocalDate.now(Clock.systemUTC())
         )
 
-        test(completeReturn, draftReturn, completeReturn.gainOrLossAfterReliefs.isDefined)
+        test(completeReturn, draftReturn, shouldDisplayGainOrLossAfterReliefs = true)
       }
 
       "given a CompleteSingleDisposal return" in {
@@ -122,7 +122,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
         test(
           completeReturn,
           draftReturn,
-          completeReturn.gainOrLossAfterReliefs.isDefined || completeReturn.initialGainOrLoss.isDefined
+          shouldDisplayGainOrLossAfterReliefs = true
         )
       }
 
@@ -142,7 +142,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           LocalDate.now(Clock.systemUTC())
         )
 
-        test(completeReturn, draftReturn, completeReturn.gainOrLossAfterReliefs.isDefined)
+        test(completeReturn, draftReturn, shouldDisplayGainOrLossAfterReliefs = true)
       }
 
       "given a CompleteMultipleIndirectDisposal return" in {
@@ -159,7 +159,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           LocalDate.now(Clock.systemUTC())
         )
 
-        test(completeReturn, draftReturn, completeReturn.gainOrLossAfterReliefs.isDefined)
+        test(completeReturn, draftReturn, shouldDisplayGainOrLossAfterReliefs = true)
       }
 
       "given a CompleteSingleMixedUseDisposal return return" in {
@@ -176,7 +176,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           LocalDate.now(Clock.systemUTC())
         )
 
-        test(completeReturn, draftReturn, completeReturn.gainOrLossAfterReliefs.isDefined)
+        test(completeReturn, draftReturn, shouldDisplayGainOrLossAfterReliefs = true)
       }
 
     }
@@ -211,7 +211,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           Some(
             AmendReturnData(
               startingToAmend.originalReturn,
-              startingToAmend.originalReturn.completeReturn.gainOrLossAfterReliefs.isDefined
+              shouldDisplayGainOrLossAfterReliefs = true
             )
           )
         )
