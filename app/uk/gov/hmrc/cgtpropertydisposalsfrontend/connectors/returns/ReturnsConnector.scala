@@ -28,7 +28,7 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest, TaxableGainOrLossCalculationRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest, TaxableGainOrLossCalculationRequest, YearToDateLiabilityCalculationRequest}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -75,6 +75,10 @@ trait ReturnsConnector {
     request: TaxableGainOrLossCalculationRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 
+  def calculateYearToDateLiability(
+    request: YearToDateLiabilityCalculationRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+
   def taxYear(date: LocalDate)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
@@ -101,6 +105,8 @@ class ReturnsConnectorImpl @Inject() (
   private val calculateCgtTaxDueUrl: String = s"$baseUrl/calculate-tax-due"
 
   private val calculateTaxableGainOrLossUrl: String = s"$baseUrl/calculate-taxable-gain-or-loss"
+
+  private val calculateYearToDateLiabilityUrl: String = s"$baseUrl/calculate-year-to-date-liability"
 
   override def storeDraftReturn(
     draftReturn: DraftReturn,
@@ -209,6 +215,18 @@ class ReturnsConnectorImpl @Inject() (
     EitherT[Future, Error, HttpResponse](
       http
         .POST[TaxableGainOrLossCalculationRequest, HttpResponse](calculateTaxableGainOrLossUrl, request)
+        .map(Right(_))
+        .recover { case NonFatal(e) =>
+          Left(Error(e))
+        }
+    )
+
+  def calculateYearToDateLiability(
+    request: YearToDateLiabilityCalculationRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+    EitherT[Future, Error, HttpResponse](
+      http
+        .POST[YearToDateLiabilityCalculationRequest, HttpResponse](calculateYearToDateLiabilityUrl, request)
         .map(Right(_))
         .recover { case NonFatal(e) =>
           Left(Error(e))

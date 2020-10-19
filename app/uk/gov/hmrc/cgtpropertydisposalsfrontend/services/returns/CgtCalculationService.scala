@@ -25,7 +25,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue, TaxableGainOrLossCalculation, TaxableGainOrLossCalculationRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue, TaxableGainOrLossCalculation, TaxableGainOrLossCalculationRequest, YearToDateLiabilityCalculation, YearToDateLiabilityCalculationRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -41,6 +41,10 @@ trait CgtCalculationService {
   def calculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, TaxableGainOrLossCalculation]
+
+  def calculateYearToDateLiability(
+    request: YearToDateLiabilityCalculationRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, YearToDateLiabilityCalculation]
 
 }
 
@@ -77,6 +81,22 @@ class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector)(implicit
         Left(
           Error(
             s"Call to calculate taxable gain or loss came back with status ${response.status}"
+          )
+        )
+    }
+
+  def calculateYearToDateLiability(
+    request: YearToDateLiabilityCalculationRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, YearToDateLiabilityCalculation] =
+    connector.calculateYearToDateLiability(request).subflatMap { response =>
+      if (response.status === OK)
+        response
+          .parseJSON[YearToDateLiabilityCalculation]()
+          .leftMap(Error(_))
+      else
+        Left(
+          Error(
+            s"Call to calculate year to date liability came back with status ${response.status}"
           )
         )
     }

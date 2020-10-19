@@ -26,7 +26,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor }
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, YearToDateLiabilityCalculation}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 @this(
@@ -47,7 +47,8 @@
     taxYear: TaxYear,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isAmend: Boolean
+    isAmend: Boolean,
+    yearToDateLiabilityCalculation: Option[YearToDateLiabilityCalculation]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "yearToDateLiability" }
@@ -92,6 +93,9 @@
 }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+
+
+    <p>!!!!!!!!!!!!!!!!!!!! Calculation is @yearToDateLiabilityCalculation !!!!!!!!!!!!!!!!!!!</p>
 
     @backLinkComponent(backLink)
 
