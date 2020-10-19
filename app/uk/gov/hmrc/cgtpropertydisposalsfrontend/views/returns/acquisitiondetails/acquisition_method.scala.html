@@ -118,7 +118,7 @@
             labelAsHeading = false,
             errorKey = form.error(otherMethodKey).map(e => s"$userErrorPrefix$assetTypeKeyForErrors${e.message}"),
             value = form.data.getOrElse(otherMethodKey, ""),
-            hasErrors = hasErrors,
+            hasErrors = form.error(otherMethodKey).isDefined,
             extraContent = None,
             inputType = Some("text"),
             autoComplete = AutoCompleteType.On
