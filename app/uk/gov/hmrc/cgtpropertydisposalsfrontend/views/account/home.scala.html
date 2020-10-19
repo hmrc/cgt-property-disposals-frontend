@@ -34,15 +34,12 @@
   buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
   sentReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.sent_returns_list,
   draftReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_returns_list,
-  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
   totalLeftHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.total_left_to_pay
 )
 
 @(subscribed: Subscribed)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
-@isAnAgent = @{subscribed.agentReferenceNumber.isDefined}
 @title = @{messages(s"account.home.title")}
-@subtitle = @{messages("account.home.subtitle", subscribed.subscribedDetails.cgtReference.value)}
 @hasRecentlyAmendedReturn = @{subscribed.sentReturns.exists(r => r.isRecentlyAmended === true)}
 
 @optionalDateOrdering = @{ (date1: Option[LocalDate], date2: Option[LocalDate]) =>
@@ -124,13 +121,17 @@
 
  <div class="grid-row account-home-heading">
   <div class="column-two-thirds account-header">
-   @caption(if(isAnAgent) {
-    s"${messages("account.agent.prefix")} ${subscribed.subscribedDetails.makeAccountName}"
-   } else {
-    subscribed.subscribedDetails.makeAccountName()
-   })
 
-   @pageHeading(title, None, Some(subtitle))
+   @pageHeading(title, None)
+
+   <h2 id="account-details">
+    <span>
+     @messages("account.home.accountName", subscribed.subscribedDetails.makeAccountName())
+    </span>
+    <span>
+    @{messages("account.home.subtitle", subscribed.subscribedDetails.cgtReference.value)}
+    </span>
+   </h2>
 
    @if(subscribed.draftReturns.nonEmpty || subscribed.totalLeftToPay() > AmountInPence.zero) {
     <p>
@@ -144,7 +145,7 @@
   </div>
   <div class="column-one-third account-due">
    @if(subscribed.sentReturns.nonEmpty) {
-    @totalLeftHeading(subscribed.totalLeftToPay(),hasRecentlyAmendedReturn)
+    @totalLeftHeading(subscribed.totalLeftToPay(), hasRecentlyAmendedReturn)
    }
   </div>
  </div>

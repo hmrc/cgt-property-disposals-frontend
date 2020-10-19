@@ -36,7 +36,7 @@
 
 <li class="single-return form-bundle">
   <div class="grid-row">
-    <div class="column-three-quarters submission-summary">
+    <div class="column-two-thirds submission-summary">
       <h3>
         <span class="caption">@messages("returns.list.disposalDetails")</span>
         @sentReturn.propertyAddress.getAddressLines.headOption.getOrElse("")
@@ -47,7 +47,7 @@
         @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.mainReturnChargeAmount.withFloorZero.inPounds())
       </h4>
     </div>
-    <div class="column-one-quarter financial-summary">
+    <div class="column-one-third financial-summary">
       @if(sentReturn.mainReturnChargeAmount.withFloorZero.isZero) {
         <h5>
           <span class="caption">
@@ -78,7 +78,7 @@
     </div>
   </div>
   <div class="grid-row">
-    <div class="column-three-quarters">
+    <div class="column-two-thirds">
       <a
         id="viewSentReturn-@sentReturn.submissionId"
         @if(index === 0 && !showButtonOnDraftReturn && !totalOutstanding.isZero) {
@@ -95,7 +95,7 @@
       </a>
     </div>
 
-    <div class="column-one-quarter">
+    <div class="column-one-third">
       <div class="submission-meta">
         <span class="caption">
           @messages("returns.list.ref") @sentReturn.submissionId

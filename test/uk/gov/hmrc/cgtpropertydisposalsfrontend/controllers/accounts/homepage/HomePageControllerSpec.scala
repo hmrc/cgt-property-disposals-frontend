@@ -1075,7 +1075,7 @@ class HomePageControllerSpec
             )
             doc
               .select(s"#viewSentReturn-${sentReturn.submissionId}")
-              .text shouldBe "View return"
+              .text shouldBe messageFromMessageKey("returns.list.view")
             doc
               .select(s"#sentDate-${sentReturn.submissionId}")
               .text shouldBe messages(
@@ -1106,7 +1106,7 @@ class HomePageControllerSpec
               { doc =>
                 if (subscribed.sentReturns.isEmpty && subscribed.draftReturns.isEmpty)
                   doc
-                    .select("#content > article > div > div > div > a.button")
+                    .select("#content a.button")
                     .text should include(
                     messageFromMessageKey(
                       "account.home.button.start-a-new-return"
@@ -1131,23 +1131,13 @@ class HomePageControllerSpec
                     )
                   )
 
-                doc
-                  .select("#content > article > div:nth-child(1) > div > span")
-                  .text shouldNot include(
-                  messageFromMessageKey("account.agent.prefix")
-                )
-                doc.select("h1 > p").text should include(
+                doc.select("#content #account-details").text should include(
                   messageFromMessageKey(
                     "account.home.subtitle",
                     subscribed.subscribedDetails.cgtReference.value
                   )
                 )
                 if (subscribed.sentReturns.nonEmpty) {
-                  doc.select("h2").text should include(
-                    messageFromMessageKey(
-                      "account.totalLeftToPay"
-                    )
-                  )
                   if (subscribed.totalLeftToPay() > AmountInPence.zero)
                     doc
                       .select(
@@ -1155,7 +1145,7 @@ class HomePageControllerSpec
                       )
                       .attr(
                         "href"
-                      )               shouldBe controllers.accounts.homepage.routes.HomePageController
+                      ) shouldBe controllers.accounts.homepage.routes.HomePageController
                       .payTotalAmountLeftToPay()
                       .url
                   else
@@ -1191,18 +1181,12 @@ class HomePageControllerSpec
           messageFromMessageKey(
             "account.home.title"
           ),
-          { doc =>
+          doc =>
             doc
-              .select("#content > article > div:nth-child(1) > div > span")
+              .select("#content > article #account-details")
               .text() should include(
-              messageFromMessageKey("account.agent.prefix")
-            )
-            doc
-              .select("#content > article > div:nth-child(1) > div > span")
-              .text() should include(
-              subscribed.subscribedDetails.makeAccountName()
-            )
-          },
+              messageFromMessageKey("account.home.accountName", subscribed.subscribedDetails.makeAccountName())
+            ),
           OK
         )
       }

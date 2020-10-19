@@ -1,7 +1,4 @@
 
-/*
-    Question page heading and nested heading styles not fully supported by Assets Frontend
- */
 h1.heading-xlarge, h1 {
     margin-bottom: 50px;
 }
@@ -31,7 +28,18 @@ h1 + .govuk-caption-xl {
 ul+form legend>h2.heading-medium {
     margin-top: 1.125em;
 }
+
+/* clearing the floated language toggle */
+.full-width .content__body:before {
+    content: " ";
+    visibility: hidden;
+    display: block;
+    height: 0;
+    clear: both;
+}
+
 .account-home-heading {
+    margin-top: 1em;
     padding-bottom: 30px;
 }
 .returns-list-header h3 {
@@ -39,15 +47,29 @@ ul+form legend>h2.heading-medium {
 }
 .govuk-box-highlight > h1,
 .account-header h1.heading-xlarge {
-    margin-bottom: 0;
+    margin-bottom: 10px;
 }
-.account-header .sub-heading {
+.account-header h1.heading-xlarge {
+    margin-top: 0;
+}
+.account-header h2 {
+    margin-top: 0;
+    font-size: 1em;
+    font-weight: normal;
     margin-bottom: 30px;
+}
+.account-header h2 > span {
+    display: block;
 }
 
 .pull-right {
     float: right;
     margin: 0;
+}
+
+#content .account-due .govuk-caption-xl {
+    color: #0b0c0c;
+    padding-top: 0;
 }
 
 .account-due h2 {
@@ -706,10 +728,26 @@ details dl.govuk-check-your-answers {
     padding: 20px;
 }
 
+.form-bundle .column-one-third {
+    text-align: right;
+}
+
+.clearfix:after {
+    content: " ";
+    display: block;
+    clear: both;
+}
+
 .sub-heading {
     display: block;
     font-weight: normal;
-    font-size: 19px;
+    font-size: 16px;
+    margin-bottom: 1em;
+}
+
+.sub-heading span {
+    float: right;
+    max-width: 190px;
 }
 
 .payments-list-container {
@@ -725,6 +763,22 @@ details dl.govuk-check-your-answers {
 
 .no-border td {
     border-bottom: none;
+}
+
+@media only screen and (max-width: 640px) {
+    .column-two-thirds.submission-summary,
+    .column-one-third.financial-summary {
+        text-align: left;
+        padding-bottom: 1em;
+    }
+    .return-list li .financial-summary h5,
+    .submission-meta {
+        text-align: left;
+    }
+
+    .submission-meta {
+        margin-top: 1em;
+    }
 }
 
 @media only screen and (max-width: 768px) {
@@ -776,15 +830,6 @@ details dl.govuk-check-your-answers {
         position: relative;
     }
 
-    .return-list li .financial-summary h5,
-    .submission-meta {
-        text-align: left;
-    }
-
-    .submission-meta {
-        margin-top: 1em;
-    }
-
     .govuk-check-your-answers.cya-questions-long .sum-part > .cya-question,
     .govuk-check-your-answers.cya-questions-long .sum-part > .cya-change,
     .govuk-check-your-answers.cya-questions-long .sum-total > .cya-question,
@@ -828,6 +873,11 @@ details dl.govuk-check-your-answers {
     }
     .column-one-third.account-due .govuk-caption-xl {
         padding-top: 0;
+    }
+
+    .sub-heading span {
+        float: none;
+        max-width: 100%;
     }
 }
 

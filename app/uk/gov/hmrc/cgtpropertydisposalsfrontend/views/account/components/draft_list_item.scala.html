@@ -82,7 +82,7 @@
 
 <li class="single-return form-bundle">
   <div class="grid-row">
-    <div id="draftReturn-@key" class="column-three-quarters submission-summary">
+    <div id="draftReturn-@key" class="column-two-thirds submission-summary">
       @draftLabel.map { case ((subHeading, heading), label) =>
       <h3>
         <span class="caption">@messages(s"drafts.list.$label")</span>
@@ -96,7 +96,7 @@
         @messages("drafts.list.lastUpdated", TimeUtils.govShortDisplayFormat(draftReturn.lastUpdatedDate))
       </span>
     </div>
-    <div id="draftReturnsendAndPayBy-@key" class="column-one-quarter financial-summary">
+    <div id="draftReturnsendAndPayBy-@key" class="column-one-third financial-summary">
       @dueDate.map(f => {
         <h4>
           <span class="caption">{messages("drafts.list.sendAndPayBy")}</span>
