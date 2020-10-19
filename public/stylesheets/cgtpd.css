@@ -90,12 +90,15 @@ ul+form legend>h2.heading-medium {
     background-color: #005ea5;
 }
 
-.govuk-box-highlight--status > p {
+.govuk-box-highlight > p {
     margin: 20px 0 0 0;
 }
 
-.govuk-box-highlight--status > p > span {
+.govuk-box-highlight > p > span {
     margin: 0;
+}
+.govuk-box-highlight > p > span.heading-large.tax-owed-label {
+    font-weight: normal;
 }
 
 .return-summary .cya-change {
@@ -117,6 +120,10 @@ ul+form legend>h2.heading-medium {
 
 #content .form-hint {
     color: #515A5C;
+}
+
+#content .govuk-box-highlight {
+    background-color: #00703c;
 }
 
 div>p.lede,

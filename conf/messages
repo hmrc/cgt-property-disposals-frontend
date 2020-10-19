@@ -4060,9 +4060,10 @@ confirmationOfSubmission.trust.clearingNotice=It takes 24 hours for your outstan
 confirmationOfSubmission.returnToAccountHome=Go to your <a href="{0}">Capital Gains Tax on UK property account home</a>.
 confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a href="{0}">Capital Gains Tax on UK property account home</a>.
 
-confirmationOfSubmission.organisationNameLine=Trust: {0}
-confirmationOfSubmission.agentNameLine=Client: {0}
-confirmationOfSubmission.estateNameLine=Estate: {0}
+confirmationOfSubmission.nameLabel=Account name
+confirmationOfSubmission.trust.nameLabel=Trust name
+confirmationOfSubmission.agent.nameLabel=Client’s name
+confirmationOfSubmission.person.nameLabel=Person’s name
 
 #===================================================
 #  CHECK ALL ANSWERS AND CONFIRMATION PAGES - END

@@ -95,6 +95,13 @@
     representeeAnswers.map(_.name.makeSingleName())
 }
 
+@nameLabel = @{
+    representativeType match {
+      case Some(_) => ".person"
+      case None => if(isATrust) ".trust" else userKey
+    }
+}
+
 @amountOwed = @{justSubmittedReturn.submissionResponse.charge.map(_.amount.inPounds()).getOrElse(BigDecimal(0))}
 
 @chargeReference = @{justSubmittedReturn.submissionResponse.charge.map { charge => charge.chargeReference }}
@@ -122,37 +129,27 @@
 
 @mainTemplate(title = title, userType = request.userType) {
 
-<div class="govuk-box-highlight">
-     <p id="user-details-name">
-         @{
-             representativeType match {
-                 case Some(PersonalRepresentativeInPeriodOfAdmin) if(!isAgent) => messages(s"$key.estateNameLine", representeeName.getOrElse(name))
-                 case _ =>
-                     if (isAgent)  messages(s"$key.agentNameLine", representeeName.getOrElse(name))
-                     else if (isATrust) messages(s"$key.organisationNameLine", name)
-                     else representeeName.getOrElse(name)
-             }
-         }
-     </p>
-    <h1 class="heading-xlarge">@title</h1>
-    @if(!isPeriodOfAdmin) {
-      <span class="heading-large" style="font-weight: normal;">
-        @messages(s"$key.$taxOwedLabel")
-        <strong style="display:block; font-weight: bold;">
-          @{{formatAmountOfMoneyWithPoundSign(amountOwed)}}
-        </strong>
-      </span>
-    }
+    <div class="govuk-box-highlight">
 
-    <span class="heading-large" style="font-weight: normal;">
-      <div id="ref-id">
+      <h1 class="heading-xlarge">@title</h1>
+
+      @if(!isPeriodOfAdmin) {
+        <p>
+          <span class="heading-large tax-owed-label">
+            @messages(s"$key.$taxOwedLabel")
+          </span>
+          <span class="heading-xlarge">
+          @{formatAmountOfMoneyWithPoundSign(amountOwed)}
+          </span>
+        </p>
+      }
+
+      <p id="ref-id">
         @{if(amountOwed.equals(BigDecimal(0)) || isPeriodOfAdmin) messages(s"$key.returnReference") else messages(s"$key.paymentReference")}
-        <strong style="display:block; font-weight: bold;">
-        @{if(amountOwed.equals(BigDecimal(0)) || isPeriodOfAdmin) justSubmittedReturn.submissionResponse.formBundleId else chargeReference}
-        </strong>
-      </div>
-    </span>
-
+        <span class="heading-large">
+          @{if(amountOwed.equals(BigDecimal(0)) || isPeriodOfAdmin) justSubmittedReturn.submissionResponse.formBundleId else chargeReference}
+        </span>
+      </p>
 
     </div>
 
@@ -165,6 +162,12 @@
     </p>
 
     @cyaSection() {
+        @cyaRow(
+          messages(s"$key$nameLabel.nameLabel"),
+          Html(representeeName.getOrElse(name)),
+          None,
+          "account-name-table"
+        )
         @cyaRow(
             messages(s"$key.sentToHmrc"),
             Html(TimeUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.processingDate.toLocalDate)),
