@@ -139,6 +139,11 @@ class ViewReturnControllerSpec
     else if (isATrust) ".trust"
     else ""
 
+  def nameLabelUserKey(isAgent: Boolean, isATrust: Boolean) =
+    if (isATrust) ".trust"
+    else if (isAgent) ".agent"
+    else ""
+
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
     case UserType.Agent | UserType.Organisation | UserType.Individual => true
     case _                                                            => false
@@ -226,7 +231,9 @@ class ViewReturnControllerSpec
           .eachText()
           .asScala
 
-        paymentDetails.headOption.getOrElse(sys.error("Error")) should startWith("Tax payment")
+        paymentDetails.headOption.getOrElse(sys.error("Error")) should startWith(
+          messageFromMessageKey("viewReturn.chargeType.UkResidentReturn")
+        )
         paymentDetails(1)                                     shouldBe govShortDisplayFormat(
           ukResidentMainReturnChargeDueDate
         )
@@ -237,13 +244,13 @@ class ViewReturnControllerSpec
           ukResidentMainReturnChargeAmount
             .inPounds() - fullPaymentForUkResidentReturnCharge.amount.inPounds()
         )
-        paymentDetails(4)                                     shouldBe "Paid"
+        paymentDetails(4)                                     shouldBe messageFromMessageKey("viewReturn.charge.status.paid")
 
         paymentDetails(5) shouldBe s"${formatAmountOfMoneyWithPoundSign(
           fullPaymentForUkResidentReturnCharge.amount.inPounds()
         )} direct debit payment received on ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
 
-        paymentDetails(6)    should startWith("Interest on penalties paid late")
+        paymentDetails(6)    should startWith(messageFromMessageKey("viewReturn.chargeType.PenaltyInterest"))
         paymentDetails(7)  shouldBe govShortDisplayFormat(
           penaltyInterestChargeAmountDueDate
         )
@@ -344,25 +351,33 @@ class ViewReturnControllerSpec
             )
           }
 
-          val result   = performAction()
-          val document = Jsoup.parse(contentAsString(result))
+          val result       = performAction()
+          val document     = Jsoup.parse(contentAsString(result))
+          val nameLabelKey = nameLabelUserKey(userType === UserType.Agent, subscribedDetails.isATrust)
 
           document
+            .select("#account-name-table-question")
+            .text()                                         shouldBe messageFromMessageKey(s"viewReturn$nameLabelKey.nameLabel")
+          document
+            .select("#account-name-table-answer")
+            .text()                                         shouldBe subscribedDetails.name
+            .fold(_.value, e => e.makeSingleName())
+          document
             .select("#date-sent-table-question")
-            .text()                                         shouldBe "Return sent to HMRC"
+            .text()                                         shouldBe messageFromMessageKey("viewReturn.sentToHmrc")
           document.select("#date-sent-table-answer").text() shouldBe TimeUtils
             .govDisplayFormat(
               sentReturn.submissionDate
             )
           document
             .select("#property-address-table-question")
-            .text()                                         shouldBe "Property address"
+            .text()                                         shouldBe messageFromMessageKey("viewReturn.propertyAddress")
           document
             .select("#property-address-table-answer")
             .text()                                         shouldBe "123 fake street, abc123"
           document
             .select("#return-reference-table-question")
-            .text()                                         shouldBe "Return reference number"
+            .text()                                         shouldBe messageFromMessageKey("viewReturn.returnReference")
           document
             .select("#return-reference-table-answer")
             .text()                                         shouldBe sentReturn.submissionId
@@ -380,6 +395,7 @@ class ViewReturnControllerSpec
 
           val time    = extractDueDate(viewingReturn)
           val userKey = deriveUserKey(isAgent, isATrust)
+
           document.select("#warning").text()          shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
           if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
             document
@@ -453,25 +469,34 @@ class ViewReturnControllerSpec
             )
           }
 
-          val result   = performAction()
-          val document = Jsoup.parse(contentAsString(result))
+          val result       = performAction()
+          val document     = Jsoup.parse(contentAsString(result))
+          val nameLabelKey = nameLabelUserKey(userType === UserType.Agent, subscribedDetails.isATrust)
+
+          document
+            .select("#account-name-table-question")
+            .text() shouldBe messageFromMessageKey(s"viewReturn$nameLabelKey.nameLabel")
+          document
+            .select("#account-name-table-answer")
+            .text() shouldBe subscribedDetails.name
+            .fold(_.value, e => e.makeSingleName())
 
           document
             .select("#date-sent-table-question")
-            .text()                                         shouldBe "Return sent to HMRC"
+            .text()                                         shouldBe messageFromMessageKey("viewReturn.sentToHmrc")
           document.select("#date-sent-table-answer").text() shouldBe TimeUtils
             .govDisplayFormat(
               sentAmendedReturn.submissionDate
             )
           document
             .select("#property-address-table-question")
-            .text()                                         shouldBe "Property address"
+            .text()                                         shouldBe messageFromMessageKey("viewReturn.propertyAddress")
           document
             .select("#property-address-table-answer")
             .text()                                         shouldBe "123 fake street, abc123"
           document
             .select("#return-reference-table-question")
-            .text()                                         shouldBe "Return reference number"
+            .text()                                         shouldBe messageFromMessageKey("viewReturn.returnReference")
           document
             .select("#return-reference-table-answer")
             .text()                                         shouldBe sentAmendedReturn.submissionId
@@ -499,6 +524,7 @@ class ViewReturnControllerSpec
 
           val time    = extractDueDate(viewingReturn)
           val userKey = deriveUserKey(isAgent, isATrust)
+
           document.select("#warning").text()          shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
           if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
             document
@@ -578,15 +604,24 @@ class ViewReturnControllerSpec
           val result   = performAction()
           val document = Jsoup.parse(contentAsString(result))
 
-          val isAgent  = userType === UserType.Agent
-          val isATrust = subscribedDetails.isATrust
-          val userKey  = deriveUserKey(isAgent, isATrust)
-          val time     = extractDueDate(viewingReturn)
+          val isAgent      = userType === UserType.Agent
+          val isATrust     = subscribedDetails.isATrust
+          val userKey      = deriveUserKey(isAgent, isATrust)
+          val time         = extractDueDate(viewingReturn)
+          val nameLabelKey = nameLabelUserKey(userType === UserType.Agent, subscribedDetails.isATrust)
+
+          document
+            .select("#account-name-table-question")
+            .text() shouldBe messageFromMessageKey(s"viewReturn$nameLabelKey.nameLabel")
+          document
+            .select("#account-name-table-answer")
+            .text() shouldBe subscribedDetails.name
+            .fold(_.value, e => e.makeSingleName())
 
           document.select("#warning").text()                shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
           document
             .select("#date-sent-table-question")
-            .text()                                         shouldBe "Return sent to HMRC"
+            .text()                                         shouldBe messageFromMessageKey("viewReturn.sentToHmrc")
           document.select("#date-sent-table-answer").text() shouldBe TimeUtils
             .govDisplayFormat(
               sentReturn.submissionDate
@@ -596,13 +631,13 @@ class ViewReturnControllerSpec
           )
           document
             .select("#property-address-table-question")
-            .text() shouldBe "Property address"
+            .text() shouldBe messageFromMessageKey("viewReturn.propertyAddress")
           document
             .select("#property-address-table-answer")
             .text() shouldBe address
           document
             .select("#return-reference-table-question")
-            .text() shouldBe "Return reference number"
+            .text() shouldBe messageFromMessageKey("viewReturn.returnReference")
           document
             .select("#return-reference-table-answer")
             .text() shouldBe sentReturn.submissionId
@@ -614,17 +649,6 @@ class ViewReturnControllerSpec
             .text() shouldBe messageFromMessageKey(
             "viewReturn.title"
           )
-
-          val expectedName = viewingReturn.subscribedDetails.name
-            .fold(_.value, e => e.makeSingleName)
-          val actualName   = document.select("#user-details-name").text()
-
-          if (subscribedDetails.isATrust)
-            actualName                                shouldBe s"Trust: $expectedName"
-          else if (Some(userType).contains(UserType.Agent))
-            actualName shouldBe s"Client: $expectedName"
-          else
-            actualName shouldBe expectedName
 
           if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
             document
@@ -697,9 +721,17 @@ class ViewReturnControllerSpec
             mockGetSession(sessionData)
           }
 
-          val result   = performAction()
-          val document = Jsoup.parse(contentAsString(result))
+          val result       = performAction()
+          val document     = Jsoup.parse(contentAsString(result))
+          val nameLabelKey = nameLabelUserKey(userType === UserType.Agent, subscribedDetails.isATrust)
 
+          document
+            .select("#account-name-table-question")
+            .text()                                         shouldBe messageFromMessageKey(s"viewReturn$nameLabelKey.nameLabel")
+          document
+            .select("#account-name-table-answer")
+            .text()                                         shouldBe subscribedDetails.name
+            .fold(_.value, e => e.makeSingleName())
           document
             .select("#date-sent-table-question")
             .text()                                         shouldBe "Return sent to HMRC"
@@ -730,17 +762,6 @@ class ViewReturnControllerSpec
             .text() shouldBe messageFromMessageKey(
             "viewReturn.title"
           )
-
-          val expectedName = viewingReturn.subscribedDetails.name
-            .fold(_.value, e => e.makeSingleName)
-          val actualName   = document.select("#user-details-name").text()
-
-          if (subscribedDetails.isATrust)
-            actualName                                shouldBe s"Trust: $expectedName"
-          else if (Some(userType).contains(UserType.Agent))
-            actualName shouldBe s"Client: $expectedName"
-          else
-            actualName shouldBe expectedName
 
           if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
             document

@@ -30,7 +30,7 @@ ul+form legend>h2.heading-medium {
 }
 
 /* clearing the floated language toggle */
-.full-width .content__body:before {
+.content__body:before {
     content: " ";
     visibility: hidden;
     display: block;
@@ -90,7 +90,7 @@ ul+form legend>h2.heading-medium {
     margin-bottom: 50px;
 }
 
-.govuk-box-highlight--status {
+#content .govuk-box-highlight.govuk-box-highlight--status {
     background-color: #005ea5;
 }
 

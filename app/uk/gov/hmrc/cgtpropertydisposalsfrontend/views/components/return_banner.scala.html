@@ -17,38 +17,31 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, ReturnType}
 
 @this()
 
-@(heading: String, returnSummary: ReturnSummary, subscribedDetails: SubscribedDetails, userType: Option[UserType], returnType: ReturnType)(implicit messages: Messages)
+@(heading: String, returnSummary: ReturnSummary, subscribedDetails: SubscribedDetails, returnType: ReturnType)(implicit messages: Messages)
 
 @taxOwed = @{returnSummary.mainReturnChargeAmount.withFloorZero}
-@name = @{subscribedDetails.name.fold(_.value, e => e.firstName + " " + e.lastName)}
 @reference = @{if(taxOwed.isPositive) subscribedDetails.cgtReference.value else returnSummary.submissionId}
 @key = @{"viewReturn"}
 @amendKey = @{if(returnType.isAmendReturn) ".amend" else ""}
 
 <div class="govuk-box-highlight govuk-box-highlight--status">
-    <p id="user-details-name">
-        @{userType match {
-            case Some(UserType.Organisation) => messages(s"$key.organisationNameLine", name)
-            case Some(UserType.Agent) => messages(s"$key.agentNameLine", name)
-            case _ => name
-        }}
-    </p>
-    <h1 class="heading-xlarge">@heading</h1>
+  <h1 class="heading-xlarge">@heading</h1>
   <p>
-    @messages(s"$key$amendKey.heading.taxOwed")
+    <span class="heading-large tax-owed-label">
+      @messages(s"$key$amendKey.heading.taxOwed")
+    </span>
     <span class="heading-xlarge" id="heading-tax-owed">
       @{MoneyUtils.formatAmountOfMoneyWithPoundSign(taxOwed.inPounds())}
     </span>
   </p>
   <p>
     @messages(if(taxOwed.isPositive) s"$key.heading.payment.reference" else s"$key.heading.reference")
-    <span class="heading-xlarge" id="heading-reference">
+    <span class="heading-large" id="heading-reference">
       @reference
     </span>
   </p>
