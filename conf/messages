@@ -3557,6 +3557,14 @@ hasEstimatedDetails.error.boolean=Select yes if any of the details in this retur
 hasEstimatedDetails.cyaChange=if any of the amounts in the return have been estimated
 
 yearToDateLiability.title=Enter your overall liability
+yearToDateLiability.agent.title=Enter your client’s overall liability
+yearToDateLiability.trust.title=Enter the trust’s overall liability
+yearToDateLiability.capacitor.title=Enter the person’s overall liability
+yearToDateLiability.personalRep.title=Enter the person’s overall liability
+yearToDateLiability.personalRepInPeriodOfAdmin.title=Enter the estate’s overall liability
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.title=Enter your client’s overall liability
+
+
 yearToDateLiability.intro=We used the details that were entered in this return to work out your overall Capital Gains Tax liability on your UK property-related disposals in the tax year {0} to {1}.
 yearToDateLiability.label=What is your overall Capital Gains Tax liability on your UK property-related disposals in tax year {0} to {1}?
 yearToDateLiability.agent.label=What is your client’s overall Capital Gains Tax liability on their UK property-related disposals in tax year {0} to {1}?
@@ -3611,6 +3619,8 @@ yearToDateLiability.error.invalid=The overall Capital Gains Tax liability must b
 yearToDateLiability.error.tooManyDecimals=The overall Capital Gains Tax liability must be 2 decimal places or less, for example 160,000 or 23,040.50
 yearToDateLiability.error.tooSmall=The overall Capital Gains Tax liability must be 0 or more
 yearToDateLiability.error.tooLarge=The overall Capital Gains Tax liability must be between 0 and 50,000,000,000.00
+
+yearToDateLiability.assistive.overallLiability=for the overall liability
 
 yearToDateLiability.cyaChange=the overall Capital Gains Tax liability
 

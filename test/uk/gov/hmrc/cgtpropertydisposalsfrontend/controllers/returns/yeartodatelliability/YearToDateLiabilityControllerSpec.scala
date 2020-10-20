@@ -650,7 +650,7 @@ class YearToDateLiabilityControllerSpec
         "a personal representative user has not answered the question before" in {
           val (session, fillingOutReturn, _) =
             sessionWithSingleDisposalState(
-              None,
+              Some(IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss = Some(sample[AmountInPence]))),
               Some(sample[DisposalDate]),
               UserType.Individual,
               wasUkResident = true,
@@ -671,9 +671,7 @@ class YearToDateLiabilityControllerSpec
             { doc =>
               doc
                 .select("#back")
-                .attr("href")   shouldBe returns.routes.TaskListController
-                .taskList()
-                .url
+                .attr("href")   shouldBe routes.YearToDateLiabilityController.taxableGainOrLoss().url
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
@@ -6477,15 +6475,19 @@ class YearToDateLiabilityControllerSpec
             { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
 
-              doc.select("#yearToDateLiability-form-hint > p").html() shouldBe expectedP1Message
+              expectedCalculationChecks match {
+                case None =>
+                  doc.select("#link").text()                                  shouldBe messageFromMessageKey(expectedLinkKey)
+                  doc.select("#yearToDateLiability-extra-content > p").html() shouldBe expectedP1Message
 
-              doc.select("#yearToDateLiability-form-hint > ol > li:nth-child(3)").text() shouldBe expectedLi3Key
-                .map(messageFromMessageKey(_))
-                .getOrElse("")
+                  doc.select("#yearToDateLiability-extra-content > ol > li:nth-child(3)").text() shouldBe expectedLi3Key
+                    .map(messageFromMessageKey(_))
+                    .getOrElse("")
 
-              doc.select("#link").text() shouldBe messageFromMessageKey(expectedLinkKey)
+                case Some(checks) =>
+                  checks(doc)
+              }
 
-              expectedCalculationChecks.foreach(_(doc))
             }
           )
         }
@@ -6789,7 +6791,10 @@ class YearToDateLiabilityControllerSpec
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link",
             expectedCalculationChecks = Some { doc =>
-              doc.text() should include("Calculation is")
+              doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
+                "yearToDateLiability.calculatedHelpText.p1",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
+              )
             },
             Some(calculationRequest -> calculationResult)
           )
@@ -6830,7 +6835,7 @@ class YearToDateLiabilityControllerSpec
               name = Right(sample[IndividualName])
             ),
             previousSentReturns = Some(sample[PreviousReturnData]),
-            amendReturnData = None
+            amendReturnData = Some(sample[AmendReturnData])
           )
 
           val session = SessionData.empty.copy(
@@ -6939,7 +6944,8 @@ class YearToDateLiabilityControllerSpec
 
           "the triage section is not complete" in {
             val (session, fillingOutReturn) = state(
-              sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+              sample[IncompleteSingleDisposalTriageAnswers]
+                .copy(individualUserType = Some(Self), disposalDate = Some(sample[DisposalDate])),
               Some(sample[AmountInPence]),
               Some(sample[AmountInPence]),
               Some(sample[AmountInPence])
