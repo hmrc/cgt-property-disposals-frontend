@@ -1453,17 +1453,18 @@ class YearToDateLiabilityControllerSpec
         "redirect to the taxable gain page" when {
 
           "that question has not been answered yet" in {
+            val (session, _, _) =
+              sessionWithMultipleDisposalsState(
+                IncompleteNonCalculatedYTDAnswers.empty,
+                UserType.Individual,
+                wasUkResident = true,
+                isFurtherReturn = false,
+                None
+              )
+
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithMultipleDisposalsState(
-                  IncompleteNonCalculatedYTDAnswers.empty,
-                  UserType.Individual,
-                  wasUkResident = true,
-                  isFurtherReturn = false,
-                  None
-                )._1
-              )
+              mockGetSession(session)
             }
 
             checkIsRedirect(
@@ -1478,12 +1479,17 @@ class YearToDateLiabilityControllerSpec
 
           def test(
             sessionData: SessionData,
+            fillingOutReturn: FillingOutReturn,
             backLink: Call,
+            furtherReturnCalculationEligibility: Option[FurtherReturnCalculationEligibility],
             extraChecks: Document => Unit = _ => ()
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData)
+              furtherReturnCalculationEligibility.foreach(e =>
+                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(e))
+              )
             }
 
             checkPageIsDisplayed(
@@ -1502,7 +1508,7 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the user has not answered the question yet" in {
-            test(
+            val (session, fillingOutReturn, _) =
               sessionWithMultipleDisposalsState(
                 IncompleteNonCalculatedYTDAnswers.empty.copy(
                   taxableGainOrLoss = Some(AmountInPence.zero)
@@ -1511,24 +1517,38 @@ class YearToDateLiabilityControllerSpec
                 wasUkResident = true,
                 isFurtherReturn = false,
                 None
-              )._1,
-              routes.YearToDateLiabilityController.taxableGainOrLoss()
+              )
+
+            test(
+              session,
+              fillingOutReturn,
+              routes.YearToDateLiabilityController.taxableGainOrLoss(),
+              None
             )
           }
 
           "the user has answered the question before" in {
-            val answers = sample[CompleteNonCalculatedYTDAnswers].copy(
-              hasEstimatedDetails = true
+            val answers = sample[IncompleteNonCalculatedYTDAnswers].copy(
+              taxableGainOrLoss = Some(sample[AmountInPence]),
+              estimatedIncome = Some(sample[AmountInPence]),
+              personalAllowance = Some(sample[AmountInPence]),
+              hasEstimatedDetails = Some(true)
             )
-            test(
+
+            val (session, fillingOutReturn, _) =
               sessionWithMultipleDisposalsState(
                 answers,
                 UserType.Individual,
                 wasUkResident = true,
-                isFurtherReturn = false,
+                isFurtherReturn = true,
                 None
-              )._1,
-              routes.YearToDateLiabilityController.checkYourAnswers(),
+              )
+
+            test(
+              session,
+              fillingOutReturn,
+              routes.YearToDateLiabilityController.personalAllowance(),
+              Some(sample[Eligible]),
               doc =>
                 doc
                   .select("#hasEstimatedDetails-true")
@@ -6729,7 +6749,7 @@ class YearToDateLiabilityControllerSpec
           )
         }
 
-        "the user is eligible for a calculation" in {
+        "the user is eligible for a calculation and they are not a trust" in {
           val (taxableGain, estimatedIncome, personalAllowance) =
             (sample[AmountInPence], sample[AmountInPence], sample[AmountInPence])
 
@@ -6790,6 +6810,68 @@ class YearToDateLiabilityControllerSpec
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link",
+            expectedCalculationChecks = Some { doc =>
+              doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
+                "yearToDateLiability.calculatedHelpText.p1",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
+              )
+            },
+            Some(calculationRequest -> calculationResult)
+          )
+        }
+
+        "the user is eligible for a calculation and they are a trust" in {
+          val taxableGain = sample[AmountInPence]
+
+          val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers.empty.copy(
+            taxableGainOrLoss = Some(taxableGain),
+            hasEstimatedDetails = Some(true)
+          )
+
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = None,
+            disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
+          )
+
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = triageAnswers,
+            yearToDateLiabilityAnswers = Some(requiredPreviousAnswers)
+          )
+
+          val fillingOutReturn = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            agentReferenceNumber = None,
+            subscribedDetails = sample[SubscribedDetails].copy(
+              name = Left(sample[TrustName])
+            ),
+            previousSentReturns = Some(sample[PreviousReturnData]),
+            amendReturnData = None
+          )
+
+          val session = SessionData.empty.copy(
+            journeyStatus = Some(fillingOutReturn),
+            userType = Some(UserType.Organisation)
+          )
+
+          val calculationRequest = YearToDateLiabilityCalculationRequest(
+            triageAnswers,
+            taxableGain,
+            AmountInPence.zero,
+            AmountInPence.zero,
+            isATrust = true
+          )
+          val calculationResult  = sample[YearToDateLiabilityCalculation]
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
+            taxYear,
+            sample[Eligible],
+            routes.YearToDateLiabilityController.hasEstimatedDetails(),
+            "yearToDateLiability.trust.title",
+            messageFromMessageKey("yearToDateLiability.trust.p1", viewConfig.trustsAndCgtUrl),
+            None,
+            "yearToDateLiability.trust.link",
             expectedCalculationChecks = Some { doc =>
               doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
                 "yearToDateLiability.calculatedHelpText.p1",

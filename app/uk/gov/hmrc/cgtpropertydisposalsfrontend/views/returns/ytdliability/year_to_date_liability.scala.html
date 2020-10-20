@@ -72,7 +72,7 @@
 @taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
 
-@title = @{messages(s"$key.title")}
+@title = @{messages(s"$key$userKey.title")}
 @label = @{messages(s"$key$userKey.title", taxYearStartYear, taxYearEndYear)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @customErrorKey = @{
@@ -116,7 +116,7 @@
   @formWrapper(routes.YearToDateLiabilityController.yearToDateLiabilitySubmit(), 'novalidate -> "novalidate") {
 
     @if(yearToDateLiabilityCalculation.isDefined) {
-      @pageHeading(messages(s"$key.title"))
+      @pageHeading(messages(s"$key$userKey.title"))
 
       <p>
       @messages(s"$key.intro", taxYearStartYear, taxYearEndYear)

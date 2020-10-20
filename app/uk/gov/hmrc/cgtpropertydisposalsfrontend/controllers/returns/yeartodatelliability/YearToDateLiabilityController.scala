@@ -807,30 +807,39 @@ class YearToDateLiabilityController @Inject() (
                   nonCalculatedAnswers: NonCalculatedYTDAnswers,
                   _: DraftReturn
                 ) =>
-              commonDisplayBehaviour(nonCalculatedAnswers)(
-                form = _.fold(
-                  _.hasEstimatedDetails.fold(hasEstimatedDetailsForm)(
-                    hasEstimatedDetailsForm.fill
-                  ),
-                  c => hasEstimatedDetailsForm.fill(c.hasEstimatedDetails)
+              withFurtherReturnCalculationEligibilityCheck(fillingOutReturn) { furtherReturnCalculationEligibility =>
+                commonDisplayBehaviour(nonCalculatedAnswers)(
+                  form = _.fold(
+                    _.hasEstimatedDetails.fold(hasEstimatedDetailsForm)(
+                      hasEstimatedDetailsForm.fill
+                    ),
+                    c => hasEstimatedDetailsForm.fill(c.hasEstimatedDetails)
+                  )
+                )(
+                  page = hasEstimatedDetailsPage(
+                    _,
+                    _,
+                    isATrust(fillingOutReturn),
+                    fillingOutReturn.draftReturn.representativeType(),
+                    fillingOutReturn.isFurtherOrAmendReturn,
+                    fillingOutReturn.isAmendReturn
+                  )
+                )(
+                  requiredPreviousAnswer = answers =>
+                    if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
+                      answers.fold(_.personalAllowance, _.personalAllowance)
+                    else
+                      answers.fold(
+                        _.taxableGainOrLoss,
+                        c => Some(c.taxableGainOrLoss)
+                      ),
+                  redirectToIfNoRequiredPreviousAnswer =
+                    if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
+                      routes.YearToDateLiabilityController.personalAllowance()
+                    else
+                      routes.YearToDateLiabilityController.taxableGainOrLoss()
                 )
-              )(
-                page = hasEstimatedDetailsPage(
-                  _,
-                  _,
-                  isATrust(fillingOutReturn),
-                  fillingOutReturn.draftReturn.representativeType(),
-                  fillingOutReturn.isFurtherOrAmendReturn,
-                  fillingOutReturn.isAmendReturn
-                )
-              )(
-                requiredPreviousAnswer = answers =>
-                  answers.fold(
-                    _.taxableGainOrLoss,
-                    c => Some(c.taxableGainOrLoss)
-                  ),
-                redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.taxableGainOrLoss()
-              )
+              }
 
             case (
                   calculatedAnswers: CalculatedYTDAnswers,
@@ -1008,46 +1017,59 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftReturn,
     fillingOutReturn: FillingOutReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
-    commonSubmitBehaviour(fillingOutReturn, draftReturn, nonCalculatedAnswers)(
-      form = hasEstimatedDetailsForm
-    )(
-      page = hasEstimatedDetailsPage(
-        _,
-        _,
-        isATrust(fillingOutReturn),
-        draftReturn.representativeType(),
-        fillingOutReturn.isFurtherOrAmendReturn,
-        fillingOutReturn.isAmendReturn
-      )
-    )(
-      requiredPreviousAnswer = answers => answers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
-      redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.taxableGainOrLoss()
-    ) { (hasEstimated, draftReturn) =>
-      if (
-        nonCalculatedAnswers
-          .fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
-          .contains(hasEstimated)
-      )
-        draftReturn
-      else {
-        val newAnswers =
-          if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
-            nonCalculatedAnswers
-              .unset(_.checkForRepayment)
-              .unset(_.expiredEvidence)
-              .unset(_.mandatoryEvidence)
-              .unset(_.pendingUpscanUpload)
-              .unset(_.yearToDateLiability)
-              .copy(hasEstimatedDetails = Some(hasEstimated))
+    withFurtherReturnCalculationEligibilityCheck(fillingOutReturn) { furtherReturnCalculationEligibility =>
+      commonSubmitBehaviour(fillingOutReturn, draftReturn, nonCalculatedAnswers)(
+        form = hasEstimatedDetailsForm
+      )(
+        page = hasEstimatedDetailsPage(
+          _,
+          _,
+          isATrust(fillingOutReturn),
+          draftReturn.representativeType(),
+          fillingOutReturn.isFurtherOrAmendReturn,
+          fillingOutReturn.isAmendReturn
+        )
+      )(
+        requiredPreviousAnswer = answers =>
+          if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
+            answers.fold(_.personalAllowance, _.personalAllowance)
           else
-            nonCalculatedAnswers
-              .unset(_.taxDue)
-              .unset(_.mandatoryEvidence)
-              .unset(_.expiredEvidence)
-              .unset(_.pendingUpscanUpload)
-              .copy(hasEstimatedDetails = Some(hasEstimated))
+            answers.fold(
+              _.taxableGainOrLoss,
+              c => Some(c.taxableGainOrLoss)
+            ),
+        redirectToIfNoRequiredPreviousAnswer =
+          if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
+            routes.YearToDateLiabilityController.personalAllowance()
+          else
+            routes.YearToDateLiabilityController.taxableGainOrLoss()
+      ) { (hasEstimated, draftReturn) =>
+        if (
+          nonCalculatedAnswers
+            .fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
+            .contains(hasEstimated)
+        )
+          draftReturn
+        else {
+          val newAnswers =
+            if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
+              nonCalculatedAnswers
+                .unset(_.checkForRepayment)
+                .unset(_.expiredEvidence)
+                .unset(_.mandatoryEvidence)
+                .unset(_.pendingUpscanUpload)
+                .unset(_.yearToDateLiability)
+                .copy(hasEstimatedDetails = Some(hasEstimated))
+            else
+              nonCalculatedAnswers
+                .unset(_.taxDue)
+                .unset(_.mandatoryEvidence)
+                .unset(_.expiredEvidence)
+                .unset(_.pendingUpscanUpload)
+                .copy(hasEstimatedDetails = Some(hasEstimated))
 
-        updateDraftReturn(newAnswers, draftReturn)
+          updateDraftReturn(newAnswers, draftReturn)
+        }
       }
     }
 
@@ -1946,7 +1968,27 @@ class YearToDateLiabilityController @Inject() (
   )(implicit
     hc: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, Option[YearToDateLiabilityCalculation]] =
+  ): EitherT[Future, Error, Option[YearToDateLiabilityCalculation]] = {
+    def requiredAnswers(
+      taxableGainOrLoss: AmountInPence,
+      estimatedIncome: AmountInPence,
+      personalAllowance: AmountInPence
+    ) =
+      fillingOutReturn.draftReturn match {
+        case d: DraftSingleDisposalReturn =>
+          d.triageAnswers.fold(
+            _ => Left(Error("Could not find complete single disposal triage answers")),
+            completeTriageAnswers =>
+              Right(Some((completeTriageAnswers, taxableGainOrLoss, estimatedIncome, personalAllowance)))
+          )
+        case _                            =>
+          Left(
+            Error(
+              "Did not get DraftSingleDisposalReturn for further/amend return eligible for a calcualtion"
+            )
+          )
+      }
+
     for {
       eligibility     <-
         furtherReturnCalculationEligibilityUtil.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
@@ -1960,22 +2002,14 @@ class YearToDateLiabilityController @Inject() (
                                  ytdAnswers.fold(_.estimatedIncome, _.estimatedIncome),
                                  ytdAnswers.fold(_.personalAllowance, _.personalAllowance)
                                ) match {
-                                 case (Some(taxableGainOrLoss), Some(income), Some(allowance)) =>
-                                   fillingOutReturn.draftReturn match {
-                                     case d: DraftSingleDisposalReturn =>
-                                       d.triageAnswers.fold(
-                                         _ => Left(Error("Could not find complete single disposal triage answers")),
-                                         completeTriageAnswers =>
-                                           Right(Some((completeTriageAnswers, taxableGainOrLoss, income, allowance)))
-                                       )
-                                     case _                            =>
-                                       Left(
-                                         Error(
-                                           "Did not get DraftSingleDisposalReturn for further/amend return eligible for a calcualtion"
-                                         )
-                                       )
-                                   }
-                                 case _                                                        =>
+                                 case (Some(taxableGainOrLoss), Some(income), Some(allowance))
+                                     if !isATrust(fillingOutReturn) =>
+                                   requiredAnswers(taxableGainOrLoss, income, allowance)
+
+                                 case (Some(taxableGainOrLoss), _, _) if isATrust(fillingOutReturn) =>
+                                   requiredAnswers(taxableGainOrLoss, AmountInPence.zero, AmountInPence.zero)
+
+                                 case _ =>
                                    Left(
                                      Error(
                                        "Could not find taxable gain or loss, estimated income and personal allowance"
@@ -2001,6 +2035,7 @@ class YearToDateLiabilityController @Inject() (
                                .map(Some(_))
                          }
     } yield calculation
+  }
 
   private def getYtdLiabilityPage(
     fillingOutReturn: FillingOutReturn,
