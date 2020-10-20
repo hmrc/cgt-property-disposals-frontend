@@ -73,7 +73,8 @@
 @taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
 
 @title = @{messages(s"$key$userKey.title")}
-@label = @{messages(s"$key$userKey.title", taxYearStartYear, taxYearEndYear)}
+@label = @{messages(s"$key$userKey.label", taxYearStartYear, taxYearEndYear)}
+@pageTitle = @{if(yearToDateLiabilityCalculation.isDefined) title else label}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @customErrorKey = @{
     form.errors.headOption.map(e =>
@@ -98,12 +99,12 @@
 }
 @calculatedHelpText = {
   @yearToDateLiabilityCalculation.map { calculation =>
-    <p>@Html(messages(s"$key.calculatedHelpText.p1", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.yearToDateLiability.inPounds())))</p>
+    <p>@Html(messages(s"$key$userKey.calculatedHelpText.p1", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.yearToDateLiability.inPounds())))</p>
     <p>@messages(s"$key.calculatedHelpText.p2")</p>
   }
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = pageTitle, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
   @backLinkComponent(backLink)
 
@@ -129,7 +130,7 @@
             calculation,
             taxYear,
             isATrust,
-            isPeriodOfAdmin = representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)),
+            representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)),
           Some(messages(s"$key.assistive.overallLiability"))
         )
       }
