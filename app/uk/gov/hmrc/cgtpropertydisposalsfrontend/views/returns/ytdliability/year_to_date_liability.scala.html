@@ -29,6 +29,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor }
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, YearToDateLiabilityCalculation}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -95,6 +96,12 @@
         </ol>
     }
 }
+@calculatedHelpText = {
+  @yearToDateLiabilityCalculation.map { calculation =>
+    <p>@messages(s"$key.calculatedHelpText.p1", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.yearToDateLiability.inPounds()))</p>
+    <p>@messages(s"$key.calculatedHelpText.p2")</p>
+  }
+}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
@@ -134,7 +141,7 @@
         hasErrors = form.error(key).nonEmpty,
         label = Html(s"""<h2 class="heading-medium">${label}</h2>"""),
         labelAsHeading = false,
-        helpText = None,
+        extraContent = Some(calculatedHelpText),
         autoComplete = AutoCompleteType.On,
         inputClass = Some("small"),
         aspect = "left",
@@ -150,7 +157,7 @@
         hasErrors = form.error(key).nonEmpty,
         label = pageHeading(label),
         labelAsHeading = true,
-        helpText = Some(helpText),
+        extraContent = Some(helpText),
         autoComplete = AutoCompleteType.On,
         inputClass = Some("small"),
         aspect = "left",
