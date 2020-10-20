@@ -4152,6 +4152,10 @@ viewReturn.returnReference=Return reference number
 viewReturn.propertyAddress=Property address
 viewReturn.companyAddress=Company address
 
+viewReturn.nameLabel=Account name
+viewReturn.trust.nameLabel=Trust name
+viewReturn.agent.nameLabel=Client name
+
 viewReturn.summaryHeading=Your return
 viewReturn.hasAttachments=Uploaded files and documents
 viewReturn.hasAttachments.p1=One or more documents uploaded

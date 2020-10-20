@@ -56,11 +56,12 @@
 @title = @{messages("viewReturn.title")}
 @amountOwed = @{returnSummary.mainReturnChargeAmount}
 @positiveCharges = @{returnSummary.charges.filter(c => c.amount.isPositive)}
-
+@name = @{subscribedDetails.name.fold(_.value, e => e.firstName + " " + e.lastName)}
 @key= @{ "viewReturn" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @isATrust = @{ subscribedDetails.isATrust }
 @userKey = @{if(isAgent) ".agent" else if(isATrust) ".trust" else ""}
+@nameLabel = @{if(isATrust) ".trust" else if(isAgent) ".agent" else ""}
 
 @propertyAddressLabel = @{
 if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
@@ -76,11 +77,17 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
-  @returnHeading(title, returnSummary, subscribedDetails, request.userType, returnType)
+  @returnHeading(title, returnSummary, subscribedDetails, returnType)
   
   @printLink(messages(s"$key.printLink"))
 
     @cyaSection() {
+        @cyaRow(
+          messages(s"$key$nameLabel.nameLabel"),
+          Html(name),
+          None,
+          "account-name-table"
+        )
         @cyaRow(
             messages(s"$key.sentToHmrc"),
             Html(TimeUtils.govDisplayFormat(returnSummary.submissionDate)),
