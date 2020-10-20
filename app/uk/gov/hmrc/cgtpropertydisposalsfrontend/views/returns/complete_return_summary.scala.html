@@ -116,7 +116,8 @@
                 isFurtherOrAmendReturn,
                 isAmend,
                 s.triageAnswers.disposalDate.taxYear,
-                hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails
+                hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails,
+                s.triageAnswers.countryOfResidence.isUk()
             ),
             calculatedYearToDateLiabilitySummary(
                 _,
@@ -162,7 +163,8 @@
             isFurtherOrAmendReturn,
             isAmend,
             m.triageAnswers.taxYear,
-            hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails
+            hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails,
+            m.triageAnswers.countryOfResidence.isUk()
         )
 
         @if(m.hasAttachments) {
@@ -217,7 +219,8 @@
             isFurtherOrAmendReturn,
             isAmend,
             s.triageAnswers.disposalDate.taxYear,
-            hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails
+            hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails,
+            s.triageAnswers.countryOfResidence.isUk()
         )
 
         @if(s.hasAttachments) {
@@ -260,7 +263,8 @@
             isFurtherOrAmendReturn,
             isAmend,
             multipleIndirect.triageAnswers.taxYear,
-            hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails
+            hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails,
+            multipleIndirect.triageAnswers.countryOfResidence.isUk()
         )
 
         @if(multipleIndirect.hasAttachments) {
@@ -296,7 +300,8 @@
             isFurtherOrAmendReturn,
             isAmend,
             singleMixedUse.triageAnswers.disposalDate.taxYear,
-            hideEstimatesQuestion = !completeReturn.hasEstimatedDetails
+            hideEstimatesQuestion = !completeReturn.hasEstimatedDetails,
+            singleMixedUse.triageAnswers.countryOfResidence.isUk()
         )
 
         @if(singleMixedUse.hasAttachments) {

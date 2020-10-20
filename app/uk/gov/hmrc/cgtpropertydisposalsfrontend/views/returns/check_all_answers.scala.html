@@ -189,7 +189,7 @@
 
      <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
      @s.yearToDateLiabilityAnswers.fold(
-      nonCalculatedYearToDateLiabilitySummary(_, showFiles = true, isMultiple = false, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, s.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion),
+      nonCalculatedYearToDateLiabilitySummary(_, showFiles = true, isMultiple = false, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, s.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion, s.triageAnswers.countryOfResidence.isUk()),
       calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate.taxYear, showFiles = true, isATrust, representativeType, s.triageAnswers.countryOfResidence.isUk(), hideEstimatesQuestion)
      )
 
@@ -216,7 +216,7 @@
         }
 
        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-       @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, m.triageAnswers.taxYear, hideEstimatesQuestion)
+       @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, m.triageAnswers.taxYear, hideEstimatesQuestion, m.triageAnswers.countryOfResidence.isUk())
 
        <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
         @supportingEvidenceSummary(m.supportingDocumentAnswers)
@@ -253,7 +253,7 @@
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, isATrust, representativeType,  Some(isFurtherOrAmendReturn), showAnnualExemptAmount)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = true, isMultiple = false, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, s.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion)
+        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = true, isMultiple = false, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, s.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion, s.triageAnswers.countryOfResidence.isUk())
 
         <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
         @supportingEvidenceSummary(s.supportingDocumentAnswers)
@@ -285,7 +285,7 @@
         )
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @nonCalculatedYearToDateLiabilitySummary(multipleIndirect.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, multipleIndirect.triageAnswers.taxYear, hideEstimatesQuestion)
+        @nonCalculatedYearToDateLiabilitySummary(multipleIndirect.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, multipleIndirect.triageAnswers.taxYear, hideEstimatesQuestion, multipleIndirect.triageAnswers.countryOfResidence.isUk())
 
         <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
         @supportingEvidenceSummary(multipleIndirect.supportingDocumentAnswers)
@@ -309,7 +309,7 @@
         @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, isATrust, representativeType, Some(isFurtherOrAmendReturn), showAnnualExemptAmount)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @nonCalculatedYearToDateLiabilitySummary(singleMixedUse.yearToDateLiabilityAnswers, showFiles = true, isMultiple = false, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, singleMixedUse.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion)
+        @nonCalculatedYearToDateLiabilitySummary(singleMixedUse.yearToDateLiabilityAnswers, showFiles = true, isMultiple = false, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, singleMixedUse.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion, singleMixedUse.triageAnswers.countryOfResidence.isUk())
 
         <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
         @supportingEvidenceSummary(singleMixedUse.supportingDocumentAnswers)

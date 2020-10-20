@@ -336,6 +336,23 @@ class YearToDateLiabilityController @Inject() (
         Redirect(controllers.returns.routes.TaskListController.taskList())
     }
 
+  private def withResidentialStatus(
+    draftReturn: DraftReturn
+  )(f: Boolean => Future[Result]): Future[Result] =
+    draftReturn.triageAnswers.fold(
+      _.fold(
+        _.wasAUKResident,
+        c => Some(c.countryOfResidence.isUk())
+      ),
+      _.fold(
+        _.wasAUKResident,
+        c => Some(c.countryOfResidence.isUk())
+      )
+    ) match {
+      case Some(u) => f(u)
+      case _       => Redirect(controllers.returns.routes.TaskListController.taskList())
+    }
+
   private def withTaxYear(
     draftReturn: DraftReturn
   )(f: TaxYear => Future[Result]): Future[Result] =
@@ -2326,8 +2343,13 @@ class YearToDateLiabilityController @Inject() (
               )
             )
 
-          case (n: NonCalculatedYTDAnswers, d)                            =>
-            withTaxYear(d)(taxYear => checkYourAnswersHandleNonCalculated(n, fillingOutReturn, d, taxYear))
+          case (n: NonCalculatedYTDAnswers, d) =>
+            withResidentialStatus(d) { wasUkResident =>
+              withTaxYear(d)(taxYear =>
+                checkYourAnswersHandleNonCalculated(n, fillingOutReturn, d, taxYear, wasUkResident)
+              )
+            }
+
           case (_: CalculatedYTDAnswers, _: DraftMultipleDisposalsReturn) =>
             logger.warn(
               "Found calculated year to date liability answers on a multiple disposals draft return"
@@ -2367,7 +2389,8 @@ class YearToDateLiabilityController @Inject() (
     answers: NonCalculatedYTDAnswers,
     fillingOutReturn: FillingOutReturn,
     draftReturn: DraftReturn,
-    taxYear: TaxYear
+    taxYear: TaxYear,
+    wasUkResident: Boolean
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     withFurtherReturnCalculationEligibilityCheck(fillingOutReturn) { furtherReturnEligibility =>
       answers match {
@@ -2496,7 +2519,8 @@ class YearToDateLiabilityController @Inject() (
                   fillingOutReturn.isFurtherOrAmendReturn,
                   fillingOutReturn.isAmendReturn,
                   taxYear,
-                  fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)
+                  fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer),
+                  wasUkResident
                 )
               )
           )
@@ -2517,7 +2541,8 @@ class YearToDateLiabilityController @Inject() (
               fillingOutReturn.isFurtherOrAmendReturn,
               fillingOutReturn.isAmendReturn,
               taxYear,
-              fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)
+              fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer),
+              wasUkResident
             )
           )
 
