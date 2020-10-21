@@ -649,7 +649,12 @@ class YearToDateLiabilityController @Inject() (
                           case n: NonCalculatedYTDAnswers              =>
                             IncompleteNonCalculatedYTDAnswers.empty.copy(
                               taxableGainOrLoss = n.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
-                              estimatedIncome = Some(estimatedIncome)
+                              estimatedIncome = Some(estimatedIncome),
+                              hasEstimatedDetails =
+                                if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
+                                  n.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
+                                else
+                                  None
                             )
                         }
 
@@ -789,7 +794,12 @@ class YearToDateLiabilityController @Inject() (
                                 IncompleteNonCalculatedYTDAnswers.empty.copy(
                                   taxableGainOrLoss = n.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
                                   estimatedIncome = Some(estimatedIncome),
-                                  personalAllowance = Some(AmountInPence.fromPounds(p))
+                                  personalAllowance = Some(AmountInPence.fromPounds(p)),
+                                  hasEstimatedDetails =
+                                    if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
+                                      n.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
+                                    else
+                                      None
                                 )
                             }
                           }
