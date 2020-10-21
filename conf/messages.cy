@@ -2061,14 +2061,7 @@ acquisitionFeesValue.error.invalid=Mae’n rhaid i’r costau ychwanegol fod yn 
 acquisitionFeesValue.error.tooSmall=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian, rhwng 0 a 50,000,000,000
 acquisitionFeesValue.error.tooLarge=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian, rhwng 0 a 50,000,000,000
 acquisitionFeesValue.error.tooManyDecimals=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 1,480 neu 900.50
-acquisitionFees.indirect.error.required=Dewiswch ‘Iawn’ os ydych am hawlio unrhyw gostau ychwanegol am gyfrifo gwerth y cyfranddaliadau ar {0}
-acquisitionFees.indirect.error.invalid=Dewiswch ‘Iawn’ os ydych am hawlio unrhyw gostau ychwanegol am gyfrifo gwerth y cyfranddaliadau ar {0}
-acquisitionFees.indirect.error.tooSmall=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian, rhwng 0 a 50,000,000,000
-acquisitionFeesValue.indirect.error.required=Nodwch faint a dalwyd mewn costau ychwanegol
-acquisitionFeesValue.indirect.error.invalid=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian, megis 1,480 neu 900.50
-acquisitionFeesValue.indirect.error.tooSmall=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian, rhwng 0 a 50,000,000,000
-acquisitionFeesValue.indirect.error.tooLarge=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian, rhwng 0 a 50,000,000,000
-acquisitionFeesValue.indirect.error.tooManyDecimals=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 1,480 neu 900.50
+
 acquisitionFeesValue.cyaChange=swm y costau ychwanegol
 rebaseAcquisitionPrice.title=Beth oedd gwerth marchnadol yr eiddo ar {0}?
 rebaseAcquisitionPrice.indirect.title=Beth oedd gwerth marchnadol y cyfranddaliadau ar {0}?
@@ -3393,9 +3386,8 @@ confirmationOfSubmission.agent.clearingNotice=Pan fyddwch yn diweddaru Ffurflen 
 confirmationOfSubmission.trust.clearingNotice=Pan fyddwch yn diweddaru Ffurflen Dreth, bydd yn cymryd 24 awr i’ch balans sy’n weddill gael ei ddiweddaru yng nghyfrif yr ymddiriedolaeth. Gallwch wneud taliad unrhyw bryd.
 confirmationOfSubmission.returnToAccountHome=Ewch i <a href="{0}">hafan eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU</a>.
 confirmationOfSubmission.trust.returnToAccountHome=Ewch i <a href="{0}">hafan cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU yr ymddiriedolaeth</a>.
-confirmationOfSubmission.organisationNameLine=Ymddiriedolaeth: {0}
-confirmationOfSubmission.agentNameLine=Cleient: {0}
-confirmationOfSubmission.estateNameLine=Ystâd: {0}
+
+
 
 #===================================================
 #  CHECK ALL ANSWERS AND CONFIRMATION PAGES - END
