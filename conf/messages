@@ -3340,7 +3340,7 @@ taxableGain.error.tooManyDecimals=Overall gain must be an amount of money with p
 taxableGainOrLoss.assistive.taxableGain=for overall gain amount
 taxableGainOrLoss.calculated.gain.prompt=Enter a net gain of <strong class="bold">{0}</strong> if you agree with these workings.
 taxableGainOrLoss.calculated.loss.prompt=Enter a net loss of <strong class="bold">{0}</strong> if you agree with these workings.
-taxableGainOrLoss.calculated.noGainOrLoss.prompt=Select ‘I made no net gain or loss’ if you agree with these workings.
+taxableGainOrLoss.calculated.noGainOrLoss.prompt=Select <strong class="bold">‘No net gain or loss’</strong> if you agree with these workings.
 
 taxableGainOrLoss.loss.label=No, I made an overall loss
 taxableGainOrLoss.agent.loss.label=No, my client made an overall loss
