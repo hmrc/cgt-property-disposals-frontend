@@ -6535,7 +6535,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.title",
+            "yearToDateLiability.label",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link"
@@ -6559,7 +6559,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.agent.title",
+            "yearToDateLiability.agent.label",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.agent.li3"),
             "yearToDateLiability.agent.link"
@@ -6583,7 +6583,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.trust.title",
+            "yearToDateLiability.trust.label",
             messageFromMessageKey("yearToDateLiability.trust.p1", viewConfig.trustsAndCgtUrl),
             None,
             "yearToDateLiability.trust.link"
@@ -6612,7 +6612,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.capacitor.title",
+            "yearToDateLiability.capacitor.label",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.capacitor.li3"),
             "yearToDateLiability.capacitor.link"
@@ -6641,7 +6641,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "yearToDateLiability.personalRep.title",
+            "yearToDateLiability.personalRep.label",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.personalRep.li3"),
             "yearToDateLiability.personalRep.link"
@@ -6670,7 +6670,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "yearToDateLiability.personalRepInPeriodOfAdmin.title",
+            "yearToDateLiability.personalRepInPeriodOfAdmin.label",
             messageFromMessageKey("yearToDateLiability.personalRepInPeriodOfAdmin.p1", viewConfig.trustsAndCgtUrl),
             None,
             "yearToDateLiability.personalRepInPeriodOfAdmin.link"
@@ -6699,7 +6699,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "yearToDateLiability.personalRepInPeriodOfAdmin.agent.title",
+            "yearToDateLiability.personalRepInPeriodOfAdmin.agent.label",
             messageFromMessageKey(
               "yearToDateLiability.personalRepInPeriodOfAdmin.agent.p1",
               viewConfig.trustsAndCgtUrl
@@ -6742,7 +6742,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.taxableGainOrLoss(),
-            "yearToDateLiability.title",
+            "yearToDateLiability.label",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link"
@@ -6782,7 +6782,7 @@ class YearToDateLiabilityControllerSpec
             subscribedDetails = sample[SubscribedDetails].copy(
               name = Right(sample[IndividualName])
             ),
-            previousSentReturns = Some(sample[PreviousReturnData]),
+            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
             amendReturnData = None
           )
 
@@ -6844,7 +6844,7 @@ class YearToDateLiabilityControllerSpec
             subscribedDetails = sample[SubscribedDetails].copy(
               name = Left(sample[TrustName])
             ),
-            previousSentReturns = Some(sample[PreviousReturnData]),
+            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
             amendReturnData = None
           )
 
@@ -6874,7 +6874,7 @@ class YearToDateLiabilityControllerSpec
             "yearToDateLiability.trust.link",
             expectedCalculationChecks = Some { doc =>
               doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
-                "yearToDateLiability.calculatedHelpText.p1",
+                "yearToDateLiability.trust.calculatedHelpText.p1",
                 MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
               )
             },
@@ -6916,7 +6916,7 @@ class YearToDateLiabilityControllerSpec
             subscribedDetails = sample[SubscribedDetails].copy(
               name = Right(sample[IndividualName])
             ),
-            previousSentReturns = Some(sample[PreviousReturnData]),
+            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
             amendReturnData = Some(sample[AmendReturnData])
           )
 
@@ -7010,7 +7010,7 @@ class YearToDateLiabilityControllerSpec
                   )
                 )
               ),
-              previousSentReturns = Some(sample[PreviousReturnData]),
+              previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
               amendReturnData = None
             )
             val session          = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
@@ -7212,7 +7212,7 @@ class YearToDateLiabilityControllerSpec
         "nothing is submitted" in {
           testCases.foreach { case (userKey, session) =>
             withClue(s"For user key '$userKey': ") {
-              test(session._1, session._2)()(s"yearToDateLiability$userKey.title", taxYearStart, taxYearEnd)(
+              test(session._1, session._2)()(s"yearToDateLiability$userKey.label", taxYearStart, taxYearEnd)(
                 s"yearToDateLiability$userKey.error.required",
                 taxYearStart,
                 taxYearEnd
@@ -7229,7 +7229,7 @@ class YearToDateLiabilityControllerSpec
               .foreach { scenario =>
                 withClue(s"For user key '$userKey' and $scenario: ") {
                   test(session._1, session._2)(scenario.formData: _*)(
-                    s"yearToDateLiability$userKey.title",
+                    s"yearToDateLiability$userKey.label",
                     taxYearStart,
                     taxYearEnd
                   )(
