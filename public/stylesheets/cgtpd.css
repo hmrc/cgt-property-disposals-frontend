@@ -790,6 +790,12 @@ details dl.govuk-check-your-answers {
     .submission-meta {
         margin-top: 1em;
     }
+
+    .button--secondary {
+        display: block;
+        text-align: center;
+        margin: 0.5em 0;
+    }
 }
 
 @media only screen and (max-width: 768px) {
