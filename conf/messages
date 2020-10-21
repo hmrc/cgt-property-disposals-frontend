@@ -4668,6 +4668,8 @@ gainOrLossAfterReliefs.calculated.loss.prompt=Enter a loss of <strong class="bol
 gainOrLossAfterReliefs.calculated.noGainOrLoss.prompt=Select <strong class="bold">‘I made no gain or loss after reliefs’</strong> if you agree with these workings.
 gainOrLossAfterReliefs.calculated.noGainOrLoss.notSelf.prompt=Select <strong class="bold">‘They made no gain or loss after reliefs’</strong> if you agree with these workings.
 
+gainOrLossAfterReliefs.calculated.promptEnding=If you do not agree with these workings you can enter a different amount.
+
 gainOrLossAfterReliefs.gain.outerLabel=Yes, I made a gain
 gainOrLossAfterReliefs.loss.outerLabel=No, I made a loss
 gainOrLossAfterReliefs.noLossOrGain.outerLabel=I made no gain or loss after reliefs
