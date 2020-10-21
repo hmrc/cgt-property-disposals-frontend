@@ -100,7 +100,7 @@
 @calculatedHelpText = {
   @yearToDateLiabilityCalculation.map { calculation =>
     <p>@Html(messages(s"$key$userKey.calculatedHelpText.p1", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.yearToDateLiability.inPounds())))</p>
-    <p>@messages(s"$key.calculatedHelpText.p2")</p>
+    <p>@messages(s"$key$userKey.calculatedHelpText.p2")</p>
   }
 }
 

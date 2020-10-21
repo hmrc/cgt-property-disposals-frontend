@@ -3588,6 +3588,11 @@ yearToDateLiability.personalRepInPeriodOfAdmin.calculatedHelpText.p1=Enter an ov
 yearToDateLiability.personalRepInPeriodOfAdmin.agent.calculatedHelpText.p1=Enter an overall liability of <strong class="bold">{0}</strong> if your client agrees with these workings.
 
 yearToDateLiability.calculatedHelpText.p2=If you do not agree with these workings you can enter a different amount.
+yearToDateLiability.agent.calculatedHelpText.p2=If they do not agree with these workings you can enter a different amount.
+yearToDateLiability.trust.calculatedHelpText.p2=If you do not agree with these workings you can enter a different amount.
+yearToDateLiability.capacitor.calculatedHelpText.p2=If they do not agree with these workings you can enter a different amount.
+yearToDateLiability.personalRepInPeriodOfAdmin.calculatedHelpText.p2=If you do not agree with these workings you can enter a different amount.
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.calculatedHelpText.p2=If they do not agree with these workings you can enter a different amount.
 
 yearToDateLiability.trust.p1=You’ll need to multiply the trust’s net gain by the correct rate of tax to get this amount.
 yearToDateLiability.personalRepInPeriodOfAdmin.p1=Multiply the estate’s net gain for the year by the relevant rate of tax for the tax year for the estate to work out its overall Capital Gains Tax liability on its UK property-related disposals.
