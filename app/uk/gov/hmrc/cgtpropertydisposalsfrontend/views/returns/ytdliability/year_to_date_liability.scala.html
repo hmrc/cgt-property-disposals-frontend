@@ -17,6 +17,7 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
+@import play.twirl.api.Html
 
 @import cats.instances.string._
 @import cats.syntax.eq._
@@ -26,8 +27,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor }
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, YearToDateLiabilityCalculation}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -38,7 +40,9 @@
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
     unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    ytdWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.year_to_date_liability_workings,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
 )
 
 @(
@@ -47,7 +51,8 @@
     taxYear: TaxYear,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isAmend: Boolean
+    isAmend: Boolean,
+    yearToDateLiabilityCalculation: Option[YearToDateLiabilityCalculation]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "yearToDateLiability" }
@@ -67,7 +72,9 @@
 @taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
 
-@title = @{messages(s"$key$userKey.title", taxYearStartYear, taxYearEndYear)}
+@title = @{messages(s"$key$userKey.title")}
+@label = @{messages(s"$key$userKey.label", taxYearStartYear, taxYearEndYear)}
+@pageTitle = @{if(yearToDateLiabilityCalculation.isDefined) title else label}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @customErrorKey = @{
     form.errors.headOption.map(e =>
@@ -90,43 +97,86 @@
         </ol>
     }
 }
+@calculatedHelpText = {
+  @yearToDateLiabilityCalculation.map { calculation =>
+    <p>@Html(messages(s"$key$userKey.calculatedHelpText.p1", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculation.yearToDateLiability.inPounds())))</p>
+    <p>@messages(s"$key$userKey.calculatedHelpText.p2")</p>
+  }
+}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = pageTitle, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
-    @backLinkComponent(backLink)
+  @backLinkComponent(backLink)
 
-    @if(hasErrors) {
-        @errorSummary(form, customErrorKey = customErrorKey)
-    }
+  @if(hasErrors) {
+    @errorSummary(form, customErrorKey = customErrorKey)
+  }
 
-    @caption(messages("ytdLiability.furtherReturn.caption"))
+  @caption(messages("ytdLiability.furtherReturn.caption"))
 
-    @formWrapper(routes.YearToDateLiabilityController.yearToDateLiabilitySubmit(), 'novalidate -> "novalidate") {
-        @unitInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            formError = form.error(key),
-            hasErrors = form.error(key).nonEmpty,
-            label = pageHeading(title),
-            labelAsHeading = true,
-            helpText = Some(helpText),
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = customErrorKey
+  @formWrapper(routes.YearToDateLiabilityController.yearToDateLiabilitySubmit(), 'novalidate -> "novalidate") {
+
+    @if(yearToDateLiabilityCalculation.isDefined) {
+      @pageHeading(messages(s"$key$userKey.title"))
+
+      <p>
+      @messages(s"$key.intro", taxYearStartYear, taxYearEndYear)
+      </p>
+
+      @yearToDateLiabilityCalculation.map { calculation =>
+        @details(
+          messages("calculator.showWorkings"),
+          ytdWorkings(
+            calculation,
+            taxYear,
+            isATrust,
+            representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)),
+          Some(messages(s"$key.assistive.overallLiability"))
         )
+      }
 
-        <p id="link">
-          <a href="@{triage.routes.FurtherReturnGuidanceController.overallGainGuidance()}">
-            @messages(s"$key$userKey.link")
-          </a>
-        </p>
-
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+      @unitInput(
+        fieldId = key,
+        value = form.data.getOrElse(key, ""),
+        formError = form.error(key),
+        hasErrors = form.error(key).nonEmpty,
+        label = Html(s"""<h2 class="heading-medium">${label}</h2>"""),
+        labelAsHeading = false,
+        extraContent = Some(calculatedHelpText),
+        autoComplete = AutoCompleteType.On,
+        inputClass = Some("small"),
+        aspect = "left",
+        unit = "£",
+        assistiveText = messages("unit-input.assistive.pounds"),
+        customErrorKey = customErrorKey
+      )
+  } else {
+      @unitInput(
+        fieldId = key,
+        value = form.data.getOrElse(key, ""),
+        formError = form.error(key),
+        hasErrors = form.error(key).nonEmpty,
+        label = pageHeading(label),
+        labelAsHeading = true,
+        extraContent = Some(helpText),
+        autoComplete = AutoCompleteType.On,
+        inputClass = Some("small"),
+        aspect = "left",
+        unit = "£",
+        assistiveText = messages("unit-input.assistive.pounds"),
+        customErrorKey = customErrorKey
+      )
+      <p id="link">
+        <a href="@{triage.routes.FurtherReturnGuidanceController.overallGainGuidance()}">
+        @messages(s"$key$userKey.link")
+        </a>
+      </p>
     }
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+    @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+
+  }
+
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

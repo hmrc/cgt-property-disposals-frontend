@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sam
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue, TaxableGainOrLossCalculation, TaxableGainOrLossCalculationRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue, TaxableGainOrLossCalculation, TaxableGainOrLossCalculationRequest, YearToDateLiabilityCalculation, YearToDateLiabilityCalculationRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -58,6 +58,14 @@ class CgtCalculationServiceImplSpec
   )(response: Either[Error, HttpResponse]) =
     (mockReturnsConnector
       .calculateTaxableGainOrLoss(_: TaxableGainOrLossCalculationRequest)(_: HeaderCarrier))
+      .expects(request, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockCalculateYearToDateLiability(
+    request: YearToDateLiabilityCalculationRequest
+  )(response: Either[Error, HttpResponse]) =
+    (mockReturnsConnector
+      .calculateYearToDateLiability(_: YearToDateLiabilityCalculationRequest)(_: HeaderCarrier))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -151,6 +159,53 @@ class CgtCalculationServiceImplSpec
           )
 
           await(service.calculateTaxableGainOrLoss(request).value) shouldBe Right(
+            calculation
+          )
+        }
+
+      }
+
+    }
+
+    "handling requests to calculate year to date liability" must {
+
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      val request = sample[YearToDateLiabilityCalculationRequest]
+
+      "return an error" when {
+
+        "there is an error making the http call" in {
+          mockCalculateYearToDateLiability(request)(Left(Error("")))
+
+          await(service.calculateYearToDateLiability(request).value).isLeft shouldBe true
+        }
+
+        "the http call comes back with a status other than 200" in {
+          mockCalculateYearToDateLiability(request)(Right(HttpResponse(500, emptyJsonBody)))
+
+          await(service.calculateYearToDateLiability(request).value).isLeft shouldBe true
+        }
+
+        "the http call comes back with status 200 but the body cannot be parsed" in {
+          mockCalculateYearToDateLiability(request)(
+            Right(HttpResponse(200, JsString("hello"), Map[String, Seq[String]]().empty))
+          )
+
+          await(service.calculateYearToDateLiability(request).value).isLeft shouldBe true
+        }
+      }
+
+      "return the calculation" when {
+
+        "the call is successful and the response body can be parsed" in {
+          val calculation = sample[YearToDateLiabilityCalculation]
+
+          mockCalculateYearToDateLiability(request)(
+            Right(HttpResponse(200, Json.toJson(calculation), Map[String, Seq[String]]().empty))
+          )
+
+          await(service.calculateYearToDateLiability(request).value) shouldBe Right(
             calculation
           )
         }

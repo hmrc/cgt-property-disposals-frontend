@@ -1,0 +1,250 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityCalculation
+
+@this(
+    calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+)
+
+@(
+    yearToDateLiabilityCalculation: YearToDateLiabilityCalculation,
+    taxYear: TaxYear,
+    isATrust: Boolean,
+    isPeriodOfAdmin: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages)
+
+@taxableIncome = @{ yearToDateLiabilityCalculation.taxableIncome }
+
+@taxDueAtLowerRate = @{
+  yearToDateLiabilityCalculation.lowerBandTax
+}
+
+@taxDueAtHigherRate = @{
+  yearToDateLiabilityCalculation.higherBandTax
+}
+
+@higherRateDisplay = @{
+   s"${taxDueAtHigherRate.taxRate}%"
+}
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKeyWithoutTrust = @{if (isAgent) ".agent" else ""}
+
+@if(yearToDateLiabilityCalculation.yearToDateLiability.isZero |
+        yearToDateLiabilityCalculation.yearToDateLiability.isNegative) {
+  <p>
+    <em>
+      @messages("calculator.noTaxToPay")
+    </em>
+  </p>
+} else {
+
+  @if(isATrust) {
+    <p>
+      <em>
+        @messages("calculator.trustRateInfo.p1", higherRateDisplay)
+      </em>
+    </p>
+    <p>
+      <em>
+      @messages(s"calculator$userKeyWithoutTrust.trustRateInfo.p2")
+      </em>
+    </p>
+  } else {
+    @if(isPeriodOfAdmin){
+      <p>
+        <em>
+        @messages("calculator.periodOfAdminRateInfo.p1", higherRateDisplay)
+        </em>
+      </p>
+    } else {
+
+      @calcSum(
+        List(
+          SumPartDisplay(
+            label = messages("calculator.annualIncome"),
+            operator = None,
+            amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(yearToDateLiabilityCalculation.estimatedIncome.inPounds())
+          ),
+          SumPartDisplay(
+            label = messages("calculator.personalAllowance"),
+            operator = Some("-"),
+            amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(yearToDateLiabilityCalculation.personalAllowance.inPounds())
+          )
+        ),
+        SumPartDisplay(
+          label = messages("calculator.total.taxableIncome"),
+          operator = Some("="),
+          amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxableIncome.inPounds()),
+          total = true
+        )
+      )
+
+      @if(taxYear.incomeTaxHigherRateThreshold.--(taxableIncome).isNegative) {
+
+        <p>
+          <em>
+          @messages(s"calculator.incomeAboveThreshold", MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.incomeTaxHigherRateThreshold.inPounds()))
+          </em>
+        </p>
+
+      } else {
+
+        @calcSum(
+          List(
+            SumPartDisplay(
+              label = messages("calculator.ukThreshold"),
+              operator = None,
+              amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.incomeTaxHigherRateThreshold.inPounds())
+            ),
+            SumPartDisplay(
+              label = messages("calculator.total.taxableIncome"),
+              operator = Some("-"),
+              amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxableIncome.inPounds())
+            )
+          ),
+          SumPartDisplay(
+            label = messages("calculator.total.ukThresholdLessTaxableIncome"),
+            operator = Some("="),
+            amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.incomeTaxHigherRateThreshold.--(taxableIncome).inPounds()),
+            total = true
+          )
+        )
+
+        <p>
+          <em>
+          @messages("calculator.basicRateRule")
+          </em>
+        </p>
+
+
+            @calcSum(
+              List(
+                SumPartDisplay(
+                  label = messages("calculator.total.ukThresholdLessTaxableIncome"),
+                  operator = None,
+                  amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.incomeTaxHigherRateThreshold.--(taxableIncome).inPounds()),
+                ),
+                SumPartDisplay(
+                  label = messages("calculator.total.taxableGain"),
+                  operator = Some("or"),
+                  amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(yearToDateLiabilityCalculation.taxableGain.inPounds())
+                )
+              ),
+              SumPartDisplay(
+                label = messages("calculator.basicAmount"),
+                operator = Some("="),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDueAtLowerRate.taxableAmount.inPounds()),
+                total = true
+              )
+            )
+
+            @calcSum(
+              List(
+                SumPartDisplay(
+                  label = messages("calculator.total.taxableGain"),
+                  operator = None,
+                  amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(yearToDateLiabilityCalculation.taxableGain.inPounds())
+                ),
+                SumPartDisplay(
+                  label = messages("calculator.basicAmount"),
+                  operator = Some("-"),
+                  amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDueAtLowerRate.taxableAmount.inPounds()),
+                )
+              ),
+              SumPartDisplay(
+                label = messages("calculator.higherAmount"),
+                operator = Some("="),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDueAtHigherRate.taxableAmount.inPounds()),
+                total = true
+              )
+            )
+
+            @calcSum(
+              List(
+                SumPartDisplay(
+                  label = messages("calculator.basicAmount"),
+                  operator = None,
+                  amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDueAtLowerRate.taxableAmount.inPounds()),
+                ),
+                SumPartDisplay(
+                  label = messages("calculator.basicRate"),
+                  operator = Some("x"),
+                  amount = taxDueAtLowerRate.taxRate.toString() + "%"
+                )
+              ),
+              SumPartDisplay(
+                label = messages("calculator.total.amountDueAtBasicRate"),
+                operator = Some("="),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDueAtLowerRate.taxDue().inPounds()),
+                total = true
+              )
+            )
+          }
+        }
+
+      }
+    }
+
+      @calcSum(
+        List(
+          SumPartDisplay(
+            label = messages("calculator.higherAmount"),
+            operator = None,
+            amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDueAtHigherRate.taxableAmount.inPounds()),
+          ),
+          SumPartDisplay(
+            label = messages("calculator.higherRate"),
+            operator = Some("x"),
+            amount = taxDueAtHigherRate.taxRate.toString() + "%"
+          )
+        ),
+        SumPartDisplay(
+          label = messages("calculator.total.amountDueAtHigherRate"),
+          operator = Some("="),
+          amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDueAtHigherRate.taxDue().inPounds()),
+          total = true
+        )
+      )
+
+      @calcSum(
+        List(
+          SumPartDisplay(
+            label = messages("calculator.total.amountDueAtBasicRate"),
+            operator = None,
+            amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDueAtLowerRate.taxDue().inPounds()),
+          ),
+          SumPartDisplay(
+            label = messages("calculator.total.amountDueAtHigherRate"),
+            operator = Some("+"),
+            amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDueAtHigherRate.taxDue().inPounds()),
+          )
+        ),
+        SumPartDisplay(
+          label = messages("calculator.total.taxOwed"),
+          operator = Some("="),
+          amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(yearToDateLiabilityCalculation.yearToDateLiability.inPounds()),
+          total = true
+        )
+      )

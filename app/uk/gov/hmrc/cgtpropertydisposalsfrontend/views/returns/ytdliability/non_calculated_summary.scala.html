@@ -42,7 +42,8 @@
     isFurtherOrAmendReturn: Option[Boolean],
     isAmend: Boolean,
     taxYear: TaxYear,
-    hideEstimatesQuestion: Boolean
+    hideEstimatesQuestion: Boolean,
+        wasUkResident: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -70,6 +71,8 @@
   if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn"
   else ""
 }
+@nrKey = @{ if(wasUkResident) "" else ".non-resident" }
+
 @checkTaxDueKey = @{
   if(isAmend) ".amendReturn.checkTaxDue"
   else if (isFurtherOrAmendReturn.contains(true)) ".furtherReturn.checkTaxDue"
@@ -108,6 +111,26 @@
             "taxableGainOrLossAmount"
         )
     }
+
+
+  @answers.estimatedIncome.map{ estimatedIncome =>
+      @cyaRow(
+          messages(s"estimatedIncome$userKey$nrKey.title"),
+          Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(estimatedIncome.inPounds())),
+          Some(cyaChange(messages(s"estimatedIncome$nrKey.cyaChange"), routes.YearToDateLiabilityController.estimatedIncome().url)),
+          "estimatedIncome-value"
+      )
+  }
+
+    @answers.personalAllowance.map { personalAllowance =>
+        @cyaRow(
+            messages(s"personalAllowance$userKey.title", taxYearStart, taxYearEnd),
+            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
+            Some(cyaChange(messages("personalAllowance.cyaChange"), routes.YearToDateLiabilityController.personalAllowance().url)),
+            "personalAllowance-value"
+        )
+    }
+
 
    @if(!hideEstimatesQuestion) {
        @cyaRow(

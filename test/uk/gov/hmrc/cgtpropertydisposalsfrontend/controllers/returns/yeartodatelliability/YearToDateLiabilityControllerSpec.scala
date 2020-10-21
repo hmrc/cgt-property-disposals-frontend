@@ -86,7 +86,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, FurtherReturnCalculationEligibilityUtil, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -470,6 +470,14 @@ class YearToDateLiabilityControllerSpec
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
 
+  def mockCalculateYearToDateLiability(
+    request: YearToDateLiabilityCalculationRequest
+  )(result: Either[Error, YearToDateLiabilityCalculation]) =
+    (mockCgtCalculationService
+      .calculateYearToDateLiability(_: YearToDateLiabilityCalculationRequest)(_: HeaderCarrier))
+      .expects(request, *)
+      .returning(EitherT.fromEither[Future](result))
+
   def mockUpscanInitiate(
     errorRedirectCall: Call,
     successRedirectCall: UploadReference => Call
@@ -530,9 +538,7 @@ class YearToDateLiabilityControllerSpec
 
       behave like noDisposalDateBehaviour(performAction)
 
-      behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(
-        performAction
-      )
+      behave like redirectToStartWhenFurtherReturnIneligibleForCalculation(performAction)
 
       "display the page" when {
 
@@ -642,19 +648,21 @@ class YearToDateLiabilityControllerSpec
         }
 
         "a personal representative user has not answered the question before" in {
+          val (session, fillingOutReturn, _) =
+            sessionWithSingleDisposalState(
+              Some(IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss = Some(sample[AmountInPence]))),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
+              Some(completeReliefDetailsAnswersWithNoOtherReliefs),
+              Some(PersonalRepresentative),
+              isFurtherReturn = true
+            )
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithSingleDisposalState(
-                None,
-                Some(sample[DisposalDate]),
-                UserType.Individual,
-                wasUkResident = true,
-                Some(completeReliefDetailsAnswersWithNoOtherReliefs),
-                Some(PersonalRepresentative)
-              )._1
-            )
+            mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
           }
 
           checkPageIsDisplayed(
@@ -663,9 +671,7 @@ class YearToDateLiabilityControllerSpec
             { doc =>
               doc
                 .select("#back")
-                .attr("href")   shouldBe returns.routes.TaskListController
-                .taskList()
-                .url
+                .attr("href")   shouldBe routes.YearToDateLiabilityController.taxableGainOrLoss().url
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
@@ -799,7 +805,7 @@ class YearToDateLiabilityControllerSpec
 
       behave like noDisposalDateBehaviour(() => performAction())
 
-      behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(() => performAction())
+      behave like redirectToStartWhenFurtherReturnIneligibleForCalculation(() => performAction())
 
       behave like unsuccessfulUpdateBehaviourForSingleDisposal(
         IncompleteCalculatedYTDAnswers.empty,
@@ -932,7 +938,7 @@ class YearToDateLiabilityControllerSpec
 
       behave like noEstimatedIncomeBehaviour(performAction)
 
-      behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(
+      behave like redirectToStartWhenFurtherReturnIneligibleForCalculation(
         performAction
       )
 
@@ -1111,7 +1117,7 @@ class YearToDateLiabilityControllerSpec
 
       behave like noEstimatedIncomeBehaviour(() => performAction())
 
-      behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(() => performAction())
+      behave like redirectToStartWhenFurtherReturnIneligibleForCalculation(() => performAction())
 
       {
         val completeAnswers = sample[CompleteCalculatedYTDAnswers].copy(
@@ -1447,17 +1453,18 @@ class YearToDateLiabilityControllerSpec
         "redirect to the taxable gain page" when {
 
           "that question has not been answered yet" in {
+            val (session, _, _) =
+              sessionWithMultipleDisposalsState(
+                IncompleteNonCalculatedYTDAnswers.empty,
+                UserType.Individual,
+                wasUkResident = true,
+                isFurtherReturn = false,
+                None
+              )
+
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithMultipleDisposalsState(
-                  IncompleteNonCalculatedYTDAnswers.empty,
-                  UserType.Individual,
-                  wasUkResident = true,
-                  isFurtherReturn = false,
-                  None
-                )._1
-              )
+              mockGetSession(session)
             }
 
             checkIsRedirect(
@@ -1472,12 +1479,17 @@ class YearToDateLiabilityControllerSpec
 
           def test(
             sessionData: SessionData,
+            fillingOutReturn: FillingOutReturn,
             backLink: Call,
+            furtherReturnCalculationEligibility: Option[FurtherReturnCalculationEligibility],
             extraChecks: Document => Unit = _ => ()
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData)
+              furtherReturnCalculationEligibility.foreach(e =>
+                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(e))
+              )
             }
 
             checkPageIsDisplayed(
@@ -1496,7 +1508,7 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the user has not answered the question yet" in {
-            test(
+            val (session, fillingOutReturn, _) =
               sessionWithMultipleDisposalsState(
                 IncompleteNonCalculatedYTDAnswers.empty.copy(
                   taxableGainOrLoss = Some(AmountInPence.zero)
@@ -1505,24 +1517,38 @@ class YearToDateLiabilityControllerSpec
                 wasUkResident = true,
                 isFurtherReturn = false,
                 None
-              )._1,
-              routes.YearToDateLiabilityController.taxableGainOrLoss()
+              )
+
+            test(
+              session,
+              fillingOutReturn,
+              routes.YearToDateLiabilityController.taxableGainOrLoss(),
+              None
             )
           }
 
           "the user has answered the question before" in {
-            val answers = sample[CompleteNonCalculatedYTDAnswers].copy(
-              hasEstimatedDetails = true
+            val answers = sample[IncompleteNonCalculatedYTDAnswers].copy(
+              taxableGainOrLoss = Some(sample[AmountInPence]),
+              estimatedIncome = Some(sample[AmountInPence]),
+              personalAllowance = Some(sample[AmountInPence]),
+              hasEstimatedDetails = Some(true)
             )
-            test(
+
+            val (session, fillingOutReturn, _) =
               sessionWithMultipleDisposalsState(
                 answers,
                 UserType.Individual,
                 wasUkResident = true,
-                isFurtherReturn = false,
+                isFurtherReturn = true,
                 None
-              )._1,
-              routes.YearToDateLiabilityController.checkYourAnswers(),
+              )
+
+            test(
+              session,
+              fillingOutReturn,
+              routes.YearToDateLiabilityController.personalAllowance(),
+              Some(sample[Eligible]),
               doc =>
                 doc
                   .select("#hasEstimatedDetails-true")
@@ -1951,7 +1977,9 @@ class YearToDateLiabilityControllerSpec
                 None,
                 None,
                 answers.yearToDateLiability,
-                answers.checkForRepayment
+                answers.checkForRepayment,
+                answers.estimatedIncome,
+                answers.personalAllowance
               )
 
               val (session, journey, draftReturn) =
@@ -3200,6 +3228,8 @@ class YearToDateLiabilityControllerSpec
           AmountInPence(2L),
           sample[MandatoryEvidence],
           None,
+          None,
+          None,
           None
         )
 
@@ -3208,6 +3238,8 @@ class YearToDateLiabilityControllerSpec
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.taxDue),
           Some(completeAnswers.mandatoryEvidence),
+          None,
+          None,
           None,
           None,
           None,
@@ -3229,7 +3261,7 @@ class YearToDateLiabilityControllerSpec
         def testRedirectWhenIncompleteAnswers(
           answers: IncompleteNonCalculatedYTDAnswers,
           expectedRedirect: Call,
-          isFurtherReturn: Boolean = false
+          furtherReturnCalculationEligibility: Option[FurtherReturnCalculationEligibility] = None
         ): Unit = {
 
           val (sessionData, fillingOutReturn, _) =
@@ -3237,7 +3269,7 @@ class YearToDateLiabilityControllerSpec
               answers,
               UserType.Individual,
               wasUkResident = true,
-              isFurtherReturn = isFurtherReturn,
+              isFurtherReturn = furtherReturnCalculationEligibility.isDefined,
               None
             )
           val fillingOutReturnWithIndividual     =
@@ -3246,9 +3278,13 @@ class YearToDateLiabilityControllerSpec
                 .copy(name = Right(sample[IndividualName]))
             )
           val sessionDataWithIndividual          = sessionData.copy(journeyStatus = Some(fillingOutReturnWithIndividual))
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionDataWithIndividual)
+            furtherReturnCalculationEligibility.foreach(e =>
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturnWithIndividual)(Right(e))
+            )
           }
 
           checkIsRedirect(performAction(), expectedRedirect)
@@ -3387,7 +3423,7 @@ class YearToDateLiabilityControllerSpec
                 yearToDateLiability = None
               ),
               routes.YearToDateLiabilityController.yearToDateLiability(),
-              isFurtherReturn = true
+              furtherReturnCalculationEligibility = Some(sample[Ineligible])
             )
 
           }
@@ -3399,10 +3435,12 @@ class YearToDateLiabilityControllerSpec
           "the return is a further return and that question hasn't been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
-                yearToDateLiability = Some(sample[AmountInPence])
+                yearToDateLiability = Some(sample[AmountInPence]),
+                estimatedIncome = Some(sample[AmountInPence]),
+                personalAllowance = Some(sample[AmountInPence])
               ),
               routes.YearToDateLiabilityController.repayment(),
-              isFurtherReturn = true
+              furtherReturnCalculationEligibility = Some(sample[Eligible])
             )
 
           }
@@ -3482,29 +3520,30 @@ class YearToDateLiabilityControllerSpec
 
           "the user is on an amend journey where the estimates question should be hidden" in {
             forAll { completeAnswers: CompleteNonCalculatedYTDAnswers =>
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithSingleDisposalState(
-                    Some(completeAnswers),
-                    Some(sample[DisposalDate]),
-                    UserType.Individual,
-                    wasUkResident = true,
-                    amendReturnData = Some(
-                      sample[AmendReturnData].copy(
-                        originalReturn = sample[CompleteReturnWithSummary].copy(
-                          completeReturn = sample[CompleteSingleDisposalReturn].copy(
-                            yearToDateLiabilityAnswers = Right(
-                              sample[CompleteCalculatedYTDAnswers].copy(
-                                hasEstimatedDetails = false
-                              )
+              val (session, fillingOutReturn, _) =
+                sessionWithSingleDisposalState(
+                  Some(completeAnswers),
+                  Some(sample[DisposalDate]),
+                  UserType.Individual,
+                  wasUkResident = true,
+                  amendReturnData = Some(
+                    sample[AmendReturnData].copy(
+                      originalReturn = sample[CompleteReturnWithSummary].copy(
+                        completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                          yearToDateLiabilityAnswers = Right(
+                            sample[CompleteCalculatedYTDAnswers].copy(
+                              hasEstimatedDetails = false
                             )
                           )
                         )
                       )
                     )
-                  )._1
+                  )
                 )
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
               }
 
               checkPageIsDisplayed(
@@ -3550,6 +3589,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
               mockStoreDraftReturn(updatedJourney)(Right(()))
               mockStoreSession(updatedSession)(Right(()))
             }
@@ -3613,6 +3653,8 @@ class YearToDateLiabilityControllerSpec
           Some(sample[AmountInPence]),
           Some(sample[Boolean]),
           Some(sample[AmountInPence]),
+          None,
+          None,
           None,
           None,
           None,
@@ -3801,6 +3843,8 @@ class YearToDateLiabilityControllerSpec
                 None,
                 None,
                 None,
+                None,
+                None,
                 None
               ),
               routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
@@ -3818,7 +3862,9 @@ class YearToDateLiabilityControllerSpec
                 None,
                 None,
                 Some(sample[AmountInPence]),
-                Some(true)
+                Some(true),
+                None,
+                None
               ),
               routes.YearToDateLiabilityController.repayment(),
               isFurtherReturn = true
@@ -4654,7 +4700,9 @@ class YearToDateLiabilityControllerSpec
               None,
               None,
               None,
-              None
+              None,
+              answers.estimatedIncome,
+              answers.personalAllowance
             )
 
             val (session, fillingOutReturn, draftReturn) =
@@ -4699,7 +4747,9 @@ class YearToDateLiabilityControllerSpec
               None,
               None,
               None,
-              None
+              None,
+              answers.estimatedIncome,
+              answers.personalAllowance
             )
 
             val (session, fillingOutReturn, draftReturn) =
@@ -5499,7 +5549,9 @@ class YearToDateLiabilityControllerSpec
             None,
             None,
             answers.yearToDateLiability,
-            None
+            None,
+            answers.estimatedIncome,
+            answers.personalAllowance
           )
           val draftReturn                 = sample[DraftSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
@@ -5555,7 +5607,9 @@ class YearToDateLiabilityControllerSpec
             None,
             None,
             answers.yearToDateLiability,
-            None
+            None,
+            answers.estimatedIncome,
+            answers.personalAllowance
           )
           val draftReturn         = sample[DraftSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
@@ -5634,7 +5688,9 @@ class YearToDateLiabilityControllerSpec
               None,
               None,
               answers.yearToDateLiability,
-              None
+              None,
+              answers.estimatedIncome,
+              answers.personalAllowance
             )
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
@@ -5700,6 +5756,8 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           Some(upscanUpload),
+          None,
+          None,
           None,
           None
         )
@@ -5837,6 +5895,8 @@ class YearToDateLiabilityControllerSpec
           None,
           Some(upscanUpload),
           None,
+          None,
+          None,
           None
         )
         val (session, journey, draftReturn) =
@@ -5893,6 +5953,8 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           Some(upscanUpload),
+          None,
+          None,
           None,
           None
         )
@@ -6310,6 +6372,8 @@ class YearToDateLiabilityControllerSpec
         None,
         None,
         None,
+        None,
+        None,
         None
       )
 
@@ -6339,23 +6403,24 @@ class YearToDateLiabilityControllerSpec
       }
 
       "redirect to the estimates page if the user has not answered that question yet" in {
+        val (session, fillingOutReturn, _) = sessionWithSingleDisposalState(
+          Some(requiredPreviousAnswers.copy(hasEstimatedDetails = None)),
+          Some(sample[DisposalDate].copy(taxYear = sample[TaxYear])),
+          UserType.Individual,
+          wasUkResident = true,
+          Some(
+            sample[CompleteReliefDetailsAnswers].copy(
+              otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
+            )
+          ),
+          isFurtherReturn = true,
+          individualUserType = Some(Self)
+        )
+
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithSingleDisposalState(
-              Some(requiredPreviousAnswers.copy(hasEstimatedDetails = None)),
-              Some(sample[DisposalDate].copy(taxYear = sample[TaxYear])),
-              UserType.Individual,
-              wasUkResident = true,
-              Some(
-                sample[CompleteReliefDetailsAnswers].copy(
-                  otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
-                )
-              ),
-              isFurtherReturn = true,
-              individualUserType = Some(Self)
-            )._1
-          )
+          mockGetSession(session)
+          mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
         }
 
         checkIsRedirect(performAction(), routes.YearToDateLiabilityController.hasEstimatedDetails())
@@ -6363,36 +6428,37 @@ class YearToDateLiabilityControllerSpec
 
       "redirect to the taxable gain or loss page if the user has not answered that question yet and the estimates question should be " +
         "preserved for an amend journey" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithSingleDisposalState(
-                Some(requiredPreviousAnswers.copy(taxableGainOrLoss = None)),
-                Some(sample[DisposalDate].copy(taxYear = sample[TaxYear])),
-                UserType.Individual,
-                wasUkResident = true,
-                Some(
-                  sample[CompleteReliefDetailsAnswers].copy(
-                    otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
-                  )
-                ),
-                isFurtherReturn = true,
-                individualUserType = Some(Self),
-                amendReturnData = Some(
-                  sample[AmendReturnData].copy(
-                    originalReturn = sample[CompleteReturnWithSummary].copy(
-                      completeReturn = sample[CompleteSingleDisposalReturn].copy(
-                        yearToDateLiabilityAnswers = Left(
-                          sample[CompleteNonCalculatedYTDAnswers].copy(
-                            hasEstimatedDetails = false
-                          )
-                        )
+          val (session, fillingOutReturn, _) = sessionWithSingleDisposalState(
+            Some(requiredPreviousAnswers.copy(taxableGainOrLoss = None)),
+            Some(sample[DisposalDate].copy(taxYear = sample[TaxYear])),
+            UserType.Individual,
+            wasUkResident = true,
+            Some(
+              sample[CompleteReliefDetailsAnswers].copy(
+                otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
+              )
+            ),
+            isFurtherReturn = true,
+            individualUserType = Some(Self),
+            amendReturnData = Some(
+              sample[AmendReturnData].copy(
+                originalReturn = sample[CompleteReturnWithSummary].copy(
+                  completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                    yearToDateLiabilityAnswers = Left(
+                      sample[CompleteNonCalculatedYTDAnswers].copy(
+                        hasEstimatedDetails = false
                       )
                     )
                   )
                 )
-              )._1
+              )
             )
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
           }
 
           checkIsRedirect(performAction(), routes.YearToDateLiabilityController.taxableGainOrLoss())
@@ -6402,12 +6468,16 @@ class YearToDateLiabilityControllerSpec
 
         def testFurtherReturnPage(
           session: SessionData,
+          fillingOutReturn: FillingOutReturn,
           taxYear: TaxYear,
+          eligibility: FurtherReturnCalculationEligibility,
           expectedBackLink: Call,
           expectedTitleKey: String,
           expectedP1Message: String,
           expectedLi3Key: Option[String],
-          expectedLinkKey: String
+          expectedLinkKey: String,
+          expectedCalculationChecks: Option[Document => Unit] = None,
+          calculation: Option[(YearToDateLiabilityCalculationRequest, YearToDateLiabilityCalculation)] = None
         ): Unit = {
           val (taxYearStart, taxYearEnd) =
             taxYear.startDateInclusive.getYear.toString -> taxYear.endDateExclusive.getYear.toString
@@ -6415,6 +6485,8 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligibility))
+            calculation.foreach { case (request, result) => mockCalculateYearToDateLiability(request)(Right(result)) }
           }
 
           checkPageIsDisplayed(
@@ -6423,13 +6495,19 @@ class YearToDateLiabilityControllerSpec
             { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
 
-              doc.select("#yearToDateLiability-form-hint > p").html() shouldBe expectedP1Message
+              expectedCalculationChecks match {
+                case None =>
+                  doc.select("#link").text()                                  shouldBe messageFromMessageKey(expectedLinkKey)
+                  doc.select("#yearToDateLiability-extra-content > p").html() shouldBe expectedP1Message
 
-              doc.select("#yearToDateLiability-form-hint > ol > li:nth-child(3)").text() shouldBe expectedLi3Key
-                .map(messageFromMessageKey(_))
-                .getOrElse("")
+                  doc.select("#yearToDateLiability-extra-content > ol > li:nth-child(3)").text() shouldBe expectedLi3Key
+                    .map(messageFromMessageKey(_))
+                    .getOrElse("")
 
-              doc.select("#link").text() shouldBe messageFromMessageKey(expectedLinkKey)
+                case Some(checks) =>
+                  checks(doc)
+              }
+
             }
           )
         }
@@ -6437,23 +6515,27 @@ class YearToDateLiabilityControllerSpec
         val taxYear = sample[TaxYear]
 
         "they are completing the return for themselves" in {
+          val (session, fillingOutReturn, _) = sessionWithSingleDisposalState(
+            Some(requiredPreviousAnswers),
+            Some(sample[DisposalDate].copy(taxYear = taxYear)),
+            UserType.Individual,
+            wasUkResident = true,
+            Some(
+              sample[CompleteReliefDetailsAnswers].copy(
+                otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
+              )
+            ),
+            isFurtherReturn = true,
+            individualUserType = Some(Self)
+          )
+
           testFurtherReturnPage(
-            sessionWithSingleDisposalState(
-              Some(requiredPreviousAnswers),
-              Some(sample[DisposalDate].copy(taxYear = taxYear)),
-              UserType.Individual,
-              wasUkResident = true,
-              Some(
-                sample[CompleteReliefDetailsAnswers].copy(
-                  otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
-                )
-              ),
-              isFurtherReturn = true,
-              individualUserType = Some(Self)
-            )._1,
+            session,
+            fillingOutReturn,
             taxYear,
+            sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.title",
+            "yearToDateLiability.label",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link"
@@ -6461,7 +6543,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "they are an agent" in {
-          testFurtherReturnPage(
+          val (session, fillingOutReturn, _) =
             sessionWithMultipleDisposalsState(
               Some(requiredPreviousAnswers),
               UserType.Agent,
@@ -6469,10 +6551,15 @@ class YearToDateLiabilityControllerSpec
               Some(Self),
               isFurtherReturn = true,
               taxYear
-            )._1,
+            )
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
             taxYear,
+            sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.agent.title",
+            "yearToDateLiability.agent.label",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.agent.li3"),
             "yearToDateLiability.agent.link"
@@ -6480,7 +6567,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "they are a trust" in {
-          testFurtherReturnPage(
+          val (session, fillingOutReturn, _) =
             sessionWithSingleIndirectDisposalState(
               Some(requiredPreviousAnswers),
               UserType.Organisation,
@@ -6488,10 +6575,15 @@ class YearToDateLiabilityControllerSpec
               Some(sample[DisposalDate].copy(taxYear = taxYear)),
               isFurtherReturn = true,
               individualUserType = None
-            )._1,
+            )
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
             taxYear,
+            sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.trust.title",
+            "yearToDateLiability.trust.label",
             messageFromMessageKey("yearToDateLiability.trust.p1", viewConfig.trustsAndCgtUrl),
             None,
             "yearToDateLiability.trust.link"
@@ -6499,7 +6591,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "they are a capacitor" in {
-          testFurtherReturnPage(
+          val (session, fillingOutReturn, _) =
             sessionWithSingleDisposalState(
               Some(requiredPreviousAnswers),
               Some(sample[DisposalDate].copy(taxYear = taxYear)),
@@ -6512,10 +6604,15 @@ class YearToDateLiabilityControllerSpec
               ),
               isFurtherReturn = true,
               individualUserType = Some(Capacitor)
-            )._1,
+            )
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
             taxYear,
+            sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.capacitor.title",
+            "yearToDateLiability.capacitor.label",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.capacitor.li3"),
             "yearToDateLiability.capacitor.link"
@@ -6523,7 +6620,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "they are a personal rep" in {
-          testFurtherReturnPage(
+          val (session, fillingOutReturn, _) =
             sessionWithSingleDisposalState(
               Some(sample[CompleteNonCalculatedYTDAnswers]),
               Some(sample[DisposalDate].copy(taxYear = taxYear)),
@@ -6536,10 +6633,15 @@ class YearToDateLiabilityControllerSpec
               ),
               isFurtherReturn = true,
               individualUserType = Some(PersonalRepresentative)
-            )._1,
+            )
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
             taxYear,
+            sample[Ineligible],
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "yearToDateLiability.personalRep.title",
+            "yearToDateLiability.personalRep.label",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.personalRep.li3"),
             "yearToDateLiability.personalRep.link"
@@ -6547,7 +6649,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "they are a personal rep in a period of admin" in {
-          testFurtherReturnPage(
+          val (session, fillingOutReturn, _) =
             sessionWithSingleDisposalState(
               Some(sample[CompleteNonCalculatedYTDAnswers]),
               Some(sample[DisposalDate].copy(taxYear = taxYear)),
@@ -6560,10 +6662,15 @@ class YearToDateLiabilityControllerSpec
               ),
               isFurtherReturn = true,
               individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
-            )._1,
+            )
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
             taxYear,
+            sample[Ineligible],
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "yearToDateLiability.personalRepInPeriodOfAdmin.title",
+            "yearToDateLiability.personalRepInPeriodOfAdmin.label",
             messageFromMessageKey("yearToDateLiability.personalRepInPeriodOfAdmin.p1", viewConfig.trustsAndCgtUrl),
             None,
             "yearToDateLiability.personalRepInPeriodOfAdmin.link"
@@ -6571,7 +6678,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "they are an agent of a personal rep in a period of admin" in {
-          testFurtherReturnPage(
+          val (session, fillingOutReturn, _) =
             sessionWithSingleDisposalState(
               Some(sample[CompleteNonCalculatedYTDAnswers]),
               Some(sample[DisposalDate].copy(taxYear = taxYear)),
@@ -6584,10 +6691,15 @@ class YearToDateLiabilityControllerSpec
               ),
               isFurtherReturn = true,
               individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
-            )._1,
+            )
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
             taxYear,
+            sample[Ineligible],
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "yearToDateLiability.personalRepInPeriodOfAdmin.agent.title",
+            "yearToDateLiability.personalRepInPeriodOfAdmin.agent.label",
             messageFromMessageKey(
               "yearToDateLiability.personalRepInPeriodOfAdmin.agent.p1",
               viewConfig.trustsAndCgtUrl
@@ -6598,7 +6710,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the user is on an amend journey where the estimates answer should be preserved" in {
-          testFurtherReturnPage(
+          val (session, fillingOutReturn, _) =
             sessionWithSingleDisposalState(
               Some(requiredPreviousAnswers),
               Some(sample[DisposalDate].copy(taxYear = taxYear)),
@@ -6622,14 +6734,344 @@ class YearToDateLiabilityControllerSpec
                   )
                 )
               )
-            )._1,
+            )
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
             taxYear,
+            sample[Ineligible],
             routes.YearToDateLiabilityController.taxableGainOrLoss(),
-            "yearToDateLiability.title",
+            "yearToDateLiability.label",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link"
           )
+        }
+
+        "the user is eligible for a calculation and they are not a trust" in {
+          val (taxableGain, estimatedIncome, personalAllowance) =
+            (sample[AmountInPence], sample[AmountInPence], sample[AmountInPence])
+
+          val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers(
+            Some(taxableGain),
+            Some(true),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(estimatedIncome),
+            Some(personalAllowance)
+          )
+
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(Self),
+            disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
+          )
+
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = triageAnswers,
+            yearToDateLiabilityAnswers = Some(requiredPreviousAnswers)
+          )
+
+          val fillingOutReturn = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            agentReferenceNumber = None,
+            subscribedDetails = sample[SubscribedDetails].copy(
+              name = Right(sample[IndividualName])
+            ),
+            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+            amendReturnData = None
+          )
+
+          val session = SessionData.empty.copy(
+            journeyStatus = Some(fillingOutReturn),
+            userType = Some(UserType.Individual)
+          )
+
+          val calculationRequest = YearToDateLiabilityCalculationRequest(
+            triageAnswers,
+            taxableGain,
+            estimatedIncome,
+            personalAllowance,
+            isATrust = false
+          )
+          val calculationResult  = sample[YearToDateLiabilityCalculation]
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
+            taxYear,
+            sample[Eligible],
+            routes.YearToDateLiabilityController.hasEstimatedDetails(),
+            "yearToDateLiability.title",
+            messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
+            Some("yearToDateLiability.li3"),
+            "yearToDateLiability.link",
+            expectedCalculationChecks = Some { doc =>
+              doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
+                "yearToDateLiability.calculatedHelpText.p1",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
+              )
+            },
+            Some(calculationRequest -> calculationResult)
+          )
+        }
+
+        "the user is eligible for a calculation and they are a trust" in {
+          val taxableGain = sample[AmountInPence]
+
+          val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers.empty.copy(
+            taxableGainOrLoss = Some(taxableGain),
+            hasEstimatedDetails = Some(true)
+          )
+
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = None,
+            disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
+          )
+
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = triageAnswers,
+            yearToDateLiabilityAnswers = Some(requiredPreviousAnswers)
+          )
+
+          val fillingOutReturn = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            agentReferenceNumber = None,
+            subscribedDetails = sample[SubscribedDetails].copy(
+              name = Left(sample[TrustName])
+            ),
+            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+            amendReturnData = None
+          )
+
+          val session = SessionData.empty.copy(
+            journeyStatus = Some(fillingOutReturn),
+            userType = Some(UserType.Organisation)
+          )
+
+          val calculationRequest = YearToDateLiabilityCalculationRequest(
+            triageAnswers,
+            taxableGain,
+            AmountInPence.zero,
+            AmountInPence.zero,
+            isATrust = true
+          )
+          val calculationResult  = sample[YearToDateLiabilityCalculation]
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
+            taxYear,
+            sample[Eligible],
+            routes.YearToDateLiabilityController.hasEstimatedDetails(),
+            "yearToDateLiability.trust.title",
+            messageFromMessageKey("yearToDateLiability.trust.p1", viewConfig.trustsAndCgtUrl),
+            None,
+            "yearToDateLiability.trust.link",
+            expectedCalculationChecks = Some { doc =>
+              doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
+                "yearToDateLiability.trust.calculatedHelpText.p1",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
+              )
+            },
+            Some(calculationRequest -> calculationResult)
+          )
+        }
+
+      }
+
+      "show an error page" when {
+
+        def state(
+          triageAnswers: SingleDisposalTriageAnswers,
+          taxableGain: Option[AmountInPence],
+          estimatedIncome: Option[AmountInPence],
+          personalAllowance: Option[AmountInPence]
+        ): (SessionData, FillingOutReturn) = {
+          val answers = IncompleteNonCalculatedYTDAnswers(
+            taxableGain,
+            Some(true),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            estimatedIncome,
+            personalAllowance
+          )
+
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = triageAnswers,
+            yearToDateLiabilityAnswers = Some(answers)
+          )
+
+          val fillingOutReturn = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            agentReferenceNumber = None,
+            subscribedDetails = sample[SubscribedDetails].copy(
+              name = Right(sample[IndividualName])
+            ),
+            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+            amendReturnData = Some(sample[AmendReturnData])
+          )
+
+          val session = SessionData.empty.copy(
+            journeyStatus = Some(fillingOutReturn),
+            userType = Some(UserType.Individual)
+          )
+
+          session -> fillingOutReturn
+        }
+
+        "there is a problem checking eligibility for a calculation" in {
+          val (session, fillingOutReturn) = state(
+            sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+            Some(sample[AmountInPence]),
+            Some(sample[AmountInPence]),
+            Some(sample[AmountInPence])
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "the user is eligible for a further return calculation and" when {
+
+          "no value for estimated income can be found" in {
+            val (session, fillingOutReturn) = state(
+              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+              Some(sample[AmountInPence]),
+              None,
+              Some(sample[AmountInPence])
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "no value for personal allowance can be found" in {
+            val (session, fillingOutReturn) = state(
+              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+              Some(sample[AmountInPence]),
+              Some(sample[AmountInPence]),
+              None
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+
+          }
+
+          "no value for taxable gain can be found" in {
+            val (session, fillingOutReturn) = state(
+              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+              None,
+              Some(sample[AmountInPence]),
+              Some(sample[AmountInPence])
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "the draft return is not a DraftSingleDisposalReturn" in {
+            val fillingOutReturn = sample[FillingOutReturn].copy(
+              draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self)),
+                yearToDateLiabilityAnswers = Some(
+                  sample[CompleteNonCalculatedYTDAnswers].copy(
+                    estimatedIncome = Some(sample[AmountInPence]),
+                    personalAllowance = Some(sample[AmountInPence])
+                  )
+                )
+              ),
+              previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+              amendReturnData = None
+            )
+            val session          = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "the triage section is not complete" in {
+            val (session, fillingOutReturn) = state(
+              sample[IncompleteSingleDisposalTriageAnswers]
+                .copy(individualUserType = Some(Self), disposalDate = Some(sample[DisposalDate])),
+              Some(sample[AmountInPence]),
+              Some(sample[AmountInPence]),
+              Some(sample[AmountInPence])
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "there is a problem performing the calculation" in {
+            val (taxableGain, estimatedIncome, personalAllowance) =
+              (sample[AmountInPence], sample[AmountInPence], sample[AmountInPence])
+            val triageAnswers                                     =
+              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
+
+            val calculationRequest = YearToDateLiabilityCalculationRequest(
+              triageAnswers,
+              taxableGain,
+              estimatedIncome,
+              personalAllowance,
+              isATrust = false
+            )
+
+            val (session, fillingOutReturn) = state(
+              triageAnswers,
+              Some(taxableGain),
+              Some(estimatedIncome),
+              Some(personalAllowance)
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockCalculateYearToDateLiability(calculationRequest)(Left(Error("")))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
         }
 
       }
@@ -6645,33 +7087,57 @@ class YearToDateLiabilityControllerSpec
 
       behave like markUnmetDependencyBehaviour(controller.yearToDateLiabilitySubmit())
 
-      {
+      "show an error page" when {
+
         val answers = IncompleteNonCalculatedYTDAnswers.empty.copy(
           taxableGainOrLoss = Some(AmountInPence(101L)),
           hasEstimatedDetails = Some(false)
         )
 
-        val (_, journey, draftReturn) = sessionWithMultipleDisposalsState(
+        val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
           Some(answers),
           UserType.Individual,
           wasUkResident = true,
           isFurtherReturn = true
         )
-
-        behave like unsuccessfulUpdateBehaviour(
-          journey,
-          journey.copy(draftReturn =
-            draftReturn.copy(yearToDateLiabilityAnswers =
-              Some(
-                answers.copy(
-                  yearToDateLiability = Some(AmountInPence(100000L))
-                )
+        val updatedJourney                  = journey.copy(draftReturn =
+          draftReturn.copy(yearToDateLiabilityAnswers =
+            Some(
+              answers.copy(
+                yearToDateLiability = Some(AmountInPence(100000L))
               )
             )
-          ),
-          () => performAction("yearToDateLiability" -> "1000")
+          )
         )
+        val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
+
+        "there is an error updating the draft return" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
+            mockStoreDraftReturn(updatedJourney)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction("yearToDateLiability" -> "1000"))
+        }
+
+        "there is an error updating the session data" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
+            mockStoreSession(updatedSession)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction("yearToDateLiability" -> "1000"))
+        }
+
       }
+
       "redirect to the check your answers page" when {
 
         "the return is not a further return" in {
@@ -6695,7 +7161,7 @@ class YearToDateLiabilityControllerSpec
 
       "show a form error" when {
 
-        def test(sessionData: SessionData)(
+        def test(sessionData: SessionData, fillingOutReturn: FillingOutReturn)(
           data: (String, String)*
         )(
           expectedTitleKey: String,
@@ -6704,7 +7170,11 @@ class YearToDateLiabilityControllerSpec
           testFormError(data: _*)(
             expectedErrorKey,
             expectedErrorArgs
-          )(expectedTitleKey, expectedTitleArgs: _*)(performAction, sessionData)
+          )(expectedTitleKey, expectedTitleArgs: _*)(
+            performAction,
+            sessionData,
+            _ => mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
+          )
 
         val taxYear = sample[TaxYear]
 
@@ -6720,7 +7190,7 @@ class YearToDateLiabilityControllerSpec
               individualUserType,
               isFurtherReturn = true,
               taxYear
-            )._1
+            )
 
           List(
             ""                                  -> session(UserType.Individual, Some(Self)),
@@ -6742,7 +7212,7 @@ class YearToDateLiabilityControllerSpec
         "nothing is submitted" in {
           testCases.foreach { case (userKey, session) =>
             withClue(s"For user key '$userKey': ") {
-              test(session)()(s"yearToDateLiability$userKey.title", taxYearStart, taxYearEnd)(
+              test(session._1, session._2)()(s"yearToDateLiability$userKey.label", taxYearStart, taxYearEnd)(
                 s"yearToDateLiability$userKey.error.required",
                 taxYearStart,
                 taxYearEnd
@@ -6758,8 +7228,8 @@ class YearToDateLiabilityControllerSpec
               .filter(s => s.input.filter(_.nonEmpty).isDefined)
               .foreach { scenario =>
                 withClue(s"For user key '$userKey' and $scenario: ") {
-                  test(session)(scenario.formData: _*)(
-                    s"yearToDateLiability$userKey.title",
+                  test(session._1, session._2)(scenario.formData: _*)(
+                    s"yearToDateLiability$userKey.label",
                     taxYearStart,
                     taxYearEnd
                   )(
@@ -6803,6 +7273,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
             mockStoreDraftReturn(newJourney)(
               Right(())
             )
@@ -6826,7 +7297,7 @@ class YearToDateLiabilityControllerSpec
             yearToDateLiability = Some(AmountInPence.zero)
           )
 
-          val (session, _, _) = sessionWithSingleDisposalState(
+          val (session, journey, _) = sessionWithSingleDisposalState(
             Some(answers),
             userType = UserType.Individual,
             wasUkResident = true,
@@ -6836,6 +7307,8 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
+
           }
 
           checkIsRedirect(
@@ -6915,6 +7388,8 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           Some(sample[AmountInPence]),
+          None,
+          None,
           None
         )
 
@@ -7619,28 +8094,6 @@ class YearToDateLiabilityControllerSpec
         )
       }
 
-      "the user is on a single disposal journey with no other reliefs, but it is a further return" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithSingleDisposalState(
-              None,
-              Some(sample[DisposalDate]),
-              UserType.Individual,
-              wasUkResident = true,
-              Some(sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(OtherReliefsOption.NoOtherReliefs))),
-              Some(Self),
-              isFurtherReturn = true
-            )._1
-          )
-        }
-
-        checkIsRedirect(
-          performAction(),
-          routes.YearToDateLiabilityController.checkYourAnswers()
-        )
-      }
-
     }
 
   def unsuccessfulUpdateBehaviourForSingleDisposal(
@@ -7945,6 +8398,47 @@ class YearToDateLiabilityControllerSpec
       }
 
     }
+
+  def redirectToStartWhenFurtherReturnIneligibleForCalculation(performAction: () => Future[Result]): Unit = {
+    val (session, fillingOutReturn, _) =
+      sessionWithSingleDisposalState(
+        None,
+        Some(sample[DisposalDate]),
+        UserType.Individual,
+        wasUkResident = true,
+        isFurtherReturn = true,
+        amendReturnData = None
+      )
+
+    "redirect to the cya endpoint" when {
+
+      "the user is on a further return journey where they are ineligible for a calculation" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
+        }
+
+        checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
+      }
+
+    }
+
+    "show an error page" when {
+
+      "there is an error checking eligibility for a calclation for a further return" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("")))
+        }
+
+        checkIsTechnicalErrorPage(performAction())
+      }
+
+    }
+
+  }
 
 }
 

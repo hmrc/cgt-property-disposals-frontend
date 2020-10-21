@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnC
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest, TaxableGainOrLossCalculationRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest, TaxableGainOrLossCalculationRequest, YearToDateLiabilityCalculationRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -156,6 +156,17 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       behave like connectorBehaviour(
         mockPost(expectedUrl, Seq.empty, request),
         () => connector.calculateTaxableGainOrLoss(request)
+      )
+    }
+
+    "handling requests to calculate year to date liability" must {
+
+      val request     = sample[YearToDateLiabilityCalculationRequest]
+      val expectedUrl = s"http://host:123/calculate-year-to-date-liability"
+
+      behave like connectorBehaviour(
+        mockPost(expectedUrl, Seq.empty, request),
+        () => connector.calculateYearToDateLiability(request)
       )
     }
 
