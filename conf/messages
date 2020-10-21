@@ -3338,9 +3338,9 @@ taxableGain.error.tooSmall=Overall gain must be an amount of money between 0 and
 taxableGain.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGainOrLoss.assistive.taxableGain=for overall gain amount
-taxableGainOrLoss.calculated.gain.prompt=Enter a gain of <strong class="bold">{0}</strong> if you agree with these workings.
-taxableGainOrLoss.calculated.loss.prompt=Enter a loss of <strong class="bold">{0}</strong> if you agree with these workings.
-taxableGainOrLoss.calculated.noGainOrLoss.prompt=Select ‘I made no gain or loss’ if you agree with these workings.
+taxableGainOrLoss.calculated.gain.prompt=Enter a net gain of <strong class="bold">{0}</strong> if you agree with these workings.
+taxableGainOrLoss.calculated.loss.prompt=Enter a net loss of <strong class="bold">{0}</strong> if you agree with these workings.
+taxableGainOrLoss.calculated.noGainOrLoss.prompt=Select <strong class="bold">‘No net gain or loss’</strong> if you agree with these workings.
 
 taxableGainOrLoss.loss.label=No, I made an overall loss
 taxableGainOrLoss.agent.loss.label=No, my client made an overall loss
@@ -3360,13 +3360,13 @@ netLoss.error.tooManyDecimals=Overall loss must be an amount of money with pence
 
 taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
-taxableGainOrLoss.furtherReturn.title=Tell us if you made a net gain or loss
-taxableGainOrLoss.agent.furtherReturn.title=Tell us if your client made a net gain or loss
-taxableGainOrLoss.trust.furtherReturn.title=Tell us if the trust made a net gain or loss
-taxableGainOrLoss.capacitor.furtherReturn.title=Tell us if the person made a net gain or loss
-taxableGainOrLoss.personalRep.furtherReturn.title=Tell us if the person made a net gain or loss
-taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Tell us if the estate made a net gain or loss
-taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.title=Tell us if your client made a net gain or loss
+taxableGainOrLoss.furtherReturn.title=Enter your net gain or loss
+taxableGainOrLoss.agent.furtherReturn.title=Enter your client’s net gain or loss
+taxableGainOrLoss.trust.furtherReturn.title=Enter the trust’s net gain or loss
+taxableGainOrLoss.capacitor.furtherReturn.title=Enter the person’s net gain or loss
+taxableGainOrLoss.personalRep.furtherReturn.title=Enter the person’s net gain or loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Enter the estate's net gain or loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.title=Enter your client’s net gain or loss
 
 taxableGainOrLoss.calculated.furtherReturn.p1=We used the details that were entered in this return to work out your net gain on the property disposals that you are paying tax on in tax year {0} to {1}.
 taxableGainOrLoss.furtherReturn.p1=You’ll need to work out if you made a net gain or loss on the UK property-related disposals you are paying tax on in the {0} to {1} tax year.
@@ -3727,13 +3727,13 @@ calculator.total.gainsAfterReliefs=All gains after reliefs
 
 calculator.cannotApplyAEA=You cannot use any of the Annual Exempt Amount. This is because there is no gain.
 calculator.annualExemptAmount=Amount of Annual Exempt Amount used
-calculator.total.taxableGain=Taxable gain
+calculator.total.taxableGain=Net gain or loss
 
 calculator.annualIncome=Gross annual income
 calculator.personalAllowance=Amount of Personal Allowance used
 calculator.total.taxableIncome=Taxable income
 
-calculator.incomeAboveThreshold=The amount of taxable gain to be charged at basic rate is 0. This means all of the taxable gain will be charged at the higher rate. This is because the taxable income is higher than the UK threshold for basic rate tax of {0}.
+calculator.incomeAboveThreshold=The amount of net gain to be charged at basic rate is 0. This means all of the net gain will be charged at the higher rate. This is because the taxable income is higher than the UK threshold for basic rate tax of {0}.
 
 calculator.trustRateInfo.p1=Most trusts disposing of this property type pay taxable gains at {0}.
 calculator.trustRateInfo.p2=Trusts for vulnerable beneficiaries get special tax treatment. If you’re a trustee of this type of trust you’ll need to work out the amount of tax due.
@@ -3743,11 +3743,11 @@ calculator.periodOfAdminRateInfo.p1=Most personal representatives or estates dis
 calculator.ukThreshold=UK threshold for basic rate tax
 calculator.total.ukThresholdLessTaxableIncome=UK threshold for basic rate tax less taxable income
 calculator.basicRateRule=To work out the amount to be charged at the basic rate of Capital Gains Tax we took the lower of these amounts:
-calculator.basicAmount=Amount of the taxable gain to be charged at the basic rate
+calculator.basicAmount=Amount of the net gain to be charged at the basic rate
 calculator.basicRate=Basic rate
 calculator.total.amountDueAtBasicRate=Amount of tax due at the basic rate
 
-calculator.higherAmount=Amount of the taxable gain to be charged at the higher rate
+calculator.higherAmount=Amount of the net gain to be charged at the higher rate
 calculator.higherRate=Higher rate
 calculator.total.amountDueAtHigherRate=Amount of tax due at the higher rate
 
