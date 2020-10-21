@@ -2830,7 +2830,7 @@ class StartControllerSpec
 
       "the session data indicates the user has started to amend a return" must {
 
-        "redirect to you must calculate page" in {
+        "redirect to the amend cya page" in {
           inSequence {
             mockAuthWithAllRetrievals(
               ConfidenceLevel.L200,
@@ -2859,7 +2859,7 @@ class StartControllerSpec
 
             checkIsRedirect(
               performAction(),
-              controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
+              controllers.returns.amend.routes.AmendReturnController.checkYourAnswers()
             )
           }
 

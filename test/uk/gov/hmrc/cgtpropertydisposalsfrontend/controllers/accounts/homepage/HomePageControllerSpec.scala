@@ -1492,7 +1492,7 @@ class HomePageControllerSpec
 
       }
 
-      "redirect to the further return help page" when {
+      "redirect to the further return how many properties page" when {
 
         "the subscribed user type is trust and the sent returns is non empty" in {
           val sentReturns = List(
@@ -1527,7 +1527,7 @@ class HomePageControllerSpec
           checkIsRedirect(
             performAction(),
             controllers.returns.triage.routes.CommonTriageQuestionsController
-              .furtherReturnHelp()
+              .howManyPropertiesFurtherReturn()
           )
         }
 

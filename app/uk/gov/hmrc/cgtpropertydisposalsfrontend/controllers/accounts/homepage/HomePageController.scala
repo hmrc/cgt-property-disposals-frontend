@@ -82,10 +82,10 @@ class HomePageController @Inject() (
             .userType()
             .fold(
               _ =>
-                if (subscribed.sentReturns.nonEmpty)
-                  triage.routes.CommonTriageQuestionsController.furtherReturnHelp()
+                if (subscribed.sentReturns.isEmpty)
+                  triage.routes.CommonTriageQuestionsController.howManyProperties()
                 else
-                  triage.routes.CommonTriageQuestionsController.howManyProperties(),
+                  triage.routes.CommonTriageQuestionsController.howManyPropertiesFurtherReturn(),
               _ =>
                 triage.routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresenting()

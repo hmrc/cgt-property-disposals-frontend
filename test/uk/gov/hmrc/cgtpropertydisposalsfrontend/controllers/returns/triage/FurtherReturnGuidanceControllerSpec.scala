@@ -229,7 +229,7 @@ class FurtherReturnGuidanceControllerSpec
         controller.guidance(back)(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        () => performAction(FurtherReturnGuidanceController.BackLinkLocations.furtherReturnStart),
+        () => performAction(FurtherReturnGuidanceController.BackLinkLocations.inYearLosses),
         isValidJourney
       )
 
@@ -291,18 +291,6 @@ class FurtherReturnGuidanceControllerSpec
             )
           }
 
-          "the user came from the further returns start page" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                test(
-                  individualUserType,
-                  userType,
-                  BackLinkLocations.furtherReturnStart,
-                  routes.CommonTriageQuestionsController.furtherReturnHelp()
-                )
-            }
-          }
-
           "the user came from the in year losses page" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
@@ -311,18 +299,6 @@ class FurtherReturnGuidanceControllerSpec
                   userType,
                   BackLinkLocations.inYearLosses,
                   controllers.returns.exemptionandlosses.routes.ExemptionAndLossesController.inYearLosses()
-                )
-            }
-          }
-
-          "the user came from the amend start page" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                test(
-                  individualUserType,
-                  userType,
-                  BackLinkLocations.calculateAmounts,
-                  controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
                 )
             }
           }
@@ -385,18 +361,6 @@ class FurtherReturnGuidanceControllerSpec
             )
           }
 
-          "the user came from the further returns start page" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                test(
-                  individualUserType,
-                  userType,
-                  BackLinkLocations.furtherReturnStart,
-                  routes.CommonTriageQuestionsController.furtherReturnHelp()
-                )
-            }
-          }
-
           "the user came from the in year losses page" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
@@ -405,18 +369,6 @@ class FurtherReturnGuidanceControllerSpec
                   userType,
                   BackLinkLocations.inYearLosses,
                   controllers.returns.exemptionandlosses.routes.ExemptionAndLossesController.inYearLosses()
-                )
-            }
-          }
-
-          "the user came from the amend start page" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                test(
-                  individualUserType,
-                  userType,
-                  BackLinkLocations.calculateAmounts,
-                  controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
                 )
             }
           }
@@ -460,7 +412,7 @@ class FurtherReturnGuidanceControllerSpec
         controller.guidance(back)(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        () => performAction(FurtherReturnGuidanceController.BackLinkLocations.furtherReturnStart),
+        () => performAction(FurtherReturnGuidanceController.BackLinkLocations.inYearLosses),
         isValidJourney
       )
 
@@ -522,18 +474,6 @@ class FurtherReturnGuidanceControllerSpec
             )
           }
 
-          "the user came from the further returns start page" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                test(
-                  individualUserType,
-                  userType,
-                  BackLinkLocations.furtherReturnStart,
-                  routes.CommonTriageQuestionsController.furtherReturnHelp()
-                )
-            }
-          }
-
           "the user came from the in year losses page" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
@@ -542,18 +482,6 @@ class FurtherReturnGuidanceControllerSpec
                   userType,
                   BackLinkLocations.inYearLosses,
                   controllers.returns.exemptionandlosses.routes.ExemptionAndLossesController.inYearLosses()
-                )
-            }
-          }
-
-          "the user came from the amend start page" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                test(
-                  individualUserType,
-                  userType,
-                  BackLinkLocations.calculateAmounts,
-                  controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
                 )
             }
           }
@@ -616,18 +544,6 @@ class FurtherReturnGuidanceControllerSpec
             )
           }
 
-          "the user came from the further returns start page" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                test(
-                  individualUserType,
-                  userType,
-                  BackLinkLocations.furtherReturnStart,
-                  routes.CommonTriageQuestionsController.furtherReturnHelp()
-                )
-            }
-          }
-
           "the user came from the in year losses page" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
@@ -636,18 +552,6 @@ class FurtherReturnGuidanceControllerSpec
                   userType,
                   BackLinkLocations.inYearLosses,
                   controllers.returns.exemptionandlosses.routes.ExemptionAndLossesController.inYearLosses()
-                )
-            }
-          }
-
-          "the user came from the amend start page" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                test(
-                  individualUserType,
-                  userType,
-                  BackLinkLocations.calculateAmounts,
-                  controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
                 )
             }
           }
