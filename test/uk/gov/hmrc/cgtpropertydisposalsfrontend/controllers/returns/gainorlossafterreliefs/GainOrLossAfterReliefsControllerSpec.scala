@@ -559,7 +559,7 @@ class GainOrLossAfterReliefsControllerSpec
                       AmountInPence(0),
                       AmountInPence(0),
                       AmountInPence(0),
-                      AmountInPence(0),
+                      AmountInPence(1L),
                       AmountInPence(0),
                       AmountInPence(0)
                     ),
@@ -652,6 +652,7 @@ class GainOrLossAfterReliefsControllerSpec
           }
 
           "the user is on a single disposal journey and" when {
+
             def validCalculatorState(
               userType: UserType,
               individualUserType: IndividualUserType,
@@ -711,6 +712,52 @@ class GainOrLossAfterReliefsControllerSpec
                 "gainOrLossAfterReliefs.h2"
               )
             }
+
+            "the value for private residence relief is zero" in {
+              val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, Some(true), None)
+
+              val (session, fillingOutReturn, _, _) =
+                validCalculatorState(Individual, Self, previousReturnData)
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(
+                  Right(
+                    Eligible(
+                      CalculatedGlarBreakdown(
+                        AmountInPence(0),
+                        AmountInPence(0),
+                        AmountInPence(0),
+                        AmountInPence(0),
+                        AmountInPence(0),
+                        AmountInPence(0),
+                        AmountInPence(0)
+                      ),
+                      List.empty,
+                      currentReturnAddress
+                    )
+                  )
+                )
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("gainOrLossAfterReliefs.title"),
+                { doc =>
+                  doc.text() shouldNot include(messageFromMessageKey("calculator.privateResidenceRelief"))
+                  doc.text() shouldNot include(messageFromMessageKey("calculator.lettingRelief"))
+
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.GainOrLossAfterReliefsController
+                    .enterGainOrLossAfterReliefsSubmit()
+                    .url
+                }
+              )
+
+            }
+
           }
 
         }

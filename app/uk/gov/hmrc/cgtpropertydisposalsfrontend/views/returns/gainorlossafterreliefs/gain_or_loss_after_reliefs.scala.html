@@ -155,7 +155,11 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
               else
                   messages(s"$key.calculated.noGainOrLoss$outerLabelUserKey.prompt")
 
-          Some(Html(s"""<p>$prompt</p>""".stripMargin))
+          Some(Html(
+              s"""
+                 |<p>$prompt</p>
+                 |<p>${messages("gainOrLossAfterReliefs.calculated.promptEnding")}</p>
+                 |""".stripMargin))
 
         case None => None
     }
