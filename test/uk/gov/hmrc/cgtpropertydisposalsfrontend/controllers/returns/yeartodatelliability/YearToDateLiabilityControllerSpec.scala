@@ -68,7 +68,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, Tru
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleMixedUseDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
@@ -869,6 +869,117 @@ class YearToDateLiabilityControllerSpec
           )
         }
 
+        "the user is on a amend return journey which is eligible for a calculation" in {
+          val oldAnswers =
+            sample[CompleteNonCalculatedYTDAnswers]
+              .copy(
+                estimatedIncome = Some(AmountInPence(5L)),
+                personalAllowance = Some(sample[AmountInPence])
+              )
+          val newAnswers =
+            IncompleteNonCalculatedYTDAnswers.empty
+              .copy(taxableGainOrLoss = Some(oldAnswers.taxableGainOrLoss), estimatedIncome = Some(AmountInPence(100L)))
+
+          val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
+            Some(oldAnswers),
+            Some(sample[DisposalDate]),
+            UserType.Individual,
+            wasUkResident = true,
+            isFurtherReturn = true,
+            amendReturnData = Some(
+              sample[AmendReturnData].copy(
+                originalReturn = sample[CompleteReturnWithSummary].copy(
+                  completeReturn = sample[CompleteSingleIndirectDisposalReturn].copy(
+                    yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+                      hasEstimatedDetails = true
+                    )
+                  )
+                )
+              )
+            )
+          )
+
+          val newFillingOutReturn = fillingOutReturn.copy(
+            draftReturn = draftReturn.copy(
+              yearToDateLiabilityAnswers = Some(newAnswers)
+            )
+          )
+
+          val newSession = session.copy(journeyStatus = Some(newFillingOutReturn))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            mockStoreDraftReturn(newFillingOutReturn)(Right(()))
+            mockStoreSession(newSession)(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("estimatedIncome" -> "1"),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+
+        }
+
+        "the user is on a amend return journey which is eligible for a calculation and" +
+          "where the estimates answer should be preserved" in {
+            val oldAnswers =
+              sample[CompleteNonCalculatedYTDAnswers]
+                .copy(
+                  estimatedIncome = Some(AmountInPence(5L)),
+                  personalAllowance = Some(sample[AmountInPence])
+                )
+            val newAnswers =
+              IncompleteNonCalculatedYTDAnswers.empty
+                .copy(
+                  taxableGainOrLoss = Some(oldAnswers.taxableGainOrLoss),
+                  estimatedIncome = Some(AmountInPence(100L)),
+                  hasEstimatedDetails = Some(oldAnswers.hasEstimatedDetails)
+                )
+
+            val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
+              Some(oldAnswers),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
+              isFurtherReturn = true,
+              amendReturnData = Some(
+                sample[AmendReturnData].copy(
+                  originalReturn = sample[CompleteReturnWithSummary].copy(
+                    completeReturn = sample[CompleteSingleIndirectDisposalReturn].copy(
+                      yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+                        hasEstimatedDetails = false
+                      )
+                    )
+                  )
+                )
+              )
+            )
+
+            val newFillingOutReturn = fillingOutReturn.copy(
+              draftReturn = draftReturn.copy(
+                yearToDateLiabilityAnswers = Some(newAnswers)
+              )
+            )
+
+            val newSession = session.copy(journeyStatus = Some(newFillingOutReturn))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockStoreDraftReturn(newFillingOutReturn)(Right(()))
+              mockStoreSession(newSession)(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction("estimatedIncome" -> "1"),
+              routes.YearToDateLiabilityController.checkYourAnswers()
+            )
+
+          }
+
       }
 
       "not do any updates if the submitted answer is the same as one already stored in session and" when {
@@ -1267,6 +1378,125 @@ class YearToDateLiabilityControllerSpec
             disposalDate
           )
         }
+
+        "the user is on a amend return journey which is eligible for a calculation" in {
+          val oldAnswers =
+            sample[CompleteNonCalculatedYTDAnswers]
+              .copy(
+                estimatedIncome = Some(AmountInPence(99L)),
+                personalAllowance = Some(AmountInPence(5L))
+              )
+          val newAnswers =
+            IncompleteNonCalculatedYTDAnswers.empty
+              .copy(
+                taxableGainOrLoss = Some(oldAnswers.taxableGainOrLoss),
+                estimatedIncome = oldAnswers.estimatedIncome,
+                personalAllowance = Some(AmountInPence(100L))
+              )
+
+          val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
+            Some(oldAnswers),
+            Some(disposalDate),
+            UserType.Individual,
+            wasUkResident = true,
+            isFurtherReturn = true,
+            amendReturnData = Some(
+              sample[AmendReturnData].copy(
+                originalReturn = sample[CompleteReturnWithSummary].copy(
+                  completeReturn = sample[CompleteSingleIndirectDisposalReturn].copy(
+                    yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+                      hasEstimatedDetails = true
+                    )
+                  )
+                )
+              )
+            ),
+            reliefDetailsAnswers = Some(sample[CompleteReliefDetailsAnswers]),
+            individualUserType = Some(Self)
+          )
+
+          val newFillingOutReturn = fillingOutReturn.copy(
+            draftReturn = draftReturn.copy(
+              yearToDateLiabilityAnswers = Some(newAnswers)
+            )
+          )
+
+          val newSession = session.copy(journeyStatus = Some(newFillingOutReturn))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            mockStoreDraftReturn(newFillingOutReturn)(Right(()))
+            mockStoreSession(newSession)(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("personalAllowance" -> "1"),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+
+        }
+
+        "the user is on a amend return journey which is eligible for a calculation and" +
+          "where the estimates answer should be preserved" in {
+            val oldAnswers =
+              sample[CompleteNonCalculatedYTDAnswers]
+                .copy(
+                  estimatedIncome = Some(AmountInPence(99L)),
+                  personalAllowance = Some(AmountInPence(5L))
+                )
+            val newAnswers =
+              IncompleteNonCalculatedYTDAnswers.empty
+                .copy(
+                  taxableGainOrLoss = Some(oldAnswers.taxableGainOrLoss),
+                  estimatedIncome = oldAnswers.estimatedIncome,
+                  personalAllowance = Some(AmountInPence(100L)),
+                  hasEstimatedDetails = Some(oldAnswers.hasEstimatedDetails)
+                )
+
+            val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
+              Some(oldAnswers),
+              Some(disposalDate),
+              UserType.Individual,
+              wasUkResident = true,
+              isFurtherReturn = true,
+              amendReturnData = Some(
+                sample[AmendReturnData].copy(
+                  originalReturn = sample[CompleteReturnWithSummary].copy(
+                    completeReturn = sample[CompleteSingleIndirectDisposalReturn].copy(
+                      yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+                        hasEstimatedDetails = false
+                      )
+                    )
+                  )
+                )
+              ),
+              reliefDetailsAnswers = Some(sample[CompleteReliefDetailsAnswers])
+            )
+
+            val newFillingOutReturn = fillingOutReturn.copy(
+              draftReturn = draftReturn.copy(
+                yearToDateLiabilityAnswers = Some(newAnswers)
+              )
+            )
+
+            val newSession = session.copy(journeyStatus = Some(newFillingOutReturn))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockStoreDraftReturn(newFillingOutReturn)(Right(()))
+              mockStoreSession(newSession)(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction("personalAllowance" -> "1"),
+              routes.YearToDateLiabilityController.checkYourAnswers()
+            )
+
+          }
 
       }
 
