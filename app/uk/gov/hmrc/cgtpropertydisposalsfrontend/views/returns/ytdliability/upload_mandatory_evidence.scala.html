@@ -49,7 +49,7 @@
     @amendKey = @{if(isAmend) ".amend" else ""}
     @guidance = {
       @if(isMultipleDisposal) {
-        <p>
+        <p id="upload-guidance">
           @messages(s"$key.multiple.guidance.p1")
         </p>
         <ul class="list-bullet">
@@ -62,7 +62,7 @@
           <li>@messages(s"$key.guidance.bullet7")</li>
         </ul>
       } else {
-        <p>
+        <p id="upload-guidance">
           @messages(s"$key.guidance.p1")
         </p>
         <ul class="list-bullet">
