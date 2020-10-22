@@ -56,7 +56,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDet
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, AssetType, DraftMultipleIndirectDisposalsReturn, DraftReturn, DraftSingleIndirectDisposalReturn, IndividualUserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, AssetType, DraftMultipleIndirectDisposalsReturn, DraftReturn, DraftSingleIndirectDisposalReturn, IndividualUserType, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -1299,7 +1299,9 @@ class CompanyDetailsControllerSpec
           }
 
           "the user is on a further return journey" in {
-            val (session, journey, draftReturn) = individualState(previousReturnData = Some(sample[PreviousReturnData]))
+            val (session, journey, draftReturn) = individualState(previousReturnData =
+              Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary])))
+            )
             val address                         =
               UkAddress("The Company", None, None, None, Postcode("ZZ10ZZ"))
 

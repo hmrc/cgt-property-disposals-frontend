@@ -47,7 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, UUIDGenera
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftSingleDisposalReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
@@ -861,7 +861,10 @@ class SingleDisposalPropertyDetailsControllerSpec
           .copy(propertyAddress = Some(sample[UkAddress]))
         val journey     =
           nonResidentialFillingOutReturn
-            .copy(draftReturn = draftReturn, previousSentReturns = Some(sample[PreviousReturnData]))
+            .copy(
+              draftReturn = draftReturn,
+              previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary])))
+            )
         val newAddress  = UkAddress("1", None, None, None, Postcode("ZZ00ZZ"))
 
         val newDraftReturn = draftReturn.copy(

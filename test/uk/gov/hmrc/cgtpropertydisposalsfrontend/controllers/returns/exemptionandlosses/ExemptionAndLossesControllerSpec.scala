@@ -282,7 +282,8 @@ class ExemptionAndLossesControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
       agentReferenceNumber = setAgentReferenceNumber(userType),
-      previousSentReturns = if (isFurtherReturn) Some(sample[PreviousReturnData]) else None,
+      previousSentReturns =
+        if (isFurtherReturn) Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))) else None,
       amendReturnData = None
     )
 
