@@ -1356,7 +1356,8 @@ class YearToDateLiabilityController @Inject() (
                   upscanUpload,
                   backLink,
                   fillingOutReturn.isFurtherOrAmendReturn,
-                  fillingOutReturn.isAmendReturn
+                  fillingOutReturn.isAmendReturn,
+                  fillingOutReturn.isMultipleDisposal
                 )
               )
           )

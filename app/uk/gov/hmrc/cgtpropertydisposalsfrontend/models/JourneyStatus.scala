@@ -122,6 +122,13 @@ object JourneyStatus {
           f.draftReturn.representeeAnswers
         )
 
+      def isMultipleDisposal: Boolean =
+        f.draftReturn match {
+          case _: DraftMultipleDisposalsReturn         => true
+          case _: DraftMultipleIndirectDisposalsReturn => true
+          case _                                       => false
+        }
+
       def withForceDisplayGainOrLossAfterReliefsForAmends: FillingOutReturn =
         f.copy(
           amendReturnData = f.amendReturnData.map(_.copy(shouldDisplayGainOrLossAfterReliefs = true)),
