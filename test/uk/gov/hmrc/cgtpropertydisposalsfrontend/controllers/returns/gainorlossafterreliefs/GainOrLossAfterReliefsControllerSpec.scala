@@ -770,13 +770,18 @@ class GainOrLossAfterReliefsControllerSpec
           val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None, None)
 
           val fillingOutReturn =
-            sample[FillingOutReturn].copy(previousSentReturns = Some(previousReturnData))
-          val sessionData      =
-            (SessionData.empty.copy(Some(fillingOutReturn)), fillingOutReturn, sample[DraftSingleDisposalReturn])
+            sample[FillingOutReturn].copy(
+              previousSentReturns = Some(previousReturnData),
+              draftReturn = sample[DraftSingleDisposalReturn].copy(
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
+              )
+            )
+          val sessionData      = SessionData.empty.copy(Some(fillingOutReturn))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionData._1)
-            mockFurthereturnCalculationEligibilityCheck(sessionData._2)(Left(Error("Error on eligibility check")))
+            mockGetSession(sessionData)
+            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("Error on eligibility check")))
           }
           checkIsTechnicalErrorPage(performAction())
         }
