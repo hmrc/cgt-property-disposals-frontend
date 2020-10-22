@@ -112,24 +112,27 @@
         )
     }
 
+   @if(!isATrust) {
 
-  @answers.estimatedIncome.map{ estimatedIncome =>
-      @cyaRow(
-          messages(s"estimatedIncome$userKey$nrKey.title"),
-          Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(estimatedIncome.inPounds())),
-          Some(cyaChange(messages(s"estimatedIncome$nrKey.cyaChange"), routes.YearToDateLiabilityController.estimatedIncome().url)),
-          "estimatedIncome-value"
-      )
-  }
+     @answers.estimatedIncome.map { estimatedIncome =>
+       @cyaRow(
+         messages(s"estimatedIncome$userKey$nrKey.title"),
+         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(estimatedIncome.inPounds())),
+         Some(cyaChange(messages(s"estimatedIncome$nrKey.cyaChange"), routes.YearToDateLiabilityController.estimatedIncome().url)),
+         "estimatedIncome-value"
+       )
+     }
 
-    @answers.personalAllowance.map { personalAllowance =>
-        @cyaRow(
-            messages(s"personalAllowance$userKey.title", taxYearStart, taxYearEnd),
-            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
-            Some(cyaChange(messages("personalAllowance.cyaChange"), routes.YearToDateLiabilityController.personalAllowance().url)),
-            "personalAllowance-value"
-        )
-    }
+     @answers.personalAllowance.map { personalAllowance =>
+       @cyaRow(
+         messages(s"personalAllowance$userKey.title", taxYearStart, taxYearEnd),
+         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
+         Some(cyaChange(messages("personalAllowance.cyaChange"), routes.YearToDateLiabilityController.personalAllowance().url)),
+         "personalAllowance-value"
+       )
+     }
+
+   }
 
 
    @if(!hideEstimatesQuestion) {
