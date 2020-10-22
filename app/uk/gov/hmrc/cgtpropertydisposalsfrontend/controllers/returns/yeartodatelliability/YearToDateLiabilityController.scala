@@ -1357,7 +1357,7 @@ class YearToDateLiabilityController @Inject() (
                   backLink,
                   fillingOutReturn.isFurtherOrAmendReturn,
                   fillingOutReturn.isAmendReturn,
-                  fillingOutReturn.isMultipleDisposal
+                  fillingOutReturn.draftReturn.triageAnswers.isLeft
                 )
               )
           )

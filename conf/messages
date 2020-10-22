@@ -3838,8 +3838,8 @@ mandatoryEvidence.guidance.bullet5=any losses, reliefs or allowances being claim
 mandatoryEvidence.guidance.bullet6=how any gains or losses were worked out
 mandatoryEvidence.guidance.bullet7=how the amount of Capital Gains Tax due was worked out
 
-mandatoryEvidence.notice=It can take a few minutes for documents to upload. Do not refresh the page or 'go back' while a file is uploading. Any files you upload to a draft return will be saved for 5 days.
-mandatoryEvidence.amend.notice=It can take a few minutes for documents to upload. Do not refresh the page or 'go back' while a file is uploading.
+mandatoryEvidence.notice=It can take a few minutes for documents to upload. Do not refresh the page or ‘go back’ while a file is uploading. Any files you upload to a draft return will be saved for 5 days.
+mandatoryEvidence.amend.notice=It can take a few minutes for documents to upload. Do not refresh the page or ‘go back’ while a file is uploading.
 
 mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG.
 mandatoryEvidence.label=Upload a document

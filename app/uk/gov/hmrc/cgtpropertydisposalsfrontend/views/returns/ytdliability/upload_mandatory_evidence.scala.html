@@ -93,11 +93,12 @@
 
         @fileInput(
           fieldId = fieldId,
-          label = Html(s"""<h2 class="heading-medium">${messages(s"$key.label")}</h2>"""),
+          label = Html(messages(s"$key.label")),
           helpText = Some(Html(messages(s"$key.helpText"))),
           hasErrors = false,
           errorKey = None,
-          labelAsHeading = true,
+          labelAsHeading = false,
+          labelClass = Some("heading-medium bold"),
           autoComplete = AutoCompleteType.On,
           isMandatoryUpload = true
         )
