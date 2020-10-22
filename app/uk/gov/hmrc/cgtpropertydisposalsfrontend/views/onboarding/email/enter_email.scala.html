@@ -58,15 +58,6 @@
    None
  }
 
- @helpTextKey = @{
-  emailJourneyType match {
-   case _: EmailJourneyType.Onboarding.ChangingSubscriptionEmail | _: EmailJourneyType.Onboarding.ChangingRegistrationEmail |
-           _: EmailJourneyType.ManagingSubscription.ChangingAccountEmail => "email.amend.extraContent"
-   case _: EmailJourneyType.Returns.ChangingRepresenteeEmail => "email.representee.extraContent"
-   case _ => "email.extraContent"
-  }
- }
-
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !isManagingSubscriptionJourney, accountMenu = menu) {
 
  @backLink.map(link => backLinkComponent(link))
@@ -86,7 +77,7 @@
    errorKey = form.error(key).map(e => e.message),
    value = form.data.getOrElse(key, ""),
    hasErrors = hasErrors,
-   extraContent = Some(Html(s"""<p class="lede">${messages(helpTextKey)}</p>""")),
+   extraContent = None,
    inputType = Some("email"),
    autoComplete = AutoCompleteType.Email
   )

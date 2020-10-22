@@ -254,7 +254,7 @@ enterSaUtr.lostUtrLink=Find a lost UTR number
 subscription.caption=Create a Capital Gains Tax on UK property account
 subscription.individual.title=Check your contact details and create an account
 subscription.organisation.title=Check the trust or estate’s contact details and create an account
-subscription.lede=We’ll only use these contact details if we need to get in touch about this service.
+subscription.lede=We only use these details if we need to get in contact about this service.confirm
 subscription.cyaLabel.contactName=Contact name
 subscription.cyaChange.contactName=your contact name
 subscription.cyaLabel.address=Contact address
@@ -278,7 +278,7 @@ registration.cyaChange.email=your email address
 enterPostcode.title=Find your UK contact address
 
 email.title=Enter a contact email address
-email.helpText=For example, name@example.com
+email.helpText=For example, name@example.com. We’ll only use this if we need to get in contact about this service.
 email.extraContent=We will only use this email address to contact you about your Capital Gains Tax on UK property disposals.
 email.amend.extraContent=The email addresses you use for other government services will not change.
 email.invalid=Enter an email address in the correct format, like name@example.com
@@ -293,7 +293,7 @@ confirmEmail.ifNoEmail=If the email did not arrive
 confirmEmail.noEmailAction=You can tell us to resend the email to that email account.
 confirmEmail.verified.title=Email address confirmed
 confirmEmail.verified.intro=The email address <strong class="bold">{0}</strong> has been confirmed.
-confirmEmail.verified.p1=We’ll use this address to contact you about your Capital Gains Tax on UK property sales or disposals.
+confirmEmail.verified.p1=We only use these details if we need to get in contact about this service.
 confirmEmail.verified.p2=Your email has not been updated in other government services.
 confirmEmail.resent=Confirmation email sent:
 
@@ -640,7 +640,7 @@ account.manageYourDetails.subtitle=Account number
 account.manageYourDetails.accountName=Account name
 account.manageYourDetails.betaNotice=This service is in private beta until 6 April 2020. On that date you will be able to come back and send a CGT on UK property disposals return for disposals made on or after 6 April 2020.
 account.manageYourDetails.contactHeading=Contact person’s details
-account.manageYourDetails.p=We’ll only use these details if we need to get in contact about this service.
+account.manageYourDetails.p=We only use these details if we need to get in contact about this service.
 account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.organisation.p2=If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.yourName=Your name
