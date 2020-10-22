@@ -54,7 +54,6 @@ class AmendReturnController @Inject() (
   auditService: AuditService,
   cc: MessagesControllerComponents,
   rebasingEligibilityUtil: RebasingEligibilityUtil,
-  youNeedToCalculatePage: pages.you_need_to_calculate,
   confirmCancelPage: pages.confirm_cancel,
   checkYourAnswersPage: pages.check_your_answers,
   unmetDependencyPage: pages.unmet_dependency
@@ -64,13 +63,6 @@ class AmendReturnController @Inject() (
     with SessionUpdates
     with Logging
     with StartingToAmendToFillingOutReturnBehaviour {
-
-  def youNeedToCalculate(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      withStartingToAmendReturn(request) { _ =>
-        Ok(youNeedToCalculatePage(controllers.returns.routes.ViewReturnController.displayReturn()))
-      }
-    }
 
   def confirmCancel(back: String): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -140,7 +132,7 @@ class AmendReturnController @Inject() (
             journey.originalReturn.completeReturn.representativeType(),
             journey.originalReturn.completeReturn.isIndirectDisposal(),
             Some(journey.originalReturn.returnType.isFurtherOrAmendReturn),
-            routes.AmendReturnController.youNeedToCalculate()
+            controllers.returns.routes.ViewReturnController.displayReturn()
           )
         )
       }
@@ -230,7 +222,6 @@ class AmendReturnController @Inject() (
 object AmendReturnController {
 
   object ConfirmCancelBackLocations {
-    val calculateAmounts: String       = "calculateAmounts"
     val checkAnswers: String           = "checkAnswers"
     val unmetDependency: String        = "unmetDependency"
     val taskList: String               = "taskList"
@@ -239,7 +230,6 @@ object AmendReturnController {
 
   val confirmCancelBackLinkMappings: Map[String, Call] =
     Map(
-      ConfirmCancelBackLocations.calculateAmounts       -> routes.AmendReturnController.youNeedToCalculate(),
       ConfirmCancelBackLocations.checkAnswers           -> routes.AmendReturnController.checkYourAnswers(),
       ConfirmCancelBackLocations.unmetDependency        -> routes.AmendReturnController.unmetDependency(),
       ConfirmCancelBackLocations.taskList               -> controllers.returns.routes.TaskListController.taskList(),

@@ -46,7 +46,8 @@
     displayReturnToSummaryLink: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isAmend: Boolean
+    isAmend: Boolean,
+        isFurtherOrAmendReturn: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"numberOfProperties"}
@@ -84,6 +85,13 @@
     ).map(messageKey =>Html(messages(messageKey)))
 }
 
+  @submitLocation = @{
+    if(isFurtherOrAmendReturn)
+        controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesFurtherReturnSubmit()
+    else
+        controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesSubmit()
+  }
+
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
     @backLink.map(backLinkComponent(_))
@@ -118,7 +126,7 @@
         <li>@messages(s"$key.helpText${userKey}.p3.li2")</li>
     </ul>
 
-    @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(submitLocation, 'novalidate -> "novalidate") {
         @radioGroup(
             fieldId = key,
             options = options,

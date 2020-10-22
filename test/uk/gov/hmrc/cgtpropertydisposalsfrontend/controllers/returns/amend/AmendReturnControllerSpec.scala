@@ -94,44 +94,13 @@ class AmendReturnControllerSpec
         }
       )
 
-    "handling requests to display the 'you must calculate' page" must {
-
-      def performAction(): Future[Result] = controller.youNeedToCalculate()(FakeRequest())
-
-      behave like redirectToStartBehaviour(performAction)
-
-      "display the page" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(SessionData.empty.copy(journeyStatus = Some(sample[StartingToAmendReturn])))
-        }
-
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("youNeedToCalculate.title"),
-          { doc =>
-            doc.select("#back").attr("href")                      shouldBe controllers.returns.routes.ViewReturnController
-              .displayReturn()
-              .url
-            doc.select("#cancelOrContinue-cancel").attr("href")   shouldBe routes.AmendReturnController
-              .confirmCancel(AmendReturnController.ConfirmCancelBackLocations.calculateAmounts)
-              .url
-            doc.select("#cancelOrContinue-continue").attr("href") shouldBe routes.AmendReturnController
-              .checkYourAnswers()
-              .url
-          }
-        )
-
-      }
-    }
-
     "handling requests to display the confirm cancellation page" must {
 
       def performAction(back: String): Future[Result] =
         controller.confirmCancel(back)(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        () => performAction(AmendReturnController.ConfirmCancelBackLocations.calculateAmounts),
+        () => performAction(AmendReturnController.ConfirmCancelBackLocations.checkAnswers),
         {
           case _: StartingToAmendReturn => true
           case f: FillingOutReturn      => f.amendReturnData.isDefined
@@ -180,13 +149,6 @@ class AmendReturnControllerSpec
           )
         }
 
-        "the user came from the 'you need to calculate page'" in {
-          test(
-            AmendReturnController.ConfirmCancelBackLocations.calculateAmounts,
-            routes.AmendReturnController.youNeedToCalculate()
-          )
-        }
-
         "the user came from the amend cya page" in {
           test(
             AmendReturnController.ConfirmCancelBackLocations.checkAnswers,
@@ -224,7 +186,7 @@ class AmendReturnControllerSpec
         controller.confirmCancelSubmit(back)(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       behave like redirectToStartWhenInvalidJourney(
-        () => performAction()(AmendReturnController.ConfirmCancelBackLocations.calculateAmounts),
+        () => performAction()(AmendReturnController.ConfirmCancelBackLocations.checkAnswers),
         {
           case _: StartingToAmendReturn => true
           case f: FillingOutReturn      => f.amendReturnData.isDefined
@@ -313,7 +275,7 @@ class AmendReturnControllerSpec
 
             checkIsRedirect(
               performAction("confirmCancelAmendReturn" -> "true")(
-                AmendReturnController.ConfirmCancelBackLocations.calculateAmounts
+                AmendReturnController.ConfirmCancelBackLocations.checkAnswers
               ),
               controllers.returns.routes.ViewReturnController.displayReturn()
             )
@@ -343,7 +305,7 @@ class AmendReturnControllerSpec
 
             checkIsRedirect(
               performAction("confirmCancelAmendReturn" -> "true")(
-                AmendReturnController.ConfirmCancelBackLocations.calculateAmounts
+                AmendReturnController.ConfirmCancelBackLocations.checkAnswers
               ),
               controllers.returns.routes.ViewReturnController.displayReturn()
             )
@@ -396,7 +358,9 @@ class AmendReturnControllerSpec
             performAction(),
             messageFromMessageKey(expectedTitle),
             { doc =>
-              doc.select("#back").attr("href") shouldBe routes.AmendReturnController.youNeedToCalculate().url
+              doc.select("#back").attr("href") shouldBe controllers.returns.routes.ViewReturnController
+                .displayReturn()
+                .url
 
               doc.select("#cancelOrContinue-cancel").attr("href") shouldBe routes.AmendReturnController
                 .confirmCancel(AmendReturnController.ConfirmCancelBackLocations.checkAnswers)

@@ -158,16 +158,12 @@ class RepresenteeController @Inject() (
   def enterName(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
-        withIsFirstReturn(answers) { isFirstReturn =>
+        withIsFirstReturn(answers) { _ =>
           withNotTooManyUnsuccessfulNameMatchAttempts(
             journey.fold(_.ggCredId, _.ggCredId)
           ) { _ =>
             val backLink = answers.fold(
-              _ =>
-                if (isFirstReturn)
-                  routes.RepresenteeController.isFirstReturn()
-                else
-                  triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
+              _ => routes.RepresenteeController.isFirstReturn(),
               _ => routes.RepresenteeController.checkYourAnswers()
             )
 
@@ -197,11 +193,7 @@ class RepresenteeController @Inject() (
             journey.fold(_.ggCredId, _.ggCredId)
           ) { _ =>
             lazy val backLink = answers.fold(
-              _ =>
-                if (isFirstReturn)
-                  routes.RepresenteeController.isFirstReturn()
-                else
-                  triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
+              _ => routes.RepresenteeController.isFirstReturn(),
               _ => routes.RepresenteeController.checkYourAnswers()
             )
 
@@ -815,9 +807,6 @@ class RepresenteeController @Inject() (
 
           case IncompleteRepresenteeAnswers(_, _, _, _, _, _, None) =>
             Redirect(routes.RepresenteeController.isFirstReturn())
-
-          case IncompleteRepresenteeAnswers(None, None, None, None, false, false, Some(false)) =>
-            Redirect(triageRoutes.CommonTriageQuestionsController.furtherReturnHelp())
 
           case IncompleteRepresenteeAnswers(None, _, _, _, _, _, _) =>
             Redirect(routes.RepresenteeController.enterName())

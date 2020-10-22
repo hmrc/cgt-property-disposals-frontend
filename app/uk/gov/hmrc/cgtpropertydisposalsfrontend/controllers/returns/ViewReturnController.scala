@@ -105,7 +105,7 @@ class ViewReturnController @Inject() (
               logger.warn("Could not start amending a return", e)
               errorHandler.errorResult()
             case Right(_) =>
-              Redirect(amendRoutes.AmendReturnController.youNeedToCalculate())
+              Redirect(amendRoutes.AmendReturnController.checkYourAnswers())
           }
         }
       }

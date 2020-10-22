@@ -210,7 +210,7 @@ class StartController @Inject() (
 
       case _: StartingToAmendReturn =>
         Redirect(
-          controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
+          controllers.returns.amend.routes.AmendReturnController.checkYourAnswers()
         )
     }
 

@@ -156,19 +156,14 @@ object FurtherReturnGuidanceController {
 
   object BackLinkLocations {
 
-    val furtherReturnStart: String = "furtherReturnStart"
-    val inYearLosses: String       = "inYearLosses"
-    val calculateAmounts: String   = "calculateAmounts"
+    val inYearLosses: String = "inYearLosses"
 
   }
 
   val backLinkMappings: Map[String, Call] =
     Map(
-      BackLinkLocations.furtherReturnStart -> returns.triage.routes.CommonTriageQuestionsController.furtherReturnHelp(),
-      BackLinkLocations.inYearLosses       -> returns.exemptionandlosses.routes.ExemptionAndLossesController
-        .inYearLosses(),
-      BackLinkLocations.calculateAmounts   -> returns.amend.routes.AmendReturnController
-        .youNeedToCalculate()
+      BackLinkLocations.inYearLosses -> returns.exemptionandlosses.routes.ExemptionAndLossesController
+        .inYearLosses()
     )
 
 }

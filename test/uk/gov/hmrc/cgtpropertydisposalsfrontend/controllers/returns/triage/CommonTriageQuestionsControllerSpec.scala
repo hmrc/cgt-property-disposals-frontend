@@ -37,6 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
@@ -47,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
@@ -56,7 +57,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homePageRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.Residential
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleMixedUseDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
@@ -130,7 +130,7 @@ class CommonTriageQuestionsControllerSpec
     ],
     name: Either[TrustName, IndividualName],
     userType: UserType = UserType.Individual,
-    representeeAnswers: Option[IncompleteRepresenteeAnswers] = None,
+    representeeAnswers: Option[RepresenteeAnswers] = None,
     previousSentReturns: Option[PreviousReturnData] = None
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn =
@@ -155,7 +155,8 @@ class CommonTriageQuestionsControllerSpec
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
     previousReturns: Option[PreviousReturnData] = None,
-    amendReturnData: Option[AmendReturnData] = None
+    amendReturnData: Option[AmendReturnData] = None,
+    representeeAnswers: Option[RepresenteeAnswers] = None
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn      = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers,
@@ -164,7 +165,8 @@ class CommonTriageQuestionsControllerSpec
       reliefDetailsAnswers =
         if (singleDisposalTriageAnswers.isPeriodOfAdmin())
           Some(IncompleteReliefDetailsAnswers.empty)
-        else None
+        else None,
+      representeeAnswers = representeeAnswers
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
@@ -254,7 +256,8 @@ class CommonTriageQuestionsControllerSpec
       amendReturnData =
         if (isAmend)
           Some(sample[AmendReturnData])
-        else None
+        else None,
+      previousSentReturns = None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -882,261 +885,6 @@ class CommonTriageQuestionsControllerSpec
 
     }
 
-    "handing request to display the further returns help page" must {
-
-      def performAction(): Future[Result] =
-        controller.furtherReturnHelp()(FakeRequest())
-
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
-
-      behave like amendReturnToFillingOutReturnSpecBehaviour(
-        controller.furtherReturnHelp(),
-        mockUUIDGenerator
-      )
-
-      "display the page" when {
-
-        "the user is starting a new draft return and" when {
-
-          "the user has not answered any triage questions yet" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionDataWithStartingNewDraftReturn(
-                  Right(IncompleteSingleDisposalTriageAnswers.empty),
-                  Right(sample[IndividualName])
-                )._1
-              )
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("further-returns.help.title"),
-              { doc =>
-                doc
-                  .select("#content > article > form")
-                  .attr(
-                    "action"
-                  ) shouldBe routes.CommonTriageQuestionsController
-                  .furtherReturnHelpSubmit()
-                  .url
-
-                doc
-                  .select("#warning")
-                  .text() shouldBe messageFromMessageKey(
-                  "further-returns.help.warning"
-                )
-                doc
-                  .select("#content > article > p:nth-child(4)")
-                  .html() shouldBe messageFromMessageKey(
-                  "further-returns.help.listHeading"
-                )
-                doc
-                  .select("#content > article > ul > li:nth-child(1)")
-                  .html() shouldBe messageFromMessageKey(
-                  s"further-returns.help.l1"
-                )
-                doc
-                  .select("#content > article > ul > li:nth-child(2)")
-                  .html() shouldBe messageFromMessageKey(
-                  s"further-returns.help.l2"
-                )
-
-                doc.select("#guidanceLink").attr("href") shouldBe routes.FurtherReturnGuidanceController
-                  .guidance(
-                    FurtherReturnGuidanceController.BackLinkLocations.furtherReturnStart
-                  )
-                  .url
-                doc.select("#submitButton").text()       shouldBe messageFromMessageKey("button.continue")
-              }
-            )
-          }
-
-          "the user is on the multiple disposals journey" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionDataWithStartingNewDraftReturn(
-                  Left(
-                    IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-                      individualUserType = Some(IndividualUserType.Capacitor)
-                    )
-                  ),
-                  Right(sample[IndividualName])
-                )._1
-              )
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("further-returns.help.title"),
-              { doc =>
-                doc
-                  .select("#content > article > form")
-                  .attr(
-                    "action"
-                  ) shouldBe routes.CommonTriageQuestionsController
-                  .furtherReturnHelpSubmit()
-                  .url
-
-                doc
-                  .select("#warning")
-                  .text()                          shouldBe messageFromMessageKey(
-                  "further-returns.help.warning"
-                )
-                doc
-                  .select("#content > article > p:nth-child(4)")
-                  .html()                          shouldBe messageFromMessageKey(
-                  "further-returns.help.listHeading"
-                )
-                doc
-                  .select("#content > article > ul > li:nth-child(1)")
-                  .html()                          shouldBe messageFromMessageKey(
-                  "further-returns.capacitor.help.l1"
-                )
-                doc
-                  .select("#content > article > ul > li:nth-child(2)")
-                  .html()                          shouldBe messageFromMessageKey(
-                  "further-returns.help.l2"
-                )
-                doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.continue")
-              }
-            )
-          }
-
-          "the user is an agent representing an individual" in {
-            List(
-              (IndividualUserType.Self, "agent"),
-              (IndividualUserType.PersonalRepresentative, "personalRep")
-            ).zipWithIndex.foreach { case (value, _) =>
-              val (session, journey) =
-                sessionDataWithStartingNewDraftReturn(
-                  Right(
-                    IncompleteSingleDisposalTriageAnswers.empty
-                  ),
-                  Right(sample[IndividualName])
-                )
-
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  session.copy(
-                    userType = Some(UserType.Agent),
-                    journeyStatus = Some(
-                      journey.copy(
-                        agentReferenceNumber = Some(sample[AgentReferenceNumber]),
-                        newReturnTriageAnswers = Right(
-                          IncompleteSingleDisposalTriageAnswers.empty.copy(
-                            individualUserType = Some(value._1)
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              }
-
-              checkPageIsDisplayed(
-                performAction(),
-                messageFromMessageKey("further-returns.help.title"),
-                { doc =>
-                  doc
-                    .select("#content > article > form")
-                    .attr(
-                      "action"
-                    ) shouldBe routes.CommonTriageQuestionsController
-                    .furtherReturnHelpSubmit()
-                    .url
-
-                  doc
-                    .select("#warning")
-                    .text()                          shouldBe messageFromMessageKey(
-                    "further-returns.help.warning"
-                  )
-                  doc
-                    .select("#content > article > p:nth-child(4)")
-                    .html()                          shouldBe messageFromMessageKey(
-                    "further-returns.help.listHeading"
-                  )
-                  doc
-                    .select("#content > article > ul > li:nth-child(1)")
-                    .html()                          shouldBe messageFromMessageKey(
-                    s"further-returns.${value._2}.help.l1"
-                  )
-                  doc
-                    .select("#content > article > ul > li:nth-child(2)")
-                    .html()                          shouldBe messageFromMessageKey(
-                    "further-returns.help.l2"
-                  )
-                  doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.continue")
-                }
-              )
-            }
-          }
-
-        }
-
-      }
-
-    }
-
-    "handling submit to further returns help page" must {
-
-      def performAction(): Future[Result] =
-        controller.furtherReturnHelpSubmit()(FakeRequest())
-
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
-
-      behave like amendReturnToFillingOutReturnSpecBehaviour(
-        controller.furtherReturnHelpSubmit(),
-        mockUUIDGenerator
-      )
-
-      "an individual representing themselves gets redirected to how many properties" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionDataWithStartingNewDraftReturn(
-              Right(IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(Self))),
-              Right(sample[IndividualName]),
-              Individual
-            )._1
-          )
-        }
-
-        checkIsRedirect(
-          performAction(),
-          routes.CommonTriageQuestionsController.howManyProperties()
-        )
-      }
-
-      "a representenative gets redirected to enter representee name page" in {
-        List(PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor).foreach { representativeType =>
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                Right(IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(representativeType))),
-                Left(sample[TrustName])
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            representeeRoutes.RepresenteeController.enterName()
-          )
-
-        }
-      }
-    }
-
     "handling requests to display the number of properties page" must {
 
       def performAction(): Future[Result] =
@@ -1151,6 +899,29 @@ class CommonTriageQuestionsControllerSpec
         controller.howManyProperties(),
         mockUUIDGenerator
       )
+
+      "redirect to the further return number of properties page" when {
+
+        "the user is on a further return journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(IncompleteSingleDisposalTriageAnswers.empty),
+                Left(sample[TrustName]),
+                previousSentReturns = Some(
+                  sample[PreviousReturnData].copy(
+                    summaries = List(sample[ReturnSummary])
+                  )
+                )
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.CommonTriageQuestionsController.howManyPropertiesFurtherReturn())
+        }
+
+      }
 
       "display the page" when {
 
@@ -1195,9 +966,7 @@ class CommonTriageQuestionsControllerSpec
               )
             }
             val expectedBacklink =
-              if (sessionData._2.isFurtherOrAmendReturn.contains(true))
-                routes.CommonTriageQuestionsController.furtherReturnHelp().url
-              else routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url
+              routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url
 
             checkPageIsDisplayed(
               performAction(),
@@ -1232,10 +1001,7 @@ class CommonTriageQuestionsControllerSpec
                 sessionData._1
               )
             }
-            val isFurtherReturn  = sessionData._2.asInstanceOf[FillingOutReturn].isFurtherOrAmendReturn
-            val expectedBacklink =
-              if (isFurtherReturn.contains(true)) routes.CommonTriageQuestionsController.furtherReturnHelp()
-              else representeeRoutes.RepresenteeController.checkYourAnswers()
+            val expectedBacklink = representeeRoutes.RepresenteeController.checkYourAnswers()
 
             checkPageIsDisplayed(
               performAction(),
@@ -1273,9 +1039,7 @@ class CommonTriageQuestionsControllerSpec
               )
             }
             val expectedBacklink =
-              if (sessionData._2.isFurtherOrAmendReturn.contains(true))
-                routes.CommonTriageQuestionsController.furtherReturnHelp()
-              else returns.representee.routes.RepresenteeController.checkYourAnswers()
+              returns.representee.routes.RepresenteeController.checkYourAnswers()
 
             checkPageIsDisplayed(
               performAction(),
@@ -1416,6 +1180,32 @@ class CommonTriageQuestionsControllerSpec
         mockUUIDGenerator
       )
 
+      "redirect to the further return number of properties page" when {
+
+        "the user is on a further return journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(IncompleteSingleDisposalTriageAnswers.empty),
+                Left(sample[TrustName]),
+                previousSentReturns = Some(
+                  sample[PreviousReturnData].copy(
+                    summaries = List(sample[ReturnSummary])
+                  )
+                )
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction("numberOfProperties" -> "0"),
+            routes.CommonTriageQuestionsController.howManyPropertiesFurtherReturn()
+          )
+        }
+
+      }
+
       "show a form error" when {
 
         def test(
@@ -1438,10 +1228,17 @@ class CommonTriageQuestionsControllerSpec
           checkPageIsDisplayed(
             performAction(formData: _*),
             messageFromMessageKey("numberOfProperties.main.title"),
-            doc =>
+            { doc =>
               doc
                 .select("#error-summary-display > ul > li > a")
-                .text() shouldBe messageFromMessageKey(expectedErrorKey),
+                .text() shouldBe messageFromMessageKey(expectedErrorKey)
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
+                .howManyPropertiesSubmit()
+                .url
+            },
             BAD_REQUEST
           )
         }
@@ -1621,37 +1418,6 @@ class CommonTriageQuestionsControllerSpec
 
         "the user is filling in a return and" when {
 
-          "they are on a single disposal journey and change the answer to more than one property" in {
-            forAll { c: SingleDisposalTriageAnswers =>
-              val answers = c.fold(
-                _.copy(individualUserType = Some(IndividualUserType.Self)),
-                _.copy(
-                  individualUserType = Some(IndividualUserType.Self)
-                )
-              )
-
-              testSuccessfulUpdateFillingOutReturn(
-                performAction("numberOfProperties" -> "1"),
-                answers,
-                amendReturnData = Some(sample[AmendReturnData])
-              )(
-                (fillingOutReturn, draftReturn) =>
-                  fillingOutReturn
-                    .copy(
-                      draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
-                        draftReturn.id,
-                        IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-                          individualUserType = Some(IndividualUserType.Self)
-                        ),
-                        draftReturn.representeeAnswers
-                      )
-                    )
-                    .withForceDisplayGainOrLossAfterReliefsForAmends,
-                routes.MultipleDisposalsTriageController.checkYourAnswers()
-              )
-            }
-          }
-
           "they are on a multiple disposals journey and change the answer to one property" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
               val answers = c.copy(
@@ -1726,6 +1492,195 @@ class CommonTriageQuestionsControllerSpec
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
 
+        }
+
+      }
+
+    }
+
+    "handling requests to display the further return number of properties page" must {
+
+      def performAction(): Future[Result] =
+        controller.howManyPropertiesFurtherReturn()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.howManyProperties(),
+        mockUUIDGenerator
+      )
+
+      "redirect to the return number of properties page" when {
+
+        "the user is not on a further return journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(IncompleteSingleDisposalTriageAnswers.empty),
+                Left(sample[TrustName]),
+                previousSentReturns = None
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.CommonTriageQuestionsController.howManyProperties())
+        }
+
+      }
+
+      "display the page" when {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithFillingOutReturn(
+              IncompleteSingleDisposalTriageAnswers.empty,
+              Left(sample[TrustName]),
+              UserType.Organisation,
+              amendReturnData = Some(sample[AmendReturnData])
+            )._1
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("numberOfProperties.main.title"),
+          { doc =>
+            doc.select("#back").attr("href") shouldBe ""
+            doc
+              .select("#content > article > form")
+              .attr("action")                shouldBe routes.CommonTriageQuestionsController
+              .howManyPropertiesFurtherReturnSubmit()
+              .url
+
+          }
+        )
+      }
+
+    }
+
+    "handling submitted answers to the further return number of properties page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.howManyPropertiesFurtherReturnSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*)
+        )
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(),
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.howManyPropertiesSubmit(),
+        mockUUIDGenerator
+      )
+
+      "redirect to the number of properties page" when {
+
+        "the user is not on a further return journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(IncompleteSingleDisposalTriageAnswers.empty),
+                Left(sample[TrustName]),
+                previousSentReturns = None
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction("numberOfProperties" -> "0"),
+            routes.CommonTriageQuestionsController.howManyProperties()
+          )
+        }
+
+      }
+
+      "show a form error" when {
+
+        def test(
+          formData: (String, String)*
+        )(expectedErrorKey: String): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Left(
+                  IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                    individualUserType = Some(IndividualUserType.Capacitor)
+                  )
+                ),
+                Right(sample[IndividualName]),
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false))
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey("numberOfProperties.main.title"),
+            { doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(expectedErrorKey)
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
+                .howManyPropertiesFurtherReturnSubmit()
+                .url
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "nothing has been submitted" in {
+          test()("numberOfProperties.error.required")
+        }
+
+        "the option submitted has not been recognised" in {
+          test("numberOfProperties" -> "2")("numberOfProperties.error.invalid")
+
+        }
+
+      }
+
+      "handle valid data" when {
+
+        "the user is on an amend return journey" in {
+          forAll { c: SingleDisposalTriageAnswers =>
+            val answers = c.fold(
+              _.copy(individualUserType = Some(IndividualUserType.Self)),
+              _.copy(
+                individualUserType = Some(IndividualUserType.Self)
+              )
+            )
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction("numberOfProperties" -> "1"),
+              answers,
+              amendReturnData = Some(sample[AmendReturnData])
+            )(
+              (fillingOutReturn, draftReturn) =>
+                fillingOutReturn
+                  .copy(
+                    draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
+                      draftReturn.id,
+                      IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                        individualUserType = Some(IndividualUserType.Self)
+                      ),
+                      draftReturn.representeeAnswers
+                    )
+                  )
+                  .withForceDisplayGainOrLossAfterReliefsForAmends,
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
         }
 
       }

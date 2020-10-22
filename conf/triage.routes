@@ -3,6 +3,8 @@ POST /before-start/who-reporting-tax-for                    uk.gov.hmrc.cgtprope
 
 GET  /before-start/properties-in-return                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.howManyProperties()
 POST /before-start/properties-in-return                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.howManyPropertiesSubmit()
+GET  /before-start/further-return/properties-in-return      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.howManyPropertiesFurtherReturn()
+POST /before-start/further-return/properties-in-return      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.howManyPropertiesFurtherReturnSubmit()
 
 # Single disposals
 GET  /before-start/how-disposed-of-property                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -68,9 +70,6 @@ GET  /check-your-answers                                    uk.gov.hmrc.cgtprope
 POST /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswersSubmit()
 
 GET /exit/same-completion-date                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate()
-
-GET  /further-return/help                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelp()
-POST /further-return/help                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelpSubmit()
 
 GET  /how-work-out-capital-gains-tax-liability              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.guidance(back: String)
 GET  /how-work-out-overall-gain                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.taxableGainGuidance()
