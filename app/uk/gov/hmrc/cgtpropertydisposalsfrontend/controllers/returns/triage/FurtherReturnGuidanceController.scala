@@ -17,8 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import com.google.inject.Inject
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -32,11 +32,9 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.Future
 
 class FurtherReturnGuidanceController @Inject() (
-  errorHandler: ErrorHandler,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
-  guidancePage: views.html.returns.triage.further_return_guidance,
   taxableGainGuidancePage: views.html.returns.ytdliability.further_return_taxable_gain_guidance,
   overallGainGuidancePage: views.html.returns.ytdliability.year_to_date_liability_guidance
 )(implicit viewConfig: ViewConfig)
@@ -44,35 +42,6 @@ class FurtherReturnGuidanceController @Inject() (
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging {
-
-  import FurtherReturnGuidanceController._
-
-  def guidance(back: String): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      withJourneyState(request) { (_, state) =>
-        backLinkMappings.get(back) match {
-          case None =>
-            logger.warn(s"Could not find back link location for '$back'")
-            errorHandler.errorResult()
-
-          case Some(backLink) =>
-            Ok(
-              guidancePage(
-                backLink,
-                state.fold(
-                  _.fold(
-                    _.subscribedDetails.isATrust,
-                    _.subscribedDetails.isATrust
-                  ),
-                  _.subscribedDetails.isATrust
-                ),
-                getRepresentativeType(state)
-              )
-            )
-        }
-
-      }
-    }
 
   def taxableGainGuidance(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -149,21 +118,5 @@ class FurtherReturnGuidanceController @Inject() (
             .start()
         )
     }
-
-}
-
-object FurtherReturnGuidanceController {
-
-  object BackLinkLocations {
-
-    val inYearLosses: String = "inYearLosses"
-
-  }
-
-  val backLinkMappings: Map[String, Call] =
-    Map(
-      BackLinkLocations.inYearLosses -> returns.exemptionandlosses.routes.ExemptionAndLossesController
-        .inYearLosses()
-    )
 
 }

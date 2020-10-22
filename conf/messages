@@ -5040,8 +5040,6 @@ language-switcher.nav=Language switcher
 #===================================================
 #  FURTHER RETURN Guidance - START
 #===================================================
-furtherReturnGuidance.stage-a=Stage A
-furtherReturnGuidance.stage-b=Stage B
 
 furtherReturnGuidance.show=Show
 furtherReturnGuidance.hide=Hide
@@ -5056,13 +5054,6 @@ furtherReturnGuidance.trust.title=How to work out the Capital Gains Tax liabilit
 furtherReturnGuidance.personalRep.title=How to work out the person’s Capital Gains Tax liability on UK property-related disposals
 furtherReturnGuidance.personalRepInPeriodOfAdmin.title=How to work out the estate’s Capital Gains Tax liability on UK property-related disposals
 
-
-furtherReturnGuidance.stage-a.headingText=Work out your net gain or net loss
-furtherReturnGuidance.agent.stage-a.headingText=Work out the net gain or loss
-furtherReturnGuidance.capacitor.stage-a.headingText=Work out the net gain or loss
-furtherReturnGuidance.trust.stage-a.headingText=Work out the net gain or loss
-furtherReturnGuidance.personalRep.stage-a.headingText=Work out the net gain or loss
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.headingText=Work out the net gain or loss
 
 furtherReturnGuidance.stage-a.step-a1=Step A1 - Work out your gain or loss after reliefs
 furtherReturnGuidance.agent.stage-a.step-a1=Step A1 - Work out the gain or loss after reliefs
