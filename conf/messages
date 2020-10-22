@@ -3825,9 +3825,24 @@ hasSupportingDocsToUpload.error.required=Select yes if you want to upload any su
 hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents
 
 mandatoryEvidence.title=Upload a document showing how the Capital Gains Tax due was worked out
-mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG. Any files you upload to a draft return will be saved for 5 days.
-mandatoryEvidence.amendReturn.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG.
 
+mandatoryEvidence.guidance.p1=It will need to include these details:
+mandatoryEvidence.multiple.guidance.p1=It will need to include these details for each property or disposal:
+
+mandatoryEvidence.multiple.guidance.bullet1=the address of each property - for property disposals
+mandatoryEvidence.multiple.guidance.bullet2=the names and addresses of the companies the shares were held in - for indirect disposals
+mandatoryEvidence.multiple.guidance.bullet3=acquisition and disposal values
+mandatoryEvidence.multiple.guidance.bullet4=any improvement, acquisition or disposal costs
+
+mandatoryEvidence.guidance.bullet5=any losses, reliefs or allowances being claimed
+mandatoryEvidence.guidance.bullet6=how any gains or losses were worked out
+mandatoryEvidence.guidance.bullet7=how the amount of Capital Gains Tax due was worked out
+
+mandatoryEvidence.notice=It can take a few minutes for documents to upload. Do not refresh the page or ‘go back’ while a file is uploading. Any files you upload to a draft return will be saved for 5 days.
+mandatoryEvidence.amend.notice=It can take a few minutes for documents to upload. Do not refresh the page or ‘go back’ while a file is uploading.
+
+mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG.
+mandatoryEvidence.label=Upload a document
 mandatoryEvidence.cyaChange=the document showing how the Capital Gains Tax due was worked out
 
 mandatoryEvidenceExpired.title=For your security, we deleted this document

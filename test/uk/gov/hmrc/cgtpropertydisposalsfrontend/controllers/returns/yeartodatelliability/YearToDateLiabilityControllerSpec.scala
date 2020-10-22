@@ -4017,12 +4017,15 @@ class YearToDateLiabilityControllerSpec
             performAction(),
             messageFromMessageKey("mandatoryEvidence.title"),
             { doc =>
-              doc.select("#back").attr("href") shouldBe backLink.url
+              doc.select("#back").attr("href")                            shouldBe backLink.url
+              doc.select("#content > article > p#upload-guidance").text() shouldBe messageFromMessageKey(
+                "mandatoryEvidence.guidance.p1"
+              )
               doc
                 .select("#content > article > form")
                 .attr(
                   "action"
-                )                              shouldBe upscanUpload.upscanUploadMeta.uploadRequest.href
+                )                                                         shouldBe upscanUpload.upscanUploadMeta.uploadRequest.href
             }
           )
         }
