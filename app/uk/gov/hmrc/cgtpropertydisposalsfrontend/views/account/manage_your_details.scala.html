@@ -65,9 +65,18 @@
     )
   }
 
- <h2 class="heading-medium">
-  @messages("account.manageYourDetails.contactHeading")
- </h2>
+  <h2 class="heading-medium">
+    @messages("account.manageYourDetails.contactHeading")
+  </h2>
+
+  <div class="panel panel-border-wide">
+    <p>
+      @messages(s"account.manageYourDetails.p")
+      @if(details.registeredWithId){
+        @changeAccountName
+      }
+    </p>
+  </div>
 
   @cyaSection() {
 
@@ -93,14 +102,5 @@
   )
 
  }
-
- <div class="panel panel-border-wide">
-  <p>
-   @messages(s"account.manageYourDetails.p")
-   @if(details.registeredWithId){
-      @changeAccountName
-  }
-  </p>
- </div>
 
 }
