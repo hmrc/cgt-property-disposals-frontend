@@ -722,7 +722,7 @@ class MixedUsePropertyDetailsControllerSpec
 
         "the user is on a further return journey" in {
           val (session, journey, draftReturn) = individualState(
-            previousReturnData = Some(sample[PreviousReturnData]),
+            previousReturnData = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
             amendReturnData = None
           )
 
