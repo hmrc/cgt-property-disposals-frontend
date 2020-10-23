@@ -4257,6 +4257,7 @@ furtherReturnGuidance.stage-b=Cam B
 furtherReturnGuidance.show=Dangos
 furtherReturnGuidance.hide=Cuddio
 furtherReturnGuidance.showall=Dangos pob un
+furtherReturnGuidance.hideall=Cuddio pob un
 furtherReturnGuidance.examplesText=Enghreifftiau
 furtherReturnGuidance.title=Sut i gyfrifo’ch rhwymedigaeth Treth Enillion Cyfalaf ar eich gwarediadau sy’n gysylltiedig ag eiddo yn y DU
 furtherReturnGuidance.agent.title=Sut i gyfrifo rhwymedigaeth Treth Enillion Cyfalaf eich cleient ar warediadau sy’n gysylltiedig ag eiddo yn y DU

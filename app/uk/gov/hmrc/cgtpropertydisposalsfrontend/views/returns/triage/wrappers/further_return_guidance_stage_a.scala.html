@@ -31,7 +31,14 @@
 
     @key = @{ "furtherReturnGuidance" }
 
-    <div id="step-by-step-navigation" class="app-step-nav app-step-nav--large app-step-nav--active" data-show-text="Show" data-hide-text="Hide" data-show-all-text="Show all" data-hide-all-text="Hide all">
+    <div
+      id="step-by-step-navigation"
+      class="app-step-nav app-step-nav--large app-step-nav--active"
+      data-show-text="@messages("furtherReturnGuidance.show")"
+      data-hide-text="@messages("furtherReturnGuidance.hide")"
+      data-show-all-text="@messages("furtherReturnGuidance.showall")"
+      data-hide-all-text="@messages("furtherReturnGuidance.hideall")"
+    >
       <ol class="app-step-nav__steps">
         <li class="app-step-nav__step js-step" id="step-a1">
           @stepHeader(1, messages(s"$key$userKey.stage-a.step-a1"))

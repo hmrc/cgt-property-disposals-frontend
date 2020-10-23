@@ -5044,7 +5044,7 @@ language-switcher.nav=Language switcher
 furtherReturnGuidance.show=Show
 furtherReturnGuidance.hide=Hide
 furtherReturnGuidance.showall=Show all steps
-
+furtherReturnGuidance.hideall=Hide all steps
 furtherReturnGuidance.examplesText=Examples
 furtherReturnGuidance.examplesText.netGainAssistive=on how to work out the net gain or loss for the year
 furtherReturnGuidance.examplesText.ytdAssistive=on how to work out overall Capital Gains Tax liability on UK property-related disposals
