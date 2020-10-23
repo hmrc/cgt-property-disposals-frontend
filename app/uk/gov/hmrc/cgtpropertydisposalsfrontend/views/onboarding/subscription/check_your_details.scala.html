@@ -34,7 +34,8 @@
  cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
  cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
  addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
- submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+ submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+ insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
 )
 
 @(details: SubscriptionDetails)(implicit request: RequestWithSubscriptionReady[_], messages: Messages, appConfig: ViewConfig)
@@ -45,9 +46,7 @@
 
  @pageHeading(title, Some(messages("subscription.caption")))
 
- <p class="lede">
-  @messages("subscription.lede", details.name.fold(_.value, n => n.makeSingleName))
- </p>
+ @insetPanel(Html(messages("subscription.lede")))
 
  @cyaSection() {
   @cyaRow(
