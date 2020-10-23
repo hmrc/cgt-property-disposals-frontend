@@ -4597,7 +4597,7 @@ nonUkAddress.representee.title=Enter the non-UK contact address
 
 email.representee.extraContent=The email addresses you use for other government services will not change.
 confirmEmail.representee.title=You have 30 minutes to confirm the email address
-confirmEmail.verified.representee.p1=We only use these details if we need to get in contact about this service.
+confirmEmail.verified.representee.p1=We'll use this address to contact you about your Capital Gains Tax on UK property return.
 representeeContactName.change.title=Change contact name
 representeeContactName.change.help=The contact name used for other government services will not change.
 representeeConfirmPerson.title=Check the details we hold for the person
