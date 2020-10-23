@@ -5059,6 +5059,7 @@ language-switcher.nav=Language switcher
 furtherReturnGuidance.show=Show
 furtherReturnGuidance.hide=Hide
 furtherReturnGuidance.showall=Show all
+furtherReturnGuidance.hideall=Hide all
 
 furtherReturnGuidance.examplesText=Examples
 
