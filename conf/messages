@@ -5046,6 +5046,8 @@ furtherReturnGuidance.hide=Hide
 furtherReturnGuidance.showall=Show all
 
 furtherReturnGuidance.examplesText=Examples
+furtherReturnGuidance.examplesText.netGainAssistive=on how to work out the net gain or loss for the year
+furtherReturnGuidance.examplesText.ytdAssistive=on how to work out overall Capital Gains Tax liability on UK property-related disposals
 
 furtherReturnGuidance.title=How to work out your Capital Gains Tax liability on your UK property-related disposals
 furtherReturnGuidance.agent.title=How to work out your client’s Capital Gains Tax liability on UK property-related disposals

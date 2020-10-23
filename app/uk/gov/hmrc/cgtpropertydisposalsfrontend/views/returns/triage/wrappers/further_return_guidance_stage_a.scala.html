@@ -62,7 +62,10 @@
       </ol>
     </div>
 
-    <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
+    <h2 class="heading-medium">
+      @messages(s"$key.examplesText")
+      <span class="visuallyhidden"> @messages(s"$key.examplesText.netGainAssistive")</span>
+    </h2>
     @if(userKey.contains(".personalRepInPeriodOfAdmin")){
         @details(
             messages(s"$key.stage-a.example4.link"),

@@ -83,7 +83,10 @@
         </ol>
       </div>
 
-  <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
+  <h2 class="heading-medium">
+    @messages(s"$key.examplesText")
+    <span class="visuallyhidden"> @messages(s"$key.examplesText.ytdAssistive")</span>
+  </h2>
   @details(
       messages(s"$key.stage-b.example1.link"),
       stageBExample1()
