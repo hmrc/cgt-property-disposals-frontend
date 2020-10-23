@@ -33,17 +33,27 @@
 
     @if(userKey.contains(".personalRepInPeriodOfAdmin")){
         <p>@Html(messages(s"$key$userKey.stage-b.p1", appConfig.cgtRatesUrl))</p>
-        <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
+        <h2 class="heading-medium">
+          @messages(s"$key.examplesText")
+          <span class="visuallyhidden"> @messages(s"$key.examplesText.ytdAssistive")</span>
+        </h2>
         @details(
             messages(s"$key$userKey.stage-b.example4.link"),
-            stageBExample4()
+            stageBExample4(),
+            None,
+            Some(messages(s"$key.assistive.prefix"))
         )
     } else if(userKey.contains(".trust")){
         <p>@Html(messages(s"$key$userKey.stage-b.step-b1.p1", appConfig.trustsAndCgtWorkoutUrl))</p>
-        <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
+        <h2 class="heading-medium">
+          @messages(s"$key.examplesText")
+          <span class="visuallyhidden"> @messages(s"$key.examplesText.ytdAssistive")</span>
+        </h2>
         @details(
             messages(s"$key$userKey.stage-b.example3.link"),
-            stageBExample3(userKey)
+            stageBExample3(userKey),
+            None,
+            Some(messages(s"$key.assistive.prefix"))
         )
     } else{
       <div id="step-by-step-navigation" class="app-step-nav app-step-nav--large app-step-nav--active" data-show-text="Show" data-hide-text="Hide" data-show-all-text="Show all" data-hide-all-text="Hide all">
@@ -83,16 +93,20 @@
         </ol>
       </div>
 
-  <h2 class="heading-medium">
-    @messages(s"$key.examplesText")
-    <span class="visuallyhidden"> @messages(s"$key.examplesText.ytdAssistive")</span>
-  </h2>
-  @details(
-      messages(s"$key.stage-b.example1.link"),
-      stageBExample1()
-  )
-  @details(
-      messages(s"$key.stage-b.example2.link"),
-      stageBExample2()
-  )
-}
+      <h2 class="heading-medium">
+        @messages(s"$key.examplesText")
+        <span class="visuallyhidden"> @messages(s"$key.examplesText.ytdAssistive")</span>
+      </h2>
+      @details(
+          messages(s"$key.stage-b.example1.link"),
+          stageBExample1(),
+          None,
+          Some(messages(s"$key.assistive.prefix"))
+      )
+      @details(
+          messages(s"$key.stage-b.example2.link"),
+          stageBExample2(),
+          None,
+          Some(messages(s"$key.assistive.prefix"))
+      )
+    }
