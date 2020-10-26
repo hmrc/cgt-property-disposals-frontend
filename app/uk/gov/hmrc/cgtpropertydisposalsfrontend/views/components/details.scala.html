@@ -18,11 +18,17 @@
 
 @this()
 
-@(summary: String, content: Html, assistiveText: Option[String] = None)
+@(
+        summary: String,
+        content: Html,
+        assistiveText: Option[String] = None,
+        assistivePrefix: Option[String] = None
+)
 
 <details>
   <summary>
     <span class="summary">
+      @assistivePrefix.map(a => Html(s"""<span class="visuallyhidden">${a} </span>"""))
       @summary
       @assistiveText.map(a => Html(s""" <span class="visuallyhidden">${a}</span>"""))
     </span>

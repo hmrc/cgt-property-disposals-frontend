@@ -3432,12 +3432,12 @@ netLoss.furtherReturn.error.tooManyDecimals=Net loss must be an amount of money 
 
 taxableGainOrLoss.furtherReturn.cyaChange=if a net gain or loss was made on the property sale or disposal
 
-taxableGainOrLossGuidance.title=Work out your net gain or loss for the year
-taxableGainOrLossGuidance.agent.title=Work out your client’s net gain or loss for the year
-taxableGainOrLossGuidance.trust.title=Work out the trust’s net gain or loss for the year
-taxableGainOrLossGuidance.capacitor.title=Work out the person’s net gain or loss for the year
-taxableGainOrLossGuidance.personalRep.title=Work out the person’s net gain or loss for the year
-taxableGainOrLossGuidance.personalRepInPeriodOfAdmin.title=Work out the estate’s net gain or loss for the year
+taxableGainOrLossGuidance.title=Steps to work out your net gain or loss for the year
+taxableGainOrLossGuidance.agent.title=Steps to work out your client’s net gain or loss for the year
+taxableGainOrLossGuidance.trust.title=Steps to work out the trust’s net gain or loss for the year
+taxableGainOrLossGuidance.capacitor.title=Steps to work out the person’s net gain or loss for the year
+taxableGainOrLossGuidance.personalRep.title=Steps to work out the person’s net gain or loss for the year
+taxableGainOrLossGuidance.personalRepInPeriodOfAdmin.title=Steps to work out the estate’s net gain or loss for the year
 
 
 estimatedIncome.title=What do you expect your gross income will be in this tax year?
@@ -3635,12 +3635,12 @@ yearToDateLiability.assistive.overallLiability=for the overall liability
 
 yearToDateLiability.cyaChange=the overall Capital Gains Tax liability
 
-yearToDateLiabilityGuidance.title=Work out your overall Capital Gains Tax liability on your UK property-related disposals
-yearToDateLiabilityGuidance.agent.title=Work out your client’s overall Capital Gains Tax liability on their UK property-related disposals
-yearToDateLiabilityGuidance.trust.title=Work out the trust’s overall Capital Gains Tax liability on their UK property-related disposals
-yearToDateLiabilityGuidance.capacitor.title=Work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
-yearToDateLiabilityGuidance.personalRep.title=Work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
-yearToDateLiabilityGuidance.personalRepInPeriodOfAdmin.title=Work out the estate’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiabilityGuidance.title=Steps to work out your overall Capital Gains Tax liability on your UK property-related disposals
+yearToDateLiabilityGuidance.agent.title=Steps to work out your client’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiabilityGuidance.trust.title=Steps to work out the trust’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiabilityGuidance.capacitor.title=Steps to work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiabilityGuidance.personalRep.title=Steps to work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
+yearToDateLiabilityGuidance.personalRepInPeriodOfAdmin.title=Steps to work out the estate’s overall Capital Gains Tax liability on their UK property-related disposals
 
 
 taxDue.title=Tell us how much Capital Gains Tax is due for this return
@@ -5058,9 +5058,12 @@ language-switcher.nav=Language switcher
 
 furtherReturnGuidance.show=Show
 furtherReturnGuidance.hide=Hide
-furtherReturnGuidance.showall=Show all
-
+furtherReturnGuidance.showall=Show all steps
+furtherReturnGuidance.hideall=Hide all steps
 furtherReturnGuidance.examplesText=Examples
+furtherReturnGuidance.examplesText.netGainAssistive=on how to work out the net gain or loss for the year
+furtherReturnGuidance.examplesText.ytdAssistive=on how to work out overall Capital Gains Tax liability on UK property-related disposals
+furtherReturnGuidance.assistive.prefix=Show example:
 
 furtherReturnGuidance.title=How to work out your Capital Gains Tax liability on your UK property-related disposals
 furtherReturnGuidance.agent.title=How to work out your client’s Capital Gains Tax liability on UK property-related disposals
