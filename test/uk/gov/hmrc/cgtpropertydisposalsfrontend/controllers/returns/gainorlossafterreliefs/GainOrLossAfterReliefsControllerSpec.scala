@@ -713,7 +713,7 @@ class GainOrLossAfterReliefsControllerSpec
               )
             }
 
-            "the value for private residence relief is zero" in {
+            "the value for total reliefs residence relief is zero" in {
               val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, Some(true), None)
 
               val (session, fillingOutReturn, _, _) =

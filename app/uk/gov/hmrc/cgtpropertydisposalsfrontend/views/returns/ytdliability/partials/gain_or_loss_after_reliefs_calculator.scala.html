@@ -95,41 +95,28 @@
             )
     )
 
-    @if(calculatedValues.privateResidentReliefs.isZero){
-    @calcSum(
-      List.empty,
-        SumPartDisplay(
-            label = messages("calculator.total.reliefs"),
-            operator = Some("="),
-            total = true,
-            amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedValues.totalReliefs.inPounds())
-        )
-    )
-    } else {
-    @calcSum(
-        List(
-            SumPartDisplay(
-                label = messages("calculator.privateResidenceRelief"),
-                operator = None,
-                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedValues.privateResidentReliefs.inPounds())
+    @if(!calculatedValues.totalReliefs.isZero){
+        @calcSum(
+            List(
+                SumPartDisplay(
+                    label = messages("calculator.privateResidenceRelief"),
+                    operator = None,
+                    amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedValues.privateResidentReliefs.inPounds())
+                ),
+                SumPartDisplay(
+                    label = messages("calculator.lettingRelief"),
+                    operator = Some("+"),
+                    amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedValues.lettingRelief.inPounds())
+                )
             ),
             SumPartDisplay(
-                label = messages("calculator.lettingRelief"),
-                operator = Some("+"),
-                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedValues.lettingRelief.inPounds())
+                label = messages("calculator.total.reliefs"),
+                operator = Some("="),
+                total = true,
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedValues.totalReliefs.inPounds())
             )
-        ),
-        SumPartDisplay(
-            label = messages("calculator.total.reliefs"),
-            operator = Some("="),
-            total = true,
-            amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedValues.totalReliefs.inPounds())
         )
-    )
     }
-
-
-
 
     @calcSum(
         List(
