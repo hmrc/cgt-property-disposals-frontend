@@ -120,7 +120,7 @@
       @pageHeading(messages(s"$key$userKey.title"))
 
       <p>
-      @messages(s"$key.intro", taxYearStartYear, taxYearEndYear)
+      @messages(s"$key$userKey.intro", taxYearStartYear, taxYearEndYear)
       </p>
 
       @yearToDateLiabilityCalculation.map { calculation =>
