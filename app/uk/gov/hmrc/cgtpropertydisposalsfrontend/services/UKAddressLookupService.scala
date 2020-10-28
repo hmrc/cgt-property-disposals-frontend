@@ -31,12 +31,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnecto
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{AddressLookupResult, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.addressLineRegexPredicate
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode.postcodeRegexPredicate
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.{AddressLookupResponse, RawAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[UKAddressLookupServiceImpl])
@@ -89,13 +89,17 @@ class UKAddressLookupServiceImpl @Inject() (
     filter: Option[String]
   ): Either[String, AddressLookupResult] = {
 
+    def isValidAddressLine(s: String): Boolean =
+      (s.length <= Address.addressLineMaxLength) &&
+        s.forall(Address.addressLineAllowedCharacters.contains(_))
+
     def validateAddressFields(address: UkAddress): Boolean =
       List(
-        addressLineRegexPredicate.test(address.line1),
+        isValidAddressLine(address.line1),
         postcodeRegexPredicate.test(address.postcode.value),
-        address.line2.forall(addressLineRegexPredicate.test),
-        address.town.forall(addressLineRegexPredicate.test),
-        address.county.forall(addressLineRegexPredicate.test)
+        address.line2.forall(isValidAddressLine),
+        address.town.forall(isValidAddressLine),
+        address.county.forall(isValidAddressLine)
       ).forall(identity)
 
     def toAddress(a: RawAddress): Either[String, UkAddress] = {
