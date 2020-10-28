@@ -31,7 +31,7 @@ sealed trait Address extends Product with Serializable
 
 object Address {
 
-  val addressLineRegexPredicate: Predicate[String] = "^[A-Za-z0-9 \\-,.&'/]{0,35}$".r.pattern.asPredicate()
+  val addressLineRegexPredicate: Predicate[String] = "^[A-Za-z0-9 \\-,.&']{0,35}$".r.pattern.asPredicate()
 
   final case class UkAddress(
     line1: String,
