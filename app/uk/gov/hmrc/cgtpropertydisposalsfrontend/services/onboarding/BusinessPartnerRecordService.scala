@@ -23,7 +23,11 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -55,10 +59,55 @@ class BusinessPartnerRecordServiceImpl @Inject() (
           case OK    =>
             response
               .parseJSON[BusinessPartnerRecordResponse]()
+              .map(response =>
+                response.copy(
+                  businessPartnerRecord = response.businessPartnerRecord.map(bpr =>
+                    bpr.copy(
+                      address = bpr.address.map(sanitiseAddress),
+                      name = bpr.name.bimap(sanitiseTrustName, sanitiseIndividualName),
+                      emailAddress = bpr.emailAddress.filter(e => Email.emailRegex.test(e.value))
+                    )
+                  )
+                )
+              )
               .leftMap(Error.apply)
           case other =>
             Left(Error(s"Call to get BPR came back with status $other"))
         }
       }
+
+  private def sanitiseTrustName(t: TrustName): TrustName =
+    TrustName(t.value.filter(TrustName.allowedCharacters.contains(_)))
+
+  private def sanitiseIndividualName(i: IndividualName): IndividualName =
+    IndividualName(
+      i.firstName.filter(IndividualName.allowedCharacters.contains(_)),
+      i.lastName.filter(IndividualName.allowedCharacters.contains(_))
+    )
+
+  private def sanitiseAddress(a: Address): Address = {
+    def sanitiseAddressLine(l: String): String = l.filter(Address.addressLineAllowedCharacters.contains(_))
+
+    a match {
+      case u: UkAddress =>
+        UkAddress(
+          sanitiseAddressLine(u.line1),
+          u.line2.map(sanitiseAddressLine),
+          u.town.map(sanitiseAddressLine),
+          u.county.map(sanitiseAddressLine),
+          u.postcode
+        )
+
+      case n: NonUkAddress =>
+        NonUkAddress(
+          sanitiseAddressLine(n.line1),
+          n.line2.map(sanitiseAddressLine),
+          n.line3.map(sanitiseAddressLine),
+          n.line4.map(sanitiseAddressLine),
+          n.postcode,
+          n.country
+        )
+    }
+  }
 
 }

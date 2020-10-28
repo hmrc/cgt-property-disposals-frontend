@@ -27,8 +27,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sam
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -52,7 +56,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val bprRequest                 = sample[BusinessPartnerRecordRequest]
-  val bpr                        = sample[BusinessPartnerRecord]
+  val bpr                        = sample[BusinessPartnerRecord].copy(emailAddress = Some(Email("abc@test.com")))
   private val emptyJsonBody      = "{}"
   private val noJsonInBody       = ""
 
@@ -116,6 +120,114 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
             service.getBusinessPartnerRecord(bprRequest).value
           ) shouldBe Right(response)
         }
+
+      "filter out invalid characters in address lines if a uk address is found" in {
+        val address = UkAddress(
+          "line1 (abc)",
+          Some("line2, abc/def"),
+          Some("line3 + abc"),
+          Some("line4 #1"),
+          Postcode("abc")
+        )
+
+        val sanitisedAddress = UkAddress(
+          "line1 abc",
+          Some("line2, abcdef"),
+          Some("line3  abc"),
+          Some("line4 1"),
+          Postcode("abc")
+        )
+
+        def response(a: Address) =
+          BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None)
+
+        mockGetBPR(bprRequest)(
+          Right(HttpResponse(200, Json.toJson(response(address)), Map[String, Seq[String]]().empty))
+        )
+
+        await(
+          service.getBusinessPartnerRecord(bprRequest).value
+        ) shouldBe Right(response(sanitisedAddress))
+      }
+
+      "filter out invalid characters in address lines if a non-uk address is found" in {
+        val country = Country("HK")
+
+        val address = NonUkAddress(
+          "line1 (abc)",
+          Some("line2, abc/def"),
+          Some("line3 + abc"),
+          Some("line4 #1"),
+          Some("abc"),
+          country
+        )
+
+        val sanitisedAddress = NonUkAddress(
+          "line1 abc",
+          Some("line2, abcdef"),
+          Some("line3  abc"),
+          Some("line4 1"),
+          Some("abc"),
+          country
+        )
+
+        def response(a: Address) =
+          BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None)
+
+        mockGetBPR(bprRequest)(
+          Right(HttpResponse(200, Json.toJson(response(address)), Map[String, Seq[String]]().empty))
+        )
+
+        await(
+          service.getBusinessPartnerRecord(bprRequest).value
+        ) shouldBe Right(response(sanitisedAddress))
+      }
+
+      "filter out invalid characters in trust names if a trust name is found" in {
+        def response(t: TrustName) =
+          BusinessPartnerRecordResponse(Some(bpr.copy(name = Left(t))), None)
+
+        val trustName          = TrustName("Trust (name)")
+        val sanitisedTrustName = TrustName("Trust name")
+
+        mockGetBPR(bprRequest)(
+          Right(HttpResponse(200, Json.toJson(response(trustName)), Map[String, Seq[String]]().empty))
+        )
+
+        await(
+          service.getBusinessPartnerRecord(bprRequest).value
+        ) shouldBe Right(response(sanitisedTrustName))
+      }
+
+      "filter out invalid characters in individual names if an individual name is found" in {
+        def response(n: IndividualName) =
+          BusinessPartnerRecordResponse(Some(bpr.copy(name = Right(n))), None)
+
+        val name          = IndividualName("First (name)", "Last name!")
+        val sanitisedName = IndividualName("First name", "Last name")
+
+        mockGetBPR(bprRequest)(
+          Right(HttpResponse(200, Json.toJson(response(name)), Map[String, Seq[String]]().empty))
+        )
+
+        await(
+          service.getBusinessPartnerRecord(bprRequest).value
+        ) shouldBe Right(response(sanitisedName))
+      }
+
+      "filter out invalid email addresses if an email is found" in {
+        def response(e: Option[Email]) =
+          BusinessPartnerRecordResponse(Some(bpr.copy(emailAddress = e)), None)
+
+        mockGetBPR(bprRequest)(
+          Right(HttpResponse(200, Json.toJson(response(Some(Email("invalid")))), Map[String, Seq[String]]().empty))
+        )
+
+        await(
+          service.getBusinessPartnerRecord(bprRequest).value
+        ) shouldBe Right(response(None))
+      }
+
     }
 
   }

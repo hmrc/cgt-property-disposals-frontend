@@ -28,6 +28,11 @@ final case class IndividualName(firstName: String, lastName: String)
 
 object IndividualName {
 
+  val allowedCharacters: List[Char] =
+    ('A' to 'Z').toList ::: ('a' to 'z').toList ::: List(' ', '&', '`', '-', '\'', '^')
+
+  val maxLength: Int = 35
+
   implicit val format: OFormat[IndividualName] = Json.format[IndividualName]
 
   implicit val eq: Eq[IndividualName] = Eq.instance { case (n1, n2) =>
@@ -39,13 +44,9 @@ object IndividualName {
   }
 
   val mapping: Mapping[String] = {
-    val nameRegexPredicate =
-      "^[a-zA-Z &`\\-'^]{1,35}$".r.pattern
-        .asPredicate()
-
     def validateName(s: String): ValidationResult =
-      if (s.length > 35) Invalid("error.tooLong")
-      else if (!nameRegexPredicate.test(s)) Invalid("error.pattern")
+      if (s.length > maxLength) Invalid("error.tooLong")
+      else if (!s.forall(allowedCharacters.contains(_))) Invalid("error.pattern")
       else Valid
 
     nonEmptyText

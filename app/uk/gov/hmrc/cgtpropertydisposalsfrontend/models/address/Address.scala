@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
-import java.util.function.Predicate
-
 import cats.Eq
 import julienrf.json.derived
 import play.api.data.Forms.{nonEmptyText, number, of, optional, text, mapping => formMapping}
@@ -31,7 +29,11 @@ sealed trait Address extends Product with Serializable
 
 object Address {
 
-  val addressLineRegexPredicate: Predicate[String] = "^[A-Za-z0-9 \\-,.&']{0,35}$".r.pattern.asPredicate()
+  val addressLineAllowedCharacters: List[Char] =
+    ('A' to 'Z').toList ::: ('a' to 'z').toList ::: ('0' to '9').toList :::
+      List(' ', '-', ',', '.', '&', '\'')
+
+  val addressLineMaxLength: Int = 35
 
   final case class UkAddress(
     line1: String,
@@ -71,14 +73,14 @@ object Address {
 
   val addressLineMapping: Mapping[String] = {
 
-    def validateName(s: String): ValidationResult =
-      if (s.length > 35) Invalid("error.tooLong")
-      else if (!addressLineRegexPredicate.test(s)) Invalid("error.pattern")
+    def validateAddressLine(s: String): ValidationResult =
+      if (s.length > addressLineMaxLength) Invalid("error.tooLong")
+      else if (!s.forall(addressLineAllowedCharacters.contains(_))) Invalid("error.pattern")
       else Valid
 
     nonEmptyText
       .transform[String](_.trim, identity)
-      .verifying(Constraint[String](validateName(_)))
+      .verifying(Constraint[String](validateAddressLine(_)))
   }
 
   val ukAddressForm: Form[UkAddress] =

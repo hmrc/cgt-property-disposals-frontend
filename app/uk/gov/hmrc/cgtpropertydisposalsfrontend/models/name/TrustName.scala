@@ -27,13 +27,15 @@ object TrustName {
 
   implicit val format: Format[TrustName] = Json.format[TrustName]
 
-  val mapping: Mapping[String] = {
-    val regexPredicate =
-      "^[a-zA-Z0-9 &`\\-\\'^]{1,105}$".r.pattern.asPredicate()
+  val allowedCharacters: List[Char] =
+    ('A' to 'Z').toList ::: ('a' to 'z').toList ::: ('0' to '9').toList ::: List(' ', '&', '`', '-', '\'', '^')
 
+  val maxLength: Int = 105
+
+  val mapping: Mapping[String] = {
     def validateTrustName(s: String): ValidationResult =
-      if (s.length > 105) Invalid("error.tooLong")
-      else if (!regexPredicate.test(s)) Invalid("error.pattern")
+      if (s.length > maxLength) Invalid("error.tooLong")
+      else if (!s.forall(allowedCharacters.contains(_))) Invalid("error.pattern")
       else Valid
 
     nonEmptyText

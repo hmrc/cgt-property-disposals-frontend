@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email
 
+import java.util.function.Predicate
+
 import cats.Eq
 import cats.instances.string._
 import cats.syntax.eq._
@@ -28,17 +30,16 @@ final case class Email(value: String) extends AnyVal
 
 object Email {
 
+  val emailRegex: Predicate[String] = "^(?=.{3,132}$)[^@]+@[^@]+$".r.pattern.asPredicate()
+
   implicit val format: Format[Email] =
     implicitly[Format[String]].inmap(Email(_), _.value)
 
   implicit val eq: Eq[Email] = Eq.instance(_.value === _.value)
 
-  val mapping: Mapping[Email] = {
-    val emailRegex = "^(?=.{3,132}$)[^@]+@[^@]+$".r.pattern.asPredicate()
-
+  val mapping: Mapping[Email] =
     nonEmptyText
       .transform[Email](s => Email(s.replaceAllLiterally(" ", "")), _.value)
       .verifying("invalid", e => emailRegex.test(e.value))
-  }
 
 }
