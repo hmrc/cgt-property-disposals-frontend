@@ -211,7 +211,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
             _,
             _
           ) =>
-        if (!triageAnswers.individualUserType.contains(Self))
+        if (!fillingOutReturn.subscribedDetails.isATrust && !triageAnswers.individualUserType.contains(Self))
           Right(None)
         else
           fillingOutReturn.previousSentReturns match {

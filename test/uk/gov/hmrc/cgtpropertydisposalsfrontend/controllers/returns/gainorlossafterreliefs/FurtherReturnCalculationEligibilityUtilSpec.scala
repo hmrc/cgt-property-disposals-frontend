@@ -39,9 +39,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
@@ -94,7 +98,8 @@ class FurtherReturnCalculationEligibilityUtilSpec
     withCompleteReliefDetails: Boolean = true,
     withCompleteTriageDetails: Boolean = true,
     withCompleteDisposalDetails: Boolean = true,
-    address: Option[UkAddress] = Some(sample[UkAddress])
+    address: Option[UkAddress] = Some(sample[UkAddress]),
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
   ): FillingOutReturn = {
     val draftReturn = sample[DraftSingleDisposalReturn]
       .copy(
@@ -133,7 +138,8 @@ class FurtherReturnCalculationEligibilityUtilSpec
     sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       previousSentReturns = previousSentReturns,
-      amendReturnData = amendReturnData
+      amendReturnData = amendReturnData,
+      subscribedDetails = sample[SubscribedDetails].copy(name = name)
     )
 
   }
@@ -558,6 +564,73 @@ class FurtherReturnCalculationEligibilityUtilSpec
             )(service)
 
           }
+
+        "there is no individual user type and the user is a trust" in new TestEnvironment() {
+          val currentReturnAddress                           = sample[UkAddress]
+          val (previousReturnAddress, previousReturnSummary) = sample[UkAddress] -> sample[ReturnSummary]
+          val previousReturnData                             =
+            sample[PreviousReturnData]
+              .copy(
+                summaries = List(previousReturnSummary),
+                previousReturnsImplyEligibilityForCalculation = None,
+                calculationData = None
+              )
+          val fillingOutReturn                               =
+            eligibleFillingOutReturn(
+              previousSentReturns = Some(previousReturnData),
+              address = Some(currentReturnAddress),
+              individualUserType = None,
+              name = Left(sample[TrustName])
+            )
+          val sessionData                                    = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+          val furtherRetrunCalculationData                   =
+            List(
+              FurtherReturnCalculationData(
+                previousReturnAddress,
+                AmountInPence(100L)
+              )
+            )
+
+          inSequence {
+            mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, previousReturnSummary.submissionId)(
+              Right(
+                genDisplayReturn(address = previousReturnAddress, gainOrLossAfterReliefs = Some(AmountInPence(100)))
+              )
+            )
+            mockStoreSession(
+              sessionData.copy(
+                journeyStatus = Some(
+                  fillingOutReturn.copy(
+                    previousSentReturns = Some(
+                      previousReturnData.copy(
+                        previousReturnsImplyEligibilityForCalculation = Some(true),
+                        calculationData = Some(furtherRetrunCalculationData)
+                      )
+                    )
+                  )
+                )
+              )
+            )(Right(()))
+          }
+
+          testWithSession(
+            fillingOutReturn,
+            sessionData,
+            Eligible(
+              CalculatedGlarBreakdown(
+                AmountInPence(0),
+                AmountInPence(0),
+                AmountInPence(0),
+                AmountInPence(0),
+                AmountInPence(0),
+                AmountInPence(0),
+                AmountInPence(0)
+              ),
+              furtherRetrunCalculationData,
+              currentReturnAddress
+            )
+          )(service)
+        }
 
       }
 
