@@ -41,7 +41,7 @@
 @isAgent = @{ request.userType.contains(Agent) }
 
 @journeyErrorKey = @{ addressJourneyType match {
-    case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => ".representee"
+    case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => ".representee."
 
     case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
         if(c.draftReturn.isLeft)                       ".multipleIndirect."
