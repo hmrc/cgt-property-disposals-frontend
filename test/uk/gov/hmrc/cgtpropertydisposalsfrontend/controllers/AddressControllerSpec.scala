@@ -659,7 +659,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         val result =
           performAction(
             Seq(
-              "nonUkAddress-line1" -> "12 ContainsIllegal={%}=Characters",
+              "nonUkAddress-line1" -> "12 ContainsIllegal=/=Characters",
               "countryCode"        -> "NZ"
             )
           )
