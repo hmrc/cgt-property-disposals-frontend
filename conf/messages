@@ -691,7 +691,8 @@ individualUserType.cyaChange=who you are reporting the tax for
 who-are-you-reporting-for-exit-page.title=You cannot change this return online
 who-are-you-reporting-for-exit-page.helpText=You must <a href="{0}">contact HMRC</a>. Tell HMRC you need to change who you’re completing this return for. 
 
-numberOfProperties.main.title=How many properties or disposals are you including in this return?
+numberOfProperties.title=How many properties or disposals are you including in this return?
+
 numberOfProperties.helpText.p1.heading=UK property disposals
 numberOfProperties.helpText.p1.text=You can include more than one disposal in this return if all the properties had the same completion date.
 numberOfProperties.helpText.p2.heading=If you disposed of a mixed use property
@@ -741,9 +742,6 @@ numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.text=This is where the
 numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.li1=person was a non-resident on the day they died
 numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.li2=shares all had the same sale or disposal date
 
-
-numberOfProperties.title=How many properties or disposals are you including in this return?
-
 numberOfProperties.details.summary=What happens on the completion date?
 
 numberOfProperties.details.p1=The completion date is usually the day the you disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
@@ -752,7 +750,6 @@ numberOfProperties.trust.details.p1=The completion date is usually the day the t
 numberOfProperties.capacitor.details.p1=The completion date is usually the day the person disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
 numberOfProperties.personalRep.details.p1=The completion date is usually the day the person disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
 numberOfProperties.personalRepInPeriodOfAdmin.details.p1=The completion date is usually the day the personal representative got the money from the sale or disposal and the new owner got the keys.
-
 
 numberOfProperties.One=One
 numberOfProperties.MoreThanOne=2 or more
