@@ -547,9 +547,16 @@ weOnlySupportGG.signIn.p1=<a href="{0}">Sign in</a> with the same Government Gat
 # AGENTS - START
 #===================================================
 
-agent.enter-client-cgt-ref.title=What is your client’s Capital Gains Tax on UK property account number?
-agent.enter-client-cgt-ref.helpText=Your client was emailed this number when they created their account. Before you can manage your client’s account they will need to authorise you to act on their behalf.<br/><br/>This number is 15 characters. For example, XY CGTP 123 456 789.
-agent.enter-client-cgt-ref.link=Find out how to get authorisation from your client
+agent.enter-client-cgt-ref.title=Access your client’s account
+agent.enter-client-cgt-ref.p1=Before you can manage your client’s Capital Gains Tax on UK property account:
+agent.enter-client-cgt-ref.li1=they will need to create an account and give you their account number
+agent.enter-client-cgt-ref.li2=they will need to give you the UK postcode or country of residence in their contact details in their account
+agent.enter-client-cgt-ref.li3=you will need to go to your agent services account and <a href="{0}">ask a client to authorise you</a>
+agent.enter-client-cgt-ref.label=What is your client’s Capital Gains Tax on UK property account number?
+agent.enter-client-cgt-ref.helpText=This is 15 characters. For example, XYCGTP123456789.
+agent.enter-client-cgt-ref.link=How to ‘Ask a client to authorise you’ online
+agent.enter-client-cgt-ref.details.li1=Go to your agent services account and select <strong class="bold">‘Ask a client to authorise you’</strong>. You need to do this with each of your clients before you can manage their Capital Gains Tax on UK property account. You must do this even if they have already completed a 64-8 form for Self Assessment. This process is called a digital handshake.
+agent.enter-client-cgt-ref.details.li2=When you send your client the authorisation link, tell them to use the same Government Gateway user ID and password they used to create their Capital Gains Tax on UK property account. They must not enter another user ID or create a new one.
 
 cgtReference.error.required=Enter a Capital Gains Tax on UK property account number
 cgtReference.error.tooShort=Enter a Capital Gains Tax on UK property account number that is 15 characters
