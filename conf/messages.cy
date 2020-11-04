@@ -2097,7 +2097,7 @@ rebaseAcquisitionPrice.agent.dropdown.p2=I gyfrifo enillion neu golledion eich c
 rebaseAcquisitionPrice.trust.dropdown.p2=I gyfrifo enillion neu golledion yr ymddiriedolaeth, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 rebaseAcquisitionPrice.capacitor.dropdown.p2=I gyfrifo enillion neu golledion y person, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 rebaseAcquisitionPrice.personalRep.dropdown.p2=I gyfrifo enillion neu golledion y person, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
-rebaseAcquisitionPrice.indirect.dropdown.p2=Dysgwch am ail-sylfaenu (yn agor ffenestr neu dab newydd).
+rebaseAcquisitionPrice.indirect.dropdown.p2=<a href="{0}" target="_blank">Dysgwch am ail-sylfaenu (yn agor ffenestr neu dab newydd)</a>
 rebaseAcquisitionPrice.dropdown.p3=Yr enw ar y broses hon yw ail-sylfaenu.
 rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Dysgwch sut i ofyn i CThEM wirio gwerth marchnadol eiddo (yn agor ffenestr newydd)</a>.
 rebaseAcquisitionPrice.dropdown.p5=Mae’n cymryd o leiaf 3 mis i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y dylech nodi amcangyfrif nawr ac, os bydd angen i chi newid y swm, gwnewch hynny’n nes ymlaen gan ddefnyddio’r gwasanaeth hwn. Neu os ydych eisoes wedi  llenwi Ffurflen Dreth Hunanasesiad, gallwch roi’r gwerth marchnadol cywir yn eich Ffurflen Dreth Hunanasesiad nesaf.
