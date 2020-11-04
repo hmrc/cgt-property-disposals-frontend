@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TimeUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
@@ -107,7 +107,7 @@ class TaskListControllerSpec
       case n: NonCalculatedYTDAnswers =>
         n.fold(
           _.copy(mandatoryEvidence = None),
-          _.copy(mandatoryEvidence = sample[MandatoryEvidence].copy(uploadedOn = TimeUtils.now()))
+          _.copy(mandatoryEvidence = None)
         )
     }
 

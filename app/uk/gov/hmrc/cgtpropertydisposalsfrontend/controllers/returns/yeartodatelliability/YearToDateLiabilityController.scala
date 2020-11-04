@@ -2480,7 +2480,7 @@ class YearToDateLiabilityController @Inject() (
               Some(t),
               Some(e),
               Some(d),
-              Some(m),
+              m,
               _,
               _,
               y,
