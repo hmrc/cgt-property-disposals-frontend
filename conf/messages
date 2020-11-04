@@ -1606,8 +1606,8 @@ disposalPrice.trust.Gifted.title=What was the market value of the property when 
 disposalPrice.trust.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
 disposalPrice.personalRep.Gifted.title=What was the market value of the property when it was disposed of?
 disposalPrice.personalRep.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.title=What were the proceeds of the disposal?
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.title=What were the proceeds of the disposal?
+disposalPrice.personalRepInPeriodOfAdmin.Gifted.title=What was the market value of the property when it was disposed of?
+disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
 disposalPrice.capacitor.Gifted.title=What was the market value of the property when it was disposed of?
 disposalPrice.capacitor.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
 
@@ -1632,8 +1632,8 @@ disposalPrice.trust.Gifted.error.required=Enter the market value when the trust 
 disposalPrice.trust.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
 disposalPrice.personalRep.Gifted.error.required=Enter the market value of the property when it was disposed of
 disposalPrice.personalRep.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.required=Enter the proceeds of the disposal
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.required=Enter the proceeds of the disposal
+disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.required=Enter the market value of the property when it was disposed of
+disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
 disposalPrice.capacitor.Gifted.error.required=Enter the market value of the property when it was disposed of
 disposalPrice.capacitor.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
 
