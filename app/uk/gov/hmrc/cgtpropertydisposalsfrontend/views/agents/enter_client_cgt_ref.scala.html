@@ -29,7 +29,9 @@
         textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
         submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(form: Form[CgtReference])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
@@ -40,25 +42,45 @@
 
 @mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType, withSignOutLink = true) {
 
- @if(hasErrors) {
-  @errorSummary(form)
- }
+  @if(hasErrors) {
+    @errorSummary(form)
+  }
 
- @formWrapper(routes.AgentAccessController.enterClientsCgtRefSubmit(), 'novalidate -> "novalidate") {
-  @textInput(
-   fieldId = key,
-   label = Html(title),
-   helpText = Some(Html(messages("agent.enter-client-cgt-ref.helpText"))),
-   labelAsHeading = true,
-   errorKey = form.error(key).map(e => e.message),
-   value = form.data.getOrElse(key, ""),
-   hasErrors = hasErrors,
-   autoComplete = AutoCompleteType.On
-  )
+  @pageHeading(title)
 
-   <p><a href="@appConfig.agentGetAuthorisationUrl">@messages("agent.enter-client-cgt-ref.link")</a></p>
+  <p>
+   @messages("agent.enter-client-cgt-ref.p1")
+  </p>
 
-  @submitButton(messages("button.continue"))
- }
+ <ul class="list list-bullet">
+  <li>@messages("agent.enter-client-cgt-ref.li1")</li>
+  <li>@messages("agent.enter-client-cgt-ref.li2")</li>
+  <li>@Html(messages("agent.enter-client-cgt-ref.li3", appConfig.agentAskClientToAuthoriseUrl))</li>
+ </ul>
+
+  @formWrapper(routes.AgentAccessController.enterClientsCgtRefSubmit(), 'novalidate -> "novalidate") {
+   @textInput(
+     fieldId = key,
+     label = Html(s"""<h2 class="heading-medium">${messages("agent.enter-client-cgt-ref.label")}</h2>"""),
+     helpText = Some(Html(messages("agent.enter-client-cgt-ref.helpText"))),
+     labelAsHeading = false,
+     errorKey = form.error(key).map(e => e.message),
+     value = form.data.getOrElse(key, ""),
+     hasErrors = hasErrors,
+     autoComplete = AutoCompleteType.On
+   )
+
+   @details(
+    messages("agent.enter-client-cgt-ref.link"),
+    Html(s"""
+     | <ol class="list list-number">
+     |   <li>${Html(messages("agent.enter-client-cgt-ref.details.li1"))}</li>
+     |   <li>${messages("agent.enter-client-cgt-ref.details.li2")}</li>
+     | </ol>
+    """.stripMargin)
+   )
+
+   @submitButton(messages("button.continue"))
+  }
 
 }

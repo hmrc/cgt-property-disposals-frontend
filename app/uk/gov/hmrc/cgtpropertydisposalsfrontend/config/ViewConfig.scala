@@ -145,7 +145,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val trustsAndCgtUrl: String             = getString("external-url.trusts-and-cgt")
   val trustsAndCgtWorkoutUrl: String      = getString("external-url.trusts-and-cgt-workout")
   val agentGetAuthorisationUrl: String    = getString("external-url.agent-get-authorisation")
-
+  val agentAskClientToAuthoriseUrl: String = getString("external-url.agent-ask-client-to-authorise")
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
   val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
   val amendsExitSurveyUrl: String     = "/feedback/CGTPD-AMEND"
