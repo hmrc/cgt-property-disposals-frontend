@@ -2527,7 +2527,7 @@ rebaseAcquisitionPrice.trust.dropdown.p2=To work out the trust’s gain or loss,
 rebaseAcquisitionPrice.capacitor.dropdown.p2=To work out the person’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 rebaseAcquisitionPrice.personalRep.dropdown.p2=To work out the person’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 
-rebaseAcquisitionPrice.indirect.dropdown.p2=Learn about rebasing (opens in a new window or tab).
+rebaseAcquisitionPrice.indirect.dropdown.p2=<a href="{0}" target="_blank">Learn about rebasing (opens in a new window or tab)</a>
 
 rebaseAcquisitionPrice.dropdown.p3=This process is called rebasing.
 rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to ask HMRC to check a property’s market value (opens in a new window)</a>.

@@ -118,7 +118,7 @@
             @details(messages(s"$key.dropdown.header"),
             Html(s"""|
             |<p> ${messages(s"$key$userKey$assetTypeKey.dropdown.p1", rebaseCutOffDateDisplayString)} </p>
-            |<p> ${messages(s"$key$assetTypeKey.dropdown.p2")} </p>
+            |<p> ${messages(s"$key$assetTypeKey.dropdown.p2", appConfig.nonResidentsRebasingUrl)} </p>
             |""".stripMargin ))
         }
         @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
