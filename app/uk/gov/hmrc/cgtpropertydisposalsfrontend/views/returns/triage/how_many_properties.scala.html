@@ -51,12 +51,8 @@
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"numberOfProperties"}
-@title = @{messages(s"$key.main.title")}
+@title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
-@subtitle = @{
-    s"""<h2 class="heading-medium">${messages(s"$key.title")}</h2>"""
-}
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
@@ -101,37 +97,14 @@
     }
 
     @caption(messages("triage.caption"))
-    @pageHeading(title)
-
-    <h2 class="heading-medium">
-        @messages(s"$key.helpText.p1.heading")
-    </h2>
-    <p>
-        @messages(s"$key.helpText.p1.text")
-    </p>
-    <h2 class="heading-medium">
-        @messages(s"$key.helpText.p2.heading")
-    </h2>
-    <p>
-        @messages(s"$key.helpText.p2.text")
-    </p>
-   <h2 class="heading-medium">
-        @messages(s"$key.helpText${userKey}.p3.heading")
-    </h2>
-    <p>
-        @messages(s"$key.helpText${userKey}.p3.text")
-    </p>
-    <ul class="list-bullet">
-        <li>@messages(s"$key.helpText${userKey}.p3.li1")</li>
-        <li>@messages(s"$key.helpText${userKey}.p3.li2")</li>
-    </ul>
 
     @formWrapper(submitLocation, 'novalidate -> "novalidate") {
         @radioGroup(
             fieldId = key,
             options = options,
             selected = form.value.map(optionIndex),
-            label = Html(subtitle),
+            label = pageHeading(title),
+            helpText = Some(Html(messages(s"$key.helpText.p1.text"))),
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors
         )
@@ -139,6 +112,29 @@
         @details(
             messages(s"$key.details.summary"),
             Html(messages(s"$key$userKey.details.p1", appConfig.tranferringOwnershipHelp))
+        )
+
+        @details(
+          messages(s"$key.nonResident$userKey.summary"),
+          Html(s"""
+           | <h2 class="heading-medium">
+           |    ${messages(s"$key.helpText$userKey.p2.heading")}
+           | </h2>
+           | <p>
+           |    ${messages(s"$key.helpText.p2.text")}
+           | </p>
+           | <h2 class="heading-medium">
+           |    ${messages(s"$key.helpText${userKey}.p3.heading")}
+           | </h2>
+           | <p>
+           |    ${messages(s"$key.helpText${userKey}.p3.text")}
+           | </p>
+           | <ul class="list-bullet">
+           |    <li>${messages(s"$key.helpText${userKey}.p3.li1")}</li>
+           |    <li>${messages(s"$key.helpText${userKey}.p3.li2")}</li>
+           | </ul>
+          """.stripMargin
+          )
         )
 
         @submitButton(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
