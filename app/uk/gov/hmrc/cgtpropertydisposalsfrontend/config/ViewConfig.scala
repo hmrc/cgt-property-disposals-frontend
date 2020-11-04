@@ -134,47 +134,47 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
     "external-url.personal-representative"
   )
 
-  val calculateCgt: String                = getString("external-url.calculate-cgt")
-  val payYourTax: String                  = getString("external-url.pay-your-tax")
-  val payTheirTaxBill: String             = getString("external-url.pay-their-tax-bill")
-  val returnsForSomeoneWhoHasDied: String = getString(
+  val calculateCgt: String                 = getString("external-url.calculate-cgt")
+  val payYourTax: String                   = getString("external-url.pay-your-tax")
+  val payTheirTaxBill: String              = getString("external-url.pay-their-tax-bill")
+  val returnsForSomeoneWhoHasDied: String  = getString(
     "external-url.returns-for-someone-who-has-died"
   )
-  val powerOfAttorney: String             = getString("external-url.power-of-attorney")
-  val cgtRatesUrl: String                 = getString("external-url.cgt-rates")
-  val trustsAndCgtUrl: String             = getString("external-url.trusts-and-cgt")
-  val trustsAndCgtWorkoutUrl: String      = getString("external-url.trusts-and-cgt-workout")
-  val agentGetAuthorisationUrl: String    = getString("external-url.agent-get-authorisation")
+  val powerOfAttorney: String              = getString("external-url.power-of-attorney")
+  val cgtRatesUrl: String                  = getString("external-url.cgt-rates")
+  val trustsAndCgtUrl: String              = getString("external-url.trusts-and-cgt")
+  val trustsAndCgtWorkoutUrl: String       = getString("external-url.trusts-and-cgt-workout")
+  val agentGetAuthorisationUrl: String     = getString("external-url.agent-get-authorisation")
   val agentAskClientToAuthoriseUrl: String = getString("external-url.agent-ask-client-to-authorise")
-  val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
-  val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
-  val amendsExitSurveyUrl: String     = "/feedback/CGTPD-AMEND"
-  val ggCreateAccountUrl: String      =
+  val onboardingExitSurveyUrl: String      = "/feedback/CGTPD-REG"
+  val returnsExitSurveyUrl: String         = "/feedback/CGTPD-RET"
+  val amendsExitSurveyUrl: String          = "/feedback/CGTPD-AMEND"
+  val ggCreateAccountUrl: String           =
     "/bas-gateway?" +
       "accountType=individual&" +
       "continueUrl=%2Fcapital-gains-tax-uk-property%2Fstart&" +
       "origin=capital-gains-tax-uk-property-frontend"
-  val ggTimeoutSeconds: Long          =
+  val ggTimeoutSeconds: Long               =
     servicesConfig.getDuration("gg.timeout").toSeconds
-  val ggCountdownSeconds: Long        =
+  val ggCountdownSeconds: Long             =
     servicesConfig.getDuration("gg.countdown").toSeconds
-  val ggKeepAliveUrl: String          =
+  val ggKeepAliveUrl: String               =
     "/capital-gains-tax-uk-property" + routes.StartController.keepAlive().url
-  val ggTimedOutUrl: String           =
+  val ggTimedOutUrl: String                =
     signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController
       .timedOut()
       .url
-  val ggSignOut: String               =
+  val ggSignOut: String                    =
     signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController
       .start()
       .url
-  val accountSignOutUrl: String       =
+  val accountSignOutUrl: String            =
     signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.AccountController
       .signedOut()
       .url
-  val hmrcTelephone: String           = getString("telephone-numbers.hmrc-helpline")
-  val outsideUkPhone: String          = getString("telephone-numbers.outside-uk")
-  val agentDedicatedLine: String      = getString(
+  val hmrcTelephone: String                = getString("telephone-numbers.hmrc-helpline")
+  val outsideUkPhone: String               = getString("telephone-numbers.outside-uk")
+  val agentDedicatedLine: String           = getString(
     "telephone-numbers.agent-dedicated-line"
   )
 

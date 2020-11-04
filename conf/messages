@@ -3268,19 +3268,19 @@ ytdLiability.caption=Tax owed
 ytdLiability.furtherReturn.caption=Year-to-date position
 
 taxableGainOrLoss.title=Did you make an overall gain or loss on the property sale or disposal?
-taxableGainOrLoss.multiple.title=Did you make an overall gain or loss on the property sales or disposals in this return?
+taxableGainOrLoss.multiple.title=Did you make an overall gain or loss on the disposals in this return?
 taxableGainOrLoss.agent.title=Did your client make an overall gain or loss on the property sale or disposal?
-taxableGainOrLoss.agent.multiple.title=Did your client make an overall gain or loss on the property sales or disposals in this return?
+taxableGainOrLoss.agent.multiple.title=Did your client make an overall gain or loss on the disposals in this return?
 taxableGainOrLoss.trust.title=Did the trust make an overall gain or loss on the property sale or disposal?
-taxableGainOrLoss.trust.multiple.title=Did the trust make an overall gain or loss on the property sales or disposals in this return?
+taxableGainOrLoss.trust.multiple.title=Did the trust make an overall gain or loss on the disposals in this return?
 taxableGainOrLoss.capacitor.title=Did the person make an overall gain or loss on the property sale or disposal?
-taxableGainOrLoss.capacitor.multiple.title=Did the person make an overall gain or loss on the property sales or disposals in this return?
+taxableGainOrLoss.capacitor.multiple.title=Did the person make an overall gain or loss on the disposals in this return?
 taxableGainOrLoss.personalRep.title=Was an overall gain or loss made on the property sale or disposal?
-taxableGainOrLoss.personalRep.multiple.title=Was an overall gain or loss made on the property sales or disposals in this return?
-taxableGainOrLoss.personalRepInPeriodOfAdmin.title=Did the estate make an overall gain or loss on the property sale or disposal?
-taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title=Did the estate make an overall gain or loss on the property sales or disposals in this return?
+taxableGainOrLoss.personalRep.multiple.title=Was an overall gain or loss made on the disposals in this return?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.title=Did the estate make an overall gain or loss on the disposals in this return?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title=Did the estate make an overall gain or loss on the disposals in this return?
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.title=Did the estate make an overall gain or loss on the property sale or disposal?
-taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.multiple.title=Did the estate make an overall gain or loss on the property sales or disposals in this return?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.multiple.title=Did your client make an overall gain or loss on the disposals in this return?
 
 taxableGainOrLoss.helpText=To work out if you made an overall gain or loss, you’ll need to take your initial gain or loss and subtract any reliefs, losses, or other allowances you are entitled to.
 taxableGainOrLoss.agent.helpText=To work out if your client made an overall gain or loss, you’ll need to take your client’s initial gain or loss and subtract any reliefs, losses, or other allowances they are entitled to.
