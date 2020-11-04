@@ -846,8 +846,6 @@ class YearToDateLiabilityController @Inject() (
                   page = hasEstimatedDetailsPage(
                     _,
                     _,
-                    isATrust(fillingOutReturn),
-                    fillingOutReturn.draftReturn.representativeType(),
                     fillingOutReturn.isFurtherOrAmendReturn,
                     fillingOutReturn.isAmendReturn
                   )
@@ -912,8 +910,6 @@ class YearToDateLiabilityController @Inject() (
       page = hasEstimatedDetailsPage(
         _,
         _,
-        isATrust(fillingOutReturn),
-        fillingOutReturn.draftReturn.representativeType(),
         fillingOutReturn.isFurtherOrAmendReturn,
         fillingOutReturn.isAmendReturn
       )
@@ -1001,8 +997,6 @@ class YearToDateLiabilityController @Inject() (
       page = hasEstimatedDetailsPage(
         _,
         _,
-        isATrust(fillingOutReturn),
-        draftReturn.representativeType(),
         fillingOutReturn.isFurtherOrAmendReturn,
         fillingOutReturn.isAmendReturn
       )
@@ -1051,8 +1045,6 @@ class YearToDateLiabilityController @Inject() (
         page = hasEstimatedDetailsPage(
           _,
           _,
-          isATrust(fillingOutReturn),
-          draftReturn.representativeType(),
           fillingOutReturn.isFurtherOrAmendReturn,
           fillingOutReturn.isAmendReturn
         )

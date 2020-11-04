@@ -3565,13 +3565,10 @@ personalAllowance.personalRep.error.tooManyDecimals=Personal allowance must be a
 personalAllowance.cyaChange=Personal Allowance
 
 hasEstimatedDetails.title=Have any of the amounts in this return been estimated?
-hasEstimatedDetails.helpText=If you estimated any amounts, you’ll need to provide the final amounts to HMRC later. For example, the property’s value.
-hasEstimatedDetails.yes.content=You can confirm the amounts through this service. Or if you need to complete a Self Assessment tax return you can do it through your next return.
-hasEstimatedDetails.agent.yes.content=The amounts will need to be confirmed with HMRC when they become available. If your client needs to complete a Self Assessment tax return this can be done in their next Self Assessment return. If not, it can be done through this service.
-hasEstimatedDetails.trust.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the trust needs to complete a Self Assessment tax return this can be done in its next Self Assessment return. If not, it can be done through this service.
-hasEstimatedDetails.capacitor.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the person needs to complete a Self Assessment tax return this can be done in their next Self Assessment return. If not, it can be done through this service.
-hasEstimatedDetails.personalRep.yes.content=The amounts will need to be confirmed with HMRC when they become available. If you need to complete a Self Assessment tax return for the person this can be done in through their Self Assessment return. If not, it can be done through this service.
-hasEstimatedDetails.personalRepInPeriodOfAdmin.yes.content=The amounts will need to be confirmed with HMRC when they become available. If you need to complete a Self Assessment tax return for the estate this can be done in its next Self Assessment return. If not, it can be done through this service.
+hasEstimatedDetails.helpText=Select ‘yes’ if any of the amounts in this return would impact the amount of Capital Gains Tax owed at this point in the tax year. For example, solicitor’s fees when a property was bought.<br><br>If you select ‘yes’, you’ll need to provide the final amounts to HMRC later.
+hasEstimatedDetails.summary=How to provide the final amounts to HMRC
+hasEstimatedDetails.details=You can confirm any estimates through this service. Or if a Self Assessment tax return needs to be completed, the estimates can be confirmed in the next Self Assessment return.
+
 hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
 

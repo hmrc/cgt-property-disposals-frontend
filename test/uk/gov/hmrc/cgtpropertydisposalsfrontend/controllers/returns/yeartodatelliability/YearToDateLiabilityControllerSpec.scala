@@ -1826,11 +1826,6 @@ class YearToDateLiabilityControllerSpec
               { doc =>
                 doc.select("#back").attr("href") shouldBe backLink.url
                 doc
-                  .select("#hasEstimatedDetails > #yes-content")
-                  .text                          shouldBe messageFromMessageKey(
-                  "hasEstimatedDetails.trust.yes.content"
-                )
-                doc
                   .select("#content > article > form")
                   .attr("action")                shouldBe routes.YearToDateLiabilityController
                   .hasEstimatedDetailsSubmit()
