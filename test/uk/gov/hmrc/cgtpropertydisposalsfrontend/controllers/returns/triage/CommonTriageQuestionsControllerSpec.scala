@@ -938,7 +938,7 @@ class CommonTriageQuestionsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("numberOfProperties.main.title"),
+            messageFromMessageKey("numberOfProperties.title"),
             { doc =>
               doc.select("#back").attr("href") shouldBe ""
               doc
@@ -970,7 +970,7 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("numberOfProperties.main.title"),
+              messageFromMessageKey("numberOfProperties.title"),
               { doc =>
                 doc
                   .select("#back")
@@ -1005,7 +1005,7 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("numberOfProperties.main.title"),
+              messageFromMessageKey("numberOfProperties.title"),
               { doc =>
                 doc
                   .select("#back")
@@ -1043,7 +1043,7 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("numberOfProperties.main.title"),
+              messageFromMessageKey("numberOfProperties.title"),
               { doc =>
                 doc
                   .select("#back")
@@ -1079,7 +1079,7 @@ class CommonTriageQuestionsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("numberOfProperties.main.title"),
+            messageFromMessageKey("numberOfProperties.title"),
             { doc =>
               doc.select("#back").attr("href") shouldBe ""
               doc
@@ -1108,7 +1108,7 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("numberOfProperties.main.title"),
+              messageFromMessageKey("numberOfProperties.title"),
               { doc =>
                 doc
                   .select("#back")
@@ -1140,7 +1140,7 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("numberOfProperties.main.title"),
+              messageFromMessageKey("numberOfProperties.title"),
               { doc =>
                 doc
                   .select("#back")
@@ -1227,7 +1227,7 @@ class CommonTriageQuestionsControllerSpec
 
           checkPageIsDisplayed(
             performAction(formData: _*),
-            messageFromMessageKey("numberOfProperties.main.title"),
+            messageFromMessageKey("numberOfProperties.title"),
             { doc =>
               doc
                 .select("#error-summary-display > ul > li > a")
@@ -1547,7 +1547,7 @@ class CommonTriageQuestionsControllerSpec
 
         checkPageIsDisplayed(
           performAction(),
-          messageFromMessageKey("numberOfProperties.main.title"),
+          messageFromMessageKey("numberOfProperties.title"),
           { doc =>
             doc.select("#back").attr("href") shouldBe ""
             doc
@@ -1623,7 +1623,7 @@ class CommonTriageQuestionsControllerSpec
 
           checkPageIsDisplayed(
             performAction(formData: _*),
-            messageFromMessageKey("numberOfProperties.main.title"),
+            messageFromMessageKey("numberOfProperties.title"),
             { doc =>
               doc
                 .select("#error-summary-display > ul > li > a")
