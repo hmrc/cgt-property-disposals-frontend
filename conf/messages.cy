@@ -1250,7 +1250,7 @@ returns.company-address.cyaChange.acquisition-price=y swm caffael
 #  SALE OR DISPOSAL DETAILS PAGES - START
 #===================================================
 
-returns.disposal-details.caption=Manylion y gwerthiannau neu warediadau
+returns.disposal-details.caption=Manylion gwerthu neu waredu
 shareOfProperty.title=Faint o''r eiddo oeddech chi''n berchen arno?
 shareOfProperty.agent.title=Faint o''r eiddo oedd eich cleient yn berchen arno?
 shareOfProperty.trust.title=Faint o''r eiddo oedd yr ymddiriedolaeth yn berchen arno?
