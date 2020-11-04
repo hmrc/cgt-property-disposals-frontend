@@ -171,7 +171,7 @@
                 else
                     messages(s"$key.calculated.noGainOrLoss.prompt")
 
-            Some(Html(s"""<p>$prompt</p>""".stripMargin))
+            Some(Html(s"""<p>$prompt</p><p>${messages(s"$key$userKey.calculatedHelpText.p2")}</p>""".stripMargin))
         case _ => None
     }
 }
