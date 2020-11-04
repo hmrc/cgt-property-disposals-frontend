@@ -3352,6 +3352,15 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Enter the estat
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.title=Enter your client’s net gain or loss
 
 taxableGainOrLoss.calculated.furtherReturn.p1=We used the details that were entered in this return to work out your net gain on the property disposals that you are paying tax on in tax year {0} to {1}.
+
+taxableGainOrLoss.calculatedHelpText.p2=If you do not agree with these workings you can enter a different amount.
+taxableGainOrLoss.agent.calculatedHelpText.p2=If they do not agree with these workings you can enter a different amount.
+taxableGainOrLoss.trust.calculatedHelpText.p2=If you do not agree with these workings you can enter a different amount.
+taxableGainOrLoss.capacitor.calculatedHelpText.p2=If they do not agree with these workings you can enter a different amount.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.calculatedHelpText.p2=If you do not agree with these workings you can enter a different amount.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.calculatedHelpText.p2=If they do not agree with these workings you can enter a different amount.
+
+
 taxableGainOrLoss.furtherReturn.p1=You’ll need to work out if you made a net gain or loss on the UK property-related disposals you are paying tax on in the {0} to {1} tax year.
 taxableGainOrLoss.agent.furtherReturn.p1=You’ll need to work out if your client made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
 taxableGainOrLoss.trust.furtherReturn.p1=You’ll need to work out if the trust made a net gain or loss on the UK property-related disposals it is paying tax on in the {0} to {1} tax year.
