@@ -1339,7 +1339,7 @@ disposalPrice.trust.Gifted.error.required=Nodwch y gwerth marchnadol pan wnaeth 
 disposalPrice.trust.indirect.Gifted.error.required=Nodwch werth marchnadol y cyfranddaliadau pan gafodd eu gwerthu neu eu gwaredu
 disposalPrice.personalRep.Gifted.error.required=Nodwch werth marchnadol yr eiddo pan gafodd ei waredu
 disposalPrice.personalRep.indirect.Gifted.error.required=Nodwch werth marchnadol y cyfranddaliadau pan gafodd eu gwerthu neu eu gwaredu
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.requiredNodwch werth marchnadol yr eiddo pan gafodd ei waredu
+disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.required=Nodwch werth marchnadol yr eiddo pan gafodd ei waredu
 disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.required=Nodwch werth marchnadol y cyfranddaliadau pan gafodd eu gwerthu neu eu gwaredu
 disposalPrice.capacitor.Gifted.error.required=Nodwch werth marchnadol yr eiddo pan gafodd ei waredu
 disposalPrice.capacitor.indirect.Gifted.error.required=Nodwch werth marchnadol y cyfranddaliadau pan gafodd eu gwerthu neu eu gwaredu
