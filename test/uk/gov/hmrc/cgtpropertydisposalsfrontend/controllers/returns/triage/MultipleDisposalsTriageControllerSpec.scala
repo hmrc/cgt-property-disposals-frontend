@@ -1729,7 +1729,9 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is complete" in {
             test(
               sessionDataWithStartingNewDraftReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers]
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                  assetTypes = List(AssetType.Residential)
+                )
               )._1,
               triage.routes.MultipleDisposalsTriageController
                 .checkYourAnswers(),
@@ -1755,7 +1757,9 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is complete" in {
             test(
               sessionDataWithFillingOutReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers]
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                  assetTypes = List(AssetType.Residential)
+                )
               )._1,
               triage.routes.MultipleDisposalsTriageController
                 .checkYourAnswers(),
