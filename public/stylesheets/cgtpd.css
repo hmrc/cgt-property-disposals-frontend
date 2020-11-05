@@ -420,6 +420,15 @@ details {
     text-transform: uppercase;
 }
 
+.govuk-tag--blue {
+    color: #144e81;
+    background: #d2e2f1;
+}
+.govuk-tag--grey {
+    color: #383f43;
+    background: #eeefef;
+}
+
 .app-task-list {
     list-style-type: none;
     padding-left: 0;
@@ -495,51 +504,20 @@ details {
     display: block;
 }
 
+
+.app-task-list__tag,
 .app-task-list__task-completed {
     margin-top: 10px;
     margin-bottom: 5px;
 }
 
 @media (min-width: 28.125em) {
+    .app-task-list__tag,
     .app-task-list__task-completed {
         float: right;
         margin-top: 0;
         margin-bottom: 0;
     }
-}
-
-.app-task-list__task-inprogress {
-    margin-top: 10px;
-    margin-bottom: 5px;
-    border: solid 2px;
-    background: white;
-    color: #005ea5;
-}
-
-@media (min-width: 28.125em) {
-    .app-task-list__task-inprogress {
-        float: right;
-        margin-top: 0;
-        margin-bottom: 0;
-    }
-}
-
-.incomplete, .IN.PROGRESS {
-    color: #005ea5;
-    background-color: white;
-    border: 2px solid #005ea5;
-}
-
-.cannot-start {
-    background-color: #fff;
-    border: 2px solid white;
-    color: #555;
-}
-
-.to-do {
-    background-color: #fff;
-    border-style: double;
-    color: #005ea5;
 }
 
 .hmcts-currency-input {
@@ -924,6 +902,7 @@ details dl.govuk-check-your-answers {
     .app-task-list__task-name {
         float: left;
         width: 75%;
+        max-width: 380px;
     }
 }
 
