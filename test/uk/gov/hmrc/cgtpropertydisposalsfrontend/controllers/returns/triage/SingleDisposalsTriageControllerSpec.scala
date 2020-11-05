@@ -674,7 +674,7 @@ class SingleDisposalsTriageControllerSpec
         requiredPreviousAnswers,
         requiredPreviousAnswers.copy(wasAUKResident = Some(false))
       )(
-        "wereYouAUKResident.main.title",
+        "wereYouAUKResident.title",
         checkContent(
           _,
           routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -693,7 +693,7 @@ class SingleDisposalsTriageControllerSpec
             individualUserType = Some(IndividualUserType.Capacitor)
           )
       )(
-        "wereYouAUKResident.capacitor.main.title",
+        "wereYouAUKResident.capacitor.title",
         checkContent(
           _,
           routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -711,7 +711,7 @@ class SingleDisposalsTriageControllerSpec
             individualUserType = Some(IndividualUserType.PersonalRepresentative)
           )
       )(
-        "wereYouAUKResident.personalRep.main.title",
+        "wereYouAUKResident.personalRep.title",
         checkContent(
           _,
           routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -728,7 +728,7 @@ class SingleDisposalsTriageControllerSpec
             individualUserType = Some(IndividualUserType.Self)
           )
       )(
-        "wereYouAUKResident.main.title",
+        "wereYouAUKResident.title",
         { doc =>
           checkContent(
             doc,
@@ -749,7 +749,7 @@ class SingleDisposalsTriageControllerSpec
             individualUserType = Some(IndividualUserType.Capacitor)
           )
       )(
-        "wereYouAUKResident.capacitor.main.title",
+        "wereYouAUKResident.capacitor.title",
         { doc =>
           checkContent(
             doc,
@@ -770,7 +770,7 @@ class SingleDisposalsTriageControllerSpec
             individualUserType = Some(IndividualUserType.PersonalRepresentative)
           )
       )(
-        "wereYouAUKResident.personalRep.main.title",
+        "wereYouAUKResident.personalRep.title",
         { doc =>
           checkContent(
             doc,
@@ -790,7 +790,7 @@ class SingleDisposalsTriageControllerSpec
           countryOfResidence = Some(Country.uk)
         )
       )(
-        "wereYouAUKResident.agent.main.title",
+        "wereYouAUKResident.agent.title",
         doc =>
           checkContent(
             doc,
@@ -807,7 +807,7 @@ class SingleDisposalsTriageControllerSpec
           individualUserType = Some(IndividualUserType.PersonalRepresentative)
         )
       )(
-        "wereYouAUKResident.personalRep.main.title",
+        "wereYouAUKResident.personalRep.title",
         doc =>
           checkContent(
             doc,
@@ -823,7 +823,7 @@ class SingleDisposalsTriageControllerSpec
           countryOfResidence = Some(Country.uk)
         )
       )(
-        "wereYouAUKResident.trust.main.title",
+        "wereYouAUKResident.trust.title",
         doc =>
           checkContent(
             doc,

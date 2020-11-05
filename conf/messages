@@ -841,13 +841,6 @@ disposalMethod.personalRep.error.invalid=Select if the person sold it, gave it a
 
 disposalMethod.cyaChange=how the property was sold or disposed of
 
-wereYouAUKResident.main.title=Tell us about your residence status on the disposal date
-wereYouAUKResident.capacitor.main.title=Tell us about the person’s residence status on the disposal date
-wereYouAUKResident.trust.main.title=Tell us about the trust’s residence status on the disposal date
-wereYouAUKResident.personalRep.main.title=Tell us about the person’s residence status on the disposal date
-wereYouAUKResident.agent.main.title=Tell us about your client’s residence status on the disposal date
-wereYouAUKResident.personalRepInPeriodOfAdmin.main.title=Was the person a UK resident for the tax year in which they died?
-
 wereYouAUKResident.title=Were you a UK resident on the disposal date?
 wereYouAUKResident.capacitor.title=Was the person a UK resident on the disposal date?
 wereYouAUKResident.trust.title=Was the trust resident in the UK on the disposal date?
@@ -855,13 +848,17 @@ wereYouAUKResident.personalRep.title=Was the person a UK resident on the disposa
 wereYouAUKResident.agent.title=Was your client a UK resident on the disposal date?
 wereYouAUKResident.personalRepInPeriodOfAdmin.title=Was the person a UK resident for the tax year in which they died?
 
-wereYouAUKResident.helpText.p1=The date of disposal for UK property is the contract exchange date. Contract exchange usually happens when a buyer and seller swap contracts and when the buyer pays a deposit.
-
-wereYouAUKResident.helpText.p2=If you were a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
-wereYouAUKResident.capacitor.helpText.p2=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
-wereYouAUKResident.trust.helpText.p2=If the trust was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
-wereYouAUKResident.personalRep.helpText.p2=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
-wereYouAUKResident.agent.helpText.p2=If your client was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
+wereYouAUKResident.helpText=The date of disposal for UK property is the contract exchange date. Contract exchange usually happens when a buyer and seller swap contracts and when the buyer pays a deposit.
+wereYouAUKResident.summary=If you made an indirect disposal
+wereYouAUKResident.agent.summary=If your client made an indirect disposal
+wereYouAUKResident.trust.summary=If the trust made an indirect disposal
+wereYouAUKResident.capacitor.summary=If the person made an indirect disposal
+wereYouAUKResident.personalRep.summary=If the person made an indirect disposal
+wereYouAUKResident.details=If you were a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
+wereYouAUKResident.agent.details=If your client was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
+wereYouAUKResident.trust.details=If the trust was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
+wereYouAUKResident.capacitor.details=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
+wereYouAUKResident.personalRep.details=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
 
 wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>
