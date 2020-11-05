@@ -35,7 +35,8 @@
     backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
     yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(
@@ -67,9 +68,8 @@
 
 @isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 
-@legend = @{messages(s"$key$userMsgKey.title")}
-@title = @{if(isPeriodOfAdmin) legend else messages(s"$key$userMsgKey.main.title") }
-@label = @{if(isPeriodOfAdmin) pageHeading(title) else Html(s"""<h2 class="heading-medium">$legend</h2>""")}
+@title = @{messages(s"$key$userMsgKey.title")}
+@label = @{pageHeading(title)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
@@ -82,12 +82,6 @@
 
     @caption(messages("triage.caption"))
 
-  @if(!isPeriodOfAdmin) {
-    @pageHeading(title)
-    <p>@messages(s"$key.helpText.p1")</p>
-    <p>@messages(s"$key$userMsgKey.helpText.p2")</p>
-  }
-
     @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
@@ -95,10 +89,14 @@
             errorKey = form.error(key).map(e => s"$userErrorMsgKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = None
+            helpText = if(isPeriodOfAdmin) None else Some(Html(messages(s"$key.helpText")))
         )
 
         <p>@Html(messages(s"$key$userMsgKey.link", viewConfig.workOurYouResidenceStatusUrl))</p>
+
+        @if(!isPeriodOfAdmin) {
+          @details(messages(s"$key$userMsgKey.summary"), Html(messages(s"$key$userMsgKey.details")))
+        }
 
         @submitButton(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
