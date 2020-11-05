@@ -878,7 +878,11 @@ class YearToDateLiabilityControllerSpec
               )
           val newAnswers =
             IncompleteNonCalculatedYTDAnswers.empty
-              .copy(taxableGainOrLoss = Some(oldAnswers.taxableGainOrLoss), estimatedIncome = Some(AmountInPence(100L)))
+              .copy(
+                taxableGainOrLoss = Some(oldAnswers.taxableGainOrLoss),
+                estimatedIncome = Some(AmountInPence(100L)),
+                taxableGainOrLossCalculation = oldAnswers.taxableGainOrLossCalculation
+              )
 
           val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
             Some(oldAnswers),
@@ -935,7 +939,8 @@ class YearToDateLiabilityControllerSpec
                 .copy(
                   taxableGainOrLoss = Some(oldAnswers.taxableGainOrLoss),
                   estimatedIncome = Some(AmountInPence(100L)),
-                  hasEstimatedDetails = Some(oldAnswers.hasEstimatedDetails)
+                  hasEstimatedDetails = Some(oldAnswers.hasEstimatedDetails),
+                  taxableGainOrLossCalculation = oldAnswers.taxableGainOrLossCalculation
                 )
 
             val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
@@ -1391,7 +1396,8 @@ class YearToDateLiabilityControllerSpec
               .copy(
                 taxableGainOrLoss = Some(oldAnswers.taxableGainOrLoss),
                 estimatedIncome = oldAnswers.estimatedIncome,
-                personalAllowance = Some(AmountInPence(100L))
+                personalAllowance = Some(AmountInPence(100L)),
+                taxableGainOrLossCalculation = oldAnswers.taxableGainOrLossCalculation
               )
 
           val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
@@ -1452,7 +1458,8 @@ class YearToDateLiabilityControllerSpec
                   taxableGainOrLoss = Some(oldAnswers.taxableGainOrLoss),
                   estimatedIncome = oldAnswers.estimatedIncome,
                   personalAllowance = Some(AmountInPence(100L)),
-                  hasEstimatedDetails = Some(oldAnswers.hasEstimatedDetails)
+                  hasEstimatedDetails = Some(oldAnswers.hasEstimatedDetails),
+                  taxableGainOrLossCalculation = oldAnswers.taxableGainOrLossCalculation
                 )
 
             val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
@@ -2209,7 +2216,9 @@ class YearToDateLiabilityControllerSpec
                 answers.yearToDateLiability,
                 answers.checkForRepayment,
                 answers.estimatedIncome,
-                answers.personalAllowance
+                answers.personalAllowance,
+                answers.taxableGainOrLossCalculation,
+                answers.yearToDateLiabilityCalculation
               )
 
               val (session, journey, draftReturn) =
@@ -3460,6 +3469,8 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           None,
+          None,
+          None,
           None
         )
 
@@ -3468,6 +3479,8 @@ class YearToDateLiabilityControllerSpec
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.taxDue),
           completeAnswers.mandatoryEvidence,
+          None,
+          None,
           None,
           None,
           None,
@@ -3839,6 +3852,88 @@ class YearToDateLiabilityControllerSpec
             )
           }
 
+          "the user has just answered all the questions for a further return where mandatory evidence " +
+            "was not required and all updates are successful" in {
+              val yearToDateLiability    = sample[AmountInPence]
+              val taxableGain            = sample[AmountInPence]
+              val gainOrLossAfterReliefs = AmountInPence(100L)
+              val estimatedIncome        = sample[AmountInPence]
+              val personalAllowance      = sample[AmountInPence]
+
+              val glarCalculation                = CalculatedGlarBreakdown(
+                AmountInPence.zero,
+                AmountInPence.zero,
+                AmountInPence(100L),
+                AmountInPence.zero,
+                AmountInPence.zero,
+                AmountInPence.zero,
+                AmountInPence.zero
+              )
+              val taxableGainOrLossCalculation   =
+                sample[TaxableGainOrLossCalculation].copy(taxableGainOrLoss = taxableGain)
+              val yearToDateLiabilityCalculation =
+                sample[YearToDateLiabilityCalculation].copy(yearToDateLiability = yearToDateLiability)
+
+              val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
+                Some(
+                  allQuestionAnswered.copy(
+                    taxableGainOrLoss = Some(taxableGain),
+                    yearToDateLiability = Some(yearToDateLiability),
+                    checkForRepayment = Some(true),
+                    mandatoryEvidence = None,
+                    estimatedIncome = Some(estimatedIncome),
+                    personalAllowance = Some(personalAllowance),
+                    taxableGainOrLossCalculation = Some(taxableGainOrLossCalculation),
+                    yearToDateLiabilityCalculation = Some(yearToDateLiabilityCalculation)
+                  )
+                ),
+                UserType.Individual,
+                wasUkResident = true,
+                isFurtherReturn = true,
+                gainOrLossAfterReliefs = Some(gainOrLossAfterReliefs)
+              )
+
+              val updatedAnswers = completeAnswers.copy(
+                taxableGainOrLoss = taxableGain,
+                yearToDateLiability = Some(yearToDateLiability),
+                checkForRepayment = Some(true),
+                mandatoryEvidence = None,
+                estimatedIncome = Some(estimatedIncome),
+                personalAllowance = Some(personalAllowance),
+                taxableGainOrLossCalculation = Some(taxableGainOrLossCalculation),
+                yearToDateLiabilityCalculation = Some(yearToDateLiabilityCalculation)
+              )
+
+              val updatedDraftReturn =
+                draftReturn.copy(yearToDateLiabilityAnswers = Some(updatedAnswers))
+              val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+              val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockFurthereturnCalculationEligibilityCheck(journey)(
+                  Right(sample[Eligible].copy(calculation = glarCalculation))
+                )
+                mockStoreDraftReturn(updatedJourney)(Right(()))
+                mockStoreSession(updatedSession)(Right(()))
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("ytdLiability.cya.title"),
+                doc =>
+                  validateNonCalculatedYearToDateLiabilityPage(
+                    updatedAnswers,
+                    doc,
+                    Some(UserType.Individual),
+                    None,
+                    isFurtherOrAmendReturn = true,
+                    hideEstimatesQuestion = false
+                  )
+              )
+            }
+
           "the user has already completed the section" in {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -3883,6 +3978,8 @@ class YearToDateLiabilityControllerSpec
           Some(sample[AmountInPence]),
           Some(sample[Boolean]),
           Some(sample[AmountInPence]),
+          None,
+          None,
           None,
           None,
           None,
@@ -3958,12 +4055,68 @@ class YearToDateLiabilityControllerSpec
 
       }
 
+      "redirect to the cya endpoint" when {
+
+        "the user is on a further return journey which is eligible for a calculation and the " +
+          "user has agreed with all the calculated figures" in {
+            val yearToDateLiability    = sample[AmountInPence]
+            val taxableGain            = sample[AmountInPence]
+            val gainOrLossAfterReliefs = AmountInPence(100L)
+            val estimatedIncome        = sample[AmountInPence]
+            val personalAllowance      = sample[AmountInPence]
+
+            val glarCalculation                = CalculatedGlarBreakdown(
+              AmountInPence.zero,
+              AmountInPence.zero,
+              AmountInPence(100L),
+              AmountInPence.zero,
+              AmountInPence.zero,
+              AmountInPence.zero,
+              AmountInPence.zero
+            )
+            val taxableGainOrLossCalculation   =
+              sample[TaxableGainOrLossCalculation].copy(taxableGainOrLoss = taxableGain)
+            val yearToDateLiabilityCalculation =
+              sample[YearToDateLiabilityCalculation].copy(yearToDateLiability = yearToDateLiability)
+
+            val (session, journey, _) = sessionWithMultipleDisposalsState(
+              Some(
+                IncompleteNonCalculatedYTDAnswers.empty.copy(
+                  taxableGainOrLoss = Some(taxableGain),
+                  yearToDateLiability = Some(yearToDateLiability),
+                  checkForRepayment = Some(true),
+                  mandatoryEvidence = None,
+                  estimatedIncome = Some(estimatedIncome),
+                  personalAllowance = Some(personalAllowance),
+                  taxableGainOrLossCalculation = Some(taxableGainOrLossCalculation),
+                  yearToDateLiabilityCalculation = Some(yearToDateLiabilityCalculation)
+                )
+              ),
+              UserType.Individual,
+              wasUkResident = true,
+              isFurtherReturn = true,
+              gainOrLossAfterReliefs = Some(gainOrLossAfterReliefs)
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(journey)(
+                Right(sample[Eligible].copy(calculation = glarCalculation))
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
+          }
+
+      }
+
       "display the page" when {
 
         def test(
           answers: YearToDateLiabilityAnswers,
           backLink: Call,
-          isFurtherReturn: Boolean
+          furtherReturnCalculationEligibility: Option[FurtherReturnCalculationEligibility]
         ): Unit = {
           val draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
             Some(answers),
@@ -3974,7 +4127,12 @@ class YearToDateLiabilityControllerSpec
           val journey     = sample[FillingOutReturn].copy(
             draftReturn = draftReturn,
             previousSentReturns = Some(
-              PreviousReturnData(if (isFurtherReturn) List(sample[ReturnSummary]) else List.empty, None, None, None)
+              PreviousReturnData(
+                if (furtherReturnCalculationEligibility.isDefined) List(sample[ReturnSummary]) else List.empty,
+                None,
+                None,
+                None
+              )
             ),
             amendReturnData = None
           )
@@ -4000,6 +4158,9 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
+            furtherReturnCalculationEligibility.foreach(e =>
+              mockFurthereturnCalculationEligibilityCheck(journey)(Right(e))
+            )
             mockUpscanInitiate(
               routes.YearToDateLiabilityController
                 .uploadMandatoryEvidenceFailure(),
@@ -4048,7 +4209,7 @@ class YearToDateLiabilityControllerSpec
                 None
               ),
               routes.YearToDateLiabilityController.taxDue(),
-              isFurtherReturn = false
+              None
             )
           }
 
@@ -4059,7 +4220,7 @@ class YearToDateLiabilityControllerSpec
                 taxDue = AmountInPence(200L)
               ),
               routes.YearToDateLiabilityController.checkYourAnswers(),
-              isFurtherReturn = false
+              None
             )
           }
         }
@@ -4078,10 +4239,12 @@ class YearToDateLiabilityControllerSpec
                 None,
                 None,
                 None,
+                None,
+                None,
                 None
               ),
               routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
-              isFurtherReturn = false
+              None
             )
           }
 
@@ -4097,10 +4260,12 @@ class YearToDateLiabilityControllerSpec
                 Some(sample[AmountInPence]),
                 Some(true),
                 None,
+                None,
+                None,
                 None
               ),
               routes.YearToDateLiabilityController.repayment(),
-              isFurtherReturn = true
+              Some(sample[Ineligible])
             )
           }
 
@@ -4108,7 +4273,7 @@ class YearToDateLiabilityControllerSpec
             test(
               sample[CompleteNonCalculatedYTDAnswers],
               routes.YearToDateLiabilityController.checkYourAnswers(),
-              isFurtherReturn = false
+              None
             )
           }
         }
@@ -4935,7 +5100,9 @@ class YearToDateLiabilityControllerSpec
               None,
               None,
               answers.estimatedIncome,
-              answers.personalAllowance
+              answers.personalAllowance,
+              None,
+              None
             )
 
             val (session, fillingOutReturn, draftReturn) =
@@ -4982,7 +5149,9 @@ class YearToDateLiabilityControllerSpec
               None,
               None,
               answers.estimatedIncome,
-              answers.personalAllowance
+              answers.personalAllowance,
+              None,
+              None
             )
 
             val (session, fillingOutReturn, draftReturn) =
@@ -5074,6 +5243,73 @@ class YearToDateLiabilityControllerSpec
             )
           }
 
+          "the user is eligible for a further return calculation" in {
+            val exemptionAndLossesAnswers = sample[CompleteExemptionAndLossesAnswers]
+            val eligible                  = sample[Eligible]
+            val gainOrLossAfterReliefs    = sample[AmountInPence]
+            val calculationRequest        = TaxableGainOrLossCalculationRequest(
+              eligible.previousReturnCalculationData,
+              gainOrLossAfterReliefs,
+              exemptionAndLossesAnswers,
+              eligible.currentReturnAddress
+            )
+            val calculation               = sample[TaxableGainOrLossCalculation]
+
+            val amount     = AmountInPence(0L)
+            val answers    =
+              sample[CompleteNonCalculatedYTDAnswers]
+                .copy(
+                  taxableGainOrLoss = amount,
+                  taxableGainOrLossCalculation =
+                    Some(calculation.copy(taxableGainOrLoss = calculation.taxableGainOrLoss ++ AmountInPence(1L)))
+                )
+            val newAnswers = IncompleteNonCalculatedYTDAnswers(
+              Some(amount),
+              None,
+              None,
+              None,
+              None,
+              None,
+              None,
+              None,
+              answers.estimatedIncome,
+              answers.personalAllowance,
+              Some(calculation),
+              None
+            )
+
+            val (session, fillingOutReturn, draftReturn) =
+              sessionWithMultipleDisposalsState(
+                Some(answers),
+                UserType.Individual,
+                wasUkResident = true,
+                isFurtherReturn = true,
+                amendReturnData = None,
+                exemptionsAndLossesAnswers = Some(exemptionAndLossesAnswers),
+                gainOrLossAfterReliefs = Some(gainOrLossAfterReliefs)
+              )
+
+            val updatedFillingOutReturn = fillingOutReturn.copy(
+              draftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+            )
+            val updatedSession          = session.copy(journeyStatus = Some(updatedFillingOutReturn))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligible))
+              mockCalculateTaxableGainOrLoss(calculationRequest)(Right(calculation))
+              mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
+              mockStoreSession(updatedSession)(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(
+                "taxableGainOrLoss" -> "2"
+              ),
+              routes.YearToDateLiabilityController.checkYourAnswers()
+            )
+          }
         }
 
       }
@@ -5086,7 +5322,7 @@ class YearToDateLiabilityControllerSpec
             mockGetSession(
               sessionWithMultipleDisposalsState(
                 sample[CompleteNonCalculatedYTDAnswers]
-                  .copy(taxableGainOrLoss = AmountInPence.zero),
+                  .copy(taxableGainOrLoss = AmountInPence.zero, taxableGainOrLossCalculation = None),
                 UserType.Individual,
                 wasUkResident = true,
                 isFurtherReturn = false,
@@ -5784,7 +6020,9 @@ class YearToDateLiabilityControllerSpec
             answers.yearToDateLiability,
             None,
             answers.estimatedIncome,
-            answers.personalAllowance
+            answers.personalAllowance,
+            answers.taxableGainOrLossCalculation,
+            answers.yearToDateLiabilityCalculation
           )
           val draftReturn                 = sample[DraftSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
@@ -5842,7 +6080,9 @@ class YearToDateLiabilityControllerSpec
             answers.yearToDateLiability,
             None,
             answers.estimatedIncome,
-            answers.personalAllowance
+            answers.personalAllowance,
+            answers.taxableGainOrLossCalculation,
+            answers.yearToDateLiabilityCalculation
           )
           val draftReturn         = sample[DraftSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
@@ -5923,7 +6163,9 @@ class YearToDateLiabilityControllerSpec
               answers.yearToDateLiability,
               None,
               answers.estimatedIncome,
-              answers.personalAllowance
+              answers.personalAllowance,
+              answers.taxableGainOrLossCalculation,
+              answers.yearToDateLiabilityCalculation
             )
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
@@ -5989,6 +6231,8 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           Some(upscanUpload),
+          None,
+          None,
           None,
           None,
           None,
@@ -6130,6 +6374,8 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           None,
+          None,
+          None,
           None
         )
         val (session, journey, draftReturn) =
@@ -6186,6 +6432,8 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           Some(upscanUpload),
+          None,
+          None,
           None,
           None,
           None,
@@ -6607,6 +6855,8 @@ class YearToDateLiabilityControllerSpec
         None,
         None,
         None,
+        None,
+        None,
         None
       )
 
@@ -6996,7 +7246,9 @@ class YearToDateLiabilityControllerSpec
             None,
             None,
             Some(estimatedIncome),
-            Some(personalAllowance)
+            Some(personalAllowance),
+            None,
+            None
           )
 
           val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
@@ -7135,7 +7387,9 @@ class YearToDateLiabilityControllerSpec
             None,
             None,
             estimatedIncome,
-            personalAllowance
+            personalAllowance,
+            None,
+            None
           )
 
           val draftReturn = sample[DraftSingleDisposalReturn].copy(
@@ -7490,7 +7744,8 @@ class YearToDateLiabilityControllerSpec
               yearToDateLiability = Some(AmountInPence(10000L)),
               taxDue = None,
               checkForRepayment = None,
-              mandatoryEvidence = None
+              mandatoryEvidence = None,
+              yearToDateLiabilityCalculation = None
             )
 
           val (session, journey, draftReturn) = sessionWithSingleDisposalState(
@@ -7520,6 +7775,86 @@ class YearToDateLiabilityControllerSpec
 
         }
 
+        "the user is eligible for a further return calculation" in {
+          val ytdLiability                                      = AmountInPence(1L)
+          val taxYear                                           = sample[TaxYear]
+          val (taxableGain, estimatedIncome, personalAllowance) =
+            (sample[AmountInPence], sample[AmountInPence], sample[AmountInPence])
+
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(Self),
+            disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
+          )
+
+          val calculationRequest = YearToDateLiabilityCalculationRequest(
+            triageAnswers,
+            taxableGain,
+            estimatedIncome,
+            personalAllowance,
+            isATrust = false
+          )
+          val calculationResult  = sample[YearToDateLiabilityCalculation]
+
+          val answers = IncompleteNonCalculatedYTDAnswers(
+            Some(taxableGain),
+            Some(true),
+            None,
+            None,
+            None,
+            None,
+            Some(ytdLiability),
+            None,
+            Some(estimatedIncome),
+            Some(personalAllowance),
+            None,
+            None
+          )
+
+          val newAnswers = answers.copy(
+            yearToDateLiability = Some(ytdLiability),
+            yearToDateLiabilityCalculation = Some(calculationResult)
+          )
+
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = triageAnswers,
+            yearToDateLiabilityAnswers = Some(answers)
+          )
+
+          val journey = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            agentReferenceNumber = None,
+            subscribedDetails = sample[SubscribedDetails].copy(
+              name = Right(sample[IndividualName])
+            ),
+            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+            amendReturnData = None
+          )
+
+          val session = SessionData.empty.copy(
+            journeyStatus = Some(journey),
+            userType = Some(UserType.Individual)
+          )
+
+          val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+          val newJourney     = journey.copy(draftReturn = newDraftReturn)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Eligible]))
+            mockCalculateYearToDateLiability(calculationRequest)(Right(calculationResult))
+            mockStoreDraftReturn(newJourney)(
+              Right(())
+            )
+            mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("yearToDateLiability" -> ytdLiability.inPounds().toString),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
+
       }
 
       "not do any updates" when {
@@ -7527,7 +7862,8 @@ class YearToDateLiabilityControllerSpec
         "the answer submitted is the same as the one held in session" in {
           val submittedAnswer = "0"
           val answers         = sample[CompleteNonCalculatedYTDAnswers].copy(
-            yearToDateLiability = Some(AmountInPence.zero)
+            yearToDateLiability = Some(AmountInPence.zero),
+            yearToDateLiabilityCalculation = None
           )
 
           val (session, journey, _) = sessionWithSingleDisposalState(
@@ -7621,6 +7957,8 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           Some(sample[AmountInPence]),
+          None,
+          None,
           None,
           None,
           None

@@ -43,7 +43,9 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
           completeAnswers.yearToDateLiability,
           completeAnswers.checkForRepayment,
           completeAnswers.estimatedIncome,
-          completeAnswers.personalAllowance
+          completeAnswers.personalAllowance,
+          completeAnswers.taxableGainOrLossCalculation,
+          completeAnswers.yearToDateLiabilityCalculation
         )
       }
 
@@ -64,7 +66,9 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         completeAnswers.yearToDateLiability,
         completeAnswers.checkForRepayment,
         completeAnswers.estimatedIncome,
-        completeAnswers.personalAllowance
+        completeAnswers.personalAllowance,
+        completeAnswers.taxableGainOrLossCalculation,
+        completeAnswers.yearToDateLiabilityCalculation
       )
 
     "have a method which unsets fields" when {

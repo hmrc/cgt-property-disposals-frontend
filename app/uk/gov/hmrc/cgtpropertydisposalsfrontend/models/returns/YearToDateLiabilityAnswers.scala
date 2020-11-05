@@ -45,12 +45,14 @@ object YearToDateLiabilityAnswers {
       yearToDateLiability: Option[AmountInPence],
       checkForRepayment: Option[Boolean],
       estimatedIncome: Option[AmountInPence],
-      personalAllowance: Option[AmountInPence]
+      personalAllowance: Option[AmountInPence],
+      taxableGainOrLossCalculation: Option[TaxableGainOrLossCalculation],
+      yearToDateLiabilityCalculation: Option[YearToDateLiabilityCalculation]
     ) extends NonCalculatedYTDAnswers
 
     object IncompleteNonCalculatedYTDAnswers {
       val empty: IncompleteNonCalculatedYTDAnswers =
-        IncompleteNonCalculatedYTDAnswers(None, None, None, None, None, None, None, None, None, None)
+        IncompleteNonCalculatedYTDAnswers(None, None, None, None, None, None, None, None, None, None, None, None)
 
       def fromCompleteAnswers(
         c: CompleteNonCalculatedYTDAnswers
@@ -65,7 +67,9 @@ object YearToDateLiabilityAnswers {
           c.yearToDateLiability,
           c.checkForRepayment,
           c.estimatedIncome,
-          c.personalAllowance
+          c.personalAllowance,
+          c.taxableGainOrLossCalculation,
+          c.yearToDateLiabilityCalculation
         )
     }
 
@@ -77,7 +81,9 @@ object YearToDateLiabilityAnswers {
       yearToDateLiability: Option[AmountInPence],
       checkForRepayment: Option[Boolean],
       estimatedIncome: Option[AmountInPence],
-      personalAllowance: Option[AmountInPence]
+      personalAllowance: Option[AmountInPence],
+      taxableGainOrLossCalculation: Option[TaxableGainOrLossCalculation],
+      yearToDateLiabilityCalculation: Option[YearToDateLiabilityCalculation]
     ) extends NonCalculatedYTDAnswers
 
     implicit class NonCalculatedYTDLiabilityAnswersOps(
