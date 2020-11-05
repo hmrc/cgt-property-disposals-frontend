@@ -26,10 +26,10 @@
 
 @classNameWithIsLink = @{
   state match {
-    case InProgress => "app-task-list__task-inprogress" -> true
-    case Complete => "app-task-list__task-completed complete" -> true
-    case CannotStart => "app-task-list__task-completed cannot-start" -> false
-    case ToDo => "app-task-list__task-completed to-do" -> true
+    case InProgress => "govuk-tag--blue app-task-list__tag" -> true
+    case Complete => "app-task-list__task-completed complete app-task-list__tag" -> true
+    case CannotStart => "govuk-tag--grey app-task-list__tag" -> false
+    case ToDo => "govuk-tag--grey app-task-list__tag" -> true
   }
 }
 
@@ -38,7 +38,7 @@
   @label
   </a>
 } else {
-  <span>
+  <span class="app-task-list__task-name">
   @label
   </span>
 }
