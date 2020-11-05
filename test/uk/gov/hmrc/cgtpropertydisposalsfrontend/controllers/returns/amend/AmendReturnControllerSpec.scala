@@ -33,13 +33,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgaino
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes.{YearToDateLiabilityController => ytdRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.completeSingleDisposalReturnGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, IndividualUserType, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.CancelAmendReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -259,9 +263,15 @@ class AmendReturnControllerSpec
             val auditEvent    = CancelAmendReturn("cgtRef", "submissionId", Some("agentRef"))
             val journeyStatus = sample[StartingToAmendReturn].copy(
               subscribedDetails = sample[SubscribedDetails].copy(cgtReference = CgtReference(auditEvent.cgtReference)),
-              originalReturn = sample[CompleteReturnWithSummary].copy(summary =
-                sample[ReturnSummary].copy(
+              originalReturn = sample[CompleteReturnWithSummary].copy(
+                summary = sample[ReturnSummary].copy(
                   submissionId = auditEvent.submissionId
+                ),
+                completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                  representeeAnswers = None,
+                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                    individualUserType = Some(IndividualUserType.Self)
+                  )
                 )
               ),
               agentReferenceNumber = auditEvent.agentReferenceNumber.map(AgentReferenceNumber(_))
@@ -287,9 +297,15 @@ class AmendReturnControllerSpec
               subscribedDetails = sample[SubscribedDetails].copy(cgtReference = CgtReference(auditEvent.cgtReference)),
               amendReturnData = Some(
                 sample[AmendReturnData].copy(
-                  originalReturn = sample[CompleteReturnWithSummary].copy(summary =
-                    sample[ReturnSummary].copy(
+                  originalReturn = sample[CompleteReturnWithSummary].copy(
+                    summary = sample[ReturnSummary].copy(
                       submissionId = auditEvent.submissionId
+                    ),
+                    completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                      representeeAnswers = None,
+                      triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                        individualUserType = Some(IndividualUserType.Self)
+                      )
                     )
                   )
                 )
