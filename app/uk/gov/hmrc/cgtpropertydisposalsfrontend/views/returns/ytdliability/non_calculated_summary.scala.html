@@ -175,12 +175,15 @@
     }
 
   @if(showFiles) {
-    @cyaRow(
-      messages("mandatoryEvidence.title"),
-      Html(answers.mandatoryEvidence.fileName),
-      Some(cyaChange(messages("mandatoryEvidence.cyaChange"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
-      "mandatoryEvidence-value"
-    )
+    @answers.mandatoryEvidence.map{ m =>
+        @cyaRow(
+            messages("mandatoryEvidence.title"),
+            Html(m.fileName),
+            Some(cyaChange(messages("mandatoryEvidence.cyaChange"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
+            "mandatoryEvidence-value"
+        )
+    }
+
   }
 
 }

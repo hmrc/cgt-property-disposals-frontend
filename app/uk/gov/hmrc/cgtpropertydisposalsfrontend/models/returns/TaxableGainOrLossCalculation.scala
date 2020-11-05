@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import cats.Eq
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
@@ -29,6 +30,8 @@ final case class TaxableGainOrLossCalculation(
 )
 
 object TaxableGainOrLossCalculation {
+
+  implicit val eq: Eq[TaxableGainOrLossCalculation] = Eq.fromUniversalEquals
 
   implicit val format: OFormat[TaxableGainOrLossCalculation] = Json.format
 

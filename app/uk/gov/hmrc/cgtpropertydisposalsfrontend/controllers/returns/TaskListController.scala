@@ -230,7 +230,7 @@ class TaskListController @Inject() (
           case c: CalculatedYTDAnswers    =>
             c.fold(_.mandatoryEvidence, _.mandatoryEvidence)
           case n: NonCalculatedYTDAnswers =>
-            n.fold(_.mandatoryEvidence, c => Some(c.mandatoryEvidence))
+            n.fold(_.mandatoryEvidence, _.mandatoryEvidence)
         }
 
         mandatoryEvidence

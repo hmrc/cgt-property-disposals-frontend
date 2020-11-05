@@ -45,12 +45,14 @@ object YearToDateLiabilityAnswers {
       yearToDateLiability: Option[AmountInPence],
       checkForRepayment: Option[Boolean],
       estimatedIncome: Option[AmountInPence],
-      personalAllowance: Option[AmountInPence]
+      personalAllowance: Option[AmountInPence],
+      taxableGainOrLossCalculation: Option[TaxableGainOrLossCalculation],
+      yearToDateLiabilityCalculation: Option[YearToDateLiabilityCalculation]
     ) extends NonCalculatedYTDAnswers
 
     object IncompleteNonCalculatedYTDAnswers {
       val empty: IncompleteNonCalculatedYTDAnswers =
-        IncompleteNonCalculatedYTDAnswers(None, None, None, None, None, None, None, None, None, None)
+        IncompleteNonCalculatedYTDAnswers(None, None, None, None, None, None, None, None, None, None, None, None)
 
       def fromCompleteAnswers(
         c: CompleteNonCalculatedYTDAnswers
@@ -59,13 +61,15 @@ object YearToDateLiabilityAnswers {
           Some(c.taxableGainOrLoss),
           Some(c.hasEstimatedDetails),
           Some(c.taxDue),
-          Some(c.mandatoryEvidence),
+          c.mandatoryEvidence,
           None,
           None,
           c.yearToDateLiability,
           c.checkForRepayment,
           c.estimatedIncome,
-          c.personalAllowance
+          c.personalAllowance,
+          c.taxableGainOrLossCalculation,
+          c.yearToDateLiabilityCalculation
         )
     }
 
@@ -73,11 +77,13 @@ object YearToDateLiabilityAnswers {
       taxableGainOrLoss: AmountInPence,
       hasEstimatedDetails: Boolean,
       taxDue: AmountInPence,
-      mandatoryEvidence: MandatoryEvidence,
+      mandatoryEvidence: Option[MandatoryEvidence],
       yearToDateLiability: Option[AmountInPence],
       checkForRepayment: Option[Boolean],
       estimatedIncome: Option[AmountInPence],
-      personalAllowance: Option[AmountInPence]
+      personalAllowance: Option[AmountInPence],
+      taxableGainOrLossCalculation: Option[TaxableGainOrLossCalculation],
+      yearToDateLiabilityCalculation: Option[YearToDateLiabilityCalculation]
     ) extends NonCalculatedYTDAnswers
 
     implicit class NonCalculatedYTDLiabilityAnswersOps(

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import cats.Eq
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
@@ -30,6 +31,8 @@ final case class YearToDateLiabilityCalculation(
 )
 
 object YearToDateLiabilityCalculation {
+
+  implicit val eq: Eq[YearToDateLiabilityCalculation] = Eq.fromUniversalEquals
 
   implicit val format: OFormat[YearToDateLiabilityCalculation] = Json.format
 
