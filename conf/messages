@@ -843,7 +843,7 @@ disposalMethod.cyaChange=how the property was sold or disposed of
 
 wereYouAUKResident.title=Were you a UK resident on the disposal date?
 wereYouAUKResident.capacitor.title=Was the person a UK resident on the disposal date?
-wereYouAUKResident.trust.title=Was the trust resident in the UK on the disposal date?
+wereYouAUKResident.trust.title=Was the trust a UK resident on the disposal date?
 wereYouAUKResident.personalRep.title=Was the person a UK resident on the disposal date?
 wereYouAUKResident.agent.title=Was your client a UK resident on the disposal date?
 wereYouAUKResident.personalRepInPeriodOfAdmin.title=Was the person a UK resident for the tax year in which they died?
