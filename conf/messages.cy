@@ -656,24 +656,13 @@ disposalMethod.trust.error.invalid=Dewiswch os gwnaeth yr ymddiriedolaeth ei wer
 disposalMethod.capacitor.error.invalid=Dewiswch os gwnaeth y person ei werthu, ei roi i ffwrdd neu arall
 disposalMethod.personalRep.error.invalid=Dewiswch os gwnaeth y person ei werthu, ei roi i ffwrdd neu arall
 disposalMethod.cyaChange=sut y cafodd yr eiddo ei werthu neu ei waredu
-wereYouAUKResident.main.title=Rhowch wybod i ni am eich statws preswylio ar y dyddiad gwaredu
-wereYouAUKResident.capacitor.main.title=Rhowch wybod i ni am statws preswylio’r person ar y dyddiad gwaredu
-wereYouAUKResident.trust.main.title=Rhowch wybod i ni am statws preswylio’r ymddiriedolaeth ar y dyddiad gwaredu
-wereYouAUKResident.personalRep.main.title=Rhowch wybod i ni am statws preswylio’r person ar y dyddiad gwaredu
-wereYouAUKResident.agent.main.title=Rhowch wybod i ni am statws preswylio’ch cleient ar y dyddiad gwaredu
-wereYouAUKResident.personalRepInPeriodOfAdmin.main.title=A oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi?
 wereYouAUKResident.title=A oeddech yn breswylydd yn y DU ar y dyddiad gwaredu?
 wereYouAUKResident.capacitor.title=A oedd y person yn breswylydd yn y DU ar y dyddiad gwaredu?
 wereYouAUKResident.trust.title=A oedd yr ymddiriedolaeth yn breswylydd yn y DU ar y dyddiad gwaredu?
 wereYouAUKResident.personalRep.title=A oedd y person yn breswylydd yn y DU ar y dyddiad gwaredu?
 wereYouAUKResident.agent.title=A oedd eich cleient yn breswylydd yn y DU ar y dyddiad gwaredu?
 wereYouAUKResident.personalRepInPeriodOfAdmin.title=A oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi?
-wereYouAUKResident.helpText.p1=Y dyddiad gwaredu ar gyfer eiddo yn y DU yw’r dyddiad cyfnewid contractau. Mae cyfnewid contractau fel arfer yn digwydd pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd a phan fydd y prynwr yn talu blaendal.
-wereYouAUKResident.helpText.p2=Os oeddech yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
-wereYouAUKResident.capacitor.helpText.p2=Os oedd y person yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
-wereYouAUKResident.trust.helpText.p2=Os oedd yr ymddiriedolaeth yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
-wereYouAUKResident.personalRep.helpText.p2=Os oedd y person yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
-wereYouAUKResident.agent.helpText.p2=Os oedd eich cleient yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
+wereYouAUKResident.helpText=Y dyddiad gwaredu ar gyfer eiddo yn y DU yw’r dyddiad cyfnewid contractau. Mae cyfnewid contractau fel arfer yn digwydd pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd a phan fydd y prynwr yn talu blaendal.
 wereYouAUKResident.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth am flwyddyn dreth (yn agor ffenestr newydd)</a>
