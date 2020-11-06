@@ -15,6 +15,7 @@
  *@
 
 @import play.api.i18n.Messages
+@import play.api.mvc.Request
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
@@ -26,7 +27,7 @@
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
-@()(implicit messages: Messages, appConfig: ViewConfig)
+@()(implicit messages: Messages, appConfig: ViewConfig, request: Request[_])
 
 @title = @{messages("signed-out.title")}
 

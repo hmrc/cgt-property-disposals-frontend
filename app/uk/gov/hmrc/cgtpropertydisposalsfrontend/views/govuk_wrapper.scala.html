@@ -15,6 +15,7 @@
  *@
 
 @import play.api.i18n.Messages
+@import play.api.mvc.Request
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
@@ -53,7 +54,7 @@
   serviceInfoContent: Html = HtmlFormat.empty,
   scriptElem: Option[Html] = None,
   withSignOutLink: Boolean = true,
-  withAccount: Boolean)(implicit messages: Messages)
+  withAccount: Boolean)(implicit messages: Messages, request: Request[_])
 
 @head = {
     <script>
