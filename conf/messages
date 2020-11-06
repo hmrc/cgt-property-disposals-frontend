@@ -1282,7 +1282,7 @@ multipleDisposals.triage.cya.guidanceLink=Help completing this section
 
 returns.return-to-summary-link=Return to summary
 task-list.InProgress=In progress
-task-list.Complete=Complete
+task-list.Complete=Completed
 task-list.CannotStart=Cannot start yet
 task-list.ToDo=Not started
 task-list.incompleteTriage=You must complete this section to continue. Some of the details you entered may have been saved as a draft.
