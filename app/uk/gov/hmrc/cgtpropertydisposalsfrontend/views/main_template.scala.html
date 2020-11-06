@@ -15,6 +15,7 @@
  *@
 
 @import play.api.i18n.Messages
+@import play.api.mvc.Request
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
@@ -36,7 +37,7 @@
     withSignOutLink: Boolean = true,
     sidebar: Option[Html] = None,
     accountMenu: Option[Html] = None
-)(mainContent: Html)(implicit messages: Messages, appConfig: ViewConfig)
+)(mainContent: Html)(implicit messages: Messages, appConfig: ViewConfig, request: Request[_])
 
 @serviceInfoContent = @{accountMenu.fold(Html(""))(s => s)}
 

@@ -15,6 +15,7 @@
  *@
 
 @import play.api.i18n.Messages
+@import play.api.mvc.Request
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
@@ -24,7 +25,7 @@
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
 )
 
-@()(implicit messages: Messages, appConfig: ViewConfig)
+@()(implicit messages: Messages, appConfig: ViewConfig, request: Request[_])
 
 @title = @{
     messages("landingPage.title")
