@@ -709,8 +709,7 @@ numberOfProperties.helpText.capacitor.p2.heading=If the property was a mixed use
 numberOfProperties.helpText.personalRep.p2.heading=If the property was a mixed use property
 numberOfProperties.helpText.personalRepInPeriodOfAdmin.p2.heading=If the property was a mixed use property
 
-numberOfProperties.helpText.p2.text=A mixed use property is part residential and part commercial. For this return, even if a property had both a commercial part and a residential part, it would still be considered ’one’ property.
-numberOfProperties.helpText.p2.text=A mixed use property is part residential and part commercial. For this return, even if a property had both a commercial part and a residential part, it would still be considered ’one’ property.
+numberOfProperties.helpText.p2.text=A mixed use property is part residential and part commercial. For this return, even if a property had both a commercial part and a residential part, it would still be considered ‘one’ property.
 
 numberOfProperties.nonResident.summary=If you’re a non-resident
 numberOfProperties.nonResident.agent.summary=If your client is a non-resident
@@ -751,12 +750,12 @@ numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.li2=shares all had the
 
 numberOfProperties.details.summary=What happens on the completion date?
 
-numberOfProperties.details.p1=The completion date is usually the day the you disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
-numberOfProperties.agent.details.p1=The completion date is usually the day the your client disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
-numberOfProperties.trust.details.p1=The completion date is usually the day the trust disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
-numberOfProperties.capacitor.details.p1=The completion date is usually the day the person disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
-numberOfProperties.personalRep.details.p1=The completion date is usually the day the person disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
-numberOfProperties.personalRepInPeriodOfAdmin.details.p1=The completion date is usually the day the personal representative got the money from the sale or disposal and the new owner got the keys.
+numberOfProperties.details.p1=The completion date is usually the day you disposed of the property and got the money from the sale or disposal. It’s usually when the new owner got the keys.
+numberOfProperties.agent.details.p1=The completion date is usually the day your client disposed of the property and got the money from the sale or disposal. It’s usually when the new owner got the keys.
+numberOfProperties.trust.details.p1=The completion date is usually the day the trust disposed of the property and got the money from the sale or disposal. It’s usually when the new owner got the keys.
+numberOfProperties.capacitor.details.p1=The completion date is usually the day the person disposed of the property and got the money from the sale or disposal. It’s usually when the new owner got the keys.
+numberOfProperties.personalRep.details.p1=The completion date is usually the day the person disposed of the property and got the money from the sale or disposal. It’s usually when the new owner got the keys.
+numberOfProperties.personalRepInPeriodOfAdmin.details.p1=The completion date is usually the day the personal representative disposed of the property and got the money from the sale or disposal. It’s usually when the new owner got the keys.
 
 numberOfProperties.One=One
 numberOfProperties.MoreThanOne=2 or more
