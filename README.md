@@ -12,7 +12,7 @@ in Scala using the Play framework. It provides functionality to do the following
 Subscription details and CGT returns are held in the Enterprise Tax Management Platform (ETMP) which is a HMRC back end
 system. Details are collected in this frontend microservice and then relayed on to ETMP via a 
 [backend microservice](https://github.com/hmrc/cgt-property-disposals). Access to this service requires users to be 
-logged in via Government Gateway.
+logged in via Government Gateway. The service can be access in production [here](https://www.tax.service.gov.uk/capital-gains-tax-uk-property/start/report-pay-capital-gains-tax-uk-property).
 
 The service also allows agents to manage subscription details and submit returns on behalf of clients. An agent-client 
 handshake has to have been completed before agents can perform such actions on behalf of clients. The handshake process 
