@@ -242,7 +242,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             gainOrLossAfterReliefs = None
           )
           complete.copy(hasAttachments =
-            complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.isLeft
+            complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers
+              .fold(_.mandatoryEvidence, _.mandatoryEvidence)
+              .isDefined
           )
         }
 
@@ -367,7 +369,9 @@ class CheckAllAnswersAndSubmitControllerSpec
                 gainOrLossAfterReliefs = Some(gainOrLossAfterReliefs)
               )
               complete.copy(hasAttachments =
-                complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.isLeft
+                complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers
+                  .fold(_.mandatoryEvidence, _.mandatoryEvidence)
+                  .isDefined
               )
             }
 
@@ -421,7 +425,9 @@ class CheckAllAnswersAndSubmitControllerSpec
                 gainOrLossAfterReliefs = Some(gainOrLossAfterReliefs)
               )
               complete.copy(hasAttachments =
-                complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.isLeft
+                complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers
+                  .fold(_.mandatoryEvidence, _.mandatoryEvidence)
+                  .isDefined
               )
             }
 
@@ -565,16 +571,22 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "the user is on a multiple disposals journey" must {
 
-        val completeReturn = sample[CompleteMultipleDisposalsReturn]
-          .copy(
-            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-              .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
-            representeeAnswers = Some(
-              sample[CompleteRepresenteeAnswers]
-                .copy(dateOfDeath = Some(DateOfDeath(LocalDate.now)), isFirstReturn = true)
-            ),
-            hasAttachments = true
+        val completeReturn = {
+          val complete = sample[CompleteMultipleDisposalsReturn]
+            .copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+              representeeAnswers = Some(
+                sample[CompleteRepresenteeAnswers]
+                  .copy(dateOfDeath = Some(DateOfDeath(LocalDate.now)), isFirstReturn = true)
+              )
+            )
+
+          complete.copy(
+            hasAttachments =
+              complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.mandatoryEvidence.isDefined
           )
+        }
 
         val completeDraftReturn = DraftMultipleDisposalsReturn(
           UUID.randomUUID(),
@@ -743,13 +755,19 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "the user is on a single indirect disposal journey" must {
 
-        val completeReturn = sample[CompleteSingleIndirectDisposalReturn].copy(
-          triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-            .copy(individualUserType = Some(PersonalRepresentative)),
-          representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true)),
-          yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers],
-          hasAttachments = true
-        )
+        val completeReturn = {
+          val complete = sample[CompleteSingleIndirectDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(individualUserType = Some(PersonalRepresentative)),
+            representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true)),
+            yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers]
+          )
+
+          complete.copy(
+            hasAttachments =
+              complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.mandatoryEvidence.isDefined
+          )
+        }
 
         val completeDraftReturn = DraftSingleIndirectDisposalReturn(
           UUID.randomUUID(),
@@ -927,13 +945,19 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "the user is on a multiple indirect disposals journey" must {
 
-        val completeReturn = sample[CompleteMultipleIndirectDisposalReturn]
-          .copy(
-            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-              .copy(individualUserType = Some(PersonalRepresentative)),
-            representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true)),
-            hasAttachments = true
+        val completeReturn = {
+          val complete = sample[CompleteMultipleIndirectDisposalReturn]
+            .copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentative)),
+              representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true))
+            )
+
+          complete.copy(
+            hasAttachments =
+              complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.mandatoryEvidence.isDefined
           )
+        }
 
         val completeDraftReturn = DraftMultipleIndirectDisposalsReturn(
           UUID.randomUUID(),
@@ -1101,13 +1125,19 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "the user is on a single mixed use disposals journey" must {
 
-        val completeReturn = sample[CompleteSingleMixedUseDisposalReturn]
-          .copy(
-            triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(individualUserType = Some(PersonalRepresentative)),
-            representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true)),
-            hasAttachments = true
+        val completeReturn = {
+          val complete = sample[CompleteSingleMixedUseDisposalReturn]
+            .copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentative)),
+              representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true))
+            )
+
+          complete.copy(
+            hasAttachments =
+              complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.mandatoryEvidence.isDefined
           )
+        }
 
         val completeDraftReturn = DraftSingleMixedUseDisposalReturn(
           UUID.randomUUID(),
@@ -1288,7 +1318,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
         val hasAttachments =
           r.supportingDocumentAnswers.evidences.nonEmpty || r.yearToDateLiabilityAnswers
-            .fold(_ => true, _.mandatoryEvidence.isDefined)
+            .fold(_.mandatoryEvidence, _.mandatoryEvidence)
+            .isDefined
 
         r.copy(hasAttachments = hasAttachments) -> hasAttachments
       }
