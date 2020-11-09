@@ -84,7 +84,7 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               gainOrLossAfterReliefs,
-              hasAttachments = true
+              hasAttachments = u.evidences.nonEmpty || y.mandatoryEvidence.isDefined
             )
           )
 
@@ -183,7 +183,7 @@ object CompleteReturn {
               i,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true
+              hasAttachments = u.evidences.nonEmpty || y.mandatoryEvidence.isDefined
             )
           )
 
@@ -247,7 +247,7 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true
+              hasAttachments = u.evidences.nonEmpty || y.mandatoryEvidence.isDefined
             )
           )
 
@@ -297,7 +297,7 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true
+              hasAttachments = u.evidences.nonEmpty || y.mandatoryEvidence.isDefined
             )
           )
 
@@ -346,7 +346,7 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true
+              hasAttachments = u.evidences.nonEmpty || y.mandatoryEvidence.isDefined
             )
           )
 
