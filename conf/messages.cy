@@ -439,7 +439,7 @@ enterTrn.ifYouCannotFind.p1=Os gwnaethoch gofrestru’r ymddiriedolaeth a ni all
 enterTrustName.label=Enw’r ymddiriedolaeth
 trustName.error.required=Nodwch enw’ch ymddiriedolaeth
 trustName.error.tooLong=Mae’n rhaid i enw’ch ymddiriedolaeth fod yn llai na 105 o gymeriadau
-trustName.error.pattern=Mae’n rhaid i enw’r ymddiriedolaeth gynnwys llythrennau, comas, ampersandau, collnodau a chysylltnodau yn unig
+trustName.error.pattern=Mae’n rhaid i enw’r ymddiriedolaeth gynnwys llythrennau, rhifau, bylchau, ampersandau, collnodau a chysylltnodau yn unig. Peidiwch â chynnwys colonau
 alreadySubscribedWithDifferentGGAccount.title=Mae angen i chi fewngofnodi â chyfrif Porth y Llywodraeth gwahanol
 alreadySubscribedWithDifferentGGAccount.p=Bydd angen i chi mewngofnodi â’r un Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth a defnyddiwyd gennych i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
 alreadySubscribedWithDifferentGGAccount.button=Mewngofnodi gyda’r Dynodydd Defnyddiwr (ID) cywir
@@ -504,7 +504,8 @@ account.menu.manageYourDetails=Rheoli’r cyfrif
 account.menu.signOut=Allgofnodi
 account.menu.changeClient=Newid cleient
 account.agent.prefix=Cleient:
-account.home.title=Hafan Cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
+account.home.title=Cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
+account.home.accountName=Enw’r cyfrif: {0}
 account.home.subtitle=Rhif y cyfrif: {0}
 account.home.left.title=Rhwymedigaeth Treth Enillion Cyfalaf
 account.home.left.placeholder=Cyfanswm eich rhwymedigaeth Treth Enillion Cyfalaf am warediadau eiddo yn y DU rhwng 6 Ebrill 2020 a 5 Ebrill 2021.
@@ -531,9 +532,9 @@ account.manageYourDetails.Email.changed=Mae’r cyfeiriad e-bost cyswllt wedi ne
 account.manageYourDetails.Address.changed=Mae’r cyfeiriad cyswllt wedi newid
 account.manageYourDetails.changed.p=Byddwn yn defnyddio hwn i gysylltu â chi ynghylch eich Treth Enillion Cyfalaf ar werthiannau neu warediadau o eiddo yn y DU.
 returns.list.title=Ffurflenni Treth a anfonwyd
-returns.list.ref=Cyfeirnod y Ffurflen Dreth:
-returns.list.view=Bwrw golwg dros y Ffurflen Dreth
-returns.list.viewAndPay=Bwrw golwg dros y Ffurflen Dreth a thalu
+returns.list.ref=Cyfeirnod Ffurflen Dreth:
+returns.list.view=Bwrw golwg dros neu newid Ffurflen Dreth
+returns.list.viewAndPay=Bwrw golwg dros, talu neu newid Ffurflen Dreth
 returns.list.paymentDue=Taliad sy’n ddyledus
 returns.list.nextPaymentDue=Taliad nesaf yn ddyledus
 returns.list.noTaxDue=Nid oedd unrhyw dreth yn ddyledus gennych am y Ffurflen Dreth hon
@@ -1996,11 +1997,11 @@ acquisitionFees.trust.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfr
 acquisitionFees.capacitor.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr. Os oedd y person yn rhannu’r costau hyn, gall ond hawlio’i gyfran ef ohonynt.
 acquisitionFees.personalRep.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr. Os oedd y person yn rhannu’r costau hyn, gallwch ond cynnwys ei gyfran ef ohonynt.
 acquisitionFees.personalRepInPeriodOfAdmin.helpText=Er enghraifft, costau cyfreithiol wrth sicrhau’r hawliau i’r eiddo.
-acquisitionFees.indirect.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr. Os oeddech yn rhannu’r costau hyn, gallwch ond hawlio’ch cyfran chi ohonynt.
-acquisitionFees.agent.indirect.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr. Os oedd eich cleient yn rhannu’r costau hyn, gall ond hawlio’i gyfran ef ohonynt.
-acquisitionFees.trust.indirect.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr. Os oedd yr ymddiriedolaeth yn rhannu’r costau hyn, gall ond hawlio’i chyfran hi ohonynt.
-acquisitionFees.capacitor.indirect.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr. Os oedd y person yn rhannu’r costau hyn, gall ond hawlio’i gyfran ef ohonynt.
-acquisitionFees.personalRep.indirect.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr. Os oedd y person yn rhannu’r costau hyn, gallwch ond cynnwys ei gyfran ef ohonynt.
+acquisitionFees.indirect.helpText=Gallai costau ychwanegol gynnwys ffioedd brocer stoc.
+acquisitionFees.agent.indirect.helpText=Gallai costau ychwanegol gynnwys ffioedd brocer stoc.
+acquisitionFees.trust.indirect.helpText=Gallai costau ychwanegol gynnwys ffioedd brocer stoc.
+acquisitionFees.capacitor.indirect.helpText=Gallai costau ychwanegol gynnwys ffioedd brocer stoc.
+acquisitionFees.personalRep.indirect.helpText=Gallai costau ychwanegol gynnwys ffioedd brocer stoc.
 acquisitionFees.personalRepInPeriodOfAdmin.indirect.helpText=Gallai costau ychwanegol gynnwys ffioedd brocer stoc.
 acquisitionFees.rebased.title=A ydych am hawlio unrhyw gostau ychwanegol y gwnaethoch eu talu pan wnaethoch ail-sylfaenu’r eiddo?
 acquisitionFees.agent.rebased.title=A oedd unrhyw gostau ail-sylfaenu ychwanegol?
@@ -2029,12 +2030,19 @@ acquisitionFees.agent.details.p1=Roedd eich cleient yn berchen ar yr eiddo ar ne
 acquisitionFees.trust.details.p1=Roedd yr ymddiriedolaeth yn berchen ar yr eiddo ar neu cyn {0}.
 acquisitionFees.capacitor.details.p1=Roedd y person yn berchen ar yr eiddo ar neu cyn {0}.
 acquisitionFees.personalRep.details.p1=Roedd y person yn berchen ar yr eiddo ar neu cyn {0}.
+
+acquisitionFees.indirect.details.p1=Roeddech yn berchen ar y cyfranddaliadau ar neu cyn {0}.
+acquisitionFees.indirect.agent.details.p1=Roedd eich cleient yn berchen ar y cyfranddaliadau ar neu cyn {0}.
+acquisitionFees.indirect.trust.details.p1=Roedd yr ymddiriedolaeth yn berchen ar y cyfranddaliadau ar neu cyn {0}.
+acquisitionFees.indirect.capacitor.details.p1=Roedd y person yn berchen ar y cyfranddaliadau ar neu cyn {0}.
+acquisitionFees.indirect.personalRep.details.p1=Roedd y person yn berchen ar y cyfranddaliadau ar neu cyn {0}.
+
 acquisitionFees.details.p2=Mae hyn yn golygu, wrth i chi gyfrifo’ch Treth Enillion Cyfalaf, fod yn rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 acquisitionFees.agent.details.p2=I gyfrifo enillion neu golledion eich cleient, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 acquisitionFees.trust.details.p2=I gyfrifo enillion neu golledion yr ymddiriedolaeth, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
-acquisitionFees.indirect.details.p2=Mae hyn yn golygu, wrth i chi gyfrifo’ch Treth Enillion Cyfalaf, fod yn rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
-acquisitionFees.indirect.agent.p2=I gyfrifo Treth Enillion Cyfalaf eich cleient, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
-acquisitionFees.indirect.trust.details.p2=I gyfrifo Treth Enillion Cyfalaf yr ymddiriedolaeth, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
+acquisitionFees.indirect.details.p2=Mae hyn yn golygu, wrth i chi gyfrifo’ch Treth Enillion Cyfalaf, fod yn rhaid i chi ddefnyddio gwerth marchnadol y cyfranddaliadau ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
+acquisitionFees.indirect.agent.p2=I gyfrifo Treth Enillion Cyfalaf eich cleient, mae’n rhaid i chi ddefnyddio gwerth marchnadol y cyfranddaliadau ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
+acquisitionFees.indirect.trust.details.p2=I gyfrifo Treth Enillion Cyfalaf yr ymddiriedolaeth, mae’n rhaid i chi ddefnyddio gwerth marchnadol y cyfranddaliadau ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 acquisitionFees.details.p3=Yr enw ar y broses hon yw ail-sylfaenu.
 acquisitionFees.non-resident.details.p3=Yr enw ar y broses hon yw <a href="{0}" target="_blank">ail-sylfaenu (yn agor ffenestr newydd)</a>.
 acquisitionFees.cyaChange=os oedd unrhyw gostau caffael ychwanegol
@@ -2048,6 +2056,21 @@ acquisitionFeesValue.error.invalid=Mae’n rhaid i’r costau ychwanegol fod yn 
 acquisitionFeesValue.error.tooSmall=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian, rhwng 0 a 50,000,000,000
 acquisitionFeesValue.error.tooLarge=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian, rhwng 0 a 50,000,000,000
 acquisitionFeesValue.error.tooManyDecimals=Mae’n rhaid i’r costau ychwanegol fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 1,480 neu 900.50
+
+acquisitionFees.rebased.error.required=Dewiswch ‘Iawn’ os oes costau ychwanegol
+acquisitionFees.rebased.error.invalid=Dewiswch ‘Iawn’ os oes costau ychwanegol
+acquisitionFees.individual.error.required=Dewiswch ‘Iawn’ os oes costau ychwanegol
+acquisitionFees.individual.error.invalid=Dewiswch ‘Iawn’ os oes costau ychwanegol
+acquisitionFees.individual.rebased.error.required=Dewiswch ‘Iawn’ os oes costau ychwanegol
+acquisitionFees.individual.rebased.error.invalid=Dewiswch ‘Iawn’ os oes costau ychwanegol
+acquisitionFees.indirect.error.required=Dewiswch ‘Iawn’ os oedd unrhyw gostau ychwanegol
+acquisitionFees.indirect.error.invalid=Dewiswch ‘Iawn’ os oedd unrhyw gostau ychwanegol
+acquisitionFees.individual.indirect.error.required=Dewiswch ‘Iawn’ os ydych am hawlio unrhyw gostau ychwanegol y gwnaethoch eu talu pan gawsoch y cyfranddaliadau
+acquisitionFees.individual.indirect.error.invalid=Dewiswch ‘Iawn’ os ydych am hawlio unrhyw gostau ychwanegol y gwnaethoch eu talu pan gawsoch y cyfranddaliadau
+acquisitionFees.indirect.rebased.error.required=Dewiswch ‘Iawn’ os oedd unrhyw gostau ychwanegol am gyfrifo gwerth y cyfranddaliadau ar {0}
+acquisitionFees.indirect.rebased.error.invalid=Dewiswch ‘Iawn’ os oedd unrhyw gostau ychwanegol am gyfrifo gwerth y cyfranddaliadau ar {0}
+acquisitionFees.individual.indirect.rebased.error.required=Dewiswch ‘Iawn’ os ydych am hawlio unrhyw gostau ychwanegol am gyfrifo gwerth y cyfranddaliadau ar {0}
+acquisitionFees.individual.indirect.rebased.error.invalid=Dewiswch ‘Iawn’ os ydych am hawlio unrhyw gostau ychwanegol am gyfrifo gwerth y cyfranddaliadau ar {0}
 
 acquisitionFeesValue.cyaChange=swm y costau ychwanegol
 rebaseAcquisitionPrice.title=Beth oedd gwerth marchnadol yr eiddo ar {0}?
@@ -2433,20 +2456,21 @@ inYearLosses.capacitor.helpText=Er enghraifft, pe bai eiddo’n cael ei werthu a
 inYearLosses.personalRep.helpText=Er enghraifft, pe bai eiddo’n cael ei werthu am lai na’r swm a dalwyd amdano, byddai’r gwerthwr yn gwneud colled.<br/> Bydd cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth y person yn y flwyddyn dreth hon yn gostwng ei enillion. Mae’n rhaid i’r person fod wedi gwneud y colledion cyn {0}.
 inYearLosses.personalRepInPeriodOfAdmin.helpText=Byddai enghraifft o golled yn un lle y byddech chi, neu’r ystâd, yn gwerthu eiddo neu gyfranddaliadau am lai na’r gwerth marchnadol ar ddyddiad marwolaeth y person.<br/> Bydd cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ystâd yn y flwyddyn dreth hon yn gostwng ei henillion.
 inYearLosses.personalRepInPeriodOfAdmin.agent.helpText=Byddai enghraifft o golled yn un lle y byddai’ch cleient, neu’r ystâd, yn gwerthu eiddo neu gyfranddaliadau am lai na’r gwerth marchnadol ar ddyddiad marwolaeth y person.<br/> Bydd cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ystâd yn y flwyddyn dreth hon yn gostwng ei henillion.
-inYearLosses.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch yn y flwyddyn dreth hon
+
+inYearLosses.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch yn ystod y flwyddyn dreth
+inYearLosses.capacitor.error.required=Dewiswch ‘Iawn’ os yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth yn ystod y flwyddyn dreth
+inYearLosses.personalRep.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth y person yn ystod y flwyddyn dreth
+inYearLosses.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth yr ystâd yn ystod y flwyddyn dreth
+inYearLosses.personalRepInPeriodOfAdmin.agent.error.required=Dewiswch ‘Iawn’ os yw’ch cleient am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth yr ystâd yn ystod y flwyddyn dreth
+inYearLosses.error.invalid=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch yn ystod y flwyddyn dreth
+inYearLosses.capacitor.error.invalid=Dewiswch ‘Iawn’ os yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch yn ystod y flwyddyn dreth
+inYearLosses.personalRep.error.invalid=Dewiswch ‘Iawn’ os yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch yn ystod y flwyddyn dreth
+inYearLosses.personalRepInPeriodOfAdmin.error.invalid=Dewiswch ‘Iawn’ os yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch yn ystod y flwyddyn dreth
+inYearLosses.personalRepInPeriodOfAdmin.agent.error.invalid=Dewiswch ‘Iawn’ os yw’ch cleient am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth yr ystâd yn ystod y flwyddyn dreth
 inYearLosses.agent.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth eich cleient yn y flwyddyn dreth
 inYearLosses.trust.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ymddiriedolaeth yn y flwyddyn dreth
-inYearLosses.capacitor.error.required=Dewiswch ‘Iawn’ os yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth yn y flwyddyn dreth hon
-inYearLosses.personalRep.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth y person yn y flwyddyn dreth hon
-inYearLosses.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth yr ystâd yn y flwyddyn dreth hon
-inYearLosses.personalRepInPeriodOfAdmin.agent.error.required=Dewiswch ‘Iawn’ os yw’ch cleient am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth yr ystâd yn y flwyddyn dreth hon
-inYearLosses.error.invalid=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch yn y flwyddyn dreth hon
 inYearLosses.agent.error.invalid=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth eich cleient yn y flwyddyn dreth
 inYearLosses.trust.error.invalid=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ymddiriedolaeth yn y flwyddyn dreth
-inYearLosses.capacitor.error.invalid=Dewiswch ‘Iawn’ os yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch yn y flwyddyn dreth hon
-inYearLosses.personalRep.error.invalid=Dewiswch ‘Iawn’ os yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch yn y flwyddyn dreth hon
-inYearLosses.personalRepInPeriodOfAdmin.error.invalid=Dewiswch ‘Iawn’ os yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch yn y flwyddyn dreth hon
-inYearLosses.personalRepInPeriodOfAdmin.agent.error.invalid=Dewiswch ‘Iawn’ os yw’ch cleient am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth yr ystâd yn y flwyddyn dreth hon
 inYearLosses.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor ffenestr newydd)</a>.
 inYearLosses.agent.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor ffenestr newydd)</a>.
 inYearLosses.trust.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor ffenestr newydd)</a>.
@@ -2555,10 +2579,10 @@ previousYearsLosses.personalRep.error.invalid=Mae’n rhaid i swm y colledion Tr
 previousYearsLosses.personalRepInPeriodOfAdmin.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
 previousYearsLosses.personalRepInPeriodOfAdmin.agent.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
 previousYearsLosses.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch mewn blynyddoedd treth blaenorol
-previousYearsLosses.agent.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch mewn blynyddoedd treth blaenorol
-previousYearsLosses.trust.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaethoch mewn blynyddoedd treth blaenorol
-previousYearsLosses.capacitor.error.required=Dewiswch ‘Iawn’ os yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth y person mewn blynyddoedd treth blaenorol
-previousYearsLosses.personalRep.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth y person yn y flwyddyn dreth hon
+previousYearsLosses.agent.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth eich cleient mewn blynyddoedd treth blaenorol
+previousYearsLosses.trust.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth yr ymddiriedolaeth mewn blynyddoedd treth blaenorol
+previousYearsLosses.capacitor.error.required=Dewiswch ‘Iawn’ os yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth mewn blynyddoedd treth blaenorol
+previousYearsLosses.personalRep.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth y person mewn blynyddoedd treth blaenorol
 previousYearsLosses.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os ydych yn cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ystâd mewn blynyddoedd treth blaenorol
 previousYearsLosses.personalRepInPeriodOfAdmin.agent.error.required=Dewiswch ‘Iawn’ os yw’ch cleient yn cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ystâd mewn blynyddoedd treth blaenorol
 previousYearsLosses.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor ffenestr newydd)</a>.
@@ -2762,6 +2786,13 @@ taxableGainOrLoss.capacitor.gain.label=Iawn, gwnaeth y person ennill cyffredinol
 taxableGainOrLoss.personalRep.gain.label=Iawn, gwnaeth y person ennill cyffredinol
 taxableGainOrLoss.personalRepInPeriodOfAdmin.gain.label=Iawn, gwnaeth yr ystâd ennill cyffredinol
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.gain.label=Iawn, gwnaeth yr ystâd ennill cyffredinol
+
+taxableGainOrLoss.assistive.taxableGain=ar gyfer swm enill cyffredinol
+taxableGainOrLoss.calculated.gain.prompt=Nodwch ennill o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
+taxableGainOrLoss.calculated.loss.prompt=Nodwch golled o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
+taxableGainOrLoss.calculated.noGainOrLoss.prompt=Dewiswch ‘Ni wnes i unrhyw ennill na cholled’ os ydych yn cytuno â’r cyfrifiadau hyn.
+taxableGainOrLoss.calculated.furtherReturn.p1=Gwnaethom ddefnyddio’r manylion a nodwyd yn y Ffurflen Dreth hon er mwyn cyfrifo’ch ennill net ar y gwarediadau eiddo yr ydych yn talu treth arnynt yn ystod y flwyddyn dreth {0} i {1}.
+
 taxableGain.label=Swm yr ennill cyffredinol
 taxableGain.error.required=Nodwch swm yr ennill cyffredinol
 taxableGain.error.invalid=Mae’n rhaid i’r ennill cyffredinol fod yn swm o arian, megis 4,820.54 neu 539
@@ -2862,13 +2893,18 @@ taxableGainOrLossGuidance.trust.title=Cyfrifwch ennill neu golled net yr ymddiri
 taxableGainOrLossGuidance.capacitor.title=Cyfrifwch ennill neu golled net y person am y flwyddyn
 taxableGainOrLossGuidance.personalRep.title=Cyfrifwch ennill neu golled net y person am y flwyddyn
 taxableGainOrLossGuidance.personalRepInPeriodOfAdmin.title=Cyfrifwch ennill neu golled net yr ystâd am y flwyddyn
-estimatedIncome.title=Beth ydych yn credu y bydd eich incwm gros yn y flwyddyn dreth hon?
-estimatedIncome.agent.title=Beth mae’ch cleient yn credu y bydd ei incwm gros yn y flwyddyn dreth hon?
-estimatedIncome.capacitor.title=Beth mae’r person yn credu y bydd ei incwm gros yn y flwyddyn dreth hon?
+
+estimatedIncome.title=Faint ydych yn disgwyl i’ch incwm gros fod yn ystod y flwyddyn dreth hon?
+estimatedIncome.agent.title=Beth mae’ch cleient yn disgwyl i’w incwm gros fod yn ystod y flwyddyn dreth hon?
+estimatedIncome.capacitor.title=Beth mae’r person yn disgwyl i’w incwm gros fod yn ystod y flwyddyn dreth hon?
+estimatedIncome.non-resident.title=Beth ydych yn disgwyl i’ch incwm gros fod yn ystod y flwyddyn dreth hon?
+estimatedIncome.agent.non-resident.title=Beth mae’ch cleient yn disgwyl i’w incwm gros sy’n agored i dreth yn y DU fod yn ystod y flwyddyn dreth hon?
+estimatedIncome.capacitor.non-resident.title=Beth mae’r person yn disgwyl i’w incwm gros sy’n agored i dreth yn y DU fod yn ystod y flwyddyn dreth hon?
+estimatedIncome.agent.error.required=Nodwch beth mae’ch cleient yn disgwyl i’w incwm gros fod yn ystod y flwyddyn dreth hon
+estimatedIncome.capacitor.error.required=Nodwch beth mae’r person yn disgwyl i’w incwm gros fod yn ystod y flwyddyn dreth hon
+estimatedIncome.capacitor.non-resident.error.required=Nodwch beth mae’r person yn disgwyl i’w incwm gros sy’n agored i dreth yn y DU fod yn ystod y flwyddyn dreth hon
+
 estimatedIncome.personalRep.title=Beth oedd incwm gros y person ar gyfer y flwyddyn dreth hon?
-estimatedIncome.non-resident.title=Beth ydych yn credu y bydd eich incwm gros sy’n agored i dreth y DU yn y flwyddyn dreth hon?
-estimatedIncome.agent.non-resident.title=Beth mae’ch cleient yn credu y bydd ei incwm gros sy’n agored i dreth y DU yn y flwyddyn dreth hon?
-estimatedIncome.capacitor.non-resident.title=Beth mae’r person yn credu y bydd ei incwm gros sy’n agored i dreth y DU yn y flwyddyn dreth hon?
 estimatedIncome.personalRep.non-resident.title=Beth oedd incwm gros y person sy’n agored i dreth y DU ar gyfer y flwyddyn dreth hon?
 estimatedIncome.helpText=Dylai’r swm gyfateb i gyfanswm eich incwm sy’n agored i dreth incwm y DU ar gyfer blwyddyn dreth {0} i {1}. Dyma’ch incwm gros cyn unrhyw ddidyniadau, megis treth neu Yswiriant Gwladol.
 estimatedIncome.agent.helpText=Dylai’r swm gyfateb i’w incwm sy’n agored i dreth incwm y DU ar gyfer blwyddyn dreth {0} i {1}. Dyma’i incwm gros cyn unrhyw ddidyniadau, megis treth neu Yswiriant Gwladol.
@@ -2880,12 +2916,9 @@ estimatedIncome.agent.details.p1=Peidiwch â chynnwys yr arian a wnaeth o werthu
 estimatedIncome.capacitor.details.p1=Peidiwch â chynnwys yr arian a wnaeth o werthu’r eiddo, o ISAs, Credydau Treth nac incwm o unrhyw gyflogaeth dramor.
 estimatedIncome.personalRep.details.p1=Peidiwch â chynnwys yr arian a wnaeth o werthu’r eiddo, o ISAs, Credydau Treth nac incwm o unrhyw gyflogaeth dramor.
 estimatedIncome.error.required=Nodwch amcangyfrif o’ch incwm sy’n agored i dreth y DU yn y flwyddyn dreth hon
-estimatedIncome.agent.error.required=Nodwch beth mae’ch cleient yn credu y bydd ei incwm gros yn y flwyddyn dreth hon
-estimatedIncome.capacitor.error.required=Nodwch beth mae’r person yn credu y bydd ei incwm gros yn y flwyddyn dreth hon
 estimatedIncome.personalRep.error.required=Nodwch incwm gros y person ar gyfer y flwyddyn dreth hon
 estimatedIncome.non-resident.error.required=Nodwch amcangyfrif o’r incwm sy’n agored i dreth y DU
 estimatedIncome.agent.non-resident.error.required=Nodwch amcangyfrif o’r incwm sy’n agored i dreth y DU
-estimatedIncome.capacitor.non-resident.error.required=Nodwch beth mae’r person yn credu y bydd ei incwm gros sy’n agored i dreth y DU yn y flwyddyn dreth hon
 estimatedIncome.personalRep.non-resident.error.required=Nodwch incwm gros y person sy’n agored i dreth y DU ar gyfer y flwyddyn dreth hon
 estimatedIncome.error.invalid=Mae’n rhaid i’r amcangyfrif o’r incwm fod yn swm o arian, megis 160,000 neu 23,040.50
 estimatedIncome.agent.error.invalid=Mae’n rhaid i’r amcangyfrif o’r incwm fod yn swm o arian, megis 160,000 neu 23,040.50
@@ -3049,6 +3082,11 @@ agreeWithCalculation.error.invalid=Dewiswch neu nodwch swm y Dreth Enillion Cyfa
 agreeWithCalculation.other.label=Swm arall
 taxDue.label=Swm y Dreth Enillion Cyfalaf sy’n ddyledus
 taxDue.cyaChange=y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
+
+calculator.cannotUsePrevYearsLosses=Ni allwch ddefnyddio colledion o flynyddoedd treth blaenorol yn y Ffurflen Dreth hon. Mae hyn oherwydd nid oes ennill.
+calculator.total.yearPosition=Safle blwyddyn
+calculator.total.gainsAfterReliefs=Enillion i gyd ar ôl rhyddhad
+
 calculator.showWorkings=Dangos y gwaith cyfrifo
 calculator.disposalPrice=Swm gwaredu’r eiddo
 calculator.disposalFees=Costau gwaredu
@@ -3067,7 +3105,6 @@ calculator.reliefsLossIntro=Mae yna golled gychwynnol – mae hyn yn golygu y by
 calculator.total.gainOrLossAfterReliefs=Ennill neu golled ar ôl rhyddhad
 calculator.inYearLosses=Colledion o’r flwyddyn dreth hon
 calculator.total.gainAfterInYearLosses=Ennill ar ôl colledion o’r flwyddyn dreth hon
-calculator.cannotUsePrevYearsLosses=Ni allwch ddefnyddio colledion o flynyddoedd treth blaenorol yn y Ffurflen Dreth hon. Mae hyn oherwydd nad oes unrhyw ennill ar ôl cymhwyso colledion o’r flwyddyn dreth hon.
 calculator.prevYearLosses=Colledion o flynyddoedd treth blaenorol
 calculator.total.gainAfterLosses=Ennill ar ôl pob colled
 calculator.cannotApplyAEA=Ni allwch ddefnyddio unrhyw ran o’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth. Mae hyn oherwydd nad oes unrhyw ennill.
@@ -3299,6 +3336,12 @@ submitReturnError.li3=Os yw yn yr adran ‘Ffurflenni Treth drafft’, nid yw CT
 submitReturnError.p3=Ar gyfer gwarediadau eiddo yn y DU a wnaed o 6 Ebrill 2020 ymlaen, mae gennych 30 diwrnod ar ôl dyddiad cwblhau’r eiddo i roi gwybod am unrhyw Dreth Enillion Cyfalaf sy’n ddyledus ar eich gwarediadau eiddo yn y DU a’i thalu.
 submitReturnError.p4=Ar gyfer gwarediadau a gwblhaodd ar 1 Gorffennaf 2020 neu ar ôl hynny, efallai y byddwch yn cael cosb am gyflwyno’n hwyr ar gyfer Ffurflenni Treth sy’n hwyr. Efallai y codir llog arnoch am daliadau hwyr.
 submitReturnError.button=Ewch i hafan y cyfrif
+
+confirmationOfSubmission.nameLabel=Enw’r cyfrif
+confirmationOfSubmission.trust.nameLabel=Enw’r ymddiriedolaeth
+confirmationOfSubmission.agent.nameLabel=Enw’r cleient
+confirmationOfSubmission.person.nameLabel=Enw’r person
+
 confirmationOfSubmission.title=Ffurflen Dreth wedi’i hanfon
 confirmationOfSubmission.taxOwed=Treth sy’n ddyledus
 confirmationOfSubmission.revisedLiability=Rhwymedigaeth ddiweddaredig ar gyfer y Ffurflen Dreth hon
@@ -3383,6 +3426,10 @@ confirmationOfSubmission.trust.returnToAccountHome=Ewch i <a href="{0}">hafan cy
 #===================================================
 #  VIEW RETURN PAGES - START
 #===================================================
+
+viewReturn.nameLabel=Enw’r cyfrif
+viewReturn.trust.nameLabel=Enw’r ymddiriedolaeth
+viewReturn.agent.nameLabel=Enw’r cleient
 
 viewReturn.title=Bwrw golwg dros y Ffurflen Dreth
 viewReturn.heading.taxOwed=Treth sy’n ddyledus ar gyfer y Ffurflen Dreth
@@ -3854,20 +3901,26 @@ representee.cyaChange.isFirstReturn=os mai dyma’r Ffurflen Dreth gyntaf yn y f
 #===================================================
 
 gainOrLossAfterReliefs.caption=Enillion neu golled ar ôl rhyddhad
-gainOrLossAfterReliefs.title=Rhowch wybod i ni a wnaethoch enillion ar y gwarediad ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.agent.title=Rhowch wybod i ni a wnaeth eich cleient enillion ar y gwarediad ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.trust.title=Rhowch wybod i ni a wnaeth yr ymddiriedolaeth enillion ar y gwarediad ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.capacitor.title=Rhowch wybod i ni a wnaeth y person enillion ar y gwarediad ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.personalRep.title=Rhowch wybod i ni a wnaeth y person enillion ar y gwarediad ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Rhowch wybod i ni a wnaeth yr ystâd enillion ar y gwarediad ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Rhowch wybod i ni a wnaeth eich cleient neu’r ystâd enillion ar y gwarediad ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.multipleDisposals.title=Rhowch wybod i ni a wnaethoch enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.agent.multipleDisposals.title=Rhowch wybod i ni a wnaeth eich cleient enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.trust.multipleDisposals.title=Rhowch wybod i ni a wnaeth yr ymddiriedolaeth enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.capacitor.multipleDisposals.title=Rhowch wybod i ni a wnaeth y person enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Rhowch wybod i ni a wnaeth y person enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Rhowch wybod i ni a wnaeth yr ystâd enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Rhowch wybod i ni a wnaeth eich cleient neu’r ystâd enillion ar y gwarediadau yn y Ffurflen Dreth hon ar ôl tynnu rhyddhad
+gainOrLossAfterReliefs.title=Nodwch eich ennill neu golled ar ôl rhyddhad
+gainOrLossAfterReliefs.agent.title=Nodwch ennill neu golled eich cleient ar ôl rhyddhad
+gainOrLossAfterReliefs.trust.title=Nodwch ennill neu golled yr ymddiriedolaeth ar ôl rhyddhad
+gainOrLossAfterReliefs.capacitor.title=Nodwch ennill neu golled y person ar ôl rhyddhad
+gainOrLossAfterReliefs.personalRep.title=Nodwch ennill neu golled y person ar ôl rhyddhad
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Nodwch ennill neu golled yr ystâd ar ôl rhyddhad
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Nodwch ennill neu golled eich cleient ar ôl rhyddhad
+gainOrLossAfterReliefs.multipleDisposals.title=Nodwch eich ennill neu golled ar ôl rhyddhad ar y gwarediadau ar y Ffurflen Dreth hon
+gainOrLossAfterReliefs.agent.multipleDisposals.title=Nodwch ennill neu golled eich cleient ar ôl rhyddhad ar y gwarediadau ar y Ffurflen Dreth hon
+gainOrLossAfterReliefs.trust.multipleDisposals.title=Nodwch ennill neu golled yr ymddiriedolaeth ar ôl rhyddhad ar y gwarediadau ar y Ffurflen Dreth hon
+gainOrLossAfterReliefs.capacitor.multipleDisposals.title=Nodwch ennill neu golled y person ar ôl rhyddhad ar y gwarediadau ar y Ffurflen Dreth hon
+gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Nodwch ennill neu golled y person ar ôl rhyddhad ar y gwarediadau ar y Ffurflen Dreth hon
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Nodwch ennill neu golled yr ystâd ar ôl rhyddhad ar y gwarediadau ar y Ffurflen Dreth hon
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Nodwch ennill neu golled eich cleient ar ôl rhyddhad ar y gwarediadau ar y Ffurflen Dreth hon
+gainOrLossAfterReliefs.calculatorHeading=Gwnaethom ddefnyddio’r manylion a nodwyd ar y Ffurflen Dreth hon er mwyn cyfrifo’ch ennill neu golled ar ôl rhyddhad a gafodd ei dynnu.
+gainOrLossAfterReliefs.calculated.gain.prompt=Nodwch ennill o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
+gainOrLossAfterReliefs.calculated.loss.prompt=Nodwch golled o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
+gainOrLossAfterReliefs.calculated.noGainOrLoss.prompt=Dewiswch <strong class="bold">‘Ni wnes i unrhyw ennill na cholled’</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
+gainOrLossAfterReliefs.calculated.noGainOrLoss.notSelf.prompt=Dewiswch <strong class="bold">‘Ni wnaeth unrhyw ennill na cholled ar ôl rhyddhad’</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
+gainOrLossAfterReliefs.assistive.gainOrLossAfterReliefs=ar gyfer ennill neu golled ar ôl rhyddhad
 gainOrLossAfterReliefs.p1=I wneud hyn, bydd angen i chi wneud y canlynol:
 gainOrLossAfterReliefs.li1=Dechrau gyda derbyniadau’r gwarediad.
 gainOrLossAfterReliefs.li2=Tynnu’r costau gwerthu neu waredu.
