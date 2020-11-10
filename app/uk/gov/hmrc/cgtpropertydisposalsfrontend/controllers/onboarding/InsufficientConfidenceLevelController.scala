@@ -400,8 +400,7 @@ class InsufficientConfidenceLevelController @Inject() (
     nameMatchError match {
       case NameMatchServiceError.BackendError(error) =>
         logger.warn("Could not get BPR with entered SA UTR", error)
-        // errorHandler.errorResult()
-        errorHandler.tmpErrorResult(request.userType)
+        errorHandler.errorResult()
 
       case NameMatchServiceError.NameMatchFailed(unsuccessfulAttempts) =>
         val form = InsufficientConfidenceLevelController.sautrAndNameForm

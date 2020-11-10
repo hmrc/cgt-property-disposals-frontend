@@ -4633,11 +4633,6 @@ representeeTooManyNameMatchFailures.p1=You have entered the wrong details too ma
 representeeTooManyNameMatchFailures.p2=The reference number you entered does not match the name of the person.
 representeeTooManyNameMatchFailures.p3=You’ll need to wait 2 hours and try again.
 
-tmpCustomError.title=Sorry, we are experiencing technical difficulties - 500
-tmpCustomError.heading=Sorry, we’re experiencing technical difficulties
-tmpCustomError.p1=In order for us to resolve the issue, please click on the ‘get help with this page’ link.
-tmpCustomError.p2=We apologise for the inconvenience and thank you for your patience while we resolve the issue.
-
 representeeIsFirstReturn.capacitor.title=Is this the person’s first return for the tax year so far?
 representeeIsFirstReturn.personalRep.title=Is this the person who died’s first return for the tax year so far?
 representeeIsFirstReturn.personalRepInPeriodOfAdmin.title=Is this the estate’s first return in the current tax year for the person represented?
