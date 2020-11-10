@@ -3751,7 +3751,7 @@ calculator.total.amountDueAtBasicRate=Amount of tax due at the basic rate
 calculator.higherAmount=Amount of the net gain to be charged at the higher rate
 calculator.higherRate=Higher rate
 calculator.total.amountDueAtHigherRate=Amount of tax due at the higher rate
-
+calculator.total.ytdLiability=Latest year to date liability
 calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
