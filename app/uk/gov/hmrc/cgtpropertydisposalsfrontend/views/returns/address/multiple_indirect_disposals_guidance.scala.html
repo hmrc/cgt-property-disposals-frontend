@@ -54,13 +54,12 @@
 
     <ul class="list-bullet">
         <li>@messages(s"$key.li1")</li>
-        <li>@messages(s"$key.li2")</li>
         @if(isPeriodOfAdmin){
+            <li>@messages(s"$key.personalRepInPeriodOfAdmin.li2")</li>
             <li>@messages(s"$key.personalRepInPeriodOfAdmin.li3")</li>
-            <li>@messages(s"$key.personalRepInPeriodOfAdmin.li4")</li>
         } else {
+            <li>@messages(s"$key.li2")</li>
             <li>@messages(s"$key.li3")</li>
-            <li>@messages(s"$key.li4")</li>
         }
     </ul>
 

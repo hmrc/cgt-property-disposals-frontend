@@ -1475,13 +1475,11 @@ company-details.multiple-indirect-disposals.guidance.title=You’ll need to ente
 company-details.multiple-indirect-disposals.guidance.p1=You should enter the details of the disposal that gave the largest gain or the smallest loss.
 company-details.multiple-indirect-disposals.guidance.p2=For that one disposal, you’ll need to enter the:
 company-details.multiple-indirect-disposals.guidance.li1=name and address of the company the shares were held in
-company-details.multiple-indirect-disposals.guidance.li2=disposal date of the shares
+company-details.multiple-indirect-disposals.guidance.li2=disposal value, less disposal costs
+company-details.multiple-indirect-disposals.guidance.li3=acquisition value, plus acquisition costs
 
-company-details.multiple-indirect-disposals.guidance.li3=disposal value, less disposal costs
-company-details.multiple-indirect-disposals.guidance.li4=acquisition value, plus acquisition costs
-
-company-details.multiple-indirect-disposals.guidance.personalRepInPeriodOfAdmin.li3=proceeds of the disposal less disposal costs
-company-details.multiple-indirect-disposals.guidance.personalRepInPeriodOfAdmin.li4=market value of the shares plus acquisition costs
+company-details.multiple-indirect-disposals.guidance.personalRepInPeriodOfAdmin.li2=proceeds of the disposal less disposal costs
+company-details.multiple-indirect-disposals.guidance.personalRepInPeriodOfAdmin.li3=market value of the shares plus acquisition costs
 
 company-details.multiple-indirect-disposals.guidance.p3=You’ll also need to upload a document later providing details of the other UK property disposals you’re including in this return.
 
