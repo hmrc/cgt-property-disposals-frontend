@@ -55,17 +55,6 @@ class ErrorHandler @Inject() (
       )
     )
 
-  def tmpErrorResult(userType: Option[UserType])(implicit request: Request[_]): Result =
-    InternalServerError(
-      error_template(
-        userType,
-        Messages("tmpCustomError.title"),
-        Messages("tmpCustomError.heading"),
-        Messages("tmpCustomError.p1"),
-        Some(Messages("tmpCustomError.p2"))
-      )
-    )
-
   def errorResult()(implicit request: RequestWithSessionData[_]): Result =
     errorResult(request.userType)
 
