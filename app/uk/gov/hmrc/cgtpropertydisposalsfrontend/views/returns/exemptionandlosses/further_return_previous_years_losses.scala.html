@@ -43,6 +43,7 @@
 @(
     form: Form[BigDecimal],
     backLink: Call,
+    wasAUkResident: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isAmend: Boolean
@@ -127,8 +128,7 @@
             helpText = None,
             customErrorKey = Some(s"$key$userKey")
         )
-
-        <p>@Html(messages(s"$key$furtherReturnKey.link", appConfig.cgtLossesUrl))</p>
+        <p>@Html(messages(s"$key$furtherReturnKey.link", if(wasAUkResident) appConfig.cgtLossesUrl else appConfig.cgtLossesUrlNonUk))</p>
 
         @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }

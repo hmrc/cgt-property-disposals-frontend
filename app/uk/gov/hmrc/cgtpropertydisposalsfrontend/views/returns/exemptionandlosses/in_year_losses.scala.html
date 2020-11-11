@@ -45,6 +45,7 @@
 @(
     form: Form[BigDecimal],
     backLink: Call,
+    wasAUkResident: Boolean,
     disposalDate: DisposalDate,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
@@ -73,7 +74,7 @@
 @details = @{
     representativeType match {
         case Some(PersonalRepresentativeInPeriodOfAdmin) => messages(s"$key$userKey.link", appConfig.personalRepresentativeUrl)
-        case _ => messages(s"$key$userKey.link", appConfig.cgtLossesUrl)
+        case _ => messages(s"$key$userKey.link", if(wasAUkResident) appConfig.cgtLossesUrl else appConfig.cgtLossesUrlNonUk)
 }}
 
 

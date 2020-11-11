@@ -279,7 +279,7 @@ class ExemptionAndLossesController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
-          withWasAUkResident(draftReturn) { _ =>
+          withWasAUkResident(draftReturn) { wasAUkResident =>
             commonDisplayBehaviour(
               answers
             )(form =
@@ -301,6 +301,7 @@ class ExemptionAndLossesController @Inject() (
                   inYearLossesPage(
                     _,
                     _,
+                    wasAUkResident,
                     disposalDate,
                     fillingOutReturn.subscribedDetails.isATrust,
                     draftReturn.representativeType(),
@@ -319,7 +320,7 @@ class ExemptionAndLossesController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
-          withWasAUkResident(draftReturn) { _ =>
+          withWasAUkResident(draftReturn) { wasAUkResident =>
             commonSubmitBehaviour(
               fillingOutReturn,
               draftReturn,
@@ -338,6 +339,7 @@ class ExemptionAndLossesController @Inject() (
                   inYearLossesPage(
                     _,
                     _,
+                    wasAUkResident,
                     disposalDate,
                     fillingOutReturn.subscribedDetails.isATrust,
                     draftReturn.representativeType(),
@@ -383,6 +385,7 @@ class ExemptionAndLossesController @Inject() (
                 furtherReturnPreviousYearsLossesPage(
                   _,
                   _,
+                  wasAUkResident,
                   fillingOutReturn.subscribedDetails.isATrust,
                   draftReturn.representativeType(),
                   fillingOutReturn.isAmendReturn
@@ -421,6 +424,7 @@ class ExemptionAndLossesController @Inject() (
                 furtherReturnPreviousYearsLossesPage(
                   _,
                   _,
+                  wasAUkResident,
                   fillingOutReturn.subscribedDetails.isATrust,
                   draftReturn.representativeType(),
                   fillingOutReturn.isAmendReturn
