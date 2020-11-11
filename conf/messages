@@ -3661,7 +3661,7 @@ taxDue.title=Tell us how much Capital Gains Tax is due for this return
 taxDue.h2=How much Capital Gains Tax is due for this return?
 taxDue.p1=We used the details that were entered into this return to work out the amount of Capital Gains Tax due.
 taxDue.p2=You may need to enter these figures when you complete future returns.
-taxDue.printLink=Print or save a copy of this page
+taxDue.printLink=Print or save this page as a PDF
 taxDue.initialGainOrLoss=Initial gain or loss
 taxDue.assistive.initialGainOrLoss=for initial gain or loss
 taxDue.gainOrLossAfterReliefs=Gain or loss after reliefs
@@ -3693,6 +3693,7 @@ taxDue.label=Amount of Capital Gains Tax due
 
 taxDue.cyaChange=the Capital Gains Tax due for this return
 
+calculator.heading=How we calculated the tax
 calculator.showWorkings=Show workings
 calculator.disposalPrice=Property disposal amount
 calculator.disposalFees=Disposal costs

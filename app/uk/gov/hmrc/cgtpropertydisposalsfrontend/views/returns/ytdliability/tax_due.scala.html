@@ -128,6 +128,10 @@
 
     @printLink(messages(s"$key.printLink"))
 
+    <h2 class="heading-large">
+      @messages("calculator.heading")
+    </h2>
+
     <ul class="calc-rows with-bottom-margin">
       <li>
         @calcRow(calculatedTax.initialGainOrLoss.amount, messages(s"$key.initialGainOrLoss"), showGainType = true)
@@ -181,6 +185,8 @@
 
       @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
+
+    @printLink(messages(s"$key.printLink"))
 
     @if(isATrust) {
       @details(messages(s"$key.trustDetails.label"), Html(messages(s"$key.trustDetails.content", viewConfig.trustsForVulnerable)))
