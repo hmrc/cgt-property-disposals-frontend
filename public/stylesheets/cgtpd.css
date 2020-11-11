@@ -637,8 +637,12 @@ main>div>.service-info {
     }
 }
 
-    .calc-rows > li {
+.calc-rows > li {
     position: relative;
+}
+
+.calc-rows h2 {
+    max-width: 390px;
 }
 
 .calc-total {
