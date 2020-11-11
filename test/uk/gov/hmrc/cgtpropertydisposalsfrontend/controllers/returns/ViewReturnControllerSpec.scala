@@ -396,15 +396,14 @@ class ViewReturnControllerSpec
           val time    = extractDueDate(viewingReturn)
           val userKey = deriveUserKey(isAgent, isATrust)
 
-          document.select("#warning").text()          shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
-          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
-            document
-              .select("#heading-reference")
-              .text()                                 shouldBe viewingReturn.subscribedDetails.cgtReference.value
-          else
-            document
-              .select("#heading-reference")
-              .text()                                 shouldBe viewingReturn.returnSummary.submissionId
+          document.select("#warning").text() shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
+
+          document
+            .select("#heading-reference")
+            .text() shouldBe viewingReturn.returnSummary.mainReturnChargeReference.getOrElse(
+            viewingReturn.returnSummary.submissionId
+          )
+
           document.select("#heading-tax-owed").text() shouldBe MoneyUtils
             .formatAmountOfMoneyWithPoundSign(
               viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero
@@ -525,15 +524,14 @@ class ViewReturnControllerSpec
           val time    = extractDueDate(viewingReturn)
           val userKey = deriveUserKey(isAgent, isATrust)
 
-          document.select("#warning").text()          shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
-          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
-            document
-              .select("#heading-reference")
-              .text()                                 shouldBe viewingReturn.subscribedDetails.cgtReference.value
-          else
-            document
-              .select("#heading-reference")
-              .text()                                 shouldBe viewingReturn.returnSummary.submissionId
+          document.select("#warning").text() shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
+
+          document
+            .select("#heading-reference")
+            .text() shouldBe viewingReturn.returnSummary.mainReturnChargeReference.getOrElse(
+            viewingReturn.returnSummary.submissionId
+          )
+
           document.select("#heading-tax-owed").text() shouldBe MoneyUtils
             .formatAmountOfMoneyWithPoundSign(
               viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero
@@ -650,14 +648,12 @@ class ViewReturnControllerSpec
             "viewReturn.title"
           )
 
-          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
-            document
-              .select("#heading-reference")
-              .text()                                 shouldBe viewingReturn.subscribedDetails.cgtReference.value
-          else
-            document
-              .select("#heading-reference")
-              .text()                                 shouldBe viewingReturn.returnSummary.submissionId
+          document
+            .select("#heading-reference")
+            .text() shouldBe viewingReturn.returnSummary.mainReturnChargeReference.getOrElse(
+            viewingReturn.returnSummary.submissionId
+          )
+
           document.select("#heading-tax-owed").text() shouldBe MoneyUtils
             .formatAmountOfMoneyWithPoundSign(
               viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero
@@ -763,14 +759,12 @@ class ViewReturnControllerSpec
             "viewReturn.title"
           )
 
-          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
-            document
-              .select("#heading-reference")
-              .text()                                 shouldBe viewingReturn.subscribedDetails.cgtReference.value
-          else
-            document
-              .select("#heading-reference")
-              .text()                                 shouldBe viewingReturn.returnSummary.submissionId
+          document
+            .select("#heading-reference")
+            .text() shouldBe viewingReturn.returnSummary.mainReturnChargeReference.getOrElse(
+            viewingReturn.returnSummary.submissionId
+          )
+
           document.select("#heading-tax-owed").text() shouldBe MoneyUtils
             .formatAmountOfMoneyWithPoundSign(
               viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero

@@ -17,15 +17,14 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, ReturnType}
 
 @this()
 
-@(heading: String, returnSummary: ReturnSummary, subscribedDetails: SubscribedDetails, returnType: ReturnType)(implicit messages: Messages)
+@(heading: String, returnSummary: ReturnSummary, returnType: ReturnType)(implicit messages: Messages)
 
 @taxOwed = @{returnSummary.mainReturnChargeAmount.withFloorZero}
-@reference = @{if(taxOwed.isPositive) subscribedDetails.cgtReference.value else returnSummary.submissionId}
+@reference = @{ returnSummary.mainReturnChargeReference.getOrElse(returnSummary.submissionId) }
 @key = @{"viewReturn"}
 @amendKey = @{if(returnType.isAmendReturn) ".amend" else ""}
 
