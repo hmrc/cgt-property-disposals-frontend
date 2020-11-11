@@ -70,13 +70,12 @@ class FurtherReturnCalculationEligibilityUtilSpec
 
   val maxPreviousReturns = 3
 
-  class TestEnvironment(calculationEnabled: Boolean = true, maxPreviousReturns: Int = maxPreviousReturns) {
+  class TestEnvironment(maxPreviousReturns: Int = maxPreviousReturns) {
 
     val config = Configuration(
       ConfigFactory.parseString(
         s"""
             |amend-and-further-returns-calculator{
-            |  enabled = ${calculationEnabled.toString}
             |  max-previous-returns = $maxPreviousReturns
             |}""".stripMargin
       )
@@ -196,17 +195,6 @@ class FurtherReturnCalculationEligibilityUtilSpec
         )
 
       "return an ineligible response" when {
-
-        "the current return is eligible but the calculation has been disabled in config" in new TestEnvironment(
-          calculationEnabled = false
-        ) {
-          val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
-          val previousReturnData = sample[PreviousReturnData]
-            .copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None, calculationData = None)
-          val fillingOutReturn   =
-            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
-          test(fillingOutReturn, Ineligible(previousReturnData.previousReturnsImplyEligibilityForCalculation))(service)
-        }
 
         "the return is multiple disposal return" in new TestEnvironment() {
           val previousReturnData = sample[PreviousReturnData].copy(

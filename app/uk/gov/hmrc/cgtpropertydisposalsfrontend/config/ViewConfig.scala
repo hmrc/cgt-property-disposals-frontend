@@ -183,14 +183,4 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enable-language-switching")
 
-  val amendReturnsEnabled: Boolean = servicesConfig.getBoolean("amend-returns.enabled")
-
-  logger.info {
-    val flags = List(
-      "languageSwitchingEnabled" -> enableLanguageSwitching,
-      "amendReturnsEnabled"      -> amendReturnsEnabled
-    )
-    s"Application started with feature flags: [${flags.mkString("; ")}"
-  }
-
 }

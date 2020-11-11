@@ -96,20 +96,8 @@
     <ul class="list-bullet">
         <li>@messages("landingPage.howTo.list1.bullet1")</li>
         <li>@messages("landingPage.howTo.list1.bullet2")</li>
-        <li>
-            @if(appConfig.amendReturnsEnabled){
-                @messages("landingPage.amendReturn.howTo.list1.bullet3")
-            }else{
-                @messages("landingPage.howTo.list1.bullet3")
-            }
-        </li>
+        <li>@messages("landingPage.amendReturn.howTo.list1.bullet3")</li>
     </ul>
-
-    @if(!appConfig.amendReturnsEnabled){
-        <div class="panel panel-border-wide">
-            <p>@Html(messages("landingPage.howTo.insetText", appConfig.contactHmrc))</p>
-        </div>
-    }
 
     <p>@messages("landingPage.howTo.p3")</p>
 

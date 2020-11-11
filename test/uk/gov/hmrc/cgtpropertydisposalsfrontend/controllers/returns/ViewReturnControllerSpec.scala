@@ -24,7 +24,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Configuration
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -45,7 +44,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
@@ -60,10 +58,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DateOfDeath, ReturnSummary, ReturnType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, ReturnSummary, ReturnType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
@@ -940,90 +937,4 @@ class ViewReturnControllerSpec
       .map(e => TimeUtils.govDisplayFormat(e.dueDate))
       .headOption
       .getOrElse(sys.error("Error"))
-}
-
-class AmendReturnDisabledViewReturnControllerSpec
-    extends ControllerSpec
-    with AuthSupport
-    with SessionSupport
-    with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
-
-  override lazy val additionalConfig = Configuration(
-    "amend-returns.enabled" -> false
-  )
-
-  override val overrideBindings =
-    List[GuiceableModule](
-      bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
-    )
-
-  lazy val controller = instanceOf[ViewReturnController]
-
-  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
-
-  "ViewReturnController" when {
-
-    "amend returns are disabled and" when {
-
-      "handling requests to display the view return page" must {
-
-        "not display amend return links" in {
-
-          val viewingReturn = sample[ViewingReturn].copy(
-            completeReturn = sample[CompleteSingleDisposalReturn].copy(
-              representeeAnswers =
-                Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
-            )
-          )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(viewingReturn)
-              )
-            )
-          }
-
-          checkPageIsDisplayed(
-            controller.displayReturn()(FakeRequest()),
-            messageFromMessageKey("viewReturn.title"),
-            { doc =>
-              doc.select("#amend-link-1").isEmpty shouldBe true
-              doc.select("#amend-link-2").isEmpty shouldBe true
-            }
-          )
-
-        }
-
-      }
-
-      "handling requests to start amending a return" must {
-
-        "redirect to the display return page" in {
-          val viewingReturn = sample[ViewingReturn]
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(viewingReturn)
-              )
-            )
-          }
-
-          checkIsRedirect(
-            controller.startAmendingReturn()(FakeRequest()),
-            routes.ViewReturnController.displayReturn()
-          )
-        }
-
-      }
-
-    }
-
-  }
-
 }

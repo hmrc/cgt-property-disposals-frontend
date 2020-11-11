@@ -69,10 +69,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
 }
 
 @changeReturnLink(id: String) = @{
-    if(viewConfig.amendReturnsEnabled)
-        Some(Html(s"""<p><a href="${routes.ViewReturnController.startAmendingReturn().url}" id="$id">${messages(s"$key.changeReturn")}</a></p>"""))
-    else
-        None
+    Html(s"""<p><a href="${routes.ViewReturnController.startAmendingReturn().url}" id="$id">${messages(s"$key.changeReturn")}</a></p>""")
 }
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {

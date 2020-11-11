@@ -18,9 +18,7 @@ landingPage.howTo.p1=Bydd angen i chi greu cyfrif Treth Enillion Cyfalaf ar eidd
 landingPage.howTo.p2=Os ydych yn breswylydd neu’n cynrychioli ymddiriedolaeth, gallwch ddefnyddio’r gwasanaeth hwn i wneud y canlynol:
 landingPage.howTo.list1.bullet1=rhoi gwybod am warediad o dir neu eiddo preswyl yn y DU a wnaed o 6 Ebrill 2020 ymlaen
 landingPage.howTo.list1.bullet2=talu unrhyw dreth a allai fod arnoch am y gwarediad hwnnw
-landingPage.howTo.list1.bullet3=bwrw golwg dros eich Ffurflenni Treth blaenorol a chyfredol
 landingPage.amendReturn.howTo.list1.bullet3=bwrw golwg dros eich Ffurflenni Treth blaenorol a’u newid
-landingPage.howTo.insetText=Os bydd angen i chi ddiwygio Ffurflen Dreth sydd ohoni, bydd angen i chi <a href="{0}">gysylltu â CThEM</a>.
 landingPage.howTo.p3=Os nad ydych yn breswylydd, mae’n rhaid i chi ddefnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau o’r canlynol ers 6 Ebrill 2020:
 landingPage.howTo.list2.bullet1=eiddo neu dir preswyl yn y DU
 landingPage.howTo.list2.bullet2=eiddo neu dir dibreswyl yn y DU

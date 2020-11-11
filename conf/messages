@@ -25,11 +25,7 @@ landingPage.howTo.p1=You’ll need to create a Capital Gains Tax on UK property 
 landingPage.howTo.p2=If you’re a resident or representing a trust, you can use this service to:
 landingPage.howTo.list1.bullet1=report the disposal of UK residential property or land made from 6 April 2020
 landingPage.howTo.list1.bullet2=pay any tax you might owe for that disposal
-landingPage.howTo.list1.bullet3=view your previous and current returns
 landingPage.amendReturn.howTo.list1.bullet3=view and change your previous returns
-
-
-landingPage.howTo.insetText=If you need to amend an existing return you will need to <a href="{0}">contact HMRC</a>.
 
 landingPage.howTo.p3=If you’re a non-resident you must use this service to report sales or disposals from 6 April 2020 of:
 landingPage.howTo.list2.bullet1=residential UK property or land
