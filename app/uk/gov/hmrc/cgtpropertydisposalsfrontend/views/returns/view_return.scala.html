@@ -77,7 +77,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
-  @returnHeading(title, returnSummary, subscribedDetails, returnType)
+  @returnHeading(title, returnSummary, returnType)
   
   @printLink(messages(s"$key.printLink"))
 
