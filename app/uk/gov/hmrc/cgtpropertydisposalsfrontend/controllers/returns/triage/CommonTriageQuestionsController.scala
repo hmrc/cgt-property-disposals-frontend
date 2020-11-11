@@ -47,7 +47,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{triage => triagePages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -60,7 +59,6 @@ class CommonTriageQuestionsController @Inject() (
   uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
-  servicesConfig: ServicesConfig,
   whoAreYouReportingForPage: triagePages.who_are_you_reporting_for,
   howManyPropertiesPage: triagePages.how_many_properties,
   ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
@@ -79,8 +77,6 @@ class CommonTriageQuestionsController @Inject() (
     with StartingToAmendToFillingOutReturnBehaviour {
 
   import CommonTriageQuestionsController._
-
-  private val newCompletionDateUsedFlag: Boolean = servicesConfig.getBoolean("amend-returns.enabled")
 
   private def isIndividual(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
@@ -440,19 +436,12 @@ class CommonTriageQuestionsController @Inject() (
             .getOrElse(List.empty)
             .find(e => CompletionDate(e.completionDate) === completionDate) match {
             case Some(matchingPreviousReturn) if state.forall(!_.isAmendReturn) =>
-              if (newCompletionDateUsedFlag)
-                Ok(
-                  previousReturnExistsWithSameCompletionDatePage(
-                    matchingPreviousReturn,
-                    backLink
-                  )
+              Ok(
+                previousReturnExistsWithSameCompletionDatePage(
+                  matchingPreviousReturn,
+                  backLink
                 )
-              else
-                Ok(
-                  previousReturnExistsWithSameCompletionDateAmendPage(
-                    backLink
-                  )
-                )
+              )
             case _ if state.exists(_.isAmendReturn)                             =>
               Ok(
                 previousReturnExistsWithSameCompletionDateAmendPage(
