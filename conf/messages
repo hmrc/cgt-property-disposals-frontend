@@ -3698,7 +3698,7 @@ calculator.showWorkings=Show workings
 calculator.disposalPrice=Property disposal amount
 calculator.disposalFees=Disposal costs
 calculator.total.disposalAmount=Property disposal amount less costs
-
+calculator.operator.or=or
 calculator.acquisitionPrice=Property acquisition amount
 calculator.acquisitionPrice.rebased=Property acquisition amount (rebased)
 calculator.improvementCosts=Improvement costs
