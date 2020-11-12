@@ -3083,7 +3083,7 @@ taxDue.cyaChange=y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dr
 calculator.cannotUsePrevYearsLosses=Ni allwch ddefnyddio colledion o flynyddoedd treth blaenorol yn y Ffurflen Dreth hon. Mae hyn oherwydd nid oes ennill.
 calculator.total.yearPosition=Safle blwyddyn
 calculator.total.gainsAfterReliefs=Enillion i gyd ar ôl rhyddhad
-
+calculator.operator.or=neu
 calculator.showWorkings=Dangos y gwaith cyfrifo
 calculator.disposalPrice=Swm gwaredu’r eiddo
 calculator.disposalFees=Costau gwaredu

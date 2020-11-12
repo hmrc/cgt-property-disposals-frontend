@@ -168,7 +168,7 @@
                 ),
                 SumPartDisplay(
                   label = messages("calculator.total.taxableGain"),
-                  operator = Some("or"),
+                  operator = Some(messages("calculator.operator.or")),
                   amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.taxableGainOrNetLoss.inPounds())
                 )
               ),
