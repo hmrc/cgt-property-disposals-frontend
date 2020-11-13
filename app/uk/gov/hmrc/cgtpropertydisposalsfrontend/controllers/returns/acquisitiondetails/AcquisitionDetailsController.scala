@@ -939,7 +939,9 @@ class AcquisitionDetailsController @Inject() (
                 rebasingEligibilityUtil
                   .getRebasingCutOffDate(assetType, wasAUkResident),
                 assetType,
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                fillingOutReturn.subscribedDetails.isATrust,
+                wasAUkResident
               )
             )
         }
@@ -979,7 +981,9 @@ class AcquisitionDetailsController @Inject() (
                       wasUkResident
                     ),
                   assetType,
-                  fillingOutReturn.isAmendReturn
+                  fillingOutReturn.isAmendReturn,
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  wasUkResident
                 )
               )(
                 requiredPreviousAnswer = _ => noAnswersRequired,

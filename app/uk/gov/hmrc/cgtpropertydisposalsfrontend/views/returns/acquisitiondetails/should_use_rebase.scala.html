@@ -36,10 +36,19 @@
    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
    yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
-   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+   warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(form: Form[Boolean], backLink: Call, rebaseCutOffDate: LocalDate, assetType: AssetType, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(
+        form: Form[Boolean],
+        backLink: Call,
+        rebaseCutOffDate: LocalDate,
+        assetType: AssetType,
+        isAmend: Boolean,
+        isATrust: Boolean,
+        wasAUkResident: Boolean
+)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "shouldUseRebase" }
 @assetTypeKey = @{assetType match {
@@ -49,6 +58,7 @@
 @rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate)}
 @title = @{messages(s"$key$assetTypeKey.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@showNrTrustWarning = @{isATrust && !wasAUkResident}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
@@ -67,8 +77,15 @@
    errorKey = form.error(key).map(e => e.message),
    hasErrors = hasErrors,
    selected = form.value,
-   helpText = Some(Html(messages(s"$key.helpText")))
+   helpText = Some(Html(messages(s"$key.helpText"))),
+   yesContent = None,
+   noContent = None,
+   describedBy = if(showNrTrustWarning) Some("single-warning") else None
   )
+
+   @if(showNrTrustWarning) {
+     @warning(messages(s"$key.nrTrust.warning"))
+   }
 
   @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
  }
