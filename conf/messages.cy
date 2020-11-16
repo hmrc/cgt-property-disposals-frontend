@@ -2789,6 +2789,14 @@ taxableGainOrLoss.calculated.gain.prompt=Nodwch ennill o <strong class="bold">{0
 taxableGainOrLoss.calculated.loss.prompt=Nodwch golled o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
 taxableGainOrLoss.calculated.noGainOrLoss.prompt=Dewiswch ‘Ni wnes i unrhyw ennill na cholled’ os ydych yn cytuno â’r cyfrifiadau hyn.
 taxableGainOrLoss.calculated.furtherReturn.p1=Gwnaethom ddefnyddio’r manylion a nodwyd yn y Ffurflen Dreth hon er mwyn cyfrifo’ch ennill net ar y gwarediadau eiddo yr ydych yn talu treth arnynt yn ystod y flwyddyn dreth {0} i {1}.
+taxableGainOrLoss.calculatedHelpText.p2=Os nad ydych yn cytuno â’r cyfrifiadau hyn, gallwch nodi swm gwahanol.
+taxableGainOrLoss.agent.calculatedHelpText.p2=Os nad yw’n cytuno â’r cyfrifiadau hyn, gallwch nodi swm gwahanol.
+taxableGainOrLoss.trust.calculatedHelpText.p2=Os nad ydych yn cytuno â’r cyfrifiadau hyn, gallwch nodi swm gwahanol.
+taxableGainOrLoss.capacitor.calculatedHelpText.p2=Os nad yw’n cytuno â’r cyfrifiadau hyn, gallwch nodi swm gwahanol.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.calculatedHelpText.p2=Os nad ydych yn cytuno â’r cyfrifiadau hyn, gallwch nodi swm gwahanol.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.calculatedHelpText.p2=Os nad yw’n cytuno â’r cyfrifiadau hyn, gallwch nodi swm gwahanol.
+
+
 
 taxableGain.label=Swm yr ennill cyffredinol
 taxableGain.error.required=Nodwch swm yr ennill cyffredinol
@@ -2811,7 +2819,7 @@ netLoss.error.tooLarge=Mae’n rhaid i’r golled gyffredinol fod yn swm o arian
 netLoss.error.tooManyDecimals=Mae’n rhaid i’r golled gyffredinol fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 4,820.54 neu 539
 taxableGainOrLoss.noLossOrGain.label=Dim ennill na cholled gyffredinol
 taxableGainOrLoss.furtherReturn.title=Rhowch wybod i ni a wnaethoch ennill neu golled net
-taxableGainOrLoss.agent.furtherReturn.title=Rhowch wybod i ni a wnaeth eich cleient ennill neu golled net
+taxableGainOrLoss.agent.furtherReturn.title=Nodwch ennill neu golled net eich cleient
 taxableGainOrLoss.trust.furtherReturn.title=Rhowch wybod i ni a wnaeth yr ymddiriedolaeth ennill neu golled net
 taxableGainOrLoss.capacitor.furtherReturn.title=Rhowch wybod i ni a wnaeth y person ennill neu golled net
 taxableGainOrLoss.personalRep.furtherReturn.title=Rhowch wybod i ni a wnaeth y person ennill neu golled net
@@ -3908,7 +3916,7 @@ gainOrLossAfterReliefs.capacitor.multipleDisposals.title=Nodwch ennill neu golle
 gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Nodwch ennill neu golled y person ar ôl rhyddhad ar y gwarediadau ar y Ffurflen Dreth hon
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Nodwch ennill neu golled yr ystâd ar ôl rhyddhad ar y gwarediadau ar y Ffurflen Dreth hon
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Nodwch ennill neu golled eich cleient ar ôl rhyddhad ar y gwarediadau ar y Ffurflen Dreth hon
-gainOrLossAfterReliefs.calculatorHeading=Gwnaethom ddefnyddio’r manylion a nodwyd ar y Ffurflen Dreth hon er mwyn cyfrifo’ch ennill neu golled ar ôl rhyddhad a gafodd ei dynnu.
+gainOrLossAfterReliefs.calculatorHeading=Gwnaethom ddefnyddio’r manylion a nodwyd ar y Ffurflen Dreth hon er mwyn cyfrifo’ch ennill neu golled ar ôl i’r rhyddhad gael ei dynnu.
 gainOrLossAfterReliefs.calculated.gain.prompt=Nodwch ennill o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
 gainOrLossAfterReliefs.calculated.loss.prompt=Nodwch golled o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
 gainOrLossAfterReliefs.calculated.noGainOrLoss.prompt=Dewiswch <strong class="bold">‘Ni wnes i unrhyw ennill na cholled’</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
@@ -3970,7 +3978,7 @@ lossAfterReliefs.error.tooManyDecimals=Mae’n rhaid i swm y golled gael 2 le de
 lossAfterReliefs.error.tooSmall=Mae’n rhaid i swm y golled fod yn fwy na 0
 gainOrLossAfterReliefs.cya.title=Gwiriwch eich atebion
 gainOrLossAfterReliefs.cyaChange=a wnaed enillion, colled, neu ddim enillion neu golled ar ôl rhyddhad
-
+gainOrLossAfterReliefs.calculated.promptEnding=Os nad ydych yn cytuno â’r cyfrifiadau hyn, gallwch nodi swm gwahanol.
 #===================================================
 #  GAIN OR LOSS AFTER RELIEFS PAGES - END
 #===================================================
