@@ -604,7 +604,7 @@ numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.heading=Gwarediadau an
 numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.text=Dyma le mae’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU. Gallwch gynnwys mwy nag un gwarediad anuniongyrchol yn y Ffurflen Dreth hon cyhyd â bod y canlynol yn berthnasol:
 numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.li1=roedd y person yn ddibreswyl ar y dyddiad y bu farw
 numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.li2=roedd gan yr holl gyfranddaliadau yr un dyddiad gwerthu neu waredu
-numberOfProperties.title=Faint o warediadau rydych yn eu cynnwys yn y Ffurflen Dreth hon?
+numberOfProperties.title=Sawl eiddo neu warediad rydych yn eu cynnwys yn y Ffurflen Dreth hon?
 numberOfProperties.details.summary=Beth sy’n digwydd ar y dyddiad cwblhau?
 numberOfProperties.details.p1=Fel arfer, y dyddiad cwblhau yw’r diwrnod y gwnaethoch waredu’r eiddo a chael yr arian o’r gwerthiant neu’r gwarediad. Mae hyn fel arfer pan fydd y perchennog newydd yn cael yr allweddi.
 numberOfProperties.agent.details.p1=Fel arfer, y dyddiad cwblhau yw’r diwrnod gwnaeth eich cleient waredu’r eiddo a chael yr arian o’r gwerthiant neu’r gwarediad. Mae hyn fel arfer pan fydd y perchennog newydd yn cael yr allweddi.
@@ -1378,7 +1378,7 @@ disposalPrice.personalRep.Gifted.error.tooManyDecimals=Mae’n rhaid i’r gwert
 disposalPrice.personalRep.indirect.Gifted.error.tooManyDecimals=Mae’n rhaid i werth marchnadol y cyfranddaliadau fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, megis 160,000 neu 23,040.50
 disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.tooManyDecimals=Mae’n rhaid i enillion y gwarediad fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, megis 160,000 neu 23,040.50
 disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.tooManyDecimals=Mae’n rhaid i enillion y gwarediad fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, megis 160,000 neu 23,040.50
-disposalPrice.SoldOther.title=Faint y cawsoch pan wnaethoch werthu neu waredu’r eiddo?
+disposalPrice.SoldOther.title=Am faint y gwnaethoch werthu’r eiddo?
 disposalPrice.indirect.SoldOther.title=Faint y cawsoch pan wnaethoch werthu neu waredu’r cyfranddaliadau?
 disposalPrice.agent.SoldOther.title=Faint y cafodd eich cleient pan wnaeth werthu neu waredu’r eiddo?
 disposalPrice.agent.indirect.SoldOther.title=Beth oedd swm y gwarediad?
@@ -2787,7 +2787,7 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.gain.label=Iawn, gwnaeth yr y
 taxableGainOrLoss.assistive.taxableGain=ar gyfer swm enill cyffredinol
 taxableGainOrLoss.calculated.gain.prompt=Nodwch ennill o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
 taxableGainOrLoss.calculated.loss.prompt=Nodwch golled o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
-taxableGainOrLoss.calculated.noGainOrLoss.prompt=Dewiswch ‘Ni wnes i unrhyw ennill na cholled’ os ydych yn cytuno â’r cyfrifiadau hyn.
+taxableGainOrLoss.calculated.noGainOrLoss.prompt=Dewiswch <strong class="bold">‘Dim ennill na cholled net’</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
 taxableGainOrLoss.calculated.furtherReturn.p1=Gwnaethom ddefnyddio’r manylion a nodwyd yn y Ffurflen Dreth hon er mwyn cyfrifo’ch ennill net ar y gwarediadau eiddo yr ydych yn talu treth arnynt yn ystod y flwyddyn dreth {0} i {1}.
 taxableGainOrLoss.calculatedHelpText.p2=Os nad ydych yn cytuno â’r cyfrifiadau hyn, gallwch nodi swm gwahanol.
 taxableGainOrLoss.agent.calculatedHelpText.p2=Os nad yw’n cytuno â’r cyfrifiadau hyn, gallwch nodi swm gwahanol.
@@ -2818,7 +2818,8 @@ netLoss.error.tooSmall=Mae’n rhaid i’r golled gyffredinol fod yn swm o arian
 netLoss.error.tooLarge=Mae’n rhaid i’r golled gyffredinol fod yn swm o arian rhwng 0 a 50,000,000,000
 netLoss.error.tooManyDecimals=Mae’n rhaid i’r golled gyffredinol fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 4,820.54 neu 539
 taxableGainOrLoss.noLossOrGain.label=Dim ennill na cholled gyffredinol
-taxableGainOrLoss.furtherReturn.title=Rhowch wybod i ni a wnaethoch ennill neu golled net
+
+taxableGainOrLoss.furtherReturn.title=Nodwch eich ennill neu golled net
 taxableGainOrLoss.agent.furtherReturn.title=Nodwch ennill neu golled net eich cleient
 taxableGainOrLoss.trust.furtherReturn.title=Rhowch wybod i ni a wnaeth yr ymddiriedolaeth ennill neu golled net
 taxableGainOrLoss.capacitor.furtherReturn.title=Rhowch wybod i ni a wnaeth y person ennill neu golled net
