@@ -29,7 +29,8 @@
   hasErrors: Boolean = false,
   selected: Option[Boolean] = None,
   yesContent: Option[Html] = None,
-  noContent: Option[Html] = None
+  noContent: Option[Html] = None,
+  describedBy: Option[String] = None
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
@@ -38,7 +39,7 @@
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
 @describedByKeys = @{
-  List(hintIdWithHintText.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+  List(describedBy.map(a => a), hintIdWithHintText.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 <div class="@classes">
   <fieldset id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>

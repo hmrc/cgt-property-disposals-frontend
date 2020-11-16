@@ -4298,7 +4298,12 @@ class AcquisitionDetailsControllerSpec
                   TimeUtils.govDisplayFormat(
                     nonUkResidentsResidentialProperty
                   )
-                )
+                ),
+                doc =>
+                  doc.select("#warning").text() shouldBe (userType match {
+                    case UserType.Organisation => messageFromMessageKey("shouldUseRebase.nrTrust.warning")
+                    case _                     => ""
+                  })
               )
           }
 

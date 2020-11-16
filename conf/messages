@@ -2575,6 +2575,7 @@ rebaseAcquisitionPrice.cyaChange=the market value of the property on {0}
 
 shouldUseRebase.title=Are you using the rebased value on {0} in your calculation?
 shouldUseRebase.helpText=You can use the rebased value or the actual cost of the property in your workings out. The amount you use could mean your gain or loss is lower.
+shouldUseRebase.nrTrust.warning=If the trust became a non-resident on or after 5 April 2019, you must select ‘No’. You cannot use the rebased value in your calculation.
 shouldUseRebase.error.required=Select whether you are using the rebased valued in your calculation
 
 shouldUseRebase.indirect.title=Are you using the value of the shares on {0} to work out the gain or loss?
