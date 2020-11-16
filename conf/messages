@@ -3828,8 +3828,8 @@ nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRep.helpText.li2=Subtract 
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRep.helpText.li3=Enter the amount - if the amount is less than zero enter zero.
 
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.p1=To work out this amount, you’ll need to:
-nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.li1=Start with the person’s previous overall Capital Gains Tax liability on their UK property-related disposals for the tax year {0} to {1}. This is what their overall liability was before this return.
-nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.li2=Subtract this amount from their new overall Capital Gains Tax liability on their UK property-related disposals for the tax year {0} to {1}. This is what their new overall liability is and includes the disposal in this return.
+nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.li1=Start with the estate’s previous overall Capital Gains Tax liability on its UK property-related disposals for the tax year {0} to {1}. This is what its overall liability was before this return.
+nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.li2=Subtract this amount from its new overall Capital Gains Tax liability on its UK property-related disposals for the tax year {0} to {1}. This is what its new overall liability is and includes the disposal in this return.
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.li3=Enter the amount - if the amount is less than zero enter zero.
 
 
