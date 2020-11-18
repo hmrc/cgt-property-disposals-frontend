@@ -18,10 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 
 final case class BusinessPartnerRecordResponse(
   businessPartnerRecord: Option[BusinessPartnerRecord],
-  cgtReference: Option[CgtReference]
+  cgtReference: Option[CgtReference],
+  newEnrolmentSubscribedDetails: Option[SubscribedDetails]
 )
 
 object BusinessPartnerRecordResponse {

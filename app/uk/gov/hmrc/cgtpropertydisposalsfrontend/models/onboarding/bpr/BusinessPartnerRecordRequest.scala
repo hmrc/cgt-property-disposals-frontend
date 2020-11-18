@@ -28,12 +28,16 @@ object BusinessPartnerRecordRequest {
 
   final case class IndividualBusinessPartnerRecordRequest(
     id: Either[SAUTR, NINO],
-    nameMatch: Option[IndividualName]
+    nameMatch: Option[IndividualName],
+    ggCredId: String,
+    createNewEnrolmentIfMissing: Boolean
   ) extends BusinessPartnerRecordRequest
 
   final case class TrustBusinessPartnerRecordRequest(
     id: Either[TRN, SAUTR],
-    nameMatch: Option[TrustName]
+    nameMatch: Option[TrustName],
+    ggCredId: String,
+    createNewEnrolmentIfMissing: Boolean
   ) extends BusinessPartnerRecordRequest
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

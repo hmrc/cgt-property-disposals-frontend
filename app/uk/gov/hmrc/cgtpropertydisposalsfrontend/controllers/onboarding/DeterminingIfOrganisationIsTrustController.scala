@@ -29,13 +29,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.Determini
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.DeterminingIfOrganisationIsTrust
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, SubscriptionStatus}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, TRN}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.WrongGGAccountEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, NameMatchServiceError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -277,7 +277,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                           .fold[EitherT[
                                             Future,
                                             NameMatchError[TrustNameMatchDetails],
-                                            (BusinessPartnerRecord, Option[CgtReference])
+                                            (BusinessPartnerRecord, BusinessPartnerRecordResponse)
                                           ]](
                                             e => EitherT.fromEither[Future](Left(ValidationError(e))),
                                             trustNameMatchDetails =>
@@ -304,23 +304,21 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                   case ServiceError(e)                 =>
                     handleNameMatchServiceError(e)
                 },
-                { case (_, maybeCgtReference) =>
-                  Redirect(
-                    maybeCgtReference.fold(
-                      controllers.routes.StartController.start()
-                    ) { cgtReference =>
-                      auditService.sendEvent(
-                        "accessWithWrongGGAccount",
-                        WrongGGAccountEvent(
-                          Some(cgtReference.value),
-                          determiningIfOrganisationIsTrust.ggCredId.value
-                        ),
-                        "access-with-wrong-gg-account"
-                      )
-                      onboarding.routes.SubscriptionController
-                        .alreadySubscribedWithDifferentGGAccount()
-                    }
-                  )
+                {
+                  case (_, BusinessPartnerRecordResponse(_, Some(cgtReference), None)) =>
+                    auditService.sendEvent(
+                      "accessWithWrongGGAccount",
+                      WrongGGAccountEvent(
+                        Some(cgtReference.value),
+                        determiningIfOrganisationIsTrust.ggCredId.value
+                      ),
+                      "access-with-wrong-gg-account"
+                    )
+                    Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+
+                  case _ =>
+                    Redirect(controllers.routes.StartController.start())
+
                 }
               )
 
@@ -373,52 +371,54 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
     request: RequestWithSessionData[_]
   ): EitherT[Future, NameMatchServiceError[
     TrustNameMatchDetails
-  ], (BusinessPartnerRecord, Option[CgtReference])] =
+  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
     for {
-      bprWithCgtReference <- bprNameMatchService
-                               .attemptBusinessPartnerRecordNameMatch(
-                                 trustNameMatchDetails,
-                                 ggCredId,
-                                 previousUnsuccessfulAttempt
-                               )
-                               .subflatMap { case (bpr, cgtReference) =>
-                                 if (bpr.name.isRight)
-                                   Left(
-                                     NameMatchServiceError
-                                       .BackendError(
-                                         Error(
-                                           "Found BPR for individual but expected one for a trust"
-                                         )
-                                       )
-                                   )
-                                 else
-                                   Right(bpr -> cgtReference)
-                               }
-      _                   <- EitherT(
-                               updateSession(sessionStore, request)(
-                                 _.copy(journeyStatus =
-                                   Some(
-                                     bprWithCgtReference._2.fold[JourneyStatus](
-                                       SubscriptionStatus.SubscriptionMissingData(
-                                         bprWithCgtReference._1,
-                                         None,
-                                         None,
-                                         ggCredId,
-                                         ggEmail
-                                       )
-                                     )(cgtRef =>
-                                       AlreadySubscribedWithDifferentGGAccount(
-                                         ggCredId,
-                                         Some(cgtRef)
-                                       )
-                                     )
-                                   )
-                                 )
-                               )
-                             ).leftMap[NameMatchServiceError[TrustNameMatchDetails]](
-                               NameMatchServiceError.BackendError
-                             )
-    } yield bprWithCgtReference
+      bprWithBprResponse <- bprNameMatchService
+                              .attemptBusinessPartnerRecordNameMatch(
+                                trustNameMatchDetails,
+                                ggCredId,
+                                previousUnsuccessfulAttempt
+                              )
+                              .subflatMap { case (bpr, bprResponse) =>
+                                if (bpr.name.isRight)
+                                  Left(
+                                    NameMatchServiceError
+                                      .BackendError(
+                                        Error(
+                                          "Found BPR for individual but expected one for a trust"
+                                        )
+                                      )
+                                  )
+                                else
+                                  Right(bpr -> bprResponse)
+                              }
+      _                  <- EitherT(
+                              updateSession(sessionStore, request)(
+                                _.copy(journeyStatus =
+                                  Some(
+                                    bprWithBprResponse._2.cgtReference.fold[JourneyStatus](
+                                      SubscriptionStatus.SubscriptionMissingData(
+                                        bprWithBprResponse._1,
+                                        None,
+                                        None,
+                                        ggCredId,
+                                        ggEmail
+                                      )
+                                    )(cgtRef =>
+                                      bprWithBprResponse._2.newEnrolmentSubscribedDetails.fold[JourneyStatus](
+                                        AlreadySubscribedWithDifferentGGAccount(
+                                          ggCredId,
+                                          Some(cgtRef)
+                                        )
+                                      )(subscribedDetails => NewEnrolmentCreatedForMissingEnrolment(subscribedDetails, ggCredId))
+                                    )
+                                  )
+                                )
+                              )
+                            ).leftMap[NameMatchServiceError[TrustNameMatchDetails]](
+                              NameMatchServiceError.BackendError
+                            )
+    } yield bprWithBprResponse
 
   private def handleNameMatchServiceError(
     nameMatchError: NameMatchServiceError[TrustNameMatchDetails]

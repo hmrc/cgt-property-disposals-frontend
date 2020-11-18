@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOff
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
@@ -212,6 +212,9 @@ class StartController @Inject() (
         Redirect(
           controllers.returns.amend.routes.AmendReturnController.checkYourAnswers()
         )
+
+      case NewEnrolmentCreatedForMissingEnrolment(subscribedDetails, ggCredId) =>
+        handleSubscribedUser(subscribedDetails.cgtReference, ggCredId, Some(subscribedDetails))
     }
 
   private def handleRetrievedUserType(
@@ -249,7 +252,7 @@ class StartController @Inject() (
         }
 
       case RetrievedUserType.Subscribed(cgtReference, ggCredId) =>
-        handleSubscribedUser(cgtReference, ggCredId)
+        handleSubscribedUser(cgtReference, ggCredId, None)
 
       case RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
             maybeNino,
@@ -305,21 +308,24 @@ class StartController @Inject() (
 
   private def handleSubscribedUser(
     cgtReference: CgtReference,
-    ggCredId: GGCredId
+    ggCredId: GGCredId,
+    subscribedDetails: Option[SubscribedDetails]
   )(implicit
     request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     val result = for {
-      subscribedDetails <- subscriptionService
-                             .getSubscribedDetails(cgtReference)
-                             .subflatMap(
-                               Either.fromOption(
-                                 _,
-                                 Error(
-                                   s"Could not find subscribed details for cgt reference ${cgtReference.value}"
+      subscribedDetails <- subscribedDetails.fold(
+                             subscriptionService
+                               .getSubscribedDetails(cgtReference)
+                               .subflatMap(
+                                 Either.fromOption(
+                                   _,
+                                   Error(
+                                     s"Could not find subscribed details for cgt reference ${cgtReference.value}"
+                                   )
                                  )
                                )
-                             )
+                           )(EitherT.pure(_))
       sentReturns       <- returnsService.listReturns(cgtReference)
       draftReturns      <- returnsService.getDraftReturns(cgtReference, sentReturns)
       _                 <- EitherT(
@@ -454,7 +460,12 @@ class StartController @Inject() (
     val result =
       for {
         bprResponse <- bprService.getBusinessPartnerRecord(
-                         TrustBusinessPartnerRecordRequest(Right(trust.sautr), None)
+                         TrustBusinessPartnerRecordRequest(
+                           Right(trust.sautr),
+                           None,
+                           trust.ggCredId.value,
+                           createNewEnrolmentIfMissing = true
+                         )
                        )
 
         bprWithTrustName         <- EitherT.fromEither[Future](
@@ -506,10 +517,18 @@ class StartController @Inject() (
                     )
                   )
                 )(cgtReference =>
-                  Left(
-                    BuildSubscriptionDataError
-                      .AlreadySubscribedToCGT(cgtReference)
-                  )
+                  bprResponse.newEnrolmentSubscribedDetails
+                    .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
+                      Left(
+                        BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference)
+                      )
+                    )(newEnrolmentSubscribedDetails =>
+                      Left(
+                        BuildSubscriptionDataError.NewSubscriptionCreatedForMissingEnrolment(
+                          newEnrolmentSubscribedDetails
+                        )
+                      )
+                    )
                 )
               }
           )
@@ -546,6 +565,12 @@ class StartController @Inject() (
             onboarding.routes.SubscriptionController
               .alreadySubscribedWithDifferentGGAccount()
           )
+
+        case Left(BuildSubscriptionDataError.NewSubscriptionCreatedForMissingEnrolment(subscribedDetails)) =>
+          logger.info(
+            s"New subscription created after missing enrolment found for cgt reference ${subscribedDetails.cgtReference.value}"
+          )
+          Redirect(routes.StartController.start())
 
         case Right(_) =>
           Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
@@ -598,7 +623,12 @@ class StartController @Inject() (
   ): Future[Result] = {
     val result = for {
       bprResponse              <- bprService.getBusinessPartnerRecord(
-                                    IndividualBusinessPartnerRecordRequest(individual.id, None)
+                                    IndividualBusinessPartnerRecordRequest(
+                                      individual.id,
+                                      None,
+                                      individual.ggCredId.value,
+                                      createNewEnrolmentIfMissing = true
+                                    )
                                   )
       bpr                      <- EitherT.fromEither[Future](
                                     Either.fromOption(
@@ -606,17 +636,24 @@ class StartController @Inject() (
                                       Error("Could not find BPR for individual")
                                     )
                                   )
-      maybeSubscriptionDetails <- EitherT.pure(
-                                    bprResponse.cgtReference
-                                      .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
-                                        SubscriptionDetails(bpr, individual.email, None, None)
-                                          .leftMap(_ => BuildSubscriptionDataError.DataMissing(bpr))
-                                      )(cgtReference =>
-                                        Left(
-                                          BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference)
-                                        )
-                                      )
-                                  )
+      maybeSubscriptionDetails <-
+        EitherT.pure(
+          bprResponse.cgtReference
+            .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
+              SubscriptionDetails(bpr, individual.email, None, None)
+                .leftMap(_ => BuildSubscriptionDataError.DataMissing(bpr))
+            )(cgtReference =>
+              bprResponse.newEnrolmentSubscribedDetails.fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
+                Left(
+                  BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference)
+                )
+              )(newEnrolmentSubscribedDetails =>
+                Left(
+                  BuildSubscriptionDataError.NewSubscriptionCreatedForMissingEnrolment(newEnrolmentSubscribedDetails)
+                )
+              )
+            )
+        )
       _                        <- updateSession(
                                     maybeSubscriptionDetails,
                                     individual.email,
@@ -649,6 +686,12 @@ class StartController @Inject() (
             onboarding.routes.SubscriptionController
               .alreadySubscribedWithDifferentGGAccount()
           )
+
+        case Left(BuildSubscriptionDataError.NewSubscriptionCreatedForMissingEnrolment(subscribedDetails)) =>
+          logger.info(
+            s"New subscription created after missing enrolment found for cgt reference ${subscribedDetails.cgtReference.value}"
+          )
+          Redirect(routes.StartController.start())
 
         case Right(_) =>
           Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
@@ -695,6 +738,19 @@ class StartController @Inject() (
                 )
               )
             )
+
+          case BuildSubscriptionDataError.NewSubscriptionCreatedForMissingEnrolment(subscribedDetails) =>
+            updateSession(sessionStore, request)(
+              _.copy(
+                journeyStatus = Some(
+                  NewEnrolmentCreatedForMissingEnrolment(
+                    subscribedDetails,
+                    ggCredId
+                  )
+                )
+              )
+            )
+
         },
         subscriptionDetails =>
           updateSession(sessionStore, request)(
@@ -719,6 +775,9 @@ object StartController {
     final case class AlreadySubscribedToCGT(cgtReference: CgtReference) extends BuildSubscriptionDataError
 
     final case class DataMissing(bpr: BusinessPartnerRecord) extends BuildSubscriptionDataError
+
+    final case class NewSubscriptionCreatedForMissingEnrolment(subscribedDetails: SubscribedDetails)
+        extends BuildSubscriptionDataError
 
   }
 

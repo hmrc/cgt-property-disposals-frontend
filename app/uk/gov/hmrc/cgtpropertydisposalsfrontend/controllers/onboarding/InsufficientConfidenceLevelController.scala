@@ -29,13 +29,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController.NameMatchError.{ServiceError, ValidationError}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, SubscriptionStatus}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOffTIvEvent, WrongGGAccountEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualSautrNameMatchDetails, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, NameMatchServiceError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -252,7 +252,7 @@ class InsufficientConfidenceLevelController @Inject() (
                                           .fold[EitherT[
                                             Future,
                                             NameMatchError[IndividualSautrNameMatchDetails],
-                                            (BusinessPartnerRecord, Option[CgtReference])
+                                            (BusinessPartnerRecord, BusinessPartnerRecordResponse)
                                           ]](
                                             e => EitherT.fromEither[Future](Left(ValidationError(e))),
                                             IndividualSautrNameMatchDetails =>
@@ -280,23 +280,20 @@ class InsufficientConfidenceLevelController @Inject() (
                     handleNameMatchServiceError(e)
 
                 },
-                { case (_, maybeCgtReference) =>
-                  Redirect(
-                    maybeCgtReference.fold(
-                      controllers.routes.StartController.start()
-                    ) { cgtReference =>
-                      auditService.sendEvent(
-                        "accessWithWrongGGAccount",
-                        WrongGGAccountEvent(
-                          Some(cgtReference.value),
-                          insufficientConfidenceLevel.ggCredId.value
-                        ),
-                        "access-with-wrong-gg-account"
-                      )
-                      routes.SubscriptionController
-                        .alreadySubscribedWithDifferentGGAccount()
-                    }
-                  )
+                {
+                  case (_, BusinessPartnerRecordResponse(_, Some(cgtReference), None)) =>
+                    auditService.sendEvent(
+                      "accessWithWrongGGAccount",
+                      WrongGGAccountEvent(
+                        Some(cgtReference.value),
+                        insufficientConfidenceLevel.ggCredId.value
+                      ),
+                      "access-with-wrong-gg-account"
+                    )
+                    Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+
+                  case _ =>
+                    Redirect(controllers.routes.StartController.start())
                 }
               )
 
@@ -347,7 +344,7 @@ class InsufficientConfidenceLevelController @Inject() (
     request: RequestWithSessionData[_]
   ): EitherT[Future, NameMatchServiceError[
     IndividualSautrNameMatchDetails
-  ], (BusinessPartnerRecord, Option[CgtReference])] =
+  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
     for {
       bprWithCgtReference <- bprNameMatchService
                                .attemptBusinessPartnerRecordNameMatch(
@@ -355,7 +352,7 @@ class InsufficientConfidenceLevelController @Inject() (
                                  ggCredId,
                                  previousUnsuccessfulAttempt
                                )
-                               .subflatMap { case (bpr, cgtReference) =>
+                               .subflatMap { case (bpr, bprResponse) =>
                                  if (bpr.name.isLeft)
                                    Left(
                                      NameMatchServiceError
@@ -366,13 +363,13 @@ class InsufficientConfidenceLevelController @Inject() (
                                        )
                                    )
                                  else
-                                   Right(bpr -> cgtReference)
+                                   Right(bpr -> bprResponse)
                                }
       _                   <- EitherT(
                                updateSession(sessionStore, request)(
                                  _.copy(journeyStatus =
                                    Some(
-                                     bprWithCgtReference._2.fold[JourneyStatus](
+                                     bprWithCgtReference._2.cgtReference.fold[JourneyStatus](
                                        SubscriptionStatus.SubscriptionMissingData(
                                          bprWithCgtReference._1,
                                          None,
@@ -381,10 +378,12 @@ class InsufficientConfidenceLevelController @Inject() (
                                          ggEmail
                                        )
                                      )(cgtReference =>
-                                       AlreadySubscribedWithDifferentGGAccount(
-                                         ggCredId,
-                                         Some(cgtReference)
-                                       )
+                                       bprWithCgtReference._2.newEnrolmentSubscribedDetails.fold[JourneyStatus](
+                                         AlreadySubscribedWithDifferentGGAccount(
+                                           ggCredId,
+                                           Some(cgtReference)
+                                         )
+                                       )(subscribedDetails => NewEnrolmentCreatedForMissingEnrolment(subscribedDetails, ggCredId))
                                      )
                                    )
                                  )

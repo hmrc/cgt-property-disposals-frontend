@@ -67,7 +67,7 @@ trait NameMatchRetryService {
     request: Request[_]
   ): EitherT[Future, NameMatchServiceError[
     IndividualSautrNameMatchDetails
-  ], (BusinessPartnerRecord, Option[CgtReference])]
+  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)]
 
   def attemptBusinessPartnerRecordNameMatch(
     nameMatchDetails: TrustNameMatchDetails,
@@ -80,7 +80,7 @@ trait NameMatchRetryService {
     request: Request[_]
   ): EitherT[Future, NameMatchServiceError[
     TrustNameMatchDetails
-  ], (BusinessPartnerRecord, Option[CgtReference])]
+  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)]
 
   def attemptNameMatch(
     nameMatchDetails: IndividualRepresenteeNameMatchDetails,
@@ -143,7 +143,7 @@ class NameMatchRetryServiceImpl @Inject() (
     request: Request[_]
   ): EitherT[Future, NameMatchServiceError[
     IndividualSautrNameMatchDetails
-  ], (BusinessPartnerRecord, Option[CgtReference])] =
+  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
     withValidPreviousUnsuccessfulNameMatchAttempts(
       previousUnsuccessfulNameMatchAttempts,
       nameMatchDetails
@@ -151,7 +151,9 @@ class NameMatchRetryServiceImpl @Inject() (
       handleBprNameMatch(
         IndividualBusinessPartnerRecordRequest(
           Left(nameMatchDetails.sautr),
-          Some(nameMatchDetails.name)
+          Some(nameMatchDetails.name),
+          ggCredId.value,
+          createNewEnrolmentIfMissing = true
         ),
         nameMatchDetails,
         ggCredId,
@@ -170,7 +172,7 @@ class NameMatchRetryServiceImpl @Inject() (
     request: Request[_]
   ): EitherT[Future, NameMatchServiceError[
     TrustNameMatchDetails
-  ], (BusinessPartnerRecord, Option[CgtReference])] =
+  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
     withValidPreviousUnsuccessfulNameMatchAttempts(
       previousUnsuccessfulNameMatchAttempts,
       nameMatchDetails
@@ -178,7 +180,9 @@ class NameMatchRetryServiceImpl @Inject() (
       handleBprNameMatch(
         TrustBusinessPartnerRecordRequest(
           Left(nameMatchDetails.trn),
-          Some(nameMatchDetails.name)
+          Some(nameMatchDetails.name),
+          ggCredId.value,
+          createNewEnrolmentIfMissing = true
         ),
         nameMatchDetails,
         ggCredId,
@@ -208,7 +212,9 @@ class NameMatchRetryServiceImpl @Inject() (
           handleBprNameMatch(
             IndividualBusinessPartnerRecordRequest(
               Right(nino),
-              Some(nameMatchDetails.name)
+              Some(nameMatchDetails.name),
+              ggCredId.value,
+              createNewEnrolmentIfMissing = false
             ),
             nameMatchDetails,
             ggCredId,
@@ -219,7 +225,9 @@ class NameMatchRetryServiceImpl @Inject() (
           handleBprNameMatch(
             IndividualBusinessPartnerRecordRequest(
               Left(sautr),
-              Some(nameMatchDetails.name)
+              Some(nameMatchDetails.name),
+              ggCredId.value,
+              createNewEnrolmentIfMissing = false
             ),
             nameMatchDetails,
             ggCredId,
@@ -293,7 +301,7 @@ class NameMatchRetryServiceImpl @Inject() (
     hc: HeaderCarrier
   ): EitherT[Future, NameMatchServiceError[
     A
-  ], (BusinessPartnerRecord, Option[CgtReference])] =
+  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
     for {
       bprResponse <- bprService
                        .getBusinessPartnerRecord(bprRequest)
@@ -448,12 +456,12 @@ class NameMatchRetryServiceImpl @Inject() (
     ]
   ): EitherT[Future, NameMatchServiceError[
     A
-  ], (BusinessPartnerRecord, Option[CgtReference])] = {
+  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] = {
     val result: Either[Future[
       NameMatchServiceError[A]
-    ], (BusinessPartnerRecord, Option[CgtReference])] = Either
+    ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] = Either
       .fromOption(
-        bprResponse.businessPartnerRecord.map(bpr => bpr -> bprResponse.cgtReference),
+        bprResponse.businessPartnerRecord.map(bpr => bpr -> bprResponse),
         updateNumberOfUnsuccessfulNameMatchAttempts(
           nameMatchDetails,
           ggCredId,
@@ -462,7 +470,7 @@ class NameMatchRetryServiceImpl @Inject() (
       )
     EitherT[Future, NameMatchServiceError[
       A
-    ], (BusinessPartnerRecord, Option[CgtReference])] {
+    ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] {
       result.leftSequence[Future, NameMatchServiceError[A]]
     }
   }

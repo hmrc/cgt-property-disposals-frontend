@@ -35,13 +35,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sam
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameMatchGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AlreadySubscribedWithDifferentGGAccount
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NameMatchServiceError.TooManyUnsuccessfulAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, NameMatchServiceError, SessionData, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.NameMatchRetryService
@@ -110,7 +112,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
   )(
     result: Either[NameMatchServiceError[
       TrustNameMatchDetails
-    ], (BusinessPartnerRecord, Option[CgtReference])]
+    ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)]
   ) =
     (
       mockBprNameMatchService
@@ -1214,7 +1216,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               ggCredId,
               Some(previousUnsuccessfulNameMatchAttempt)
             )(
-              Right(bpr -> None)
+              Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), None, None))
             )
             mockStoreSession(
               sessionDataWithStatus(
@@ -1233,6 +1235,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         }
 
         "a BPR is found but it is one for an individual instead of a trust" in {
+          val individualBpr = bpr.copy(name = Right(IndividualName("Name", "Wame")))
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(expectedSessionData)
@@ -1246,7 +1250,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Some(previousUnsuccessfulNameMatchAttempt)
             )(
               Right(
-                bpr.copy(name = Right(IndividualName("Name", "Wame"))) -> None
+                individualBpr -> BusinessPartnerRecordResponse(Some(individualBpr), None, None)
               )
             )
           }
@@ -1277,11 +1281,48 @@ class DeterminingIfOrganisationIsTrustControllerSpec
                 ggCredId,
                 Some(previousUnsuccessfulNameMatchAttempt)
               )(
-                Right(bpr -> None)
+                Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), None, None))
               )
               mockStoreSession(
                 sessionDataWithStatus(
                   SubscriptionMissingData(bpr, None, None, ggCredId, None)
+                )
+              )(Right(()))
+            }
+
+            val result = performAction(
+              "trustName" -> validTrustName.value,
+              "trn"       -> validTrn.value
+            )
+            checkIsRedirect(
+              result,
+              cgtpropertydisposalsfrontend.controllers.routes.StartController
+                .start()
+            )
+          }
+
+        "the user submits a valid TRN and trust name and a BPR can be retrieved and a " +
+          "new enrolment has been created for the user" in {
+            val cgtReference      = sample[CgtReference]
+            val subscribedDetails = sample[SubscribedDetails]
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(expectedSessionData)
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+                Right(Some(previousUnsuccessfulNameMatchAttempt))
+              )
+              mockAttemptNameMatch(
+                validTrn,
+                validTrustName,
+                ggCredId,
+                Some(previousUnsuccessfulNameMatchAttempt)
+              )(
+                Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), Some(subscribedDetails)))
+              )
+              mockStoreSession(
+                sessionDataWithStatus(
+                  NewEnrolmentCreatedForMissingEnrolment(subscribedDetails, ggCredId)
                 )
               )(Right(()))
             }
@@ -1316,7 +1357,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               ggCredId,
               Some(previousUnsuccessfulNameMatchAttempt)
             )(
-              Right(bpr -> Some(cgtReference))
+              Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), None))
             )
             mockStoreSession(
               sessionDataWithStatus(
@@ -1403,7 +1444,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             ggCredId,
             Some(previousUnsuccessfulNameMatchAttempt)
           )(
-            Right(bpr -> None)
+            Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), None, None))
           )
           mockStoreSession(
             sessionDataWithStatus(
