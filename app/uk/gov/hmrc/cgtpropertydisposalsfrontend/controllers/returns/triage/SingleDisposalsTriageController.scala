@@ -1390,7 +1390,7 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 None,
                 _,
-                None
+                _
               ) =>
             Redirect(
               routes.SingleDisposalsTriageController.whenWasDisposalDate()

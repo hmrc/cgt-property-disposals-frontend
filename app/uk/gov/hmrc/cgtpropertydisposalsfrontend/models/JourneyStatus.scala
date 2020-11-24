@@ -69,6 +69,13 @@ object JourneyStatus {
     ) extends SubscriptionStatus
   }
 
+  // cgt account existed in ETMP but no enrolment was found in MDTP - a new enrolment
+  // has just been created to make the state consistent across ETMP and MTDTP
+  final case class NewEnrolmentCreatedForMissingEnrolment(
+    subscribedDetails: SubscribedDetails,
+    GGCredId: GGCredId
+  ) extends JourneyStatus
+
   // subscription has been submitted to ETMP
   final case class Subscribed(
     subscribedDetails: SubscribedDetails,

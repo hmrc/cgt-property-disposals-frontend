@@ -187,7 +187,9 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
   def mockGetIndividualBpr(
     expectedId: Either[SAUTR, NINO],
-    expectedName: IndividualName
+    expectedName: IndividualName,
+    ggCredId: GGCredId,
+    createNewEnrolmentIfMissing: Boolean
   )(
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
@@ -196,12 +198,22 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
         _: HeaderCarrier
       ))
       .expects(
-        IndividualBusinessPartnerRecordRequest(expectedId, Some(expectedName)),
+        IndividualBusinessPartnerRecordRequest(
+          expectedId,
+          Some(expectedName),
+          ggCredId.value,
+          createNewEnrolmentIfMissing
+        ),
         *
       )
       .returning(EitherT.fromEither[Future](result))
 
-  def mockGetTrustBpr(expectedTrn: TRN, expectedName: TrustName)(
+  def mockGetTrustBpr(
+    expectedTrn: TRN,
+    expectedName: TrustName,
+    ggCredId: GGCredId,
+    createNewEnrolmentIfMissing: Boolean
+  )(
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (bprService
@@ -211,7 +223,9 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
       .expects(
         TrustBusinessPartnerRecordRequest(
           Left(expectedTrn),
-          Some(expectedName)
+          Some(expectedName),
+          ggCredId.value,
+          createNewEnrolmentIfMissing
         ),
         *
       )
@@ -272,7 +286,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           )
 
           await(
-            service.getNumberOfUnsuccessfulAttempts(ggCredId).value
+            service.getNumberOfUnsuccessfulAttempts[IndividualSautrNameMatchDetails](ggCredId).value
           ) shouldBe Right(
             Some(UnsuccessfulNameMatchAttempts(1, maxRetries, nameMatchDetails))
           )
@@ -287,7 +301,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           mockGetNumberOfUnsccessfulAttempts(ggCredId)(Right(None))
 
           await(
-            service.getNumberOfUnsuccessfulAttempts(ggCredId).value
+            service.getNumberOfUnsuccessfulAttempts[IndividualSautrNameMatchDetails](ggCredId).value
           ) shouldBe Right(
             None
           )
@@ -442,7 +456,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
       behave like commonBprNameMatchBehaviour[
         IndividualSautrNameMatchDetails,
-        (BusinessPartnerRecord, Option[CgtReference])
+        (BusinessPartnerRecord, BusinessPartnerRecordResponse)
       ](
         nameMatchDetails,
         IndividualNameWithSaUtrAuditDetails(
@@ -450,10 +464,13 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           nameMatchDetails.name.lastName,
           nameMatchDetails.sautr.value
         ),
-        mockGetIndividualBpr(
-          Left(nameMatchDetails.sautr),
-          nameMatchDetails.name
-        )(_),
+        ggCredId =>
+          mockGetIndividualBpr(
+            Left(nameMatchDetails.sautr),
+            nameMatchDetails.name,
+            ggCredId,
+            createNewEnrolmentIfMissing = true
+          )(_),
         service.attemptBusinessPartnerRecordNameMatch(_, _, _),
         _ -> _
       )
@@ -466,14 +483,15 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
       behave like commonBprNameMatchBehaviour[
         TrustNameMatchDetails,
-        (BusinessPartnerRecord, Option[CgtReference])
+        (BusinessPartnerRecord, BusinessPartnerRecordResponse)
       ](
         nameMatchDetails,
         TrustNameWithTrnAuditDetails(
           nameMatchDetails.name.value,
           nameMatchDetails.trn.value
         ),
-        mockGetTrustBpr(nameMatchDetails.trn, nameMatchDetails.name)(_),
+        ggCreId =>
+          mockGetTrustBpr(nameMatchDetails.trn, nameMatchDetails.name, ggCreId, createNewEnrolmentIfMissing = true)(_),
         service.attemptBusinessPartnerRecordNameMatch(_, _, _),
         _ -> _
       )
@@ -518,10 +536,13 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             nameMatchDetails.name.lastName,
             representeeNino.value.value
           ),
-          mockGetIndividualBpr(
-            Right(representeeNino.value),
-            nameMatchDetails.name
-          )(_),
+          ggCredId =>
+            mockGetIndividualBpr(
+              Right(representeeNino.value),
+              nameMatchDetails.name,
+              ggCredId,
+              createNewEnrolmentIfMissing = false
+            )(_),
           service.attemptNameMatch(_, _, _),
           (_, _) => representeeNino
         )
@@ -546,10 +567,13 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             nameMatchDetails.name.lastName,
             representeeSautr.value.value
           ),
-          mockGetIndividualBpr(
-            Left(representeeSautr.value),
-            nameMatchDetails.name
-          )(_),
+          ggCredId =>
+            mockGetIndividualBpr(
+              Left(representeeSautr.value),
+              nameMatchDetails.name,
+              ggCredId,
+              createNewEnrolmentIfMissing = false
+            )(_),
           service.attemptNameMatch(_, _, _),
           (_, _) => representeeSautr
         )
@@ -888,13 +912,13 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
   private def commonBprNameMatchBehaviour[A <: NameMatchDetails : Gen, B](
     sampleNameMatchDetails: A,
     auditEvent: BusinessPartnerRecordNameMatchAuditDetails,
-    mockGetBpr: Either[Error, BusinessPartnerRecordResponse] => Unit,
+    mockGetBpr: GGCredId => Either[Error, BusinessPartnerRecordResponse] => Unit,
     toResult: (
       A,
       GGCredId,
       Option[UnsuccessfulNameMatchAttempts[A]]
     ) => EitherT[Future, NameMatchServiceError[A], B],
-    toSuccessfulResponse: (BusinessPartnerRecord, Option[CgtReference]) => B
+    toSuccessfulResponse: (BusinessPartnerRecord, BusinessPartnerRecordResponse) => B
   ) = {
     val ggCredId = sample[GGCredId]
 
@@ -947,7 +971,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
               maxRetries,
               auditEvent
             )(())
-            mockGetBpr(Right(BusinessPartnerRecordResponse(None, None)))
+            mockGetBpr(ggCredId)(Right(BusinessPartnerRecordResponse(None, None, None)))
             mockStoreNumberOfUnsccessfulAttempts(
               ggCredId,
               UnsuccessfulNameMatchAttempts(
@@ -984,7 +1008,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             maxRetries,
             auditEvent
           )(())
-          mockGetBpr(Left(Error("")))
+          mockGetBpr(ggCredId)(Left(Error("")))
         }
 
         testIsErrorOfType[A, NameMatchServiceError.BackendError](
@@ -1003,7 +1027,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             maxRetries,
             auditEvent
           )(())
-          mockGetBpr(Right(BusinessPartnerRecordResponse(None, None)))
+          mockGetBpr(ggCredId)(Right(BusinessPartnerRecordResponse(None, None, None)))
           mockStoreNumberOfUnsccessfulAttempts(
             ggCredId,
             UnsuccessfulNameMatchAttempts(1, maxRetries, sampleNameMatchDetails)
@@ -1034,7 +1058,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
               auditEvent
             )(())
 
-            mockGetBpr(Right(BusinessPartnerRecordResponse(None, None)))
+            mockGetBpr(ggCredId)(Right(BusinessPartnerRecordResponse(None, None, None)))
 
             mockStoreNumberOfUnsccessfulAttempts(
               ggCredId,
@@ -1083,7 +1107,8 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
     "return a successful response" when {
 
       "the name match succeeded and a BPR was found" in {
-        val bpr = sample[BusinessPartnerRecord]
+        val bpr         = sample[BusinessPartnerRecord]
+        val bprResponse = BusinessPartnerRecordResponse(Some(bpr), None, None)
 
         inSequence {
           mockSendBprNameMatchAttemptEvent(
@@ -1091,7 +1116,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             maxRetries,
             auditEvent
           )(())
-          mockGetBpr(Right(BusinessPartnerRecordResponse(Some(bpr), None)))
+          mockGetBpr(ggCredId)(Right(bprResponse))
         }
 
         val result = toResult(
@@ -1100,12 +1125,13 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           None
         )
 
-        await(result.value) shouldBe Right(toSuccessfulResponse(bpr, None))
+        await(result.value) shouldBe Right(toSuccessfulResponse(bpr, bprResponse))
       }
 
-      "the name match succeeded and a BPR was found and an existing cgt reference" in {
+      "the name match succeeded and a BPR was found with an existing cgt reference" in {
         val bpr          = sample[BusinessPartnerRecord]
         val cgtReference = sample[CgtReference]
+        val bprResponse  = BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), None)
 
         inSequence {
           mockSendBprNameMatchAttemptEvent(
@@ -1113,9 +1139,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             maxRetries,
             auditEvent
           )(())
-          mockGetBpr(
-            Right(BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference)))
-          )
+          mockGetBpr(ggCredId)(Right(bprResponse))
         }
 
         val result = toResult(
@@ -1124,9 +1148,30 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           None
         )
 
-        await(result.value) shouldBe Right(
-          toSuccessfulResponse(bpr, Some(cgtReference))
+        await(result.value) shouldBe Right(toSuccessfulResponse(bpr, bprResponse))
+      }
+
+      "the name match succeeded and a BPR was found with subscription details of a new enrolment" in {
+        val bpr          = sample[BusinessPartnerRecord]
+        val cgtReference = sample[CgtReference]
+        val bprResponse  = BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), Some(sample[SubscribedDetails]))
+
+        inSequence {
+          mockSendBprNameMatchAttemptEvent(
+            1,
+            maxRetries,
+            auditEvent
+          )(())
+          mockGetBpr(ggCredId)(Right(bprResponse))
+        }
+
+        val result = toResult(
+          sampleNameMatchDetails,
+          ggCredId,
+          None
         )
+
+        await(result.value) shouldBe Right(toSuccessfulResponse(bpr, bprResponse))
       }
 
     }

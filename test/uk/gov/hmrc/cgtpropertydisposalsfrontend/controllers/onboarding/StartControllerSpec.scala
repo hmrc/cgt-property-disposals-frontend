@@ -47,7 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, Subscribed, SubscriptionStatus, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NewEnrolmentCreatedForMissingEnrolment, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, Subscribed, SubscriptionStatus, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -766,9 +766,14 @@ class StartControllerSpec
                   mockHasFailedCgtEnrolment()(Right(None))
                   mockGetSession(Right(maybeSession))
                   mockGetBusinessPartnerRecord(
-                    IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                    IndividualBusinessPartnerRecordRequest(
+                      Right(nino),
+                      None,
+                      retrievedGGCredId.providerId,
+                      createNewEnrolmentIfMissing = true
+                    )
                   )(
-                    Right(BusinessPartnerRecordResponse(Some(bpr), None))
+                    Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                   )
                   mockStoreSession(session)(Right(()))
                 }
@@ -809,10 +814,12 @@ class StartControllerSpec
                     mockGetBusinessPartnerRecord(
                       IndividualBusinessPartnerRecordRequest(
                         Left(SAUTR("sautr")),
-                        None
+                        None,
+                        retrievedGGCredId.providerId,
+                        createNewEnrolmentIfMissing = true
                       )
                     )(
-                      Right(BusinessPartnerRecordResponse(Some(bpr), None))
+                      Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                     )
                     mockStoreSession(session)(Right(()))
                   }
@@ -849,10 +856,15 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(
-                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                  IndividualBusinessPartnerRecordRequest(
+                    Right(nino),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
                   Right(
-                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None)
+                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None, None)
                   )
                 )
                 mockStoreSession(session)(Right(()))
@@ -894,10 +906,15 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(
-                  IndividualBusinessPartnerRecordRequest(Left(sautr), None)
+                  IndividualBusinessPartnerRecordRequest(
+                    Left(sautr),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
                   Right(
-                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None)
+                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None, None)
                   )
                 )
                 mockStoreSession(session)(Right(()))
@@ -1150,7 +1167,12 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(
-                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                  IndividualBusinessPartnerRecordRequest(
+                    Right(nino),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
                   Left(Error("error"))
                 )
@@ -1168,9 +1190,14 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(
-                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                  IndividualBusinessPartnerRecordRequest(
+                    Right(nino),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
-                  Right(BusinessPartnerRecordResponse(None, None))
+                  Right(BusinessPartnerRecordResponse(None, None, None))
                 )
               }
 
@@ -1195,9 +1222,14 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(
-                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                  IndividualBusinessPartnerRecordRequest(
+                    Right(nino),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
-                  Right(BusinessPartnerRecordResponse(Some(bpr), None))
+                  Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                 )
                 mockStoreSession(session)(Left(Error("Oh no!")))
               }
@@ -1222,10 +1254,12 @@ class StartControllerSpec
                 mockGetBusinessPartnerRecord(
                   IndividualBusinessPartnerRecordRequest(
                     Left(SAUTR("sautr")),
-                    None
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
                   )
                 )(
-                  Right(BusinessPartnerRecordResponse(None, None))
+                  Right(BusinessPartnerRecordResponse(None, None, None))
                 )
               }
 
@@ -1256,10 +1290,12 @@ class StartControllerSpec
                 mockGetBusinessPartnerRecord(
                   IndividualBusinessPartnerRecordRequest(
                     Left(SAUTR("sautr")),
-                    None
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
                   )
                 )(
-                  Right(BusinessPartnerRecordResponse(Some(bpr), None))
+                  Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                 )
                 mockStoreSession(session)(Left(Error("Oh no!")))
               }
@@ -1283,10 +1319,15 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(
-                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                  IndividualBusinessPartnerRecordRequest(
+                    Right(nino),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
                   Right(
-                    BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference))
+                    BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), None)
                   )
                 )
                 mockStoreSession(
@@ -1349,10 +1390,15 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(
-                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                  IndividualBusinessPartnerRecordRequest(
+                    Right(nino),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
                   Right(
-                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None)
+                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None, None)
                   )
                 )
                 mockStoreSession(updatedSession)(Right(()))
@@ -1401,11 +1447,13 @@ class StartControllerSpec
                 mockGetBusinessPartnerRecord(
                   IndividualBusinessPartnerRecordRequest(
                     Left(SAUTR("sautr")),
-                    None
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
                   )
                 )(
                   Right(
-                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None)
+                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None, None)
                   )
                 )
                 mockStoreSession(updatedSession)(Right(()))
@@ -1448,10 +1496,15 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(
-                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                  IndividualBusinessPartnerRecordRequest(
+                    Right(nino),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
                   Right(
-                    BusinessPartnerRecordResponse(Some(bprWithNoAddress), None)
+                    BusinessPartnerRecordResponse(Some(bprWithNoAddress), None, None)
                   )
                 )
                 mockStoreSession(updatedSession)(Right(()))
@@ -1500,11 +1553,13 @@ class StartControllerSpec
                 mockGetBusinessPartnerRecord(
                   IndividualBusinessPartnerRecordRequest(
                     Left(SAUTR("sautr")),
-                    None
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
                   )
                 )(
                   Right(
-                    BusinessPartnerRecordResponse(Some(bprWithNoAddress), None)
+                    BusinessPartnerRecordResponse(Some(bprWithNoAddress), None, None)
                   )
                 )
                 mockStoreSession(updatedSession)(Right(()))
@@ -1621,6 +1676,56 @@ class StartControllerSpec
 
           }
 
+          "redirect to the account homepage" when {
+
+            "the call to get a BPR indicates that a new enrolment has just been created for the user" in {
+              val subscribedDetails = sample[SubscribedDetails]
+
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(Right(None))
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(
+                    Right(nino),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(
+                      Some(bpr),
+                      Some(subscribedDetails.cgtReference),
+                      Some(subscribedDetails)
+                    )
+                  )
+                )
+                mockStoreSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(
+                      NewEnrolmentCreatedForMissingEnrolment(
+                        subscribedDetails,
+                        GGCredId(retrievedGGCredId.providerId)
+                      )
+                    ),
+                    userType = Some(UserType.Individual)
+                  )
+                )(Right(()))
+              }
+
+              checkIsRedirect(
+                performAction(),
+                controllers.routes.StartController.start()
+              )
+            }
+
+          }
+
         }
 
         "handling trusts" must {
@@ -1695,7 +1800,12 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(
-                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                  TrustBusinessPartnerRecordRequest(
+                    Right(sautr),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(Left(Error("")))
               }
 
@@ -1708,11 +1818,17 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(
-                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                  TrustBusinessPartnerRecordRequest(
+                    Right(sautr),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
                   Right(
                     BusinessPartnerRecordResponse(
                       Some(bpr.copy(name = Right(IndividualName("", "")))),
+                      None,
                       None
                     )
                   )
@@ -1728,9 +1844,14 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(
-                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                  TrustBusinessPartnerRecordRequest(
+                    Right(sautr),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
-                  Right(BusinessPartnerRecordResponse(Some(bpr), None))
+                  Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
@@ -1751,9 +1872,14 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(
-                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                  TrustBusinessPartnerRecordRequest(
+                    Right(sautr),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
-                  Right(BusinessPartnerRecordResponse(None, None))
+                  Right(BusinessPartnerRecordResponse(None, None, None))
                 )
               }
 
@@ -1770,9 +1896,14 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(
-                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                  TrustBusinessPartnerRecordRequest(
+                    Right(sautr),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
-                  Right(BusinessPartnerRecordResponse(Some(bpr), None))
+                  Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
@@ -1801,11 +1932,17 @@ class StartControllerSpec
                   mockHasFailedCgtEnrolment()(Right(None))
                   mockGetSession(Right(None))
                   mockGetBusinessPartnerRecord(
-                    TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                    TrustBusinessPartnerRecordRequest(
+                      Right(sautr),
+                      None,
+                      retrievedGGCredId.providerId,
+                      createNewEnrolmentIfMissing = true
+                    )
                   )(
                     Right(
                       BusinessPartnerRecordResponse(
                         Some(bpr.copy(emailAddress = None)),
+                        None,
                         None
                       )
                     )
@@ -2069,10 +2206,15 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(
-                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                  TrustBusinessPartnerRecordRequest(
+                    Right(sautr),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
                   Right(
-                    BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference))
+                    BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), None)
                   )
                 )
                 mockStoreSession(
@@ -2112,10 +2254,15 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(
-                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                  TrustBusinessPartnerRecordRequest(
+                    Right(sautr),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
                   Right(
-                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None)
+                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None, None)
                   )
                 )
                 mockStoreSession(
@@ -2182,10 +2329,15 @@ class StartControllerSpec
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(
-                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                  TrustBusinessPartnerRecordRequest(
+                    Right(sautr),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
                 )(
                   Right(
-                    BusinessPartnerRecordResponse(Some(bprWithNoAddress), None)
+                    BusinessPartnerRecordResponse(Some(bprWithNoAddress), None, None)
                   )
                 )
                 mockStoreSession(
@@ -2244,6 +2396,48 @@ class StartControllerSpec
                   controllers.onboarding.address.routes.SubscriptionEnterAddressController.isUk()
                 )
               }
+
+          }
+
+          "redirect to the account homepage" when {
+
+            "the call to get a BPR indicates that a new enrolment has just been created for the user" in {
+              val subscribedDetails = sample[SubscribedDetails]
+
+              inSequence {
+                mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(Right(None))
+                mockGetBusinessPartnerRecord(
+                  TrustBusinessPartnerRecordRequest(
+                    Right(sautr),
+                    None,
+                    retrievedGGCredId.providerId,
+                    createNewEnrolmentIfMissing = true
+                  )
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), Some(subscribedDetails))
+                  )
+                )
+                mockStoreSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(
+                      NewEnrolmentCreatedForMissingEnrolment(
+                        subscribedDetails,
+                        GGCredId(retrievedGGCredId.providerId)
+                      )
+                    ),
+                    userType = Some(UserType.Organisation)
+                  )
+                )(Right(()))
+              }
+
+              checkIsRedirect(
+                performAction(),
+                controllers.routes.StartController.start()
+              )
+            }
 
           }
 
@@ -2923,6 +3117,67 @@ class StartControllerSpec
           }
 
         }
+      }
+
+      "the session data indicates a new enrolment has been created for a user" must {
+
+        "redirect to the account home page" in {
+          val subscribedDetails = sample[SubscribedDetails]
+          val ggCredId          = sample[GGCredId]
+          val draftReturns      = List(sample[DraftSingleDisposalReturn])
+
+          val sentReturns = List(sample[ReturnSummary])
+
+          val sessionWithSubscribed = SessionData.empty.copy(
+            userType = Some(UserType.Individual),
+            journeyStatus = Some(
+              Subscribed(
+                subscribedDetails,
+                ggCredId,
+                None,
+                draftReturns,
+                sentReturns
+              )
+            )
+          )
+
+          inSequence {
+            mockAuthWithAllRetrievals(
+              ConfidenceLevel.L200,
+              Some(AffinityGroup.Individual),
+              None,
+              None,
+              None,
+              Set(cgtEnrolment),
+              Some(retrievedGGCredId)
+            )
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  NewEnrolmentCreatedForMissingEnrolment(
+                    subscribedDetails,
+                    ggCredId
+                  )
+                )
+              )
+            )
+            mockGetReturnsList(subscribedDetails.cgtReference)(
+              Right(sentReturns)
+            )
+            mockGetDraftReturns(subscribedDetails.cgtReference, sentReturns)(
+              Right(draftReturns)
+            )
+            mockStoreSession(
+              sessionWithSubscribed.copy(userType = Some(UserType.Individual))
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            controllers.accounts.homepage.routes.HomePageController.homepage()
+          )
+        }
+
       }
     }
 

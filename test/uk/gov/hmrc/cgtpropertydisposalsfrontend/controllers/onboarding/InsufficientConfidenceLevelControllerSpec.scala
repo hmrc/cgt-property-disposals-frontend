@@ -33,13 +33,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sam
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameMatchGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AlreadySubscribedWithDifferentGGAccount
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualSautrNameMatchDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.NameMatchRetryService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -103,7 +105,7 @@ class InsufficientConfidenceLevelControllerSpec
   )(
     result: Either[NameMatchServiceError[
       IndividualSautrNameMatchDetails
-    ], (BusinessPartnerRecord, Option[CgtReference])]
+    ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)]
   ) =
     (
       mockBprNameMatchService
@@ -1067,7 +1069,7 @@ class InsufficientConfidenceLevelControllerSpec
               ggCredId,
               Some(previousUnsuccessfulNameMatchAttempt)
             )(
-              Right(bpr -> None)
+              Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), None, None))
             )
             mockStoreSession(
               session(SubscriptionMissingData(bpr, None, None, ggCredId, None))
@@ -1084,6 +1086,8 @@ class InsufficientConfidenceLevelControllerSpec
         }
 
         "a BPR is found but it is one for a trust instead of an individual" in {
+          val trustBpr = bpr.copy(name = Left(TrustName("trust")))
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(expectedSessionData)
@@ -1096,7 +1100,7 @@ class InsufficientConfidenceLevelControllerSpec
               ggCredId,
               Some(previousUnsuccessfulNameMatchAttempt)
             )(
-              Right(bpr.copy(name = Left(TrustName(""))) -> None)
+              Right(trustBpr -> BusinessPartnerRecordResponse(Some(trustBpr), None, None))
             )
           }
 
@@ -1127,7 +1131,7 @@ class InsufficientConfidenceLevelControllerSpec
               ggCredId,
               Some(previousUnsuccessfulNameMatchAttempt)
             )(
-              Right(bpr -> None)
+              Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), None, None))
             )
             mockStoreSession(
               session(SubscriptionMissingData(bpr, None, None, ggCredId, None))
@@ -1146,6 +1150,43 @@ class InsufficientConfidenceLevelControllerSpec
               .start()
           )
         }
+
+        "the user submits a valid SA UTR and name and a BPR can be retrieved and " +
+          "a new enrolment has been created for the user" in {
+            val cgtReference      = sample[CgtReference]
+            val subscribedDetails = sample[SubscribedDetails]
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(expectedSessionData)
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+                Right(Some(previousUnsuccessfulNameMatchAttempt))
+              )
+              mockAttemptNameMatch(
+                validSautr,
+                validName,
+                ggCredId,
+                Some(previousUnsuccessfulNameMatchAttempt)
+              )(
+                Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), Some(subscribedDetails)))
+              )
+              mockStoreSession(
+                session(NewEnrolmentCreatedForMissingEnrolment(subscribedDetails, ggCredId))
+              )(Right(()))
+            }
+
+            val result = performAction(
+              "firstName" -> validName.firstName,
+              "lastName"  -> validName.lastName,
+              "saUtr"     -> validSautr.value
+            )
+
+            checkIsRedirect(
+              result,
+              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController
+                .start()
+            )
+          }
 
       }
 
@@ -1166,7 +1207,7 @@ class InsufficientConfidenceLevelControllerSpec
               ggCredId,
               Some(previousUnsuccessfulNameMatchAttempt)
             )(
-              Right(bpr -> Some(cgtReference))
+              Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), None))
             )
             mockStoreSession(
               session(

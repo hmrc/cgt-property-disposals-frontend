@@ -96,7 +96,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
       "return the bpr when the http response comes back with status 200 and " +
         "the json body returns a bpr" in {
-          val response = BusinessPartnerRecordResponse(Some(bpr), None)
+          val response = BusinessPartnerRecordResponse(Some(bpr), None, None)
 
           mockGetBPR(bprRequest)(
             Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
@@ -110,7 +110,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
       "return nothing when the http response comes back with status 200 and " +
         "the json body does not contain a bpr" in {
           val response =
-            BusinessPartnerRecordResponse(Some(bpr), Some(sample[CgtReference]))
+            BusinessPartnerRecordResponse(Some(bpr), Some(sample[CgtReference]), None)
 
           mockGetBPR(bprRequest)(
             Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
@@ -139,7 +139,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         )
 
         def response(a: Address) =
-          BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None)
+          BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None, None)
 
         mockGetBPR(bprRequest)(
           Right(HttpResponse(200, Json.toJson(response(address)), Map[String, Seq[String]]().empty))
@@ -172,7 +172,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         )
 
         def response(a: Address) =
-          BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None)
+          BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None, None)
 
         mockGetBPR(bprRequest)(
           Right(HttpResponse(200, Json.toJson(response(address)), Map[String, Seq[String]]().empty))
@@ -185,7 +185,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
       "filter out invalid characters in trust names if a trust name is found" in {
         def response(t: TrustName) =
-          BusinessPartnerRecordResponse(Some(bpr.copy(name = Left(t))), None)
+          BusinessPartnerRecordResponse(Some(bpr.copy(name = Left(t))), None, None)
 
         val trustName          = TrustName("Trust (name)")
         val sanitisedTrustName = TrustName("Trust name")
@@ -201,7 +201,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
       "filter out invalid characters in individual names if an individual name is found" in {
         def response(n: IndividualName) =
-          BusinessPartnerRecordResponse(Some(bpr.copy(name = Right(n))), None)
+          BusinessPartnerRecordResponse(Some(bpr.copy(name = Right(n))), None, None)
 
         val name          = IndividualName("First (name)", "Last name!")
         val sanitisedName = IndividualName("First name", "Last name")
@@ -217,7 +217,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
       "filter out invalid email addresses if an email is found" in {
         def response(e: Option[Email]) =
-          BusinessPartnerRecordResponse(Some(bpr.copy(emailAddress = e)), None)
+          BusinessPartnerRecordResponse(Some(bpr.copy(emailAddress = e)), None, None)
 
         mockGetBPR(bprRequest)(
           Right(HttpResponse(200, Json.toJson(response(Some(Email("invalid")))), Map[String, Seq[String]]().empty))
