@@ -3530,20 +3530,24 @@ class YearToDateLiabilityControllerSpec
 
         def testRedirectWhenIsATrust(
           answers: IncompleteNonCalculatedYTDAnswers,
-          expectedRedirect: Call
+          expectedRedirect: Call,
+          furtherReturnCalculationEligibility: Option[FurtherReturnCalculationEligibility] = None
         ): Unit = {
 
-          val (sessionData, _, _) = sessionWithMultipleDisposalsState(
+          val (sessionData, fillingOutReturn, _) = sessionWithMultipleDisposalsState(
             answers,
             UserType.Organisation,
             wasUkResident = true,
-            isFurtherReturn = false,
+            isFurtherReturn = furtherReturnCalculationEligibility.isDefined,
             None
           )
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
+            furtherReturnCalculationEligibility.foreach(e =>
+              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(e))
+            )
           }
 
           checkIsRedirect(performAction(), expectedRedirect)
@@ -3567,6 +3571,35 @@ class YearToDateLiabilityControllerSpec
 
         }
 
+        "redirect to the estimated income page" when {
+
+          "the user is eligible for a further return calculation and they are not a trust" in {
+            testRedirectWhenIncompleteAnswers(
+              allQuestionAnswered.copy(
+                estimatedIncome = None
+              ),
+              routes.YearToDateLiabilityController.estimatedIncome(),
+              Some(sample[Eligible])
+            )
+          }
+
+        }
+
+        "redirect to the personal allowance page" when {
+
+          "the user is eligible for a further return calculation and they are not a trust and their estimated income " +
+            "is greater than zero" in {
+              testRedirectWhenIncompleteAnswers(
+                allQuestionAnswered.copy(
+                  estimatedIncome = Some(AmountInPence(1L))
+                ),
+                routes.YearToDateLiabilityController.personalAllowance(),
+                Some(sample[Eligible])
+              )
+            }
+
+        }
+
         "redirect to the has estimated details page" when {
 
           "that question has not been answered yet" in {
@@ -3576,12 +3609,43 @@ class YearToDateLiabilityControllerSpec
             )
 
           }
+
           "the user IS a trust" in {
             testRedirectWhenIsATrust(
               allQuestionAnswered.copy(hasEstimatedDetails = None),
               routes.YearToDateLiabilityController.hasEstimatedDetails()
             )
           }
+
+          "the user is eligible for a further return calculation and " when {
+
+            "they haven't answered the personal allowance but they " +
+              "have an estimated income of zero" in {
+                testRedirectWhenIncompleteAnswers(
+                  allQuestionAnswered.copy(
+                    estimatedIncome = Some(AmountInPence.zero),
+                    personalAllowance = None,
+                    hasEstimatedDetails = None
+                  ),
+                  routes.YearToDateLiabilityController.hasEstimatedDetails(),
+                  Some(sample[Eligible])
+                )
+              }
+
+            "they haven't answered personal allowance and estimated income but they are a trust" in {
+              testRedirectWhenIsATrust(
+                allQuestionAnswered.copy(
+                  estimatedIncome = None,
+                  personalAllowance = None,
+                  hasEstimatedDetails = None
+                ),
+                routes.YearToDateLiabilityController.hasEstimatedDetails(),
+                Some(sample[Eligible])
+              )
+            }
+
+          }
+
         }
 
         "redirect to the non-calculated enter tax due page" when {

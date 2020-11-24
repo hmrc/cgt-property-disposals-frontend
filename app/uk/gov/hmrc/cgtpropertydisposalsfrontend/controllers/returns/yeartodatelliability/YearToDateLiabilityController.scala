@@ -2500,8 +2500,9 @@ class YearToDateLiabilityController @Inject() (
             if furtherReturnEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn) =>
           Redirect(routes.YearToDateLiabilityController.estimatedIncome())
 
-        case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, _, _, _, _, None, _, _)
-            if furtherReturnEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn) =>
+        case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, _, _, _, estimatedIncome, None, _, _)
+            if furtherReturnEligibility
+              .exists(_.isEligible) && !isATrust(fillingOutReturn) && estimatedIncome.exists(_.isPositive) =>
           Redirect(routes.YearToDateLiabilityController.personalAllowance())
 
         case IncompleteNonCalculatedYTDAnswers(_, None, _, _, _, _, _, _, _, _, _, _) =>
