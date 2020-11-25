@@ -134,7 +134,9 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
     "external-url.personal-representative"
   )
 
-  val calculateCgt: String                 = getString("external-url.calculate-cgt")
+  val calculateCgt: String   = getString("external-url.calculate-cgt")
+  val calculateCgtNr: String = getString("external-url.calculate-cgt-non-resident")
+
   val payYourTax: String                   = getString("external-url.pay-your-tax")
   val payTheirTaxBill: String              = getString("external-url.pay-their-tax-bill")
   val returnsForSomeoneWhoHasDied: String  = getString(

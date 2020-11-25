@@ -35,12 +35,16 @@
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[BigDecimal], backLink: Call, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, isAmend: Boolean, isATrust: Boolean, wasUkResident: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "nonCalculatedTaxDue" }
-
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@link = @{
+  if(isATrust) ".trust" -> viewConfig.trustsAndCgtWorkoutUrl
+  else if(wasUkResident) ".ukResident" -> viewConfig.calculateCgt
+  else ".nonResident" -> viewConfig.calculateCgtNr
+}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
@@ -67,6 +71,12 @@
             unit = "£",
             assistiveText = messages("unit-input.assistive.pounds")
         )
+
+        <p>
+          <a href="@link._2" target="_blank">
+            @messages(s"$key${link._1}.link")
+          </a>
+        </p>
 
         @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
