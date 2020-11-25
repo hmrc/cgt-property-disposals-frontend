@@ -857,7 +857,10 @@ class YearToDateLiabilityController @Inject() (
                 )(
                   requiredPreviousAnswer = answers =>
                     if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
-                      answers.fold(_.personalAllowance, _.personalAllowance)
+                      if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+                        answers.fold(_.personalAllowance, _.personalAllowance)
+                      else
+                        answers.fold(_.estimatedIncome, _.estimatedIncome)
                     else
                       answers.fold(
                         _.taxableGainOrLoss,
@@ -865,7 +868,10 @@ class YearToDateLiabilityController @Inject() (
                       ),
                   redirectToIfNoRequiredPreviousAnswer =
                     if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
-                      routes.YearToDateLiabilityController.personalAllowance()
+                      if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+                        routes.YearToDateLiabilityController.personalAllowance()
+                      else
+                        routes.YearToDateLiabilityController.estimatedIncome()
                     else
                       routes.YearToDateLiabilityController.taxableGainOrLoss()
                 )
@@ -1056,7 +1062,10 @@ class YearToDateLiabilityController @Inject() (
       )(
         requiredPreviousAnswer = answers =>
           if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
-            answers.fold(_.personalAllowance, _.personalAllowance)
+            if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+              answers.fold(_.personalAllowance, _.personalAllowance)
+            else
+              answers.fold(_.estimatedIncome, _.estimatedIncome)
           else
             answers.fold(
               _.taxableGainOrLoss,
@@ -1064,7 +1073,10 @@ class YearToDateLiabilityController @Inject() (
             ),
         redirectToIfNoRequiredPreviousAnswer =
           if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
-            routes.YearToDateLiabilityController.personalAllowance()
+            if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+              routes.YearToDateLiabilityController.personalAllowance()
+            else
+              routes.YearToDateLiabilityController.estimatedIncome()
           else
             routes.YearToDateLiabilityController.taxableGainOrLoss()
       ) { (hasEstimated, draftReturn) =>
@@ -2065,9 +2077,9 @@ class YearToDateLiabilityController @Inject() (
                                  ytdAnswers.fold(_.estimatedIncome, _.estimatedIncome),
                                  ytdAnswers.fold(_.personalAllowance, _.personalAllowance)
                                ) match {
-                                 case (Some(taxableGainOrLoss), Some(income), Some(allowance))
+                                 case (Some(taxableGainOrLoss), Some(income), allowance)
                                      if !isATrust(fillingOutReturn) =>
-                                   requiredAnswers(taxableGainOrLoss, income, allowance)
+                                   requiredAnswers(taxableGainOrLoss, income, allowance.getOrElse(AmountInPence.zero))
 
                                  case (Some(taxableGainOrLoss), _, _) if isATrust(fillingOutReturn) =>
                                    requiredAnswers(taxableGainOrLoss, AmountInPence.zero, AmountInPence.zero)
