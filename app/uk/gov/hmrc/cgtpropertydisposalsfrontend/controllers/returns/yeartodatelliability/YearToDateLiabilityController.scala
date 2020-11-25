@@ -2164,7 +2164,7 @@ class YearToDateLiabilityController @Inject() (
                   )(
                     requiredPreviousAnswer = { answers =>
                       if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
-                        if (eligibility.isEligible)
+                        if (eligibility.isEligible && !isATrust(fillingOutReturn))
                           if (answers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
                             answers.fold(_.personalAllowance, _.personalAllowance).map(_ => ())
                           else
@@ -2176,7 +2176,7 @@ class YearToDateLiabilityController @Inject() (
                     },
                     redirectToIfNoRequiredPreviousAnswer =
                       if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
-                        if (eligibility.isEligible)
+                        if (eligibility.isEligible && !isATrust(fillingOutReturn))
                           if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
                             routes.YearToDateLiabilityController.personalAllowance()
                           else
@@ -2220,7 +2220,7 @@ class YearToDateLiabilityController @Inject() (
                   )(
                     requiredPreviousAnswer = { answers =>
                       if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
-                        if (eligibility.isEligible)
+                        if (eligibility.isEligible && !isATrust(fillingOutReturn))
                           if (answers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
                             answers.fold(_.personalAllowance, _.personalAllowance).map(_ => ())
                           else
@@ -2232,7 +2232,7 @@ class YearToDateLiabilityController @Inject() (
                     },
                     redirectToIfNoRequiredPreviousAnswer =
                       if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
-                        if (eligibility.isEligible)
+                        if (eligibility.isEligible && !isATrust(fillingOutReturn))
                           if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
                             routes.YearToDateLiabilityController.personalAllowance()
                           else

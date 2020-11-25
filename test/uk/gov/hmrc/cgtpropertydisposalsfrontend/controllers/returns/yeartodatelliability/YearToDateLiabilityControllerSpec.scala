@@ -7549,65 +7549,85 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the user is eligible for a calculation and they are a trust" in {
-          val taxableGain = sample[AmountInPence]
+          val testCases: List[(Option[AmendReturnData], Call)] =
+            List(
+              Some(
+                sample[AmendReturnData].copy(
+                  originalReturn = sample[CompleteReturnWithSummary].copy(
+                    completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                      yearToDateLiabilityAnswers = Left(
+                        sample[CompleteNonCalculatedYTDAnswers].copy(
+                          hasEstimatedDetails = false
+                        )
+                      )
+                    )
+                  )
+                )
+              )    -> routes.YearToDateLiabilityController.taxableGainOrLoss(),
+              None -> routes.YearToDateLiabilityController.hasEstimatedDetails()
+            )
 
-          val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers.empty.copy(
-            taxableGainOrLoss = Some(taxableGain),
-            hasEstimatedDetails = Some(true)
-          )
+          testCases.foreach { case (amendReturnData, expectedBackLink) =>
+            val taxableGain = sample[AmountInPence]
 
-          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-            individualUserType = None,
-            disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
-          )
+            val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers.empty.copy(
+              taxableGainOrLoss = Some(taxableGain),
+              hasEstimatedDetails = Some(true)
+            )
 
-          val draftReturn = sample[DraftSingleDisposalReturn].copy(
-            triageAnswers = triageAnswers,
-            yearToDateLiabilityAnswers = Some(requiredPreviousAnswers)
-          )
+            val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = None,
+              disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
+            )
 
-          val fillingOutReturn = sample[FillingOutReturn].copy(
-            draftReturn = draftReturn,
-            agentReferenceNumber = None,
-            subscribedDetails = sample[SubscribedDetails].copy(
-              name = Left(sample[TrustName])
-            ),
-            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
-            amendReturnData = None
-          )
+            val draftReturn = sample[DraftSingleDisposalReturn].copy(
+              triageAnswers = triageAnswers,
+              yearToDateLiabilityAnswers = Some(requiredPreviousAnswers)
+            )
 
-          val session = SessionData.empty.copy(
-            journeyStatus = Some(fillingOutReturn),
-            userType = Some(UserType.Organisation)
-          )
+            val fillingOutReturn = sample[FillingOutReturn].copy(
+              draftReturn = draftReturn,
+              agentReferenceNumber = None,
+              subscribedDetails = sample[SubscribedDetails].copy(
+                name = Left(sample[TrustName])
+              ),
+              previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+              amendReturnData = amendReturnData
+            )
 
-          val calculationRequest = YearToDateLiabilityCalculationRequest(
-            triageAnswers,
-            taxableGain,
-            AmountInPence.zero,
-            AmountInPence.zero,
-            isATrust = true
-          )
-          val calculationResult  = sample[YearToDateLiabilityCalculation]
+            val session = SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn),
+              userType = Some(UserType.Organisation)
+            )
 
-          testFurtherReturnPage(
-            session,
-            fillingOutReturn,
-            taxYear,
-            sample[Eligible],
-            routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.trust.title",
-            messageFromMessageKey("yearToDateLiability.trust.p1", viewConfig.trustsAndCgtUrl),
-            None,
-            "yearToDateLiability.trust.link",
-            expectedCalculationChecks = Some { doc =>
-              doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
-                "yearToDateLiability.trust.calculatedHelpText.p1",
-                MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
-              )
-            },
-            Some(calculationRequest -> calculationResult)
-          )
+            val calculationRequest = YearToDateLiabilityCalculationRequest(
+              triageAnswers,
+              taxableGain,
+              AmountInPence.zero,
+              AmountInPence.zero,
+              isATrust = true
+            )
+            val calculationResult  = sample[YearToDateLiabilityCalculation]
+
+            testFurtherReturnPage(
+              session,
+              fillingOutReturn,
+              taxYear,
+              sample[Eligible],
+              expectedBackLink,
+              "yearToDateLiability.trust.title",
+              messageFromMessageKey("yearToDateLiability.trust.p1", viewConfig.trustsAndCgtUrl),
+              None,
+              "yearToDateLiability.trust.link",
+              expectedCalculationChecks = Some { doc =>
+                doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
+                  "yearToDateLiability.trust.calculatedHelpText.p1",
+                  MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
+                )
+              },
+              Some(calculationRequest -> calculationResult)
+            )
+          }
         }
 
       }
