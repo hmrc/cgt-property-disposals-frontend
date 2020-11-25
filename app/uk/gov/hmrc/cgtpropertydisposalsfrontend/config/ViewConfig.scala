@@ -36,8 +36,6 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
     s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   val reportAProblemNonJSUrl: String                  =
     s"/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  val betaFeedbackUrlNoAuth: String                   =
-    s"/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
   val govUkUrl: String                                = getString("external-url.gov-uk")
   val signOutUrl: String                              = s"$companyAuthUrl$signOutUri"
   val trustRegistrationUrl: String                    = getString(
