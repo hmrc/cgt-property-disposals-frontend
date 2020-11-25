@@ -7,9 +7,6 @@ landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if 
 landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
 
 landingPage.warning=For UK property disposals made from 6 April 2020, you have 30 days after the property’s completion date to report and pay any Capital Gains Tax due on your UK property disposals.
-landingPage.covid.p1=Due to coronavirus (Covid-19) HMRC did not issue late penalties to any transactions completed between 6 April and 30 June 2020, provided the gain was reported and any tax due paid by 31 July 2020. Anyone who completes the sale of a property from 1 July 2020 onwards has 30 calendar days to report and pay the tax due.
-landingPage.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
-landingPage.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
 
 landingPage.contents.h2=Contents
 landingPage.intro.h2=Overview
