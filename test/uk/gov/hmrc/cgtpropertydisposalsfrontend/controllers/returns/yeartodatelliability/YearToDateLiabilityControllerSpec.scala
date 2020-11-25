@@ -7380,7 +7380,7 @@ class YearToDateLiabilityControllerSpec
 
         "the user is eligible for a calculation and they are not a trust" in {
           val (taxableGain, estimatedIncome, personalAllowance) =
-            (sample[AmountInPence], sample[AmountInPence], sample[AmountInPence])
+            (sample[AmountInPence], AmountInPence(1L), sample[AmountInPence])
 
           val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers(
             Some(taxableGain),
@@ -7414,7 +7414,19 @@ class YearToDateLiabilityControllerSpec
               name = Right(sample[IndividualName])
             ),
             previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
-            amendReturnData = None
+            amendReturnData = Some(
+              sample[AmendReturnData].copy(
+                originalReturn = sample[CompleteReturnWithSummary].copy(
+                  completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                    yearToDateLiabilityAnswers = Left(
+                      sample[CompleteNonCalculatedYTDAnswers].copy(
+                        hasEstimatedDetails = false
+                      )
+                    )
+                  )
+                )
+              )
+            )
           )
 
           val session = SessionData.empty.copy(
@@ -7436,7 +7448,7 @@ class YearToDateLiabilityControllerSpec
             fillingOutReturn,
             taxYear,
             sample[Eligible],
-            routes.YearToDateLiabilityController.hasEstimatedDetails(),
+            routes.YearToDateLiabilityController.personalAllowance(),
             "yearToDateLiability.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
@@ -7453,7 +7465,7 @@ class YearToDateLiabilityControllerSpec
 
         "the user is eligible for a calculation and they are not a trust and there is no personal allowance" in {
           val (taxableGain, estimatedIncome) =
-            (sample[AmountInPence], sample[AmountInPence])
+            (sample[AmountInPence], AmountInPence.zero)
 
           val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers(
             Some(taxableGain),
@@ -7487,7 +7499,19 @@ class YearToDateLiabilityControllerSpec
               name = Right(sample[IndividualName])
             ),
             previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
-            amendReturnData = None
+            amendReturnData = Some(
+              sample[AmendReturnData].copy(
+                originalReturn = sample[CompleteReturnWithSummary].copy(
+                  completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                    yearToDateLiabilityAnswers = Left(
+                      sample[CompleteNonCalculatedYTDAnswers].copy(
+                        hasEstimatedDetails = false
+                      )
+                    )
+                  )
+                )
+              )
+            )
           )
 
           val session = SessionData.empty.copy(
@@ -7509,7 +7533,7 @@ class YearToDateLiabilityControllerSpec
             fillingOutReturn,
             taxYear,
             sample[Eligible],
-            routes.YearToDateLiabilityController.hasEstimatedDetails(),
+            routes.YearToDateLiabilityController.estimatedIncome(),
             "yearToDateLiability.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
