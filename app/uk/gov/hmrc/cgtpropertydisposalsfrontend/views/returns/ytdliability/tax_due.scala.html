@@ -170,7 +170,9 @@
     </ul>
 
     <p>@{Html(messages(s"$key.helpText.p1", calculatedTaxDue))}</p>
-    @{if(isATrust) "<p>" + messages(s"$key.helpText.p3") + "</p>" else ""}
+    @if(isATrust) {
+      <p>@messages(s"$key.helpText.p3")</p>
+    }
 
     @formWrapper(routes.YearToDateLiabilityController.taxDueSubmit(), 'novalidate -> "novalidate") {
 
