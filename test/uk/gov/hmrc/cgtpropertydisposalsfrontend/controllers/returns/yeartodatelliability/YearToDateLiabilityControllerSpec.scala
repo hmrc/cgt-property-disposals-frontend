@@ -1710,6 +1710,84 @@ class YearToDateLiabilityControllerSpec
             )
           }
 
+          "the user is on a further return journey that is eligible for a calculation and they are a trust and they haven't answered " +
+            "the taxable gain question yet" in {
+              val (session, fillingOutReturn, _) =
+                sessionWithMultipleDisposalsState(
+                  IncompleteNonCalculatedYTDAnswers.empty,
+                  UserType.Organisation,
+                  wasUkResident = true,
+                  isFurtherReturn = true,
+                  None
+                )
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.YearToDateLiabilityController.taxableGainOrLoss()
+              )
+            }
+
+        }
+
+        "redirect to the personal allowance page" when {
+
+          "the user is on a further return journey that is eligible for a calculation and they haven't answered " +
+            "the personal allowance question yet" in {
+              val (session, fillingOutReturn, _) =
+                sessionWithMultipleDisposalsState(
+                  IncompleteNonCalculatedYTDAnswers.empty.copy(
+                    estimatedIncome = Some(AmountInPence(1L))
+                  ),
+                  UserType.Individual,
+                  wasUkResident = true,
+                  isFurtherReturn = true,
+                  None
+                )
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.YearToDateLiabilityController.personalAllowance()
+              )
+            }
+
+        }
+
+        "redirect to the estimated income page" when {
+
+          "the user is on a further return journey that is eligible for a calculation and they haven't " +
+            "answered the question yet" in {
+              val (session, fillingOutReturn, _) =
+                sessionWithMultipleDisposalsState(
+                  IncompleteNonCalculatedYTDAnswers.empty,
+                  UserType.Individual,
+                  wasUkResident = true,
+                  isFurtherReturn = true,
+                  None
+                )
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.YearToDateLiabilityController.estimatedIncome()
+              )
+            }
         }
 
         "display the page" when {
@@ -1765,32 +1843,41 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the user has answered the question before" in {
-            val answers = sample[IncompleteNonCalculatedYTDAnswers].copy(
-              taxableGainOrLoss = Some(sample[AmountInPence]),
-              estimatedIncome = Some(sample[AmountInPence]),
-              personalAllowance = Some(sample[AmountInPence]),
-              hasEstimatedDetails = Some(true)
-            )
-
-            val (session, fillingOutReturn, _) =
-              sessionWithMultipleDisposalsState(
-                answers,
-                UserType.Individual,
-                wasUkResident = true,
-                isFurtherReturn = true,
-                None
+            List(
+              (
+                Some(AmountInPence(1L)),
+                Some(sample[AmountInPence]),
+                routes.YearToDateLiabilityController.personalAllowance()
+              ),
+              (Some(AmountInPence.zero), None, routes.YearToDateLiabilityController.estimatedIncome())
+            ).foreach { case (estimatedIncome, personalAllowance, expectedBackLink) =>
+              val answers = sample[IncompleteNonCalculatedYTDAnswers].copy(
+                taxableGainOrLoss = Some(sample[AmountInPence]),
+                estimatedIncome = estimatedIncome,
+                personalAllowance = personalAllowance,
+                hasEstimatedDetails = Some(true)
               )
 
-            test(
-              session,
-              fillingOutReturn,
-              routes.YearToDateLiabilityController.personalAllowance(),
-              Some(sample[Eligible]),
-              doc =>
-                doc
-                  .select("#hasEstimatedDetails-true")
-                  .attr("checked") shouldBe "checked"
-            )
+              val (session, fillingOutReturn, _) =
+                sessionWithMultipleDisposalsState(
+                  answers,
+                  UserType.Individual,
+                  wasUkResident = true,
+                  isFurtherReturn = true,
+                  None
+                )
+
+              test(
+                session,
+                fillingOutReturn,
+                expectedBackLink,
+                Some(sample[Eligible]),
+                doc =>
+                  doc
+                    .select("#hasEstimatedDetails-true")
+                    .attr("checked") shouldBe "checked"
+              )
+            }
           }
 
         }
@@ -7364,6 +7451,79 @@ class YearToDateLiabilityControllerSpec
           )
         }
 
+        "the user is eligible for a calculation and they are not a trust and there is no personal allowance" in {
+          val (taxableGain, estimatedIncome) =
+            (sample[AmountInPence], sample[AmountInPence])
+
+          val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers(
+            Some(taxableGain),
+            Some(true),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(estimatedIncome),
+            None,
+            None,
+            None
+          )
+
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(Self),
+            disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
+          )
+
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = triageAnswers,
+            yearToDateLiabilityAnswers = Some(requiredPreviousAnswers)
+          )
+
+          val fillingOutReturn = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            agentReferenceNumber = None,
+            subscribedDetails = sample[SubscribedDetails].copy(
+              name = Right(sample[IndividualName])
+            ),
+            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+            amendReturnData = None
+          )
+
+          val session = SessionData.empty.copy(
+            journeyStatus = Some(fillingOutReturn),
+            userType = Some(UserType.Individual)
+          )
+
+          val calculationRequest = YearToDateLiabilityCalculationRequest(
+            triageAnswers,
+            taxableGain,
+            estimatedIncome,
+            AmountInPence.zero,
+            isATrust = false
+          )
+          val calculationResult  = sample[YearToDateLiabilityCalculation]
+
+          testFurtherReturnPage(
+            session,
+            fillingOutReturn,
+            taxYear,
+            sample[Eligible],
+            routes.YearToDateLiabilityController.hasEstimatedDetails(),
+            "yearToDateLiability.title",
+            messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
+            Some("yearToDateLiability.li3"),
+            "yearToDateLiability.link",
+            expectedCalculationChecks = Some { doc =>
+              doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
+                "yearToDateLiability.calculatedHelpText.p1",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
+              )
+            },
+            Some(calculationRequest -> calculationResult)
+          )
+        }
+
         "the user is eligible for a calculation and they are a trust" in {
           val taxableGain = sample[AmountInPence]
 
@@ -7508,24 +7668,6 @@ class YearToDateLiabilityControllerSpec
             }
 
             checkIsTechnicalErrorPage(performAction())
-          }
-
-          "no value for personal allowance can be found" in {
-            val (session, fillingOutReturn) = state(
-              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
-              Some(sample[AmountInPence]),
-              Some(sample[AmountInPence]),
-              None
-            )
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
-            }
-
-            checkIsTechnicalErrorPage(performAction())
-
           }
 
           "no value for taxable gain can be found" in {
