@@ -34,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[CGTPropertyDisposalsConnectorImpl])
 trait CGTPropertyDisposalsConnector {
 
-  def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(implicit
+  def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -89,10 +89,10 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (
   def getSubscribedDetailsUrl(cgtReference: CgtReference): String =
     s"$baseUrl/subscription/${cgtReference.value}"
 
-  override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(implicit
+  override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.POST[JsValue, HttpResponse](bprUrl, Json.toJson(request)))
+  ): EitherT[Future, Error, HttpResponse]                             =
+    makeCall(_.POST[JsValue, HttpResponse](bprUrl, Json.toJson(request), Seq(ACCEPT_LANGUAGE -> lang.language)))
 
   override def subscribe(
     subscriptionDetails: SubscriptionDetails,

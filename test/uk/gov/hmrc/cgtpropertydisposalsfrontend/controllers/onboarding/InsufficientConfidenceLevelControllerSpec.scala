@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.Reads
@@ -101,7 +101,8 @@ class InsufficientConfidenceLevelControllerSpec
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[
       UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]
-    ]
+    ],
+    lang: Lang
   )(
     result: Either[NameMatchServiceError[
       IndividualSautrNameMatchDetails
@@ -114,7 +115,8 @@ class InsufficientConfidenceLevelControllerSpec
           _: GGCredId,
           _: Option[
             UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]
-          ]
+          ],
+          _: Lang
         )(
           _: HeaderCarrier,
           _: Request[_]
@@ -124,6 +126,7 @@ class InsufficientConfidenceLevelControllerSpec
         IndividualSautrNameMatchDetails(name, sautr),
         ggCredId,
         previousUnsuccessfulNameMatchAttempts,
+        lang,
         *,
         *
       )
@@ -987,7 +990,8 @@ class InsufficientConfidenceLevelControllerSpec
                 validSautr,
                 validName,
                 ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
+                Some(previousUnsuccessfulNameMatchAttempt),
+                lang
               )(
                 Left(
                   NameMatchServiceError.NameMatchFailed(
@@ -1041,7 +1045,8 @@ class InsufficientConfidenceLevelControllerSpec
               validSautr,
               validName,
               ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
+              Some(previousUnsuccessfulNameMatchAttempt),
+              lang
             )(
               Left(NameMatchServiceError.BackendError(Error("")))
             )
@@ -1067,7 +1072,8 @@ class InsufficientConfidenceLevelControllerSpec
               validSautr,
               validName,
               ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
+              Some(previousUnsuccessfulNameMatchAttempt),
+              lang
             )(
               Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), None, None))
             )
@@ -1098,7 +1104,8 @@ class InsufficientConfidenceLevelControllerSpec
               validSautr,
               validName,
               ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
+              Some(previousUnsuccessfulNameMatchAttempt),
+              lang
             )(
               Right(trustBpr -> BusinessPartnerRecordResponse(Some(trustBpr), None, None))
             )
@@ -1129,7 +1136,8 @@ class InsufficientConfidenceLevelControllerSpec
               validSautr,
               validName,
               ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
+              Some(previousUnsuccessfulNameMatchAttempt),
+              lang
             )(
               Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), None, None))
             )
@@ -1166,7 +1174,8 @@ class InsufficientConfidenceLevelControllerSpec
                 validSautr,
                 validName,
                 ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
+                Some(previousUnsuccessfulNameMatchAttempt),
+                lang
               )(
                 Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), Some(subscribedDetails)))
               )
@@ -1205,7 +1214,8 @@ class InsufficientConfidenceLevelControllerSpec
               validSautr,
               validName,
               ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
+              Some(previousUnsuccessfulNameMatchAttempt),
+              lang
             )(
               Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), None))
             )
@@ -1265,7 +1275,8 @@ class InsufficientConfidenceLevelControllerSpec
                 validSautr,
                 validName,
                 ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
+                Some(previousUnsuccessfulNameMatchAttempt),
+                lang
               )(
                 Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
               )

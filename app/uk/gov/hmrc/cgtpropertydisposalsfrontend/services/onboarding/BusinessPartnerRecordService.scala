@@ -21,6 +21,7 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
+import play.api.i18n.Lang
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -36,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[BusinessPartnerRecordServiceImpl])
 trait BusinessPartnerRecordService {
 
-  def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(implicit
+  def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, BusinessPartnerRecordResponse]
 
@@ -49,11 +50,11 @@ class BusinessPartnerRecordServiceImpl @Inject() (
   ec: ExecutionContext
 ) extends BusinessPartnerRecordService {
 
-  override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(implicit
+  override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, BusinessPartnerRecordResponse] =
     connector
-      .getBusinessPartnerRecord(request)
+      .getBusinessPartnerRecord(request, lang)
       .subflatMap { response =>
         response.status match {
           case OK    =>

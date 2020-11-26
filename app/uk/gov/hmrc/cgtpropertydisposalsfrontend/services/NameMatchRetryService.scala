@@ -23,6 +23,7 @@ import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.Configuration
+import play.api.i18n.Lang
 import play.api.libs.json.{Reads, Writes}
 import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.EitherOps
@@ -61,7 +62,8 @@ trait NameMatchRetryService {
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[
       UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]
-    ]
+    ],
+    lang: Lang
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
@@ -74,7 +76,8 @@ trait NameMatchRetryService {
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[
       UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
-    ]
+    ],
+    lang: Lang
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
@@ -87,7 +90,8 @@ trait NameMatchRetryService {
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[
       UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
-    ]
+    ],
+    lang: Lang
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
@@ -137,7 +141,8 @@ class NameMatchRetryServiceImpl @Inject() (
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[
       UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]
-    ]
+    ],
+    lang: Lang
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
@@ -157,7 +162,8 @@ class NameMatchRetryServiceImpl @Inject() (
         ),
         nameMatchDetails,
         ggCredId,
-        _
+        _,
+        lang
       )
     }
 
@@ -166,7 +172,8 @@ class NameMatchRetryServiceImpl @Inject() (
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[
       UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
-    ]
+    ],
+    lang: Lang
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
@@ -186,7 +193,8 @@ class NameMatchRetryServiceImpl @Inject() (
         ),
         nameMatchDetails,
         ggCredId,
-        _
+        _,
+        lang
       )
     }
 
@@ -195,7 +203,8 @@ class NameMatchRetryServiceImpl @Inject() (
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[
       UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
-    ]
+    ],
+    lang: Lang
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
@@ -218,7 +227,8 @@ class NameMatchRetryServiceImpl @Inject() (
             ),
             nameMatchDetails,
             ggCredId,
-            u
+            u,
+            lang
           ).map(_ => n)
 
         case s @ RepresenteeSautr(sautr) =>
@@ -231,7 +241,8 @@ class NameMatchRetryServiceImpl @Inject() (
             ),
             nameMatchDetails,
             ggCredId,
-            u
+            u,
+            lang
           ).map(_ => s)
 
         case c @ RepresenteeCgtReference(cgtReference) =>
@@ -296,7 +307,8 @@ class NameMatchRetryServiceImpl @Inject() (
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[
       UnsuccessfulNameMatchAttempts[A]
-    ]
+    ],
+    lang: Lang
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, NameMatchServiceError[
@@ -304,7 +316,7 @@ class NameMatchRetryServiceImpl @Inject() (
   ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
     for {
       bprResponse <- bprService
-                       .getBusinessPartnerRecord(bprRequest)
+                       .getBusinessPartnerRecord(bprRequest, lang)
                        .leftMap(NameMatchServiceError.BackendError)
       bpr         <- extractBpr(
                        bprResponse,

@@ -449,7 +449,8 @@ class RepresenteeController @Inject() (
                                            id
                                          ),
                                          ggCredId,
-                                         unsuccessfulNameMatchAttempts
+                                         unsuccessfulNameMatchAttempts,
+                                         request.messages.lang
                                        )
                                        .leftMap(ServiceError)
                                  )

@@ -20,7 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.joda.time.{LocalDate => JodaLocalDate}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.Writes
@@ -100,14 +100,14 @@ class StartControllerSpec
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  def mockGetBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
+  def mockGetBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (mockBprService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
         _: HeaderCarrier
       ))
-      .expects(request, *)
+      .expects(request, lang, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockHasFailedCgtEnrolment()(
@@ -771,7 +771,8 @@ class StartControllerSpec
                       None,
                       retrievedGGCredId.providerId,
                       createNewEnrolmentIfMissing = true
-                    )
+                    ),
+                    lang
                   )(
                     Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                   )
@@ -817,7 +818,8 @@ class StartControllerSpec
                         None,
                         retrievedGGCredId.providerId,
                         createNewEnrolmentIfMissing = true
-                      )
+                      ),
+                      lang
                     )(
                       Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                     )
@@ -861,7 +863,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bprWithNoEmail), None, None)
@@ -911,7 +914,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bprWithNoEmail), None, None)
@@ -1172,7 +1176,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Left(Error("error"))
                 )
@@ -1195,7 +1200,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(BusinessPartnerRecordResponse(None, None, None))
                 )
@@ -1227,7 +1233,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                 )
@@ -1257,7 +1264,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(BusinessPartnerRecordResponse(None, None, None))
                 )
@@ -1293,7 +1301,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                 )
@@ -1324,7 +1333,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), None)
@@ -1395,7 +1405,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bprWithNoEmail), None, None)
@@ -1450,7 +1461,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bprWithNoEmail), None, None)
@@ -1501,7 +1513,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bprWithNoAddress), None, None)
@@ -1556,7 +1569,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bprWithNoAddress), None, None)
@@ -1695,7 +1709,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(
@@ -1805,7 +1820,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(Left(Error("")))
               }
 
@@ -1823,7 +1839,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(
@@ -1849,7 +1866,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                 )
@@ -1877,7 +1895,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(BusinessPartnerRecordResponse(None, None, None))
                 )
@@ -1901,7 +1920,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None, None))
                 )
@@ -1937,7 +1957,8 @@ class StartControllerSpec
                       None,
                       retrievedGGCredId.providerId,
                       createNewEnrolmentIfMissing = true
-                    )
+                    ),
+                    lang
                   )(
                     Right(
                       BusinessPartnerRecordResponse(
@@ -2211,7 +2232,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), None)
@@ -2259,7 +2281,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bprWithNoEmail), None, None)
@@ -2334,7 +2357,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bprWithNoAddress), None, None)
@@ -2414,7 +2438,8 @@ class StartControllerSpec
                     None,
                     retrievedGGCredId.providerId,
                     createNewEnrolmentIfMissing = true
-                  )
+                  ),
+                  lang
                 )(
                   Right(
                     BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), Some(subscribedDetails))

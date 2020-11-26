@@ -23,6 +23,7 @@ import org.scalacheck.Gen
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
+import play.api.i18n.Lang
 import play.api.libs.json.{Reads, Writes}
 import play.api.mvc.Request
 import play.api.test.FakeRequest
@@ -83,6 +84,8 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
     mockAuditService,
     config
   )
+
+  val lang = Lang.defaultLang
 
   def mockSendNameMatchAccountLockedEvent(
     event: NameMatchAccountLocked
@@ -189,12 +192,13 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
     expectedId: Either[SAUTR, NINO],
     expectedName: IndividualName,
     ggCredId: GGCredId,
-    createNewEnrolmentIfMissing: Boolean
+    createNewEnrolmentIfMissing: Boolean,
+    lang: Lang
   )(
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (bprService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
         _: HeaderCarrier
       ))
       .expects(
@@ -204,6 +208,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           ggCredId.value,
           createNewEnrolmentIfMissing
         ),
+        lang,
         *
       )
       .returning(EitherT.fromEither[Future](result))
@@ -212,12 +217,13 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
     expectedTrn: TRN,
     expectedName: TrustName,
     ggCredId: GGCredId,
-    createNewEnrolmentIfMissing: Boolean
+    createNewEnrolmentIfMissing: Boolean,
+    lang: Lang
   )(
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (bprService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
         _: HeaderCarrier
       ))
       .expects(
@@ -227,6 +233,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           ggCredId.value,
           createNewEnrolmentIfMissing
         ),
+        lang,
         *
       )
       .returning(EitherT.fromEither[Future](result))
@@ -469,9 +476,10 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             Left(nameMatchDetails.sautr),
             nameMatchDetails.name,
             ggCredId,
-            createNewEnrolmentIfMissing = true
+            createNewEnrolmentIfMissing = true,
+            lang
           )(_),
-        service.attemptBusinessPartnerRecordNameMatch(_, _, _),
+        service.attemptBusinessPartnerRecordNameMatch(_, _, _, lang),
         _ -> _
       )
 
@@ -491,8 +499,14 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           nameMatchDetails.trn.value
         ),
         ggCreId =>
-          mockGetTrustBpr(nameMatchDetails.trn, nameMatchDetails.name, ggCreId, createNewEnrolmentIfMissing = true)(_),
-        service.attemptBusinessPartnerRecordNameMatch(_, _, _),
+          mockGetTrustBpr(
+            nameMatchDetails.trn,
+            nameMatchDetails.name,
+            ggCreId,
+            createNewEnrolmentIfMissing = true,
+            lang
+          )(_),
+        service.attemptBusinessPartnerRecordNameMatch(_, _, _, lang),
         _ -> _
       )
 
@@ -509,7 +523,8 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
               NoReferenceId
             ),
             sample[GGCredId],
-            None
+            None,
+            lang
           )
 
           await(result.value) shouldBe Right(NoReferenceId)
@@ -541,9 +556,10 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
               Right(representeeNino.value),
               nameMatchDetails.name,
               ggCredId,
-              createNewEnrolmentIfMissing = false
+              createNewEnrolmentIfMissing = false,
+              lang
             )(_),
-          service.attemptNameMatch(_, _, _),
+          service.attemptNameMatch(_, _, _, lang),
           (_, _) => representeeNino
         )
 
@@ -572,9 +588,10 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
               Left(representeeSautr.value),
               nameMatchDetails.name,
               ggCredId,
-              createNewEnrolmentIfMissing = false
+              createNewEnrolmentIfMissing = false,
+              lang
             )(_),
-          service.attemptNameMatch(_, _, _),
+          service.attemptNameMatch(_, _, _, lang),
           (_, _) => representeeSautr
         )
 
@@ -613,7 +630,8 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
                     maxRetries,
                     sample[IndividualRepresenteeNameMatchDetails]
                   )
-                )
+                ),
+                lang
               )
             )
           }
@@ -639,7 +657,8 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
                     maxRetries,
                     sample[IndividualRepresenteeNameMatchDetails]
                   )
-                )
+                ),
+                lang
               )
             )
           }
@@ -680,7 +699,8 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
                       maxRetries,
                       sample[IndividualRepresenteeNameMatchDetails]
                     )
-                  )
+                  ),
+                  lang
                 )
               )
             }
@@ -734,7 +754,8 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
               service.attemptNameMatch(
                 nameMatchDetails,
                 ggCredId,
-                None
+                None,
+                lang
               )
             )
           }
@@ -763,7 +784,8 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
               service.attemptNameMatch(
                 nameMatchDetails,
                 ggCredId,
-                None
+                None,
+                lang
               )
             )
           }
@@ -804,7 +826,8 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
                     maxRetries,
                     sample[IndividualRepresenteeNameMatchDetails]
                   )
-                )
+                ),
+                lang
               )
             )
           }
@@ -857,7 +880,8 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
                 ggCredId,
                 Some(
                   UnsuccessfulNameMatchAttempts(1, maxRetries, nameMatchDetails)
-                )
+                ),
+                lang
               )
             )
 
@@ -885,7 +909,7 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             }
 
             val result =
-              service.attemptNameMatch(nameMatchDetails, ggCredId, None)
+              service.attemptNameMatch(nameMatchDetails, ggCredId, None, lang)
             await(result.value) shouldBe Right(representeeCgtReference)
           }
 

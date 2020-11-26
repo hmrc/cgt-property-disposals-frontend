@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.Reads
@@ -108,7 +108,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[
       UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
-    ]
+    ],
+    lang: Lang
   )(
     result: Either[NameMatchServiceError[
       TrustNameMatchDetails
@@ -119,7 +120,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         .attemptBusinessPartnerRecordNameMatch(
           _: TrustNameMatchDetails,
           _: GGCredId,
-          _: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]]
+          _: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]],
+          _: Lang
         )(
           _: HeaderCarrier,
           _: Request[_]
@@ -129,6 +131,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         TrustNameMatchDetails(name, trn),
         ggCredId,
         previousUnsuccessfulNameMatchAttempts,
+        lang,
         *,
         *
       )
@@ -1137,7 +1140,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
                 validTrn,
                 validTrustName,
                 ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
+                Some(previousUnsuccessfulNameMatchAttempt),
+                lang
               )(
                 Left(
                   NameMatchServiceError.NameMatchFailed(
@@ -1190,7 +1194,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               validTrn,
               validTrustName,
               ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
+              Some(previousUnsuccessfulNameMatchAttempt),
+              lang
             )(
               Left(NameMatchServiceError.BackendError(Error("")))
             )
@@ -1214,7 +1219,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               validTrn,
               validTrustName,
               ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
+              Some(previousUnsuccessfulNameMatchAttempt),
+              lang
             )(
               Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), None, None))
             )
@@ -1247,7 +1253,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               validTrn,
               validTrustName,
               ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
+              Some(previousUnsuccessfulNameMatchAttempt),
+              lang
             )(
               Right(
                 individualBpr -> BusinessPartnerRecordResponse(Some(individualBpr), None, None)
@@ -1279,7 +1286,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
                 validTrn,
                 validTrustName,
                 ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
+                Some(previousUnsuccessfulNameMatchAttempt),
+                lang
               )(
                 Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), None, None))
               )
@@ -1316,7 +1324,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
                 validTrn,
                 validTrustName,
                 ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
+                Some(previousUnsuccessfulNameMatchAttempt),
+                lang
               )(
                 Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), Some(subscribedDetails)))
               )
@@ -1355,7 +1364,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               validTrn,
               validTrustName,
               ggCredId,
-              Some(previousUnsuccessfulNameMatchAttempt)
+              Some(previousUnsuccessfulNameMatchAttempt),
+              lang
             )(
               Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference), None))
             )
@@ -1412,7 +1422,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
                 validTrn,
                 validTrustName,
                 ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
+                Some(previousUnsuccessfulNameMatchAttempt),
+                lang
               )(
                 Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
               )
@@ -1442,7 +1453,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             validTrnWithSpaces,
             validTrustName,
             ggCredId,
-            Some(previousUnsuccessfulNameMatchAttempt)
+            Some(previousUnsuccessfulNameMatchAttempt),
+            lang
           )(
             Right(bpr -> BusinessPartnerRecordResponse(Some(bpr), None, None))
           )
