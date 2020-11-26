@@ -20,6 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import play.api.i18n.Lang
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
@@ -45,13 +46,14 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
   val service = new BusinessPartnerRecordServiceImpl(mockConnector)
 
   def mockGetBPR(
-    request: BusinessPartnerRecordRequest
+    request: BusinessPartnerRecordRequest,
+    lang: Lang
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
         _: HeaderCarrier
       ))
-      .expects(request, *)
+      .expects(request, lang, *)
       .returning(EitherT.fromEither[Future](response))
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -59,6 +61,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
   val bpr                        = sample[BusinessPartnerRecord].copy(emailAddress = Some(Email("abc@test.com")))
   private val emptyJsonBody      = "{}"
   private val noJsonInBody       = ""
+  val lang                       = Lang.defaultLang
 
   "The BusinessPartnerRecordServiceImpl" when {
 
@@ -67,10 +70,10 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
       "return an error" when {
 
         def testError(response: => Either[Error, HttpResponse]) = {
-          mockGetBPR(bprRequest)(response)
+          mockGetBPR(bprRequest, lang)(response)
 
           await(
-            service.getBusinessPartnerRecord(bprRequest).value
+            service.getBusinessPartnerRecord(bprRequest, lang).value
           ).isLeft shouldBe true
         }
 
@@ -98,12 +101,12 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         "the json body returns a bpr" in {
           val response = BusinessPartnerRecordResponse(Some(bpr), None, None)
 
-          mockGetBPR(bprRequest)(
+          mockGetBPR(bprRequest, lang)(
             Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
           )
 
           await(
-            service.getBusinessPartnerRecord(bprRequest).value
+            service.getBusinessPartnerRecord(bprRequest, lang).value
           ) shouldBe Right(response)
         }
 
@@ -112,12 +115,12 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
           val response =
             BusinessPartnerRecordResponse(Some(bpr), Some(sample[CgtReference]), None)
 
-          mockGetBPR(bprRequest)(
+          mockGetBPR(bprRequest, lang)(
             Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
           )
 
           await(
-            service.getBusinessPartnerRecord(bprRequest).value
+            service.getBusinessPartnerRecord(bprRequest, lang).value
           ) shouldBe Right(response)
         }
 
@@ -141,12 +144,12 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         def response(a: Address) =
           BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None, None)
 
-        mockGetBPR(bprRequest)(
+        mockGetBPR(bprRequest, lang)(
           Right(HttpResponse(200, Json.toJson(response(address)), Map[String, Seq[String]]().empty))
         )
 
         await(
-          service.getBusinessPartnerRecord(bprRequest).value
+          service.getBusinessPartnerRecord(bprRequest, lang).value
         ) shouldBe Right(response(sanitisedAddress))
       }
 
@@ -174,12 +177,12 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         def response(a: Address) =
           BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None, None)
 
-        mockGetBPR(bprRequest)(
+        mockGetBPR(bprRequest, lang)(
           Right(HttpResponse(200, Json.toJson(response(address)), Map[String, Seq[String]]().empty))
         )
 
         await(
-          service.getBusinessPartnerRecord(bprRequest).value
+          service.getBusinessPartnerRecord(bprRequest, lang).value
         ) shouldBe Right(response(sanitisedAddress))
       }
 
@@ -190,12 +193,12 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         val trustName          = TrustName("Trust (name)")
         val sanitisedTrustName = TrustName("Trust name")
 
-        mockGetBPR(bprRequest)(
+        mockGetBPR(bprRequest, lang)(
           Right(HttpResponse(200, Json.toJson(response(trustName)), Map[String, Seq[String]]().empty))
         )
 
         await(
-          service.getBusinessPartnerRecord(bprRequest).value
+          service.getBusinessPartnerRecord(bprRequest, lang).value
         ) shouldBe Right(response(sanitisedTrustName))
       }
 
@@ -206,12 +209,12 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         val name          = IndividualName("First (name)", "Last name!")
         val sanitisedName = IndividualName("First name", "Last name")
 
-        mockGetBPR(bprRequest)(
+        mockGetBPR(bprRequest, lang)(
           Right(HttpResponse(200, Json.toJson(response(name)), Map[String, Seq[String]]().empty))
         )
 
         await(
-          service.getBusinessPartnerRecord(bprRequest).value
+          service.getBusinessPartnerRecord(bprRequest, lang).value
         ) shouldBe Right(response(sanitisedName))
       }
 
@@ -219,12 +222,12 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         def response(e: Option[Email]) =
           BusinessPartnerRecordResponse(Some(bpr.copy(emailAddress = e)), None, None)
 
-        mockGetBPR(bprRequest)(
+        mockGetBPR(bprRequest, lang)(
           Right(HttpResponse(200, Json.toJson(response(Some(Email("invalid")))), Map[String, Seq[String]]().empty))
         )
 
         await(
-          service.getBusinessPartnerRecord(bprRequest).value
+          service.getBusinessPartnerRecord(bprRequest, lang).value
         ) shouldBe Right(response(None))
       }
 

@@ -465,7 +465,8 @@ class StartController @Inject() (
                            None,
                            trust.ggCredId.value,
                            createNewEnrolmentIfMissing = true
-                         )
+                         ),
+                         request.messages.lang
                        )
 
         bprWithTrustName         <- EitherT.fromEither[Future](
@@ -524,7 +525,7 @@ class StartController @Inject() (
                       )
                     )(newEnrolmentSubscribedDetails =>
                       Left(
-                        BuildSubscriptionDataError.NewSubscriptionCreatedForMissingEnrolment(
+                        BuildSubscriptionDataError.NewEnrolmentCreatedForMissingEnrolment(
                           newEnrolmentSubscribedDetails
                         )
                       )
@@ -566,9 +567,9 @@ class StartController @Inject() (
               .alreadySubscribedWithDifferentGGAccount()
           )
 
-        case Left(BuildSubscriptionDataError.NewSubscriptionCreatedForMissingEnrolment(subscribedDetails)) =>
+        case Left(BuildSubscriptionDataError.NewEnrolmentCreatedForMissingEnrolment(subscribedDetails)) =>
           logger.info(
-            s"New subscription created after missing enrolment found for cgt reference ${subscribedDetails.cgtReference.value}"
+            s"New enrolment created after missing enrolment found for cgt reference ${subscribedDetails.cgtReference.value}"
           )
           Redirect(routes.StartController.start())
 
@@ -628,7 +629,8 @@ class StartController @Inject() (
                                       None,
                                       individual.ggCredId.value,
                                       createNewEnrolmentIfMissing = true
-                                    )
+                                    ),
+                                    request.messages.lang
                                   )
       bpr                      <- EitherT.fromEither[Future](
                                     Either.fromOption(
@@ -649,7 +651,7 @@ class StartController @Inject() (
                 )
               )(newEnrolmentSubscribedDetails =>
                 Left(
-                  BuildSubscriptionDataError.NewSubscriptionCreatedForMissingEnrolment(newEnrolmentSubscribedDetails)
+                  BuildSubscriptionDataError.NewEnrolmentCreatedForMissingEnrolment(newEnrolmentSubscribedDetails)
                 )
               )
             )
@@ -687,9 +689,9 @@ class StartController @Inject() (
               .alreadySubscribedWithDifferentGGAccount()
           )
 
-        case Left(BuildSubscriptionDataError.NewSubscriptionCreatedForMissingEnrolment(subscribedDetails)) =>
+        case Left(BuildSubscriptionDataError.NewEnrolmentCreatedForMissingEnrolment(subscribedDetails)) =>
           logger.info(
-            s"New subscription created after missing enrolment found for cgt reference ${subscribedDetails.cgtReference.value}"
+            s"New enrolment created after missing enrolment found for cgt reference ${subscribedDetails.cgtReference.value}"
           )
           Redirect(routes.StartController.start())
 
@@ -739,7 +741,7 @@ class StartController @Inject() (
               )
             )
 
-          case BuildSubscriptionDataError.NewSubscriptionCreatedForMissingEnrolment(subscribedDetails) =>
+          case BuildSubscriptionDataError.NewEnrolmentCreatedForMissingEnrolment(subscribedDetails) =>
             updateSession(sessionStore, request)(
               _.copy(
                 journeyStatus = Some(
@@ -776,7 +778,7 @@ object StartController {
 
     final case class DataMissing(bpr: BusinessPartnerRecord) extends BuildSubscriptionDataError
 
-    final case class NewSubscriptionCreatedForMissingEnrolment(subscribedDetails: SubscribedDetails)
+    final case class NewEnrolmentCreatedForMissingEnrolment(subscribedDetails: SubscribedDetails)
         extends BuildSubscriptionDataError
 
   }

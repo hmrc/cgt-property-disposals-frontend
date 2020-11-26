@@ -377,7 +377,8 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                               .attemptBusinessPartnerRecordNameMatch(
                                 trustNameMatchDetails,
                                 ggCredId,
-                                previousUnsuccessfulAttempt
+                                previousUnsuccessfulAttempt,
+                                request.messages.lang
                               )
                               .subflatMap { case (bpr, bprResponse) =>
                                 if (bpr.name.isRight)

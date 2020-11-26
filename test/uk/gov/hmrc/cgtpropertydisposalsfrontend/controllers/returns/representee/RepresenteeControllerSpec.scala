@@ -177,7 +177,8 @@ class RepresenteeControllerSpec
     ggCredId: GGCredId,
     previousNameMatchAttempts: Option[
       UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
-    ]
+    ],
+    lang: Lang
   )(
     result: Either[NameMatchServiceError[
       IndividualRepresenteeNameMatchDetails
@@ -190,7 +191,8 @@ class RepresenteeControllerSpec
           _: GGCredId,
           _: Option[
             UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
-          ]
+          ],
+          _: Lang
         )(
           _: HeaderCarrier,
           _: Request[_]
@@ -200,6 +202,7 @@ class RepresenteeControllerSpec
         details,
         ggCredId,
         previousNameMatchAttempts,
+        lang,
         *,
         *
       )
@@ -1896,7 +1899,8 @@ class RepresenteeControllerSpec
             mockNameMatch(
               IndividualRepresenteeNameMatchDetails(name, cgtRef),
               journey.ggCredId,
-              None
+              None,
+              lang
             )(
               Left(NameMatchServiceError.BackendError(Error("")))
             )
@@ -1913,7 +1917,8 @@ class RepresenteeControllerSpec
             mockNameMatch(
               IndividualRepresenteeNameMatchDetails(name, cgtRef),
               journey.ggCredId,
-              None
+              None,
+              lang
             )(Right(cgtRef))
             mockStoreDraftReturn(newJourney)(Left(Error("")))
           }
@@ -1929,7 +1934,8 @@ class RepresenteeControllerSpec
             mockNameMatch(
               IndividualRepresenteeNameMatchDetails(name, cgtRef),
               journey.ggCredId,
-              None
+              None,
+              lang
             )(Right(cgtRef))
             mockStoreDraftReturn(newJourney)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
@@ -1959,7 +1965,7 @@ class RepresenteeControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockGetPreviousNameMatchAttempts(journey.ggCredId)(Right(None))
-            mockNameMatch(nameMatchDetails, journey.ggCredId, None)(
+            mockNameMatch(nameMatchDetails, journey.ggCredId, None, lang)(
               Left(
                 NameMatchServiceError.NameMatchFailed(
                   UnsuccessfulNameMatchAttempts(1, 2, nameMatchDetails)
@@ -2018,7 +2024,8 @@ class RepresenteeControllerSpec
             mockNameMatch(
               IndividualRepresenteeNameMatchDetails(name, cgtRef),
               journey.ggCredId,
-              Some(previousAttempts)
+              Some(previousAttempts),
+              lang
             )(
               Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
             )
@@ -2062,7 +2069,8 @@ class RepresenteeControllerSpec
               mockNameMatch(
                 IndividualRepresenteeNameMatchDetails(name, cgtRef),
                 journey.ggCredId,
-                None
+                None,
+                lang
               )(Right(cgtRef))
               mockStoreDraftReturn(newJourney)(Right(()))
               mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
@@ -2103,7 +2111,8 @@ class RepresenteeControllerSpec
               mockNameMatch(
                 IndividualRepresenteeNameMatchDetails(name, nino),
                 journey.ggCredId,
-                None
+                None,
+                lang
               )(Right(nino))
               mockStoreDraftReturn(newJourney)(Right(()))
               mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
@@ -2136,7 +2145,8 @@ class RepresenteeControllerSpec
               mockNameMatch(
                 IndividualRepresenteeNameMatchDetails(name, sautr),
                 journey.ggCredId,
-                None
+                None,
+                lang
               )(Right(sautr))
               mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
                 Right(())
@@ -2167,7 +2177,8 @@ class RepresenteeControllerSpec
               mockNameMatch(
                 IndividualRepresenteeNameMatchDetails(name, NoReferenceId),
                 journey.ggCredId,
-                None
+                None,
+                lang
               )(
                 Right(NoReferenceId)
               )

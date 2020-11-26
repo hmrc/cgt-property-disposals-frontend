@@ -350,7 +350,8 @@ class InsufficientConfidenceLevelController @Inject() (
                                .attemptBusinessPartnerRecordNameMatch(
                                  IndividualSautrNameMatchDetails,
                                  ggCredId,
-                                 previousUnsuccessfulAttempt
+                                 previousUnsuccessfulAttempt,
+                                 request.messages.lang
                                )
                                .subflatMap { case (bpr, bprResponse) =>
                                  if (bpr.name.isLeft)

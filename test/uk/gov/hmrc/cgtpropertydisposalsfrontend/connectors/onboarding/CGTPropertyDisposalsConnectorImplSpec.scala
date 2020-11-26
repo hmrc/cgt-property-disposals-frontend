@@ -136,10 +136,11 @@ class CGTPropertyDisposalsConnectorImplSpec
       val bprUrl     =
         "http://host:123/cgt-property-disposals/business-partner-record"
       val bprRequest = sample[BusinessPartnerRecordRequest]
+      val lang       = Lang.defaultLang
 
       behave like connectorBehaviour(
-        mockPost(bprUrl, Seq.empty, Json.toJson(bprRequest))(_),
-        () => connector.getBusinessPartnerRecord(bprRequest)
+        mockPost(bprUrl, Seq(ACCEPT_LANGUAGE -> lang.language), Json.toJson(bprRequest))(_),
+        () => connector.getBusinessPartnerRecord(bprRequest, lang)
       )
 
     }
