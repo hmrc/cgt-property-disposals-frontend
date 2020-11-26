@@ -2,9 +2,6 @@ landingPage.title=Rhoi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y DU a’i t
 landingPage.intro.p1=Efallai y bydd yn rhaid i chi dalu <a href="{0}">Treth Enillion Cyfalaf</a> os gwnewch elw (‘ennill’) wrth werthu (neu ‘<a href="{0}">waredu</a>’) eiddo nad yw’n gartref i chi. Er enghraifft, eiddo prynu i osod, tir neu eiddo etifeddol.
 landingPage.intro.p2=Yn y rhan fwyaf o achosion, nid oes angen i chi dalu’r dreth pan fyddwch yn <a href="{0}">gwerthu’ch prif gartref</a>.
 landingPage.warning=Ar gyfer gwarediadau eiddo yn y DU a wnaed o 6 Ebrill 2020 ymlaen, mae gennych 30 diwrnod ar ôl dyddiad cwblhau’r eiddo i roi gwybod am unrhyw Dreth Enillion Cyfalaf sy’n ddyledus ar eich gwarediadau eiddo yn y DU a’i thalu.
-landingPage.covid.p1=Oherwydd coronafeirws (COVID-19), ni chyhoeddodd CThEM gosbau hwyr ar gyfer unrhyw drafodion a gwblhawyd rhwng 6 Ebrill a 30 Mehefin 2020, ar yr amod y rhoddwyd gwybod am yr ennill ac y talwyd unrhyw dreth ddyledus erbyn 31 Gorffennaf 2020. Mae gan unrhyw un sy’n cwblhau gwerthu eiddo o 1 Gorffennaf 2020 ymlaen 30 diwrnod calendr i roi gwybod am y dreth ddyledus a’i thalu.
-landingPage.covid.p2=Bydd trafodion a gwblhawyd o 1 Gorffennaf 2020 ymlaen yn cael cosb am gyflwyno’n hwyr os na roddir gwybod amdanynt cyn pen 30 diwrnod calendr.
-landingPage.covid.p3=Codir llog os bydd y dreth yn parhau i fod heb ei thalu ar ôl 30 diwrnod ar gyfer pob trafodyn o 6 Ebrill 2020 ymlaen.
 landingPage.contents.h2=Cynnwys
 landingPage.intro.h2=Trosolwg
 landingPage.contents.list.bullet1=<a href="{0}">Trosolwg</a>
