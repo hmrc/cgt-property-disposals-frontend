@@ -1435,7 +1435,6 @@ disposalPrice.personalRep.indirect.SoldOther.title=Beth oedd swm y gwarediad?
 disposalPrice.personalRepInPeriodOfAdmin.SoldOther.title=Beth oedd enillion y gwarediad?
 disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.title=Beth oedd enillion y gwarediad?
 disposalPrice.capacitor.SoldOther.title=Beth oedd swm y gwarediad?
-.capacitor.indirect.SoldOther.title=Faint y cafodd y person pan wnaeth werthu neu waredu’r eiddo?
 disposalPrice.indirect.SoldOther.helpText=Byddwch yn gallu cynnwys costau prynu neu gaffael yn nes ymlaen.
 disposalPrice.agent.indirect.SoldOther.helpText=Byddwch yn gallu cynnwys costau caffael yn nes ymlaen.
 disposalPrice.trust.indirect.SoldOther.helpText=Byddwch yn gallu cynnwys costau caffael yn nes ymlaen.
