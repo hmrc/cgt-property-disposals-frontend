@@ -3178,8 +3178,8 @@ annualExemptAmount.agent.title=How much of your client’s Capital Gains Tax Ann
 annualExemptAmount.trust.title=How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?
 annualExemptAmount.capacitor.title=How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?
 annualExemptAmount.personalRep.title=How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?
-annualExemptAmount.personalRepInPeriodOfAdmin.title=How much of the Annual Exempt Amount are you including?
-annualExemptAmount.personalRepInPeriodOfAdmin.agent.title=How much of the Annual Exempt Amount are you including?
+annualExemptAmount.personalRepInPeriodOfAdmin.title=How much of the estate’s Capital Gains Tax Annual Exempt Amount is being used?
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.title=How much of the estate’s Capital Gains Tax Annual Exempt Amount is being used?
 
 annualExemptAmount.helpText=In the tax year {0} to {1}, you only have to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.agent.helpText=In the tax year {0} to {1}, your client only has to pay Capital Gains Tax on gains above {3}.
@@ -3188,6 +3188,14 @@ annualExemptAmount.capacitor.helpText=In the tax year {0} to {1}, the person onl
 annualExemptAmount.personalRep.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.personalRepInPeriodOfAdmin.helpText=During the period of administration, all of the Annual Exempt Amount can be included in the estate’s return. This is the case even if the time between 6 April and the day the person died was very short.
 annualExemptAmount.personalRepInPeriodOfAdmin.agent.helpText=During the period of administration, all of the Annual Exempt Amount can be included in the estate’s return. This is the case even if the time between 6 April and the day the person died was very short.
+
+annualExemptAmount.furtherReturn.helpText=Include the amount you want to use for the whole tax year. Use your whole Annual Exempt Amount even if you included any of it in previous returns.<br><br>For the tax year {0} to {1}, your Annual Exempt amount is {3}.
+annualExemptAmount.furtherReturn.agent.helpText=Include the amount your client wants to use for the whole tax year. Use their whole Annual Exempt Amount even if they included any of it in previous returns.<br><br>In the tax year {0} to {1}, your client only has to pay Capital Gains Tax on gains above {3}.
+annualExemptAmount.furtherReturn.trust.helpText=Include the amount the trust wants to use for the whole tax year. Use its whole Annual Exempt Amount even if it included any of it in previous returns.<br><br>In the tax year {0} to {1}, most trustees only have to pay Capital Gains Tax on gains above {2}. This is called the Annual Exempt Amount.<br><br>The Annual Exempt Amount for trusts for vulnerable beneficiaries is {3}.
+annualExemptAmount.furtherReturn.capacitor.helpText=Include the amount the person wants to use for the whole tax year. Use their whole Annual Exempt Amount even if they included any of it in previous returns.<br><br>In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
+annualExemptAmount.furtherReturn.personalRep.helpText=Include the amount the person wants to use for the whole tax year. Use their whole Annual Exempt Amount even if they included any of it in previous returns.<br><br>The person had an Annual Exempt Amount of {3} for the tax year {0} to {1}.<br><br>This means that any gains the person made up to {3} in the tax year are tax free. Capital Gains Tax will be due on any gains the person made that were above {3} in the tax year.<br><br>Enter an amount between £0 and {3}.
+annualExemptAmount.furtherReturn.personalRepInPeriodOfAdmin.helpText=Include the amount the estate wants to use for the whole tax year. Use its whole Annual Exempt Amount even if it included any of it in previous returns.<br><br>In the tax year {0} to {1}, the estate only has to pay Capital Gains Tax on gains above {3}.
+annualExemptAmount.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText=Include the amount the estate wants to use for the whole tax year. Use its whole Annual Exempt Amount even if it included any of it in previous returns.<br><br>In the tax year {0} to {1}, the estate only has to pay Capital Gains Tax on gains above {3}.
 
 annualExemptAmount.details.1.header=What is the Annual Exempt Amount?
 annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
