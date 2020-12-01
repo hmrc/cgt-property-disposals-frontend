@@ -388,10 +388,22 @@ class AmendReturnControllerSpec
           )
         }
 
+        val completeReturnWithSummary = sample[CompleteReturnWithSummary].copy(
+          completeReturn = sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(IndividualUserType.Self)
+            )
+          )
+        )
+
         "the user is not an agent" in {
           test(
             SessionData.empty.copy(
-              journeyStatus = Some(sample[StartingToAmendReturn]),
+              journeyStatus = Some(
+                sample[StartingToAmendReturn].copy(
+                  originalReturn = completeReturnWithSummary
+                )
+              ),
               userType = Some(UserType.Individual)
             ),
             "amendCya.title"
@@ -401,7 +413,11 @@ class AmendReturnControllerSpec
         "the user is an agent" in {
           test(
             SessionData.empty.copy(
-              journeyStatus = Some(sample[StartingToAmendReturn]),
+              journeyStatus = Some(
+                sample[StartingToAmendReturn].copy(
+                  originalReturn = completeReturnWithSummary
+                )
+              ),
               userType = Some(UserType.Agent)
             ),
             "amendCya.agent.title"
