@@ -3183,7 +3183,7 @@ annualExemptAmount.personalRepInPeriodOfAdmin.agent.title=How much of the estate
 
 annualExemptAmount.helpText=In the tax year {0} to {1}, you only have to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.agent.helpText=In the tax year {0} to {1}, your client only has to pay Capital Gains Tax on gains above {3}.
-annualExemptAmount.trust.helpText=In the tax year {0} to {1}, most trustees only have to pay Capital Gains Tax on gains above {2}. This is called the Annual Exempt Amount. <br/> <br/>The Annual Exempt Amount for trusts for vulnerable beneficiaries is {3}.
+annualExemptAmount.trust.helpText=In the tax year {0} to {1}, most trustees only have to pay Capital Gains Tax on gains above {2}. This is called the Annual Exempt Amount. <br> <br>The Annual Exempt Amount for trusts for vulnerable beneficiaries is {3}.
 annualExemptAmount.capacitor.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.personalRep.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.personalRepInPeriodOfAdmin.helpText=During the period of administration, all of the Annual Exempt Amount can be included in the estate’s return. This is the case even if the time between 6 April and the day the person died was very short.

@@ -1560,101 +1560,27 @@ class ExemptionAndLossesControllerSpec
 
       "display the page" when {
 
-        "the exemption and losses section has not yet been completed" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithMultipleDisposalsState(
-                    sample[IncompleteExemptionAndLossesAnswers].copy(
-                      previousYearsLosses = Some(sample[AmountInPence]),
-                      annualExemptAmount = None
-                    ),
-                    sample[DisposalDate],
-                    userType,
-                    Some(individualUserType)
-                  )._1
-                )
-              }
+        val taxYear                               = sample[TaxYear]
+        val disposalDate                          = sample[DisposalDate].copy(taxYear = taxYear)
+        val annualExemptAmountString              =
+          MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountGeneral.inPounds())
+        val annualExemptAmountForVulnerableString =
+          MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountNonVulnerableTrust.inPounds())
 
-              val userKey = userMessageKey(individualUserType, userType)
+        "the user is not on a further or amend return journey and" when {
 
-              checkPageIsDisplayed(
-                performAction(),
-                messageFromMessageKey(s"$key$userKey.title"),
-                { doc =>
-                  doc
-                    .select("#back")
-                    .attr("href")   shouldBe routes.ExemptionAndLossesController
-                    .previousYearsLosses()
-                    .url
-                  doc
-                    .select("#content > article > form")
-                    .attr("action") shouldBe routes.ExemptionAndLossesController
-                    .annualExemptAmountSubmit()
-                    .url
-                }
-              )
-          }
-        }
-
-        "the exemption and losses section has been completed" in {
-          val amount = AmountInPence(1000L)
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithSingleIndirectDisposalsState(
-                    sample[CompleteExemptionAndLossesAnswers].copy(
-                      annualExemptAmount = amount
-                    ),
-                    sample[DisposalDate],
-                    userType,
-                    Some(individualUserType)
-                  )._1
-                )
-              }
-
-              val userKey = userMessageKey(individualUserType, userType)
-
-              checkPageIsDisplayed(
-                performAction(),
-                messageFromMessageKey(s"$key$userKey.title"),
-                { doc =>
-                  doc
-                    .select("#back")
-                    .attr("href")                    shouldBe routes.ExemptionAndLossesController
-                    .checkYourAnswers()
-                    .url
-                  doc
-                    .select("#content > article > form")
-                    .attr("action")                  shouldBe routes.ExemptionAndLossesController
-                    .annualExemptAmountSubmit()
-                    .url
-                  doc.select(s"#$key").attr("value") shouldBe "10"
-
-                }
-              )
-          }
-        }
-
-        "the user type is an individual or agent" in {
-          val amount            = AmountInPence(1000L)
-          val acceptedUserTypes =
-            List[UserType](UserType.Individual, UserType.Agent)
-
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              whenever(acceptedUserTypes.contains(userType)) {
+          "the exemption and losses section has not yet been completed" in {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(
-                    sessionWithSingleMixedUseDisposalsState(
-                      sample[CompleteExemptionAndLossesAnswers]
-                        .copy(annualExemptAmount = amount),
-                      sample[DisposalDate],
+                    sessionWithMultipleDisposalsState(
+                      sample[IncompleteExemptionAndLossesAnswers].copy(
+                        previousYearsLosses = Some(sample[AmountInPence]),
+                        annualExemptAmount = None
+                      ),
+                      disposalDate,
                       userType,
                       Some(individualUserType)
                     )._1
@@ -1668,69 +1594,290 @@ class ExemptionAndLossesControllerSpec
                   messageFromMessageKey(s"$key$userKey.title"),
                   { doc =>
                     doc
-                      .select(s"#$key-form-hint")
-                      .text() contains messageFromMessageKey(
-                      s"$key$userKey.helpText"
-                    )
+                      .select("#back")
+                      .attr("href")   shouldBe routes.ExemptionAndLossesController
+                      .previousYearsLosses()
+                      .url
                     doc
-                      .select("#content > article > form > p > a")
-                      .text() contains messageFromMessageKey(
-                      s"$key.link"
-                    )
+                      .select("#content > article > form")
+                      .attr("action") shouldBe routes.ExemptionAndLossesController
+                      .annualExemptAmountSubmit()
+                      .url
                   }
                 )
+            }
+          }
+
+          "the exemption and losses section has been completed" in {
+            val amount = AmountInPence(1000L)
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+              (userType: UserType, individualUserType: IndividualUserType) =>
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    sessionWithSingleIndirectDisposalsState(
+                      sample[CompleteExemptionAndLossesAnswers].copy(
+                        annualExemptAmount = amount
+                      ),
+                      disposalDate,
+                      userType,
+                      Some(individualUserType)
+                    )._1
+                  )
+                }
+
+                val userKey = userMessageKey(individualUserType, userType)
+
+                checkPageIsDisplayed(
+                  performAction(),
+                  messageFromMessageKey(s"$key$userKey.title"),
+                  { doc =>
+                    doc
+                      .select("#back")
+                      .attr("href")                    shouldBe routes.ExemptionAndLossesController
+                      .checkYourAnswers()
+                      .url
+                    doc
+                      .select("#content > article > form")
+                      .attr("action")                  shouldBe routes.ExemptionAndLossesController
+                      .annualExemptAmountSubmit()
+                      .url
+                    doc.select(s"#$key").attr("value") shouldBe "10"
+
+                  }
+                )
+            }
+          }
+
+          "the user type is an individual" in {
+            val amount = AmountInPence(1000L)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithSingleMixedUseDisposalsState(
+                  sample[CompleteExemptionAndLossesAnswers]
+                    .copy(annualExemptAmount = amount),
+                  disposalDate,
+                  UserType.Individual,
+                  Some(IndividualUserType.Self)
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"$key.title"),
+              { doc =>
+                doc
+                  .select(s"#$key-form-hint")
+                  .html()      shouldBe messageFromMessageKey(
+                  s"$key.helpText",
+                  taxYear.startDateInclusive.getYear.toString,
+                  taxYear.endDateExclusive.getYear.toString,
+                  annualExemptAmountForVulnerableString,
+                  annualExemptAmountString
+                )
+                doc
+                  .select("#content > article > form > p > a")
+                  .outerHtml() shouldBe messageFromMessageKey(
+                  s"$key.link",
+                  viewConfig.annualExemptAmountUrl
+                ).stripSuffix(".")
               }
+            )
+          }
+
+          "the user type is an agent" in {
+            val amount = AmountInPence(1000L)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithSingleMixedUseDisposalsState(
+                  sample[CompleteExemptionAndLossesAnswers]
+                    .copy(annualExemptAmount = amount),
+                  disposalDate,
+                  UserType.Agent,
+                  Some(IndividualUserType.Self)
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"$key.agent.title"),
+              { doc =>
+                doc
+                  .select(s"#$key-form-hint")
+                  .text()      shouldBe messageFromMessageKey(
+                  s"$key.agent.helpText",
+                  taxYear.startDateInclusive.getYear.toString,
+                  taxYear.endDateExclusive.getYear.toString,
+                  annualExemptAmountForVulnerableString,
+                  annualExemptAmountString
+                )
+                doc
+                  .select("#content > article > form > p > a")
+                  .outerHtml() shouldBe messageFromMessageKey(
+                  s"$key.link",
+                  viewConfig.annualExemptAmountUrl
+                ).stripSuffix(".")
+              }
+            )
+          }
+
+          "the user type is a trust" in {
+            val amount = AmountInPence(1000L)
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithSingleDisposalState(
+                  sample[CompleteExemptionAndLossesAnswers]
+                    .copy(annualExemptAmount = amount),
+                  disposalDate,
+                  UserType.Organisation,
+                  None
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(
+                "annualExemptAmount.trust.title"
+              ),
+              { doc =>
+                doc
+                  .select("#annualExemptAmount-form-hint")
+                  .html() shouldBe messageFromMessageKey(
+                  "annualExemptAmount.trust.helpText",
+                  taxYear.startDateInclusive.getYear.toString,
+                  taxYear.endDateExclusive.getYear.toString,
+                  annualExemptAmountForVulnerableString,
+                  annualExemptAmountString
+                )
+
+                doc
+                  .select(
+                    "#content > article > form > details:nth-child(2) > summary > span"
+                  )
+                  .text() shouldBe messageFromMessageKey(
+                  "annualExemptAmount.details.1.header"
+                )
+                doc
+                  .select(
+                    "#content > article > form > details:nth-child(3) > summary > span"
+                  )
+                  .text() shouldBe messageFromMessageKey(
+                  "annualExemptAmount.details.2.header"
+                )
+              }
+            )
           }
         }
 
-        "the user type is a trust" in {
-          val amount = AmountInPence(1000L)
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithSingleDisposalState(
+        "the user is on a further or amend return journey and" when {
+
+          "the user type is an individual" in {
+            val amount          = AmountInPence(1000L)
+            val (session, _, _) =
+              sessionWithSingleMixedUseDisposalsState(
                 sample[CompleteExemptionAndLossesAnswers]
                   .copy(annualExemptAmount = amount),
-                sample[DisposalDate],
-                UserType.Organisation,
-                Some(IndividualUserType.Self)
-              )._1
+                disposalDate,
+                UserType.Individual,
+                Some(Self),
+                isFurtherReturn = true
+              )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"$key.title"),
+              doc =>
+                doc
+                  .select(s"#$key-form-hint")
+                  .html() shouldBe messageFromMessageKey(
+                  s"$key.furtherReturn.helpText",
+                  taxYear.startDateInclusive.getYear.toString,
+                  taxYear.endDateExclusive.getYear.toString,
+                  annualExemptAmountForVulnerableString,
+                  annualExemptAmountString
+                )
             )
           }
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(
-              "annualExemptAmount.trust.title"
-            ),
-            { doc =>
-              doc
-                .select("#content > article > form > p > a")
-                .text() contains messageFromMessageKey(
-                "annualExemptAmount.trust.link"
+
+          "the user type is an agent" in {
+            val amount          = AmountInPence(1000L)
+            val (session, _, _) =
+              sessionWithSingleMixedUseDisposalsState(
+                sample[CompleteExemptionAndLossesAnswers]
+                  .copy(annualExemptAmount = amount),
+                disposalDate,
+                UserType.Agent,
+                Some(Self),
+                isFurtherReturn = true
               )
-              doc
-                .select("#annualExemptAmount-form-hint")
-                .text() contains messageFromMessageKey(
-                "annualExemptAmount.trust.helpText"
-              )
-              doc.select(
-                "#content > article > form > details:nth-child(3) > summary > span"
-              ) contains messageFromMessageKey(
-                "annualExemptAmount.trust.details.1.header"
-              )
-              doc.select("#details-content-0") contains messageFromMessageKey(
-                "annualExemptAmount.trust.details.1.body"
-              )
-              doc.select(
-                "#content > article > form > details:nth-child(4) > summary > span"
-              ) contains messageFromMessageKey(
-                "annualExemptAmount.trust.details.2.header"
-              )
-              doc.select("#details-content-1") contains messageFromMessageKey(
-                "annualExemptAmount.trust.details.2.body"
-              )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
             }
-          )
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"$key.agent.title"),
+              doc =>
+                doc
+                  .select(s"#$key-form-hint")
+                  .html() shouldBe messageFromMessageKey(
+                  s"$key.furtherReturn.agent.helpText",
+                  taxYear.startDateInclusive.getYear.toString,
+                  taxYear.endDateExclusive.getYear.toString,
+                  annualExemptAmountForVulnerableString,
+                  annualExemptAmountString
+                )
+            )
+          }
+
+          "the user type is a trust" in {
+            val amount          = AmountInPence(1000L)
+            val (session, _, _) =
+              sessionWithSingleMixedUseDisposalsState(
+                sample[CompleteExemptionAndLossesAnswers]
+                  .copy(annualExemptAmount = amount),
+                disposalDate,
+                UserType.Organisation,
+                None,
+                isFurtherReturn = true
+              )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"$key.trust.title"),
+              doc =>
+                doc
+                  .select(s"#$key-form-hint")
+                  .html() shouldBe messageFromMessageKey(
+                  s"$key.furtherReturn.trust.helpText",
+                  taxYear.startDateInclusive.getYear.toString,
+                  taxYear.endDateExclusive.getYear.toString,
+                  annualExemptAmountForVulnerableString,
+                  annualExemptAmountString
+                )
+            )
+          }
+
         }
 
       }
@@ -2531,10 +2678,6 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?"
-    else if (individualUserType === IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
-      doc
-        .select("#annualExemptAmount-question")
-        .text() shouldBe "How much of the Annual Exempt Amount are you including?"
     else if (individualUserType === IndividualUserType.Capacitor)
       doc
         .select("#annualExemptAmount-question")
@@ -2542,7 +2685,7 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     else if (individualUserType === PersonalRepresentativeInPeriodOfAdmin)
       doc
         .select("#annualExemptAmount-question")
-        .text() shouldBe "How much of the Annual Exempt Amount are you including?"
+        .text() shouldBe "How much of the estate’s Capital Gains Tax Annual Exempt Amount is being used?"
     else if (isATrust)
       doc
         .select("#annualExemptAmount-question")
