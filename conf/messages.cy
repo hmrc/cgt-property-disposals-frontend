@@ -1,3 +1,43 @@
+multiple-draft.exit.title=Mae gennych Ffurflen Dreth ddrafft sy’n bodoli eisoes
+multiple-draft.exit.p1=Llenwch eich Ffurflen Dreth ddrafft cyn dechrau un newydd.
+who-are-you-reporting-for-exit-page.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
+who-are-you-reporting-for-exit-page.helpText=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod i CThEM fod angen i chi newid pwy ydych yn llenwi’r Ffurflen Dreth hon ar ei gyfer.
+previousReturnExistsWithSameCompletionDate.amend.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
+previousReturnExistsWithSameCompletionDate.amend.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
+previousReturnExistsWithSameCompletionDate.amend.trust.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
+previousReturnExistsWithSameCompletionDate.amend.agent.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
+previousReturnExistsWithSameCompletionDate.amend.p2=Mae hyn oherwydd bod rhaid i werthiannau neu warediadau sydd â’r un dyddiad cwblhau fod ar yr un Ffurflen Dreth.
+previousReturnExistsWithSameCompletionDate.amend.p3=Rhowch wybod i CThEM fod angen i chi newid:
+previousReturnExistsWithSameCompletionDate.amend.li1=Ffurflen Dreth flaenorol
+previousReturnExistsWithSameCompletionDate.amend.li2=y Ffurflen Dreth sydd â’r un dyddiad cwblhau gwaredu â’r un a nodwyd gennych ar y dudalen flaenorol
+previousReturnExistsWithSameCompletionDate.p2=Bydd angen i chi newid <strong class="bold">nifer y gwarediadau yr ydych yn eu cynnwys</strong> ar y Ffurflen Dreth honno
+previousReturnExistsWithSameCompletionDate.caption=Manylion Ffurflen Dreth sy’n bodoli eisoes
+previousReturnExistsWithSameCompletionDate.button.viewAndChange=Bwrw golwg dros a newid Ffurflen Dreth
+cannotAmendResidentialStatusForAssetType.title=Rhaid i chi gysylltu â CThEM
+cannotAmendResidentialStatusForAssetType.warning=Er mwyn newid eich statws preswylio ar gyfer y Ffurflen Dreth hon, mae’n rhaid i chi gysylltu â CThEM cyn gynted â phosibl.
+cannotAmendResidentialStatusForAssetType.agent.warning=Er mwyn newid statws preswylio eich cleient ar gyfer y Ffurflen Dreth hon, mae’n rhaid i chi gysylltu â CThEM cyn gynted â phosibl.
+cannotAmendResidentialStatusForAssetType.trust.warning=Er mwyn newid statws preswylio’r ymddiriedolaeth ar gyfer y Ffurflen Dreth hon, mae’n rhaid i chi gysylltu â CThEM cyn gynted â phosibl.
+cannotAmendResidentialStatusForAssetType.p1=Mae hyn oherwydd y gall y newid hwn effeithio ar y canlynol:
+cannotAmendResidentialStatusForAssetType.li1=y dyddiad y mae angen i chi dalu Treth Enillion Cyfalaf erbyn
+cannotAmendResidentialStatusForAssetType.agent.li1=y dyddiad y mae angen iddynt dalu Treth Enillion Cyfalaf erbyn
+cannotAmendResidentialStatusForAssetType.trust.li1=y dyddiad y mae angen i’r Dreth Enillion Cyfalaf gael ei thalu erbyn
+cannotAmendResidentialStatusForAssetType.li2=faint o dreth sydd arnoch
+cannotAmendResidentialStatusForAssetType.agent.li2=faint o dreth sydd arnynt
+cannotAmendResidentialStatusForAssetType.trust.li2=faint o dreth sy’n ddyledus
+cannotAmendResidentialStatusForAssetType.li3=sut y mae angen i chi roi gwybod am y gwarediad
+cannotAmendResidentialStatusForAssetType.agent.li3=sut y mae angen iddynt roi gwybod am y gwarediad
+cannotAmendResidentialStatusForAssetType.trust.li3=sut y mae angen rhoi gwybod am y dreth
+cannotAmendResidentialStatusForAssetType.li4=llog a thaliadau cosb y mae’n bosibl sydd arnoch yn barod neu mae’n bosibl y codir arnoch yn y dyfodol
+cannotAmendResidentialStatusForAssetType.agent.li4=llog a thaliadau cosb y mae’n bosibl sydd arno yn barod neu mae’n bosibl y codir arno yn y dyfodol
+cannotAmendResidentialStatusForAssetType.trust.li4=llog a thaliadau cosb y mae’n bosibl sydd ar yr ymddiriedolaeth yn barod neu mae’n bosibl y codir arni yn y dyfodol
+cannotAmendResidentialStatusForAssetType.link=Cysylltu â CThEM
+ukResidentCanOnlyReportResidential.agent.p1=Gwnaethoch roi gwybod i ni fod eich cleient yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
+ukResidentCanOnlyReportResidential.trust.p1=Gwnaethoch roi gwybod i ni fod yr ymddiriedolaeth yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
+ukResidentCanOnlyReportResidential.capacitor.p1=Gwnaethoch roi gwybod i ni fod y person yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
+ukResidentCanOnlyReportResidential.personalRep.p1=Gwnaethoch roi gwybod i ni fod y person yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
+ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.p1=Gwnaethoch roi gwybod i ni fod y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
+ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.agent.p1=Gwnaethoch roi gwybod i ni fod eich cleient yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
+
 landingPage.title=Rhoi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y DU a’i thalu
 landingPage.intro.p1=Efallai y bydd yn rhaid i chi dalu <a href="{0}">Treth Enillion Cyfalaf</a> os gwnewch elw (‘ennill’) wrth werthu (neu ‘<a href="{0}">waredu</a>’) eiddo nad yw’n gartref i chi. Er enghraifft, eiddo prynu i osod, tir neu eiddo etifeddol.
 landingPage.intro.p2=Yn y rhan fwyaf o achosion, nid oes angen i chi dalu’r dreth pan fyddwch yn <a href="{0}">gwerthu’ch prif gartref</a>.
@@ -501,6 +541,11 @@ agentNoEnrolment.button.tryAgain=Rhowch gynnig arall arni
 # ACCOUNT PAGES - START
 #===================================================
 
+account.trust.prefix=Ymddiriedolaeth:
+account.personalRep.prefix=Person sy’n cael ei gynrychioli:
+account.personalRepInPeriodOfAdmin.prefix=Ystâd:
+account.balance-updating=Balans yn cael ei ddiweddaru
+
 account.caption=Cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 account.menu.home=Hafan
 account.menu.manageYourDetails=Rheoli’r cyfrif
@@ -545,6 +590,7 @@ returns.list.leftToPay=Y cyfanswm sy’n weddill i’w dalu
 returns.list.taxOwed=Treth sy’n ddyledus ar gyfer y Ffurflen Dreth
 returns.list.sentDate=Anfonwyd i CThEM ar {0}
 returns.list.disposalDetails=Manylion y gwarediad
+returns.list.updating-payment-details=Rydym yn diweddaru’r manylion talu
 returns.paymentTakes3Days=Gall taliadau gymryd hyd at 3 diwrnod gwaith i ddangos ar y dudalen hon
 drafts.list.title=Ffurflenni Treth drafft
 drafts.list.completionDate=Dyddiad cwblhau’r eiddo
@@ -770,6 +816,7 @@ assetTypeForNonUkResidents.trust.error.invalid=Dewiswch y math o eiddo neu ased 
 assetTypeForNonUkResidents.capacitor.error.invalid=Dewiswch y math o eiddo neu ased y gwnaeth y person ei werthu neu ei waredu
 assetTypeForNonUkResidents.personalRep.error.invalid=Dewiswch y math o eiddo neu ased y gwnaeth y person ei werthu neu ei waredu
 assetTypeForNonUkResidents.cyaChange=y math o eiddo neu ased a waredwyd
+
 sharesDisposalDate.title=Beth oedd dyddiad gwaredu’r cyfranddaliadau?
 sharesDisposalDate.helpText=Er enghraifft, 25 4 2020.
 sharesDisposalDate.error.required=Nodwch y dyddiad gwaredu
@@ -785,7 +832,10 @@ sharesDisposalDate-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad gwar
 sharesDisposalDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad gwaredu gynnwys diwrnod a mis
 sharesDisposalDate.error.tooFarInFuture=Ni all y dyddiad y gwnaethoch waredu’r cyfranddaliadau fod yn y dyfodol
 sharesDisposalDate.error.before1900=Mae’n rhaid i’r dyddiad y gwnaethoch waredu’r cyfranddaliadau fod ar neu ar ôl 01 01 1900, cysylltwch â CThEM os yw’r dyddiad cyn hyn
+sharesDisposalDate.error.periodOfAdminDeathNotAfterDate=Ni all y dyddiad gwaredu fod ar neu cyn dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r Ffurflen Dreth hon?’
+sharesDisposalDate.error.nonPeriodOfAdminDeathAfterDate=Ni all y dyddiad gwaredu fod ar ôl dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r Ffurflen Dreth hon?’
 sharesDisposalDate.cyaChange=pryd y gwerthwyd y cyfranddaliadau
+
 didYouDisposeOfResidentialProperty.title=A wnaethoch werthu neu waredu eiddo preswyl yn y DU?
 didYouDisposeOfResidentialProperty.agent.title=A wnaeth eich cleient waredu eiddo preswyl yn y DU?
 didYouDisposeOfResidentialProperty.trust.title=A ydych yn rhoi gwybod am warediad eiddo preswyl yn y DU?
@@ -836,6 +886,8 @@ disposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
 disposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
 disposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod heddiw neu yn y gorffennol
 disposalDate.error.before1900=Mae’n rhaid i’r dyddiad cyfnewid contractau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEM os yw’r dyddiad cyn hyn
+disposalDate.error.periodOfAdminDeathNotAfterDate=Ni all dyddiad cyfnewid y contract fod ar neu cyn dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r Ffurflen Dreth hon?’
+disposalDate.error.nonPeriodOfAdminDeathAfterDate=Ni all dyddiad cyfnewid y contract fod ar ôl dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r Ffurflen Dreth hon?’
 disposalDate-day.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys diwrnod
 disposalDate-month.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys mis
 disposalDate-year.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys blwyddyn
@@ -1038,6 +1090,7 @@ multipleDisposalsCompletionDate-year.error.invalid=Nodwch ddyddiad cwblhau go ia
 multipleDisposalsCompletionDate-month.error.monthAndYearRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys mis a blwyddyn
 multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a blwyddyn
 multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a mis
+multipleDisposalsCompletionDate.error.tooFarInPast=Rhaid i’r dyddiad cwblhau fod ar neu ar ôl 6 Ebrill 2020
 multipleDisposalsCompletionDate.cyaChange=y dyddiad cwblhau ar gyfer yr holl eiddo
 multipleDisposals.triage.cya.title=Gwiriwch eich atebion
 multipleDisposals.triage.cya.guidanceLink=Help i lenwi’r adran hon
@@ -1329,6 +1382,8 @@ percentageShare.trust.error.tooManyDecimals=Mae’n rhaid i ganran yr eiddo yr o
 percentageShare.personalRep.error.tooManyDecimals=Mae’n rhaid i ganran yr eiddo yr oedd y person yn berchen arni gael 2 le degol neu lai, er enghraifft 33.33
 percentageShare.personalRepInPeriodOfAdmin.error.tooManyDecimals=Mae’n rhaid i ganran yr eiddo yr oedd y person yn berchen arni gael 2 le degol neu lai, er enghraifft 33.33
 percentageShare.capacitor.error.tooManyDecimals=Mae’n rhaid i ganran yr eiddo yr oedd y person yn berchen arni gael 2 le degol neu lai, er enghraifft 33.33
+
+
 disposalPrice.Gifted.title=Beth oedd gwerth marchnadol yr eiddo pan wnaethoch ei roi i ffwrdd?
 disposalPrice.indirect.Gifted.title=Beth oedd gwerth marchnadol y cyfranddaliadau pan wnaethoch eu gwerthu neu eu gwaredu?
 disposalPrice.agent.Gifted.title=Beth oedd gwerth marchnadol yr eiddo pan wnaeth eich cleient ei roi i ffwrdd?
@@ -1338,6 +1393,8 @@ disposalPrice.trust.indirect.Gifted.title=Beth oedd gwerth marchnadol y cyfrandd
 disposalPrice.personalRepInPeriodOfAdmin.Gifted.title=Beth oedd gwerth marchnadol yr eiddo pan gafodd ei waredu?
 disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.title=Beth oedd gwerth marchnadol y cyfranddaliadau pan wnaeth eich cleient eu gwerthu neu eu gwaredu?
 disposalPrice.capacitor.Gifted.title=Beth oedd gwerth marchnadol yr eiddo pan gafodd ei waredu?
+disposalPrice.personalRep.Gifted.title=Beth oedd gwerth marchnadol yr eiddo pan gafodd ei waredu?
+disposalPrice.personalRep.indirect.Gifted.title=Beth oedd gwerth marchnadol y cyfranddaliadau pan gawsant eu gwerthu neu eu gwaredu?
 disposalPrice.capacitor.indirect.Gifted.title=Beth oedd gwerth marchnadol y cyfranddaliadau pan wnaeth eich cleient eu gwerthu neu eu gwaredu?
 disposalPrice.Gifted.helpText=Os oeddech yn berchen ar ran o’r eiddo, dylech ond nodi’ch cyfranddaliad chi o’r gwerth marchnadol. Byddwch yn gallu nodi unrhyw gostau ychwanegol yn nes ymlaen.
 disposalPrice.indirect.Gifted.helpText=Gallwch roi prisiad neu amcangyfrif realistig.
@@ -3053,6 +3110,15 @@ yearToDateLiability.capacitor.intro=Gwnaethom ddefnyddio’r manylion a nodwyd y
 yearToDateLiability.personalRep.intro=Gwnaethom ddefnyddio’r manylion a nodwyd yn y Ffurflen Dreth hon i gyfrifo rhwymedigaeth Treth Enillion Cyfalaf gyffredinol y person ar eich gwarediadau sy’n gysylltiedig ag eiddo yn y DU ym mlwyddyn dreth {0} i {1}.
 yearToDateLiability.personalRepInPeriodOfAdmin.intro=Gwnaethom ddefnyddio’r manylion a nodwyd yn y Ffurflen Dreth hon i gyfrifo rhwymedigaeth Treth Enillion Cyfalaf gyffredinol yr ystâd ar eich gwarediadau sy’n gysylltiedig ag eiddo yn y DU ym mlwyddyn dreth {0} i {1}.
 yearToDateLiability.personalRepInPeriodOfAdmin.agent.intro=Gwnaethom ddefnyddio’r manylion a nodwyd yn y Ffurflen Dreth hon i gyfrifo rhwymedigaeth Treth Enillion Cyfalaf gyffredinol eich cleient ar eich gwarediadau sy’n gysylltiedig ag eiddo yn y DU ym mlwyddyn dreth {0} i {1}.
+
+yearToDateLiability.label=Beth yw’ch rhwymedigaeth Treth Enillion Cyfalaf gyffredinol ar eich gwarediadau sy’n gysylltiedig ag eiddo yn y DU ym mlwyddyn dreth {0} i {1}?
+yearToDateLiability.agent.label=Beth yw rhwymedigaeth Treth Enillion Cyfalaf gyffredinol eich cleient ar ei warediadau sy’n gysylltiedig ag eiddo yn y DU ym mlwyddyn dreth {0} i {1}?
+yearToDateLiability.trust.label=Beth yw rhwymedigaeth Treth Enillion Cyfalaf gyffredinol yr ymddiriedolaeth ar ei gwarediadau sy’n gysylltiedig ag eiddo yn y DU ym mlwyddyn dreth {0} i {1}?
+yearToDateLiability.capacitor.label=Beth yw rhwymedigaeth Treth Enillion Cyfalaf gyffredinol y person ar ei warediadau sy’n gysylltiedig ag eiddo yn y DU ym mlwyddyn dreth {0} i {1}?
+yearToDateLiability.personalRep.label=Beth yw rhwymedigaeth Treth Enillion Cyfalaf gyffredinol y person ar ei warediadau sy’n gysylltiedig ag eiddo yn y DU ym mlwyddyn dreth {0} i {1}?
+yearToDateLiability.personalRepInPeriodOfAdmin.label=Beth yw rhwymedigaeth Treth Enillion Cyfalaf gyffredinol yr ystâd ar ei gwarediadau sy’n gysylltiedig ag eiddo yn y DU ym mlwyddyn dreth {0} i {1}?
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.label=Beth yw rhwymedigaeth Treth Enillion Cyfalaf gyffredinol eich cleient ar ei warediadau sy’n gysylltiedig ag eiddo yn y DU ym mlwyddyn dreth {0} i {1}?
+
 yearToDateLiability.calculatedHelpText.p1=Nodwch rwymedigaeth gyffredinol o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
 yearToDateLiability.agent.calculatedHelpText.p1=Nodwch rwymedigaeth gyffredinol o <strong class="bold">{0}</strong> os yw’ch cleient yn cytuno â’r cyfrifiadau hyn.
 yearToDateLiability.trust.calculatedHelpText.p1=Nodwch rwymedigaeth gyffredinol o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
@@ -3374,6 +3440,7 @@ supporting-evidence.upload.title=Uwchlwytho dogfen gyda’ch tystiolaeth ategol
 supporting-evidence.upload.caption=Tystiolaeth ategol
 supporting-evidence.upload.error.required=Uwchlwytho ffeil gyda’ch tystiolaeth ategol
 supporting-evidence.upload.help-text=Gall y ffeil fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, a JPG.
+supporting-evidence.upload.amendReturn.help-text=Gall y ffeil fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, a JPG.
 file.error.required=Dewiswch ffeil sy''n cynnwys eich tystiolaeth ategol
 supporting-evidence.expired.title=Er eich diogelwch, gwnaethom ddileu’r dogfennau hyn
 supporting-evidence.expired.p1=Rydym yn cadw dogfennau am 5 diwrnod.
@@ -3416,6 +3483,15 @@ checkAllAnswers.amend.warning=Ni fyddwch yn gallu cadw a dod yn ôl yn nes ymlae
 checkAllAnswers.declaration=Datganiad
 checkAllAnswers.declaration.p1=Drwy barhau rydych yn cadarnhau, hyd eithaf eich gwybodaeth, fod y manylion yr ydych yn eu rhoi yn gywir.
 checkAllAnswers.declaration.p2=Efallai y bydd yn rhaid i chi dalu cosbau ariannol a chael eich erlyn os rhowch wybodaeth anghywir.
+checkAllAnswers.submissionDetails.title=Manylion y Cyflwyniad
+checkAllAnswers.submissionDetails.returnType=Math o Ffurflen Dreth
+checkAllAnswers.submissionDetails.returnType.amend=Diwygio
+checkAllAnswers.submissionDetails.returnType.new=Newydd
+checkAllAnswers.submissionDetails.cgtReferencenumber=Cyfeirnod CGT
+checkAllAnswers.submissionDetails.agentReferencenumber=Cyfeirnod yr asiant
+checkAllAnswers.submissionDetails.nino=Rhif YG y person sy’n cael ei gynrychioli
+checkAllAnswers.submissionDetails.sautr=UTR Hunanasesiad y person sy’n cael ei gynrychioli
+checkAllAnswers.submissionDetails.cgt=Cyfeirnod CGT y person sy’n cael ei gynrychioli
 submitReturnError.title=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
 submitReturnError.p1=Efallai na anfonwyd eich Ffurflen Dreth i CThEM.
 submitReturnError.p2=Bydd yn rhaid i chi wneud y canlynol:
@@ -4632,7 +4708,6 @@ furtherReturnGuidance.stage-a.step1.example4.table2.row6.key=Mae’n tynnu rhydd
 furtherReturnGuidance.stage-a.step1.example4.table2.row6.value=£0
 furtherReturnGuidance.stage-a.step1.example4.table2.total.key=Ennill ar ôl rhyddhad ar gyfer eiddo 2
 furtherReturnGuidance.stage-a.step1.example4.table2.total.value=Ennill o £33,630
-furtherReturnGuidance.stage-a.step2.example4.headingText=Cam A2 – Mae Akash yn cyfrifo ennill net yr ystâd am y flwyddyn.
 furtherReturnGuidance.stage-a.step2.example4.p1=Mae’n ychwanegu at ei gilydd yr holl enillion neu golledion ar ôl rhyddhad
 furtherReturnGuidance.stage-a.step2.example4.table1.row1.key=Mae’n dechrau gyda’r ennill neu’r golled ar gyfer eiddo 1 ar ôl rhyddhad
 furtherReturnGuidance.stage-a.step2.example4.table1.row1.value=Ennill o £43,070
