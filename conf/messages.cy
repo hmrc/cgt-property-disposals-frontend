@@ -2657,8 +2657,8 @@ annualExemptAmount.agent.title=Faint o Swm Blynyddol eich cleient, sydd wedi ei 
 annualExemptAmount.trust.title=Faint o Swm Blynyddol yr ymddiriedolaeth, sydd wedi ei Eithrio rhag Treth Enillion Cyfalaf, y mae am ei ddefnyddio?
 annualExemptAmount.capacitor.title=Faint o Swm Blynyddol y person, sydd wedi ei Eithrio rhag Treth Enillion Cyfalaf, y mae am ei ddefnyddio?
 annualExemptAmount.personalRep.title=Faint o Swm Blynyddol y person, sydd wedi ei Eithrio rhag Treth Enillion Cyfalaf, y mae am ei ddefnyddio?
-annualExemptAmount.personalRepInPeriodOfAdmin.title=Faint o’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth rydych yn ei gynnwys?
-annualExemptAmount.personalRepInPeriodOfAdmin.agent.title=Faint o’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth rydych yn ei gynnwys?
+annualExemptAmount.personalRepInPeriodOfAdmin.title=Faint o Swm Blynyddol yr ystâd, sydd wedi ei Eithrio rhag Treth Enillion Cyfalaf, sy’n cael ei ddefnyddio?
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.title=Faint o Swm Blynyddol yr ystâd, sydd wedi ei Eithrio rhag Treth Enillion Cyfalaf, sy’n cael ei ddefnyddio?
 annualExemptAmount.helpText=Ym mlwyddyn dreth {0} i {1}, dim ond ar enillion dros {3} y mae’n rhaid i chi dalu Treth Enillion Cyfalaf.
 annualExemptAmount.agent.helpText=Ym mlwyddyn dreth {0} i {1}, dim ond ar enillion dros {3} y mae’n rhaid i’ch cleient dalu Treth Enillion Cyfalaf.
 annualExemptAmount.trust.helpText=Ym mlwyddyn dreth {0} i {1}, dim ond ar enillion dros {2} y mae’n rhaid i’r rhan fwyaf o ymddiriedolwyr dalu Treth Enillion Cyfalaf. Gelwir hyn yn Swm Blynyddol sydd wedi ei Eithrio rhag Treth. <br/> <br/>Y Swm Blynyddol sydd wedi ei Eithrio rhag Treth ar gyfer ymddiriedolaethau ar gyfer buddiolwyr sy’n agored i niwed yw {3}.
@@ -2711,6 +2711,10 @@ annualExemptAmount.personalRep.error.tooManyDecimals=Mae’n rhaid i’r Swm Bly
 annualExemptAmount.personalRepInPeriodOfAdmin.error.tooManyDecimals=Mae’n rhaid i’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth gynnwys 2 le degol neu lai, megis 8,700 neu 33.33
 annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Mae’n rhaid i’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth gynnwys 2 le degol neu lai, megis 8,700 neu 33.33
 annualExemptAmount.cyaChange=faint o’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth sy’n cael ei ddefnyddio
+annualExemptAmount.furtherReturn.helpText=Dylech gynnwys y swm rydych am ei ddefnyddio am y flwyddyn dreth gyfan. Defnyddiwch eich Swm Blynyddol llawn sydd wedi ei Eithrio rhag Treth, hyd yn oed os gwnaethoch gynnwys unrhyw ran ohono mewn datganiadau blaenorol.<br><br>Ar gyfer blwyddyn dreth {0} i {1}, {3} yw’ch Swm Blynyddol sydd wedi ei Eithrio rhag Treth.
+annualExemptAmount.furtherReturn.agent.helpText=Dylech gynnwys y swm mae’ch cleient am ei ddefnyddio am y flwyddyn dreth gyfan. Defnyddiwch ei Swm Blynyddol llawn sydd wedi ei Eithrio rhag Treth, hyd yn oed os gwnaeth gynnwys unrhyw ran ohono mewn datganiadau blaenorol.<br><br>Ym mlwyddyn dreth {0} i {1}, dim ond ar enillion dros {3} y mae’n rhaid i’ch cleient dalu Treth Enillion Cyfalaf.
+annualExemptAmount.furtherReturn.trust.helpText=Dylech gynnwys y swm mae’r ymddiriedolaeth am ei ddefnyddio am y flwyddyn dreth gyfan. Defnyddiwch ei Swm Blynyddol llawn sydd wedi ei Eithrio rhag Treth, hyd yn oed os gwnaeth gynnwys unrhyw ran ohono mewn datganiadau blaenorol.<br><br>Ym mlwyddyn dreth {0} i {1}, dim ond ar enillion dros {2} y mae’n rhaid i’r rhan fwyaf o ymddiriedolwyr dalu Treth Enillion Cyfalaf. Y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yw’r enw a roddir am hyn.<br><br>Y Swm Blynyddol sydd wedi ei Eithrio rhag Treth ar gyfer ymddiriedolaethau ar gyfer buddiolwyr sy’n agored i niwed yw {3}.
+
 exemptionsAndLosses.cya.title=Gwiriwch eich atebion
 
 #===================================================
