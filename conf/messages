@@ -1133,7 +1133,7 @@ multipleDisposalsNumberOfProperties.cyaChange=how many disposals
 
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on all of the contract ‘exchange’ dates?
-multipleDisposalsWereYouAUKResident.trust.title=Was the trust resident in the UK on all of the contract ‘exchange‘ dates?
+multipleDisposalsWereYouAUKResident.trust.title=Was the trust resident in the UK on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.capacitor.title=Was the person a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.personalRep.title=Was the person a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.title=Was the person a UK resident for the tax year in which they died?
@@ -3755,6 +3755,9 @@ calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
 nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
+nonCalculatedTaxDue.ukResident.link=Find out how to work out tax when property is sold (opens in a new window)
+nonCalculatedTaxDue.trust.link=Find out how to work out Capital Gains Tax for a trust (opens in a new window)
+nonCalculatedTaxDue.nonResident.link=Find out how to work out tax when property is sold or for indirect disposals (opens in a new window)
 
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
 nonCalculatedTaxDue.error.required=Enter the amount of Capital Gains Tax due for this return
