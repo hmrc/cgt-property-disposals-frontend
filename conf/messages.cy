@@ -683,8 +683,8 @@ numberOfProperties.error.invalid=Dewiswch faint o eiddo yn y DU rydych yn eu cyn
 numberOfProperties.error.required=Dewiswch faint o eiddo yn y DU rydych yn eu cynnwys yn y Ffurflen Dreth hon
 numberOfProperties.cyaChange=faint o eiddo rydych am eu cynnwys yn y Ffurflen Dreth hon
 
-previousReturnExistsWithSameCompletionDate.title=Ni allwch lenwi’r Ffurflen Dreth hon ar-lein
-previousReturnExistsWithSameCompletionDate.p1=Mae’n rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod iddynt fod angen i chi newid un o’ch Ffurflenni Treth blaenorol.
+previousReturnExistsWithSameCompletionDate.title=Bydd angen i chi newid Ffurflen Dreth sy’n bodoli eisoes
+previousReturnExistsWithSameCompletionDate.p1=Rydych eisoes wedi anfon Ffurflen Dreth a oedd â gwarediad arni gyda dyddiad cwblhau o <strong class="bold">{0}</strong>. Bydd angen i chi newid y Ffurflen Dreth honno yn hytrach na chreu un newydd.
 previousReturnExistsWithSameCompletionDate.trust.p1=Mae’n rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod iddynt fod angen i chi newid un o Ffurflenni Treth blaenorol eich ymddiriedolaeth.
 previousReturnExistsWithSameCompletionDate.agent.p1=Mae’n rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod iddynt fod angen i chi newid un o Ffurflenni Treth blaenorol eich cleient.
 previousReturnExistsWithSameCompletionDate.propertyDisposals.title=Gwarediadau eiddo
