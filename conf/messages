@@ -99,8 +99,6 @@ service.signOut=Sign out
 hmrc_branding=HM Revenue & Customs
 exitSurvey.linkText=Tell us how we can improve this service (takes 1 minute)
 
-label.beta=Beta
-
 button.startNow=Start now
 button.continue=Continue
 button.back=Back
@@ -609,8 +607,6 @@ account.home.left.title=Capital Gains Tax liability
 account.home.left.placeholder=Your total Capital Gains Tax liability for UK property disposals from 6 April 2020 to 5 April 2021.
 account.home.right.title=Total amount left to pay
 account.home.right.placeholder=The total amount due for all your Capital Gains Tax on UK property disposals made from 6 April 2020.
-account.home.private-beta.guide=How to report capital gains on disposals made from 6 April 2020
-account.home.private-beta.guide.content=You will be able to use this service from 6 April 2020, to report and pay Capital Gains Tax on UK property disposals made on or after 6 April 2020. Find out how to <a href="{0}">report a capital gain on UK property disposals made before 6 April 2020</a>.
 account.home.button.start-a-new-return=Start new return
 
 account.totalLeftToPay=Total left to pay
@@ -622,7 +618,6 @@ account.balance-updating=Balance updating
 account.manageYourDetails.title=Manage account
 account.manageYourDetails.subtitle=Account number
 account.manageYourDetails.accountName=Account name
-account.manageYourDetails.betaNotice=This service is in private beta until 6 April 2020. On that date you will be able to come back and send a CGT on UK property disposals return for disposals made on or after 6 April 2020.
 account.manageYourDetails.contactHeading=Contact person’s details
 account.manageYourDetails.p=We only use these details if we need to get in contact about this service.
 account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.

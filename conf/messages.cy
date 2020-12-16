@@ -115,8 +115,6 @@ service.signOut=Allgofnodi
 hmrc_branding=Cyllid a Thollau EM
 exitSurvey.linkText=Rhowch wybod sut y gallwn wella’r gwasanaeth (mae’n cymryd 1 munud)
 
-label.beta=Beta
-
 button.startNow=Dechrau nawr
 button.continue=Yn eich blaen
 button.back=Yn ôl
@@ -560,8 +558,6 @@ account.home.left.title=Rhwymedigaeth Treth Enillion Cyfalaf
 account.home.left.placeholder=Cyfanswm eich rhwymedigaeth Treth Enillion Cyfalaf am warediadau eiddo yn y DU rhwng 6 Ebrill 2020 a 5 Ebrill 2021.
 account.home.right.title=Y cyfanswm sy’n weddill i’w dalu
 account.home.right.placeholder=Y cyfanswm sy’n ddyledus am eich holl Dreth Enillion Cyfalaf ar warediadau eiddo yn y DU a wnaed o 6 Ebrill 2020.
-account.home.private-beta.guide=Sut i roi gwybod am enillion cyfalaf ar warediadau a wnaed o 6 Ebrill 2020
-account.home.private-beta.guide.content=Byddwch yn gallu defnyddio’r gwasanaeth hwn o 6 Ebrill 2020, i roi gwybod am a thalu Treth Enillion Cyfalaf ar warediadau eiddo yn y DU a wnaed ar neu ar ôl 6 Ebrill 2020. Dysgwch sut i <a href="{0}">roi gwybod am enillion cyfalaf ar warediadau eiddo yn y DU a wnaed cyn 6 Ebrill 2020</a>.
 account.home.button.start-a-new-return=Dechrau Ffurflen Dreth newydd
 account.totalLeftToPay=Y cyfanswm sy’n weddill i’w dalu
 account.make.payment.link=Gwneud taliad
@@ -570,7 +566,6 @@ account.totalLeftToPay.payments=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gost
 account.manageYourDetails.title=Rheoli’r cyfrif
 account.manageYourDetails.subtitle=Rhif y cyfrif
 account.manageYourDetails.accountName=Enw’r cyfrif
-account.manageYourDetails.betaNotice=Mae’r gwasanaeth hwn mewn beta breifat tan 6 Ebrill 2020. Ar y dyddiad hwnnw byddwch yn gallu dod yn ôl ac anfon Treth Enillion Cyfalaf ar ffurflen gwarediadau eiddo yn y DU ar gyfer gwarediadau a wnaed ar neu ar ôl 6 Ebrill 2020.
 account.manageYourDetails.contactHeading=Manylion y person cyswllt
 account.manageYourDetails.p=Byddwn dim ond yn defnyddio’r manylion cyswllt hyn os oes angen i ni gysylltu â chi ynghylch y gwasanaeth hwn.
 account.manageYourDetails.individual.p2=Os oes angen i ‘Enw’r cyfrif’ newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEM (yn agor ffenestr newydd)</a>.
