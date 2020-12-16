@@ -475,7 +475,8 @@ class ExemptionAndLossesController @Inject() (
               disposalDate,
               fillingOutReturn.subscribedDetails.isATrust,
               draftReturn.representativeType(),
-              fillingOutReturn.isAmendReturn
+              fillingOutReturn.isAmendReturn,
+              fillingOutReturn.isFurtherOrAmendReturn
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -521,7 +522,8 @@ class ExemptionAndLossesController @Inject() (
                 disposalDate,
                 fillingOutReturn.subscribedDetails.isATrust,
                 draftReturn.representativeType(),
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                fillingOutReturn.isFurtherOrAmendReturn
               )
             }
           )(

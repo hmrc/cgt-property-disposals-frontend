@@ -47,10 +47,12 @@
     disposalDate: DisposalDate,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isAmend: Boolean
+    isAmend: Boolean,
+    isFurtherOrAmendReturn: Option[Boolean]
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "annualExemptAmount" }
+@furtherReturnKey = @{if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
@@ -78,6 +80,7 @@
       else ""
   }
 }
+
 @isPeriodOfAdmin = @{
     representativeType match {
         case Some(PersonalRepresentativeInPeriodOfAdmin) => true
@@ -94,7 +97,7 @@
 @annualExemptAmountForVulnerableString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountNonVulnerableTrust.inPounds()) }
 
 @helpText = @{ Some(Html( messages(
-    s"$key$helpTextUserKey.helpText",
+    s"$key$furtherReturnKey$helpTextUserKey.helpText",
     taxYear.startDateInclusive.getYear.toString,
     taxYear.endDateExclusive.getYear.toString,
     annualExemptAmountForVulnerableString,
