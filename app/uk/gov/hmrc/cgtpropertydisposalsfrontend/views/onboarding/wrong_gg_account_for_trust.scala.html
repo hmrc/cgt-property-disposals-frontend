@@ -47,14 +47,14 @@
     @messages("wrongAccountForTrusts.whatNext")
   </h2>
   <p>
-    @Html(messages("wrongAccountForTrusts.whatNext.p1", appConfig.signOutUrl + "?continue_url=/bas-gateway/sign-in"))
+    @Html(messages("wrongAccountForTrusts.whatNext.p1", appConfig.signOutUrl + "?continue=/bas-gateway/sign-in"))
   </p>
 
   <h2 class="heading-medium">
     @messages("wrongAccountForTrusts.createGGAccount")
   </h2>
   <p>
-    @Html(messages("wrongAccountForTrusts.createGGAccount.p1", appConfig.signOutUrl + "?continue_url=/bas-gateway/sign-in", appConfig.trusteeResponsibilitiesUrl))
+    @Html(messages("wrongAccountForTrusts.createGGAccount.p1", appConfig.signOutUrl + "?continue=/bas-gateway/sign-in", appConfig.trusteeResponsibilitiesUrl))
   </p>
 }
 

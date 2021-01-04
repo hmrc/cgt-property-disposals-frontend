@@ -61,8 +61,8 @@ trait AuthenticatedActionBase[P[_]] extends ActionRefiner[MessagesRequest, P] wi
           Redirect(
             signInUrl,
             Map(
-              "continue" -> Seq(selfBaseUrl + request.uri),
-              "origin"   -> Seq(origin)
+              "continue_url" -> Seq(selfBaseUrl + request.uri),
+              "origin"       -> Seq(origin)
             )
           )
         )
