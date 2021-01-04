@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   private def getString(key: String): String = servicesConfig.getString(key)
 
-  private val companyAuthUrl: String       = getString("company-auth-frontend.url")
-  private val signOutUri: String           = getString("sign-out.uri")
-  private val contactFormServiceIdentifier = "CGTPD"
+  private val basGatewayFrontendUrl: String = getString("bas-gateway-frontend.url")
+  private val signOutUri: String            = getString("sign-out.uri")
+  private val contactFormServiceIdentifier  = "CGTPD"
 
   val assetsPrefix: String                            =
     getString("assets.url") + getString("assets.version")
@@ -37,7 +37,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val reportAProblemNonJSUrl: String                  =
     s"/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   val govUkUrl: String                                = getString("external-url.gov-uk")
-  val signOutUrl: String                              = s"$companyAuthUrl$signOutUri"
+  val signOutUrl: String                              = s"$basGatewayFrontendUrl$signOutUri"
   val trustRegistrationUrl: String                    = getString(
     "external-url.trust-registration"
   )

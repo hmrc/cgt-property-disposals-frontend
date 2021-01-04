@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ trait AuthenticatedActionBase[P[_]] extends ActionRefiner[MessagesRequest, P] wi
 
   private def getString(key: String): String = config.underlying.getString(key)
 
-  private val signInUrl: String = getString("gg.url")
+  private val signInUrl: String = getString("bas-gateway.url")
 
   private val origin: String = getString("gg.origin")
 
@@ -61,8 +61,8 @@ trait AuthenticatedActionBase[P[_]] extends ActionRefiner[MessagesRequest, P] wi
           Redirect(
             signInUrl,
             Map(
-              "continue" -> Seq(selfBaseUrl + request.uri),
-              "origin"   -> Seq(origin)
+              "continue_url" -> Seq(selfBaseUrl + request.uri),
+              "origin"       -> Seq(origin)
             )
           )
         )

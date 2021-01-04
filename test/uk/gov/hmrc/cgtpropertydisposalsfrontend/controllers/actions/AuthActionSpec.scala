@@ -38,9 +38,9 @@ trait AuthActionSpec { this: MockFactory =>
     Configuration(
       ConfigFactory.parseString(
         s"""
-           |gg.url    = "$signInUrl"
-           |gg.origin = "$origin"
-           |self.url  = "$selfBaseUrl"
+           |bas-gateway.url = "$signInUrl"
+           |gg.origin       = "$origin"
+           |self.url        = "$selfBaseUrl"
     """.stripMargin
       )
     )
