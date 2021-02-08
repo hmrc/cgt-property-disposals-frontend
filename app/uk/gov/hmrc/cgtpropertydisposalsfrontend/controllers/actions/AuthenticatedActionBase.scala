@@ -58,13 +58,7 @@ trait AuthenticatedActionBase[P[_]] extends ActionRefiner[MessagesRequest, P] wi
     authorisedFunction[A](authorisedFunctions, request).recoverWith { case _: NoActiveSession =>
       Future.successful(
         Left(
-          Redirect(
-            signInUrl,
-            Map(
-              "continue_url" -> Seq(selfBaseUrl + request.uri),
-              "origin"       -> Seq(origin)
-            )
-          )
+          Redirect(s"$signInUrl?continue_url=$selfBaseUrl${request.uri}&origin=$origin")
         )
       )
     }
