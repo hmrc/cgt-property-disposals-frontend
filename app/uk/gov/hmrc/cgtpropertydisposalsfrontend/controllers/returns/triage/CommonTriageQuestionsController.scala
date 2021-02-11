@@ -641,7 +641,7 @@ class CommonTriageQuestionsController @Inject() (
         .unset(_.assetTypes)
         .unset(_.wereAllPropertiesResidential)
         .unset(_.taxYear)
-        .unset(_.taxYearAfter6April2020)
+        .unset(_.taxYearExchanged)
         .unset(_.completionDate)
         .copy(individualUserType = Some(individualUserType))
 

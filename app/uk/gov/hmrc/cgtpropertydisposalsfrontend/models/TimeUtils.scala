@@ -40,6 +40,8 @@ object TimeUtils {
 
   val minimumDate: LocalDate = LocalDate.of(1900, 1, 1)
 
+  def getTaxYearStartDate(year: Int): LocalDate = LocalDate.of(year, 4, 6)
+
   def today(): LocalDate = LocalDate.now(clock)
 
   def now(): LocalDateTime = LocalDateTime.now(clock)

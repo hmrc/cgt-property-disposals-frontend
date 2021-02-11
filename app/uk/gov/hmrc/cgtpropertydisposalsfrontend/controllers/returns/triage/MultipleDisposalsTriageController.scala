@@ -23,6 +23,7 @@ import cats.data.EitherT
 import cats.instances.boolean._
 import cats.instances.future._
 import cats.instances.list._
+import cats.instances.int._
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
@@ -550,7 +551,7 @@ class MultipleDisposalsTriageController @Inject() (
           Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
         else {
           val taxYearExchanged =
-            answers.fold(_.taxYearAfter6April2020, _ => Some(true))
+            answers.fold(_.taxYearExchanged, c => Some(c.taxYearExchanged))
           val form             =
             taxYearExchanged.fold(taxYearExchangedForm)(taxYearExchangedForm.fill)
           val backLink         = answers.fold(
@@ -595,11 +596,11 @@ class MultipleDisposalsTriageController @Inject() (
                   )
                 )
               },
-              taxYearAfter6April2020 =>
+              taxYearExchanged =>
                 if (
                   answers
-                    .fold(_.taxYearAfter6April2020, _ => Some(true))
-                    .contains(taxYearAfter6April2020)
+                    .fold(_.taxYearExchanged, _ => Some(taxYearExchanged))
+                    .contains(taxYearExchanged)
                 )
                   Redirect(
                     routes.MultipleDisposalsTriageController.checkYourAnswers()
@@ -608,12 +609,17 @@ class MultipleDisposalsTriageController @Inject() (
 
                   val result =
                     for {
-                      taxYear        <- if (taxYearAfter6April2020)
-                                          taxYearService.taxYear(TimeUtils.today())
-                                        else EitherT.pure[Future, Error](None)
+                      taxYear <- taxYearExchanged match {
+                                   case TaxYearExchanged.TaxYear2021 =>
+                                     taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2021))
+                                   case TaxYearExchanged.TaxYear2020 =>
+                                     taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2020))
+                                   case _                            => EitherT.pure[Future, Error](None)
+                                 }
+
                       updatedAnswers <- EitherT.fromEither[Future](
                                           updateTaxYearToAnswers(
-                                            taxYearAfter6April2020,
+                                            taxYearExchanged,
                                             taxYear,
                                             answers
                                           )
@@ -876,19 +882,19 @@ class MultipleDisposalsTriageController @Inject() (
     }
 
   private def updateTaxYearToAnswers(
-    taxYearAfter6April2020: Boolean,
+    taxYearExchanged: TaxYearExchanged,
     taxYear: Option[TaxYear],
     answers: MultipleDisposalsTriageAnswers
   ): Either[Error, MultipleDisposalsTriageAnswers] =
     taxYear match {
-      case None if taxYearAfter6April2020 =>
+      case None => //if taxYearAfter6April2020 TODO: check this logic =>
         Left(Error("Could not find tax year"))
-      case _                              =>
+      case _    =>
         Right(
           answers
             .unset(_.completionDate)
             .copy(
-              taxYearAfter6April2020 = Some(taxYearAfter6April2020),
+              taxYearExchanged = Some(taxYearExchanged),
               taxYear = taxYear
             )
         )
@@ -966,7 +972,7 @@ class MultipleDisposalsTriageController @Inject() (
                                                 .copy(
                                                   taxYear = taxYear,
                                                   completionDate = Some(CompletionDate(shareDisposalDate.value)),
-                                                  taxYearAfter6April2020 = Some(taxYear.isDefined)
+                                                  taxYearExchanged = getTaxYearExchanged(taxYear)
                                                 )
                                             )
                                           )
@@ -1030,6 +1036,14 @@ class MultipleDisposalsTriageController @Inject() (
             )
         }
       }
+    }
+
+  // TODO: what is the possibility to capture other TaxYearExchanged values like TaxYearBefore2020, DifferentTaxYears
+  private def getTaxYearExchanged(taxYear: Option[TaxYear]): Option[TaxYearExchanged] =
+    taxYear match {
+      case Some(t) if t.startDateInclusive.getYear === 2020 => Some(TaxYearExchanged.TaxYear2020)
+      case Some(t) if t.startDateInclusive.getYear === 2021 => Some(TaxYearExchanged.TaxYear2021)
+      case _                                                => None
     }
 
   private def isAmendReturn(state: JourneyState): Boolean =
@@ -1208,10 +1222,11 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 assetTypes,
-                Some(false),
+                Some(taxYearExchanged), //Some(false),
                 _,
                 _
-              ) =>
+              )
+              if taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears =>
             val redirectPage =
               if (isAmendReturn(state))
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
@@ -1229,10 +1244,11 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                Some(true),
+                Some(taxYearExchanged), //Some(true),
                 None,
                 _
-              ) =>
+              )
+              if taxYearExchanged === TaxYearExchanged.TaxYear2020 || taxYearExchanged === TaxYearExchanged.TaxYear2021 =>
             logger.warn("No tax year was found when we expected one")
             errorHandler.errorResult()
 
@@ -1269,12 +1285,12 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 Some(true),
                 Some(a),
-                Some(true),
+                Some(taxYearExchanged),
                 Some(t),
                 Some(d)
               ) =>
             val completeAnswers =
-              CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, t, d)
+              CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, taxYearExchanged, t, d)
             updateStateAndThen(
               updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = true),
               Ok(
@@ -1297,12 +1313,12 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(c),
                 _,
                 Some(a),
-                Some(true),
+                Some(taxYearExchanged),
                 Some(t),
                 Some(d)
               ) =>
             val completeAnswers =
-              CompleteMultipleDisposalsTriageAnswers(i, n, c, a, t, d)
+              CompleteMultipleDisposalsTriageAnswers(i, n, c, a, taxYearExchanged, t, d)
             updateStateAndThen(
               updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = false),
               Ok(
@@ -1583,15 +1599,39 @@ object MultipleDisposalsTriageController {
     )(identity)(Some(_))
   )
 
-  val taxYearExchangedForm: Form[Boolean] =
+  val taxYearExchangedForm: Form[TaxYearExchanged] = {
+    val taxYearExchangedFormFormatter: Formatter[TaxYearExchanged] =
+      new Formatter[TaxYearExchanged] {
+
+        override def bind(
+          key: String,
+          data: Map[String, String]
+        ): Either[Seq[FormError], TaxYearExchanged] =
+          readValue(key, data, identity)
+            .flatMap {
+              case "0" => Right(TaxYearExchanged.TaxYear2021)
+              case "1" => Right(TaxYearExchanged.TaxYear2020)
+              case "2" => Right(TaxYearExchanged.TaxYearBefore2020)
+              case "3" => Right(TaxYearExchanged.DifferentTaxYears)
+              case _   => Left(FormError(key, "error.invalid"))
+            }
+            .leftMap(Seq(_))
+
+        override def unbind(
+          key: String,
+          value: TaxYearExchanged
+        ): Map[String, String] =
+          Map(key -> value.toString)
+      }
+
     Form(
       mapping(
-        "multipleDisposalsTaxYear" -> of(
-          FormUtils
-            .radioFormFormatter(List(true, false))
-        )
+        "multipleDisposalsTaxYear" -> Forms
+          .of(taxYearExchangedFormFormatter)
+        //.verifying("error.required", _.nonEmpty) //TODO
       )(identity)(Some(_))
     )
+  }
 
   val assetTypeForNonUkResidentsForm: Form[List[AssetType]] = {
     val checkBoxAssetTypeFormFormatter: Formatter[AssetType] =
