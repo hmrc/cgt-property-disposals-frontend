@@ -76,6 +76,7 @@ class MultipleDisposalsTriageController @Inject() (
   wereAllPropertiesResidentialPage: triagePages.were_all_properties_residential,
   countryOfResidencePage: triagePages.country_of_residence,
   taxYearExchangedPage: triagePages.tax_year_exchanged,
+  exchangedInDifferentTaxYearsPage: triagePages.exchanged_different_tax_years,
   assetTypeForNonUkResidentsPage: triagePages.asset_type_for_non_uk_residents,
   completionDatePage: triagePages.completion_date,
   disposalDateOfSharesForNonUk: disposal_date_of_shares,
@@ -666,6 +667,15 @@ class MultipleDisposalsTriageController @Inject() (
       }
     }
 
+  def exchangedInDifferentTaxYears(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      Ok(
+        exchangedInDifferentTaxYearsPage(
+          routes.MultipleDisposalsTriageController.whenWereContractsExchanged()
+        )
+      )
+    }
+
   def assetTypeForNonUkResidents(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
@@ -887,9 +897,9 @@ class MultipleDisposalsTriageController @Inject() (
     answers: MultipleDisposalsTriageAnswers
   ): Either[Error, MultipleDisposalsTriageAnswers] =
     taxYear match {
-      case None => //if taxYearAfter6April2020 TODO: check this logic =>
+      case None if isAValidCGTTaxTear(taxYearExchanged) =>
         Left(Error("Could not find tax year"))
-      case _    =>
+      case _                                            =>
         Right(
           answers
             .unset(_.completionDate)
@@ -1222,16 +1232,17 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 assetTypes,
-                Some(taxYearExchanged), //Some(false),
+                Some(taxYearExchanged),
                 _,
                 _
-              )
-              if taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears =>
+              ) if !isAValidCGTTaxTear(taxYearExchanged) =>
             val redirectPage =
               if (isAmendReturn(state))
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               else if (assetTypes.contains(List(IndirectDisposal)))
                 routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
+              else if (taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
+                routes.MultipleDisposalsTriageController.exchangedInDifferentTaxYears()
               else
                 routes.CommonTriageQuestionsController.disposalDateTooEarly()
 
@@ -1244,11 +1255,10 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                Some(taxYearExchanged), //Some(true),
+                Some(taxYearExchanged),
                 None,
                 _
-              )
-              if taxYearExchanged === TaxYearExchanged.TaxYear2020 || taxYearExchanged === TaxYearExchanged.TaxYear2021 =>
+              ) if isAValidCGTTaxTear(taxYearExchanged) =>
             logger.warn("No tax year was found when we expected one")
             errorHandler.errorResult()
 
@@ -1349,6 +1359,9 @@ class MultipleDisposalsTriageController @Inject() (
         }
       }
     }
+
+  def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged): Boolean =
+    !(taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -1628,7 +1641,6 @@ object MultipleDisposalsTriageController {
       mapping(
         "multipleDisposalsTaxYear" -> Forms
           .of(taxYearExchangedFormFormatter)
-        //.verifying("error.required", _.nonEmpty) //TODO
       )(identity)(Some(_))
     )
   }
