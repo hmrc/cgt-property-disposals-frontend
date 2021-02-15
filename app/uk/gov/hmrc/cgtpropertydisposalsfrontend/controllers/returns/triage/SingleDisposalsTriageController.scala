@@ -450,7 +450,7 @@ class SingleDisposalsTriageController @Inject() (
           displayTriagePage(state, triageAnswers)(
             _.fold(_.assetType, c => Some(c.assetType)),
             answers => disposalDateBackLink(answers)
-          )(_ => disposalDateForm(TimeUtils.today(), personalRepDetails))(
+          )(_ => disposalDateForm(TimeUtils.today().plusDays(365), personalRepDetails))(
             extractField = _.fold(
               i => i.disposalDate.map(_.value).orElse(i.tooEarlyDisposalDate),
               c => Some(c.disposalDate.value)
@@ -487,7 +487,7 @@ class SingleDisposalsTriageController @Inject() (
           triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
             case None    => Redirect(disposalDateBackLink(triageAnswers))
             case Some(_) =>
-              disposalDateForm(TimeUtils.today(), personalRepDetails)
+              disposalDateForm(TimeUtils.today().plusDays(365), personalRepDetails)
                 .bindFromRequest()
                 .fold(
                   formWithErrors =>
