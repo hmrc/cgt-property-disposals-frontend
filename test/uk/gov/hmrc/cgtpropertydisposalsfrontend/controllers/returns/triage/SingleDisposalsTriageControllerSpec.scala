@@ -2171,7 +2171,7 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the disposal date is in the future" in {
-          test(formData(tomorrow), "disposalDate.error.tooFarInFuture")
+          test(formData(tomorrow.plusDays(500)), "disposalDate.error.tooFarInFuture")
         }
 
         "the disposal date is before 1st Jan 1900" in {
@@ -2212,7 +2212,7 @@ class SingleDisposalsTriageControllerSpec
             "disposalDate.error.tooFarInFuture"
           )
 
-          test(formData(tomorrow), "disposalDate.error.tooFarInFuture")
+          test(formData(tomorrow.plusDays(500)), "disposalDate.error.tooFarInFuture")
         }
 
       }
@@ -2253,7 +2253,10 @@ class SingleDisposalsTriageControllerSpec
             "disposalDate.error.tooFarInFuture"
           )
 
-          test(Left(PersonalRepresentativeInPeriodOfAdmin))(formData(tomorrow), "disposalDate.error.tooFarInFuture")
+          test(Left(PersonalRepresentativeInPeriodOfAdmin))(
+            formData(tomorrow.plusDays(500)),
+            "disposalDate.error.tooFarInFuture"
+          )
         }
 
         "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" in {
@@ -2859,7 +2862,7 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+          test(formData(tomorrow.plusDays(500)), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
         }
 
         "the completion date is before 01-01-1900" in {
@@ -2912,7 +2915,7 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+          test(formData(tomorrow.plusDays(500)), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
         }
 
         "the completion date is before 01-01-1900" in {
@@ -2965,7 +2968,7 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+          test(formData(tomorrow.plusDays(500)), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
         }
 
         "the completion date is before 01-01-1900" in {

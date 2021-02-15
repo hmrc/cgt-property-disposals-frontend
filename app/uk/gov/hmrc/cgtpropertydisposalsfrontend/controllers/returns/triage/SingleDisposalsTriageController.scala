@@ -487,7 +487,7 @@ class SingleDisposalsTriageController @Inject() (
           triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
             case None    => Redirect(disposalDateBackLink(triageAnswers))
             case Some(_) =>
-              disposalDateForm(TimeUtils.today(), personalRepDetails)
+              disposalDateForm(TimeUtils.today().plusDays(365), personalRepDetails)
                 .bindFromRequest()
                 .fold(
                   formWithErrors =>
@@ -694,7 +694,7 @@ class SingleDisposalsTriageController @Inject() (
         handleTriagePageSubmit(state, triageAnswers)(
           _.fold(_.disposalDate, c => Some(c.disposalDate)),
           _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
-        )(disposalDate => completionDateForm(disposalDate, TimeUtils.today()))(
+        )(disposalDate => completionDateForm(disposalDate, TimeUtils.today().plusDays(365)))(
           page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
             val isATrust = journeyStatus
               .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
