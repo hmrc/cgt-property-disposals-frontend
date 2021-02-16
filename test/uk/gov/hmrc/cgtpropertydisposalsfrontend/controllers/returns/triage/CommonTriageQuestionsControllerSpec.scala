@@ -60,6 +60,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.Residen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleMixedUseDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged
 
 import scala.concurrent.Future
 
@@ -740,7 +741,7 @@ class CommonTriageQuestionsControllerSpec
                   assetTypes = None,
                   wereAllPropertiesResidential = None,
                   taxYear = None,
-                  taxYearAfter6April2020 = None,
+                  taxYearExchanged = None,
                   completionDate = None,
                   individualUserType = Some(IndividualUserType.PersonalRepresentative)
                 )
@@ -815,7 +816,7 @@ class CommonTriageQuestionsControllerSpec
                   assetTypes = None,
                   wereAllPropertiesResidential = None,
                   taxYear = None,
-                  taxYearAfter6April2020 = None,
+                  taxYearExchanged = None,
                   completionDate = None,
                   individualUserType = Some(IndividualUserType.PersonalRepresentative)
                 )
@@ -1705,7 +1706,7 @@ class CommonTriageQuestionsControllerSpec
           countryOfResidence = None,
           assetTypes = Some(List(AssetType.Residential)),
           wereAllPropertiesResidential = Some(true),
-          taxYearAfter6April2020 = Some(false)
+          taxYearExchanged = Some(TaxYearExchanged.TaxYearBefore2020)
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
