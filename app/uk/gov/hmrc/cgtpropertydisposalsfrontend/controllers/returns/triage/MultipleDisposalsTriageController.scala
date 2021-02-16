@@ -565,7 +565,7 @@ class MultipleDisposalsTriageController @Inject() (
 
           taxYears.fold(
             { e =>
-              logger.warn("Could not find tax year or update session", e)
+              logger.warn("Could not find available tax years", e)
               errorHandler.errorResult()
             },
             availableTaxYears =>
@@ -607,7 +607,7 @@ class MultipleDisposalsTriageController @Inject() (
                 )
                 taxYears.fold(
                   { e =>
-                    logger.warn("Could not find tax year or update session", e)
+                    logger.warn("Could not find available tax years", e)
                     errorHandler.errorResult()
                   },
                   availableTaxYears =>
@@ -1640,7 +1640,6 @@ object MultipleDisposalsTriageController {
   val taxYearExchangedForm: Form[TaxYearExchanged] = {
     val taxYearExchangedFormFormatter: Formatter[TaxYearExchanged] =
       new Formatter[TaxYearExchanged] {
-
         override def bind(
           key: String,
           data: Map[String, String]
@@ -1673,7 +1672,6 @@ object MultipleDisposalsTriageController {
   val assetTypeForNonUkResidentsForm: Form[List[AssetType]] = {
     val checkBoxAssetTypeFormFormatter: Formatter[AssetType] =
       new Formatter[AssetType] {
-
         override def bind(
           key: String,
           data: Map[String, String]

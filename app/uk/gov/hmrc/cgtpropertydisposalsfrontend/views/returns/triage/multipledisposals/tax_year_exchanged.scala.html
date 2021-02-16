@@ -18,6 +18,8 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
+@import cats.syntax.order._
+@import cats.instances.int._
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -51,12 +53,20 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @toIndex(taxYearExchanged: TaxYearExchanged) = @{
-    taxYearExchanged match {
-        case TaxYearExchanged.TaxYear2021 => 0
-        case TaxYearExchanged.TaxYear2020 => 1
-        case TaxYearExchanged.TaxYearBefore2020 => 2
-        case TaxYearExchanged.DifferentTaxYears => 3
-    }
+   if(availableTaxYears.size === 2)
+        taxYearExchanged match {
+            case TaxYearExchanged.TaxYear2021 => 0
+            case TaxYearExchanged.TaxYear2020 => 1
+            case TaxYearExchanged.TaxYearBefore2020 => 2
+            case TaxYearExchanged.DifferentTaxYears => 3
+        }
+   else
+        taxYearExchanged match {
+            case TaxYearExchanged.TaxYear2021 => -1
+            case TaxYearExchanged.TaxYear2020 => 0
+            case TaxYearExchanged.TaxYearBefore2020 => 1
+            case TaxYearExchanged.DifferentTaxYears => 2
+        }
 }
 
 @options = @{
