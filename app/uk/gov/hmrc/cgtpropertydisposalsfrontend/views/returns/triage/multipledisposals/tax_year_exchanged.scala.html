@@ -26,19 +26,25 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[TaxYearExchanged], backLink: Call, hasCreatedDraftReturn: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+    form: Form[TaxYearExchanged],
+    backLink: Call,
+    hasCreatedDraftReturn: Boolean,
+    isAmend: Boolean,
+    availableTaxYears: List[Int]
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsTaxYear"}
 @title = @{messages(s"$key.title")}
@@ -52,20 +58,9 @@
         case TaxYearExchanged.DifferentTaxYears => 3
     }
 }
-List(2020,2021)
 
 @options = @{
-    List(
-        RadioOption(
-            label = messages(s"$key.taxyear.2021"),
-            content = None,
-            optionHelpText = None
-        ),
-        RadioOption(
-            label = messages(s"$key.taxyear.2020"),
-            content = None,
-            optionHelpText = None
-        ),
+   val defaultOptions = List(
         RadioOption(
             label = messages(s"$key.taxyear.before2020"),
             content = None,
@@ -77,6 +72,16 @@ List(2020,2021)
             optionHelpText = None
         )
     )
+
+    val availableOptions = availableTaxYears.map{year =>
+        RadioOption(
+            label = messages(s"$key.taxyear.$year"),
+            content = None,
+            optionHelpText = None
+        )
+    }
+
+    availableOptions ++ defaultOptions
 }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {

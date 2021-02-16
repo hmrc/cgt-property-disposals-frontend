@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
-
 import cats.syntax.order._
 import cats.data.EitherT
 import cats.instances.boolean._
@@ -559,13 +558,26 @@ class MultipleDisposalsTriageController @Inject() (
             i => incompleteJourneyTaxYearBackLink(i.wasAUKResident.contains(true)),
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
-          Ok(
-            taxYearExchangedPage(
-              form,
-              backLink,
-              state.isRight,
-              state.fold(_ => false, _._1.isAmendReturn)
-            )
+          val taxYears         =
+            for {
+              taxYears <- taxYearService.availableTaxYears()
+            } yield taxYears
+
+          taxYears.fold(
+            { e =>
+              logger.warn("Could not find tax year or update session", e)
+              errorHandler.errorResult()
+            },
+            availableTaxYears =>
+              Ok(
+                taxYearExchangedPage(
+                  form,
+                  backLink,
+                  state.isRight,
+                  state.fold(_ => false, _._1.isAmendReturn),
+                  availableTaxYears
+                )
+              )
           )
         }
       }
@@ -574,6 +586,11 @@ class MultipleDisposalsTriageController @Inject() (
   def whenWereContractsExchangedSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
+        val taxYears =
+          for {
+            taxYears <- taxYearService.availableTaxYears()
+          } yield taxYears
+
         if (answers.isIndirectDisposal())
           Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
         else
@@ -588,13 +605,21 @@ class MultipleDisposalsTriageController @Inject() (
                     ),
                   _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-                BadRequest(
-                  taxYearExchangedPage(
-                    formWithErrors,
-                    backLink,
-                    state.isRight,
-                    state.fold(_ => false, _._1.isAmendReturn)
-                  )
+                taxYears.fold(
+                  { e =>
+                    logger.warn("Could not find tax year or update session", e)
+                    errorHandler.errorResult()
+                  },
+                  availableTaxYears =>
+                    BadRequest(
+                      taxYearExchangedPage(
+                        formWithErrors,
+                        backLink,
+                        state.isRight,
+                        state.fold(_ => false, _._1.isAmendReturn),
+                        availableTaxYears
+                      )
+                    )
                 )
               },
               taxYearExchanged =>
