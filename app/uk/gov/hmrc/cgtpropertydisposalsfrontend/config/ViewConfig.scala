@@ -183,6 +183,9 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enable-language-switching")
 
-  val enableFutureDateForCompletion: Boolean = servicesConfig.getBoolean("enable-futureDate-Completion")
+  val enableFutureDateForDisposalAndCompletion: Boolean =
+    servicesConfig.getBoolean("futureDate.disposalsAndCompletion.enabled")
+
+  val maxYearForDisposalsAndCompletion: Int = servicesConfig.getInt("futureDate.disposalsAndCompletion.maxYear")
 
 }
