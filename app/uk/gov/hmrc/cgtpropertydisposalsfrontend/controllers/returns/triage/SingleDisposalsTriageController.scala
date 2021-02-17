@@ -452,7 +452,7 @@ class SingleDisposalsTriageController @Inject() (
             answers => disposalDateBackLink(answers)
           )(_ =>
             disposalDateForm(
-              TimeUtils.getMaximumDateOf(TimeUtils.today(), TimeUtils.maxDateForSinglePropertyDisposals),
+              getMaximumDateForSingleDisposals,
               personalRepDetails
             )
           )(
@@ -493,7 +493,7 @@ class SingleDisposalsTriageController @Inject() (
             case None    => Redirect(disposalDateBackLink(triageAnswers))
             case Some(_) =>
               disposalDateForm(
-                TimeUtils.getMaximumDateOf(TimeUtils.today(), TimeUtils.maxDateForSinglePropertyDisposals),
+                getMaximumDateForSingleDisposals,
                 personalRepDetails
               )
                 .bindFromRequest()
@@ -677,7 +677,7 @@ class SingleDisposalsTriageController @Inject() (
         )(disposalDate =>
           completionDateForm(
             disposalDate,
-            TimeUtils.getMaximumDateOf(TimeUtils.today(), TimeUtils.maxDateForSinglePropertyDisposals)
+            getMaximumDateForSingleDisposals
           )
         )(
           extractField = _.fold(_.completionDate, c => Some(c.completionDate)),
@@ -710,7 +710,7 @@ class SingleDisposalsTriageController @Inject() (
         )(disposalDate =>
           completionDateForm(
             disposalDate,
-            TimeUtils.getMaximumDateOf(TimeUtils.today(), TimeUtils.maxDateForSinglePropertyDisposals)
+            getMaximumDateForSingleDisposals
           )
         )(
           page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
@@ -1826,6 +1826,13 @@ class SingleDisposalsTriageController @Inject() (
       f
     )
   }
+
+  private def getMaximumDateForSingleDisposals() =
+    if (viewConfig.enableFutureDateForCompletion) {
+      TimeUtils.getMaximumDateOf(TimeUtils.today(), TimeUtils.maxDateForSinglePropertyDisposals)
+    } else {
+      TimeUtils.today()
+    }
 
 }
 
