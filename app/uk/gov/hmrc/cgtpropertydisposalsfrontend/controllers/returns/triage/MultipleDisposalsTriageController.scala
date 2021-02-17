@@ -1646,11 +1646,11 @@ object MultipleDisposalsTriageController {
         ): Either[Seq[FormError], TaxYearExchanged] =
           readValue(key, data, identity)
             .flatMap {
-              case "0" => Right(TaxYearExchanged.TaxYear2021)
-              case "1" => Right(TaxYearExchanged.TaxYear2020)
-              case "2" => Right(TaxYearExchanged.TaxYearBefore2020)
-              case "3" => Right(TaxYearExchanged.DifferentTaxYears)
-              case _   => Left(FormError(key, "error.invalid"))
+              case "TaxYear2021"       => Right(TaxYearExchanged.TaxYear2021)
+              case "TaxYear2020"       => Right(TaxYearExchanged.TaxYear2020)
+              case "TaxYearBefore2020" => Right(TaxYearExchanged.TaxYearBefore2020)
+              case "DifferentTaxYears" => Right(TaxYearExchanged.DifferentTaxYears)
+              case _                   => Left(FormError(key, "error.invalid"))
             }
             .leftMap(Seq(_))
 

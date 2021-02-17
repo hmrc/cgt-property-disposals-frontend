@@ -396,3 +396,16 @@ textarea:focus {
     -webkit-box-shadow: none;
     box-shadow: none
 }
+
+.govuk-radios__divider {
+    font-family: "GDS Transport",arial,sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 1.31579;
+    color: #0b0c0c;
+    width: 40px;
+    margin-bottom: 10px;
+    text-align: center;
+}
