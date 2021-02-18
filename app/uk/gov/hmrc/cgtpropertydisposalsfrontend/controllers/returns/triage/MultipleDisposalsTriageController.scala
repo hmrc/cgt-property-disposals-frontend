@@ -1088,7 +1088,6 @@ class MultipleDisposalsTriageController @Inject() (
       }
     }
 
-  // TODO: what is the possibility to capture other TaxYearExchanged values like TaxYearBefore2020, DifferentTaxYears
   private def getTaxYearExchanged(taxYear: Option[TaxYear]): Option[TaxYearExchanged] =
     taxYear match {
       case Some(t) if t.startDateInclusive.getYear === 2020 => Some(TaxYearExchanged.TaxYear2020)
