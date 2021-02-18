@@ -1,0 +1,85 @@
+@*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.data.FormError
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
+
+@this(
+    errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
+)
+
+@(
+    fieldId: String,
+    label: Html,
+    options: List[RadioOption],
+    helpText: Option[Html] = None,
+    error: Option[FormError] = None,
+    selected: Option[String] = None,
+    customErrorKey: Option[String] = None,
+    extraContent: Option[Html] = None
+)(implicit messages: Messages)
+
+@classes = @{if(error.nonEmpty) "form-group form-group-error" else "form-group" }
+@hintTextKey = @{s"${{fieldId}}-form-hint"}
+@extraContentKey = @{s"${{fieldId}}-extra-content"}
+@errorId = @{s"${{fieldId}}-inline-error"}
+@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
+@extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
+@errorIdWithError = @{error.map(errorId -> _)}
+@describedByKeys = @{
+  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+
+<div class="@classes">
+  <fieldset id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+    <legend>
+      @label
+    </legend>
+    @extraContentIdWithContent.map { case (id, text) =>
+      <div id="@id">
+        @text
+      </div>
+    }
+    @hintIdWithHintText.map { case (id, text) =>
+      <span id="@id" class="form-hint">
+        @text
+      </span>
+    }
+    @errorIdWithError.map { case (id, e) =>
+      @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${e.message}", e.args: _*))
+      }
+
+    @options.zipWithIndex.map{ case (option, index) =>
+      <div class="multiple-choice"@if(option.content.nonEmpty){ data-target="@{fieldId}-@{index}-content" }>
+        <input id="@{fieldId}-@{option.value}"
+          name="@fieldId"
+          value="@{option.value}"
+          type="radio"
+          @if(selected.contains(option.value)) { checked="checked" }
+          />
+        <label for="@{fieldId}-@{option.value}">
+          @option.label
+        </label>
+        @option.optionHelpText.map(helpText => Html(s"""<span class="form-hint">$helpText</span>"""))
+      </div>
+      @if(option.followedByOr){<div class="govuk-radios__divider">or</div>}
+      @option.content.map(content => Html(s"""<div id='${fieldId}-${option.value}-content' class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
+    }
+
+  </fieldset>
+</div>

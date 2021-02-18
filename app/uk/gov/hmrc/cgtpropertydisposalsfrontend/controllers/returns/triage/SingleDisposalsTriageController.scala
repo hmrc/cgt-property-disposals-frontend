@@ -1046,13 +1046,17 @@ class SingleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
+          val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
+            viewConfig.enableFutureDateForDisposalAndCompletion,
+            viewConfig.maxYearForDisposalsAndCompletion
+          )
           displayTriagePage(state, triageAnswers)(
             _.fold(
               _.assetType,
               c => Some(c.assetType).filter(e => e === IndirectDisposal)
             ),
             _ => routes.SingleDisposalsTriageController.countryOfResidence()
-          )(_ => sharesDisposalDateForm(personalRepDetails))(
+          )(_ => sharesDisposalDateForm(personalRepDetails, maxDateAllowed))(
             _.fold(
               i =>
                 i.disposalDate
@@ -1083,7 +1087,11 @@ class SingleDisposalsTriageController @Inject() (
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
             case Some(assetType) if assetType === AssetType.IndirectDisposal =>
-              sharesDisposalDateForm(personalRepDetails)
+              val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
+                viewConfig.enableFutureDateForDisposalAndCompletion,
+                viewConfig.maxYearForDisposalsAndCompletion
+              )
+              sharesDisposalDateForm(personalRepDetails, maxDateAllowed)
                 .bindFromRequest()
                 .fold(
                   formWithErrors =>
