@@ -46,7 +46,7 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
             None,
             Some(true),
             Some(List(AssetType.Residential)),
-            Some(true),
+            Some(c.taxYearExchanged),
             Some(c.taxYear),
             Some(c.completionDate)
           )
@@ -66,7 +66,7 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
             Some(completeAnswers.countryOfResidence),
             None,
             Some(completeAnswers.assetTypes),
-            Some(true),
+            Some(c.taxYearExchanged),
             Some(c.taxYear),
             Some(c.completionDate)
           )
@@ -102,7 +102,7 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
             None,
             Some(true),
             Some(List(AssetType.Residential)),
-            Some(true),
+            Some(ukCompleteAnswers.taxYearExchanged),
             Some(ukCompleteAnswers.taxYear),
             Some(ukCompleteAnswers.completionDate)
           )
@@ -115,7 +115,7 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
             Some(nonUkCompleteAnswers.countryOfResidence),
             None,
             Some(nonUkCompleteAnswers.assetTypes),
-            Some(true),
+            Some(nonUkCompleteAnswers.taxYearExchanged),
             Some(nonUkCompleteAnswers.taxYear),
             Some(nonUkCompleteAnswers.completionDate)
           )
@@ -138,9 +138,9 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
             _.assetTypes
           ) shouldBe nonUkIncompleteAnswers.copy(assetTypes = None)
           nonUkIncompleteAnswers.unset(
-            _.taxYearAfter6April2020
+            _.taxYearExchanged
           ) shouldBe nonUkIncompleteAnswers
-            .copy(taxYearAfter6April2020 = None)
+            .copy(taxYearExchanged = None)
           nonUkIncompleteAnswers.unset(
             _.taxYear
           ) shouldBe nonUkIncompleteAnswers.copy(taxYear = None)
@@ -167,9 +167,9 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
             _.assetTypes
           )                                     shouldBe nonUkIncompleteAnswers.copy(assetTypes = None)
           nonUkCompleteAnswers.unset(
-            _.taxYearAfter6April2020
+            _.taxYearExchanged
           )                                     shouldBe nonUkIncompleteAnswers
-            .copy(taxYearAfter6April2020 = None)
+            .copy(taxYearExchanged = None)
           nonUkCompleteAnswers.unset(_.taxYear) shouldBe nonUkIncompleteAnswers
             .copy(taxYear = None)
           nonUkCompleteAnswers.unset(

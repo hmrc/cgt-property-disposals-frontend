@@ -641,7 +641,7 @@ class CommonTriageQuestionsController @Inject() (
         .unset(_.assetTypes)
         .unset(_.wereAllPropertiesResidential)
         .unset(_.taxYear)
-        .unset(_.taxYearAfter6April2020)
+        .unset(_.taxYearExchanged)
         .unset(_.completionDate)
         .copy(individualUserType = Some(individualUserType))
 
@@ -840,14 +840,15 @@ object CommonTriageQuestionsController {
   )
 
   def sharesDisposalDateForm(
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
+    maximumDateInclusive: LocalDate
   ): Form[ShareDisposalDate] = {
     val key = "sharesDisposalDate"
     Form(
       mapping(
         "" -> of(
           TimeUtils.dateFormatter(
-            Some(LocalDate.now()),
+            Some(maximumDateInclusive),
             None,
             s"$key-day",
             s"$key-month",

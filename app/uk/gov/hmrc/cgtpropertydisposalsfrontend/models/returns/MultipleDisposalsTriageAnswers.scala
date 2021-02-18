@@ -40,7 +40,7 @@ object MultipleDisposalsTriageAnswers {
     countryOfResidence: Option[Country],
     wereAllPropertiesResidential: Option[Boolean],
     assetTypes: Option[List[AssetType]],
-    taxYearAfter6April2020: Option[Boolean],
+    taxYearExchanged: Option[TaxYearExchanged],
     taxYear: Option[TaxYear],
     completionDate: Option[CompletionDate]
   ) extends MultipleDisposalsTriageAnswers
@@ -71,7 +71,7 @@ object MultipleDisposalsTriageAnswers {
           Some(c.assetTypes === List(AssetType.Residential))
         else None,
         Some(c.assetTypes),
-        Some(true),
+        Some(c.taxYearExchanged),
         Some(c.taxYear),
         Some(c.completionDate)
       )
@@ -82,6 +82,7 @@ object MultipleDisposalsTriageAnswers {
     numberOfProperties: Int,
     countryOfResidence: Country,
     assetTypes: List[AssetType],
+    taxYearExchanged: TaxYearExchanged,
     taxYear: TaxYear,
     completionDate: CompletionDate
   ) extends MultipleDisposalsTriageAnswers

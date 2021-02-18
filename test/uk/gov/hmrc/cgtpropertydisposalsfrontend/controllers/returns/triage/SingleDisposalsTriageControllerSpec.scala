@@ -2859,7 +2859,8 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+          val futureDate = today.plusYears(2).plusDays(1L)
+          test(formData(futureDate), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
         }
 
         "the completion date is before 01-01-1900" in {
@@ -4598,8 +4599,8 @@ class SingleDisposalsTriageControllerSpec
             Some(tomorrow.getYear.toString),
             "sharesDisposalDate.error.tooFarInFuture"
           )
-
-          test()(formData(tomorrow), "sharesDisposalDate.error.tooFarInFuture")
+          val futureDate = today.plusYears(2).plusDays(1L)
+          test()(formData(futureDate), "sharesDisposalDate.error.tooFarInFuture")
         }
 
         "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" in {

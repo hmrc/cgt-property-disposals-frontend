@@ -1184,12 +1184,23 @@ multipleDisposalsCountryOfResidence.personalRep.helpText=It’s usually the day 
 
 multipleDisposalsTaxYear.title=When were contracts exchanged on all the properties?
 multipleDisposalsTaxYear.link=What happens on the exchange date?
-multipleDisposalsTaxYear.before=Before 6 April 2020
-multipleDisposalsTaxYear.after=After 6 April 2020
+
+multipleDisposalsTaxYear.taxyear.2021=All between 6 April 2021 and 5 April 2022
+multipleDisposalsTaxYear.taxyear.2020=All between 6 April 2020 and 5 April 2021
+multipleDisposalsTaxYear.taxyear.before2020=All before 6 April 2020
+multipleDisposalsTaxYear.taxyear.different=The properties were exchanged in different tax years
+
 multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
 
 multipleDisposalsTaxYear.cyaChange=when contracts were exchanged on all the properties
+
+
+multipleDisposalsExchangedInDifferentTaxYears.title=You cannot use this service
+multipleDisposalsExchangedInDifferentTaxYears.p1=This is because you can only submit a return for properties that were exchanged in a single tax year.
+multipleDisposalsExchangedInDifferentTaxYears.p2=For example, if you exchanged one property in the tax year 2020 to 2021 and another in the tax year 2021 to 2022, you cannot submit them in the same return.
+multipleDisposalsExchangedInDifferentTaxYears.whatNext=What you’ll need to do next
+multipleDisposalsExchangedInDifferentTaxYears.p3=<a href="{0}">Start again</a> and submit a separate return for each tax year.
 
 multipleDisposalsAssetTypeForNonUkResidents.title=What types of property or assets did you dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.agent.title=What types of property or assets did your client dispose of?
@@ -1701,7 +1712,7 @@ disposalPrice.trust.SoldOther.helpText=This is the entire amount the property wa
 disposalPrice.trust.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
 disposalPrice.personalRep.SoldOther.helpText=This is the entire amount the property was sold for. Do not subtract any costs or fees. You’ll be able to enter any additional costs later.<br><br>If the property was shared, only enter the amount the person got for their share.
 disposalPrice.personalRep.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.helpText=This is the entire amount the property was sold for. Do not subtract any costs or fees. You'll be able to enter any additional costs later.<br><br>If the property was shared, only enter the amount the estate got for their share.
+disposalPrice.personalRepInPeriodOfAdmin.SoldOther.helpText=This is the entire amount the property was sold for. Do not subtract any costs or fees. You’ll be able to enter any additional costs later.<br><br>If the property was shared, only enter the amount the estate got for their share.
 disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.helpText=You’ll be able to enter any additional costs later.
 disposalPrice.capacitor.SoldOther.helpText=This is the entire amount the property was sold for. Do not subtract any costs or fees. You’ll be able to enter any additional costs later.<br><br>If the property was shared, only enter the amount the person got for their share.
 disposalPrice.capacitor.indirect.SoldOther.helpText=You’ll be able to include buying or acquisition costs later.
@@ -3354,7 +3365,7 @@ taxableGainOrLoss.agent.furtherReturn.title=Enter your client’s net gain or lo
 taxableGainOrLoss.trust.furtherReturn.title=Enter the trust’s net gain or loss
 taxableGainOrLoss.capacitor.furtherReturn.title=Enter the person’s net gain or loss
 taxableGainOrLoss.personalRep.furtherReturn.title=Enter the person’s net gain or loss
-taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Enter the estate's net gain or loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Enter the estate’s net gain or loss
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.title=Enter your client’s net gain or loss
 
 taxableGainOrLoss.calculated.furtherReturn.p1=We used the details that were entered in this return to work out your net gain on the property disposals that you are paying tax on in tax year {0} to {1}.

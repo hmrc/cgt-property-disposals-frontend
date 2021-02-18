@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import play.twirl.api.Html
+import cats.Eq
+import julienrf.json.derived
+import play.api.libs.json.OFormat
 
-final case class RadioOption(
-  label: Html,
-  content: Option[Html],
-  optionHelpText: Option[Html],
-  value: String,
-  followedByOr: Boolean
-)
+sealed trait TaxYearExchanged extends Product with Serializable
 
-object RadioOption {
+object TaxYearExchanged {
 
-  def apply(
-    label: String,
-    content: Option[Html],
-    optionHelpText: Option[Html],
-    value: String = "",
-    followedByOr: Boolean = false
-  ): RadioOption =
-    RadioOption(Html(label), content, optionHelpText, value, followedByOr)
+  case object TaxYear2021 extends TaxYearExchanged
+
+  case object TaxYear2020 extends TaxYearExchanged
+
+  case object TaxYearBefore2020 extends TaxYearExchanged
+
+  case object DifferentTaxYears extends TaxYearExchanged
+
+  implicit val format: OFormat[TaxYearExchanged] = derived.oformat()
+  implicit val eq: Eq[TaxYearExchanged]          = Eq.fromUniversalEquals
 
 }
