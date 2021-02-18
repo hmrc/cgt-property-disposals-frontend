@@ -840,14 +840,15 @@ object CommonTriageQuestionsController {
   )
 
   def sharesDisposalDateForm(
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
+    maximumDateInclusive: LocalDate
   ): Form[ShareDisposalDate] = {
     val key = "sharesDisposalDate"
     Form(
       mapping(
         "" -> of(
           TimeUtils.dateFormatter(
-            Some(LocalDate.now()),
+            Some(maximumDateInclusive),
             None,
             s"$key-day",
             s"$key-month",

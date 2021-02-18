@@ -76,7 +76,7 @@
         )
     )
 
-    val availableOptions = availableTaxYears.sortWith(_ < _).map{year =>
+    val availableOptions = availableTaxYears.map{year =>
         RadioOption(
             label = messages(s"$key.taxyear.$year"),
             content = None,

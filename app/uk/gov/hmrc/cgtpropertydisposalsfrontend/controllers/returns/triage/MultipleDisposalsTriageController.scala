@@ -831,9 +831,12 @@ class MultipleDisposalsTriageController @Inject() (
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val completionDate =
           answers.fold(_.completionDate, c => Some(c.completionDate))
-        val today          = TimeUtils.today()
-        val form           = completionDate.fold(completionDateForm(today))(
-          completionDateForm(today).fill
+        val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
+          viewConfig.enableFutureDateForDisposalAndCompletion,
+          viewConfig.maxYearForDisposalsAndCompletion
+        )
+        val form           = completionDate.fold(completionDateForm(maxDateAllowed))(
+          completionDateForm(maxDateAllowed).fill
         )
         val backLink       = answers.fold(
           _ =>
@@ -848,7 +851,11 @@ class MultipleDisposalsTriageController @Inject() (
   def completionDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
-        completionDateForm(TimeUtils.today())
+        val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
+          viewConfig.enableFutureDateForDisposalAndCompletion,
+          viewConfig.maxYearForDisposalsAndCompletion
+        )
+        completionDateForm(maxDateAllowed)
           .bindFromRequest()
           .fold(
             { formWithErrors =>
@@ -939,14 +946,18 @@ class MultipleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
-          val backLink = answers.fold(
+          val backLink       = answers.fold(
             _ =>
               routes.MultipleDisposalsTriageController
                 .assetTypeForNonUkResidents(),
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
+          val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
+            viewConfig.enableFutureDateForDisposalAndCompletion,
+            viewConfig.maxYearForDisposalsAndCompletion
+          )
           val form = {
-            val blankForm = sharesDisposalDateForm(personalRepDetails)
+            val blankForm = sharesDisposalDateForm(personalRepDetails, maxDateAllowed)
             answers
               .fold(_.completionDate, e => Some(e.completionDate))
               .fold(blankForm)(c => blankForm.fill(ShareDisposalDate(c.value)))
@@ -969,7 +980,11 @@ class MultipleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
-          sharesDisposalDateForm(personalRepDetails)
+          val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
+            viewConfig.enableFutureDateForDisposalAndCompletion,
+            viewConfig.maxYearForDisposalsAndCompletion
+          )
+          sharesDisposalDateForm(personalRepDetails, maxDateAllowed)
             .bindFromRequest()
             .fold(
               { formWithErrors =>
