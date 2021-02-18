@@ -2097,7 +2097,12 @@ class SingleDisposalsTriageControllerSpec
           gainOrLossAfterReliefs = None
         )
 
-      val tomorrow = controller.getMaximumDateForDisposalsAndCompletion.plusDays(1L)
+      val tomorrow = TimeUtils
+        .getMaximumDateForDisposalsAndCompletion(
+          viewConfig.enableFutureDateForDisposalAndCompletion,
+          viewConfig.maxYearForDisposalsAndCompletion
+        )
+        .plusDays(1L)
 
       val taxYear = sample[TaxYear].copy(
         startDateInclusive = LocalDate.of(today.getYear, 4, 6),
@@ -2804,7 +2809,12 @@ class SingleDisposalsTriageControllerSpec
 
       val disposalDate = DisposalDate(today.minusDays(5L), sample[TaxYear])
 
-      val tomorrow = controller.getMaximumDateForDisposalsAndCompletion.plusDays(1L)
+      val tomorrow = TimeUtils
+        .getMaximumDateForDisposalsAndCompletion(
+          viewConfig.enableFutureDateForDisposalAndCompletion,
+          viewConfig.maxYearForDisposalsAndCompletion
+        )
+        .plusDays(1L)
 
       val dayBeforeDisposalDate = disposalDate.value.minusDays(1L)
 

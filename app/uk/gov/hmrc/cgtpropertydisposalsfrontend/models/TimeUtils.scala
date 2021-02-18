@@ -181,7 +181,6 @@ object TimeUtils {
     else
       TimeUtils.today()
 
-
   def getMaximumDateOf(date1: LocalDate, date2: LocalDate): LocalDate =
     if (date1.isAfter(date2))
       date1
