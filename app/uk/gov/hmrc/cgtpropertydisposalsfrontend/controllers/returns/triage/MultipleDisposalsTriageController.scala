@@ -29,6 +29,7 @@ import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms}
+import play.api.i18n.Messages
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -1718,7 +1719,7 @@ object MultipleDisposalsTriageController {
 
   def completionDateForm(
     maximumDateInclusive: LocalDate
-  ): Form[CompletionDate] =
+  )(implicit messages: Messages): Form[CompletionDate] =
     Form(
       mapping(
         "" -> of(

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
@@ -26,6 +25,7 @@ import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.{Form, FormError}
+import play.api.i18n.Messages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -940,7 +940,7 @@ object RepresenteeController {
   val nameForm: Form[IndividualName] =
     IndividualName.form("representeeFirstName", "representeeLastName")
 
-  val dateOfDeathForm: Form[DateOfDeath] = {
+  def dateOfDeathForm(implicit messages: Messages): Form[DateOfDeath] = {
     val key = "dateOfDeath"
     Form(
       mapping(

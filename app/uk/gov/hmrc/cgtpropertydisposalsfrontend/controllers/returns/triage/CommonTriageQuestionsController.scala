@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.list._
@@ -27,6 +26,7 @@ import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
+import play.api.i18n.Messages
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -842,7 +842,7 @@ object CommonTriageQuestionsController {
   def sharesDisposalDateForm(
     personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
     maximumDateInclusive: LocalDate
-  ): Form[ShareDisposalDate] = {
+  )(implicit messages: Messages): Form[ShareDisposalDate] = {
     val key = "sharesDisposalDate"
     Form(
       mapping(

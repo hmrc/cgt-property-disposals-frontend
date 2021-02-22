@@ -1446,7 +1446,7 @@ object AcquisitionDetailsController {
     )
   }
 
-  def acquisitionDateForm(today: LocalDate): Form[AcquisitionDate] =
+  def acquisitionDateForm(today: LocalDate)(implicit messages: Messages): Form[AcquisitionDate] =
     Form(
       mapping(
         "" -> of(

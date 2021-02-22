@@ -910,6 +910,7 @@ completionDate.link=<a href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar
 completionDate.error.required=Nodwch ddyddiad cwblhau
 completionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
 completionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod yr un fath â’r dyddiad cyfnewid contractau neu ar ôl hynny
+completionDate.error.tooFarInPastWithArg=Rhaid i'r dyddiad cwblhau fod ar ôl dyddiad cyfnewid y contract,{0}
 completionDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cwblhau fod heddiw neu yn y gorffennol
 completionDate.error.before1900=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEM os yw’r dyddiad cyn hyn
 completionDate-day.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod
@@ -1086,7 +1087,7 @@ multipleDisposalsCompletionDate-year.error.invalid=Nodwch ddyddiad cwblhau go ia
 multipleDisposalsCompletionDate-month.error.monthAndYearRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys mis a blwyddyn
 multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a blwyddyn
 multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a mis
-multipleDisposalsCompletionDate.error.tooFarInPast=Rhaid i’r dyddiad cwblhau fod ar neu ar ôl 6 Ebrill 2020
+multipleDisposalsCompletionDate.error.tooFarInPast=Rhaid i'r dyddiad cwblhau fod yn neu ar ôl yr un flwyddyn dreth â'r dyddiad cyfnewid
 multipleDisposalsCompletionDate.cyaChange=y dyddiad cwblhau ar gyfer yr holl eiddo
 multipleDisposals.triage.cya.title=Gwiriwch eich atebion
 multipleDisposals.triage.cya.guidanceLink=Help i lenwi’r adran hon

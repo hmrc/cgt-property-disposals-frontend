@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.boolean._
 import cats.instances.future._
@@ -28,6 +27,7 @@ import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
+import play.api.i18n.Messages
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
@@ -1893,7 +1893,7 @@ object SingleDisposalsTriageController {
   def disposalDateForm(
     maximumDateInclusive: LocalDate,
     personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
-  ): Form[LocalDate] =
+  )(implicit messages: Messages): Form[LocalDate] =
     Form(
       mapping(
         "" -> of(
@@ -1918,7 +1918,7 @@ object SingleDisposalsTriageController {
   def completionDateForm(
     disposalDate: DisposalDate,
     maximumDateInclusive: LocalDate
-  ): Form[CompletionDate] =
+  )(implicit messages: Messages): Form[CompletionDate] =
     Form(
       mapping(
         "" -> of(
