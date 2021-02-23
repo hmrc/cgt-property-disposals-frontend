@@ -840,12 +840,7 @@ object CommonTriageQuestionsController {
   )
 
   def sharesDisposalDateForm(
-<<<<<<< Updated upstream
     personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
-=======
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
-    maximumDateInclusive: LocalDate
->>>>>>> Stashed changes
   ): Form[ShareDisposalDate] = {
     val key = "sharesDisposalDate"
     Form(

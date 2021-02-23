@@ -1055,11 +1055,7 @@ completionDate.personalRepInPeriodOfAdmin.helpText=It’s usually when the money
 completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
-<<<<<<< Updated upstream
-completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date
-=======
 completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date, {0}
->>>>>>> Stashed changes
 completionDate.error.tooFarInFuture=Completion date must be today or in the past
 completionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
 

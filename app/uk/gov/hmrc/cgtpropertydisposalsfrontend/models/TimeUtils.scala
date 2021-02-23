@@ -98,7 +98,6 @@ object TimeUtils {
           day ← toValidInt(dayKey, dateFieldStrings._1, Some(31))
           month ← toValidInt(monthKey, dateFieldStrings._2, Some(12))
           year ← toValidInt(yearKey, dateFieldStrings._3, None)
-<<<<<<< Updated upstream
           date ← Either
                    .fromTry(Try(LocalDate.of(year, month, day)))
                    .leftMap(_ => FormError(dateKey, "error.invalid"))
@@ -116,26 +115,6 @@ object TimeUtils {
                          .getOrElse(Right(()))
                          .map(_ => date)
                    )
-=======
-          date ←
-            Either
-              .fromTry(Try(LocalDate.of(year, month, day)))
-              .leftMap(_ => FormError(dateKey, "error.invalid"))
-              .flatMap(date =>
-                if (maximumDateInclusive.exists(_.isBefore(date)))
-                  Left(FormError(dateKey, "error.tooFarInFuture"))
-                else if (minimumDateInclusive.exists(_.isAfter(date)))
-                  Left(FormError(dateKey, "error.tooFarInPast"))
-                else if (date.isBefore(minimumDate))
-                  Left(FormError(dateKey, "error.before1900"))
-                else
-                  extraValidation
-                    .map(_(date))
-                    .find(_.isLeft)
-                    .getOrElse(Right(()))
-                    .map(_ => date)
-              )
->>>>>>> Stashed changes
         } yield date
 
         result.leftMap(Seq(_))
