@@ -22,10 +22,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompletionDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompletionDate,DisposalDate}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 
 @this(
   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -44,11 +45,13 @@
   displayReturnToSummaryLink: Boolean,
   isATrust: Boolean,
   representativeType: Option[RepresentativeType],
-  isAmend: Boolean
+  isAmend: Boolean,
+  disposalDate: Option[DisposalDate]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"completionDate"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @userKey = @{
  representativeType match {
@@ -63,15 +66,18 @@
 }
 
 @title = @{messages(s"$key$userKey.title")}
-@hasErrors = @{form.hasErrors}
+
 @errorKey = @{List("completionDate-day", "completionDate-month", "completionDate-year", "completionDate").map(form.error).find(_.isDefined).flatten}
 
+@{
+  println(s"errorKey ======== $errorKey")
+}
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
  @backLinkComponent(backLink)
 
  @if(hasErrors) {
-  @errorSummary(form)
+   @errorSummary(form, errorKey.map(e => messages(s"${e.key}.${e.message}", TimeUtils.govDisplayFormat(disposalDate))))
  }
 
  @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.whenWasCompletionDateSubmit(), 'novalidate -> "novalidate") {
@@ -82,7 +88,11 @@
    monthValue = form.data.get("completionDate-month"),
    yearValue = form.data.get("completionDate-year"),
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
+<<<<<<< Updated upstream
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
+=======
+   errorKey = errorKey.map(e => messages(s"${e.key}.${e.message}", TimeUtils.govDisplayFormat(disposalDate))),
+>>>>>>> Stashed changes
    hasErrors = hasErrors
   )
   <p>@Html(messages("completionDate.link", viewConfig.tranferringOwnershipHelp))</p>

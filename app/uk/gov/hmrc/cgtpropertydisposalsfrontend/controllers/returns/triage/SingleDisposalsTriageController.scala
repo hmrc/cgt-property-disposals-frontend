@@ -681,7 +681,11 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              isAmendReturn(state)
+              isAmendReturn(state),
+              currentAnswers.fold(
+                _.disposalDate,
+                c => Some(c.disposalDate)
+              )
             )
           }
         )
@@ -707,7 +711,11 @@ class SingleDisposalsTriageController @Inject() (
               isDraftReturn,
               isATrust,
               currentAnswers.representativeType(),
-              isAmendReturn(state)
+              isAmendReturn(state),
+              currentAnswers.fold(
+                _.disposalDate,
+                c => Some(c.disposalDate)
+              )
             )
           },
           updateState = { (date, state, answers) =>
