@@ -22,7 +22,6 @@ import java.time.{Clock, LocalDate, LocalDateTime}
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
-import cats.instances.string._
 import configs.Configs
 import play.api.data.FormError
 import play.api.data.format.Formatter
@@ -107,19 +106,14 @@ object TimeUtils {
               .flatMap(date =>
                 if (maximumDateInclusive.exists(_.isBefore(date)))
                   Left(FormError(dateKey, "error.tooFarInFuture"))
-                else if (
-                  (dateKey === "completionDate") && minimumDateInclusive
-                    .exists(_.isAfter(date))
-                )
+                else if (minimumDateInclusive.exists(_.isAfter(date)))
                   Left(
                     FormError(
                       dateKey,
-                      "error.tooFarInPastWithArg",
+                      "error.tooFarInPast",
                       List(govDisplayFormat(minimumDateInclusive.getOrElse(LocalDate.now())))
                     )
                   )
-                else if (minimumDateInclusive.exists(_.isAfter(date)))
-                  Left(FormError(dateKey, "error.tooFarInPast"))
                 else if (date.isBefore(minimumDate))
                   Left(FormError(dateKey, "error.before1900"))
                 else
