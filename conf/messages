@@ -797,6 +797,20 @@ cannotAmendResidentialStatusForAssetType.trust.li4=interest and penalty payments
 
 cannotAmendResidentialStatusForAssetType.link=Contact HMRC
 
+selfAssessment.title=Have you sent a Self Assessment tax return for {0} to {1}?
+selfAssessment.agent.title=Has your client sent a Self Assessment tax return for {0} to {1}?
+selfAssessment.trust.title=Has the trust sent a Self Assessment: Trust and Estate tax return for {0} to {1}?
+selfAssessment.capacitor.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
+selfAssessment.personalRep.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
+selfAssessment.personalRepInPeriodOfAdmin.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
+
+
+
+
+
+
+
+
 #===================================================
 # COMMON TRIAGE PAGES - END
 #===================================================

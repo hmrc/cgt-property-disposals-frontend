@@ -60,6 +60,9 @@ POST /multiple-disposals/tax-year-exchanged                 uk.gov.hmrc.cgtprope
 GET  /multiple-disposals/property-types                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.assetTypeForNonUkResidents()
 POST /multiple-disposals/property-types                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.assetTypeForNonUkResidentsSubmit()
 
+GET  /multiple-disposals/already-sent-self-assessment       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.haveYouSentSelfAssessment()
+POST /multiple-disposals/already-sent-self-assessment       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.haveYouSentSelfAssessmentSubmit()
+
 GET  /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDate()
 POST /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDateSubmit()
 
