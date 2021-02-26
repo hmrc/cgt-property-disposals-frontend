@@ -25,10 +25,10 @@
 @import controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.play.views.html.layouts.HeadWithTrackingConsent
 
 @this(
     govUkTemplate: views.html.layouts.GovUkTemplate,
-    uiHead: uk.gov.hmrc.play.views.html.layouts.Head,
     uiHeaderNav: uk.gov.hmrc.play.views.html.layouts.HeaderNav,
     uiFooter: uk.gov.hmrc.play.views.html.layouts.Footer,
     uiMainContentHeader: uk.gov.hmrc.play.views.html.layouts.MainContentHeader,
@@ -36,7 +36,8 @@
     uiFooterLinks: uk.gov.hmrc.play.views.html.layouts.FooterLinks,
     helperReportAProblemLink: uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink,
     userRecruitmentBanner: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.user_recruitment_banner,
-    languageSwitcher: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.language_switcher
+    languageSwitcher: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.language_switcher,
+    headWithTrackingConsent: HeadWithTrackingConsent
 )
 
 
@@ -82,9 +83,10 @@
         window.jsConfig.logout_url = "@{if(withAccount) appConfig.accountSignOutUrl else appConfig.ggSignOut}";
       }
     </script>
-    @uiHead(
+    @headWithTrackingConsent(
       linkElem = None,
-      headScripts = None)
+      headScripts = None
+    )
     <link rel="stylesheet" href='@routes.Assets.at("stylesheets/location-autocomplete.min.css")' />
     <link rel="stylesheet" href='@routes.Assets.at("stylesheets/cgtpd.css")' />
     <link rel="stylesheet" href='@routes.Assets.at("stylesheets/step-by-step-nav.css")' />
