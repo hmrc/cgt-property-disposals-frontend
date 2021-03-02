@@ -22,6 +22,7 @@ import java.time.{Clock, LocalDate, LocalDateTime}
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
+import cats.instances.string._
 import configs.Configs
 import play.api.data.FormError
 import play.api.data.format.Formatter
