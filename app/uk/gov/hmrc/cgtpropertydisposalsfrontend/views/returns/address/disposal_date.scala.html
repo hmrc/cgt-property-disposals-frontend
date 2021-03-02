@@ -47,12 +47,12 @@
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @hasErrors = @{form.hasErrors}
 @title = @{messages(s"$key$userKey.title")}
-@errorKey = @{List("disposalDate-day", "disposalDate-month", "disposalDate-year", "disposalDate").map(form.error).find(_.isDefined).flatten}
+@errorKey = @{List("multipleDisposalsDisposalDate-day", "multipleDisposalsDisposalDate-month", "multipleDisposalsDisposalDate-year", "multipleDisposalsDisposalDate").map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
  @if(hasErrors) {
-  @errorSummary(form)
+   @errorSummary(form)
  }
 
  @caption(messages("returns.property-details.multipleDisposals.caption"))
@@ -65,7 +65,13 @@
    monthValue = form.data.get(s"$key-month"),
    yearValue = form.data.get(s"$key-year"),
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-   errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
+   errorKey = errorKey.map(e => {
+            if(e.message == "error.WithArg") {
+                messages(s"${e.key}.${e.message}", s"${e.args(0)}")
+            } else {
+                s"${e.key}.${e.message}"
+            }
+}),
    hasErrors = hasErrors
   )
 

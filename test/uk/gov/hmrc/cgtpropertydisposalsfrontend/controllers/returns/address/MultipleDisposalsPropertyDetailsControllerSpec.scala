@@ -1664,7 +1664,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the date entered is too far in future" in {
           testFormError()(formData(today.plusYears(2L)))(
-            s"$key.error.tooFarInFuture"
+            s"$key.error.tooFarInPastWithArg"
           )
         }
 

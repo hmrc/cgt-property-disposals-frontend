@@ -105,7 +105,14 @@ object TimeUtils {
               .fromTry(Try(LocalDate.of(year, month, day)))
               .leftMap(_ => FormError(dateKey, "error.invalid"))
               .flatMap(date =>
-                if (maximumDateInclusive.exists(_.isBefore(date)))
+                if (dateKey === "multipleDisposalsDisposalDate" && maximumDateInclusive.exists(_.isBefore(date))) {
+                  Left(
+                    FormError(
+                      dateKey,
+                      "error.WithArg"
+                    )
+                  )
+                } else if (maximumDateInclusive.exists(_.isBefore(date)))
                   Left(FormError(dateKey, "error.tooFarInFuture"))
                 else if (
                   (dateKey === "completionDate") && minimumDateInclusive
