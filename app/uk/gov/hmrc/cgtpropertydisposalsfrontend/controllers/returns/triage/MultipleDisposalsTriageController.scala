@@ -1401,7 +1401,7 @@ class MultipleDisposalsTriageController @Inject() (
     }
 
   def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged): Boolean =
-    !(taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
+    !(taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.TaxYear2021 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>

@@ -82,7 +82,14 @@
    monthValue = form.data.get("completionDate-month"),
    yearValue = form.data.get("completionDate-year"),
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-   errorKey = errorKey.map(e => messages(s"${e.key}.${e.message}", s"${e.args(0)}")),
+   errorKey = errorKey.map(e => {
+        if(e.message == "error.tooFarInPastWithArg") {
+            messages(s"${e.key}.${e.message}", s"${e.args(0)}")
+        } else {
+            s"${e.key}.${e.message}"
+        }
+
+        }),
    hasErrors = hasErrors
   )
   <p>@Html(messages("completionDate.link", viewConfig.tranferringOwnershipHelp))</p>
