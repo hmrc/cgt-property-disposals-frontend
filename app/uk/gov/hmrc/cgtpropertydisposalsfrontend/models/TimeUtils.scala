@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.format.DateTimeFormatter
 import java.time.{Clock, LocalDate, LocalDateTime}
+
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
@@ -53,7 +54,7 @@ object TimeUtils {
     yearKey: String,
     dateKey: String,
     extraValidation: List[LocalDate => Either[FormError, Unit]] = List.empty
-  )(implicit messages: Messages): Formatter[LocalDate] =
+  ): Formatter[LocalDate] =
     new Formatter[LocalDate] {
       def dateFieldStringValues(
         data: Map[String, String]
@@ -98,34 +99,23 @@ object TimeUtils {
           day ← toValidInt(dayKey, dateFieldStrings._1, Some(31))
           month ← toValidInt(monthKey, dateFieldStrings._2, Some(12))
           year ← toValidInt(yearKey, dateFieldStrings._3, None)
-          date ←
-            Either
-              .fromTry(Try(LocalDate.of(year, month, day)))
-              .leftMap(_ => FormError(dateKey, "error.invalid"))
-              .flatMap(date =>
-                if (maximumDateInclusive.exists(_.isBefore(date)))
-                  Left(
-                    FormError(
-                      dateKey,
-                      "error.tooFarInFuture" )
-                  )
-                else if (minimumDateInclusive.exists(_.isAfter(date)))
-                  Left(
-                    FormError(
-                      dateKey,
-                      "error.tooFarInPast",
-
-                    )
-                  )
-                else if (date.isBefore(minimumDate))
-                  Left(FormError(dateKey, "error.before1900"))
-                else
-                  extraValidation
-                    .map(_(date))
-                    .find(_.isLeft)
-                    .getOrElse(Right(()))
-                    .map(_ => date)
-              )
+          date ← Either
+                   .fromTry(Try(LocalDate.of(year, month, day)))
+                   .leftMap(_ => FormError(dateKey, "error.invalid"))
+                   .flatMap(date =>
+                     if (maximumDateInclusive.exists(_.isBefore(date)))
+                       Left(FormError(dateKey, "error.tooFarInFuture"))
+                     else if (minimumDateInclusive.exists(_.isAfter(date)))
+                       Left(FormError(dateKey, "error.tooFarInPast"))
+                     else if (date.isBefore(minimumDate))
+                       Left(FormError(dateKey, "error.before1900"))
+                     else
+                       extraValidation
+                         .map(_(date))
+                         .find(_.isLeft)
+                         .getOrElse(Right(()))
+                         .map(_ => date)
+                   )
         } yield date
 
         result.leftMap(Seq(_))

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
 import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.order._
@@ -24,7 +25,6 @@ import com.google.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of, optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid}
-import play.api.i18n.Messages
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -501,7 +501,7 @@ class PropertyDetailsController @Inject() (
                     .bindFromRequest()
                     .fold(
                       formWithErrors => {
-                        val param1                = completionDate.value.toString
+                        val param1                = TimeUtils.govDisplayFormat(completionDate.value)
                         val param2                = taxYear.startDateInclusive.getYear.toString
                         val param3                = taxYear.endDateExclusive.getYear.toString
                         val updatedFormWithErrors = formWithErrors.errors.map {
@@ -896,7 +896,7 @@ class PropertyDetailsController @Inject() (
     taxYear: TaxYear,
     completionDate: CompletionDate,
     personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
-  )(implicit messages: Messages): Form[LocalDate] = {
+  ): Form[LocalDate] = {
     val startDateOfTaxYear = taxYear.startDateInclusive
     val endDateOfTaxYear   = taxYear.endDateExclusive
 
@@ -1003,7 +1003,7 @@ object PropertyDetailsController {
     maximumDateInclusive: LocalDate,
     minimumDateInclusive: LocalDate,
     personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
-  )(implicit messages: Messages): Form[LocalDate] = {
+  ): Form[LocalDate] = {
     val key = "multipleDisposalsDisposalDate"
     Form(
       mapping(

@@ -2900,10 +2900,9 @@ class SingleDisposalsTriageControllerSpec
         "the completion date is before the disposal date" in {
           val disposalDatInStrFormat =
             s"${disposalDate.value.getDayOfMonth()} ${disposalDate.value.getMonth().toString.toLowerCase.capitalize} ${disposalDate.value.getYear}"
-          println("MOHAN MOHAN = " + disposalDatInStrFormat)
           testWithErrorArgs(
             formData(dayBeforeDisposalDate),
-            "completionDate.error.tooFarInPastWithArg",
+            "completionDate.error.tooFarInPast",
             disposalDatInStrFormat
           )(requiredPreviousAnswers)
         }
@@ -2923,6 +2922,16 @@ class SingleDisposalsTriageControllerSpec
             )
           )
 
+        def testWithErrorArgs(formData: Seq[(String, String)], expectedErrorKey: String, arg: String)(
+          requiredPreviousTriageAnswers: SingleDisposalTriageAnswers
+        ): Unit =
+          testFormErrorWithErrorArg(performAction, "completionDate.title")(
+            formData,
+            expectedErrorKey,
+            arg,
+            requiredPreviousTriageAnswers
+          )
+
         "the date is invalid" in {
           dateErrorScenarios("completionDate", "").foreach { scenario =>
             withClue(s"For $scenario: ") {
@@ -2955,9 +2964,12 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the completion date is before the disposal date" in {
-          test(
+          val disposalDatInStrFormat =
+            s"${disposalDate.value.getDayOfMonth()} ${disposalDate.value.getMonth().toString.toLowerCase.capitalize} ${disposalDate.value.getYear}"
+          testWithErrorArgs(
             formData(dayBeforeDisposalDate),
-            "completionDate.error.tooFarInPast"
+            "completionDate.error.tooFarInPast",
+            disposalDatInStrFormat
           )(requiredPreviousAnswers)
         }
 
@@ -2976,6 +2988,16 @@ class SingleDisposalsTriageControllerSpec
             )
           )
 
+        def testWithErrorArgs(formData: Seq[(String, String)], expectedErrorKey: String, arg: String)(
+          requiredPreviousTriageAnswers: SingleDisposalTriageAnswers
+        ): Unit =
+          testFormErrorWithErrorArg(performAction, "completionDate.title")(
+            formData,
+            expectedErrorKey,
+            arg,
+            requiredPreviousTriageAnswers
+          )
+
         "the date is invalid" in {
           dateErrorScenarios("completionDate", "").foreach { scenario =>
             withClue(s"For $scenario: ") {
@@ -3008,9 +3030,12 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the completion date is before the disposal date" in {
-          test(
+          val disposalDatInStrFormat =
+            s"${disposalDate.value.getDayOfMonth()} ${disposalDate.value.getMonth().toString.toLowerCase.capitalize} ${disposalDate.value.getYear}"
+          testWithErrorArgs(
             formData(dayBeforeDisposalDate),
-            "completionDate.error.tooFarInPast"
+            "completionDate.error.tooFarInPast",
+            disposalDatInStrFormat
           )(requiredPreviousAnswers)
         }
 
