@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 
 import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
@@ -514,11 +515,15 @@ class RepresenteeController @Inject() (
             case Capacitor                                                      =>
               Redirect(routes.RepresenteeController.checkYourAnswers())
             case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
-              val form     =
+              val allowedDateOfDeath = TimeUtils.getMaximumDateForDisposalsAndCompletion(
+                viewConfig.enableFutureDateForDisposalAndCompletion,
+                viewConfig.maxYearForDisposalsAndCompletion
+              )
+              val form               =
                 answers
                   .fold(_.dateOfDeath, c => c.dateOfDeath)
-                  .fold(dateOfDeathForm)(dateOfDeathForm.fill(_))
-              val backLink = answers.fold(
+                  .fold(dateOfDeathForm(allowedDateOfDeath))(dateOfDeathForm(allowedDateOfDeath).fill(_))
+              val backLink           = answers.fold(
                 _ => routes.RepresenteeController.enterName(),
                 _ => routes.RepresenteeController.checkYourAnswers()
               )
@@ -536,11 +541,15 @@ class RepresenteeController @Inject() (
             case Capacitor                                                      =>
               Redirect(routes.RepresenteeController.checkYourAnswers())
             case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
-              lazy val backLink = answers.fold(
+              lazy val backLink      = answers.fold(
                 _ => routes.RepresenteeController.enterName(),
                 _ => routes.RepresenteeController.checkYourAnswers()
               )
-              dateOfDeathForm
+              val allowedDateOfDeath = TimeUtils.getMaximumDateForDisposalsAndCompletion(
+                viewConfig.enableFutureDateForDisposalAndCompletion,
+                viewConfig.maxYearForDisposalsAndCompletion
+              )
+              dateOfDeathForm(allowedDateOfDeath)
                 .bindFromRequest()
                 .fold(
                   formWithErrors =>
@@ -940,13 +949,13 @@ object RepresenteeController {
   val nameForm: Form[IndividualName] =
     IndividualName.form("representeeFirstName", "representeeLastName")
 
-  def dateOfDeathForm(implicit messages: Messages): Form[DateOfDeath] = {
+  def dateOfDeathForm(allowedDateOfDeath: LocalDate)(implicit messages: Messages): Form[DateOfDeath] = {
     val key = "dateOfDeath"
     Form(
       mapping(
         "" -> of(
           TimeUtils.dateFormatter(
-            Some(LocalDate.now()),
+            Some(allowedDateOfDeath),
             None,
             s"$key-day",
             s"$key-month",

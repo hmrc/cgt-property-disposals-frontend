@@ -4378,11 +4378,10 @@ multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what h
 
 multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
 multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
-multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date
-multipleDisposalsDisposalDate.error.tooFarInPastWithArg=Completion date must be the same as or after the contract exchange date,{0}
+multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date, {0}
 multipleDisposalsDisposalDate.error.before1900=Contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
 
-multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {0} to {1}
+multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {1} to {2}
 multipleDisposalsDisposalDate-day.error.required=Contract exchange date must include a day
 multipleDisposalsDisposalDate-month.error.required=Contract exchange date must include a month
 multipleDisposalsDisposalDate-year.error.required=Contract exchange date must include a year

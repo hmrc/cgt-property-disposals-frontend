@@ -18,11 +18,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.format.DateTimeFormatter
 import java.time.{Clock, LocalDate, LocalDateTime}
-
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
-import cats.instances.string._
 import configs.Configs
 import play.api.data.FormError
 import play.api.data.format.Formatter
@@ -105,29 +103,20 @@ object TimeUtils {
               .fromTry(Try(LocalDate.of(year, month, day)))
               .leftMap(_ => FormError(dateKey, "error.invalid"))
               .flatMap(date =>
-                if (dateKey === "multipleDisposalsDisposalDate" && maximumDateInclusive.exists(_.isBefore(date))) {
+                if (maximumDateInclusive.exists(_.isBefore(date)))
                   Left(
                     FormError(
                       dateKey,
-                      "error.tooFarInPastWithArg",
-                      List(govDisplayFormat(maximumDateInclusive.getOrElse(LocalDate.now())))
-                    )
-                  )
-                } else if (maximumDateInclusive.exists(_.isBefore(date)))
-                  Left(FormError(dateKey, "error.tooFarInFuture"))
-                else if (
-                  (dateKey === "completionDate") && minimumDateInclusive
-                    .exists(_.isAfter(date))
-                )
-                  Left(
-                    FormError(
-                      dateKey,
-                      "error.tooFarInPastWithArg",
-                      List(govDisplayFormat(minimumDateInclusive.getOrElse(LocalDate.now())))
-                    )
+                      "error.tooFarInFuture" )
                   )
                 else if (minimumDateInclusive.exists(_.isAfter(date)))
-                  Left(FormError(dateKey, "error.tooFarInPast"))
+                  Left(
+                    FormError(
+                      dateKey,
+                      "error.tooFarInPast",
+
+                    )
+                  )
                 else if (date.isBefore(minimumDate))
                   Left(FormError(dateKey, "error.before1900"))
                 else
