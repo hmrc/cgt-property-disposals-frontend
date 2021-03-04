@@ -1083,7 +1083,7 @@ class RepresenteeControllerSpec
 
         "the date is in the future" in {
           testFormError(performAction, "dateOfDeath.title", session)(
-            formData(DateOfDeath(LocalDate.now().plusDays(1L))),
+            formData(DateOfDeath(LocalDate.now().plusYears(2L).plusDays(1L))),
             "dateOfDeath.error.tooFarInFuture"
           )
         }

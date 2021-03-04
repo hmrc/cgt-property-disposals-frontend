@@ -625,14 +625,13 @@ class MultipleDisposalsTriageController @Inject() (
               taxYearExchanged =>
                 if (
                   answers
-                    .fold(_.taxYearExchanged, _ => Some(taxYearExchanged))
+                    .fold(_.taxYearExchanged, c => Some(c.taxYearExchanged))
                     .contains(taxYearExchanged)
                 )
                   Redirect(
                     routes.MultipleDisposalsTriageController.checkYourAnswers()
                   )
                 else {
-
                   val result =
                     for {
                       taxYear <- taxYearExchanged match {
