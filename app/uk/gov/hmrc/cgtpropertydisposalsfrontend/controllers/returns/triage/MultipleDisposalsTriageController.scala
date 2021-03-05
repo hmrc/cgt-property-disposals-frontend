@@ -1277,7 +1277,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _
               ) if !isAValidCGTTaxTear(taxYearExchanged, Some(stateYear)) =>
             val redirectPage =
-              if (isAmendReturn(state)) 
+              if (isAmendReturn(state))
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               else if (assetTypes.contains(List(IndirectDisposal)))
                 routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
