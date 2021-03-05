@@ -1115,7 +1115,7 @@ class MultipleDisposalsTriageController @Inject() (
           .map(_.fold(_ => false, _ => true))
           .getOrElse(false)
 
-        val stateYear = state.fold(_ => "", _._1.amendReturnData.fold("")(x => x.originalReturn.summary.taxYear))
+        val originalSubmissionYear = state.fold(_ => "", _._1.amendReturnData.fold("")(x => x.originalReturn.summary.taxYear))
 
         triageAnswers match {
           case IncompleteMultipleDisposalsTriageAnswers(
@@ -1275,7 +1275,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(taxYearExchanged),
                 _,
                 _
-              ) if !isAValidCGTTaxTear(taxYearExchanged, Some(stateYear)) =>
+              ) if !isAValidCGTTaxTear(taxYearExchanged, Some(originalSubmissionYear)) =>
             val redirectPage =
               if (isAmendReturn(state))
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
@@ -1400,8 +1400,8 @@ class MultipleDisposalsTriageController @Inject() (
       }
     }
 
-  def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged, stateYear: Option[String] = None): Boolean =
-    TaxYearExchanged.taxYearsMap.get(stateYear.getOrElse("")) match {
+  def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged, originalSubmissionYear: Option[String] = None): Boolean =
+    TaxYearExchanged.taxYearsMap.get(originalSubmissionYear.getOrElse("")) match {
       case Some(x) => x === taxYearExchanged
       case None    =>
         !(taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
