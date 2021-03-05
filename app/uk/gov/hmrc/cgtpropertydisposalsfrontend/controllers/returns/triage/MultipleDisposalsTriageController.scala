@@ -1115,6 +1115,8 @@ class MultipleDisposalsTriageController @Inject() (
           .map(_.fold(_ => false, _ => true))
           .getOrElse(false)
 
+        val stateYear = state.fold(_ => "", _._1.amendReturnData.fold("")(x => x.originalReturn.summary.taxYear))
+
         triageAnswers match {
           case IncompleteMultipleDisposalsTriageAnswers(
                 None,
@@ -1272,12 +1274,13 @@ class MultipleDisposalsTriageController @Inject() (
                 assetTypes,
                 Some(taxYearExchanged),
                 _,
-                _
-              ) if !isAValidCGTTaxTear(taxYearExchanged) =>
+                completionDate
+              ) if !isAValidCGTTaxTear(taxYearExchanged, Some(stateYear)) =>
             val redirectPage =
-              if (isAmendReturn(state))
+              if (isAmendReturn(state)) {
+                println(completionDate)
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
-              else if (assetTypes.contains(List(IndirectDisposal)))
+              } else if (assetTypes.contains(List(IndirectDisposal)))
                 routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
               else if (taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
                 routes.MultipleDisposalsTriageController.exchangedInDifferentTaxYears()
@@ -1398,8 +1401,12 @@ class MultipleDisposalsTriageController @Inject() (
       }
     }
 
-  def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged): Boolean =
-    !(taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
+  def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged, stateYear: Option[String] = None): Boolean =
+    TaxYearExchanged.taxYearsMap.get(stateYear.getOrElse("")) match {
+      case Some(x) => x === taxYearExchanged
+      case None    =>
+        !(taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
+    }
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
