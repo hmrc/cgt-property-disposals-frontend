@@ -553,14 +553,8 @@ class MultipleDisposalsTriageController @Inject() (
         else {
           val taxYearExchanged =
             answers.fold(_.taxYearExchanged, c => Some(c.taxYearExchanged))
-          val dateOfDeath      = state
-            .fold(
-              _.representeeAnswers,
-              _._2.fold(_.representeeAnswers, _.representeeAnswers)
-            )
-            .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
 
-          val taxYearOfDateOfDeath = dateOfDeath match {
+          val taxYearOfDateOfDeath = getDateOfDeath(state) match {
             case Some(date) => TimeUtils.getTaxYearExchangedOfADate(date.value)
             case _          => TaxYearExchanged.TaxYearBefore2020
           }
@@ -614,14 +608,7 @@ class MultipleDisposalsTriageController @Inject() (
               taxYears <- taxYearService.availableTaxYears()
             } yield taxYears
 
-          val dateOfDeath = state
-            .fold(
-              _.representeeAnswers,
-              _._2.fold(_.representeeAnswers, _.representeeAnswers)
-            )
-            .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
-
-          val taxYearOfDateOfDeath = dateOfDeath match {
+          val taxYearOfDateOfDeath = getDateOfDeath(state) match {
             case Some(date) => TimeUtils.getTaxYearExchangedOfADate(date.value)
             case _          => TaxYearExchanged.TaxYearBefore2020
           }
@@ -874,10 +861,11 @@ class MultipleDisposalsTriageController @Inject() (
           viewConfig.enableFutureDateForDisposalAndCompletion,
           viewConfig.maxYearForDisposalsAndCompletion
         )
-        val form           = completionDate.fold(completionDateForm(maxDateAllowed))(
-          completionDateForm(maxDateAllowed).fill
+
+        val form     = completionDate.fold(completionDateForm(maxDateAllowed, getDateOfDeath(state)))(
+          completionDateForm(maxDateAllowed, getDateOfDeath(state)).fill
         )
-        val backLink       = answers.fold(
+        val backLink = answers.fold(
           _ =>
             routes.MultipleDisposalsTriageController
               .whenWereContractsExchanged(),
@@ -894,7 +882,8 @@ class MultipleDisposalsTriageController @Inject() (
           viewConfig.enableFutureDateForDisposalAndCompletion,
           viewConfig.maxYearForDisposalsAndCompletion
         )
-        completionDateForm(maxDateAllowed)
+
+        completionDateForm(maxDateAllowed, getDateOfDeath(state))
           .bindFromRequest()
           .fold(
             { formWithErrors =>
@@ -961,6 +950,14 @@ class MultipleDisposalsTriageController @Inject() (
           )
       }
     }
+
+  private def getDateOfDeath(state: JourneyState): Option[DateOfDeath] =
+    state
+      .fold(
+        _.representeeAnswers,
+        _._2.fold(_.representeeAnswers, _.representeeAnswers)
+      )
+      .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
 
   private def updateTaxYearToAnswers(
     taxYearExchanged: TaxYearExchanged,
@@ -1779,14 +1776,15 @@ object MultipleDisposalsTriageController {
   }
 
   def completionDateForm(
-    maximumDateInclusive: LocalDate
+    maximumDateInclusive: LocalDate,
+    dateOfDeath: Option[DateOfDeath]
   ): Form[CompletionDate] =
     Form(
       mapping(
         "" -> of(
           TimeUtils.dateFormatter(
             Some(maximumDateInclusive),
-            Some(TaxYear.earliestTaxYearStartDate),
+            Some(dateOfDeath.getOrElse(DateOfDeath(TaxYear.earliestTaxYearStartDate)).value),
             "multipleDisposalsCompletionDate-day",
             "multipleDisposalsCompletionDate-month",
             "multipleDisposalsCompletionDate-year",
