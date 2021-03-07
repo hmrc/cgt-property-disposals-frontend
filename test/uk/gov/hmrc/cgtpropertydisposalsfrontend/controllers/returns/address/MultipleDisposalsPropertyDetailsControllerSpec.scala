@@ -1663,8 +1663,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         }
 
         "the date entered is too far in future" in {
+          val param1 = TimeUtils.govDisplayFormat(completionDate.value)
+          val param2 = taxYear.startDateInclusive.getYear.toString
+          val param3 = taxYear.endDateExclusive.getYear.toString
           testFormError()(formData(today.plusYears(2L)))(
-            s"$key.error.tooFarInPastWithArg"
+            s"$key.error.tooFarInFuture",
+            Seq(param1, param2, param3)
           )
         }
 
