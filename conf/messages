@@ -1192,7 +1192,7 @@ multipleDisposalsTaxYear.taxyear.different=The properties were exchanged in diff
 
 multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
-
+multipleDisposalsTaxYear.error.invalid=Please select valid taxyear
 multipleDisposalsTaxYear.cyaChange=when contracts were exchanged on all the properties
 
 
@@ -1254,7 +1254,7 @@ multipleDisposalsCompletionDate.details.p1=The <a href="{0}" target=_blank>‘co
 multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
-multipleDisposalsCompletionDate.error.tooFarInPast=Completion date must be on or after 6 April 2020
+multipleDisposalsCompletionDate.error.tooFarInPast=Completion date must be on or after {0}
 
 multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
 multipleDisposalsCompletionDate-month.error.required=Completion date must include a month

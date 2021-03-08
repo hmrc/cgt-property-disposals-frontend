@@ -35,4 +35,22 @@ object TaxYearExchanged {
   implicit val format: OFormat[TaxYearExchanged] = derived.oformat()
   implicit val eq: Eq[TaxYearExchanged]          = Eq.fromUniversalEquals
 
+  implicit class TaxYearExchangedOps(private val t: TaxYearExchanged) extends AnyVal {
+    def toTaxYearExchanged(value: String): TaxYearExchanged =
+      value match {
+        case "TaxYear2021"       => TaxYearExchanged.TaxYear2021
+        case "TaxYear2020"       => TaxYearExchanged.TaxYear2020
+        case "TaxYearBefore2020" => TaxYearExchanged.TaxYearBefore2020
+        case "DifferentTaxYears" => TaxYearExchanged.DifferentTaxYears
+      }
+
+    def toSting: String =
+      t match {
+        case TaxYearExchanged.TaxYear2021       => "TaxYear2021"
+        case TaxYearExchanged.TaxYear2020       => "TaxYear2020"
+        case TaxYearExchanged.TaxYearBefore2020 => "TaxYearBefore2020"
+        case TaxYearExchanged.DifferentTaxYears => "DifferentTaxYears"
+      }
+  }
+
 }
