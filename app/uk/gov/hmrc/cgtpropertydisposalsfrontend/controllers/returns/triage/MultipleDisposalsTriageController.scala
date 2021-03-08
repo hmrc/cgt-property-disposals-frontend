@@ -883,7 +883,8 @@ class MultipleDisposalsTriageController @Inject() (
           viewConfig.maxYearForDisposalsAndCompletion
         )
 
-        completionDateForm(maxDateAllowed, getDateOfDeath(state))
+        val dateOfDeath = getDateOfDeath(state)
+        completionDateForm(maxDateAllowed, dateOfDeath)
           .bindFromRequest()
           .fold(
             { formWithErrors =>
@@ -893,9 +894,17 @@ class MultipleDisposalsTriageController @Inject() (
                     .whenWereContractsExchanged(),
                 _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
+
+              val param1                = TimeUtils.govDisplayFormat(
+                dateOfDeath.getOrElse(DateOfDeath(TimeUtils.today())).value
+              )
+              val updatedFormWithErrors = formWithErrors.errors.map {
+                _.copy(args = Seq(param1))
+              }
+
               BadRequest(
                 completionDatePage(
-                  formWithErrors,
+                  formWithErrors.copy(errors = updatedFormWithErrors),
                   backLink,
                   state.isRight,
                   state.fold(_ => false, _._1.isAmendReturn)
