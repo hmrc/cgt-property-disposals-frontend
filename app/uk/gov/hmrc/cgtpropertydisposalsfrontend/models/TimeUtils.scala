@@ -106,9 +106,7 @@ object TimeUtils {
               .fromTry(Try(LocalDate.of(year, month, day)))
               .leftMap(_ => FormError(dateKey, "error.invalid"))
               .flatMap(date =>
-                if (!isCompletionDateWithinTaxYear(taxYearStartSelected, dateFieldStrings))
-                  Left(FormError(dateKey, "error.tooFarInPast"))
-                else if (
+                if (
                   maximumDateInclusive
                     .exists(_.isBefore(date))
                 )
@@ -117,6 +115,8 @@ object TimeUtils {
                   Left(FormError(dateKey, "error.tooFarInPast"))
                 else if (date.isBefore(minimumDate))
                   Left(FormError(dateKey, "error.before1900"))
+                else if (taxYearStartSelected.exists(x => !isCompletionDateWithinTaxYear(x, dateFieldStrings)))
+                  Left(FormError(dateKey, "error.tooFarInPast"))
                 else
                   extraValidation
                     .map(_(date))
@@ -139,15 +139,14 @@ object TimeUtils {
     }
 
   def isCompletionDateWithinTaxYear(
-    taxYearStartSelected: Option[Int],
+    taxYearStartSelected: Int,
     dateFieldStrings: (String, String, String)
-  ): Boolean =
-    taxYearStartSelected.exists { x =>
-      val userSelectedCompletionDate =
-        LocalDate.of(dateFieldStrings._3.toInt, dateFieldStrings._2.toInt, dateFieldStrings._1.toInt)
-      val userSelectedTaxYear        = taxYearStart(userSelectedCompletionDate)
-      x === userSelectedTaxYear.getYear
-    }
+  ): Boolean = {
+    val userSelectedCompletionDate =
+      LocalDate.of(dateFieldStrings._3.toInt, dateFieldStrings._2.toInt, dateFieldStrings._1.toInt)
+    val userSelectedTaxYear        = taxYearStart(userSelectedCompletionDate)
+    taxYearStartSelected === userSelectedTaxYear.getYear
+  }
 
   def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
     s"""${date.getDayOfMonth()} ${messages(
