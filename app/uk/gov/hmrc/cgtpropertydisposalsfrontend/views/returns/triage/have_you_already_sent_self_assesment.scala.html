@@ -17,7 +17,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -46,9 +45,9 @@
     representativeType: Option[RepresentativeType]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@key = @{"selfAssessment"}
+@key = @{"alreadySentSelfAssessment"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
+
 @userKey = @{
   representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
@@ -84,14 +83,14 @@
 
     @caption(messages("triage.caption"))
 
-    @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouSentSelfAssessmentSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessmentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
             label = pageHeading(title),
             errorKey = form.error(key).map(e => s"$userErrorKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = Some(Html(messages(s"$key.helpText"))).filterNot(_ => isPeriodOfAdmin)
+            helpText = None
         )
 
         @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))

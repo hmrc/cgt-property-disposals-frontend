@@ -1304,6 +1304,20 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                _,
+                _,
+                None,
+                _
+              ) =>
+            Redirect(routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment())
+
+          case IncompleteMultipleDisposalsTriageAnswers(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
                 Some(taxYearExchanged),
                 None,
                 _,

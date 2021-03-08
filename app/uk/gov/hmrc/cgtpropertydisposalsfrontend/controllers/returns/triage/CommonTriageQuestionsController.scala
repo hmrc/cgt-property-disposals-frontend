@@ -68,7 +68,7 @@ class CommonTriageQuestionsController @Inject() (
   disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
   cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
   whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page,
-  selfAssessmentPage: triagePages.have_you_sent_self_assesment
+  alreadySentselfAssessmentPage: triagePages.have_you_already_sent_self_assesment
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -515,15 +515,15 @@ class CommonTriageQuestionsController @Inject() (
       Ok(whoAreYouSubmittingAmendExitPage(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()))
     }
 
-  def haveYouSentSelfAssessment(): Action[AnyContent] =
+  def haveYouAlreadySentSelfAssessment(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
         val triageAnswers      = triageAnswersFomState(state)
         val sentSelfAssessment =
           triageAnswers.fold(
             _.fold(
-              _.sentSelfAssessment,
-              mc => Some(mc.sentSelfAssessment)
+              _.alreadySentSelfAssessment,
+              mc => Some(mc.alreadySentSelfAssessment)
             ),
             _.fold(
               _.sentSelfAssessment,
@@ -531,7 +531,7 @@ class CommonTriageQuestionsController @Inject() (
             )
           )
 
-        val form     = sentSelfAssessment.fold(sentSelfAssessmentForm)(sentSelfAssessmentForm.fill)
+        val form     = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
         val backLink = triageAnswers.fold(
           _.fold(
             _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
@@ -544,7 +544,7 @@ class CommonTriageQuestionsController @Inject() (
         )
 
         Ok(
-          selfAssessmentPage(
+          alreadySentselfAssessmentPage(
             form,
             backLink,
             state.isRight,
@@ -562,11 +562,11 @@ class CommonTriageQuestionsController @Inject() (
       }
     }
 
-  def haveYouSentSelfAssessmentSubmit(): Action[AnyContent] =
+  def haveYouAlreadySentSelfAssessmentSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
         val triageAnswers = triageAnswersFomState(state)
-        sentSelfAssessmentForm
+        alreadySentSelfAssessmentForm
           .bindFromRequest()
           .fold(
             { formWithErrors =>
@@ -581,7 +581,7 @@ class CommonTriageQuestionsController @Inject() (
                 )
               )
               BadRequest(
-                selfAssessmentPage(
+                alreadySentselfAssessmentPage(
                   formWithErrors,
                   backLink,
                   state.isRight,
@@ -596,20 +596,20 @@ class CommonTriageQuestionsController @Inject() (
                 )
               )
             },
-            sentSelfAssessment =>
+            alreadySentSelfAssessment =>
               if (
                 triageAnswers
                   .fold(
                     _.fold(
-                      _.sentSelfAssessment,
-                      completeMultiple => Some(completeMultiple.sentSelfAssessment)
+                      _.alreadySentSelfAssessment,
+                      completeMultiple => Some(completeMultiple.alreadySentSelfAssessment)
                     ),
                     _.fold(
                       _.sentSelfAssessment,
                       completeSingle => Some(completeSingle.sentSelfAssessment)
                     )
                   )
-                  .contains(sentSelfAssessment)
+                  .contains(alreadySentSelfAssessment)
               )
                 Redirect(
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
@@ -619,13 +619,13 @@ class CommonTriageQuestionsController @Inject() (
                   i: SingleDisposalTriageAnswers
                 ): IncompleteSingleDisposalTriageAnswers =
                   i.unset(_.sentSelfAssessment)
-                    .copy(sentSelfAssessment = Some(sentSelfAssessment))
+                    .copy(sentSelfAssessment = Some(alreadySentSelfAssessment))
 
                 def updateMultipleDisposalAnswers(
                   i: MultipleDisposalsTriageAnswers
                 ): IncompleteMultipleDisposalsTriageAnswers =
-                  i.unset(_.sentSelfAssessment)
-                    .copy(sentSelfAssessment = Some(sentSelfAssessment))
+                  i.unset(_.alreadySentSelfAssessment)
+                    .copy(alreadySentSelfAssessment = Some(alreadySentSelfAssessment))
 
                 val furtherReturn = isFurtherReturn(state)
 
@@ -1097,9 +1097,9 @@ object CommonTriageQuestionsController {
     )
   }
 
-  val sentSelfAssessmentForm: Form[Boolean] = Form(
+  val alreadySentSelfAssessmentForm: Form[Boolean] = Form(
     mapping(
-      "selfAssessment" -> of(BooleanFormatter.formatter)
+      "alreadySentSelfAssessment" -> of(BooleanFormatter.formatter)
     )(identity)(Some(_))
   )
 

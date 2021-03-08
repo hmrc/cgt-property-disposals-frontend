@@ -797,18 +797,29 @@ cannotAmendResidentialStatusForAssetType.trust.li4=interest and penalty payments
 
 cannotAmendResidentialStatusForAssetType.link=Contact HMRC
 
-selfAssessment.title=Have you sent a Self Assessment tax return for {0} to {1}?
-selfAssessment.agent.title=Has your client sent a Self Assessment tax return for {0} to {1}?
-selfAssessment.trust.title=Has the trust sent a Self Assessment: Trust and Estate tax return for {0} to {1}?
-selfAssessment.capacitor.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
-selfAssessment.personalRep.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
-selfAssessment.personalRepInPeriodOfAdmin.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.title=Have you sent a Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.agent.title=Has your client sent a Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.trust.title=Has the trust sent a Self Assessment: Trust and Estate tax return for {0} to {1}?
+alreadySentSelfAssessment.capacitor.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.personalRep.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
+
+alreadySentSelfAssessment.error.required=Select whether you have sent a Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.agent.error.required=Select whether your client has sent a Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.trust.error.required=Select whether the trust has sent a Self Assessment: Trust and Estate tax return for {0} to {1}?
+alreadySentSelfAssessment.capacitor.error.required=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.personalRep.error.required=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.required=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}?
+
+alreadySentSelfAssessment.error.invalid=Select whether you have sent a Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.agent.error.invalid=Select whether your client has sent a Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.trust.error.invalid=Select whether the trust has sent a Self Assessment: Trust and Estate tax return for {0} to {1}?
+alreadySentSelfAssessment.capacitor.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.personalRep.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}?
 
 
-
-
-
-
+alreadySentSelfAssessment.cyaChange=Have you sent a Self Assessment tax return
 
 
 #===================================================

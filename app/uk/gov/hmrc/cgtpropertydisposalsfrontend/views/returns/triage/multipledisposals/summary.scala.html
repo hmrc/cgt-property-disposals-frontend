@@ -143,6 +143,12 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
       )
   }
 
+  @cyaRow(
+    messages(s"alreadySentSelfAssessment$userKey.title"),
+    Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.toString}")),
+    Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
+    "alreadySentSelfAssessment"
+  )
 
   @if(answers.assetTypes === List(AssetType.IndirectDisposal)) {
     @cyaRow(

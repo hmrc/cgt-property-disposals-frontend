@@ -42,7 +42,7 @@ object MultipleDisposalsTriageAnswers {
     assetTypes: Option[List[AssetType]],
     taxYearExchanged: Option[TaxYearExchanged],
     taxYear: Option[TaxYear],
-    sentSelfAssessment: Option[Boolean],
+    alreadySentSelfAssessment: Option[Boolean],
     completionDate: Option[CompletionDate]
   ) extends MultipleDisposalsTriageAnswers
 
@@ -75,7 +75,7 @@ object MultipleDisposalsTriageAnswers {
         Some(c.assetTypes),
         Some(c.taxYearExchanged),
         Some(c.taxYear),
-        Some(c.sentSelfAssessment),
+        Some(c.alreadySentSelfAssessment),
         Some(c.completionDate)
       )
   }
@@ -87,7 +87,7 @@ object MultipleDisposalsTriageAnswers {
     assetTypes: List[AssetType],
     taxYearExchanged: TaxYearExchanged,
     taxYear: TaxYear,
-    sentSelfAssessment: Boolean,
+    alreadySentSelfAssessment: Boolean,
     completionDate: CompletionDate
   ) extends MultipleDisposalsTriageAnswers
 
