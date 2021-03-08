@@ -501,12 +501,12 @@ class PropertyDetailsController @Inject() (
                     .bindFromRequest()
                     .fold(
                       formWithErrors => {
-                        val param1                = TimeUtils.govDisplayFormat(completionDate.value)
-                        val param2                = taxYear.startDateInclusive.getYear.toString
-                        val param3                = taxYear.endDateExclusive.getYear.toString
+                        val param1                = taxYear.startDateInclusive.getYear.toString
+                        val param2                = taxYear.endDateExclusive.getYear.toString
                         val updatedFormWithErrors = formWithErrors.errors.map {
-                          _.copy(args = Seq(param1, param2, param3))
+                          _.copy(args = Seq(param1, param2))
                         }
+
                         BadRequest(
                           multipleDisposalsDisposalDatePage(
                             formWithErrors.copy(errors = updatedFormWithErrors),
