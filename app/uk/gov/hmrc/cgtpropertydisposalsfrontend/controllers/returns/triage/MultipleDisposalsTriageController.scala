@@ -854,7 +854,12 @@ class MultipleDisposalsTriageController @Inject() (
           viewConfig.enableFutureDateForDisposalAndCompletion,
           viewConfig.maxYearForDisposalsAndCompletion
         )
-        completionDateForm(maxDateAllowed)
+
+        val taxYearExchangedSelected: Option[TaxYearExchanged] =
+          answers.fold(_.taxYearExchanged, c => Some(c.taxYearExchanged))
+        val taxYearAtStart                                     = getTaxYearByTaxYearExchanged(taxYearExchangedSelected)
+
+        completionDateForm(maxDateAllowed, Some(taxYearAtStart))
           .bindFromRequest()
           .fold(
             { formWithErrors =>
@@ -1085,6 +1090,13 @@ class MultipleDisposalsTriageController @Inject() (
             )
         }
       }
+    }
+
+  private def getTaxYearByTaxYearExchanged(taxYearExhanged: Option[TaxYearExchanged]): Int =
+    taxYearExhanged match {
+      case Some(TaxYearExchanged.TaxYear2020) => 2020
+      case Some(TaxYearExchanged.TaxYear2021) => 2021
+      case _                                  => 0
     }
 
   private def getTaxYearExchanged(taxYear: Option[TaxYear]): Option[TaxYearExchanged] =
@@ -1716,7 +1728,8 @@ object MultipleDisposalsTriageController {
   }
 
   def completionDateForm(
-    maximumDateInclusive: LocalDate
+    maximumDateInclusive: LocalDate,
+    taxYearStart: Option[Int] = None
   ): Form[CompletionDate] =
     Form(
       mapping(
@@ -1727,10 +1740,10 @@ object MultipleDisposalsTriageController {
             "multipleDisposalsCompletionDate-day",
             "multipleDisposalsCompletionDate-month",
             "multipleDisposalsCompletionDate-year",
-            "multipleDisposalsCompletionDate"
+            "multipleDisposalsCompletionDate",
+            taxYearStart
           )
         )
       )(CompletionDate(_))(d => Some(d.value))
     )
-
 }

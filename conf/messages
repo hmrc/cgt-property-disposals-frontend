@@ -1256,7 +1256,6 @@ multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
 multipleDisposalsCompletionDate.error.tooFarInPast=Completion date must be in or after the same tax year as the exchange date
-multipleDisposalsCompletionDate.error.tooFarInPastWithArg=Completion date must be the same as or after the contract exchange date,{0}
 
 multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
 multipleDisposalsCompletionDate-month.error.required=Completion date must include a month

@@ -1646,7 +1646,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           )
         }
 
-        "the date entered is invalid" ignore {
+        "the date entered is invalid" in {
           DateErrorScenarios
             .dateErrorScenarios(key, "")
             .foreach { scenario =>
@@ -1662,7 +1662,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             }
         }
 
-        "the date entered is too far in future" ignore {
+        "the date entered is too far in future" in {
           val param1 = TimeUtils.govDisplayFormat(completionDate.value)
           val param2 = taxYear.startDateInclusive.getYear.toString
           val param3 = taxYear.endDateExclusive.getYear.toString
@@ -1672,7 +1672,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           )
         }
 
-        "the date entered is too far in past" ignore {
+        "the date entered is too far in past" in {
           val param1 = taxYear.startDateInclusive.getYear.toString
           val param2 = taxYear.endDateExclusive.getYear.toString
           testFormError()(formData(taxYear.startDateInclusive.minusYears(2L)))(
@@ -1681,7 +1681,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           )
         }
 
-        "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" ignore {
+        "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" in {
           testFormError(
             Some(PersonalRepresentative),
             Some(
@@ -1693,7 +1693,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           )
         }
 
-        "the disposal date is on the date of death and the user is a period of admin personal rep" ignore {
+        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
           testFormError(
             Some(PersonalRepresentativeInPeriodOfAdmin),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(completionDate.value))))
@@ -1702,7 +1702,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           )
         }
 
-        "the disposal date is strictly before the date of death and the user is a period of admin personal rep" ignore {
+        "the disposal date is strictly before the date of death and the user is a period of admin personal rep" in {
           testFormError(
             Some(PersonalRepresentativeInPeriodOfAdmin),
             Some(

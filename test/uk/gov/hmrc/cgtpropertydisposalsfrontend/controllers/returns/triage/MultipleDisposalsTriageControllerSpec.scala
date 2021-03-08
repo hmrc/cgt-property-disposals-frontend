@@ -1244,6 +1244,8 @@ class MultipleDisposalsTriageControllerSpec
         val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
         val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
+        println("MOHAN MOHAN at line No: 1247 " + updatedAnswers.toString)
+
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -3438,6 +3440,8 @@ class MultipleDisposalsTriageControllerSpec
 
         "the date entered is before 06-04-2020" in {
           val date = LocalDate.of(2020, 4, 5)
+
+          println("MOHAN at 3444 : " + formData(date).toString)
 
           testFormError(formData(date))(
             "multipleDisposalsCompletionDate.error.tooFarInPast"
