@@ -555,7 +555,8 @@ class CommonTriageQuestionsController @Inject() (
             triageAnswers.fold(
               _.representativeType(),
               _.representativeType()
-            )
+            ),
+            getTaxYearStringFromAnswers(triageAnswers)
           )
         )
 
@@ -592,7 +593,8 @@ class CommonTriageQuestionsController @Inject() (
                   triageAnswers.fold(
                     _.representativeType(),
                     _.representativeType()
-                  )
+                  ),
+                  getTaxYearStringFromAnswers(triageAnswers)
                 )
               )
             },
@@ -750,6 +752,25 @@ class CommonTriageQuestionsController @Inject() (
           )
       }
     }
+
+  private def getTaxYearStringFromAnswers(
+    triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers]
+  ): Option[String] =
+    triageAnswers.fold(
+      _.fold(
+        i => i.taxYearExchanged.map(t => TaxYearExchanged.taxYearExchangedMap.get(t)).flatten,
+        c => TaxYearExchanged.taxYearExchangedMap.get(c.taxYearExchanged)
+      ),
+      _.fold(
+        i =>
+          i.disposalDate
+            .map(d => TaxYearExchanged.taxYearExchangedMap.get(TimeUtils.getTaxYearExchangedOfADate(d.value)))
+            .flatten,
+        c =>
+          TaxYearExchanged.taxYearExchangedMap
+            .get(TimeUtils.getTaxYearExchangedOfADate(c.disposalDate.value))
+      )
+    )
 
   private def redirectToCheckYourAnswers(
     state: Either[StartingNewDraftReturn, FillingOutReturn]

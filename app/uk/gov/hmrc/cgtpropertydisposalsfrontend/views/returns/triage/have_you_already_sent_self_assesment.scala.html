@@ -42,7 +42,8 @@
     backLink: Call,
     hasCreatedDraftReturn: Boolean,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    taxYear: Option[String]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"alreadySentSelfAssessment"}
@@ -70,7 +71,8 @@
             else ""
     }
 }
-@title = @{messages(s"$key$userKey.title")}
+@taxYearStr = @{taxYear.getOrElse("2020").toInt}
+@title = @{messages(s"$key$userKey.title", taxYearStr, taxYearStr+1)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
