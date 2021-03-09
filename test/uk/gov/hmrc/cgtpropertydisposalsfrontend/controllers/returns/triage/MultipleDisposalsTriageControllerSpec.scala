@@ -3382,11 +3382,9 @@ class MultipleDisposalsTriageControllerSpec
 
       "show a form error" when {
 
-        implicit val messages: Messages = MessagesImpl(lang, messagesApi)
-
         def testFormError(
           formData: List[(String, String)]
-        )(expectedErrorMessageKey: String, args: Seq[String] = Seq()) = {
+        )(expectedErrorMessageKey: String) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -3406,8 +3404,7 @@ class MultipleDisposalsTriageControllerSpec
               doc
                 .select("#error-summary-display > ul > li > a")
                 .text() shouldBe messageFromMessageKey(
-                expectedErrorMessageKey,
-                args
+                expectedErrorMessageKey
               ),
             BAD_REQUEST
           )
@@ -3441,10 +3438,8 @@ class MultipleDisposalsTriageControllerSpec
         "the date entered is before 06-04-2020" ignore {
           val date = LocalDate.of(2020, 4, 5)
 
-          val param1 = TimeUtils.govDisplayFormat(LocalDate.of(2021, 3, 8))
           testFormError(formData(date))(
-            "multipleDisposalsCompletionDate.error.tooFarInPast",
-            Seq(param1)
+            "multipleDisposalsCompletionDate.error.tooFarInPast"
           )
         }
 
