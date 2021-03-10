@@ -909,7 +909,7 @@ completionDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan drosglw
 completionDate.link=<a href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cwblhau (yn agor ffenestr newydd)</a>
 completionDate.error.required=Nodwch ddyddiad cwblhau
 completionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
-completionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod yr un fath â’r dyddiad cyfnewid contractau neu ar ôl hynny
+completionDate.error.tooFarInPast=Rhaid i'r dyddiad cwblhau fod ar neu ar ôl dyddiad cyfnewid contract, {0}
 completionDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cwblhau fod heddiw neu yn y gorffennol
 completionDate.error.before1900=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEM os yw’r dyddiad cyn hyn
 completionDate-day.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod

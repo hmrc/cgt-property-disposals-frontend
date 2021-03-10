@@ -890,7 +890,7 @@ class MultipleDisposalsTriageController @Inject() (
 
         val dateOfDeath = getDateOfDeath(state)
         completionDateForm(maxDateAllowed, dateOfDeath, taxYearAtStart)
-         .bindFromRequest()
+          .bindFromRequest()
           .fold(
             { formWithErrors =>
               val backLink = answers.fold(
