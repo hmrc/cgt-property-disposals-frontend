@@ -112,7 +112,7 @@ object TimeUtils {
                      else if (date.isBefore(minimumDate))
                        Left(FormError(dateKey, "error.before1900"))
                      else if (taxYearStartSelected.exists(x => !isCompletionDateWithinTaxYear(x, dateFieldStrings)))
-                       Left(FormError(dateKey, "error.tooFarInPast"))
+                       Left(FormError(dateKey, "error.CompletionDateNotWithinTaxYear"))
                      else
                        extraValidation
                          .map(_(date))
