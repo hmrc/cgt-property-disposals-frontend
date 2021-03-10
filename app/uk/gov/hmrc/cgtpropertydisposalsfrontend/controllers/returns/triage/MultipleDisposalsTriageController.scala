@@ -862,10 +862,15 @@ class MultipleDisposalsTriageController @Inject() (
           viewConfig.maxYearForDisposalsAndCompletion
         )
 
-        val form     = completionDate.fold(completionDateForm(maxDateAllowed, getDateOfDeath(state)))(
-          completionDateForm(maxDateAllowed, getDateOfDeath(state)).fill
+        val dateOfDeath                            = getDateOfDeath(state)
+        val (dateOfDeathValue, isDateOfDeathValid) = dateOfDeath match {
+          case Some(x) => (x.value, Some(true))
+          case _       => (TaxYear.earliestTaxYearStartDate, Some(false))
+        }
+        val form                                   = completionDate.fold(completionDateForm(maxDateAllowed, dateOfDeathValue, isDateOfDeathValid))(
+          completionDateForm(maxDateAllowed, dateOfDeathValue, isDateOfDeathValid).fill
         )
-        val backLink = answers.fold(
+        val backLink                               = answers.fold(
           _ =>
             routes.MultipleDisposalsTriageController
               .whenWereContractsExchanged(),
@@ -888,8 +893,13 @@ class MultipleDisposalsTriageController @Inject() (
 
         val taxYearAtStart: Option[Int] = getTaxYearByTaxYearExchanged(taxYearExchangedSelected)
 
-        val dateOfDeath = getDateOfDeath(state)
-        completionDateForm(maxDateAllowed, dateOfDeath, taxYearAtStart)
+        val dateOfDeath                            = getDateOfDeath(state)
+        val (dateOfDeathValue, isDateOfDeathValid) = dateOfDeath match {
+          case Some(x) => (x.value, Some(true))
+          case _       => (TaxYear.earliestTaxYearStartDate, Some(false))
+        }
+
+        completionDateForm(maxDateAllowed, dateOfDeathValue, isDateOfDeathValid, taxYearAtStart)
           .bindFromRequest()
           .fold(
             { formWithErrors =>
@@ -1824,20 +1834,22 @@ object MultipleDisposalsTriageController {
 
   def completionDateForm(
     maximumDateInclusive: LocalDate,
-    dateOfDeath: Option[DateOfDeath],
+    minimumDateInclusive: LocalDate,
+    isDateOfDeathValid: Option[Boolean] = None,
     taxYearAtStart: Option[Int] = None
   ): Form[CompletionDate] =
     Form(
       mapping(
         "" -> of(
-          TimeUtils.dateFormatter(
+          TimeUtils.dateFormatterForMultiDisposals(
             Some(maximumDateInclusive),
-            Some(dateOfDeath.getOrElse(DateOfDeath(TaxYear.earliestTaxYearStartDate)).value),
+            Some(minimumDateInclusive),
             "multipleDisposalsCompletionDate-day",
             "multipleDisposalsCompletionDate-month",
             "multipleDisposalsCompletionDate-year",
             "multipleDisposalsCompletionDate",
-            taxYearAtStart
+            taxYearAtStart,
+            isDateOfDeathValid
           )
         )
       )(CompletionDate(_))(d => Some(d.value))
