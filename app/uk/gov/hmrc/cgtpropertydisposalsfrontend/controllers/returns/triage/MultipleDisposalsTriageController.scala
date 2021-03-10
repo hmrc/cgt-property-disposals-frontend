@@ -878,10 +878,11 @@ class MultipleDisposalsTriageController @Inject() (
   def completionDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
-        val maxDateAllowed                                     = TimeUtils.getMaximumDateForDisposalsAndCompletion(
+        val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
           viewConfig.enableFutureDateForDisposalAndCompletion,
           viewConfig.maxYearForDisposalsAndCompletion
         )
+
         val taxYearExchangedSelected: Option[TaxYearExchanged] =
           answers.fold(_.taxYearExchanged, c => Some(c.taxYearExchanged))
 
@@ -889,7 +890,7 @@ class MultipleDisposalsTriageController @Inject() (
 
         val dateOfDeath = getDateOfDeath(state)
         completionDateForm(maxDateAllowed, dateOfDeath, taxYearAtStart)
-          .bindFromRequest()
+         .bindFromRequest()
           .fold(
             { formWithErrors =>
               val backLink = answers.fold(
