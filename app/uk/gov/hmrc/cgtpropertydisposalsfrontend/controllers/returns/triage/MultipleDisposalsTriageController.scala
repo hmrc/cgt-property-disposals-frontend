@@ -1407,6 +1407,12 @@ class MultipleDisposalsTriageController @Inject() (
         !(taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
     }
 
+  def isTaxYearWithinOriginalSubmissionTaxYear(originalSubmissionYear: Option[String] = None) : Boolean = {
+
+
+    true
+  }
+
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, journey, answers) =>
