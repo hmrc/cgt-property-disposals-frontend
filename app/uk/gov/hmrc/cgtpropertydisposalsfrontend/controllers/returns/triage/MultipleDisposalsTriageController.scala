@@ -886,7 +886,7 @@ class MultipleDisposalsTriageController @Inject() (
         val taxYearExchangedSelected: Option[TaxYearExchanged] =
           answers.fold(_.taxYearExchanged, c => Some(c.taxYearExchanged))
 
-        val taxYearAtStart: Option[Int] = Some(getTaxYearByTaxYearExchanged(taxYearExchangedSelected))
+        val taxYearAtStart: Option[Int] = getTaxYearByTaxYearExchanged(taxYearExchangedSelected)
 
         val dateOfDeath = getDateOfDeath(state)
         completionDateForm(maxDateAllowed, dateOfDeath, taxYearAtStart)
@@ -958,11 +958,11 @@ class MultipleDisposalsTriageController @Inject() (
       }
     }
 
-  private def getTaxYearByTaxYearExchanged(taxYearExhanged: Option[TaxYearExchanged]): Int =
+  private def getTaxYearByTaxYearExchanged(taxYearExhanged: Option[TaxYearExchanged]): Option[Int] =
     taxYearExhanged match {
-      case Some(TaxYearExchanged.TaxYear2020) => 2020
-      case Some(TaxYearExchanged.TaxYear2021) => 2021
-      case _                                  => 0
+      case Some(TaxYearExchanged.TaxYear2020) => Some(2020)
+      case Some(TaxYearExchanged.TaxYear2021) => Some(2021)
+      case _                                  => None
     }
 
   private def getDateOfDeath(state: JourneyState): Option[DateOfDeath] =
