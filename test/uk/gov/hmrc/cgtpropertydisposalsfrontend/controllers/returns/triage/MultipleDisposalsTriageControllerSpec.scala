@@ -3482,8 +3482,6 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
 
-          println("MOHAN at 3482 : " + updatedAnswers.toString)
-
           checkIsTechnicalErrorPage(
             performAction(formData(today): _*)
           )
@@ -3522,7 +3520,6 @@ class MultipleDisposalsTriageControllerSpec
             )(Left(Error("")))
           }
 
-          println("MOHAN MOHAN at 3522 " + answers.toString)
           checkIsTechnicalErrorPage(
             performAction(formData(newCompletionDate.value): _*)
           )
@@ -3562,7 +3559,6 @@ class MultipleDisposalsTriageControllerSpec
                 session.copy(journeyStatus = Some(updatedJourney))
               )(Right(()))
             }
-            println("MOHAN MOHAN at 3542 new" + updatedJourney.toString)
 
             checkIsRedirect(
               performAction(formData(newCompletionDate.value): _*),
@@ -3689,8 +3685,6 @@ class MultipleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
           }
-
-          println("MOHAN MOHAN at line:3675 " + answers.toString)
 
           checkIsRedirect(
             performAction(formData(answers.completionDate.value): _*),
