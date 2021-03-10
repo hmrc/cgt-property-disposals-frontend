@@ -725,11 +725,11 @@ class SingleDisposalsTriageController @Inject() (
             )
           )
         )(
-          page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+          page = { (journeyStatus, currentAnswers, form, isDraftReturn, d) =>
             val isATrust = journeyStatus
               .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
             completionDatePage(
-              form,
+              form.copy(errors = form.errors.map(x => x.copy(args = Seq(TimeUtils.govDisplayFormat(d.value))))),
               backLink(
                 currentAnswers,
                 routes.SingleDisposalsTriageController.whenWasDisposalDate()
@@ -1904,6 +1904,7 @@ object SingleDisposalsTriageController {
             "disposalDate-month",
             "disposalDate-year",
             "disposalDate",
+            None,
             List(
               TimeUtils.personalRepresentativeDateValidation(
                 personalRepresentativeDetails,

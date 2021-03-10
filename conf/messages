@@ -1055,7 +1055,7 @@ completionDate.personalRepInPeriodOfAdmin.helpText=It’s usually when the money
 completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
-completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date
+completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date, {0}
 completionDate.error.tooFarInFuture=Completion date must be today or in the past
 completionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
 
@@ -1256,7 +1256,7 @@ multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
 multipleDisposalsCompletionDate.error.tooFarInPast=The completion date cannot be before the date of death
-
+multipleDisposalsCompletionDate.error.CompletionDateNotWithinTaxYear=Completion date must be in or after the same tax year as the exchange date
 multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
 multipleDisposalsCompletionDate-month.error.required=Completion date must include a month
 multipleDisposalsCompletionDate-year.error.required=Completion date must include a year

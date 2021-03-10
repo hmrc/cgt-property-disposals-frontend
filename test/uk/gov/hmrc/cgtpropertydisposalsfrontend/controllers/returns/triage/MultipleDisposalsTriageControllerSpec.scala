@@ -3453,11 +3453,18 @@ class MultipleDisposalsTriageControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
+          val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
+            TaxYearExchanged.TaxYear2020
+          } else {
+            TaxYearExchanged.TaxYear2021
+          }
+          val answers                                    = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             individualUserType = Some(Self),
+            taxYearExchanged = taxYearExchangedAdjusted,
             completionDate = CompletionDate(today.minusDays(1L))
           )
-          val (session, journey, draftReturn) =
+          val (session, journey, draftReturn)            =
             sessionDataWithFillingOutReturn(answers)
 
           val updatedAnswers     =
@@ -3481,12 +3488,19 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "there is an error updating the session" in {
-          val answers            =
+          val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
+          val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
+            TaxYearExchanged.TaxYear2020
+          } else {
+            TaxYearExchanged.TaxYear2021
+          }
+          val answers                                    =
             sample[CompleteMultipleDisposalsTriageAnswers].copy(
               individualUserType = Some(Self),
+              taxYearExchanged = taxYearExchangedAdjusted,
               completionDate = CompletionDate(today)
             )
-          val (session, journey) =
+          val (session, journey)                         =
             sessionDataWithStartingNewDraftReturn(answers)
 
           val newCompletionDate =
@@ -3518,13 +3532,25 @@ class MultipleDisposalsTriageControllerSpec
         "the user has not started a draft return and" when {
 
           "the user has not answered the question before" in {
-            val answers            = IncompleteMultipleDisposalsTriageAnswers.empty
-            val (session, journey) =
+            val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
+            val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
+              TaxYearExchanged.TaxYear2020
+            } else {
+              TaxYearExchanged.TaxYear2021
+            }
+            val answers                                    =
+              IncompleteMultipleDisposalsTriageAnswers.empty.copy(taxYearExchanged = Some(taxYearExchangedAdjusted))
+            val (session, journey)                         =
               sessionDataWithStartingNewDraftReturn(answers)
 
             val newCompletionDate = CompletionDate(today)
             val updatedJourney    =
-              journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = Some(newCompletionDate))))
+              journey.copy(newReturnTriageAnswers =
+                Left(
+                  answers
+                    .copy(completionDate = Some(newCompletionDate))
+                )
+              )
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -3542,12 +3568,19 @@ class MultipleDisposalsTriageControllerSpec
 
           "the user has already answered the question" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
-              val answers            =
+              val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
+              val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
+                TaxYearExchanged.TaxYear2020
+              } else {
+                TaxYearExchanged.TaxYear2021
+              }
+              val answers                                    =
                 c.copy(
                   individualUserType = Some(Self),
-                  completionDate = CompletionDate(today)
+                  completionDate = CompletionDate(today),
+                  taxYearExchanged = taxYearExchangedAdjusted
                 )
-              val (session, journey) =
+              val (session, journey)                         =
                 sessionDataWithStartingNewDraftReturn(answers)
 
               val newCompletionDate =
@@ -3579,8 +3612,16 @@ class MultipleDisposalsTriageControllerSpec
 
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
+              val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
+              val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
+                TaxYearExchanged.TaxYear2020
+              } else {
+                TaxYearExchanged.TaxYear2021
+              }
+
               val currentAnswers  = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 individualUserType = Some(Self),
+                taxYearExchanged = taxYearExchangedAdjusted,
                 completionDate = CompletionDate(today.minusDays(1L))
               )
               val submittedDate   = today
@@ -3626,8 +3667,16 @@ class MultipleDisposalsTriageControllerSpec
       "not perform any updates" when {
 
         "the date submitted is the same as one that already exists in session" in {
+          val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
+          val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
+            TaxYearExchanged.TaxYear2020
+          } else {
+            TaxYearExchanged.TaxYear2021
+          }
+
           val answers      = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             individualUserType = Some(Self),
+            taxYearExchanged = taxYearExchangedAdjusted,
             completionDate = CompletionDate(TimeUtils.today())
           )
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
