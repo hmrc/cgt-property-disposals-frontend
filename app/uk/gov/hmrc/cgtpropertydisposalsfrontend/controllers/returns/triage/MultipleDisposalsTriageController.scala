@@ -899,16 +899,9 @@ class MultipleDisposalsTriageController @Inject() (
                 _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
 
-              val param1                = TimeUtils.govDisplayFormat(
-                dateOfDeath.getOrElse(DateOfDeath(TimeUtils.today())).value
-              )
-              val updatedFormWithErrors = formWithErrors.errors.map {
-                _.copy(args = Seq(param1))
-              }
-
               BadRequest(
                 completionDatePage(
-                  formWithErrors.copy(errors = updatedFormWithErrors),
+                  formWithErrors,
                   backLink,
                   state.isRight,
                   state.fold(_ => false, _._1.isAmendReturn)
@@ -1726,19 +1719,17 @@ object MultipleDisposalsTriageController {
           readValue(key, data, identity)
             .flatMap {
               case "TaxYear2021"       =>
-                if (
-                  (representativeType.contains(PersonalRepresentative) && conditionExpr1) ||
-                  (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr3)
-                )
-                  Left(FormError(key, "error.invalid"))
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr1)
+                  Left(FormError(key, "error.before.invalid"))
+                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr3)
+                  Left(FormError(key, "error.after.invalid"))
                 else
                   Right(TaxYearExchanged.TaxYear2021)
               case "TaxYear2020"       =>
-                if (
-                  (representativeType.contains(PersonalRepresentative) && conditionExpr3) ||
-                  (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr2)
-                )
-                  Left(FormError(key, "error.invalid"))
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr3)
+                  Left(FormError(key, "error.before.invalid"))
+                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr2)
+                  Left(FormError(key, "error.after.invalid"))
                 else
                   Right(TaxYearExchanged.TaxYear2020)
               case "TaxYearBefore2020" => Right(TaxYearExchanged.TaxYearBefore2020)
