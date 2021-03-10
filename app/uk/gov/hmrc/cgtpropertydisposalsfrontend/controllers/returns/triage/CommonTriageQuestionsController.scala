@@ -68,7 +68,8 @@ class CommonTriageQuestionsController @Inject() (
   previousReturnExistsWithSameCompletionDateAmendPage: triagePages.previous_return_exists_with_same_completion_date_amend,
   disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
   cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
-  whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page
+  whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page,
+  disposalDateIncompatibleTaxyears: triagePages.disposaldate_incompatible_taxyears
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -507,6 +508,13 @@ class CommonTriageQuestionsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
         Ok(disposalDateInDifferentTaxYearPage(amendReturnDisposalDateBackLink(state)))
+      }
+    }
+
+  def disposalDateIncompatibleTaxyears(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState { (_, state) =>
+        Ok(disposalDateIncompatibleTaxyears(amendReturnDisposalDateBackLink(state)))
       }
     }
 

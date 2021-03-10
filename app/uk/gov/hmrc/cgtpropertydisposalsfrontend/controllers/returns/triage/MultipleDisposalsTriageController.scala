@@ -1166,8 +1166,12 @@ class MultipleDisposalsTriageController @Inject() (
           .map(_.fold(_ => false, _ => true))
           .getOrElse(false)
 
-        val originalSubmissionYear =
-          state.fold(_ => 0, _._1.amendReturnData.fold(0)(x => x.originalReturn.summary.taxYear.toInt))
+        println(
+          "MOHAN at 1169: " + state.fold(_ => "", _._1.amendReturnData.fold("")(x => x.originalReturn.summary.taxYear))
+        )
+
+        val originalSubmissionYear: Option[String] =
+          state.toOption.flatMap(_._1.amendReturnData.map(_.originalReturn.summary.taxYear))
 
         triageAnswers match {
           case IncompleteMultipleDisposalsTriageAnswers(
@@ -1356,7 +1360,7 @@ class MultipleDisposalsTriageController @Inject() (
                 originalSubmissionYear
               ) =>
             Redirect(
-              routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+              routes.CommonTriageQuestionsController.disposalDateIncompatibleTaxyears()
             )
 
           case IncompleteMultipleDisposalsTriageAnswers(
@@ -1476,10 +1480,10 @@ class MultipleDisposalsTriageController @Inject() (
 
   def isTaxYearWithinOriginalSubmissionTaxYear(
     taxYearExchanged: Option[TaxYearExchanged],
-    originalSubmissionYear: Int
+    originalSubmissionYear: Option[String]
   ): Boolean =
     getTaxYearByTaxYearExchanged(taxYearExchanged) match {
-      case Some(tyExchanged) => tyExchanged === originalSubmissionYear
+      case Some(tyExchanged) => tyExchanged === originalSubmissionYear.getOrElse("0").toInt
       case _                 => false
     }
 
