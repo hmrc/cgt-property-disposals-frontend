@@ -1904,7 +1904,6 @@ object SingleDisposalsTriageController {
             "disposalDate-month",
             "disposalDate-year",
             "disposalDate",
-            None,
             List(
               TimeUtils.personalRepresentativeDateValidation(
                 personalRepresentativeDetails,

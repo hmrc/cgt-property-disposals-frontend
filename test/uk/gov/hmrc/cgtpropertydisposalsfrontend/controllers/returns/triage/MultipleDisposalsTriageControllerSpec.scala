@@ -4575,13 +4575,6 @@ class MultipleDisposalsTriageControllerSpec
               )
             }
 
-            println(
-              "MOHAN MOHAN AT 4578 " + sessionDataWithStartingNewDraftReturn(
-                completeAnswersNonUk,
-                userType = UserType.Agent
-              )._1.toString
-            )
-
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("multipleDisposals.triage.cya.title"),

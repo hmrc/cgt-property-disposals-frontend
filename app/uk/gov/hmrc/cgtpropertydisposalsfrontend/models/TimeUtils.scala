@@ -55,7 +55,6 @@ object TimeUtils {
     monthKey: String,
     yearKey: String,
     dateKey: String,
-    taxYearStartSelected: Option[Int] = None,
     extraValidation: List[LocalDate => Either[FormError, Unit]] = List.empty
   ): Formatter[LocalDate] =
     new Formatter[LocalDate] {
@@ -112,8 +111,6 @@ object TimeUtils {
                        Left(FormError(dateKey, "error.tooFarInPast"))
                      else if (date.isBefore(minimumDate))
                        Left(FormError(dateKey, "error.before1900"))
-                     else if (taxYearStartSelected.exists(x => !isCompletionDateWithinTaxYear(x, dateFieldStrings)))
-                       Left(FormError(dateKey, "error.CompletionDateNotWithinTaxYear"))
                      else
                        extraValidation
                          .map(_(date))

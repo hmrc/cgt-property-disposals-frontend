@@ -1176,10 +1176,6 @@ class MultipleDisposalsTriageController @Inject() (
           .map(_.fold(_ => false, _ => true))
           .getOrElse(false)
 
-        println(
-          "MOHAN at 1169: " + state.fold(_ => "", _._1.amendReturnData.fold("")(x => x.originalReturn.summary.taxYear))
-        )
-
         val originalSubmissionYear: Option[String] =
           state.toOption.flatMap(_._1.amendReturnData.map(_.originalReturn.summary.taxYear))
 
