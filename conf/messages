@@ -1192,8 +1192,8 @@ multipleDisposalsTaxYear.taxyear.different=The properties were exchanged in diff
 
 multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
-multipleDisposalsTaxYear.error.before.invalid=The taxyear exchanged must be in or before the tax year of the date of death
-multipleDisposalsTaxYear.error.after.invalid=The taxyear exchanged must be in or after the tax year of the date of death
+multipleDisposalsTaxYear.error.before.invalid=The exchange dates must be either in the same tax year as the date of death or a previous tax year
+multipleDisposalsTaxYear.error.after.invalid=The exchange dates must be either in the same tax year as the date of death or a later tax year
 multipleDisposalsTaxYear.cyaChange=when contracts were exchanged on all the properties
 
 
