@@ -1166,6 +1166,9 @@ class MultipleDisposalsTriageController @Inject() (
           .map(_.fold(_ => false, _ => true))
           .getOrElse(false)
 
+        val originalSubmissionYear =
+          state.fold(_ => 0, _._1.amendReturnData.fold(0)(x => x.originalReturn.summary.taxYear.toInt))
+
         triageAnswers match {
           case IncompleteMultipleDisposalsTriageAnswers(
                 None,
@@ -1344,6 +1347,25 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                taxYearExchanged,
+                _,
+                _
+              )
+              if isAmendReturn(state) && !isTaxYearWithinOriginalSubmissionTaxYear(
+                taxYearExchanged,
+                originalSubmissionYear
+              ) =>
+            Redirect(
+              routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
+            )
+
+          case IncompleteMultipleDisposalsTriageAnswers(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
                 Some(taxYearExchanged),
                 None,
                 _
@@ -1451,6 +1473,15 @@ class MultipleDisposalsTriageController @Inject() (
 
   def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged): Boolean =
     !(taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
+
+  def isTaxYearWithinOriginalSubmissionTaxYear(
+    taxYearExchanged: Option[TaxYearExchanged],
+    originalSubmissionYear: Int
+  ): Boolean =
+    getTaxYearByTaxYearExchanged(taxYearExchanged) match {
+      case Some(tyExchanged) => tyExchanged === originalSubmissionYear
+      case _                 => false
+    }
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
