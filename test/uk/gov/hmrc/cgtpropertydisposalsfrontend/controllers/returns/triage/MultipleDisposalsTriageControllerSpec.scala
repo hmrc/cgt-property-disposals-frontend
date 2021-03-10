@@ -1849,7 +1849,6 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionDataWithFillingOutReturn(incompleteAnswers)._1)
-            mockAvailableTaxYears()(Right(List(2020)))
           }
 
           checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.checkYourAnswers())
@@ -3385,7 +3384,7 @@ class MultipleDisposalsTriageControllerSpec
 
         def testFormError(
           formData: List[(String, String)]
-        )(expectedErrorMessageKey: String) = {
+        )(expectedErrorMessageKey: String, args: Seq[String] = Seq()) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -3405,7 +3404,8 @@ class MultipleDisposalsTriageControllerSpec
               doc
                 .select("#error-summary-display > ul > li > a")
                 .text() shouldBe messageFromMessageKey(
-                expectedErrorMessageKey
+                expectedErrorMessageKey,
+                args
               ),
             BAD_REQUEST
           )

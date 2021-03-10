@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.format.DateTimeFormatter
 import java.time.{Clock, LocalDate, LocalDateTime}
-
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
@@ -27,7 +26,8 @@ import configs.Configs
 import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.i18n.Messages
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.PersonalRepresentativeDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{PersonalRepresentativeDetails, TaxYearExchanged}
 
 import scala.util.Try
 
@@ -101,29 +101,25 @@ object TimeUtils {
           day ← toValidInt(dayKey, dateFieldStrings._1, Some(31))
           month ← toValidInt(monthKey, dateFieldStrings._2, Some(12))
           year ← toValidInt(yearKey, dateFieldStrings._3, None)
-          date ←
-            Either
-              .fromTry(Try(LocalDate.of(year, month, day)))
-              .leftMap(_ => FormError(dateKey, "error.invalid"))
-              .flatMap(date =>
-                if (
-                  maximumDateInclusive
-                    .exists(_.isBefore(date))
-                )
-                  Left(FormError(dateKey, "error.tooFarInFuture"))
-                else if (minimumDateInclusive.exists(_.isAfter(date)))
-                  Left(FormError(dateKey, "error.tooFarInPast"))
-                else if (date.isBefore(minimumDate))
-                  Left(FormError(dateKey, "error.before1900"))
-                else if (taxYearStartSelected.exists(x => !isCompletionDateWithinTaxYear(x, dateFieldStrings)))
-                  Left(FormError(dateKey, "error.tooFarInPast"))
-                else
-                  extraValidation
-                    .map(_(date))
-                    .find(_.isLeft)
-                    .getOrElse(Right(()))
-                    .map(_ => date)
-              )
+          date ← Either
+                   .fromTry(Try(LocalDate.of(year, month, day)))
+                   .leftMap(_ => FormError(dateKey, "error.invalid"))
+                   .flatMap(date =>
+                     if (maximumDateInclusive.exists(_.isBefore(date)))
+                       Left(FormError(dateKey, "error.tooFarInFuture"))
+                     else if (minimumDateInclusive.exists(_.isAfter(date)))
+                       Left(FormError(dateKey, "error.tooFarInPast"))
+                     else if (date.isBefore(minimumDate))
+                       Left(FormError(dateKey, "error.before1900"))
+                     else if (taxYearStartSelected.exists(x => !isCompletionDateWithinTaxYear(x, dateFieldStrings)))
+                       Left(FormError(dateKey, "error.tooFarInPast"))
+                     else
+                       extraValidation
+                         .map(_(date))
+                         .find(_.isLeft)
+                         .getOrElse(Right(()))
+                         .map(_ => date)
+                   )
         } yield date
 
         result.leftMap(Seq(_))
@@ -203,5 +199,15 @@ object TimeUtils {
     if (date1.isAfter(date2))
       date1
     else date2
+
+  def getTaxYearExchangedOfADate(d: LocalDate): TaxYearExchanged = {
+    val taxYear2020StartDate = LocalDate.of(2020, 4, 5)
+    val taxYear2020EndDate   = LocalDate.of(2021, 4, 6)
+    val taxYear2021StartDate = LocalDate.of(2021, 4, 5)
+    val taxYear2021EndDate   = LocalDate.of(2022, 4, 6)
+    if (d.isAfter(taxYear2020StartDate) && d.isBefore(taxYear2020EndDate)) TaxYear2020
+    else if (d.isAfter(taxYear2021StartDate) && d.isBefore(taxYear2021EndDate)) TaxYear2021
+    else TaxYearBefore2020
+  }
 
 }

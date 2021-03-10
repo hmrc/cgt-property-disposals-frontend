@@ -1193,7 +1193,7 @@ multipleDisposalsTaxYear.taxyear.different=The properties were exchanged in diff
 
 multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
-
+multipleDisposalsTaxYear.error.invalid=Please select valid taxyear
 multipleDisposalsTaxYear.cyaChange=when contracts were exchanged on all the properties
 
 
@@ -4380,7 +4380,7 @@ multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
 multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date
 multipleDisposalsDisposalDate.error.before1900=Contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
 
-multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {1} to {2}
+multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {0} to {1}
 multipleDisposalsDisposalDate-day.error.required=Contract exchange date must include a day
 multipleDisposalsDisposalDate-month.error.required=Contract exchange date must include a month
 multipleDisposalsDisposalDate-year.error.required=Contract exchange date must include a year
