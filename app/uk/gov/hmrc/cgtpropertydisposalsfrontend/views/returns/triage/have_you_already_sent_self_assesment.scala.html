@@ -71,8 +71,8 @@
             else ""
     }
 }
-@taxYearStr = @{taxYear.getOrElse("2020").toInt}
-@title = @{messages(s"$key$userKey.title", taxYearStr, taxYearStr+1)}
+@taxYearStart = @{taxYear.getOrElse("2020").toInt}
+@title = @{messages(s"$key$userKey.title", taxYearStart.toString, (taxYearStart+1).toString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {

@@ -839,9 +839,7 @@ class MultipleDisposalsTriageController @Inject() (
           completionDateForm(maxDateAllowed).fill
         )
         val backLink       = answers.fold(
-          _ =>
-            routes.MultipleDisposalsTriageController
-              .whenWereContractsExchanged(),
+          _ => routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
           _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
         Ok(completionDatePage(form, backLink, state.isRight, state.fold(_ => false, _._1.isAmendReturn)))
@@ -860,9 +858,7 @@ class MultipleDisposalsTriageController @Inject() (
           .fold(
             { formWithErrors =>
               val backLink = answers.fold(
-                _ =>
-                  routes.MultipleDisposalsTriageController
-                    .whenWereContractsExchanged(),
+                _ => routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
                 _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
               BadRequest(

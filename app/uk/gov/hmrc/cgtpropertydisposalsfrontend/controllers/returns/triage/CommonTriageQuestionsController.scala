@@ -68,7 +68,8 @@ class CommonTriageQuestionsController @Inject() (
   disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
   cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
   whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page,
-  alreadySentselfAssessmentPage: triagePages.have_you_already_sent_self_assesment
+  alreadySentSelfAssessmentPage: triagePages.have_you_already_sent_self_assesment,
+  selfAssessmentExitPage: triagePages.self_assessment_already_submitted
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -515,6 +516,22 @@ class CommonTriageQuestionsController @Inject() (
       Ok(whoAreYouSubmittingAmendExitPage(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()))
     }
 
+  def selfAssessmentAlreadySubmitted(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState { (_, state) =>
+        Ok(
+          selfAssessmentExitPage(
+            routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
+            state.fold(
+              _.subscribedDetails.isATrust,
+              _.subscribedDetails.isATrust
+            ),
+            getTaxYearStringFromAnswers(triageAnswersFomState(state))
+          )
+        )
+      }
+    }
+
   def haveYouAlreadySentSelfAssessment(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
@@ -544,7 +561,7 @@ class CommonTriageQuestionsController @Inject() (
         )
 
         Ok(
-          alreadySentselfAssessmentPage(
+          alreadySentSelfAssessmentPage(
             form,
             backLink,
             state.isRight,
@@ -582,7 +599,7 @@ class CommonTriageQuestionsController @Inject() (
                 )
               )
               BadRequest(
-                alreadySentselfAssessmentPage(
+                alreadySentSelfAssessmentPage(
                   formWithErrors,
                   backLink,
                   state.isRight,
@@ -746,7 +763,11 @@ class CommonTriageQuestionsController @Inject() (
                     logger.warn("Could not perform updates", e)
                     errorHandler.errorResult()
                   },
-                  _ => Redirect(redirectToCheckYourAnswers(updatedState))
+                  _ =>
+                    if (alreadySentSelfAssessment)
+                      Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
+                    else
+                      Redirect(redirectToCheckYourAnswers(updatedState))
                 )
               }
           )

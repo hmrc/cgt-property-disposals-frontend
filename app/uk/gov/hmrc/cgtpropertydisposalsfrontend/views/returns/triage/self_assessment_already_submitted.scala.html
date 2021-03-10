@@ -16,6 +16,7 @@
 
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
+@import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -24,16 +25,16 @@
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
 @(
     backLink: Call,
-    isATrust: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+    isATrust: Boolean,
+    taxYear: Option[String]
+)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-@key = @{"cannotAmendResidentialStatusForAssetType"}
+@key = @{"selfAssessmentAlreadySubmitted"}
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
@@ -43,7 +44,8 @@
     else ""
 }
 
-@title = @{messages(s"$key.title")}
+@taxYearStart = @{taxYear.getOrElse("2020").toInt}
+@title = @{messages(s"$key$userKey.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -51,17 +53,15 @@
 
     @pageHeading(title)
 
-    @warning(messages(s"$key$userKey.warning"))
+    <p>@messages(s"$key$userKey.p1", taxYearStart.toString, (taxYearStart+1).toString)</p>
 
-    <p>@messages(s"$key.p1")</p>
-
-    <ul class="list-bullet">
-        <li>@messages(s"$key$userKey.li1")</li>
-        <li>@messages(s"$key$userKey.li2")</li>
-        <li>@messages(s"$key$userKey.li3")</li>
-        <li>@messages(s"$key$userKey.li4")</li>
-    </ul>
-
-  <a href="@{appConfig.contactHmrc}">@messages(s"$key.link")</a>
+    <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
+    <p>@Html(messages(
+        s"$key$userKey.p2",
+        viewConfig.selfAssessmentTaxReturnsCorrections,
+        taxYearStart.toString,
+        (taxYearStart+1).toString
+       ))
+    </p>
 
 }

@@ -797,47 +797,47 @@ cannotAmendResidentialStatusForAssetType.trust.li4=interest and penalty payments
 
 cannotAmendResidentialStatusForAssetType.link=Contact HMRC
 
-alreadySentSelfAssessment.title=Have you sent a Self Assessment tax return for {0} to {1}?
-alreadySentSelfAssessment.agent.title=Has your client sent a Self Assessment tax return for {0} to {1}?
-alreadySentSelfAssessment.trust.title=Has the trust sent a Self Assessment: Trust and Estate tax return for {0} to {1}?
-alreadySentSelfAssessment.capacitor.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
-alreadySentSelfAssessment.personalRep.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
-alreadySentSelfAssessment.personalRepInPeriodOfAdmin.title=Has anyone sent the person’s Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.title=Have you sent a Self Assessment tax return for 6 April {0} to 5 April {1}?
+alreadySentSelfAssessment.agent.title=Has your client sent a Self Assessment tax return for 6 April {0} to 5 April {1}?
+alreadySentSelfAssessment.trust.title=Has the trust sent a Self Assessment: Trust and Estate tax return for 6 April {0} to 5 April {1}?
+alreadySentSelfAssessment.capacitor.title=Has anyone sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}?
+alreadySentSelfAssessment.personalRep.title=Has anyone sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}?
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.title=Has anyone sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}?
 
-alreadySentSelfAssessment.error.required=Select whether you have sent a Self Assessment tax return for {0} to {1}?
-alreadySentSelfAssessment.agent.error.required=Select whether your client has sent a Self Assessment tax return for {0} to {1}?
-alreadySentSelfAssessment.trust.error.required=Select whether the trust has sent a Self Assessment: Trust and Estate tax return for {0} to {1}?
-alreadySentSelfAssessment.capacitor.error.required=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}?
-alreadySentSelfAssessment.personalRep.error.required=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}?
-alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.required=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}?
+alreadySentSelfAssessment.error.required=Select whether you have sent a Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.agent.error.required=Select whether your client has sent a Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.trust.error.required=Select whether the trust has sent a Self Assessment: Trust and Estate tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.capacitor.error.required=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.personalRep.error.required=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.required=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
 
-alreadySentSelfAssessment.error.invalid=Select whether you have sent a Self Assessment tax return for {0} to {1}
-alreadySentSelfAssessment.agent.error.invalid=Select whether your client has sent a Self Assessment tax return for {0} to {1}
-alreadySentSelfAssessment.trust.error.invalid=Select whether the trust has sent a Self Assessment: Trust and Estate tax return for {0} to {1}
-alreadySentSelfAssessment.capacitor.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}
-alreadySentSelfAssessment.personalRep.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}
-alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for {0} to {1}
+alreadySentSelfAssessment.error.invalid=Select whether you have sent a Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.agent.error.invalid=Select whether your client has sent a Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.trust.error.invalid=Select whether the trust has sent a Self Assessment: Trust and Estate tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.capacitor.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.personalRep.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
 
 
 alreadySentSelfAssessment.cyaChange=Have you sent a Self Assessment tax return
 
 selfAssessmentAlreadySubmitted.title=You cannot use this service
 
-selfAssessmentAlreadySubmitted.p1=You have already sent your Self Assessment tax return for the tax year 6 April 2020 to 5 April 2021.
-selfAssessmentAlreadySubmitted.agent.p1=Your client has already sent the their Self Assessment tax return for the tax year 6 April 2020 to 5 April 2021.
-selfAssessmentAlreadySubmitted.trust.p1=Someone has already sent the trust’s Self Assessment: Trust and Estate tax return for the tax year 6 April 2020 to 5 April 2021.
-selfAssessmentAlreadySubmitted.capacitor.p1=Someone has already sent the person’s Self Assessment tax return for the tax year 6 April 2020 to 5 April 2021.
-selfAssessmentAlreadySubmitted.personalRep.p1=Someone has already sent the person’s Self Assessment tax return for the tax year 6 April 2020 to 5 April 2021.
-selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p1=Someone has already sent the person’s Self Assessment tax return for the tax year 6 April 2020 to 5 April 2021.
+selfAssessmentAlreadySubmitted.p1=You have already sent your Self Assessment tax return for the tax year 6 April {0} to 5 April {1}.
+selfAssessmentAlreadySubmitted.agent.p1=Your client has already sent the their Self Assessment tax return for the tax year 6 April {0} to 5 April {1}.
+selfAssessmentAlreadySubmitted.trust.p1=Someone has already sent the trust’s Self Assessment: Trust and Estate tax return for the tax year 6 April {0} to 5 April {1}.
+selfAssessmentAlreadySubmitted.capacitor.p1=Someone has already sent the person’s Self Assessment tax return for the tax year 6 April {0} to 5 April {1}.
+selfAssessmentAlreadySubmitted.personalRep.p1=Someone has already sent the person’s Self Assessment tax return for the tax year 6 April {0} to 5 April {1}.
+selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p1=Someone has already sent the person’s Self Assessment tax return for the tax year 6 April {0} to 5 April {1}.
 
 selfAssessmentAlreadySubmitted.whatNext=What you’ll need to do next
 
-selfAssessmentAlreadySubmitted.p2=You’ll need to change your Self Assessment tax return by adding details of any UK property sales or disposals made during the tax year 6 April 2020 to 5 April 2021.
-selfAssessmentAlreadySubmitted.agent.p2=You’ll need to change your client’s Self Assessment tax return by adding details of any UK property sales or disposals made during the tax year 6 April 2020 to 5 April 2021.
-selfAssessmentAlreadySubmitted.trust.p2=You’ll need to change the trust’s Self Assessment: Trust and Estate tax return by adding details of any UK property sales or disposals made during the tax year 6 April 2020 to 5 April 2021.
-selfAssessmentAlreadySubmitted.capacitor.p2=You’ll need to change the person’s Self Assessment tax return by adding details of any UK property sales or disposals made during the tax year 6 April 2020 to 5 April 2021.
-selfAssessmentAlreadySubmitted.personalRep.p2=You’ll need to change the person’s Self Assessment tax return by adding details of any UK property sales or disposals made during the tax year 6 April 2020 to 5 April 2021.
-selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=You’ll need to change the person’s Self Assessment tax return by adding details of any UK property sales or disposals made during the tax year 6 April 2020 to 5 April 2021.
+selfAssessmentAlreadySubmitted.p2=You’ll need to <a href="{0}" target="_blank">change your Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.agent.p2=You’ll need to <a href="{0}" target="_blank">change your client’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.trust.p2=You’ll need to <a href="{0}" target="_blank">change the trust’s Self Assessment: Trust and Estate tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.capacitor.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.personalRep.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 
 
 #===================================================

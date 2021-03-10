@@ -29,15 +29,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 
 @this(
-cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(
     answers: CompleteMultipleDisposalsTriageAnswers,
     isATrust: Boolean,
-        representeeAnswers: Option[RepresenteeAnswers]
+    representeeAnswers: Option[RepresenteeAnswers]
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @representativeType = @{answers.representativeType()}
@@ -144,7 +144,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
   }
 
   @cyaRow(
-    messages(s"alreadySentSelfAssessment$userKey.title"),
+    messages(s"alreadySentSelfAssessment$userKey.title", answers.taxYear.startDateInclusive.getYear.toString, answers.taxYear.endDateExclusive.getYear.toString),
     Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.toString}")),
     Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
     "alreadySentSelfAssessment"
