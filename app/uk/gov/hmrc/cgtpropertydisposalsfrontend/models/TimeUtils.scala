@@ -18,10 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.format.DateTimeFormatter
 import java.time.{Clock, LocalDate, LocalDateTime}
-
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
+import cats.instances.int._
 import configs.Configs
 import play.api.data.FormError
 import play.api.data.format.Formatter
@@ -54,6 +54,7 @@ object TimeUtils {
     monthKey: String,
     yearKey: String,
     dateKey: String,
+    taxYearStartSelected: Option[Int] = None,
     extraValidation: List[LocalDate => Either[FormError, Unit]] = List.empty
   ): Formatter[LocalDate] =
     new Formatter[LocalDate] {
@@ -110,6 +111,8 @@ object TimeUtils {
                        Left(FormError(dateKey, "error.tooFarInPast"))
                      else if (date.isBefore(minimumDate))
                        Left(FormError(dateKey, "error.before1900"))
+                     else if (taxYearStartSelected.exists(x => !isCompletionDateWithinTaxYear(x, dateFieldStrings)))
+                       Left(FormError(dateKey, "error.CompletionDateNotWithinTaxYear"))
                      else
                        extraValidation
                          .map(_(date))
@@ -130,6 +133,16 @@ object TimeUtils {
         )
 
     }
+
+  def isCompletionDateWithinTaxYear(
+    taxYearStartSelected: Int,
+    dateFieldStrings: (String, String, String)
+  ): Boolean = {
+    val userSelectedCompletionDate =
+      LocalDate.of(dateFieldStrings._3.toInt, dateFieldStrings._2.toInt, dateFieldStrings._1.toInt)
+    val userSelectedTaxYear        = taxYearStart(userSelectedCompletionDate)
+    taxYearStartSelected === userSelectedTaxYear.getYear
+  }
 
   def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
     s"""${date.getDayOfMonth()} ${messages(
