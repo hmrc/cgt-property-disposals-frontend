@@ -543,8 +543,8 @@ class CommonTriageQuestionsController @Inject() (
               mc => Some(mc.alreadySentSelfAssessment)
             ),
             _.fold(
-              _.sentSelfAssessment,
-              sc => Some(sc.sentSelfAssessment)
+              _.alreadySentSelfAssessment,
+              sc => Some(sc.alreadySentSelfAssessment)
             )
           )
 
@@ -624,8 +624,8 @@ class CommonTriageQuestionsController @Inject() (
                       completeMultiple => Some(completeMultiple.alreadySentSelfAssessment)
                     ),
                     _.fold(
-                      _.sentSelfAssessment,
-                      completeSingle => Some(completeSingle.sentSelfAssessment)
+                      _.alreadySentSelfAssessment,
+                      completeSingle => Some(completeSingle.alreadySentSelfAssessment)
                     )
                   )
                   .contains(alreadySentSelfAssessment)
@@ -637,8 +637,8 @@ class CommonTriageQuestionsController @Inject() (
                 def updateSingleDisposalAnswers(
                   i: SingleDisposalTriageAnswers
                 ): IncompleteSingleDisposalTriageAnswers =
-                  i.unset(_.sentSelfAssessment)
-                    .copy(sentSelfAssessment = Some(alreadySentSelfAssessment))
+                  i.unset(_.alreadySentSelfAssessment)
+                    .copy(alreadySentSelfAssessment = Some(alreadySentSelfAssessment))
 
                 def updateMultipleDisposalAnswers(
                   i: MultipleDisposalsTriageAnswers

@@ -151,6 +151,16 @@
             "disposalDate"
         )
         @cyaRow(
+            messages(
+                s"alreadySentSelfAssessment$userKey.title",
+                answers.disposalDate.taxYear.startDateInclusive.getYear.toString,
+                answers.disposalDate.taxYear.endDateExclusive.getYear.toString
+            ),
+            Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.toString}")),
+            Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
+            "alreadySentSelfAssessment"
+        )
+        @cyaRow(
             messages(s"completionDate$userKey.title"),
             Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
             Some(cyaChange(messages("completionDate.cyaChange"), routes.SingleDisposalsTriageController.whenWasCompletionDate().url)),

@@ -1424,6 +1424,22 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                None,
+                _,
+                _
+              ) =>
+            Redirect(
+              routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+            )
+
+          case IncompleteSingleDisposalTriageAnswers(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
                 _,
                 None,
                 None
