@@ -650,7 +650,8 @@ class SingleDisposalsTriageController @Inject() (
         .copy(
           disposalDate = date.toOption,
           tooEarlyDisposalDate = date.swap.toOption,
-          completionDate = None
+          completionDate = None,
+          alreadySentSelfAssessment = None
         )
 
     taxYear.fold {
@@ -658,7 +659,8 @@ class SingleDisposalsTriageController @Inject() (
         _.copy(
           disposalDate = None,
           tooEarlyDisposalDate = Some(d),
-          completionDate = None
+          completionDate = None,
+          alreadySentSelfAssessment = None
         ),
         updateCompleteAnswers(_, Left(d))
       )
@@ -667,7 +669,8 @@ class SingleDisposalsTriageController @Inject() (
         _.copy(
           disposalDate = Some(DisposalDate(d, taxYear)),
           tooEarlyDisposalDate = None,
-          completionDate = None
+          completionDate = None,
+          alreadySentSelfAssessment = None
         ),
         updateCompleteAnswers(_, Right(DisposalDate(d, taxYear)))
       )
@@ -1453,14 +1456,19 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                _,
+                Some(DisposalDate(_, taxYear)),
                 None,
-                _,
-                _
+                None,
+                None
               ) =>
-            Redirect(
-              routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
-            )
+            if (taxYear.isItInLatestTaxYear())
+              Redirect(
+                routes.SingleDisposalsTriageController.whenWasCompletionDate()
+              )
+            else
+              Redirect(
+                routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+              )
 
           case IncompleteSingleDisposalTriageAnswers(
                 _,
@@ -1502,7 +1510,7 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 Some(r),
                 Some(d),
-                Some(sa),
+                sa,
                 Some(c),
                 _
               ) =>
@@ -1521,7 +1529,7 @@ class SingleDisposalsTriageController @Inject() (
                 Some(country),
                 Some(r),
                 Some(d),
-                Some(sa),
+                sa,
                 Some(c),
                 _
               ) =>

@@ -2689,7 +2689,7 @@ class CommonTriageQuestionsControllerSpec
                 Country.uk,
                 assetType = AssetType.Residential,
                 disposalDate,
-                false,
+                Some(false),
                 sample[CompletionDate]
               )
             val completeTriageQuestionsWithIndirectDisposal = completeTriageQuestions.copy(
@@ -2750,7 +2750,7 @@ class CommonTriageQuestionsControllerSpec
                 Country.uk,
                 assetType = AssetType.Residential,
                 disposalDate,
-                false,
+                Some(false),
                 sample[CompletionDate]
               )
             val completeTriageQuestionsWithIndirectDisposal = completeTriageQuestions.copy(

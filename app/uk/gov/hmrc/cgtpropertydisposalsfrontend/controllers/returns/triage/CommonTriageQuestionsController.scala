@@ -540,11 +540,11 @@ class CommonTriageQuestionsController @Inject() (
           triageAnswers.fold(
             _.fold(
               _.alreadySentSelfAssessment,
-              mc => Some(mc.alreadySentSelfAssessment)
+              _.alreadySentSelfAssessment
             ),
             _.fold(
               _.alreadySentSelfAssessment,
-              sc => Some(sc.alreadySentSelfAssessment)
+              _.alreadySentSelfAssessment
             )
           )
 
@@ -619,14 +619,8 @@ class CommonTriageQuestionsController @Inject() (
               if (
                 triageAnswers
                   .fold(
-                    _.fold(
-                      _.alreadySentSelfAssessment,
-                      completeMultiple => Some(completeMultiple.alreadySentSelfAssessment)
-                    ),
-                    _.fold(
-                      _.alreadySentSelfAssessment,
-                      completeSingle => Some(completeSingle.alreadySentSelfAssessment)
-                    )
+                    _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment),
+                    _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
                   )
                   .contains(alreadySentSelfAssessment)
               )

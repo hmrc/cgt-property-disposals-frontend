@@ -1037,7 +1037,7 @@ class SingleDisposalsTriageControllerSpec
                   None,
                   None,
                   Some(completeAnswers.disposalDate),
-                  Some(completeAnswers.alreadySentSelfAssessment),
+                  completeAnswers.alreadySentSelfAssessment,
                   Some(completeAnswers.completionDate),
                   None
                 ),
@@ -1065,7 +1065,7 @@ class SingleDisposalsTriageControllerSpec
                   None,
                   None,
                   Some(completeAnswers.disposalDate),
-                  Some(completeAnswers.alreadySentSelfAssessment),
+                  completeAnswers.alreadySentSelfAssessment,
                   Some(completeAnswers.completionDate),
                   None
                 ),
@@ -1091,7 +1091,7 @@ class SingleDisposalsTriageControllerSpec
                   None,
                   None,
                   Some(completeAnswers.disposalDate),
-                  Some(completeAnswers.alreadySentSelfAssessment),
+                  completeAnswers.alreadySentSelfAssessment,
                   Some(completeAnswers.completionDate),
                   None
                 )
@@ -2339,7 +2339,7 @@ class SingleDisposalsTriageControllerSpec
                 .copy(
                   individualUserType = Some(Self),
                   disposalDate = DisposalDate(today, taxYear),
-                  alreadySentSelfAssessment = false
+                  alreadySentSelfAssessment = None
                 )
             val date            = today.minusDays(1L)
 
@@ -2360,7 +2360,7 @@ class SingleDisposalsTriageControllerSpec
                 else Some(completeJourney.countryOfResidence),
                 Some(completeJourney.assetType),
                 Some(DisposalDate(date, taxYear)),
-                Some(false),
+                None,
                 None,
                 None
               ),
@@ -2407,7 +2407,7 @@ class SingleDisposalsTriageControllerSpec
                 individualUserType = Some(Self),
                 disposalDate = DisposalDate(today, taxYear),
                 disposalMethod = DisposalMethod.Sold,
-                alreadySentSelfAssessment = false
+                alreadySentSelfAssessment = None
               )
               val date            = today.minusDays(1L)
               val newAnswers      =
@@ -2420,7 +2420,7 @@ class SingleDisposalsTriageControllerSpec
                   else Some(completeJourney.countryOfResidence),
                   Some(completeJourney.assetType),
                   Some(DisposalDate(date, taxYear)),
-                  Some(false),
+                  None,
                   None,
                   None
                 )
@@ -4743,7 +4743,8 @@ class SingleDisposalsTriageControllerSpec
               disposalDate = DisposalDate(today, taxYear),
               completionDate = CompletionDate(today),
               assetType = IndirectDisposal,
-              disposalMethod = DisposalMethod.Sold
+              disposalMethod = DisposalMethod.Sold,
+              alreadySentSelfAssessment = None
             )
 
             val date = today.minusDays(1L)
@@ -4761,7 +4762,7 @@ class SingleDisposalsTriageControllerSpec
                 else Some(completeJourney.countryOfResidence),
                 Some(completeJourney.assetType),
                 Some(DisposalDate(date, taxYear)),
-                Some(completeJourney.alreadySentSelfAssessment),
+                completeJourney.alreadySentSelfAssessment,
                 Some(CompletionDate(date)),
                 None
               ),
@@ -4815,7 +4816,8 @@ class SingleDisposalsTriageControllerSpec
                 disposalDate = DisposalDate(today, taxYear),
                 completionDate = CompletionDate(today),
                 assetType = IndirectDisposal,
-                disposalMethod = DisposalMethod.Sold
+                disposalMethod = DisposalMethod.Sold,
+                alreadySentSelfAssessment = None
               )
               val date            = today.minusDays(1L)
               val newAnswers      =
@@ -4828,7 +4830,7 @@ class SingleDisposalsTriageControllerSpec
                   else Some(completeJourney.countryOfResidence),
                   Some(completeJourney.assetType),
                   Some(DisposalDate(date, taxYear)),
-                  Some(completeJourney.alreadySentSelfAssessment),
+                  completeJourney.alreadySentSelfAssessment,
                   Some(CompletionDate(date)),
                   None
                 )
@@ -4960,7 +4962,7 @@ class SingleDisposalsTriageControllerSpec
               requiredPreviousAnswers.copy(
                 disposalMethod = Some(DisposalMethod.Sold),
                 completionDate = Some(CompletionDate(date)),
-                alreadySentSelfAssessment = Some(false)
+                alreadySentSelfAssessment = None
               ),
               formData(date),
               (fillingOutReturn, draftReturn) =>
@@ -4973,7 +4975,7 @@ class SingleDisposalsTriageControllerSpec
                         tooEarlyDisposalDate = Some(date),
                         completionDate = Some(CompletionDate(date)),
                         disposalMethod = Some(DisposalMethod.Sold),
-                        alreadySentSelfAssessment = Some(false)
+                        alreadySentSelfAssessment = None
                       )
                     )
                   )
@@ -4995,7 +4997,8 @@ class SingleDisposalsTriageControllerSpec
                 disposalDate = DisposalDate(today, taxYear),
                 completionDate = CompletionDate(today),
                 assetType = IndirectDisposal,
-                disposalMethod = DisposalMethod.Sold
+                disposalMethod = DisposalMethod.Sold,
+                alreadySentSelfAssessment = None
               )
               val newAnswers      =
                 IncompleteSingleDisposalTriageAnswers(
@@ -5007,7 +5010,7 @@ class SingleDisposalsTriageControllerSpec
                   else Some(completeJourney.countryOfResidence),
                   Some(completeJourney.assetType),
                   None,
-                  Some(completeJourney.alreadySentSelfAssessment),
+                  completeJourney.alreadySentSelfAssessment,
                   Some(CompletionDate(date)),
                   Some(date)
                 )
@@ -5072,7 +5075,7 @@ class SingleDisposalsTriageControllerSpec
           Country.uk,
           assetType = AssetType.Residential,
           sample[DisposalDate],
-          false,
+          Some(false),
           sample[CompletionDate]
         )
 

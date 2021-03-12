@@ -40,7 +40,7 @@ object SingleDisposalTriageAnswers {
     countryOfResidence: Option[Country],
     assetType: Option[AssetType],
     disposalDate: Option[DisposalDate],
-    alreadySentSelfAssessment: Option[Boolean],
+    alreadySentSelfAssessment: Option[Boolean] = None,
     completionDate: Option[CompletionDate],
     tooEarlyDisposalDate: Option[LocalDate]
   ) extends SingleDisposalTriageAnswers
@@ -71,7 +71,7 @@ object SingleDisposalTriageAnswers {
         if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
         Some(c.assetType),
         Some(c.disposalDate),
-        Some(c.alreadySentSelfAssessment),
+        c.alreadySentSelfAssessment,
         Some(c.completionDate),
         None
       )
@@ -86,7 +86,7 @@ object SingleDisposalTriageAnswers {
     countryOfResidence: Country,
     assetType: AssetType,
     disposalDate: DisposalDate,
-    alreadySentSelfAssessment: Boolean,
+    alreadySentSelfAssessment: Option[Boolean] = None,
     completionDate: CompletionDate
   ) extends SingleDisposalTriageAnswers
 

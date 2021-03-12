@@ -150,16 +150,18 @@
             Some(cyaChange(messages("disposalDate.cyaChange"), routes.SingleDisposalsTriageController.whenWasDisposalDate().url)),
             "disposalDate"
         )
-        @cyaRow(
-            messages(
-                s"alreadySentSelfAssessment$userKey.title",
-                answers.disposalDate.taxYear.startDateInclusive.getYear.toString,
-                answers.disposalDate.taxYear.endDateExclusive.getYear.toString
-            ),
-            Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.toString}")),
-            Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
-            "alreadySentSelfAssessment"
-        )
+        @if(answers.alreadySentSelfAssessment.contains(false)){
+            @cyaRow(
+                messages(
+                    s"alreadySentSelfAssessment$userKey.title",
+                    answers.disposalDate.taxYear.startDateInclusive.getYear.toString,
+                    answers.disposalDate.taxYear.endDateExclusive.getYear.toString
+                ),
+                Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.getOrElse(false).toString}")),
+                Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
+                "alreadySentSelfAssessment"
+            )
+        }
         @cyaRow(
             messages(s"completionDate$userKey.title"),
             Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),

@@ -980,6 +980,7 @@ class MultipleDisposalsTriageController @Inject() (
       case _                                            =>
         Right(
           answers
+            .unset(_.alreadySentSelfAssessment)
             .unset(_.completionDate)
             .copy(
               taxYearExchanged = Some(taxYearExchanged),
@@ -1351,11 +1352,18 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                _,
+                Some(taxYear),
                 None,
-                _
+                None
               ) =>
-            Redirect(routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment())
+            if (taxYear.isItInLatestTaxYear())
+              Redirect(
+                routes.MultipleDisposalsTriageController.completionDate()
+              )
+            else
+              Redirect(
+                routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+              )
 
           case IncompleteMultipleDisposalsTriageAnswers(
                 _,
@@ -1409,7 +1417,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(a),
                 Some(taxYearExchanged),
                 Some(t),
-                Some(sa),
+                sa,
                 Some(d)
               ) =>
             val completeAnswers =
@@ -1438,7 +1446,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(a),
                 Some(taxYearExchanged),
                 Some(t),
-                Some(sa),
+                sa,
                 Some(d)
               ) =>
             val completeAnswers =
