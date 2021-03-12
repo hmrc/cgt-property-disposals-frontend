@@ -1897,13 +1897,15 @@ object SingleDisposalsTriageController {
     Form(
       mapping(
         "" -> of(
-          TimeUtils.dateFormatter(
+          TimeUtils.dateFormatterForMultiDisposals(
             Some(maximumDateInclusive),
             None,
             "disposalDate-day",
             "disposalDate-month",
             "disposalDate-year",
             "disposalDate",
+            None,
+            None,
             List(
               TimeUtils.personalRepresentativeDateValidation(
                 personalRepresentativeDetails,

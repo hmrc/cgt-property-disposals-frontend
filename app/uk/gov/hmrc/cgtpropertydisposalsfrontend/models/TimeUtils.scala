@@ -194,7 +194,9 @@ object TimeUtils {
               .flatMap(date =>
                 if (maximumDateInclusive.exists(_.isBefore(date)))
                   Left(FormError(dateKey, "error.tooFarInFuture"))
-                else if (isDateOfDeathValid.exists(x => x === true && minimumDateInclusive.exists(_.isAfter(date))))
+                else if (isDateOfDeathValid.exists(d => d === true && date.isBefore(TaxYear.earliestTaxYearStartDate)))
+                  Left(FormError(dateKey, "error.dateOfDeathBeforeTaxYear"))
+                else if (isDateOfDeathValid.exists(d => d === true && minimumDateInclusive.exists(_.isAfter(date))))
                   Left(FormError(dateKey, "error.dateOfDeath"))
                 else if (minimumDateInclusive.exists(_.isAfter(date)))
                   Left(FormError(dateKey, "error.tooFarInPast"))
