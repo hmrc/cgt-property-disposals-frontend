@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
+import java.time.LocalDate
 import java.util.UUID
 
 import cats.data.EitherT
@@ -28,6 +29,7 @@ import play.api.http.Status.OK
 import play.api.i18n.Lang
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
@@ -38,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
@@ -82,7 +84,8 @@ trait ReturnsService {
 @Singleton
 class ReturnsServiceImpl @Inject() (
   connector: ReturnsConnector,
-  auditService: AuditService
+  auditService: AuditService,
+  viewConfig: ViewConfig
 )(implicit
   ec: ExecutionContext
 ) extends ReturnsService
@@ -310,8 +313,8 @@ class ReturnsServiceImpl @Inject() (
   def listReturns(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, List[ReturnSummary]] = {
-    val fromDate = TaxYear.thisTaxYearStartDate()
-    val toDate   = fromDate.plusYears(1L).minusDays(1L)
+    val fromDate = LocalDate.of(2020, 4, 6)
+    val toDate   = fromDate.plusYears(viewConfig.numberOfTaxYearsForReturns).minusDays(1L)
 
     connector.listReturns(cgtReference, fromDate, toDate).subflatMap { response =>
       if (response.status === OK)

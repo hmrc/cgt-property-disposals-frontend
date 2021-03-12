@@ -188,4 +188,5 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   val maxYearForDisposalsAndCompletion: Int = servicesConfig.getInt("futureDates.maxTaxYearAllowed")
 
+  val numberOfTaxYearsForReturns: Long = servicesConfig.getInt("returns-number-of-tax-years").toLong
 }
