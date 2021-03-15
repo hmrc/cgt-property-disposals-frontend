@@ -55,7 +55,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 @Singleton
 class SingleDisposalsTriageController @Inject() (
@@ -495,21 +494,12 @@ class SingleDisposalsTriageController @Inject() (
           triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
             case None    => Redirect(disposalDateBackLink(triageAnswers))
             case Some(_) =>
-              val originalSubmissionYear: Option[String] =
-                state.toOption.flatMap(_._2.amendReturnData.map(_.originalReturn.summary.taxYear))
-
-              val taxYearAtStart: Option[Int] = originalSubmissionYear match {
-                case Some(year) => Try(year.toInt) toOption
-                case _          => None
-              }
-
               disposalDateForm(
                 TimeUtils.getMaximumDateForDisposalsAndCompletion(
                   viewConfig.enableFutureDateForDisposalAndCompletion,
                   viewConfig.maxYearForDisposalsAndCompletion
                 ),
-                personalRepDetails,
-                taxYearAtStart
+                personalRepDetails
               )
                 .bindFromRequest()
                 .fold(
@@ -1901,21 +1891,18 @@ object SingleDisposalsTriageController {
 
   def disposalDateForm(
     maximumDateInclusive: LocalDate,
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
-    taxYearAtStart: Option[Int] = None
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
   ): Form[LocalDate] =
     Form(
       mapping(
         "" -> of(
-          TimeUtils.dateFormatterForMultiDisposals(
+          TimeUtils.dateFormatter(
             Some(maximumDateInclusive),
             None,
             "disposalDate-day",
             "disposalDate-month",
             "disposalDate-year",
             "disposalDate",
-            taxYearAtStart,
-            None,
             List(
               TimeUtils.personalRepresentativeDateValidation(
                 personalRepresentativeDetails,
