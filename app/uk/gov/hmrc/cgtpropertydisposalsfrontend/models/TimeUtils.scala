@@ -202,8 +202,8 @@ object TimeUtils {
                   Left(FormError(dateKey, "error.tooFarInPast"))
                 else if (date.isBefore(minimumDate))
                   Left(FormError(dateKey, "error.before1900"))
-                else if (taxYearStartSelected.exists(x => !isCompletionDateWithinTaxYear(x, dateFieldStrings)))
-                  Left(FormError(dateKey, "error.CompletionDateNotWithinTaxYear"))
+                else if (taxYearStartSelected.exists(x => !isDateWithinTaxYear(x, dateFieldStrings)))
+                  Left(FormError(dateKey, "error.dateNotWithinTaxYear"))
                 else
                   extraValidation
                     .map(_(date))
@@ -225,7 +225,7 @@ object TimeUtils {
 
     }
 
-  def isCompletionDateWithinTaxYear(
+  def isDateWithinTaxYear(
     taxYearStartSelected: Int,
     dateFieldStrings: (String, String, String)
   ): Boolean = {
