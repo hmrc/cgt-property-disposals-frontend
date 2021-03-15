@@ -44,6 +44,7 @@ class SingleDisposalTriageAnswersSpec extends WordSpec with Matchers with ScalaC
           None,
           Some(completeAnswers.assetType),
           Some(completeAnswers.disposalDate),
+          completeAnswers.alreadySentSelfAssessment,
           Some(completeAnswers.completionDate),
           None
         )
@@ -64,6 +65,7 @@ class SingleDisposalTriageAnswersSpec extends WordSpec with Matchers with ScalaC
           Some(completeAnswers.countryOfResidence),
           Some(completeAnswers.assetType),
           Some(completeAnswers.disposalDate),
+          completeAnswers.alreadySentSelfAssessment,
           Some(completeAnswers.completionDate),
           None
         )
@@ -90,6 +92,7 @@ class SingleDisposalTriageAnswersSpec extends WordSpec with Matchers with ScalaC
         Some(completeAnswers.countryOfResidence),
         Some(completeAnswers.assetType),
         Some(completeAnswers.disposalDate),
+        completeAnswers.alreadySentSelfAssessment,
         Some(completeAnswers.completionDate),
         None
       )

@@ -866,9 +866,7 @@ class MultipleDisposalsTriageController @Inject() (
           completionDateForm(maxDateAllowed, getDateOfDeath(state)).fill
         )
         val backLink = answers.fold(
-          _ =>
-            routes.MultipleDisposalsTriageController
-              .whenWereContractsExchanged(),
+          _ => routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
           _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
         Ok(completionDatePage(form, backLink, state.isRight, state.fold(_ => false, _._1.isAmendReturn)))
@@ -894,9 +892,7 @@ class MultipleDisposalsTriageController @Inject() (
           .fold(
             { formWithErrors =>
               val backLink = answers.fold(
-                _ =>
-                  routes.MultipleDisposalsTriageController
-                    .whenWereContractsExchanged(),
+                _ => routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
                 _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
 
@@ -984,6 +980,7 @@ class MultipleDisposalsTriageController @Inject() (
       case _                                            =>
         Right(
           answers
+            .unset(_.alreadySentSelfAssessment)
             .unset(_.completionDate)
             .copy(
               taxYearExchanged = Some(taxYearExchanged),
@@ -1176,6 +1173,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                _,
                 _
               ) if isIndividual =>
             Redirect(
@@ -1192,6 +1190,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                _,
                 _
               ) if representeeAnswersIncomplete =>
             Redirect(
@@ -1199,13 +1198,14 @@ class MultipleDisposalsTriageController @Inject() (
                 .checkYourAnswers()
             )
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, None, _, _, _, _, _, _, _) =>
+          case IncompleteMultipleDisposalsTriageAnswers(_, None, _, _, _, _, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.guidance())
 
           case IncompleteMultipleDisposalsTriageAnswers(
                 _,
                 _,
                 None,
+                _,
                 _,
                 _,
                 _,
@@ -1226,6 +1226,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                _,
                 _
               ) =>
             Redirect(
@@ -1241,6 +1242,7 @@ class MultipleDisposalsTriageController @Inject() (
                 None,
                 _,
                 _,
+                _,
                 _
               ) =>
             Redirect(
@@ -1254,6 +1256,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(true),
                 _,
                 None,
+                _,
                 _,
                 _,
                 _,
@@ -1273,6 +1276,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                _,
                 _
               ) =>
             Redirect(
@@ -1287,6 +1291,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 Some(assetTypes),
+                _,
                 _,
                 _,
                 None
@@ -1307,6 +1312,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 None,
                 _,
+                _,
                 _
               ) =>
             Redirect(
@@ -1322,6 +1328,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 assetTypes,
                 Some(taxYearExchanged),
+                _,
                 _,
                 _
               ) if !isAValidCGTTaxTear(taxYearExchanged) =>
@@ -1344,14 +1351,37 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                _,
+                Some(taxYear),
+                None,
+                None
+              ) =>
+            if (taxYear.isItInLatestTaxYear())
+              Redirect(
+                routes.MultipleDisposalsTriageController.completionDate()
+              )
+            else
+              Redirect(
+                routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+              )
+
+          case IncompleteMultipleDisposalsTriageAnswers(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
                 Some(taxYearExchanged),
                 None,
+                _,
                 _
               ) if isAValidCGTTaxTear(taxYearExchanged) =>
             logger.warn("No tax year was found when we expected one")
             errorHandler.errorResult()
 
           case IncompleteMultipleDisposalsTriageAnswers(
+                _,
                 _,
                 _,
                 _,
@@ -1373,6 +1403,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                _,
                 Some(completionDate)
               ) if hasPreviousReturnWithSameCompletionDate(completionDate, individualUserType, state) =>
             Redirect(routes.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate())
@@ -1386,10 +1417,11 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(a),
                 Some(taxYearExchanged),
                 Some(t),
+                sa,
                 Some(d)
               ) =>
             val completeAnswers =
-              CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, taxYearExchanged, t, d)
+              CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, taxYearExchanged, t, sa, d)
             updateStateAndThen(
               updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = true),
               Ok(
@@ -1414,10 +1446,11 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(a),
                 Some(taxYearExchanged),
                 Some(t),
+                sa,
                 Some(d)
               ) =>
             val completeAnswers =
-              CompleteMultipleDisposalsTriageAnswers(i, n, c, a, taxYearExchanged, t, d)
+              CompleteMultipleDisposalsTriageAnswers(i, n, c, a, taxYearExchanged, t, sa, d)
             updateStateAndThen(
               updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = false),
               Ok(
