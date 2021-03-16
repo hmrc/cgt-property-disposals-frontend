@@ -889,7 +889,8 @@ class MultipleDisposalsTriageController @Inject() (
         val taxYearExchangedSelected: Option[TaxYearExchanged] =
           answers.fold(_.taxYearExchanged, c => Some(c.taxYearExchanged))
 
-        val taxYearAtStart: Option[Int] = getTaxYearByTaxYearExchanged(taxYearExchangedSelected)
+        val taxYearAtStart: Option[Int] =
+          getTaxYearByTaxYearExchanged(taxYearExchangedSelected.getOrElse(TaxYearExchanged.DifferentTaxYears))
 
         val dateOfDeath                            = getDateOfDeath(state)
         val (dateOfDeathValue, isDateOfDeathValid) = dateOfDeath match {
@@ -964,11 +965,11 @@ class MultipleDisposalsTriageController @Inject() (
       }
     }
 
-  private def getTaxYearByTaxYearExchanged(taxYearExhanged: Option[TaxYearExchanged]): Option[Int] =
+  private def getTaxYearByTaxYearExchanged(taxYearExhanged: TaxYearExchanged): Option[Int] =
     taxYearExhanged match {
-      case Some(TaxYearExchanged.TaxYear2020) => Some(2020)
-      case Some(TaxYearExchanged.TaxYear2021) => Some(2021)
-      case _                                  => None
+      case TaxYearExchanged.TaxYear2020 => Some(2020)
+      case TaxYearExchanged.TaxYear2021 => Some(2021)
+      case _                            => None
     }
 
   private def getDateOfDeath(state: JourneyState): Option[DateOfDeath] =
@@ -1269,7 +1270,7 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                taxYearExchanged,
+                Some(taxYearExchanged),
                 _,
                 _,
                 _
@@ -1518,7 +1519,7 @@ class MultipleDisposalsTriageController @Inject() (
     !(taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
 
   def isTaxYearWithinOriginalSubmissionTaxYear(
-    taxYearExchanged: Option[TaxYearExchanged],
+    taxYearExchanged: TaxYearExchanged,
     originalSubmissionYear: Option[String]
   ): Boolean =
     getTaxYearByTaxYearExchanged(taxYearExchanged) match {
