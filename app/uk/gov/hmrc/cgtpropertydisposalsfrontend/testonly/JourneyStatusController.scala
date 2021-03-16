@@ -132,7 +132,6 @@ class JourneyStatusController @Inject() (
       answers.disposedOfResidentialProperty
         .map(if (_) AssetType.Residential else AssetType.NonResidential),
       disposalDate,
-      None, //TODO: check this for Self Assessment flag
       answers.completionDate.map(CompletionDate(_)),
       None
     )

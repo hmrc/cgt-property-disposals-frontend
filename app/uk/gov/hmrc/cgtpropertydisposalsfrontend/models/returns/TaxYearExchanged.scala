@@ -53,8 +53,4 @@ object TaxYearExchanged {
       }
   }
 
-  val taxYearsMap: Map[String, TaxYearExchanged] = Map("2020" -> TaxYear2020, "2021" -> TaxYear2021)
-
-  val taxYearExchangedMap: Map[TaxYearExchanged, String] = Map(TaxYear2020 -> "2020", TaxYear2021 -> "2021")
-
 }
