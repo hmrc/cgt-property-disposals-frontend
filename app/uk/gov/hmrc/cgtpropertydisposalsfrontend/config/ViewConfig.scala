@@ -186,8 +186,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val enableFutureDateForDisposalAndCompletion: Boolean =
     servicesConfig.getBoolean("futureDates.enabled")
 
-  val maxYearForDisposalsAndCompletion: Int       = servicesConfig.getInt("futureDates.maxTaxYearAllowed")
-  val selfAssessmentTaxReturnsCorrections: String = getString("external-url.sa-tax-returns-corrections")
+  val maxYearForDisposalsAndCompletion: Int = servicesConfig.getInt("futureDates.maxTaxYearAllowed")
 
   val numberOfTaxYearsForReturns: Long = servicesConfig.getInt("returns-number-of-tax-years").toLong
 }
