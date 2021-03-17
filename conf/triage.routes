@@ -78,4 +78,6 @@ GET  /how-work-out-overall-liability                        uk.gov.hmrc.cgtprope
 
 GET  /exit/different-tax-year                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
 
-GET /exit/change-who-completing-return-for                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendWhoAreYouSubmittingFor()
+GET  /exit/exchangedate-incompatible-taxyears               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.exchangedYearIncompatibleWithTaxYear()
+
+GET /exit/change-who-completing-return-for                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendWhoAreYouSubmittingFor()
