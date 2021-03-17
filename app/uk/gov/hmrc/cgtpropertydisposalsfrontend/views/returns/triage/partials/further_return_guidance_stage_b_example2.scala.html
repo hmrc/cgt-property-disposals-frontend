@@ -25,25 +25,13 @@
 
 @(taxYear: Option[TaxYear])(implicit messages: Messages)
 
-@key = @{
-    "furtherReturnGuidance"
-}
+@key = @{ "furtherReturnGuidance" }
 
-@personalAllowance = @{
-    taxYear.map(_.personalAllowance.inPounds).getOrElse(BigDecimal("12500"))
-}
-@incomeTaxHigherRateThreshold = @{
-    taxYear.map(_.incomeTaxHigherRateThreshold.inPounds).getOrElse(BigDecimal("37500"))
-}
-@cgtRateHigherBandResidential = @{
-    taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28"))
-}
-@taxYearStartYear = @{
-    taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString
-}
-@taxYearEndYear = @{
-    taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString
-}
+@personalAllowance = @{ taxYear.map(_.personalAllowance.inPounds).getOrElse(BigDecimal("12500")) }
+@incomeTaxHigherRateThreshold = @{ taxYear.map(_.incomeTaxHigherRateThreshold.inPounds).getOrElse(BigDecimal("37500")) }
+@cgtRateHigherBandResidential = @{ taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28")) }
+@taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
+@taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
 
 <p>
 @messages(

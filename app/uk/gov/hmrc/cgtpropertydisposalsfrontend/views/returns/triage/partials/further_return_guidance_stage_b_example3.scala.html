@@ -25,18 +25,10 @@
 
 @(userKey: String, taxYear: Option[TaxYear])(implicit messages: Messages)
 
-@key = @{
-    "furtherReturnGuidance"
-}
-@cgtRateHigherBandResidential = @{
-    taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28"))
-}
-@taxYearStartYear = @{
-    taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString
-}
-@taxYearEndYear = @{
-    taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString
-}
+@key = @{ "furtherReturnGuidance" }
+@cgtRateHigherBandResidential = @{ taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28")) }
+@taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
+@taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
 
 <h4 class="heading-medium">
 @messages(

@@ -25,41 +25,21 @@
 
 @(taxYear: Option[TaxYear])(implicit messages: Messages)
 
-@key = @{
-    "furtherReturnGuidance"
-}
+@key = @{ "furtherReturnGuidance" }
 
 <p>@messages(s"$key.stage-b.step1.example1.p1")</p>
 <h4 class="heading-medium">@messages(s"$key.stage-b.step1.example1.headingText")</h4>
 <p>@messages(s"$key.stage-b.step1.example1.p2", "£45,000")</p>
 
-@personalAllowance = @{
-    taxYear.map(_.personalAllowance.inPounds).getOrElse(BigDecimal("12500"))
-}
-@incomeTaxHigherRateThreshold = @{
-    taxYear.map(_.incomeTaxHigherRateThreshold.inPounds).getOrElse(BigDecimal("37500"))
-}
-@netGainChargedAtBasicRate = @{
-    incomeTaxHigherRateThreshold - (BigDecimal("45000") - personalAllowance)
-}
-@cgtRateLowerBandResidential = @{
-    taxYear.map(_.cgtRateLowerBandResidential).getOrElse(BigDecimal("18"))
-}
-@cgtRateHigherBandResidential = @{
-    taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28"))
-}
-@taxAtBasicRate = @{
-    (netGainChargedAtBasicRate * cgtRateLowerBandResidential) / 100
-}
-@taxAtHigherRate = @{
-    ((BigDecimal("67400") - netGainChargedAtBasicRate) * cgtRateHigherBandResidential) / 100
-}
-@taxYearStartYear = @{
-    taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString
-}
-@taxYearEndYear = @{
-    taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString
-}
+@personalAllowance = @{ taxYear.map(_.personalAllowance.inPounds).getOrElse(BigDecimal("12500")) }
+@incomeTaxHigherRateThreshold = @{ taxYear.map(_.incomeTaxHigherRateThreshold.inPounds).getOrElse(BigDecimal("37500")) }
+@netGainChargedAtBasicRate = @{ incomeTaxHigherRateThreshold - (BigDecimal("45000") - personalAllowance) }
+@cgtRateLowerBandResidential = @{ taxYear.map(_.cgtRateLowerBandResidential).getOrElse(BigDecimal("18")) }
+@cgtRateHigherBandResidential = @{ taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28")) }
+@taxAtBasicRate = @{ (netGainChargedAtBasicRate * cgtRateLowerBandResidential) / 100 }
+@taxAtHigherRate = @{ ((BigDecimal("67400") - netGainChargedAtBasicRate) * cgtRateHigherBandResidential) / 100 }
+@taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
+@taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
 
 @calcSum(
     List(

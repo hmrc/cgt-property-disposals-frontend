@@ -26,15 +26,9 @@
 
 @(taxYear: Option[TaxYear])(implicit messages: Messages)
 
-@key = @{
-    "furtherReturnGuidance"
-}
-@taxYearStartYear = @{
-    taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString
-}
-@annualExemptAmountGeneral = @{
-    taxYear.map(_.annualExemptAmountGeneral.inPounds).getOrElse(BigDecimal("0"))
-}
+@key = @{ "furtherReturnGuidance" }
+@taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
+@annualExemptAmountGeneral = @{ taxYear.map(_.annualExemptAmountGeneral.inPounds).getOrElse(BigDecimal("0")) }
 
 <h4 class="heading-medium">@messages(s"$key.stage-a.step1.example1.headingText")</h4>
 <p>@messages(s"$key.stage-a.step1.example1.p1")</p>
