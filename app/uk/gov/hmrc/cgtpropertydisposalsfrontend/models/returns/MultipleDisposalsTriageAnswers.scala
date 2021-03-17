@@ -42,14 +42,12 @@ object MultipleDisposalsTriageAnswers {
     assetTypes: Option[List[AssetType]],
     taxYearExchanged: Option[TaxYearExchanged],
     taxYear: Option[TaxYear],
-    alreadySentSelfAssessment: Option[Boolean] = None,
     completionDate: Option[CompletionDate]
   ) extends MultipleDisposalsTriageAnswers
 
   object IncompleteMultipleDisposalsTriageAnswers {
     val empty: IncompleteMultipleDisposalsTriageAnswers =
       IncompleteMultipleDisposalsTriageAnswers(
-        None,
         None,
         None,
         None,
@@ -75,7 +73,6 @@ object MultipleDisposalsTriageAnswers {
         Some(c.assetTypes),
         Some(c.taxYearExchanged),
         Some(c.taxYear),
-        c.alreadySentSelfAssessment,
         Some(c.completionDate)
       )
   }
@@ -87,7 +84,6 @@ object MultipleDisposalsTriageAnswers {
     assetTypes: List[AssetType],
     taxYearExchanged: TaxYearExchanged,
     taxYear: TaxYear,
-    alreadySentSelfAssessment: Option[Boolean] = None,
     completionDate: CompletionDate
   ) extends MultipleDisposalsTriageAnswers
 

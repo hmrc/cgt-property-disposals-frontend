@@ -89,9 +89,9 @@
     }
 
     (draftReturn.triageAnswers) match {
-        case IncompleteSingleDisposalTriageAnswers(individualUserType, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _, _) =>
+        case IncompleteSingleDisposalTriageAnswers(individualUserType, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) =>
             isFurtherOrAmendReturn.contains(false) && shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
-        case CompleteSingleDisposalTriageAnswers(individualUserType, _, countryOfResidence, assetType, _, _, _) =>
+        case CompleteSingleDisposalTriageAnswers(individualUserType, _, countryOfResidence, assetType, _, _) =>
             isFurtherOrAmendReturn.contains(false) && shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
         case _ =>
             false

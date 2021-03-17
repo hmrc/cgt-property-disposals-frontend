@@ -23,11 +23,13 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.Lang
 import play.api.libs.json.{JsNumber, JsString, Json}
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
@@ -62,11 +64,11 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
+class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory with GuiceOneAppPerSuite {
 
   val mockConnector = mock[ReturnsConnector]
-
-  val language = Lang("en")
+  val config        = app.injector.instanceOf[ViewConfig]
+  val language      = Lang("en")
 
   def mockStoreDraftReturn(
     draftReturn: DraftReturn,
@@ -126,7 +128,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       .expects(draftReturnIds, *)
       .returning(EitherT.fromEither[Future](response))
 
-  val service = new ReturnsServiceImpl(mockConnector, stub[AuditService])
+  val service = new ReturnsServiceImpl(mockConnector, stub[AuditService], config)
 
   implicit val hc: HeaderCarrier   = HeaderCarrier()
   implicit val request: Request[_] = FakeRequest()
@@ -746,11 +748,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
     "handling requests to list returns" must {
 
       val cgtReference       = sample[CgtReference]
-      val (fromDate, toDate) = TaxYear
-        .thisTaxYearStartDate() -> TaxYear
-        .thisTaxYearStartDate()
-        .plusYears(1L)
-        .minusDays(1L)
+      val (fromDate, toDate) = LocalDate.of(2020, 4, 6) -> LocalDate.of(2022, 4, 5)
 
       "return an error " when {
 
