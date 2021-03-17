@@ -16,33 +16,60 @@
 
 @import play.api.i18n.Messages
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
     calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
 )
 
-@(userKey: String)(implicit messages:Messages)
+@(userKey: String, taxYear: Option[TaxYear])(implicit messages:Messages)
 
 @key = @{ "furtherReturnGuidance" }
+@cgtRateHigherBandResidential = @{ taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28")) }
+@taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
+@taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
 
-<h4 class="heading-medium">@messages(s"$key$userKey.stage-b.example3.headingText")</h4>
+<h4 class="heading-medium">
+    @messages(
+        s"$key$userKey.stage-b.example3.headingText",
+        taxYearStartYear,
+        taxYearEndYear
+    )
+</h4>
+
 @calcSum(
   List(
     SumPartDisplay(
         label = messages(s"$key$userKey.stage-b.example3.table1.row1.key"),
         operator = None,
-        amount = messages(s"$key$userKey.stage-b.example3.table1.row1.value")
+        amount = messages(
+                    s"$key$userKey.stage-b.example3.table1.row1.value",
+                    "£73,550"
+                 )
     ),
     SumPartDisplay(
-        label = messages(s"$key$userKey.stage-b.example3.table1.row2.key"),
+        label = messages(
+                    s"$key$userKey.stage-b.example3.table1.row2.key",
+                    taxYearStartYear,
+                    taxYearEndYear
+                ),
         operator = Some("X"),
-        amount = messages(s"$key$userKey.stage-b.example3.table1.row2.value")
+        amount = messages(
+                    s"$key$userKey.stage-b.example3.table1.row2.value",
+                    s"${cgtRateHigherBandResidential}%"
+                 )
     )
   ),
   SumPartDisplay(
     label = messages(s"$key$userKey.stage-b.example3.table1.total.key"),
     operator = Some("="),
-    amount = messages(s"$key$userKey.stage-b.example3.table1.total.value"),
+    amount = messages(
+                s"$key$userKey.stage-b.example3.table1.total.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(
+                    (BigDecimal("73550") * cgtRateHigherBandResidential)/100
+                )
+             ),
     total = true
   )
 )

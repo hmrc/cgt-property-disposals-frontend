@@ -17,6 +17,7 @@
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 
 @this(
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
@@ -27,7 +28,7 @@
     stepHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.step_header
 )
 
-@(userKey: String)(implicit messages:Messages, appConfig: ViewConfig)
+@(userKey: String, taxYear: Option[TaxYear])(implicit messages:Messages, appConfig: ViewConfig)
 
     @key = @{ "furtherReturnGuidance" }
 
@@ -76,27 +77,27 @@
     @if(userKey.contains(".personalRepInPeriodOfAdmin")){
         @details(
             messages(s"$key.stage-a.example4.link"),
-            stageAExample4(),
+            stageAExample4(taxYear),
             None,
             Some(messages(s"$key.assistive.prefix"))
         )
     } else if(userKey.contains(".trust")){
         @details(
             messages(s"$key$userKey.stage-a.example3.link"),
-            stageAExample3(userKey),
+            stageAExample3(userKey, taxYear),
             None,
             Some(messages(s"$key.assistive.prefix"))
         )
     } else {
         @details(
             messages(s"$key.stage-a.example1.link"),
-            stageAExample1(),
+            stageAExample1(taxYear),
             None,
             Some(messages(s"$key.assistive.prefix"))
         )
         @details(
             messages(s"$key.stage-a.example2.link"),
-            stageAExample2(),
+            stageAExample2(taxYear),
             None,
             Some(messages(s"$key.assistive.prefix"))
         )

@@ -1279,7 +1279,7 @@ class YearToDateLiabilityControllerSpec
       "show a form error" when {
 
         "the amount of money is invalid" in {
-          val personalAllowance    = AmountInPence(1250000L)
+          val personalAllowance    = AmountInPence(1270000L)
           val maxPersonalAllowance = AmountInPence(2000000L)
           val taxYear              =
             sample[TaxYear].copy(
