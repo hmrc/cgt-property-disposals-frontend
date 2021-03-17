@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.boolean._
 import cats.instances.future._
@@ -1904,7 +1903,6 @@ object SingleDisposalsTriageController {
             "disposalDate-month",
             "disposalDate-year",
             "disposalDate",
-            None,
             List(
               TimeUtils.personalRepresentativeDateValidation(
                 personalRepresentativeDetails,
