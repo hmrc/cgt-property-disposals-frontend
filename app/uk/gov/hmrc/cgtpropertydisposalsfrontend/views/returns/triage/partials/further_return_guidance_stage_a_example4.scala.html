@@ -21,160 +21,168 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
-calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
 )
 
-@(taxYear: Option[TaxYear])(implicit messages:Messages)
+@(taxYear: Option[TaxYear])(implicit messages: Messages)
 
-@key = @{ "furtherReturnGuidance" }
-@taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
-@taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
-@annualExemptAmountGeneral = @{ taxYear.map(_.annualExemptAmountGeneral.inPounds).getOrElse(BigDecimal("0")) }
+@key = @{
+    "furtherReturnGuidance"
+}
+@taxYearStartYear = @{
+    taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString
+}
+@taxYearEndYear = @{
+    taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString
+}
+@annualExemptAmountGeneral = @{
+    taxYear.map(_.annualExemptAmountGeneral.inPounds).getOrElse(BigDecimal("0"))
+}
 
 <p>@messages(s"$key.stage-a.step1.example4.p1", taxYearStartYear)</p>
 <h4 class="heading-medium">
-    @messages(
+@messages(
     s"$key.stage-a.step1.example4.headingText",
     taxYearStartYear,
     taxYearEndYear
-    )
+)
 </h4>
 
 <p>@messages(s"$key.stage-a.step1.example4.p2")</p>
 <h5 class="heading-small">@Html(messages(s"$key.stage-a.step1.example4.p3", taxYearStartYear))</h5>
 @calcSum(
-List(
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table1.row1.key"),
-operator = None,
-amount = messages(s"$key.stage-a.step1.example4.table1.row1.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table1.row2.key"),
-operator = Some("-"),
-amount = messages(s"$key.stage-a.step1.example4.table1.row2.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table1.row3.key"),
-operator = Some("-"),
-amount = messages(s"$key.stage-a.step1.example4.table1.row3.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table1.row4.key"),
-operator = Some("-"),
-amount = messages(s"$key.stage-a.step1.example4.table1.row4.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table1.row5.key"),
-operator = Some("="),
-amount = messages(s"$key.stage-a.step1.example4.table1.row5.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table1.row6.key"),
-operator = Some("-"),
-amount = messages(s"$key.stage-a.step1.example4.table1.row6.value")
-)
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table1.total.key"),
-operator = Some("="),
-amount = messages(s"$key.stage-a.step1.example4.table1.total.value"),
-total = true
-)
+    List(
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table1.row1.key"),
+            operator = None,
+            amount = messages(s"$key.stage-a.step1.example4.table1.row1.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table1.row2.key"),
+            operator = Some("-"),
+            amount = messages(s"$key.stage-a.step1.example4.table1.row2.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table1.row3.key"),
+            operator = Some("-"),
+            amount = messages(s"$key.stage-a.step1.example4.table1.row3.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table1.row4.key"),
+            operator = Some("-"),
+            amount = messages(s"$key.stage-a.step1.example4.table1.row4.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table1.row5.key"),
+            operator = Some("="),
+            amount = messages(s"$key.stage-a.step1.example4.table1.row5.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table1.row6.key"),
+            operator = Some("-"),
+            amount = messages(s"$key.stage-a.step1.example4.table1.row6.value")
+        )
+    ),
+    SumPartDisplay(
+        label = messages(s"$key.stage-a.step1.example4.table1.total.key"),
+        operator = Some("="),
+        amount = messages(s"$key.stage-a.step1.example4.table1.total.value"),
+        total = true
+    )
 )
 
 <h5 class="heading-small">
-    @Html(
+@Html(
     messages(
-    s"$key.stage-a.step1.example4.p4",
-    taxYearStartYear
+        s"$key.stage-a.step1.example4.p4",
+        taxYearStartYear
     )
-    )
+)
 </h5>
 @calcSum(
-List(
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table2.row1.key"),
-operator = None,
-amount = messages(s"$key.stage-a.step1.example4.table2.row1.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table2.row2.key"),
-operator = Some("-"),
-amount = messages(s"$key.stage-a.step1.example4.table2.row2.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table2.row3.key"),
-operator = Some("-"),
-amount = messages(s"$key.stage-a.step1.example4.table2.row3.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table2.row4.key"),
-operator = Some("-"),
-amount = messages(s"$key.stage-a.step1.example4.table2.row4.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table2.row5.key"),
-operator = Some("="),
-amount = messages(s"$key.stage-a.step1.example4.table2.row5.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table2.row6.key"),
-operator = Some("-"),
-amount = messages(s"$key.stage-a.step1.example4.table2.row6.value")
-)
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step1.example4.table2.total.key"),
-operator = Some("="),
-amount = messages(s"$key.stage-a.step1.example4.table2.total.value"),
-total = true
-)
+    List(
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table2.row1.key"),
+            operator = None,
+            amount = messages(s"$key.stage-a.step1.example4.table2.row1.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table2.row2.key"),
+            operator = Some("-"),
+            amount = messages(s"$key.stage-a.step1.example4.table2.row2.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table2.row3.key"),
+            operator = Some("-"),
+            amount = messages(s"$key.stage-a.step1.example4.table2.row3.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table2.row4.key"),
+            operator = Some("-"),
+            amount = messages(s"$key.stage-a.step1.example4.table2.row4.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table2.row5.key"),
+            operator = Some("="),
+            amount = messages(s"$key.stage-a.step1.example4.table2.row5.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step1.example4.table2.row6.key"),
+            operator = Some("-"),
+            amount = messages(s"$key.stage-a.step1.example4.table2.row6.value")
+        )
+    ),
+    SumPartDisplay(
+        label = messages(s"$key.stage-a.step1.example4.table2.total.key"),
+        operator = Some("="),
+        amount = messages(s"$key.stage-a.step1.example4.table2.total.value"),
+        total = true
+    )
 )
 
 <h4 class="heading-medium">@messages(s"$key.stage-a.step2.example4.headingText")</h4>
 <p>@messages(s"$key.stage-a.step2.example4.p1")</p>
 
 @calcSum(
-List(
-SumPartDisplay(
-label = messages(s"$key.stage-a.step2.example4.table1.row1.key"),
-operator = None,
-amount = messages(s"$key.stage-a.step2.example4.table1.row1.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step2.example4.table1.row2.key"),
-operator = Some("+"),
-amount = messages(s"$key.stage-a.step2.example4.table1.row2.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step2.example4.table1.row3.key"),
-operator = Some("="),
-amount = messages(s"$key.stage-a.step2.example4.table1.row3.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step2.example4.table1.row4.key"),
-operator = Some("-"),
-amount = messages(s"$key.stage-a.step2.example4.table1.row4.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step2.example4.table1.row5.key"),
-operator = Some("-"),
-amount = messages(s"$key.stage-a.step2.example4.table1.row5.value")
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step2.example4.table1.row6.key"),
-operator = Some("-"),
-amount = messages(
-s"$key.stage-a.step2.example4.table1.row6.value",
-MoneyUtils.formatAmountOfMoneyWithPoundSign(annualExemptAmountGeneral)
-)
-)
-),
-SumPartDisplay(
-label = messages(s"$key.stage-a.step2.example4.table1.total.key"),
-operator = Some("="),
-amount = messages(s"$key.stage-a.step2.example4.table1.total.value"),
-total = true
-)
+    List(
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step2.example4.table1.row1.key"),
+            operator = None,
+            amount = messages(s"$key.stage-a.step2.example4.table1.row1.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step2.example4.table1.row2.key"),
+            operator = Some("+"),
+            amount = messages(s"$key.stage-a.step2.example4.table1.row2.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step2.example4.table1.row3.key"),
+            operator = Some("="),
+            amount = messages(s"$key.stage-a.step2.example4.table1.row3.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step2.example4.table1.row4.key"),
+            operator = Some("-"),
+            amount = messages(s"$key.stage-a.step2.example4.table1.row4.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step2.example4.table1.row5.key"),
+            operator = Some("-"),
+            amount = messages(s"$key.stage-a.step2.example4.table1.row5.value")
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-a.step2.example4.table1.row6.key"),
+            operator = Some("-"),
+            amount = messages(
+                s"$key.stage-a.step2.example4.table1.row6.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(annualExemptAmountGeneral)
+            )
+        )
+    ),
+    SumPartDisplay(
+        label = messages(s"$key.stage-a.step2.example4.table1.total.key"),
+        operator = Some("="),
+        amount = messages(s"$key.stage-a.step2.example4.table1.total.value"),
+        total = true
+    )
 )

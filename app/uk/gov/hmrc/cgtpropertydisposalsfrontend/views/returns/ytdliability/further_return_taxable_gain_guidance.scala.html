@@ -25,22 +25,26 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    guidanceStageAWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.wrappers.further_return_guidance_stage_a
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+        guidanceStageAWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.wrappers.further_return_guidance_stage_a
 )
 
 @(
-    backLink: Call,
-    isATrust: Boolean,
-    representativeType: Option[RepresentativeType],
-    taxYear: Option[TaxYear]
-)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+        backLink: Call,
+        isATrust: Boolean,
+        representativeType: Option[RepresentativeType],
+        taxYear: Option[TaxYear]
+)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
-@key = @{ "taxableGainOrLossGuidance" }
+@key = @{
+    "taxableGainOrLossGuidance"
+}
 
-@isAgent = @{ request.userType.contains(UserType.Agent) }
+@isAgent = @{
+    request.userType.contains(UserType.Agent)
+}
 
 @userKey = @{
     representativeType match {
@@ -48,21 +52,25 @@
         case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
         case Some(Capacitor) => ".capacitor"
         case None =>
-        if (isAgent) ".agent"
-        else if (isATrust) ".trust"
-        else ""
+            if(isAgent) ".agent"
+            else if(isATrust) ".trust"
+            else ""
     }
 }
 
-@title = @{messages(s"$key$userKey.title")}
+@title = @{
+    messages(s"$key$userKey.title")
+}
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
 
-@backLinkComponent(backLink)
+    @backLinkComponent(backLink)
 
-@pageHeading(title)
+    @pageHeading(title)
 
-@guidanceStageAWrapper(userKey, taxYear)
+    @guidanceStageAWrapper(userKey, taxYear)
 
-<a class="button" role="button" href="@{backLink.url}">@messages("button.back")</a>
+    <a class="button" role="button" href="@{
+        backLink.url
+    }">@messages("button.back")</a>
 
 }

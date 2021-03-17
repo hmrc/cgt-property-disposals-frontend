@@ -20,19 +20,21 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 
 @this(
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
-    stageBExample1: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example1,
-    stageBExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example2,
-    stageBExample3: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example3,
-    stageBExample4: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example4,
-    stepHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.step_header
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+        stageBExample1: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example1,
+        stageBExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example2,
+        stageBExample3: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example3,
+        stageBExample4: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example4,
+        stepHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.step_header
 )
 
-@(userKey: String, taxYear: Option[TaxYear])(implicit messages:Messages, appConfig: ViewConfig)
+@(userKey: String, taxYear: Option[TaxYear])(implicit messages: Messages, appConfig: ViewConfig)
 
-@key = @{ "furtherReturnGuidance" }
+@key = @{
+    "furtherReturnGuidance"
+}
 
-@if(userKey.contains(".personalRepInPeriodOfAdmin")){
+@if(userKey.contains(".personalRepInPeriodOfAdmin")) {
     <p>@Html(messages(s"$key$userKey.stage-b.p1", appConfig.cgtRatesUrl))</p>
     <h2 class="heading-medium">
         @messages(s"$key.examplesText")
@@ -45,26 +47,26 @@
         Some(messages(s"$key.assistive.prefix"))
     )
 } else if(userKey.contains(".trust")){
-    <p>@Html(messages(s"$key$userKey.stage-b.step-b1.p1", appConfig.trustsAndCgtWorkoutUrl))</p>
-    <h2 class="heading-medium">
-        @messages(s"$key.examplesText")
-        <span class="visuallyhidden"> @messages(s"$key.examplesText.ytdAssistive")</span>
-    </h2>
-    @details(
-        messages(s"$key$userKey.stage-b.example3.link"),
-        stageBExample3(userKey, taxYear),
-        None,
-        Some(messages(s"$key.assistive.prefix"))
-    )
-} else{
-    <div
-            id="step-by-step-navigation"
-            class="app-step-nav app-step-nav--large app-step-nav--active"
-            data-show-text="@messages("furtherReturnGuidance.show")"
-    data-hide-text="@messages("furtherReturnGuidance.hide")"
-    data-show-all-text="@messages("furtherReturnGuidance.showall")"
-    data-hide-all-text="@messages("furtherReturnGuidance.hideall")"
-    >
+<p>@Html(messages(s"$key$userKey.stage-b.step-b1.p1", appConfig.trustsAndCgtWorkoutUrl))</p>
+<h2 class="heading-medium">
+    @messages(s"$key.examplesText")
+    <span class="visuallyhidden"> @messages(s"$key.examplesText.ytdAssistive")</span>
+</h2>
+@details(
+    messages(s"$key$userKey.stage-b.example3.link"),
+    stageBExample3(userKey, taxYear),
+    None,
+    Some(messages(s"$key.assistive.prefix"))
+)
+    } else{
+<div
+id="step-by-step-navigation"
+class="app-step-nav app-step-nav--large app-step-nav--active"
+data-show-text="@messages("furtherReturnGuidance.show")"
+data-hide-text="@messages("furtherReturnGuidance.hide")"
+data-show-all-text="@messages("furtherReturnGuidance.showall")"
+data-hide-all-text="@messages("furtherReturnGuidance.hideall")"
+>
     <ol class="app-step-nav__steps">
         <li class="app-step-nav__step js-step" id="step-b1">
             @stepHeader(1, messages(s"$key$userKey.stage-b.step-b1"))
@@ -99,22 +101,22 @@
             </div>
         </li>
     </ol>
-    </div>
+</div>
 
-    <h2 class="heading-medium">
-        @messages(s"$key.examplesText")
-        <span class="visuallyhidden"> @messages(s"$key.examplesText.ytdAssistive")</span>
-    </h2>
-    @details(
-        messages(s"$key.stage-b.example1.link"),
-        stageBExample1(taxYear),
-        None,
-        Some(messages(s"$key.assistive.prefix"))
-    )
-    @details(
-        messages(s"$key.stage-b.example2.link"),
-        stageBExample2(taxYear),
-        None,
-        Some(messages(s"$key.assistive.prefix"))
-    )
-}
+<h2 class="heading-medium">
+    @messages(s"$key.examplesText")
+    <span class="visuallyhidden"> @messages(s"$key.examplesText.ytdAssistive")</span>
+</h2>
+@details(
+    messages(s"$key.stage-b.example1.link"),
+    stageBExample1(taxYear),
+    None,
+    Some(messages(s"$key.assistive.prefix"))
+)
+@details(
+    messages(s"$key.stage-b.example2.link"),
+    stageBExample2(taxYear),
+    None,
+    Some(messages(s"$key.assistive.prefix"))
+)
+    }

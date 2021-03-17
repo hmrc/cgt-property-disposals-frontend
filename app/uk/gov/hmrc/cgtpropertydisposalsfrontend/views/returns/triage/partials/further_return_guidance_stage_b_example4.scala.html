@@ -20,22 +20,30 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
-    calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
 )
 
-@(taxYear: Option[TaxYear])(implicit messages:Messages)
+@(taxYear: Option[TaxYear])(implicit messages: Messages)
 
-@key = @{ "furtherReturnGuidance" }
-@cgtRateHigherBandResidential = @{ taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28")) }
-@taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
-@taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
+@key = @{
+    "furtherReturnGuidance"
+}
+@cgtRateHigherBandResidential = @{
+    taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28"))
+}
+@taxYearStartYear = @{
+    taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString
+}
+@taxYearEndYear = @{
+    taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString
+}
 
 <h4 class="heading-medium">
-    @messages(
-        s"$key.personalRepInPeriodOfAdmin.stage-b.example4.headingText",
-        taxYearStartYear,
-        taxYearEndYear
-    )
+@messages(
+    s"$key.personalRepInPeriodOfAdmin.stage-b.example4.headingText",
+    taxYearStartYear,
+    taxYearEndYear
+)
 </h4>
 
 @calcSum(
@@ -56,19 +64,19 @@
             ),
             operator = Some("X"),
             amount = messages(
-                    s"$key.personalRepInPeriodOfAdmin.stage-b.example4.table1.row2.value",
-                    s"${cgtRateHigherBandResidential}%"
-                )
+                s"$key.personalRepInPeriodOfAdmin.stage-b.example4.table1.row2.value",
+                s"${cgtRateHigherBandResidential}%"
+            )
         )
     ),
-        SumPartDisplay(
-            label = messages(s"$key.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.key"),
-            operator = Some("="),
-            amount = messages(
-                        s"$key.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.value",
-                        MoneyUtils.formatAmountOfMoneyWithPoundSign(
-                        (BigDecimal("67400") * cgtRateHigherBandResidential)/100
-                    )
+    SumPartDisplay(
+        label = messages(s"$key.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.key"),
+        operator = Some("="),
+        amount = messages(
+            s"$key.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.value",
+            MoneyUtils.formatAmountOfMoneyWithPoundSign(
+                (BigDecimal("67400") * cgtRateHigherBandResidential) / 100
+            )
         ),
         total = true
     )
