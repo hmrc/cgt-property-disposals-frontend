@@ -1255,8 +1255,10 @@ multipleDisposalsCompletionDate.details.p1=The <a href="{0}" target=_blank>‘co
 multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
-multipleDisposalsCompletionDate.error.tooFarInPast=The completion date cannot be before the date of death
-multipleDisposalsCompletionDate.error.CompletionDateNotWithinTaxYear=Completion date must be in or after the same tax year as the exchange date
+multipleDisposalsCompletionDate.error.tooFarInPast=Completion date must be in or after the same tax year as the exchange date
+multipleDisposalsCompletionDate.error.dateOfDeathBeforeTaxYear=Completion date must be on or after 6 April 2020
+multipleDisposalsCompletionDate.error.dateOfDeath=The completion date cannot be before the date of death
+multipleDisposalsCompletionDate.error.dateNotWithinTaxYear=Completion date must be in or after the same tax year as the exchange date
 multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
 multipleDisposalsCompletionDate-month.error.required=Completion date must include a month
 multipleDisposalsCompletionDate-year.error.required=Completion date must include a year
@@ -4380,6 +4382,11 @@ multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
 multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date
 multipleDisposalsDisposalDate.error.before1900=Contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
 
+multipleDisposalsExchangeDateInDifferentTaxYear.title=You cannot change this return online
+multipleDisposalsExchangeDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in
+multipleDisposalsExchangeDateInDifferentTaxYear.subheading=What you’ll need to do next
+multipleDisposalsExchangeDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">contact HMRC</a>
+
 multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {0} to {1}
 multipleDisposalsDisposalDate-day.error.required=Contract exchange date must include a day
 multipleDisposalsDisposalDate-month.error.required=Contract exchange date must include a month
@@ -5060,7 +5067,8 @@ unmetDependency.x2.li2=work out the new amount of tax due
 unmetDependency.x2.li3=upload a document showing how the new amount of tax due was worked out
 
 disposalDateInDifferentTaxYear.title=You cannot change this return online
-disposalDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in.
+disposalDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in
+disposalDateInDifferentTaxYear.subheading=What you’ll need to do next
 disposalDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">contact HMRC</a>
 
 #===================================================

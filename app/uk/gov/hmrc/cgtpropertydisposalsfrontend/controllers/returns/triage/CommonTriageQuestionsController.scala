@@ -68,6 +68,7 @@ class CommonTriageQuestionsController @Inject() (
   previousReturnExistsWithSameCompletionDateAmendPage: triagePages.previous_return_exists_with_same_completion_date_amend,
   disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
   cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
+  exchangeDateIncompatibleTaxyears: triagePages.exchangedate_incompatible_taxyears,
   whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -510,6 +511,13 @@ class CommonTriageQuestionsController @Inject() (
       }
     }
 
+  def exchangedYearIncompatibleWithTaxYear(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState { (_, state) =>
+        Ok(exchangeDateIncompatibleTaxyears(amendReturnDisposalDateBackLink(state)))
+      }
+    }
+
   def amendWhoAreYouSubmittingFor(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       Ok(whoAreYouSubmittingAmendExitPage(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()))
@@ -854,7 +862,6 @@ object CommonTriageQuestionsController {
             s"$key-month",
             s"$key-year",
             key,
-            None,
             List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, key))
           )
         )
