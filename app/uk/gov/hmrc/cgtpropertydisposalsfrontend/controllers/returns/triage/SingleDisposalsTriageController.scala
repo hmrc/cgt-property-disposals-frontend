@@ -649,8 +649,7 @@ class SingleDisposalsTriageController @Inject() (
         .copy(
           disposalDate = date.toOption,
           tooEarlyDisposalDate = date.swap.toOption,
-          completionDate = None,
-          alreadySentSelfAssessment = None
+          completionDate = None
         )
 
     taxYear.fold {
@@ -658,8 +657,7 @@ class SingleDisposalsTriageController @Inject() (
         _.copy(
           disposalDate = None,
           tooEarlyDisposalDate = Some(d),
-          completionDate = None,
-          alreadySentSelfAssessment = None
+          completionDate = None
         ),
         updateCompleteAnswers(_, Left(d))
       )
@@ -668,8 +666,7 @@ class SingleDisposalsTriageController @Inject() (
         _.copy(
           disposalDate = Some(DisposalDate(d, taxYear)),
           tooEarlyDisposalDate = None,
-          completionDate = None,
-          alreadySentSelfAssessment = None
+          completionDate = None
         ),
         updateCompleteAnswers(_, Right(DisposalDate(d, taxYear)))
       )
@@ -1262,7 +1259,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                _,
                 _
               ) if isIndividual =>
             Redirect(
@@ -1272,7 +1268,6 @@ class SingleDisposalsTriageController @Inject() (
 
           case IncompleteSingleDisposalTriageAnswers(
                 Some(_: RepresentativeType),
-                _,
                 _,
                 _,
                 _,
@@ -1296,7 +1291,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                _,
                 _
               ) =>
             Redirect(routes.CommonTriageQuestionsController.howManyProperties())
@@ -1305,7 +1299,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 None,
-                _,
                 _,
                 _,
                 _,
@@ -1326,7 +1319,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                _,
                 _
               ) =>
             Redirect(
@@ -1339,7 +1331,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 Some(false),
                 None,
-                _,
                 _,
                 _,
                 _,
@@ -1358,7 +1349,6 @@ class SingleDisposalsTriageController @Inject() (
                 None,
                 _,
                 _,
-                _,
                 _
               ) =>
             Redirect(
@@ -1373,7 +1363,6 @@ class SingleDisposalsTriageController @Inject() (
                 Some(true),
                 _,
                 None,
-                _,
                 _,
                 _,
                 _
@@ -1392,7 +1381,6 @@ class SingleDisposalsTriageController @Inject() (
                 Some(NonResidential),
                 _,
                 _,
-                _,
                 _
               ) =>
             Redirect(
@@ -1408,7 +1396,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 Some(AssetType.IndirectDisposal),
                 None,
-                _,
                 None,
                 _
               ) =>
@@ -1424,7 +1411,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 Some(AssetType.IndirectDisposal),
                 Some(shareDisposalDate),
-                _,
                 None,
                 _
               ) if hasPreviousReturnWithSameCompletionDate(shareDisposalDate.value, individualUserType, state) =>
@@ -1441,7 +1427,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 None,
                 _,
-                _,
                 _
               ) =>
             Redirect(
@@ -1449,28 +1434,6 @@ class SingleDisposalsTriageController @Inject() (
             )
 
           case IncompleteSingleDisposalTriageAnswers(
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                Some(DisposalDate(_, taxYear)),
-                None,
-                None,
-                None
-              ) =>
-            if (taxYear.isItInLatestTaxYear())
-              Redirect(
-                routes.SingleDisposalsTriageController.whenWasCompletionDate()
-              )
-            else
-              Redirect(
-                routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
-              )
-
-          case IncompleteSingleDisposalTriageAnswers(
-                _,
                 _,
                 _,
                 _,
@@ -1493,7 +1456,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                _,
                 Some(completionDate),
                 _
               ) if hasPreviousReturnWithSameCompletionDate(completionDate.value, individualUserType, state) =>
@@ -1509,13 +1471,12 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 Some(r),
                 Some(d),
-                sa,
                 Some(c),
                 _
               ) =>
             updateAnswersAndShowCheckYourAnswersPage(
               state,
-              CompleteSingleDisposalTriageAnswers(t, m, Country.uk, r, d, sa, c),
+              CompleteSingleDisposalTriageAnswers(t, m, Country.uk, r, d, c),
               displayReturnToSummaryLink,
               representeeAnswers
             )
@@ -1528,13 +1489,12 @@ class SingleDisposalsTriageController @Inject() (
                 Some(country),
                 Some(r),
                 Some(d),
-                sa,
                 Some(c),
                 _
               ) =>
             updateAnswersAndShowCheckYourAnswersPage(
               state,
-              CompleteSingleDisposalTriageAnswers(t, m, country, r, d, sa, c),
+              CompleteSingleDisposalTriageAnswers(t, m, country, r, d, c),
               displayReturnToSummaryLink,
               representeeAnswers
             )
