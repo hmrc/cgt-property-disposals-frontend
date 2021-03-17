@@ -2,7 +2,7 @@
 # cgt-property-disposals-frontend
 
 This is a microservice which provides a UI for reporting Capital Gains Tax on UK property (CGT). This service is written 
-in Scala using the Play framework. It provides functionality to do the following:
+in Scala using the Play Framework. It provides functionality to do the following:
 - subscribe to the CGT service
 - manage subscription details
 - fill in and submit CGT returns
