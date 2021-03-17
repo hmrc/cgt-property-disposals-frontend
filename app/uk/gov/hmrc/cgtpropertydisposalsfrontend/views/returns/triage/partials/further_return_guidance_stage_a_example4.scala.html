@@ -83,7 +83,14 @@
     )
 )
 
-<h5 class="heading-small">@Html(messages(s"$key.stage-a.step1.example4.p4", taxYearStartYear))</h5>
+<h5 class="heading-small">
+    @Html(
+        messages(
+            s"$key.stage-a.step1.example4.p4",
+            taxYearStartYear
+        )
+    )
+</h5>
 @calcSum(
     List(
         SumPartDisplay(
