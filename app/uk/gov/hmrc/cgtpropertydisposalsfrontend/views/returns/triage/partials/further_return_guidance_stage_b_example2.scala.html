@@ -33,7 +33,14 @@
 @taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
 @taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
 
-<p>@messages( s"$key.stage-b.step1.example2.p1", taxYearStartYear, taxYearEndYear)</p>
+<p>
+    @messages(
+        s"$key.stage-b.step1.example2.p1",
+        taxYearStartYear,
+        taxYearEndYear,
+        MoneyUtils.formatAmountOfMoneyWithPoundSign(89700)
+    )
+</p>
 <h4 class="heading-medium">
     @messages(
         s"$key.stage-b.step1.example2.headingText",

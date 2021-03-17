@@ -5371,7 +5371,7 @@ furtherReturnGuidance.trust.stage-a.step2.example3.table1.row4.value=£0
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.row5.key=She subtracts allowable previous years Capital Gains Tax losses
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.row5.value=£0
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.row6.key=She subtracts the portion of Annual Exempt Amount to use on residential property gains
-furtherReturnGuidance.trust.stage-a.step2.example3.table1.row6.value=£{0}
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row6.value={0}
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.total.key=Taxable gain on residential property
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.total.value=£73,550 gain
 
@@ -5573,7 +5573,7 @@ furtherReturnGuidance.stage-b.step3.example1.table3.total.key=Richard’s new ov
 furtherReturnGuidance.stage-b.step3.example1.table3.total.value={0}
 
 
-furtherReturnGuidance.stage-b.step1.example2.p1=Kavita has already worked out her net gain for the tax year {0} to {1} to be £89,700.
+furtherReturnGuidance.stage-b.step1.example2.p1=Kavita has already worked out her net gain for the tax year {0} to {1} to be {2}.
 furtherReturnGuidance.stage-b.step1.example2.headingText=Step B1 - Kavita works out her taxable income for the tax year {0} to {1}
 
 furtherReturnGuidance.stage-b.step1.example2.table1.row1.key=She starts with her expected gross annual income
