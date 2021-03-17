@@ -32,13 +32,13 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.Future
 
 class FurtherReturnGuidanceController @Inject() (
-                                                  val authenticatedAction: AuthenticatedAction,
-                                                  val sessionDataAction: SessionDataAction,
-                                                  cc: MessagesControllerComponents,
-                                                  taxableGainGuidancePage: views.html.returns.ytdliability.further_return_taxable_gain_guidance,
-                                                  overallGainGuidancePage: views.html.returns.ytdliability.year_to_date_liability_guidance
-                                                )(implicit viewConfig: ViewConfig)
-  extends FrontendController(cc)
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  cc: MessagesControllerComponents,
+  taxableGainGuidancePage: views.html.returns.ytdliability.further_return_taxable_gain_guidance,
+  overallGainGuidancePage: views.html.returns.ytdliability.year_to_date_liability_guidance
+)(implicit viewConfig: ViewConfig)
+    extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging {
@@ -84,8 +84,8 @@ class FurtherReturnGuidanceController @Inject() (
     }
 
   private def getRepresentativeType(
-                                     state: Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
-                                   ): Option[RepresentativeType] =
+    state: Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
+  ): Option[RepresentativeType] =
     state
       .fold(
         _.fold(
@@ -99,8 +99,8 @@ class FurtherReturnGuidanceController @Inject() (
       )
 
   private def getTaxYear(
-                          state: Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
-                        ): Option[TaxYear] =
+    state: Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
+  ): Option[TaxYear] =
     state.fold(
       _.fold(
         a => Some(a.originalReturn.completeReturn.taxYear()),
@@ -118,8 +118,8 @@ class FurtherReturnGuidanceController @Inject() (
   private def withJourneyState(request: RequestWithSessionData[_])(
     f: (
       SessionData,
-        Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
-      ) => Future[Result]
+      Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
+    ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((session, s: StartingToAmendReturn)) =>
