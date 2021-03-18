@@ -650,7 +650,7 @@ class CommonTriageQuestionsController @Inject() (
                           updateMultipleDisposalAnswers,
                           updateSingleDisposalAnswers
                         ),
-                      representeeAnswers = None
+                      representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers)
                     ),
                     r =>
                       r.copy(
@@ -658,7 +658,7 @@ class CommonTriageQuestionsController @Inject() (
                           multiple =>
                             multiple.copy(
                               triageAnswers = updateMultipleDisposalAnswers(multiple.triageAnswers),
-                              representeeAnswers = None,
+                              representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers),
                               examplePropertyDetailsAnswers = None,
                               yearToDateLiabilityAnswers = None,
                               supportingEvidenceAnswers = None,
@@ -668,7 +668,7 @@ class CommonTriageQuestionsController @Inject() (
                           single =>
                             single.copy(
                               triageAnswers = updateSingleDisposalAnswers(single.triageAnswers),
-                              representeeAnswers = None,
+                              representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers),
                               propertyAddress = None,
                               disposalDetailsAnswers = None,
                               acquisitionDetailsAnswers = None,
@@ -694,7 +694,7 @@ class CommonTriageQuestionsController @Inject() (
                           singleIndirect =>
                             singleIndirect.copy(
                               triageAnswers = updateSingleDisposalAnswers(singleIndirect.triageAnswers),
-                              representeeAnswers = None,
+                              representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers),
                               companyAddress = None,
                               disposalDetailsAnswers = None,
                               acquisitionDetailsAnswers = None,
@@ -710,7 +710,7 @@ class CommonTriageQuestionsController @Inject() (
                           multipleIndirect =>
                             multipleIndirect.copy(
                               triageAnswers = updateMultipleDisposalAnswers(multipleIndirect.triageAnswers),
-                              representeeAnswers = None,
+                              representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers),
                               exampleCompanyDetailsAnswers = None,
                               yearToDateLiabilityAnswers = None,
                               supportingEvidenceAnswers = None,
@@ -724,7 +724,7 @@ class CommonTriageQuestionsController @Inject() (
                           singleMixedUse =>
                             singleMixedUse.copy(
                               triageAnswers = updateSingleDisposalAnswers(singleMixedUse.triageAnswers),
-                              representeeAnswers = None,
+                              representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers),
                               mixedUsePropertyDetailsAnswers = None,
                               yearToDateLiabilityAnswers = None,
                               supportingEvidenceAnswers = None,
