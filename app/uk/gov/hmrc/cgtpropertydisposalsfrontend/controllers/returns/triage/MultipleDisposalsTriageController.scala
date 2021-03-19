@@ -551,13 +551,13 @@ class MultipleDisposalsTriageController @Inject() (
         if (answers.isIndirectDisposal())
           Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
         else {
+          val taxYearExchanged: Option[TaxYearExchanged] =
+            answers.fold(i => getTaxYearExchanged(i.taxYear), c => getTaxYearExchanged(Some(c.taxYear)))
+
           val taxYearOfDateOfDeath = getDateOfDeath(state) match {
             case Some(date) => TimeUtils.getTaxYearExchangedOfADate(date.value)
             case _          => TaxYearExchanged.TaxYearBefore2020
           }
-
-          val tye: Option[TaxYearExchanged] =
-            answers.fold(i => getTaxYearExchanged(i.taxYear), c => getTaxYearExchanged(Some(c.taxYear)))
 
           val representativeType: Option[RepresentativeType] =
             state.fold(
@@ -565,15 +565,7 @@ class MultipleDisposalsTriageController @Inject() (
               _._1.draftReturn.representativeType()
             )
 
-          /*val form = taxYearExchanged match {
-            case Some(x) =>
-              taxYearExchangedForm(taxYearOfDateOfDeath, representativeType).fill(x)
-            case _       => taxYearExchangedForm(taxYearOfDateOfDeath, representativeType).fill(taxYearOfDateOfDeath)
-          }*/
-
-          val form     = tye.fold(
-            taxYearExchangedForm(taxYearOfDateOfDeath, representativeType)
-          )(
+          val form     = taxYearExchanged.fold(taxYearExchangedForm(taxYearOfDateOfDeath, representativeType))(
             taxYearExchangedForm(taxYearOfDateOfDeath, representativeType).fill
           )
           val backLink = answers.fold(
