@@ -71,7 +71,7 @@ object MultipleDisposalsTriageAnswers {
           Some(c.assetTypes === List(AssetType.Residential))
         else None,
         Some(c.assetTypes),
-        Some(c.taxYearExchanged),
+        c.taxYearExchanged,
         Some(c.taxYear),
         Some(c.completionDate)
       )
@@ -82,7 +82,7 @@ object MultipleDisposalsTriageAnswers {
     numberOfProperties: Int,
     countryOfResidence: Country,
     assetTypes: List[AssetType],
-    taxYearExchanged: TaxYearExchanged,
+    taxYearExchanged: Option[TaxYearExchanged],
     taxYear: TaxYear,
     completionDate: CompletionDate
   ) extends MultipleDisposalsTriageAnswers

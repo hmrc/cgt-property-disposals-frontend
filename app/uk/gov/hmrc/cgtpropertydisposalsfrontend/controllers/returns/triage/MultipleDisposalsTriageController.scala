@@ -551,13 +551,13 @@ class MultipleDisposalsTriageController @Inject() (
         if (answers.isIndirectDisposal())
           Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
         else {
-          val taxYearExchanged =
-            answers.fold(_.taxYearExchanged, c => Some(c.taxYearExchanged))
-
           val taxYearOfDateOfDeath = getDateOfDeath(state) match {
             case Some(date) => TimeUtils.getTaxYearExchangedOfADate(date.value)
             case _          => TaxYearExchanged.TaxYearBefore2020
           }
+
+          val tye: Option[TaxYearExchanged] =
+            answers.fold(i => getTaxYearExchanged(i.taxYear), c => getTaxYearExchanged(Some(c.taxYear)))
 
           val representativeType: Option[RepresentativeType] =
             state.fold(
@@ -565,7 +565,15 @@ class MultipleDisposalsTriageController @Inject() (
               _._1.draftReturn.representativeType()
             )
 
-          val form     = taxYearExchanged.fold(taxYearExchangedForm(taxYearOfDateOfDeath, representativeType))(
+          /*val form = taxYearExchanged match {
+            case Some(x) =>
+              taxYearExchangedForm(taxYearOfDateOfDeath, representativeType).fill(x)
+            case _       => taxYearExchangedForm(taxYearOfDateOfDeath, representativeType).fill(taxYearOfDateOfDeath)
+          }*/
+
+          val form     = tye.fold(
+            taxYearExchangedForm(taxYearOfDateOfDeath, representativeType)
+          )(
             taxYearExchangedForm(taxYearOfDateOfDeath, representativeType).fill
           )
           val backLink = answers.fold(
@@ -651,7 +659,7 @@ class MultipleDisposalsTriageController @Inject() (
               taxYearExchanged =>
                 if (
                   answers
-                    .fold(_.taxYearExchanged, c => Some(c.taxYearExchanged))
+                    .fold(_.taxYearExchanged, _.taxYearExchanged)
                     .contains(taxYearExchanged)
                 )
                   Redirect(
@@ -889,7 +897,7 @@ class MultipleDisposalsTriageController @Inject() (
         )
 
         val taxYearExchangedSelected: Option[TaxYearExchanged] =
-          answers.fold(_.taxYearExchanged, c => Some(c.taxYearExchanged))
+          answers.fold(_.taxYearExchanged, c => c.taxYearExchanged)
 
         val taxYearAtStart: Option[Int] =
           getTaxYearByTaxYearExchanged(taxYearExchangedSelected.getOrElse(TaxYearExchanged.DifferentTaxYears))
@@ -1421,7 +1429,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(d)
               ) =>
             val completeAnswers =
-              CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, taxYearExchanged, t, d)
+              CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, Some(taxYearExchanged), t, d)
             updateStateAndThen(
               updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = true),
               Ok(
@@ -1449,7 +1457,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(d)
               ) =>
             val completeAnswers =
-              CompleteMultipleDisposalsTriageAnswers(i, n, c, a, taxYearExchanged, t, d)
+              CompleteMultipleDisposalsTriageAnswers(i, n, c, a, Some(taxYearExchanged), t, d)
             updateStateAndThen(
               updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = false),
               Ok(
