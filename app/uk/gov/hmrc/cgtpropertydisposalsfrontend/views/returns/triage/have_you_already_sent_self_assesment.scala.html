@@ -43,7 +43,7 @@
     hasCreatedDraftReturn: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    taxYear: Option[String]
+    taxYearStartYear: Int
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"alreadySentSelfAssessment"}
@@ -71,9 +71,9 @@
             else ""
     }
 }
-@taxYearStart = @{taxYear.getOrElse("2020").toInt}
-@title = @{messages(s"$key$userKey.title", taxYearStart.toString, (taxYearStart+1).toString)}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
+@title = @{messages(s"$key$userKey.title", taxYearStartYear.toString, (taxYearStartYear+1).toString)}
+@hasErrors = @{form.hasErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
@@ -92,7 +92,8 @@
             errorKey = form.error(key).map(e => s"$userErrorKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = None
+            helpText = None,
+            errorMessage = form.error(key).map(e => messages(s"${e.key}.$userErrorKey${e.message}", e.args:_*) )
         )
 
         @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))

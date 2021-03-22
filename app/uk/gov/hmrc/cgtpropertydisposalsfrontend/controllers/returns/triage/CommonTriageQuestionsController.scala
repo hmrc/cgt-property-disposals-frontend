@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, SessionData, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -519,6 +519,9 @@ class CommonTriageQuestionsController @Inject() (
   def selfAssessmentAlreadySubmitted(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
+        val taxYear          = getTaxYearFromTriageAnswers(triageAnswersFomState(state))
+        val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)
+
         Ok(
           selfAssessmentExitPage(
             routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
@@ -526,7 +529,7 @@ class CommonTriageQuestionsController @Inject() (
               _.subscribedDetails.isATrust,
               _.subscribedDetails.isATrust
             ),
-            getTaxYearStringFromAnswers(triageAnswersFomState(state))
+            taxYearStartYear
           )
         )
       }
@@ -560,6 +563,9 @@ class CommonTriageQuestionsController @Inject() (
           )
         )
 
+        val taxYear          = getTaxYearFromTriageAnswers(triageAnswers)
+        val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)
+
         Ok(
           alreadySentSelfAssessmentPage(
             form,
@@ -573,7 +579,7 @@ class CommonTriageQuestionsController @Inject() (
               _.representativeType(),
               _.representativeType()
             ),
-            getTaxYearStringFromAnswers(triageAnswers)
+            taxYearStartYear
           )
         )
 
@@ -588,7 +594,7 @@ class CommonTriageQuestionsController @Inject() (
           .bindFromRequest()
           .fold(
             { formWithErrors =>
-              val backLink = triageAnswers.fold(
+              val backLink         = triageAnswers.fold(
                 _.fold(
                   _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
                   _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
@@ -598,9 +604,17 @@ class CommonTriageQuestionsController @Inject() (
                   _ => routes.SingleDisposalsTriageController.checkYourAnswers()
                 )
               )
+              val taxYear          = getTaxYearFromTriageAnswers(triageAnswers)
+              val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)
+              val taxYearEndYear   = taxYear.map(_.endDateExclusive.getYear).getOrElse(2021)
+
+              val updatedFormWithErrors = formWithErrors.errors.map {
+                _.copy(args = Seq(taxYearStartYear.toString, taxYearEndYear.toString))
+              }
+
               BadRequest(
                 alreadySentSelfAssessmentPage(
-                  formWithErrors,
+                  formWithErrors.copy(errors = updatedFormWithErrors),
                   backLink,
                   state.isRight,
                   state.fold(
@@ -611,23 +625,23 @@ class CommonTriageQuestionsController @Inject() (
                     _.representativeType(),
                     _.representativeType()
                   ),
-                  getTaxYearStringFromAnswers(triageAnswers)
+                  taxYearStartYear
                 )
               )
             },
-            alreadySentSelfAssessment =>
-              if (
-                triageAnswers
-                  .fold(
-                    _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment),
-                    _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
-                  )
-                  .contains(alreadySentSelfAssessment)
-              )
-                Redirect(
-                  routes.MultipleDisposalsTriageController.checkYourAnswers()
+            alreadySentSelfAssessment => {
+              val alreadySentSA = triageAnswers
+                .fold(
+                  _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment),
+                  _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
                 )
-              else {
+
+              if (alreadySentSA.contains(alreadySentSelfAssessment)) {
+                if (alreadySentSA.contains(true))
+                  Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
+                else
+                  Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+              } else {
                 def updateSingleDisposalAnswers(
                   i: SingleDisposalTriageAnswers
                 ): IncompleteSingleDisposalTriageAnswers =
@@ -764,26 +778,19 @@ class CommonTriageQuestionsController @Inject() (
                       Redirect(redirectToCheckYourAnswers(updatedState))
                 )
               }
+            }
           )
       }
     }
 
-  private def getTaxYearStringFromAnswers(
+  private def getTaxYearFromTriageAnswers(
     triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers]
-  ): Option[String] =
+  ): Option[TaxYear] =
     triageAnswers.fold(
+      _.fold(_.taxYear, c => Some(c.taxYear)),
       _.fold(
-        i => i.taxYearExchanged.map(t => TaxYearExchanged.taxYearExchangedMap.get(t)).flatten,
-        c => TaxYearExchanged.taxYearExchangedMap.get(c.taxYearExchanged)
-      ),
-      _.fold(
-        i =>
-          i.disposalDate
-            .map(d => TaxYearExchanged.taxYearExchangedMap.get(TimeUtils.getTaxYearExchangedOfADate(d.value)))
-            .flatten,
-        c =>
-          TaxYearExchanged.taxYearExchangedMap
-            .get(TimeUtils.getTaxYearExchangedOfADate(c.disposalDate.value))
+        _.disposalDate.map(_.taxYear),
+        c => Some(c.disposalDate.taxYear)
       )
     )
 

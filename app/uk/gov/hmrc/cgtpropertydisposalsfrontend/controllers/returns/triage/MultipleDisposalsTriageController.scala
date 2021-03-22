@@ -857,21 +857,39 @@ class MultipleDisposalsTriageController @Inject() (
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val completionDate =
           answers.fold(_.completionDate, c => Some(c.completionDate))
+
         val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
           viewConfig.enableFutureDateForDisposalAndCompletion,
           viewConfig.maxYearForDisposalsAndCompletion
         )
 
-        val form     = completionDate.fold(completionDateForm(maxDateAllowed, getDateOfDeath(state)))(
+        val form = completionDate.fold(completionDateForm(maxDateAllowed, getDateOfDeath(state)))(
           completionDateForm(maxDateAllowed, getDateOfDeath(state)).fill
         )
-        val backLink = answers.fold(
-          _ => routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
-          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+
+        Ok(
+          completionDatePage(
+            form,
+            backLinkForCompletionDate(answers),
+            state.isRight,
+            state.fold(_ => false, _._1.isAmendReturn)
+          )
         )
-        Ok(completionDatePage(form, backLink, state.isRight, state.fold(_ => false, _._1.isAmendReturn)))
       }
     }
+
+  def backLinkForCompletionDate(answers: MultipleDisposalsTriageAnswers): Call = {
+    val alreadySentSA = answers.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
+
+    answers.fold(
+      _ =>
+        if (alreadySentSA.contains(false))
+          routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+        else
+          routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+      _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+    )
+  }
 
   def completionDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -890,21 +908,15 @@ class MultipleDisposalsTriageController @Inject() (
         completionDateForm(maxDateAllowed, dateOfDeath, taxYearAtStart)
           .bindFromRequest()
           .fold(
-            { formWithErrors =>
-              val backLink = answers.fold(
-                _ => routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
-                _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-              )
-
+            formWithErrors =>
               BadRequest(
                 completionDatePage(
                   formWithErrors,
-                  backLink,
+                  backLinkForCompletionDate(answers),
                   state.isRight,
                   state.fold(_ => false, _._1.isAmendReturn)
                 )
-              )
-            },
+              ),
             completionDate =>
               if (
                 answers
