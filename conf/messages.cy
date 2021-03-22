@@ -909,7 +909,7 @@ completionDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan drosglw
 completionDate.link=<a href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cwblhau (yn agor ffenestr newydd)</a>
 completionDate.error.required=Nodwch ddyddiad cwblhau
 completionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
-completionDate.error.tooFarInPast=Rhaid i'r dyddiad cwblhau fod ar neu ar ôl dyddiad cyfnewid contract, {0}
+completionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl dyddiad cyfnewid y contract, {0}
 completionDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cwblhau fod heddiw neu yn y gorffennol
 completionDate.error.before1900=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEM os yw’r dyddiad cyn hyn
 completionDate-day.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod
@@ -1031,6 +1031,13 @@ multipleDisposalsTaxYear.after=Ar ôl 6 Ebrill 2020
 multipleDisposalsTaxYear.details.p1=Fel arfer, mae cyfnewid <a href="{0}" target="_blank">contractau (yn agor ffenestr newydd)</a> yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
 multipleDisposalsTaxYear.error.required=Dewiswch bryd y cyfnewidiwyd y contractau ar yr holl eiddo
 multipleDisposalsTaxYear.cyaChange=pryd y cyfnewidiwyd y contractau ar yr holl eiddo
+
+multipleDisposalsExchangedInDifferentTaxYears.title=Ni allwch ddefnyddio'r gwasanaeth hwn
+multipleDisposalsExchangedInDifferentTaxYears.p1=Mae hyn oherwydd mai dim ond ar gyfer eiddo a gyfnewidiwyd mewn un flwyddyn dreth y gallwch chi gyflwyno Ffurflen Dreth.
+multipleDisposalsExchangedInDifferentTaxYears.p2=Er enghraifft, os gwnaethoch gyfnewid un eiddo yn y flwyddyn dreth 2020 i 2021 ac un arall yn y flwyddyn dreth 2021 i 2022, ni allwch eu cyflwyno yn yr un Ffurflen Dreth.
+multipleDisposalsExchangedInDifferentTaxYears.whatNext=Beth fydd angen i chi ei wneud nesaf
+multipleDisposalsExchangedInDifferentTaxYears.p3=<a href="{0}">Beth fydd</a> angen i chi ei wneud nesaf Dechreuwch eto a chyflwynwch Ffurflen Dreth ar wahân ar gyfer pob blwyddyn dreth.
+
 multipleDisposalsAssetTypeForNonUkResidents.title=Pa fathau o eiddo neu asedion a waredwyd gennych?
 multipleDisposalsAssetTypeForNonUkResidents.agent.title=Pa fathau o eiddo neu asedion a waredwyd gan eich cleient?
 multipleDisposalsAssetTypeForNonUkResidents.trust.title=Pa fathau o eiddo neu asedion a waredwyd gan yr ymddiriedolaeth?
@@ -1087,8 +1094,8 @@ multipleDisposalsCompletionDate-month.error.monthAndYearRequired=Mae’n rhaid i
 multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a blwyddyn
 multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a mis
 multipleDisposalsCompletionDate.error.dateOfDeath=Ni all y dyddiad cwblhau fod cyn y dyddiad marwolaeth
-multipleDisposalsCompletionDate.error.tooFarInPast=Rhaid i'r dyddiad cwblhau fod yn neu ar ôl yr un flwyddyn dreth â'r dyddiad cyfnewid
-multipleDisposalsCompletionDate.error.CompletionDateNotWithinTaxYear=Rhaid i'r dyddiad cwblhau fod yn neu ar ôl yr un flwyddyn dreth â'r dyddiad cyfnewid
+multipleDisposalsCompletionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod yn ystod yr un flwyddyn dreth â’r dyddiad cyfnewid neu ar ôl hynny
+multipleDisposalsCompletionDate.error.dateNotWithinTaxYear=Rhaid i'r dyddiad cwblhau fod yn neu ar ôl yr un flwyddyn dreth â'r dyddiad cyfnewid
 multipleDisposalsCompletionDate.cyaChange=y dyddiad cwblhau ar gyfer yr holl eiddo
 multipleDisposals.triage.cya.title=Gwiriwch eich atebion
 multipleDisposals.triage.cya.guidanceLink=Help i lenwi’r adran hon

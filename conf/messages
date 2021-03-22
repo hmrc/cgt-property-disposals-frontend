@@ -1056,7 +1056,7 @@ completionDate.personalRepInPeriodOfAdmin.helpText=It’s usually when the money
 completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
-completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date, {0}
+completionDate.error.tooFarInPast=Completion date must be on or after contract exchange date, {0}
 completionDate.error.tooFarInFuture=Completion date must be today or in the past
 completionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
 
@@ -1196,7 +1196,6 @@ multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged
 multipleDisposalsTaxYear.error.before.invalid=The exchange dates must be either in the same tax year as the date of death or a previous tax year
 multipleDisposalsTaxYear.error.after.invalid=The exchange dates must be either in the same tax year as the date of death or a later tax year
 multipleDisposalsTaxYear.cyaChange=when contracts were exchanged on all the properties
-
 
 multipleDisposalsExchangedInDifferentTaxYears.title=You cannot use this service
 multipleDisposalsExchangedInDifferentTaxYears.p1=This is because you can only submit a return for properties that were exchanged in a single tax year.
