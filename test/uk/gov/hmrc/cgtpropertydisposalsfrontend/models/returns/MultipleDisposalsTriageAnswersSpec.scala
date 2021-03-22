@@ -46,7 +46,7 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
             None,
             Some(true),
             Some(List(AssetType.Residential)),
-            Some(c.taxYearExchanged),
+            c.taxYearExchanged,
             Some(c.taxYear),
             Some(c.completionDate)
           )
@@ -66,7 +66,7 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
             Some(completeAnswers.countryOfResidence),
             None,
             Some(completeAnswers.assetTypes),
-            Some(c.taxYearExchanged),
+            c.taxYearExchanged,
             Some(c.taxYear),
             Some(c.completionDate)
           )
@@ -102,7 +102,7 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
             None,
             Some(true),
             Some(List(AssetType.Residential)),
-            Some(ukCompleteAnswers.taxYearExchanged),
+            ukCompleteAnswers.taxYearExchanged,
             Some(ukCompleteAnswers.taxYear),
             Some(ukCompleteAnswers.completionDate)
           )
@@ -115,7 +115,7 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
             Some(nonUkCompleteAnswers.countryOfResidence),
             None,
             Some(nonUkCompleteAnswers.assetTypes),
-            Some(nonUkCompleteAnswers.taxYearExchanged),
+            nonUkCompleteAnswers.taxYearExchanged,
             Some(nonUkCompleteAnswers.taxYear),
             Some(nonUkCompleteAnswers.completionDate)
           )

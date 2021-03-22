@@ -1135,7 +1135,7 @@ class MultipleDisposalsTriageControllerSpec
               forAll { c: CompleteMultipleDisposalsTriageAnswers =>
                 val answers                         = c.copy(
                   countryOfResidence = sample[Country],
-                  taxYearExchanged = getTaxYearExchanged(taxYear),
+                  taxYearExchanged = Some(getTaxYearExchanged(taxYear)),
                   taxYear = taxYear
                 )
                 val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
@@ -1147,7 +1147,7 @@ class MultipleDisposalsTriageControllerSpec
                   countryOfResidence = None,
                   wereAllPropertiesResidential = None,
                   assetTypes = None,
-                  taxYearExchanged = Some(answers.taxYearExchanged),
+                  taxYearExchanged = answers.taxYearExchanged,
                   taxYear = Some(answers.taxYear),
                   completionDate = Some(answers.completionDate)
                 )
@@ -1237,7 +1237,7 @@ class MultipleDisposalsTriageControllerSpec
           countryOfResidence = None,
           wereAllPropertiesResidential = None,
           assetTypes = None,
-          taxYearExchanged = Some(answers.taxYearExchanged),
+          taxYearExchanged = answers.taxYearExchanged,
           taxYear = Some(answers.taxYear),
           completionDate = Some(answers.completionDate)
         )
@@ -1504,7 +1504,7 @@ class MultipleDisposalsTriageControllerSpec
                 countryOfResidence = None,
                 wereAllPropertiesResidential = Some(false),
                 assetTypes = Some(List(AssetType.NonResidential)),
-                taxYearExchanged = Some(answers.taxYearExchanged),
+                taxYearExchanged = answers.taxYearExchanged,
                 taxYear = Some(answers.taxYear),
                 completionDate = Some(answers.completionDate)
               )
@@ -1639,7 +1639,7 @@ class MultipleDisposalsTriageControllerSpec
           countryOfResidence = None,
           wereAllPropertiesResidential = Some(false),
           assetTypes = Some(List(AssetType.NonResidential)),
-          taxYearExchanged = Some(answers.taxYearExchanged),
+          taxYearExchanged = answers.taxYearExchanged,
           taxYear = Some(answers.taxYear),
           completionDate = Some(answers.completionDate)
         )
@@ -2002,7 +2002,7 @@ class MultipleDisposalsTriageControllerSpec
                 val answers                         = c.copy(
                   taxYear = taxYear,
                   assetTypes = List(AssetType.Residential),
-                  taxYearExchanged = TaxYearExchanged.TaxYear2021
+                  taxYearExchanged = Some(TaxYearExchanged.TaxYear2021)
                 )
                 val (session, journey, draftReturn) =
                   sessionDataWithFillingOutReturn(
@@ -3081,7 +3081,7 @@ class MultipleDisposalsTriageControllerSpec
                     Some(answers.countryOfResidence),
                     None,
                     Some(List(AssetType.NonResidential)),
-                    Some(answers.taxYearExchanged),
+                    answers.taxYearExchanged,
                     Some(answers.taxYear),
                     Some(answers.completionDate)
                   )
@@ -3211,7 +3211,7 @@ class MultipleDisposalsTriageControllerSpec
             Some(answers.countryOfResidence),
             None,
             Some(List(AssetType.NonResidential)),
-            Some(answers.taxYearExchanged),
+            answers.taxYearExchanged,
             Some(answers.taxYear),
             Some(answers.completionDate)
           )
@@ -3461,7 +3461,7 @@ class MultipleDisposalsTriageControllerSpec
           }
           val answers                                    = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             individualUserType = Some(Self),
-            taxYearExchanged = taxYearExchangedAdjusted,
+            taxYearExchanged = Some(taxYearExchangedAdjusted),
             completionDate = CompletionDate(today.minusDays(1L))
           )
           val (session, journey, draftReturn)            =
@@ -3497,7 +3497,7 @@ class MultipleDisposalsTriageControllerSpec
           val answers                                    =
             sample[CompleteMultipleDisposalsTriageAnswers].copy(
               individualUserType = Some(Self),
-              taxYearExchanged = taxYearExchangedAdjusted,
+              taxYearExchanged = Some(taxYearExchangedAdjusted),
               completionDate = CompletionDate(today)
             )
           val (session, journey)                         =
@@ -3578,7 +3578,7 @@ class MultipleDisposalsTriageControllerSpec
                 c.copy(
                   individualUserType = Some(Self),
                   completionDate = CompletionDate(today),
-                  taxYearExchanged = taxYearExchangedAdjusted
+                  taxYearExchanged = Some(taxYearExchangedAdjusted)
                 )
               val (session, journey)                         =
                 sessionDataWithStartingNewDraftReturn(answers)
@@ -3621,7 +3621,7 @@ class MultipleDisposalsTriageControllerSpec
 
               val currentAnswers  = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 individualUserType = Some(Self),
-                taxYearExchanged = taxYearExchangedAdjusted,
+                taxYearExchanged = Some(taxYearExchangedAdjusted),
                 completionDate = CompletionDate(today.minusDays(1L))
               )
               val submittedDate   = today
@@ -3676,7 +3676,7 @@ class MultipleDisposalsTriageControllerSpec
 
           val answers      = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             individualUserType = Some(Self),
-            taxYearExchanged = taxYearExchangedAdjusted,
+            taxYearExchanged = Some(taxYearExchangedAdjusted),
             completionDate = CompletionDate(TimeUtils.today())
           )
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -4133,7 +4133,7 @@ class MultipleDisposalsTriageControllerSpec
         2,
         Country.uk,
         List(AssetType.Residential),
-        TaxYearExchanged.TaxYear2020,
+        Some(TaxYearExchanged.TaxYear2020),
         sample[TaxYear],
         sample[CompletionDate]
       )
@@ -4155,7 +4155,7 @@ class MultipleDisposalsTriageControllerSpec
         2,
         sample[Country],
         List(AssetType.Residential),
-        TaxYearExchanged.TaxYear2020,
+        Some(TaxYearExchanged.TaxYear2020),
         sample[TaxYear],
         sample[CompletionDate]
       )
