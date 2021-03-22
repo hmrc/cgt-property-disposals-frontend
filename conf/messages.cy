@@ -1026,10 +1026,16 @@ assetTypeNotYetImplemented.h2=Yr hyn y bydd angen i chi ei wneud nesaf
 assetTypeNotYetImplemented.p2=Bydd angen i chi lenwi <a href="{0}">dibreswyl: rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo neu dir yn y DU </a>.
 multipleDisposalsTaxYear.title=Pryd y cyfnewidiwyd contractau ar yr holl eiddo?
 multipleDisposalsTaxYear.link=Beth sy’n digwydd ar y dyddiad cyfnewid?
-multipleDisposalsTaxYear.before=Cyn 6 Ebrill 2020
-multipleDisposalsTaxYear.after=Ar ôl 6 Ebrill 2020
+
+multipleDisposalsTaxYear.taxyear.2021= Y cyfan rhwng 6 Ebrill 2021 a 5 Ebrill 2022
+multipleDisposalsTaxYear.taxyear.2020= Y cyfan rhwng 6 Ebrill 2020 a 5 Ebrill 2021
+multipleDisposalsTaxYear.taxyear.before2020=Y cyfan cyn 6 Ebrill 2020
+multipleDisposalsTaxYear.taxyear.different=Cyfnewidiwyd yr eiddo mewn gwahanol flynyddoedd treth
+
 multipleDisposalsTaxYear.details.p1=Fel arfer, mae cyfnewid <a href="{0}" target="_blank">contractau (yn agor ffenestr newydd)</a> yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
 multipleDisposalsTaxYear.error.required=Dewiswch bryd y cyfnewidiwyd y contractau ar yr holl eiddo
+multipleDisposalsTaxYear.error.before.invalid=Mae’n rhaid i’r dyddiadau cyfnewid fod naill ai yn ystod yr un flwyddyn dreth â dyddiad y farwolaeth neu mewn blwyddyn dreth flaenorol
+multipleDisposalsTaxYear.error.after.invalid=Mae’n rhaid i’r dyddiadau cyfnewid fod naill ai yn ystod yr un flwyddyn dreth â dyddiad y farwolaeth neu mewn blwyddyn dreth ddiweddarach
 multipleDisposalsTaxYear.cyaChange=pryd y cyfnewidiwyd y contractau ar yr holl eiddo
 
 multipleDisposalsExchangedInDifferentTaxYears.title=Ni allwch ddefnyddio'r gwasanaeth hwn
@@ -1095,6 +1101,8 @@ multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Mae’n rhaid i’r
 multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a mis
 multipleDisposalsCompletionDate.error.dateOfDeath=Ni all y dyddiad cwblhau fod cyn y dyddiad marwolaeth
 multipleDisposalsCompletionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod yn ystod yr un flwyddyn dreth â’r dyddiad cyfnewid neu ar ôl hynny
+multipleDisposalsCompletionDate.error.dateOfDeathBeforeTaxYear=Rhaid i’r dyddiad cwblhau fod ar neu ar ôl 6 Ebrill 2020
+multipleDisposalsCompletionDate.error.dateOfDeath=Ni all y dyddiad cwblhau fod cyn dyddiad y farwolaeth
 multipleDisposalsCompletionDate.error.dateNotWithinTaxYear=Rhaid i'r dyddiad cwblhau fod yn neu ar ôl yr un flwyddyn dreth â'r dyddiad cyfnewid
 multipleDisposalsCompletionDate.cyaChange=y dyddiad cwblhau ar gyfer yr holl eiddo
 multipleDisposals.triage.cya.title=Gwiriwch eich atebion
