@@ -40,7 +40,7 @@ object SingleDisposalTriageAnswers {
     countryOfResidence: Option[Country],
     assetType: Option[AssetType],
     disposalDate: Option[DisposalDate],
-    alreadySentSelfAssessment: Option[Boolean] = None,
+    alreadySentSelfAssessment: Option[Boolean],
     completionDate: Option[CompletionDate],
     tooEarlyDisposalDate: Option[LocalDate]
   ) extends SingleDisposalTriageAnswers
@@ -86,7 +86,7 @@ object SingleDisposalTriageAnswers {
     countryOfResidence: Country,
     assetType: AssetType,
     disposalDate: DisposalDate,
-    alreadySentSelfAssessment: Option[Boolean] = None,
+    alreadySentSelfAssessment: Option[Boolean],
     completionDate: CompletionDate
   ) extends SingleDisposalTriageAnswers
 

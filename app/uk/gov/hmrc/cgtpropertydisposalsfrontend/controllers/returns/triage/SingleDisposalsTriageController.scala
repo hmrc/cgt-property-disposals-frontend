@@ -699,7 +699,7 @@ class SingleDisposalsTriageController @Inject() (
 
             completionDatePage(
               form,
-              backLink(
+              backLinkForCompletionDate(
                 currentAnswers,
                 routes.SingleDisposalsTriageController.whenWasDisposalDate()
               ),
@@ -733,7 +733,7 @@ class SingleDisposalsTriageController @Inject() (
               .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
             completionDatePage(
               form.copy(errors = form.errors.map(x => x.copy(args = Seq(TimeUtils.govDisplayFormat(d.value))))),
-              backLink(
+              backLinkForCompletionDate(
                 currentAnswers,
                 routes.SingleDisposalsTriageController.whenWasDisposalDate()
               ),
@@ -1846,6 +1846,20 @@ class SingleDisposalsTriageController @Inject() (
       _ => ifIncomplete,
       _ => routes.SingleDisposalsTriageController.checkYourAnswers()
     )
+
+  private def backLinkForCompletionDate(
+    answers: SingleDisposalTriageAnswers,
+    ifIncomplete: Call
+  ): Call = {
+    val alreadySentSA = answers.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
+    answers.fold(
+      _ =>
+        if (alreadySentSA.contains(false))
+          routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+        else ifIncomplete,
+      _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+    )
+  }
 
   private def hasPreviousReturnWithSameCompletionDate(
     completionDate: LocalDate,

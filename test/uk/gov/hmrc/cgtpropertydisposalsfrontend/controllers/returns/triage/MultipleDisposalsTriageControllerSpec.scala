@@ -3292,12 +3292,25 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user has not started a new draft return and" when {
 
-          "the journey is incomplete" in {
+          "the journey is incomplete with alreadySentSelfAssessment = false" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                  alreadySentSelfAssessment = Some(false)
+                )
+              )._1,
+              triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
+              "button.continue",
+              expectReturnToSummaryLink = false
+            )
+          }
+
+          "the journey is incomplete with alreadySentSelfAssessment = None" in {
             test(
               sessionDataWithStartingNewDraftReturn(
                 IncompleteMultipleDisposalsTriageAnswers.empty
               )._1,
-              triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
+              triage.routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
               "button.continue",
               expectReturnToSummaryLink = false
             )
@@ -3306,7 +3319,9 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is complete" in {
             test(
               sessionDataWithStartingNewDraftReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self))
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                  individualUserType = Some(Self)
+                )
               )._1,
               triage.routes.MultipleDisposalsTriageController
                 .checkYourAnswers(),
@@ -3319,12 +3334,25 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user has started a new draft return and" when {
 
-          "the journey is incomplete" in {
+          "the journey is incomplete with alreadySentSelfAssessment = false" in {
+            test(
+              sessionDataWithFillingOutReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                  alreadySentSelfAssessment = Some(false)
+                )
+              )._1,
+              triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
+
+          "the journey is incomplete with alreadySentSelfAssessment = None" in {
             test(
               sessionDataWithFillingOutReturn(
                 IncompleteMultipleDisposalsTriageAnswers.empty
               )._1,
-              triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
+              triage.routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true
             )
