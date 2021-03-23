@@ -31,7 +31,7 @@
 @(
     backLink: Call,
     isATrust: Boolean,
-    taxYear: Option[String]
+    taxYearStart: Int
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @key = @{"selfAssessmentAlreadySubmitted"}
@@ -44,8 +44,7 @@
     else ""
 }
 
-@taxYearStart = @{taxYear.getOrElse("2020").toInt}
-@title = @{messages(s"$key$userKey.title")}
+@title = @{messages(s"$key.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
 
