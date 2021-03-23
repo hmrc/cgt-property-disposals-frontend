@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.list._
@@ -29,10 +31,9 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{StartingToAmendToFillingOutReturnBehaviour, representee}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
@@ -45,8 +46,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{triage => triagePages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 
-import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class CommonTriageQuestionsController @Inject() (
@@ -69,7 +70,8 @@ class CommonTriageQuestionsController @Inject() (
   cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
   whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page,
   alreadySentSelfAssessmentPage: triagePages.have_you_already_sent_self_assesment,
-  selfAssessmentExitPage: triagePages.self_assessment_already_submitted
+  selfAssessmentExitPage: triagePages.self_assessment_already_submitted,
+  exchangeDateIncompatibleTaxyears: triagePages.exchangedate_incompatible_taxyears,
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -508,6 +510,13 @@ class CommonTriageQuestionsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
         Ok(disposalDateInDifferentTaxYearPage(amendReturnDisposalDateBackLink(state)))
+      }
+    }
+
+  def exchangedYearIncompatibleWithTaxYear(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState { (_, state) =>
+        Ok(exchangeDateIncompatibleTaxyears(amendReturnDisposalDateBackLink(state)))
       }
     }
 
@@ -1133,7 +1142,6 @@ object CommonTriageQuestionsController {
             s"$key-month",
             s"$key-year",
             key,
-            None,
             List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, key))
           )
         )

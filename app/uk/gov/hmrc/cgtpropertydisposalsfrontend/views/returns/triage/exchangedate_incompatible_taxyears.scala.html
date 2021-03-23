@@ -22,22 +22,22 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
 @(backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{ "disposalDateInDifferentTaxYear" }
+@key = @{ "multipleDisposalsExchangeDateInDifferentTaxYear" }
 @title = @{messages(s"$key.title")}
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
-    @backLinkComponent(backLink)
+  @backLinkComponent(backLink)
 
-    @pageHeading(title)
-    <p>@messages(s"$key.p1")</p>
-    <h2>@messages(s"$key.subheading")</h2>
-    <p>@Html(messages(s"$key.p2", appConfig.contactHmrc))</p>
+  @pageHeading(title)
+  <p>@messages(s"$key.p1")</p>
+  <h2>@messages(s"$key.subheading")</h2>
+  <p>@Html(messages(s"$key.p2", appConfig.contactHmrc))</p>
 
 }

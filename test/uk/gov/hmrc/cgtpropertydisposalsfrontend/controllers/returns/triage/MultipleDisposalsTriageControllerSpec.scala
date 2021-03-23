@@ -1135,7 +1135,7 @@ class MultipleDisposalsTriageControllerSpec
               forAll { c: CompleteMultipleDisposalsTriageAnswers =>
                 val answers                         = c.copy(
                   countryOfResidence = sample[Country],
-                  taxYearExchanged = getTaxYearExchanged(taxYear),
+                  taxYearExchanged = Some(getTaxYearExchanged(taxYear)),
                   taxYear = taxYear
                 )
                 val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
@@ -1147,9 +1147,8 @@ class MultipleDisposalsTriageControllerSpec
                   countryOfResidence = None,
                   wereAllPropertiesResidential = None,
                   assetTypes = None,
-                  taxYearExchanged = Some(answers.taxYearExchanged),
+                  taxYearExchanged = answers.taxYearExchanged,
                   taxYear = Some(answers.taxYear),
-                  alreadySentSelfAssessment = answers.alreadySentSelfAssessment,
                   completionDate = Some(answers.completionDate)
                 )
                 val updatedDraftReturn =
@@ -1195,8 +1194,7 @@ class MultipleDisposalsTriageControllerSpec
             ) {
               val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                 individualUserType = Some(setIndividualUserType(displayType)),
-                numberOfProperties = Some(2),
-                alreadySentSelfAssessment = Some(false)
+                numberOfProperties = Some(2)
               )
               val session = sessionDataWithStartingNewDraftReturn(
                 answers,
@@ -1229,7 +1227,8 @@ class MultipleDisposalsTriageControllerSpec
 
         val answers                         = sample[CompleteMultipleDisposalsTriageAnswers]
           .copy(countryOfResidence = sample[Country])
-        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+        val (session, journey, draftReturn) =
+          sessionDataWithFillingOutReturn(answers)
 
         val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers(
           individualUserType = answers.individualUserType,
@@ -1238,9 +1237,8 @@ class MultipleDisposalsTriageControllerSpec
           countryOfResidence = None,
           wereAllPropertiesResidential = None,
           assetTypes = None,
-          taxYearExchanged = Some(answers.taxYearExchanged),
+          taxYearExchanged = answers.taxYearExchanged,
           taxYear = Some(answers.taxYear),
-          alreadySentSelfAssessment = answers.alreadySentSelfAssessment,
           completionDate = Some(answers.completionDate)
         )
         val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
@@ -1506,9 +1504,8 @@ class MultipleDisposalsTriageControllerSpec
                 countryOfResidence = None,
                 wereAllPropertiesResidential = Some(false),
                 assetTypes = Some(List(AssetType.NonResidential)),
-                taxYearExchanged = Some(answers.taxYearExchanged),
+                taxYearExchanged = answers.taxYearExchanged,
                 taxYear = Some(answers.taxYear),
-                alreadySentSelfAssessment = answers.alreadySentSelfAssessment,
                 completionDate = Some(answers.completionDate)
               )
               val updatedDraftReturn =
@@ -1642,9 +1639,8 @@ class MultipleDisposalsTriageControllerSpec
           countryOfResidence = None,
           wereAllPropertiesResidential = Some(false),
           assetTypes = Some(List(AssetType.NonResidential)),
-          taxYearExchanged = Some(answers.taxYearExchanged),
+          taxYearExchanged = answers.taxYearExchanged,
           taxYear = Some(answers.taxYear),
-          alreadySentSelfAssessment = answers.alreadySentSelfAssessment,
           completionDate = Some(answers.completionDate)
         )
         val updatedDraftReturn =
@@ -1963,7 +1959,6 @@ class MultipleDisposalsTriageControllerSpec
                 assetTypes = Some(List(AssetType.Residential)),
                 taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
                 taxYear = Some(taxYear),
-                alreadySentSelfAssessment = None,
                 completionDate = Some(sample[CompletionDate])
               )
 
@@ -1982,8 +1977,7 @@ class MultipleDisposalsTriageControllerSpec
                         answers.copy(
                           taxYearExchanged = Some(TaxYearExchanged.TaxYearBefore2020),
                           taxYear = None,
-                          completionDate = None,
-                          alreadySentSelfAssessment = None
+                          completionDate = None
                         )
                       )
                     )
@@ -2008,7 +2002,7 @@ class MultipleDisposalsTriageControllerSpec
                 val answers                         = c.copy(
                   taxYear = taxYear,
                   assetTypes = List(AssetType.Residential),
-                  taxYearExchanged = TaxYearExchanged.TaxYear2021
+                  taxYearExchanged = Some(TaxYearExchanged.TaxYear2021)
                 )
                 val (session, journey, draftReturn) =
                   sessionDataWithFillingOutReturn(
@@ -3087,9 +3081,8 @@ class MultipleDisposalsTriageControllerSpec
                     Some(answers.countryOfResidence),
                     None,
                     Some(List(AssetType.NonResidential)),
-                    Some(answers.taxYearExchanged),
+                    answers.taxYearExchanged,
                     Some(answers.taxYear),
-                    answers.alreadySentSelfAssessment,
                     Some(answers.completionDate)
                   )
                 val updatedDraftReturn =
@@ -3218,9 +3211,8 @@ class MultipleDisposalsTriageControllerSpec
             Some(answers.countryOfResidence),
             None,
             Some(List(AssetType.NonResidential)),
-            Some(answers.taxYearExchanged),
+            answers.taxYearExchanged,
             Some(answers.taxYear),
-            answers.alreadySentSelfAssessment,
             Some(answers.completionDate)
           )
         val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers, journey.isFurtherReturn.contains(true))
@@ -3299,7 +3291,8 @@ class MultipleDisposalsTriageControllerSpec
                   alreadySentSelfAssessment = Some(false)
                 )
               )._1,
-              triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
+              triage.routes.MultipleDisposalsTriageController
+                .whenWereContractsExchanged(),
               "button.continue",
               expectReturnToSummaryLink = false
             )
@@ -3341,7 +3334,8 @@ class MultipleDisposalsTriageControllerSpec
                   alreadySentSelfAssessment = Some(false)
                 )
               )._1,
-              triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
+              triage.routes.MultipleDisposalsTriageController
+                .whenWereContractsExchanged(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true
             )
@@ -3495,7 +3489,7 @@ class MultipleDisposalsTriageControllerSpec
           }
           val answers                                    = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             individualUserType = Some(Self),
-            taxYearExchanged = taxYearExchangedAdjusted,
+            taxYearExchanged = Some(taxYearExchangedAdjusted),
             completionDate = CompletionDate(today.minusDays(1L))
           )
           val (session, journey, draftReturn)            =
@@ -3531,7 +3525,7 @@ class MultipleDisposalsTriageControllerSpec
           val answers                                    =
             sample[CompleteMultipleDisposalsTriageAnswers].copy(
               individualUserType = Some(Self),
-              taxYearExchanged = taxYearExchangedAdjusted,
+              taxYearExchanged = Some(taxYearExchangedAdjusted),
               completionDate = CompletionDate(today)
             )
           val (session, journey)                         =
@@ -3612,7 +3606,7 @@ class MultipleDisposalsTriageControllerSpec
                 c.copy(
                   individualUserType = Some(Self),
                   completionDate = CompletionDate(today),
-                  taxYearExchanged = taxYearExchangedAdjusted
+                  taxYearExchanged = Some(taxYearExchangedAdjusted)
                 )
               val (session, journey)                         =
                 sessionDataWithStartingNewDraftReturn(answers)
@@ -3655,7 +3649,7 @@ class MultipleDisposalsTriageControllerSpec
 
               val currentAnswers  = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 individualUserType = Some(Self),
-                taxYearExchanged = taxYearExchangedAdjusted,
+                taxYearExchanged = Some(taxYearExchangedAdjusted),
                 completionDate = CompletionDate(today.minusDays(1L))
               )
               val submittedDate   = today
@@ -3710,7 +3704,7 @@ class MultipleDisposalsTriageControllerSpec
 
           val answers      = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             individualUserType = Some(Self),
-            taxYearExchanged = taxYearExchangedAdjusted,
+            taxYearExchanged = Some(taxYearExchangedAdjusted),
             completionDate = CompletionDate(TimeUtils.today())
           )
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -4167,9 +4161,8 @@ class MultipleDisposalsTriageControllerSpec
         2,
         Country.uk,
         List(AssetType.Residential),
-        TaxYearExchanged.TaxYear2020,
+        Some(TaxYearExchanged.TaxYear2020),
         sample[TaxYear],
-        Some(false),
         sample[CompletionDate]
       )
 
@@ -4182,7 +4175,6 @@ class MultipleDisposalsTriageControllerSpec
         Some(completeAnswersUk.assetTypes),
         Some(TaxYearExchanged.TaxYear2020),
         Some(completeAnswersUk.taxYear),
-        Some(false),
         Some(completeAnswersUk.completionDate)
       )
 
@@ -4191,9 +4183,8 @@ class MultipleDisposalsTriageControllerSpec
         2,
         sample[Country],
         List(AssetType.Residential),
-        TaxYearExchanged.TaxYear2020,
+        Some(TaxYearExchanged.TaxYear2020),
         sample[TaxYear],
-        Some(false),
         sample[CompletionDate]
       )
 
@@ -4206,7 +4197,6 @@ class MultipleDisposalsTriageControllerSpec
         Some(completeAnswersNonUk.assetTypes),
         Some(TaxYearExchanged.TaxYear2020),
         Some(completeAnswersNonUk.taxYear),
-        Some(false),
         Some(completeAnswersNonUk.completionDate)
       )
 

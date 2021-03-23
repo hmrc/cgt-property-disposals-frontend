@@ -60,11 +60,6 @@ POST /multiple-disposals/tax-year-exchanged                 uk.gov.hmrc.cgtprope
 GET  /multiple-disposals/property-types                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.assetTypeForNonUkResidents()
 POST /multiple-disposals/property-types                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.assetTypeForNonUkResidentsSubmit()
 
-GET  /multiple-disposals/already-sent-self-assessment       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
-POST /multiple-disposals/already-sent-self-assessment       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessmentSubmit()
-
-GET /multiple-disposals/exit-self-assessment               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted()
-
 GET  /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDate()
 POST /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDateSubmit()
 
@@ -83,4 +78,6 @@ GET  /how-work-out-overall-liability                        uk.gov.hmrc.cgtprope
 
 GET  /exit/different-tax-year                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
 
-GET /exit/change-who-completing-return-for                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendWhoAreYouSubmittingFor()
+GET  /exit/exchangedate-incompatible-taxyears               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.exchangedYearIncompatibleWithTaxYear()
+
+GET /exit/change-who-completing-return-for                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendWhoAreYouSubmittingFor()
