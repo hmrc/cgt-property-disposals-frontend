@@ -694,6 +694,7 @@ class SingleDisposalsTriageController @Inject() (
         )(
           extractField = _.fold(_.completionDate, c => Some(c.completionDate)),
           page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+          
             val isATrust = journeyStatus
               .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
 
