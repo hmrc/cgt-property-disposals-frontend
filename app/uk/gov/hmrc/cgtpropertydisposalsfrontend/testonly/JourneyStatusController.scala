@@ -132,6 +132,7 @@ class JourneyStatusController @Inject() (
       answers.disposedOfResidentialProperty
         .map(if (_) AssetType.Residential else AssetType.NonResidential),
       disposalDate,
+      None,
       answers.completionDate.map(CompletionDate(_)),
       None
     )

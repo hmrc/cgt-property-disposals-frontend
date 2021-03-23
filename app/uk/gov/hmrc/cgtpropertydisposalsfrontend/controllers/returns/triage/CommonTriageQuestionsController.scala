@@ -71,7 +71,7 @@ class CommonTriageQuestionsController @Inject() (
   whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page,
   alreadySentSelfAssessmentPage: triagePages.have_you_already_sent_self_assesment,
   selfAssessmentExitPage: triagePages.self_assessment_already_submitted,
-  exchangeDateIncompatibleTaxyears: triagePages.exchangedate_incompatible_taxyears,
+  exchangeDateIncompatibleTaxyears: triagePages.exchangedate_incompatible_taxyears
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction

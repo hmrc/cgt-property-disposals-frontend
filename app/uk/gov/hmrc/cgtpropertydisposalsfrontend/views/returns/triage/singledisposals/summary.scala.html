@@ -59,7 +59,7 @@
 
 @isIndirecDisposal = @{
     answers match {
-        case CompleteSingleDisposalTriageAnswers(_, _, _, AssetType.IndirectDisposal, _, _) => true
+        case CompleteSingleDisposalTriageAnswers(_, _, _, AssetType.IndirectDisposal, _, _, _) => true
         case _ => false
     }
 }
@@ -150,6 +150,18 @@
             Some(cyaChange(messages("disposalDate.cyaChange"), routes.SingleDisposalsTriageController.whenWasDisposalDate().url)),
             "disposalDate"
         )
+        @if(answers.alreadySentSelfAssessment.contains(false)){
+            @cyaRow(
+                messages(
+                    s"alreadySentSelfAssessment$userKey.title",
+                    answers.disposalDate.taxYear.startDateInclusive.getYear.toString,
+                    answers.disposalDate.taxYear.endDateExclusive.getYear.toString
+                ),
+                Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.getOrElse(false).toString}")),
+                Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
+                "alreadySentSelfAssessment"
+            )
+        }
         @cyaRow(
             messages(s"completionDate$userKey.title"),
             Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
