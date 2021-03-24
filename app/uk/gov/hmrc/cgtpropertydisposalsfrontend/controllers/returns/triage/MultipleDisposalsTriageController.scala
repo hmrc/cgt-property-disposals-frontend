@@ -1275,25 +1275,6 @@ class MultipleDisposalsTriageController @Inject() (
               routes.MultipleDisposalsTriageController
                 .assetTypeForNonUkResidents()
             )
-          case IncompleteMultipleDisposalsTriageAnswers(
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                Some(taxYearExchanged),
-                _,
-                _,
-                _
-              )
-              if isAmendReturn(state) && !isTaxYearWithinOriginalSubmissionTaxYear(
-                taxYearExchanged,
-                originalSubmissionYear
-              ) =>
-            Redirect(
-              routes.CommonTriageQuestionsController.exchangedYearIncompatibleWithTaxYear()
-            )
 
           case IncompleteMultipleDisposalsTriageAnswers(
                 _,
@@ -1371,6 +1352,26 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                _,
+                Some(taxYearExchanged),
+                _,
+                _,
+                _
+              )
+              if isAmendReturn(state) && !isTaxYearWithinOriginalSubmissionTaxYear(
+                taxYearExchanged,
+                originalSubmissionYear
+              ) =>
+            Redirect(
+              routes.CommonTriageQuestionsController.exchangedYearIncompatibleWithTaxYear()
+            )
+
+          case IncompleteMultipleDisposalsTriageAnswers(
+                _,
+                _,
+                _,
+                _,
+                _,
                 assetTypes,
                 Some(taxYearExchanged),
                 _,
@@ -1396,19 +1397,13 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                _,
-                Some(taxYear),
+                Some(taxYearExchanged),
                 None,
-                None
-              ) =>
-            if (taxYear.isItInLatestTaxYear())
-              Redirect(
-                routes.MultipleDisposalsTriageController.completionDate()
-              )
-            else
-              Redirect(
-                routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
-              )
+                _,
+                _
+              ) if isAValidCGTTaxTear(taxYearExchanged) =>
+            logger.warn("No tax year was found when we expected one")
+            errorHandler.errorResult()
 
           case IncompleteMultipleDisposalsTriageAnswers(
                 _,
@@ -1417,13 +1412,14 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                Some(taxYearExchanged),
+                Some(_),
+                Some(taxYear),
                 None,
-                _,
                 _
-              ) if isAValidCGTTaxTear(taxYearExchanged) =>
-            logger.warn("No tax year was found when we expected one")
-            errorHandler.errorResult()
+              ) if !taxYear.isItInLatestTaxYear =>
+            Redirect(
+              routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+            )
 
           case IncompleteMultipleDisposalsTriageAnswers(
                 _,

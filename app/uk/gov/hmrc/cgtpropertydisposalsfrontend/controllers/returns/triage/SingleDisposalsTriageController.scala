@@ -1456,17 +1456,12 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 Some(DisposalDate(_, taxYear)),
                 None,
-                None,
-                None
-              ) =>
-            if (taxYear.isItInLatestTaxYear())
-              Redirect(
-                routes.SingleDisposalsTriageController.whenWasCompletionDate()
-              )
-            else
-              Redirect(
-                routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
-              )
+                _,
+                _
+              ) if !taxYear.isItInLatestTaxYear =>
+            Redirect(
+              routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+            )
 
           case IncompleteSingleDisposalTriageAnswers(
                 _,

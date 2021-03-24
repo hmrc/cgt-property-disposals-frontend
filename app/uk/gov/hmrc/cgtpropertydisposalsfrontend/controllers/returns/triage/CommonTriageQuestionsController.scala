@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.list._
@@ -638,32 +637,36 @@ class CommonTriageQuestionsController @Inject() (
                 )
               )
             },
-            alreadySentSelfAssessment => {
-              val alreadySentSA = triageAnswers
+            alreadySentSA => {
+              val alreadySentSelfAssessment = triageAnswers
                 .fold(
                   _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment),
                   _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
                 )
 
-              if (alreadySentSA.contains(alreadySentSelfAssessment)) {
-                if (alreadySentSA.contains(true))
+              if (alreadySentSelfAssessment.contains(alreadySentSA)) {
+                if (alreadySentSA)
                   Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
                 else
                   Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-              } else {
+              } else if (alreadySentSA)
+                Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
+              else {
                 def updateSingleDisposalAnswers(
-                  i: SingleDisposalTriageAnswers
-                ): IncompleteSingleDisposalTriageAnswers =
-                  i.unset(_.alreadySentSelfAssessment)
-                    .copy(alreadySentSelfAssessment = Some(alreadySentSelfAssessment))
+                  s: SingleDisposalTriageAnswers
+                ): SingleDisposalTriageAnswers =
+                  s.fold(
+                    _.copy(alreadySentSelfAssessment = Some(alreadySentSA)),
+                    _.copy(alreadySentSelfAssessment = Some(alreadySentSA))
+                  )
 
                 def updateMultipleDisposalAnswers(
-                  i: MultipleDisposalsTriageAnswers
-                ): IncompleteMultipleDisposalsTriageAnswers =
-                  i.unset(_.alreadySentSelfAssessment)
-                    .copy(alreadySentSelfAssessment = Some(alreadySentSelfAssessment))
-
-                val furtherReturn = isFurtherReturn(state)
+                  m: MultipleDisposalsTriageAnswers
+                ): MultipleDisposalsTriageAnswers =
+                  m.fold[MultipleDisposalsTriageAnswers](
+                    _.copy(alreadySentSelfAssessment = Some(alreadySentSA)),
+                    _.copy(alreadySentSelfAssessment = Some(alreadySentSA))
+                  )
 
                 val updatedState: Either[StartingNewDraftReturn, FillingOutReturn] =
                   state.bimap(
@@ -672,94 +675,33 @@ class CommonTriageQuestionsController @Inject() (
                         .bimap[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers](
                           updateMultipleDisposalAnswers,
                           updateSingleDisposalAnswers
-                        ),
-                      representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers)
+                        )
                     ),
                     r =>
                       r.copy(
                         draftReturn = r.draftReturn.fold[DraftReturn](
                           multiple =>
                             multiple.copy(
-                              triageAnswers = updateMultipleDisposalAnswers(multiple.triageAnswers),
-                              representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers),
-                              examplePropertyDetailsAnswers = None,
-                              yearToDateLiabilityAnswers = None,
-                              supportingEvidenceAnswers = None,
-                              exemptionAndLossesAnswers = None,
-                              gainOrLossAfterReliefs = None
+                              triageAnswers = updateMultipleDisposalAnswers(multiple.triageAnswers)
                             ),
                           single =>
                             single.copy(
-                              triageAnswers = updateSingleDisposalAnswers(single.triageAnswers),
-                              representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers),
-                              propertyAddress = None,
-                              disposalDetailsAnswers = None,
-                              acquisitionDetailsAnswers = None,
-                              reliefDetailsAnswers = single.reliefDetailsAnswers
-                                .map(
-                                  _.unsetPrrAndLettingRelief(
-                                    triageAnswers.fold(
-                                      _.isPeriodOfAdmin(),
-                                      _.isPeriodOfAdmin()
-                                    )
-                                  )
-                                ),
-                              yearToDateLiabilityAnswers = None,
-                              initialGainOrLoss = None,
-                              supportingEvidenceAnswers = None,
-                              exemptionAndLossesAnswers =
-                                if (furtherReturn)
-                                  single.exemptionAndLossesAnswers
-                                    .map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                                else None,
-                              gainOrLossAfterReliefs = None
+                              triageAnswers = updateSingleDisposalAnswers(single.triageAnswers)
                             ),
                           singleIndirect =>
                             singleIndirect.copy(
-                              triageAnswers = updateSingleDisposalAnswers(singleIndirect.triageAnswers),
-                              representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers),
-                              companyAddress = None,
-                              disposalDetailsAnswers = None,
-                              acquisitionDetailsAnswers = None,
-                              yearToDateLiabilityAnswers = None,
-                              supportingEvidenceAnswers = None,
-                              exemptionAndLossesAnswers =
-                                if (furtherReturn)
-                                  singleIndirect.exemptionAndLossesAnswers
-                                    .map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                                else None,
-                              gainOrLossAfterReliefs = None
+                              triageAnswers = updateSingleDisposalAnswers(singleIndirect.triageAnswers)
                             ),
                           multipleIndirect =>
                             multipleIndirect.copy(
-                              triageAnswers = updateMultipleDisposalAnswers(multipleIndirect.triageAnswers),
-                              representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers),
-                              exampleCompanyDetailsAnswers = None,
-                              yearToDateLiabilityAnswers = None,
-                              supportingEvidenceAnswers = None,
-                              exemptionAndLossesAnswers =
-                                if (furtherReturn)
-                                  multipleIndirect.exemptionAndLossesAnswers
-                                    .map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                                else None,
-                              gainOrLossAfterReliefs = None
+                              triageAnswers = updateMultipleDisposalAnswers(multipleIndirect.triageAnswers)
                             ),
                           singleMixedUse =>
                             singleMixedUse.copy(
-                              triageAnswers = updateSingleDisposalAnswers(singleMixedUse.triageAnswers),
-                              representeeAnswers = state.fold(_.representeeAnswers, _.draftReturn.representeeAnswers),
-                              mixedUsePropertyDetailsAnswers = None,
-                              yearToDateLiabilityAnswers = None,
-                              supportingEvidenceAnswers = None,
-                              exemptionAndLossesAnswers =
-                                if (furtherReturn)
-                                  singleMixedUse.exemptionAndLossesAnswers
-                                    .map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                                else None,
-                              gainOrLossAfterReliefs = None
+                              triageAnswers = updateSingleDisposalAnswers(singleMixedUse.triageAnswers)
                             )
                         )
-                      ).withForceDisplayGainOrLossAfterReliefsForAmends
+                      )
                   )
 
                 val result =
@@ -781,7 +723,7 @@ class CommonTriageQuestionsController @Inject() (
                     errorHandler.errorResult()
                   },
                   _ =>
-                    if (alreadySentSelfAssessment)
+                    if (alreadySentSA)
                       Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
                     else
                       Redirect(redirectToCheckYourAnswers(updatedState))

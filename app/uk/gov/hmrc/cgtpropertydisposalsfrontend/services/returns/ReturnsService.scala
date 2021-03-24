@@ -160,13 +160,15 @@ class ReturnsServiceImpl @Inject() (
                                                  )
       (validDraftReturns, invalidDraftReturns) = draftReturns.partition(isValid(_, cgtReference))
       (sentDraftReturns, unsentDraftReturns)   = validDraftReturns.partition(hasBeenSent(sentReturns))
-      toDelete                                 = invalidDraftReturns ::: sentDraftReturns
-      _                                       <- if (toDelete.nonEmpty)
-                                                   EitherT.liftF[Future, Error, Unit](
-                                                     deleteSentOrInvalidDraftReturns(toDelete)
-                                                   )
-                                                 else EitherT.rightT[Future, Error](())
-    } yield unsentDraftReturns
+      unsentDraftReturnsWithSAStatus           = unsentDraftReturns.map(updateSAStatusToDraftReturn)
+
+      toDelete = invalidDraftReturns ::: sentDraftReturns
+      _       <- if (toDelete.nonEmpty)
+                   EitherT.liftF[Future, Error, Unit](
+                     deleteSentOrInvalidDraftReturns(toDelete)
+                   )
+                 else EitherT.rightT[Future, Error](())
+    } yield unsentDraftReturnsWithSAStatus
 
   private def deleteSentOrInvalidDraftReturns(
     sentDraftReturns: List[DraftReturn]
@@ -184,6 +186,60 @@ class ReturnsServiceImpl @Inject() (
       _ => logger.info(s"Deleted draft returns with ids [${ids.mkString(" ")}] ")
     )
   }
+
+  private def updateSAStatusToDraftReturn(draftReturn: DraftReturn): DraftReturn =
+    draftReturn.fold(
+      whenMultiple =>
+        if (
+          whenMultiple.triageAnswers.fold(
+            _.alreadySentSelfAssessment.isDefined,
+            _.alreadySentSelfAssessment.isDefined
+          )
+        ) whenMultiple
+        else
+          whenMultiple.copy(
+            triageAnswers = whenMultiple.triageAnswers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+          ),
+      whenSingle =>
+        if (
+          whenSingle.triageAnswers.fold(
+            _.alreadySentSelfAssessment.isDefined,
+            _.alreadySentSelfAssessment.isDefined
+          )
+        ) whenSingle
+        else
+          whenSingle.copy(
+            triageAnswers = whenSingle.triageAnswers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+          ),
+      whenSingleIndirect =>
+        if (
+          whenSingleIndirect.triageAnswers
+            .fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined)
+        )
+          whenSingleIndirect
+        else
+          whenSingleIndirect.copy(
+            triageAnswers = whenSingleIndirect.triageAnswers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+          ),
+      whenMultipleIndirect =>
+        if (
+          whenMultipleIndirect.triageAnswers
+            .fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined)
+        ) whenMultipleIndirect
+        else
+          whenMultipleIndirect.copy(
+            triageAnswers = whenMultipleIndirect.triageAnswers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+          ),
+      whenSingleMixedUse =>
+        if (
+          whenSingleMixedUse.triageAnswers
+            .fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined)
+        ) whenSingleMixedUse
+        else
+          whenSingleMixedUse.copy(
+            triageAnswers = whenSingleMixedUse.triageAnswers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+          )
+    )
 
   private def isValid(draftReturn: DraftReturn, cgtReference: CgtReference): Boolean = {
     val dateOfDeath =
