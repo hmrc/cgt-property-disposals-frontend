@@ -20,6 +20,7 @@ import java.time.LocalDate
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.list._
+import cats.instances.boolean._
 import cats.syntax.either._
 import cats.syntax.order._
 import com.google.inject.Inject
@@ -546,8 +547,8 @@ class CommonTriageQuestionsController @Inject() (
   def haveYouAlreadySentSelfAssessment(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
-        val triageAnswers      = triageAnswersFomState(state)
-        val sentSelfAssessment =
+        val triageAnswers          = triageAnswersFomState(state)
+        val sentSelfAssessment     =
           triageAnswers.fold(
             _.fold(
               _.alreadySentSelfAssessment,
@@ -558,18 +559,27 @@ class CommonTriageQuestionsController @Inject() (
               _.alreadySentSelfAssessment
             )
           )
+        val isAmendReturn: Boolean = state.fold(_ => false, _.isAmendReturn)
+        println("MOHAN " + isAmendReturn.toString)
+
+        val originalSubmissionId: Option[String] =
+          state.toOption.flatMap(_.amendReturnData.map(_.originalReturn.summary.submissionId))
 
         val form     = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
-        val backLink = triageAnswers.fold(
-          _.fold(
-            _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
-            _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-          ),
-          _.fold(
-            _ => routes.SingleDisposalsTriageController.whenWasDisposalDate(),
-            _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+        val backLink = if (isAmendReturn && !sentSelfAssessment.exists(x => x === false || x === true)) {
+          controllers.accounts.homepage.routes.HomePageController.viewSentReturn(originalSubmissionId.getOrElse(""))
+        } else {
+          triageAnswers.fold(
+            _.fold(
+              _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+              _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+            ),
+            _.fold(
+              _ => routes.SingleDisposalsTriageController.whenWasDisposalDate(),
+              _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+            )
           )
-        )
+        }
 
         val taxYear          = getTaxYearFromTriageAnswers(triageAnswers)
         val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)

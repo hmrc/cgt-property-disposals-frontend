@@ -124,17 +124,27 @@ class AmendReturnController @Inject() (
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withStartingToAmendReturn(request) { journey =>
-        Ok(
-          checkYourAnswersPage(
-            journey.originalReturn.completeReturn,
-            rebasingEligibilityUtil,
-            journey.subscribedDetails,
-            journey.originalReturn.completeReturn.representativeType(),
-            journey.originalReturn.completeReturn.isIndirectDisposal(),
-            Some(journey.originalReturn.returnType.isFurtherOrAmendReturn),
-            controllers.returns.routes.ViewReturnController.displayReturn()
-          )
-        )
+        val isItSent: Option[Boolean] = journey.originalReturn.completeReturn.triageAnswers
+          .fold(_.alreadySentSelfAssessment, c => c.alreadySentSelfAssessment)
+        isItSent match {
+          case Some(_) =>
+            Ok(
+              checkYourAnswersPage(
+                journey.originalReturn.completeReturn,
+                rebasingEligibilityUtil,
+                journey.subscribedDetails,
+                journey.originalReturn.completeReturn.representativeType(),
+                journey.originalReturn.completeReturn.isIndirectDisposal(),
+                Some(journey.originalReturn.returnType.isFurtherOrAmendReturn),
+                controllers.returns.routes.ViewReturnController.displayReturn()
+              )
+            )
+          case None    =>
+            Redirect(
+              controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+            )
+        }
+
       }
     }
 
