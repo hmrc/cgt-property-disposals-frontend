@@ -515,7 +515,7 @@ class RepresenteeController @Inject() (
               Redirect(routes.RepresenteeController.checkYourAnswers())
             case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
               val allowedDateOfDeath = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-                viewConfig.enableFutureDateForDisposalAndCompletion,
+                viewConfig.enableFutureDates,
                 viewConfig.maxYearForDisposalsAndCompletion
               )
               val form               =
@@ -545,7 +545,7 @@ class RepresenteeController @Inject() (
                 _ => routes.RepresenteeController.checkYourAnswers()
               )
               val allowedDateOfDeath = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-                viewConfig.enableFutureDateForDisposalAndCompletion,
+                viewConfig.enableFutureDates,
                 viewConfig.maxYearForDisposalsAndCompletion
               )
               dateOfDeathForm(allowedDateOfDeath)

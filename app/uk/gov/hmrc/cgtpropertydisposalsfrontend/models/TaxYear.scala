@@ -58,13 +58,12 @@ object TaxYear {
 
   implicit class TaxYearOps(private val taxTear: TaxYear) extends AnyVal {
 
-    def isItInLatestTaxYear(): Boolean = {
-      //TODO: remove below line and uncomment next line
-      val today = TimeUtils.today().plusYears(1L)
-      // val today = TimeUtils.today()
+    def isItInLatestTaxYear(futureTaxYearsEnabled: Boolean): Boolean = {
+      val today =
+        if (futureTaxYearsEnabled) TimeUtils.today().plusYears(1L)
+        else TimeUtils.today()
       today < taxTear.endDateExclusive && today >= taxTear.startDateInclusive
     }
-
   }
 
 }

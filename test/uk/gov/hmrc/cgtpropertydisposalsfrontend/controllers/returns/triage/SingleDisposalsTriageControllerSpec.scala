@@ -2102,7 +2102,7 @@ class SingleDisposalsTriageControllerSpec
 
       val tomorrow = TimeUtils
         .getMaximumDateForDisposalsAndCompletion(
-          viewConfig.enableFutureDateForDisposalAndCompletion,
+          viewConfig.enableFutureDates,
           viewConfig.maxYearForDisposalsAndCompletion
         )
         .plusDays(1L)
@@ -2819,7 +2819,7 @@ class SingleDisposalsTriageControllerSpec
 
       val tomorrow = TimeUtils
         .getMaximumDateForDisposalsAndCompletion(
-          viewConfig.enableFutureDateForDisposalAndCompletion,
+          viewConfig.enableFutureDates,
           viewConfig.maxYearForDisposalsAndCompletion
         )
         .plusDays(1L)
