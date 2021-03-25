@@ -190,56 +190,65 @@ class ReturnsServiceImpl @Inject() (
   private def updateSAStatusToDraftReturn(draftReturn: DraftReturn): DraftReturn =
     draftReturn.fold(
       whenMultiple =>
-        if (
-          whenMultiple.triageAnswers.fold(
-            _.alreadySentSelfAssessment.isDefined,
-            _.alreadySentSelfAssessment.isDefined
-          )
-        ) whenMultiple
+        if (isSAStatusUpdatedToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers))
+          whenMultiple
         else
-          whenMultiple.copy(
-            triageAnswers = whenMultiple.triageAnswers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
-          ),
+          whenMultiple.copy(triageAnswers = unsetSAStatusToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers)),
       whenSingle =>
-        if (
-          whenSingle.triageAnswers.fold(
-            _.alreadySentSelfAssessment.isDefined,
-            _.alreadySentSelfAssessment.isDefined
-          )
-        ) whenSingle
+        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingle.triageAnswers))
+          whenSingle
         else
-          whenSingle.copy(
-            triageAnswers = whenSingle.triageAnswers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
-          ),
+          whenSingle.copy(triageAnswers = unsetSAStatusToSingleDisposalTriageAnswers(whenSingle.triageAnswers)),
       whenSingleIndirect =>
-        if (
-          whenSingleIndirect.triageAnswers
-            .fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined)
-        )
+        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingleIndirect.triageAnswers))
           whenSingleIndirect
         else
-          whenSingleIndirect.copy(
-            triageAnswers = whenSingleIndirect.triageAnswers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+          whenSingleIndirect.copy(triageAnswers =
+            unsetSAStatusToSingleDisposalTriageAnswers(whenSingleIndirect.triageAnswers)
           ),
       whenMultipleIndirect =>
-        if (
-          whenMultipleIndirect.triageAnswers
-            .fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined)
-        ) whenMultipleIndirect
+        if (isSAStatusUpdatedToMultipleDisposalsTriageAnswers(whenMultipleIndirect.triageAnswers))
+          whenMultipleIndirect
         else
-          whenMultipleIndirect.copy(
-            triageAnswers = whenMultipleIndirect.triageAnswers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+          whenMultipleIndirect.copy(triageAnswers =
+            unsetSAStatusToMultipleDisposalsTriageAnswers(whenMultipleIndirect.triageAnswers)
           ),
       whenSingleMixedUse =>
-        if (
-          whenSingleMixedUse.triageAnswers
-            .fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined)
-        ) whenSingleMixedUse
+        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingleMixedUse.triageAnswers))
+          whenSingleMixedUse
         else
-          whenSingleMixedUse.copy(
-            triageAnswers = whenSingleMixedUse.triageAnswers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+          whenSingleMixedUse.copy(triageAnswers =
+            unsetSAStatusToSingleDisposalTriageAnswers(whenSingleMixedUse.triageAnswers)
           )
     )
+
+  private def unsetSAStatusToMultipleDisposalsTriageAnswers(
+    answers: MultipleDisposalsTriageAnswers
+  ): MultipleDisposalsTriageAnswers =
+    answers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+
+  private def unsetSAStatusToSingleDisposalTriageAnswers(
+    answers: SingleDisposalTriageAnswers
+  ): SingleDisposalTriageAnswers =
+    answers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+
+  private def isSAStatusUpdatedToMultipleDisposalsTriageAnswers(answers: MultipleDisposalsTriageAnswers): Boolean =
+    answers.fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined) ||
+      answers
+        .fold(
+          _.taxYear.map(_.isItInLatestTaxYear(viewConfig.enableFutureDates)),
+          c => Some(c.taxYear.isItInLatestTaxYear(viewConfig.enableFutureDates))
+        )
+        .contains(true)
+
+  private def isSAStatusUpdatedToSingleDisposalTriageAnswers(answers: SingleDisposalTriageAnswers): Boolean =
+    answers.fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined) ||
+      answers
+        .fold(
+          _.disposalDate.map(_.taxYear.isItInLatestTaxYear(viewConfig.enableFutureDates)),
+          c => Some(c.disposalDate.taxYear.isItInLatestTaxYear(viewConfig.enableFutureDates))
+        )
+        .contains(true)
 
   private def isValid(draftReturn: DraftReturn, cgtReference: CgtReference): Boolean = {
     val dateOfDeath =
