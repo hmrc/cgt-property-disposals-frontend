@@ -643,14 +643,10 @@ class CommonTriageQuestionsController @Inject() (
                   _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment),
                   _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
                 )
-
-              if (alreadySentSelfAssessment.contains(alreadySentSA)) {
-                if (alreadySentSA)
-                  Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
-                else
-                  Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-              } else if (alreadySentSA)
+              if (alreadySentSA)
                 Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
+              else if (alreadySentSelfAssessment.contains(alreadySentSA))
+                Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
               else {
                 def updateSingleDisposalAnswers(
                   s: SingleDisposalTriageAnswers
