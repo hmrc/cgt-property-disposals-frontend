@@ -40,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
@@ -160,7 +160,10 @@ class ReturnsServiceImpl @Inject() (
                                                  )
       (validDraftReturns, invalidDraftReturns) = draftReturns.partition(isValid(_, cgtReference))
       (sentDraftReturns, unsentDraftReturns)   = validDraftReturns.partition(hasBeenSent(sentReturns))
-      unsentDraftReturnsWithSAStatus           = unsentDraftReturns.map(updateSAStatusToDraftReturn)
+      unsentDraftReturnsTaxYearExchanged       = unsentDraftReturns.map(updateTaxYearExchangedToDraftReturn)
+
+      unsentDraftReturnsWithTaxYearExchangedAndSAStatus =
+        unsentDraftReturnsTaxYearExchanged.map(updateSAStatusToDraftReturn)
 
       toDelete = invalidDraftReturns ::: sentDraftReturns
       _       <- if (toDelete.nonEmpty)
@@ -168,7 +171,39 @@ class ReturnsServiceImpl @Inject() (
                      deleteSentOrInvalidDraftReturns(toDelete)
                    )
                  else EitherT.rightT[Future, Error](())
-    } yield unsentDraftReturnsWithSAStatus
+    } yield unsentDraftReturnsWithTaxYearExchangedAndSAStatus
+
+  private def updateTaxYearExchangedToDraftReturn(draftReturn: DraftReturn): DraftReturn =
+    draftReturn.fold(
+      whenMultiple =>
+        whenMultiple.copy(
+          triageAnswers = updateTaxYearExchangedToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers)
+        ),
+      whenSingle => whenSingle,
+      whenSingleIndirect => whenSingleIndirect,
+      whenMultipleIndirect =>
+        whenMultipleIndirect.copy(
+          triageAnswers = updateTaxYearExchangedToMultipleDisposalsTriageAnswers(whenMultipleIndirect.triageAnswers)
+        ),
+      whenSingleMixedUse => whenSingleMixedUse
+    )
+
+  private def updateTaxYearExchangedToMultipleDisposalsTriageAnswers(
+    answers: MultipleDisposalsTriageAnswers
+  ): MultipleDisposalsTriageAnswers = {
+    val taxYear          = answers.fold(_.taxYear, c => Some(c.taxYear))
+    val date             = taxYear.map(_.startDateInclusive).getOrElse(TimeUtils.today())
+    val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(date)
+
+    val actualtaxYearExchanged = answers.fold(_.taxYearExchanged, _.taxYearExchanged)
+    if (actualtaxYearExchanged.isDefined)
+      answers
+    else
+      answers.fold[MultipleDisposalsTriageAnswers](
+        _.copy(taxYearExchanged = Some(taxYearExchanged)),
+        _.copy(taxYearExchanged = Some(taxYearExchanged))
+      )
+  }
 
   private def deleteSentOrInvalidDraftReturns(
     sentDraftReturns: List[DraftReturn]
