@@ -171,48 +171,33 @@ class ReturnsServiceImpl @Inject() (
 
   private def updateTaxYearExchangedToDraftReturn(draftReturn: DraftReturn): DraftReturn =
     draftReturn.fold(
-      whenMultiple => updateTaxYearExchangedToMultipleDisposalsDraftReturn(whenMultiple),
+      whenMultiple =>
+        whenMultiple.copy(
+          triageAnswers = updateTaxYearExchangedToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers)
+        ),
       whenSingle => whenSingle,
       whenSingleIndirect => whenSingleIndirect,
-      whenMultipleIndirect => updateTaxYearExchangedToDraftMultipleIndirectDisposalsReturn(whenMultipleIndirect),
+      whenMultipleIndirect =>
+        whenMultipleIndirect.copy(
+          triageAnswers = updateTaxYearExchangedToMultipleDisposalsTriageAnswers(whenMultipleIndirect.triageAnswers)
+        ),
       whenSingleMixedUse => whenSingleMixedUse
     )
 
-  private def updateTaxYearExchangedToMultipleDisposalsDraftReturn(
-    draftReturn: DraftMultipleDisposalsReturn
-  ): DraftMultipleDisposalsReturn = {
-    val taxYear          = draftReturn.triageAnswers.fold(_.taxYear, c => Some(c.taxYear))
+  private def updateTaxYearExchangedToMultipleDisposalsTriageAnswers(
+    answers: MultipleDisposalsTriageAnswers
+  ): MultipleDisposalsTriageAnswers = {
+    val taxYear          = answers.fold(_.taxYear, c => Some(c.taxYear))
     val date             = taxYear.map(_.startDateInclusive).getOrElse(TimeUtils.today())
     val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(date)
 
-    val actualtaxYearExchanged = draftReturn.triageAnswers.fold(_.taxYearExchanged, _.taxYearExchanged)
+    val actualtaxYearExchanged = answers.fold(_.taxYearExchanged, _.taxYearExchanged)
     if (actualtaxYearExchanged.isDefined)
-      draftReturn
+      answers
     else
-      draftReturn.copy(
-        triageAnswers = draftReturn.triageAnswers.fold[MultipleDisposalsTriageAnswers](
-          _.copy(taxYearExchanged = Some(taxYearExchanged)),
-          _.copy(taxYearExchanged = Some(taxYearExchanged))
-        )
-      )
-  }
-
-  private def updateTaxYearExchangedToDraftMultipleIndirectDisposalsReturn(
-    draftReturn: DraftMultipleIndirectDisposalsReturn
-  ): DraftMultipleIndirectDisposalsReturn = {
-    val taxYear          = draftReturn.triageAnswers.fold(_.taxYear, c => Some(c.taxYear))
-    val date             = taxYear.map(_.startDateInclusive).getOrElse(TimeUtils.today())
-    val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(date)
-
-    val actualtaxYearExchanged = draftReturn.triageAnswers.fold(_.taxYearExchanged, _.taxYearExchanged)
-    if (actualtaxYearExchanged.isDefined)
-      draftReturn
-    else
-      draftReturn.copy(
-        triageAnswers = draftReturn.triageAnswers.fold[MultipleDisposalsTriageAnswers](
-          _.copy(taxYearExchanged = Some(taxYearExchanged)),
-          _.copy(taxYearExchanged = Some(taxYearExchanged))
-        )
+      answers.fold[MultipleDisposalsTriageAnswers](
+        _.copy(taxYearExchanged = Some(taxYearExchanged)),
+        _.copy(taxYearExchanged = Some(taxYearExchanged))
       )
   }
 
