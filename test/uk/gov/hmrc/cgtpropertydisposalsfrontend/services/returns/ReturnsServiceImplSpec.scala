@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import java.time.{LocalDate, LocalDateTime, LocalTime}
 import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
@@ -55,6 +54,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged.TaxYear2020
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
@@ -489,16 +489,22 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
             ) shouldBe Right(List(draftReturn))
           }
 
+          val dateOfDeath = LocalDate.now()
+
+          val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(dateOfDeath)
+
+          val taxYear = sample[TaxYear].copy(
+            startDateInclusive = LocalDate.of(dateOfDeath.getYear, 4, 6),
+            endDateExclusive = LocalDate.of(dateOfDeath.getYear, 4, 6)
+          )
+
+          val alreadySentSA = taxYearExchanged match {
+            case TaxYear2020                            => Some(false)
+            case _ if taxYear.isItInLatestTaxYear(true) => None
+            case _                                      => None
+          }
+
           "the user is a period of admin personal rep and" when {
-
-            val dateOfDeath = LocalDate.now()
-
-            val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(dateOfDeath)
-
-            val taxYear = sample[TaxYear].copy(
-              startDateInclusive = LocalDate.of(dateOfDeath.getYear, 4, 6),
-              endDateExclusive = LocalDate.of(dateOfDeath.getYear, 4, 6)
-            )
 
             val representeeAnswers =
               sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))
@@ -507,14 +513,14 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
               sample[CompleteSingleDisposalTriageAnswers].copy(
                 individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
                 disposalDate = DisposalDate(dateOfDeath.plusDays(1L), taxYear),
-                alreadySentSelfAssessment = Some(false)
+                alreadySentSelfAssessment = alreadySentSA
               )
 
             val multipleDisposalsTriageAnswers =
               sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
                 completionDate = CompletionDate(dateOfDeath.plusDays(1L)),
-                alreadySentSelfAssessment = Some(false),
+                alreadySentSelfAssessment = alreadySentSA,
                 taxYearExchanged = Some(taxYearExchanged),
                 taxYear = taxYear
               )
@@ -576,15 +582,6 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
 
           "the user is a non-period of admin personal rep and" when {
 
-            val dateOfDeath = LocalDate.now()
-
-            val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(dateOfDeath)
-
-            val taxYear = sample[TaxYear].copy(
-              startDateInclusive = LocalDate.of(dateOfDeath.getYear, 4, 6),
-              endDateExclusive = LocalDate.of(dateOfDeath.getYear, 4, 6)
-            )
-
             val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(
               dateOfDeath = Some(DateOfDeath(dateOfDeath))
             )
@@ -593,7 +590,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
               sample[CompleteSingleDisposalTriageAnswers].copy(
                 individualUserType = Some(PersonalRepresentative),
                 disposalDate = DisposalDate(dateOfDeath.minusDays(2), taxYear),
-                alreadySentSelfAssessment = Some(false)
+                alreadySentSelfAssessment = alreadySentSA
               )
 
             val multipleDisposalsTriageAnswers =
@@ -602,7 +599,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
                 completionDate = CompletionDate(dateOfDeath.minusDays(2)),
                 taxYearExchanged = Some(taxYearExchanged),
                 taxYear = taxYear,
-                alreadySentSelfAssessment = Some(false)
+                alreadySentSelfAssessment = alreadySentSA
               )
 
             val examplePropertyDetailsAnswers =
@@ -657,7 +654,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
                 )
               )
             }
-            
+
           }
 
         }
