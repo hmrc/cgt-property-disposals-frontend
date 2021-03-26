@@ -548,8 +548,8 @@ class CommonTriageQuestionsController @Inject() (
   def haveYouAlreadySentSelfAssessment(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
-        val triageAnswers          = triageAnswersFomState(state)
-        val sentSelfAssessment     =
+        val triageAnswers                        = triageAnswersFomState(state)
+        val sentSelfAssessment                   =
           triageAnswers.fold(
             _.fold(
               _.alreadySentSelfAssessment,
@@ -560,11 +560,11 @@ class CommonTriageQuestionsController @Inject() (
               _.alreadySentSelfAssessment
             )
           )
-        val isAmendReturn: Boolean = state.fold(_ => false, _.isAmendReturn)
+        val isAmendReturn: Boolean               = state.fold(_ => false, _.isAmendReturn)
         val originalSubmissionId: Option[String] =
           state.toOption.flatMap(_.amendReturnData.map(_.originalReturn.summary.submissionId))
-        val form     = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
-        val backLink = if (isAmendReturn && !sentSelfAssessment.exists(x => x === false || x === true)) {
+        val form                                 = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
+        val backLink                             = if (isAmendReturn && !sentSelfAssessment.exists(x => x === false || x === true)) {
           controllers.accounts.homepage.routes.HomePageController.viewSentReturn(originalSubmissionId.getOrElse(""))
         } else {
           triageAnswers.fold(
