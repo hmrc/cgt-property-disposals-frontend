@@ -143,6 +143,18 @@
             Some(cyaChange(messages("sharesDisposalDate.cyaChange"), routes.SingleDisposalsTriageController.disposalDateOfShares.url)),
             "disposalDateOfShares"
         )
+        @if(answers.alreadySentSelfAssessment.contains(false)){
+            @cyaRow(
+                messages(
+                    s"alreadySentSelfAssessment$userKey.title",
+                    answers.disposalDate.taxYear.startDateInclusive.getYear.toString,
+                    answers.disposalDate.taxYear.endDateExclusive.getYear.toString
+                ),
+                Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.getOrElse(false).toString}")),
+                Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
+                "alreadySentSelfAssessment"
+            )
+        }
     } else {
         @cyaRow(
             messages(s"disposalDate$userKey.title"),

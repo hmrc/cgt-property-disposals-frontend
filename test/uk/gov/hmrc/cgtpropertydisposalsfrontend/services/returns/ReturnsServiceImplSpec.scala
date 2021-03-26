@@ -56,7 +56,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -476,7 +476,6 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
           def testDraftReturnIsNotDeleted(draftReturn: DraftReturn): Unit = {
             val cgtReference         = sample[CgtReference]
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
-
             inSequence {
               mockGetDraftReturns(cgtReference)(
                 Right(
@@ -565,24 +564,37 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
 
           "the user is a non-period of admin personal rep and" when {
 
-            val dateOfDeath = LocalDate.now()
+            val dateOfDeath = LocalDate.of(2020, 6, 6)
 
-            val representeeAnswers =
-              sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))
+            val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(dateOfDeath)
+
+            val taxYear            = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(2020, 4, 6),
+              endDateExclusive = LocalDate.of(2021, 4, 6)
+            )
+            val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(
+              dateOfDeath = Some(DateOfDeath(dateOfDeath))
+            )
 
             val singleDisposalTriageAnswers =
               sample[CompleteSingleDisposalTriageAnswers].copy(
                 individualUserType = Some(PersonalRepresentative),
-                disposalDate = DisposalDate(dateOfDeath, sample[TaxYear])
+                disposalDate = DisposalDate(dateOfDeath.minusDays(2), taxYear),
+                alreadySentSelfAssessment = Some(false)
               )
 
             val multipleDisposalsTriageAnswers =
-              sample[CompleteMultipleDisposalsTriageAnswers]
-                .copy(individualUserType = Some(PersonalRepresentative), completionDate = CompletionDate(dateOfDeath))
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                individualUserType = Some(PersonalRepresentative),
+                completionDate = CompletionDate(dateOfDeath.minusDays(2)),
+                taxYearExchanged = Some(taxYearExchanged),
+                taxYear = taxYear,
+                alreadySentSelfAssessment = Some(false)
+              )
 
             val examplePropertyDetailsAnswers =
               sample[CompleteExamplePropertyDetailsAnswers].copy(
-                disposalDate = DisposalDate(dateOfDeath, sample[TaxYear])
+                disposalDate = DisposalDate(dateOfDeath.minusDays(2), taxYear)
               )
 
             "the user is on a single disposal journey" in {
