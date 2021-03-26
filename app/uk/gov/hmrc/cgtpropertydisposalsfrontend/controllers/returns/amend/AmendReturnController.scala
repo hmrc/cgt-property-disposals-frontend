@@ -124,9 +124,9 @@ class AmendReturnController @Inject() (
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withStartingToAmendReturn(request) { journey =>
-        val isItSent: Option[Boolean] = journey.originalReturn.completeReturn.triageAnswers
+        val isSAquestionAnswered: Option[Boolean] = journey.originalReturn.completeReturn.triageAnswers
           .fold(_.alreadySentSelfAssessment, c => c.alreadySentSelfAssessment)
-        isItSent match {
+        isSAquestionAnswered match {
           case Some(_) =>
             Ok(
               checkYourAnswersPage(
