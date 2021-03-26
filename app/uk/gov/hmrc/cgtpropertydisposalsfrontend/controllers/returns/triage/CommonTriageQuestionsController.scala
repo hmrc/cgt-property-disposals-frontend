@@ -657,7 +657,10 @@ class CommonTriageQuestionsController @Inject() (
               if (alreadySentSA)
                 Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
               else if (alreadySentSelfAssessment.contains(alreadySentSA))
-                Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                triageAnswersFomState(state).isLeft match {
+                  case true  => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                  case false => Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
+                }
               else {
                 def updateSingleDisposalAnswers(
                   s: SingleDisposalTriageAnswers
