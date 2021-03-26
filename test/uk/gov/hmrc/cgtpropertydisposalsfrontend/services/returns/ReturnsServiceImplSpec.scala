@@ -493,24 +493,35 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
 
             val dateOfDeath = LocalDate.now()
 
+            val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(dateOfDeath)
+
+            val taxYear = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(dateOfDeath.getYear, 4, 6),
+              endDateExclusive = LocalDate.of(dateOfDeath.getYear, 4, 6)
+            )
+
             val representeeAnswers =
               sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))
 
             val singleDisposalTriageAnswers =
               sample[CompleteSingleDisposalTriageAnswers].copy(
                 individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
-                disposalDate = DisposalDate(dateOfDeath.plusDays(1L), sample[TaxYear])
+                disposalDate = DisposalDate(dateOfDeath.plusDays(1L), taxYear),
+                alreadySentSelfAssessment = Some(false)
               )
 
             val multipleDisposalsTriageAnswers =
               sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
-                completionDate = CompletionDate(dateOfDeath.plusDays(1L))
+                completionDate = CompletionDate(dateOfDeath.plusDays(1L)),
+                alreadySentSelfAssessment = Some(false),
+                taxYearExchanged = Some(taxYearExchanged),
+                taxYear = taxYear
               )
 
             val examplePropertyDetailsAnswers =
               sample[CompleteExamplePropertyDetailsAnswers].copy(
-                disposalDate = DisposalDate(dateOfDeath.plusDays(1L), sample[TaxYear])
+                disposalDate = DisposalDate(dateOfDeath.plusDays(1L), taxYear)
               )
 
             "the user is on a single disposal journey" in {
@@ -525,9 +536,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
             "the user is on a multiple disposal journey" in {
               testDraftReturnIsNotDeleted(
                 sample[DraftMultipleDisposalsReturn].copy(
-                  triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                    individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
-                  ),
+                  triageAnswers = multipleDisposalsTriageAnswers,
                   examplePropertyDetailsAnswers = Some(examplePropertyDetailsAnswers),
                   representeeAnswers = Some(representeeAnswers)
                 )
@@ -546,7 +555,9 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
             "the user is on a multiple indirect disposal journey" in {
               testDraftReturnIsNotDeleted(
                 sample[DraftMultipleIndirectDisposalsReturn].copy(
-                  triageAnswers = multipleDisposalsTriageAnswers,
+                  triageAnswers = multipleDisposalsTriageAnswers.copy(
+                    assetTypes = List(AssetType.IndirectDisposal)
+                  ),
                   representeeAnswers = Some(representeeAnswers)
                 )
               )
@@ -564,14 +575,15 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
 
           "the user is a non-period of admin personal rep and" when {
 
-            val dateOfDeath = LocalDate.of(2020, 6, 6)
+            val dateOfDeath = LocalDate.now()
 
             val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(dateOfDeath)
 
-            val taxYear            = sample[TaxYear].copy(
-              startDateInclusive = LocalDate.of(2020, 4, 6),
-              endDateExclusive = LocalDate.of(2021, 4, 6)
+            val taxYear = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(dateOfDeath.getYear, 4, 6),
+              endDateExclusive = LocalDate.of(dateOfDeath.getYear, 4, 6)
             )
+
             val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(
               dateOfDeath = Some(DateOfDeath(dateOfDeath))
             )
@@ -609,9 +621,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
             "the user is on a multiple disposal journey" in {
               testDraftReturnIsNotDeleted(
                 sample[DraftMultipleDisposalsReturn].copy(
-                  triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                    individualUserType = Some(PersonalRepresentative)
-                  ),
+                  triageAnswers = multipleDisposalsTriageAnswers,
                   examplePropertyDetailsAnswers = Some(examplePropertyDetailsAnswers),
                   representeeAnswers = Some(representeeAnswers)
                 )
@@ -630,7 +640,9 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
             "the user is on a multiple indirect disposal journey" in {
               testDraftReturnIsNotDeleted(
                 sample[DraftMultipleIndirectDisposalsReturn].copy(
-                  triageAnswers = multipleDisposalsTriageAnswers,
+                  triageAnswers = multipleDisposalsTriageAnswers.copy(
+                    assetTypes = List(AssetType.IndirectDisposal)
+                  ),
                   representeeAnswers = Some(representeeAnswers)
                 )
               )
