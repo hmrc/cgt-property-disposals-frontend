@@ -571,6 +571,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
                 )
               )
             }
+
           }
 
           "the user is a non-period of admin personal rep and" when {
@@ -656,6 +657,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
                 )
               )
             }
+            
           }
 
         }
