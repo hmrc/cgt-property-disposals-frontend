@@ -561,11 +561,8 @@ class CommonTriageQuestionsController @Inject() (
             )
           )
         val isAmendReturn: Boolean = state.fold(_ => false, _.isAmendReturn)
-        println("MOHAN " + isAmendReturn.toString)
-
         val originalSubmissionId: Option[String] =
           state.toOption.flatMap(_.amendReturnData.map(_.originalReturn.summary.submissionId))
-
         val form     = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
         val backLink = if (isAmendReturn && !sentSelfAssessment.exists(x => x === false || x === true)) {
           controllers.accounts.homepage.routes.HomePageController.viewSentReturn(originalSubmissionId.getOrElse(""))
