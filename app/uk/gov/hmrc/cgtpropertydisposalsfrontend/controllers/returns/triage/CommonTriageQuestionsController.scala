@@ -564,10 +564,10 @@ class CommonTriageQuestionsController @Inject() (
         val originalSubmissionId: Option[String] =
           state.toOption.flatMap(_.amendReturnData.map(_.originalReturn.summary.submissionId))
         val form                                 = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
-        val backLink                             = if (isAmendReturn && sentSelfAssessment.isEmpty) {
-          controllers.accounts.homepage.routes.HomePageController.viewSentReturn(originalSubmissionId.getOrElse(""))
-        } else {
-          triageAnswers.fold(
+
+        val backLink = (isAmendReturn, sentSelfAssessment.isEmpty, originalSubmissionId) match {
+          case(true, true, Some(submissionId) ) => controllers.accounts.homepage.routes.HomePageController.viewSentReturn(submissionId)
+          case _ => triageAnswers.fold(
             _.fold(
               _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
               _ => routes.MultipleDisposalsTriageController.checkYourAnswers()

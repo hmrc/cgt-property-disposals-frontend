@@ -132,11 +132,7 @@ class AmendReturnController @Inject() (
         val isSubmissionInPreviousTaxYear         = originalTaxYear =!= currentTaxYear
 
         (isSAquestionAnswered.isEmpty, areFutureDatesEnabled, isSubmissionInPreviousTaxYear) match {
-          case (true, false, true) =>
-            Redirect(
-              controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
-            )
-          case (true, true, _)     =>
+          case (true, false, true) | (true, true, _)  =>
             Redirect(
               controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
             )
