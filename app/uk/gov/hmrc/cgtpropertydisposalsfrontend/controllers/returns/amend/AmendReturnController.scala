@@ -128,15 +128,15 @@ class AmendReturnController @Inject() (
           .fold(_.alreadySentSelfAssessment, c => c.alreadySentSelfAssessment)
         val originalTaxYear                       = journey.originalReturn.summary.taxYear
         val currentTaxYear                        = TaxYear.thisTaxYearStartDate().getYear.toString
-        val areFutureDatesEnabled                 = viewConfig.enableFutureDates
+        val futureDatesEnabled                    = viewConfig.enableFutureDates
         val isSubmissionInPreviousTaxYear         = originalTaxYear =!= currentTaxYear
 
-        (isSAquestionAnswered.isEmpty, areFutureDatesEnabled, isSubmissionInPreviousTaxYear) match {
-          case (true, false, true) | (true, true, _)  =>
+        (isSAquestionAnswered.isEmpty, futureDatesEnabled, isSubmissionInPreviousTaxYear) match {
+          case (true, false, true) | (true, true, _) =>
             Redirect(
               controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
             )
-          case _                   =>
+          case _                                     =>
             Ok(
               checkYourAnswersPage(
                 journey.originalReturn.completeReturn,
