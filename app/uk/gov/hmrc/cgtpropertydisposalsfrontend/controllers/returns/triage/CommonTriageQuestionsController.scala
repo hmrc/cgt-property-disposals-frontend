@@ -21,7 +21,6 @@ import java.time.LocalDate
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.list._
-import cats.instances.boolean._
 import cats.syntax.either._
 import cats.syntax.order._
 import com.google.inject.Inject
@@ -563,8 +562,9 @@ class CommonTriageQuestionsController @Inject() (
         val isAmendReturn: Boolean               = state.fold(_ => false, _.isAmendReturn)
         val originalSubmissionId: Option[String] =
           state.toOption.flatMap(_.amendReturnData.map(_.originalReturn.summary.submissionId))
-        val form                                 = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
-        val backLink                             = if (isAmendReturn && !sentSelfAssessment.exists(x => x === false || x === true)) {
+
+        val form     = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
+        val backLink = if (isAmendReturn && sentSelfAssessment.isEmpty) {
           controllers.accounts.homepage.routes.HomePageController.viewSentReturn(originalSubmissionId.getOrElse(""))
         } else {
           triageAnswers.fold(

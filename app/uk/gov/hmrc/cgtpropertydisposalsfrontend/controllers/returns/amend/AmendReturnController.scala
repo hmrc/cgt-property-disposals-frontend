@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AmendReturnData
@@ -126,8 +126,21 @@ class AmendReturnController @Inject() (
       withStartingToAmendReturn(request) { journey =>
         val isSAquestionAnswered: Option[Boolean] = journey.originalReturn.completeReturn.triageAnswers
           .fold(_.alreadySentSelfAssessment, c => c.alreadySentSelfAssessment)
-        isSAquestionAnswered match {
-          case Some(_) =>
+        val originalTaxYear                       = journey.originalReturn.summary.taxYear
+        val currentTaxYear                        = TaxYear.thisTaxYearStartDate().getYear.toString
+        val areFutureDatesEnabled                 = viewConfig.enableFutureDates
+        val isSubmissionInPreviousTaxYear         = originalTaxYear =!= currentTaxYear
+
+        (isSAquestionAnswered.isEmpty, areFutureDatesEnabled, isSubmissionInPreviousTaxYear) match {
+          case (true, false, true) =>
+            Redirect(
+              controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+            )
+          case (true, true, _)     =>
+            Redirect(
+              controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+            )
+          case _                   =>
             Ok(
               checkYourAnswersPage(
                 journey.originalReturn.completeReturn,
@@ -139,12 +152,7 @@ class AmendReturnController @Inject() (
                 controllers.returns.routes.ViewReturnController.displayReturn()
               )
             )
-          case None    =>
-            Redirect(
-              controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
-            )
         }
-
       }
     }
 
