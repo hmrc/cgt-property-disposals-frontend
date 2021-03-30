@@ -191,18 +191,21 @@ class ReturnsServiceImpl @Inject() (
   private def updateTaxYearExchangedToMultipleDisposalsTriageAnswers(
     answers: MultipleDisposalsTriageAnswers
   ): MultipleDisposalsTriageAnswers = {
-    val taxYear          = answers.fold(_.taxYear, c => Some(c.taxYear))
-    val date             = taxYear.map(_.startDateInclusive).getOrElse(TimeUtils.today())
-    val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(date)
-
-    val actualtaxYearExchanged = answers.fold(_.taxYearExchanged, _.taxYearExchanged)
-    if (actualtaxYearExchanged.isDefined)
+    val actualTaxYearExchanged = answers.fold(_.taxYearExchanged, _.taxYearExchanged)
+    if (actualTaxYearExchanged.isDefined)
       answers
-    else
-      answers.fold[MultipleDisposalsTriageAnswers](
-        _.copy(taxYearExchanged = Some(taxYearExchanged)),
-        _.copy(taxYearExchanged = Some(taxYearExchanged))
-      )
+    else {
+      val taxYear = answers.fold(_.taxYear, c => Some(c.taxYear))
+      taxYear match {
+        case Some(t) =>
+          val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(t.startDateInclusive)
+          answers.fold[MultipleDisposalsTriageAnswers](
+            _.copy(taxYearExchanged = Some(taxYearExchanged)),
+            _.copy(taxYearExchanged = Some(taxYearExchanged))
+          )
+        case None    => answers
+      }
+    }
   }
 
   private def deleteSentOrInvalidDraftReturns(
