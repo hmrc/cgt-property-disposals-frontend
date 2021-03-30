@@ -4381,12 +4381,6 @@ multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
 multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
 multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date
 multipleDisposalsDisposalDate.error.before1900=Contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
-
-multipleDisposalsExchangeDateInDifferentTaxYear.title=You cannot change this return online
-multipleDisposalsExchangeDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in
-multipleDisposalsExchangeDateInDifferentTaxYear.subheading=What you’ll need to do next
-multipleDisposalsExchangeDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">contact HMRC</a>
-
 multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {0} to {1}
 multipleDisposalsDisposalDate-day.error.required=Contract exchange date must include a day
 multipleDisposalsDisposalDate-month.error.required=Contract exchange date must include a month
@@ -4401,6 +4395,11 @@ multipleDisposalsDisposalDate.error.periodOfAdminDeathNotAfterDate=The contract 
 multipleDisposalsDisposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 multipleDisposalsDisposalDate.cyaChange=the contract exchange date
+
+multipleDisposalsExchangeDateInDifferentTaxYear.title=You cannot use this service
+multipleDisposalsExchangeDateInDifferentTaxYear.p1=You cannot use the online service to change the tax year for a return that has already been sent
+multipleDisposalsExchangeDateInDifferentTaxYear.subheading=What you’ll need to do next
+multipleDisposalsExchangeDateInDifferentTaxYear.p2=You’ll need to <a href="{0}">write to us</a> with your change of tax year
 
 hasValidPostcode.singleDisposal.title=Does the property have a UK postcode?
 hasValidPostcode.singleDisposal.error.boolean=Select whether the property has a UK postcode
@@ -5065,11 +5064,6 @@ unmetDependency.x2.p1=To make this change, you’ll also need to:
 unmetDependency.x2.li1=calculate and then answer questions about any losses, the net gain or loss and the updated overall liability
 unmetDependency.x2.li2=work out the new amount of tax due
 unmetDependency.x2.li3=upload a document showing how the new amount of tax due was worked out
-
-disposalDateInDifferentTaxYear.title=You cannot change this return online
-disposalDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in
-disposalDateInDifferentTaxYear.subheading=What you’ll need to do next
-disposalDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">contact HMRC</a>
 
 #===================================================
 #  AMEND RETURNS - END

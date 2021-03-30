@@ -1042,7 +1042,7 @@ multipleDisposalsExchangedInDifferentTaxYears.title=Ni allwch ddefnyddio'r gwasa
 multipleDisposalsExchangedInDifferentTaxYears.p1=Mae hyn oherwydd mai dim ond ar gyfer eiddo a gyfnewidiwyd mewn un flwyddyn dreth y gallwch chi gyflwyno Ffurflen Dreth.
 multipleDisposalsExchangedInDifferentTaxYears.p2=Er enghraifft, os gwnaethoch gyfnewid un eiddo yn y flwyddyn dreth 2020 i 2021 ac un arall yn y flwyddyn dreth 2021 i 2022, ni allwch eu cyflwyno yn yr un Ffurflen Dreth.
 multipleDisposalsExchangedInDifferentTaxYears.whatNext=Beth fydd angen i chi ei wneud nesaf
-multipleDisposalsExchangedInDifferentTaxYears.p3=<a href="{0}">Beth fydd</a> angen i chi ei wneud nesaf Dechreuwch eto a chyflwynwch Ffurflen Dreth ar wahân ar gyfer pob blwyddyn dreth.
+multipleDisposalsExchangedInDifferentTaxYears.p3=<a href="{0}">Dechreuwch eto</a> a chyflwynwch Ffurflen Dreth ar wahân ar gyfer pob blwyddyn dreth.
 
 multipleDisposalsAssetTypeForNonUkResidents.title=Pa fathau o eiddo neu asedion a waredwyd gennych?
 multipleDisposalsAssetTypeForNonUkResidents.agent.title=Pa fathau o eiddo neu asedion a waredwyd gan eich cleient?
@@ -1103,7 +1103,7 @@ multipleDisposalsCompletionDate.error.dateOfDeath=Ni all y dyddiad cwblhau fod c
 multipleDisposalsCompletionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod yn ystod yr un flwyddyn dreth â’r dyddiad cyfnewid neu ar ôl hynny
 multipleDisposalsCompletionDate.error.dateOfDeathBeforeTaxYear=Rhaid i’r dyddiad cwblhau fod ar neu ar ôl 6 Ebrill 2020
 multipleDisposalsCompletionDate.error.dateOfDeath=Ni all y dyddiad cwblhau fod cyn dyddiad y farwolaeth
-multipleDisposalsCompletionDate.error.dateNotWithinTaxYear=Rhaid i'r dyddiad cwblhau fod yn neu ar ôl yr un flwyddyn dreth â'r dyddiad cyfnewid
+multipleDisposalsCompletionDate.error.dateNotWithinTaxYear=Mae’n rhaid i’r dyddiad cwblhau fod yn ystod yr un flwyddyn dreth â’r dyddiad cyfnewid neu ar ôl hynny
 multipleDisposalsCompletionDate.cyaChange=y dyddiad cwblhau ar gyfer yr holl eiddo
 multipleDisposals.triage.cya.title=Gwiriwch eich atebion
 multipleDisposals.triage.cya.guidanceLink=Help i lenwi’r adran hon
@@ -3840,6 +3840,12 @@ multipleDisposalsDisposalDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r 
 multipleDisposalsDisposalDate.error.periodOfAdminDeathNotAfterDate=Ni all y dyddiad cyfnewid contractau fod ar neu cyn dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r ffurflen hon?’
 multipleDisposalsDisposalDate.error.nonPeriodOfAdminDeathAfterDate=Ni all y dyddiad cyfnewid contractau fod ar ôl dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r ffurflen hon?’
 multipleDisposalsDisposalDate.cyaChange=dyddiad cyfnewid contractau
+
+multipleDisposalsExchangeDateInDifferentTaxYear.title=Ni allwch ddefnyddio’r gwasanaeth hwn
+multipleDisposalsExchangeDateInDifferentTaxYear.p1=Ni allwch ddefnyddio’r gwasanaeth ar-lein i newid y flwyddyn dreth ar gyfer Ffurflen Dreth sydd eisoes wedi’i hanfon
+multipleDisposalsExchangeDateInDifferentTaxYear.subheading=Yr hyn y bydd angen i chi ei wneud nesaf
+multipleDisposalsExchangeDateInDifferentTaxYear.p2=Bydd angen i chi <a href="{0}">ysgrifennu atom</a> gyda’r newid yn eich blwyddyn dreth
+
 hasValidPostcode.singleDisposal.title=A oes gan yr eiddo god post yn y DU?
 hasValidPostcode.singleDisposal.error.boolean=Dewiswch p’un a oes gan yr eiddo god post yn y DU
 hasValidPostcode.singleDisposal.error.required=Dewiswch p’un a oes gan yr eiddo god post yn y DU
@@ -4451,6 +4457,7 @@ unmetDependency.x2.p1=I wneud y newid hwn, bydd angen i chi hefyd wneud y canlyn
 unmetDependency.x2.li1=cyfrifo ac yna ateb cwestiynau am unrhyw golledion, yr ennill neu’r golled net a’r rhwymedigaeth gyffredinol ddiweddaredig
 unmetDependency.x2.li2=cyfrifo swm newydd y dreth sy’n ddyledus
 unmetDependency.x2.li3=uwchlwytho dogfen sy’n dangos sut y cyfrifwyd swm newydd y dreth sy’n ddyledus
+
 disposalDateInDifferentTaxYear.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
 disposalDateInDifferentTaxYear.p1=Mae hyn oherwydd y byddai’r dyddiad cyfnewid contract a nodwyd gennych yn newid y flwyddyn dreth yr oedd y gwarediad ynddi.
 disposalDateInDifferentTaxYear.p2=I newid y manylion hyn, bydd angen i chi <a href=”{0}”>gysylltu â CThEM</a>
