@@ -858,7 +858,7 @@ class MultipleDisposalsTriageController @Inject() (
         val completionDate =
           answers.fold(_.completionDate, c => Some(c.completionDate))
         val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-          viewConfig.enableFutureDateForDisposalAndCompletion,
+          viewConfig.futureDatesEnabled,
           viewConfig.maxYearForDisposalsAndCompletion
         )
 
@@ -884,7 +884,7 @@ class MultipleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-          viewConfig.enableFutureDateForDisposalAndCompletion,
+          viewConfig.futureDatesEnabled,
           viewConfig.maxYearForDisposalsAndCompletion
         )
 
@@ -1015,7 +1015,7 @@ class MultipleDisposalsTriageController @Inject() (
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
           val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-            viewConfig.enableFutureDateForDisposalAndCompletion,
+            viewConfig.futureDatesEnabled,
             viewConfig.maxYearForDisposalsAndCompletion
           )
           val form = {
@@ -1043,7 +1043,7 @@ class MultipleDisposalsTriageController @Inject() (
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-            viewConfig.enableFutureDateForDisposalAndCompletion,
+            viewConfig.futureDatesEnabled,
             viewConfig.maxYearForDisposalsAndCompletion
           )
           sharesDisposalDateForm(personalRepDetails, maxDateAllowed)
