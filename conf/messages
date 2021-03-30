@@ -1097,7 +1097,7 @@ completionDate.personalRepInPeriodOfAdmin.helpText=It’s usually when the money
 completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
-completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date, {0}
+completionDate.error.tooFarInPast=Completion date must be on or after contract exchange date, {0}
 completionDate.error.tooFarInFuture=Completion date must be today or in the past
 completionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
 
@@ -1237,7 +1237,6 @@ multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged
 multipleDisposalsTaxYear.error.before.invalid=The exchange dates must be either in the same tax year as the date of death or a previous tax year
 multipleDisposalsTaxYear.error.after.invalid=The exchange dates must be either in the same tax year as the date of death or a later tax year
 multipleDisposalsTaxYear.cyaChange=when contracts were exchanged on all the properties
-
 
 multipleDisposalsExchangedInDifferentTaxYears.title=You cannot use this service
 multipleDisposalsExchangedInDifferentTaxYears.p1=This is because you can only submit a return for properties that were exchanged in a single tax year.
@@ -4423,12 +4422,6 @@ multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
 multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
 multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date
 multipleDisposalsDisposalDate.error.before1900=Contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
-
-multipleDisposalsExchangeDateInDifferentTaxYear.title=You cannot change this return online
-multipleDisposalsExchangeDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in
-multipleDisposalsExchangeDateInDifferentTaxYear.subheading=What you’ll need to do next
-multipleDisposalsExchangeDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">contact HMRC</a>
-
 multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {0} to {1}
 multipleDisposalsDisposalDate-day.error.required=Contract exchange date must include a day
 multipleDisposalsDisposalDate-month.error.required=Contract exchange date must include a month
@@ -4443,6 +4436,11 @@ multipleDisposalsDisposalDate.error.periodOfAdminDeathNotAfterDate=The contract 
 multipleDisposalsDisposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 multipleDisposalsDisposalDate.cyaChange=the contract exchange date
+
+multipleDisposalsExchangeDateInDifferentTaxYear.title=You cannot use this service
+multipleDisposalsExchangeDateInDifferentTaxYear.p1=You cannot use the online service to change the tax year for a return that has already been sent
+multipleDisposalsExchangeDateInDifferentTaxYear.subheading=What you’ll need to do next
+multipleDisposalsExchangeDateInDifferentTaxYear.p2=You’ll need to <a href="{0}">write to us</a> with your change of tax year
 
 hasValidPostcode.singleDisposal.title=Does the property have a UK postcode?
 hasValidPostcode.singleDisposal.error.boolean=Select whether the property has a UK postcode
