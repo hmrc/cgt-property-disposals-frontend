@@ -4457,7 +4457,6 @@ unmetDependency.x2.p1=I wneud y newid hwn, bydd angen i chi hefyd wneud y canlyn
 unmetDependency.x2.li1=cyfrifo ac yna ateb cwestiynau am unrhyw golledion, yr ennill neu’r golled net a’r rhwymedigaeth gyffredinol ddiweddaredig
 unmetDependency.x2.li2=cyfrifo swm newydd y dreth sy’n ddyledus
 unmetDependency.x2.li3=uwchlwytho dogfen sy’n dangos sut y cyfrifwyd swm newydd y dreth sy’n ddyledus
-
 disposalDateInDifferentTaxYear.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
 disposalDateInDifferentTaxYear.p1=Mae hyn oherwydd y byddai’r dyddiad cyfnewid contract a nodwyd gennych yn newid y flwyddyn dreth yr oedd y gwarediad ynddi.
 disposalDateInDifferentTaxYear.p2=I newid y manylion hyn, bydd angen i chi <a href=”{0}”>gysylltu â CThEM</a>
