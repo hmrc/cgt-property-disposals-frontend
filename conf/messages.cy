@@ -1038,7 +1038,7 @@ multipleDisposalsTaxYear.error.before.invalid=Mae’n rhaid i’r dyddiadau cyfn
 multipleDisposalsTaxYear.error.after.invalid=Mae’n rhaid i’r dyddiadau cyfnewid fod naill ai yn ystod yr un flwyddyn dreth â dyddiad y farwolaeth neu mewn blwyddyn dreth ddiweddarach
 multipleDisposalsTaxYear.cyaChange=pryd y cyfnewidiwyd y contractau ar yr holl eiddo
 
-multipleDisposalsExchangedInDifferentTaxYears.title=Ni allwch ddefnyddio'r gwasanaeth hwn
+multipleDisposalsExchangedInDifferentTaxYears.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 multipleDisposalsExchangedInDifferentTaxYears.p1=Mae hyn oherwydd mai dim ond ar gyfer eiddo a gyfnewidiwyd mewn un flwyddyn dreth y gallwch chi gyflwyno Ffurflen Dreth.
 multipleDisposalsExchangedInDifferentTaxYears.p2=Er enghraifft, os gwnaethoch gyfnewid un eiddo yn y flwyddyn dreth 2020 i 2021 ac un arall yn y flwyddyn dreth 2021 i 2022, ni allwch eu cyflwyno yn yr un Ffurflen Dreth.
 multipleDisposalsExchangedInDifferentTaxYears.whatNext=Beth fydd angen i chi ei wneud nesaf
