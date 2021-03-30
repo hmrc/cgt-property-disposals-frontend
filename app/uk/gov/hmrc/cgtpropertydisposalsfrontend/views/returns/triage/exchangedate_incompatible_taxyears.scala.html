@@ -24,7 +24,8 @@
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
 pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
@@ -34,7 +35,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
   @backLinkComponent(backLink)
-
+  @caption(messages("triage.caption"))
   @pageHeading(title)
   <p>@messages(s"$key.p1")</p>
   <h2>@messages(s"$key.subheading")</h2>
