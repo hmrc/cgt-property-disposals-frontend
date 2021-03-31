@@ -143,19 +143,6 @@
       )
   }
 
-  @if(answers.alreadySentSelfAssessment.contains(false)){
-    @cyaRow(
-      messages(
-        s"alreadySentSelfAssessment$userKey.title",
-        answers.taxYear.startDateInclusive.getYear.toString,
-        answers.taxYear.endDateExclusive.getYear.toString
-      ),
-      Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.getOrElse(false).toString}")),
-      Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
-      "alreadySentSelfAssessment"
-    )
-  }
-
   @if(answers.assetTypes === List(AssetType.IndirectDisposal)) {
     @cyaRow(
       messages("sharesDisposalDate.title"),
@@ -163,7 +150,31 @@
       Some(cyaChange(messages("multipleDisposalsCompletionDate.cyaChange"), routes.MultipleDisposalsTriageController.disposalDateOfShares().url)),
       "completionDate"
     )
+    @if(answers.alreadySentSelfAssessment.contains(false)){
+        @cyaRow(
+            messages(
+                s"alreadySentSelfAssessment$userKey.title",
+                answers.taxYear.startDateInclusive.getYear.toString,
+                answers.taxYear.endDateExclusive.getYear.toString
+            ),
+            Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.getOrElse(false).toString}")),
+            Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
+            "alreadySentSelfAssessment"
+        )
+    }
   } else {
+    @if(answers.alreadySentSelfAssessment.contains(false)){
+        @cyaRow(
+            messages(
+                s"alreadySentSelfAssessment$userKey.title",
+                answers.taxYear.startDateInclusive.getYear.toString,
+                answers.taxYear.endDateExclusive.getYear.toString
+            ),
+            Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.getOrElse(false).toString}")),
+            Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
+            "alreadySentSelfAssessment"
+        )
+    }
     @cyaRow(
       messages("multipleDisposalsCompletionDate.title"),
       Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
