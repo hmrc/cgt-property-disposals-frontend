@@ -538,7 +538,8 @@ class CommonTriageQuestionsController @Inject() (
               _.subscribedDetails.isATrust,
               _.subscribedDetails.isATrust
             ),
-            taxYearStartYear
+            taxYearStartYear,
+            getRepresentativeType(state)
           )
         )
       }
