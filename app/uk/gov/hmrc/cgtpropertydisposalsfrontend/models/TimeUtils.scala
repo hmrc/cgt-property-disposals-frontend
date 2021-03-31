@@ -194,13 +194,19 @@ object TimeUtils {
                   Left(FormError(dateKey, "error.tooFarInFuture"))
                 else if (isDateOfDeathValid.exists(d => d && date.isBefore(TaxYear.earliestTaxYearStartDate)))
                   Left(FormError(dateKey, "error.dateOfDeathBeforeTaxYear"))
-                else if (isDateOfDeathValid.exists(d => d && minimumDateInclusive.exists(_.isAfter(date))))
+                else if (
+                  isDateOfDeathValid
+                    .exists(d => d && minimumDateInclusive.exists(d => d.isEqual(date) || d.isAfter(date)))
+                )
                   Left(FormError(dateKey, "error.dateOfDeath"))
                 else if (minimumDateInclusive.exists(_.isAfter(date)))
                   Left(FormError(dateKey, "error.tooFarInPast"))
                 else if (date.isBefore(minimumDate))
                   Left(FormError(dateKey, "error.before1900"))
-                else if (taxYearStartYear.exists(tyStartYear => !isValidDate(tyStartYear, date, maximumDateInclusive)))
+                else if (
+                  taxYearStartYear
+                    .exists(tyStartYear => !isValidDate(tyStartYear, date, minimumDateInclusive, maximumDateInclusive))
+                )
                   Left(FormError(dateKey, "error.dateNotWithinTaxYear"))
                 else
                   extraValidation
@@ -226,9 +232,11 @@ object TimeUtils {
   def isValidDate(
     taxYearStartYear: Int,
     completionDate: LocalDate,
+    minimumDateInclusive: Option[LocalDate],
     maximumDateInclusive: Option[LocalDate]
   ): Boolean = {
-    val minDateInclusive = LocalDate.of(taxYearStartYear, 4, 6)
+    val year             = minimumDateInclusive.map(_.getYear).getOrElse(taxYearStartYear)
+    val minDateInclusive = LocalDate.of(year, 4, 6)
     val maxDateInclusive = maximumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear + 1, 4, 5))
     completionDate <= maxDateInclusive && completionDate >= minDateInclusive
   }
