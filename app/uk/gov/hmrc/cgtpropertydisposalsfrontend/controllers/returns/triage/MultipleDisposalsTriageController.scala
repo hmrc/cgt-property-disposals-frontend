@@ -1088,6 +1088,7 @@ class MultipleDisposalsTriageController @Inject() (
                                           .fromEither[Future](
                                             Right(
                                               answers
+                                                .unset(_.alreadySentSelfAssessment)
                                                 .unset(_.completionDate)
                                                 .copy(
                                                   taxYear = taxYear,
