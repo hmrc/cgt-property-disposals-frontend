@@ -341,9 +341,9 @@ nonUkAddress-line1.error.tooLong=Address line 1 must be 35 characters or fewer
 nonUkAddress-line2.error.tooLong=Address line 2 must be 35 characters or fewer
 nonUkAddress-line3.error.tooLong=Address line 3 must be 35 characters or fewer
 nonUkAddress-line4.error.tooLong=Address line 4 must be 35 characters or fewer
-nonUkAddress-line1.error.pattern=Address line 1 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands and apostrophes 
-nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands and apostrophes 
-nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands and apostrophes 
+nonUkAddress-line1.error.pattern=Address line 1 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands and apostrophes
+nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands and apostrophes
+nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands and apostrophes
 nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands and apostrophes
 countryCode.error.required=Select a country from the options presented as you type
 countryCode.error.notFound=Select a country from the options presented as you type
@@ -685,7 +685,7 @@ individualUserType.error.invalid=Select who are you reporting the tax for
 individualUserType.cyaChange=who you are reporting the tax for
 
 who-are-you-reporting-for-exit-page.title=You cannot change this return online
-who-are-you-reporting-for-exit-page.helpText=You must <a href="{0}">contact HMRC</a>. Tell HMRC you need to change who you’re completing this return for. 
+who-are-you-reporting-for-exit-page.helpText=You must <a href="{0}">contact HMRC</a>. Tell HMRC you need to change who you’re completing this return for.
 
 numberOfProperties.title=How many properties or disposals are you including in this return?
 
@@ -796,6 +796,7 @@ cannotAmendResidentialStatusForAssetType.agent.li4=interest and penalty payments
 cannotAmendResidentialStatusForAssetType.trust.li4=interest and penalty payments the trust might already owe or be charged in the future
 
 cannotAmendResidentialStatusForAssetType.link=Contact HMRC
+
 
 #===================================================
 # COMMON TRIAGE PAGES - END
@@ -1055,7 +1056,7 @@ completionDate.personalRepInPeriodOfAdmin.helpText=It’s usually when the money
 completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
-completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date
+completionDate.error.tooFarInPast=Completion date must be on or after contract exchange date, {0}
 completionDate.error.tooFarInFuture=Completion date must be today or in the past
 completionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
 
@@ -1184,12 +1185,23 @@ multipleDisposalsCountryOfResidence.personalRep.helpText=It’s usually the day 
 
 multipleDisposalsTaxYear.title=When were contracts exchanged on all the properties?
 multipleDisposalsTaxYear.link=What happens on the exchange date?
-multipleDisposalsTaxYear.before=Before 6 April 2020
-multipleDisposalsTaxYear.after=After 6 April 2020
+
+multipleDisposalsTaxYear.taxyear.2021=All between 6 April 2021 and 5 April 2022
+multipleDisposalsTaxYear.taxyear.2020=All between 6 April 2020 and 5 April 2021
+multipleDisposalsTaxYear.taxyear.before2020=All before 6 April 2020
+multipleDisposalsTaxYear.taxyear.different=The properties were exchanged in different tax years
+
 multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
-
+multipleDisposalsTaxYear.error.before.invalid=The exchange dates must be either in the same tax year as the date of death or a previous tax year
+multipleDisposalsTaxYear.error.after.invalid=The exchange dates must be either in the same tax year as the date of death or a later tax year
 multipleDisposalsTaxYear.cyaChange=when contracts were exchanged on all the properties
+
+multipleDisposalsExchangedInDifferentTaxYears.title=You cannot use this service
+multipleDisposalsExchangedInDifferentTaxYears.p1=This is because you can only submit a return for properties that were exchanged in a single tax year.
+multipleDisposalsExchangedInDifferentTaxYears.p2=For example, if you exchanged one property in the tax year 2020 to 2021 and another in the tax year 2021 to 2022, you cannot submit them in the same return.
+multipleDisposalsExchangedInDifferentTaxYears.whatNext=What you’ll need to do next
+multipleDisposalsExchangedInDifferentTaxYears.p3=<a href="{0}">Start again</a> and submit a separate return for each tax year.
 
 multipleDisposalsAssetTypeForNonUkResidents.title=What types of property or assets did you dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.agent.title=What types of property or assets did your client dispose of?
@@ -1243,8 +1255,10 @@ multipleDisposalsCompletionDate.details.p1=The <a href="{0}" target=_blank>‘co
 multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
-multipleDisposalsCompletionDate.error.tooFarInPast=Completion date must be on or after 6 April 2020
-
+multipleDisposalsCompletionDate.error.tooFarInPast=Completion date must be in or after the same tax year as the exchange date
+multipleDisposalsCompletionDate.error.dateOfDeathBeforeTaxYear=Completion date must be on or after 6 April 2020
+multipleDisposalsCompletionDate.error.dateOfDeath=The completion date cannot be before the date of death
+multipleDisposalsCompletionDate.error.dateNotWithinTaxYear=Completion date must be in or after the same tax year as the exchange date
 multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
 multipleDisposalsCompletionDate-month.error.required=Completion date must include a month
 multipleDisposalsCompletionDate-year.error.required=Completion date must include a year
@@ -1701,7 +1715,7 @@ disposalPrice.trust.SoldOther.helpText=This is the entire amount the property wa
 disposalPrice.trust.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
 disposalPrice.personalRep.SoldOther.helpText=This is the entire amount the property was sold for. Do not subtract any costs or fees. You’ll be able to enter any additional costs later.<br><br>If the property was shared, only enter the amount the person got for their share.
 disposalPrice.personalRep.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.helpText=This is the entire amount the property was sold for. Do not subtract any costs or fees. You'll be able to enter any additional costs later.<br><br>If the property was shared, only enter the amount the estate got for their share.
+disposalPrice.personalRepInPeriodOfAdmin.SoldOther.helpText=This is the entire amount the property was sold for. Do not subtract any costs or fees. You’ll be able to enter any additional costs later.<br><br>If the property was shared, only enter the amount the estate got for their share.
 disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.helpText=You’ll be able to enter any additional costs later.
 disposalPrice.capacitor.SoldOther.helpText=This is the entire amount the property was sold for. Do not subtract any costs or fees. You’ll be able to enter any additional costs later.<br><br>If the property was shared, only enter the amount the person got for their share.
 disposalPrice.capacitor.indirect.SoldOther.helpText=You’ll be able to include buying or acquisition costs later.
@@ -3354,7 +3368,7 @@ taxableGainOrLoss.agent.furtherReturn.title=Enter your client’s net gain or lo
 taxableGainOrLoss.trust.furtherReturn.title=Enter the trust’s net gain or loss
 taxableGainOrLoss.capacitor.furtherReturn.title=Enter the person’s net gain or loss
 taxableGainOrLoss.personalRep.furtherReturn.title=Enter the person’s net gain or loss
-taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Enter the estate's net gain or loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Enter the estate’s net gain or loss
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.title=Enter your client’s net gain or loss
 
 taxableGainOrLoss.calculated.furtherReturn.p1=We used the details that were entered in this return to work out your net gain on the property disposals that you are paying tax on in tax year {0} to {1}.
@@ -4367,7 +4381,6 @@ multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
 multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
 multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date
 multipleDisposalsDisposalDate.error.before1900=Contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
-
 multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {0} to {1}
 multipleDisposalsDisposalDate-day.error.required=Contract exchange date must include a day
 multipleDisposalsDisposalDate-month.error.required=Contract exchange date must include a month
@@ -4382,6 +4395,11 @@ multipleDisposalsDisposalDate.error.periodOfAdminDeathNotAfterDate=The contract 
 multipleDisposalsDisposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 multipleDisposalsDisposalDate.cyaChange=the contract exchange date
+
+multipleDisposalsExchangeDateInDifferentTaxYear.title=You cannot use this service
+multipleDisposalsExchangeDateInDifferentTaxYear.p1=You cannot use the online service to change the tax year for a return that has already been sent
+multipleDisposalsExchangeDateInDifferentTaxYear.subheading=What you’ll need to do next
+multipleDisposalsExchangeDateInDifferentTaxYear.p2=You’ll need to <a href="{0}">write to us</a> with your change of tax year
 
 hasValidPostcode.singleDisposal.title=Does the property have a UK postcode?
 hasValidPostcode.singleDisposal.error.boolean=Select whether the property has a UK postcode
@@ -5048,7 +5066,8 @@ unmetDependency.x2.li2=work out the new amount of tax due
 unmetDependency.x2.li3=upload a document showing how the new amount of tax due was worked out
 
 disposalDateInDifferentTaxYear.title=You cannot change this return online
-disposalDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in.
+disposalDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in
+disposalDateInDifferentTaxYear.subheading=What you’ll need to do next
 disposalDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">contact HMRC</a>
 
 #===================================================
@@ -5083,6 +5102,7 @@ furtherReturnGuidance.trust.title=How to work out the Capital Gains Tax liabilit
 furtherReturnGuidance.personalRep.title=How to work out the person’s Capital Gains Tax liability on UK property-related disposals
 furtherReturnGuidance.personalRepInPeriodOfAdmin.title=How to work out the estate’s Capital Gains Tax liability on UK property-related disposals
 
+# Stage-A
 
 furtherReturnGuidance.stage-a.step-a1=Step A1 - Work out your gain or loss after reliefs
 furtherReturnGuidance.agent.stage-a.step-a1=Step A1 - Work out the gain or loss after reliefs
@@ -5152,7 +5172,7 @@ furtherReturnGuidance.stage-a.example4.link=Personal representative Akash sold 2
 furtherReturnGuidance.stage-a.step1.example1.headingText=Step A1 - Richard works out the gain or loss after reliefs for each disposal he has made so far this tax year.
 furtherReturnGuidance.stage-a.step1.example1.p1=He includes the disposals he is including in this return.
 
-furtherReturnGuidance.stage-a.step1.example1.p2=<strong class="bold">Property 1 - UK residential property disposal in May 2020</strong>
+furtherReturnGuidance.stage-a.step1.example1.p2=<strong class="bold">Property 1 - UK residential property disposal in May {0}</strong>
 
 furtherReturnGuidance.stage-a.step1.example1.table1.row1.key=He starts with the proceeds of the property disposal
 furtherReturnGuidance.stage-a.step1.example1.table1.row1.value=£325,500
@@ -5169,7 +5189,7 @@ furtherReturnGuidance.stage-a.step1.example1.table1.row6.value=£9,480
 furtherReturnGuidance.stage-a.step1.example1.table1.total.key=Gain after reliefs for property 1
 furtherReturnGuidance.stage-a.step1.example1.table1.total.value=£46,070 gain
 
-furtherReturnGuidance.stage-a.step1.example1.p3=<strong class="bold">Property 2 - UK residential property disposal in June 2020</strong>
+furtherReturnGuidance.stage-a.step1.example1.p3=<strong class="bold">Property 2 - UK residential property disposal in June {0}</strong>
 
 furtherReturnGuidance.stage-a.step1.example1.table2.row1.key=He starts with the proceeds of the property disposal
 furtherReturnGuidance.stage-a.step1.example1.table2.row1.value=£549,950
@@ -5201,14 +5221,14 @@ furtherReturnGuidance.stage-a.step2.example1.table1.row4.value=£0
 furtherReturnGuidance.stage-a.step2.example1.table1.row5.key=He subtracts allowable previous years Capital Gains Tax losses
 furtherReturnGuidance.stage-a.step2.example1.table1.row5.value=£0
 furtherReturnGuidance.stage-a.step2.example1.table1.row6.key=He subtracts the portion of Annual Exempt Amount he wishes to use
-furtherReturnGuidance.stage-a.step2.example1.table1.row6.value=£12,300
+furtherReturnGuidance.stage-a.step2.example1.table1.row6.value={0}
 furtherReturnGuidance.stage-a.step2.example1.table1.total.key=Net gain on UK property related disposals
 furtherReturnGuidance.stage-a.step2.example1.table1.total.value=£67,400 gain
 
 furtherReturnGuidance.stage-a.step1.example2.p1=Kavita sold 2 UK residential properties that both had a contract exchange date in this tax year. She wants to use the loss from a second disposal to reduce net gain on the first.
 furtherReturnGuidance.stage-a.step1.example2.headingText=Step A1 - Kavita works out the gain or loss after reliefs for each disposal she has made so far this tax year.
 furtherReturnGuidance.stage-a.step1.example2.p2=She includes the disposals she is including in this return.
-furtherReturnGuidance.stage-a.step1.example2.p3=<strong class="bold">Property 1 - UK residential property disposal in May 2020</strong>
+furtherReturnGuidance.stage-a.step1.example2.p3=<strong class="bold">Property 1 - UK residential property disposal in May {0}</strong>
 
 furtherReturnGuidance.stage-a.step1.example2.table1.row1.key=She starts with the proceeds of the property disposal
 furtherReturnGuidance.stage-a.step1.example2.table1.row1.value=£325,500
@@ -5225,7 +5245,7 @@ furtherReturnGuidance.stage-a.step1.example2.table1.row6.value=£1,200
 furtherReturnGuidance.stage-a.step1.example2.table1.total.key=Gain after reliefs for property 1
 furtherReturnGuidance.stage-a.step1.example2.table1.total.value=£157,900
 
-furtherReturnGuidance.stage-a.step1.example2.p4=<strong class="bold">Property 2 - UK residential property disposal in June 2020</strong>
+furtherReturnGuidance.stage-a.step1.example2.p4=<strong class="bold">Property 2 - UK residential property disposal in June {0}</strong>
 
 furtherReturnGuidance.stage-a.step1.example2.table2.row1.key=She starts with the proceeds of the property disposal
 furtherReturnGuidance.stage-a.step1.example2.table2.row1.value=£150,000
@@ -5255,17 +5275,17 @@ furtherReturnGuidance.stage-a.step2.example2.table1.row4.value=£4000
 furtherReturnGuidance.stage-a.step2.example2.table1.row5.key=She subtracts allowable previous years Capital Gains Tax losses
 furtherReturnGuidance.stage-a.step2.example2.table1.row5.value=£0
 furtherReturnGuidance.stage-a.step2.example2.table1.row6.key=She subtracts the portion of Annual Exempt Amount she wishes to use
-furtherReturnGuidance.stage-a.step2.example2.table1.row6.value=£12,300
+furtherReturnGuidance.stage-a.step2.example2.table1.row6.value={0}
 furtherReturnGuidance.stage-a.step2.example2.table1.total.key=Net gain on UK property related disposals
 furtherReturnGuidance.stage-a.step2.example2.table1.total.value=£89,700 gain
 
 
-furtherReturnGuidance.trust.stage-a.example3.p1=Bianca is a trustee of Square Trust, a trust resident in the UK. She sold 2 of Square Trust’s UK residential properties in May and June 2020.
+furtherReturnGuidance.trust.stage-a.example3.p1=Bianca is a trustee of Square Trust, a trust resident in the UK. She sold 2 of Square Trust’s UK residential properties in May and June {0}.
 
-furtherReturnGuidance.trust.stage-a.step1.example3.headingText=Step A1 - Bianca works out the gain or loss after reliefs for each of the disposals made so far in tax year 2020 to 2021.
+furtherReturnGuidance.trust.stage-a.step1.example3.headingText=Step A1 - Bianca works out the gain or loss after reliefs for each of the disposals made so far in tax year {0} to {1}.
 furtherReturnGuidance.trust.stage-a.step1.example3.p1=She includes the disposals she is including in this return.
 
-furtherReturnGuidance.trust.stage-a.step1.example3.property1=<strong class="bold">Property 1 - UK residential property disposal in May 2020</strong>
+furtherReturnGuidance.trust.stage-a.step1.example3.property1=<strong class="bold">Property 1 - UK residential property disposal in May {0}</strong>
 
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.row1.key=She starts with the proceeds of the property disposal
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.row1.value=£325,500
@@ -5283,7 +5303,7 @@ furtherReturnGuidance.trust.stage-a.step1.example3.table1.total.key=Gain after r
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.total.value=£46,070 gain
 
 
-furtherReturnGuidance.trust.stage-a.step1.example3.property2=<strong class="bold">Property 2 - UK residential property disposal in June 2020</strong>
+furtherReturnGuidance.trust.stage-a.step1.example3.property2=<strong class="bold">Property 2 - UK residential property disposal in June {0}</strong>
 
 furtherReturnGuidance.trust.stage-a.step1.example3.table2.row1.key=She starts with the proceeds of the property disposal
 furtherReturnGuidance.trust.stage-a.step1.example3.table2.row1.value=£549,950
@@ -5315,18 +5335,18 @@ furtherReturnGuidance.trust.stage-a.step2.example3.table1.row4.value=£0
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.row5.key=She subtracts allowable previous years Capital Gains Tax losses
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.row5.value=£0
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.row6.key=She subtracts the portion of Annual Exempt Amount to use on residential property gains
-furtherReturnGuidance.trust.stage-a.step2.example3.table1.row6.value=£6,150
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row6.value={0}
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.total.key=Taxable gain on residential property
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.total.value=£73,550 gain
 
 
-furtherReturnGuidance.stage-a.step1.example4.p1=Akash is a personal representative of Taylor family estate that is resident in the UK. He sold 2 UK residential properties in May and June 2020 for the estate.
-furtherReturnGuidance.stage-a.step1.example4.headingText=Step A1 - Akash works out the gain or loss after reliefs for each disposal the estate has made so far in tax year 2020 to 2021.
+furtherReturnGuidance.stage-a.step1.example4.p1=Akash is a personal representative of Taylor family estate that is resident in the UK. He sold 2 UK residential properties in May and June {0} for the estate.
+furtherReturnGuidance.stage-a.step1.example4.headingText=Step A1 - Akash works out the gain or loss after reliefs for each disposal the estate has made so far in tax year {0} to {1}.
 
 furtherReturnGuidance.stage-a.step2.example4.headingText=Step A2 - Akash works out the estate’s net gain for the year.
 furtherReturnGuidance.stage-a.step1.example4.p2=He includes the disposals he is including in this return.
-furtherReturnGuidance.stage-a.step1.example4.p3=Property 1 - UK residential property disposal in May 2020
-furtherReturnGuidance.stage-a.step1.example4.p4=Property 2 - UK residential property disposal in June 2020
+furtherReturnGuidance.stage-a.step1.example4.p3=Property 1 - UK residential property disposal in May {0}
+furtherReturnGuidance.stage-a.step1.example4.p4=Property 2 - UK residential property disposal in June {0}
 
 furtherReturnGuidance.stage-a.step1.example4.table1.row1.key=He starts with the proceeds of the property disposal
 furtherReturnGuidance.stage-a.step1.example4.table1.row1.value=£325,500
@@ -5372,7 +5392,7 @@ furtherReturnGuidance.stage-a.step2.example4.table1.row4.value=£0
 furtherReturnGuidance.stage-a.step2.example4.table1.row5.key=He subtracts allowable previous years Capital Gains Tax losses
 furtherReturnGuidance.stage-a.step2.example4.table1.row5.value=£0
 furtherReturnGuidance.stage-a.step2.example4.table1.row6.key=He subtracts the portion of Annual Exempt Amount to use on residential property gains
-furtherReturnGuidance.stage-a.step2.example4.table1.row6.value=£12,300
+furtherReturnGuidance.stage-a.step2.example4.table1.row6.value={0}
 furtherReturnGuidance.stage-a.step2.example4.table1.total.key=Taxable gain on residential property
 furtherReturnGuidance.stage-a.step2.example4.table1.total.value=£67,400 gain
 
@@ -5457,125 +5477,126 @@ furtherReturnGuidance.trust.stage-b.example3.link=Trustee Bianca sold 2 of Squar
 
 furtherReturnGuidance.stage-b.step1.example1.p1=Richard sold 2 UK residential properties that both had a contract exchange date in this tax year.
 furtherReturnGuidance.stage-b.step1.example1.headingText=Step B1 - Work out taxable income
-furtherReturnGuidance.stage-b.step1.example1.p2=Richard has a gross annual income, before taxes and allowances, of £45,000.
+furtherReturnGuidance.stage-b.step1.example1.p2=Richard has a gross annual income, before taxes and allowances, of {0}.
 
 
 furtherReturnGuidance.stage-b.step1.example1.table1.row1.key=He starts with his expected gross annual income
-furtherReturnGuidance.stage-b.step1.example1.table1.row1.value=£45,000
+furtherReturnGuidance.stage-b.step1.example1.table1.row1.value={0}
 furtherReturnGuidance.stage-b.step1.example1.table1.row2.key=He subtracts his Personal Allowance for the tax year
-furtherReturnGuidance.stage-b.step1.example1.table1.row2.value=£12,500
+furtherReturnGuidance.stage-b.step1.example1.table1.row2.value={0}
 furtherReturnGuidance.stage-b.step1.example1.table1.total.key=Taxable income
-furtherReturnGuidance.stage-b.step1.example1.table1.total.value=£32,500
+furtherReturnGuidance.stage-b.step1.example1.table1.total.value={0}
 
 
 furtherReturnGuidance.stage-b.step2.example1.headingText=Step B2 - Richard works out the rate of Capital Gains Tax he must pay
 furtherReturnGuidance.stage-b.step2.example1.p1=Amount to be charged at basic rate
 
 
-furtherReturnGuidance.stage-b.step2.example1.table1.row1.key=He starts with the basic band rate threshold for tax year 2020 to 2021
-furtherReturnGuidance.stage-b.step2.example1.table1.row1.value=£37,500
+furtherReturnGuidance.stage-b.step2.example1.table1.row1.key=He starts with the basic band rate threshold for tax year {0} to {1}
+furtherReturnGuidance.stage-b.step2.example1.table1.row1.value={0}
 furtherReturnGuidance.stage-b.step2.example1.table1.row2.key=He subtracts his taxable income
-furtherReturnGuidance.stage-b.step2.example1.table1.row2.value=£32,500
+furtherReturnGuidance.stage-b.step2.example1.table1.row2.value={0}
 furtherReturnGuidance.stage-b.step2.example1.table1.total.key=Amount of net gain to be charged at the basic rate
-furtherReturnGuidance.stage-b.step2.example1.table1.total.value=£5,000
+furtherReturnGuidance.stage-b.step2.example1.table1.total.value={0}
 
 furtherReturnGuidance.stage-b.step2.example1.p2=Amount to be charged at higher rate
-furtherReturnGuidance.stage-b.step2.example1.p3=Richard’s net gain so far this year, worked out in Richard’s net gain example, was £64,400
+furtherReturnGuidance.stage-b.step2.example1.p3=Richard’s net gain so far this year, worked out in Richard’s net gain example, was {0}
 
 
 furtherReturnGuidance.stage-b.step2.example1.table2.row1.key=He starts with his net gain
-furtherReturnGuidance.stage-b.step2.example1.table2.row1.value=£67,400
+furtherReturnGuidance.stage-b.step2.example1.table2.row1.value={0}
 furtherReturnGuidance.stage-b.step2.example1.table2.row2.key=He subtracts the amount of net gain to be charged at the basic rate
-furtherReturnGuidance.stage-b.step2.example1.table2.row2.value=£5,000
+furtherReturnGuidance.stage-b.step2.example1.table2.row2.value={0}
 furtherReturnGuidance.stage-b.step2.example1.table2.total.key=Amount of net gain to be taxed at the higher rate
-furtherReturnGuidance.stage-b.step2.example1.table2.total.value=£62,400
+furtherReturnGuidance.stage-b.step2.example1.table2.total.value={0}
 
 
 furtherReturnGuidance.stage-b.step3.example1.headingText=Step B3 - Richard works out his overall Capital Gains Tax liability on his UK property-related disposals for the tax year so far
 
 furtherReturnGuidance.stage-b.step3.example1.table1.row1.key=He starts with the amount of net gain to be taxed at the basic rate of tax
-furtherReturnGuidance.stage-b.step3.example1.table1.row1.value=£5,000
-furtherReturnGuidance.stage-b.step3.example1.table1.row2.key=He multiplies the amount of income to be taxed at the basic rate of tax for residential property in tax year 2020 to 2021
-furtherReturnGuidance.stage-b.step3.example1.table1.row2.value=18%
+furtherReturnGuidance.stage-b.step3.example1.table1.row1.value={0}
+furtherReturnGuidance.stage-b.step3.example1.table1.row2.key=He multiplies the amount of income to be taxed at the basic rate of tax for residential property in tax year {0} to {1}
+furtherReturnGuidance.stage-b.step3.example1.table1.row2.value={0}
 furtherReturnGuidance.stage-b.step3.example1.table1.total.key=Amount of tax to pay at the basic rate
-furtherReturnGuidance.stage-b.step3.example1.table1.total.value=£900
+furtherReturnGuidance.stage-b.step3.example1.table1.total.value={0}
 
 furtherReturnGuidance.stage-b.step3.example1.table2.row1.key=Amount of net gain to be taxed at the higher rate
-furtherReturnGuidance.stage-b.step3.example1.table2.row1.value=£62,400
-furtherReturnGuidance.stage-b.step3.example1.table2.row2.key=Higher rate for residential property in tax year 2020 to 2021
-furtherReturnGuidance.stage-b.step3.example1.table2.row2.value=28%
+furtherReturnGuidance.stage-b.step3.example1.table2.row1.value={0}
+furtherReturnGuidance.stage-b.step3.example1.table2.row2.key=Higher rate for residential property in tax year {0} to {1}
+furtherReturnGuidance.stage-b.step3.example1.table2.row2.value={0}
 furtherReturnGuidance.stage-b.step3.example1.table2.total.key=Amount of tax to pay at the higher rate
-furtherReturnGuidance.stage-b.step3.example1.table2.total.value=£17,472
+furtherReturnGuidance.stage-b.step3.example1.table2.total.value={0}
 
 furtherReturnGuidance.stage-b.step3.example1.p1=Add these amounts together to get the overall Capital Gains Tax liability on your UK property-related disposals
 
 furtherReturnGuidance.stage-b.step3.example1.table3.row1.key=Amount of tax to pay at the basic rate
-furtherReturnGuidance.stage-b.step3.example1.table3.row1.value=£900
+furtherReturnGuidance.stage-b.step3.example1.table3.row1.value={0}
 furtherReturnGuidance.stage-b.step3.example1.table3.row2.key=Amount of tax to pay at the higher rate
-furtherReturnGuidance.stage-b.step3.example1.table3.row2.value=£17,472
+furtherReturnGuidance.stage-b.step3.example1.table3.row2.value={0}
 furtherReturnGuidance.stage-b.step3.example1.table3.total.key=Richard’s new overall Capital Gains Tax liability on his UK property-related disposals for the tax year so far
-furtherReturnGuidance.stage-b.step3.example1.table3.total.value=£18,372
+furtherReturnGuidance.stage-b.step3.example1.table3.total.value={0}
 
-furtherReturnGuidance.stage-b.step1.example2.p1=Kavita has already worked out her net gain for the tax year 2020 to 2021 to be £89,700.
-furtherReturnGuidance.stage-b.step1.example2.headingText=Step B1 - Kavita works out her taxable income for the tax year 2020 to 2021
+
+furtherReturnGuidance.stage-b.step1.example2.p1=Kavita has already worked out her net gain for the tax year {0} to {1} to be {2}.
+furtherReturnGuidance.stage-b.step1.example2.headingText=Step B1 - Kavita works out her taxable income for the tax year {0} to {1}
 
 furtherReturnGuidance.stage-b.step1.example2.table1.row1.key=She starts with her expected gross annual income
-furtherReturnGuidance.stage-b.step1.example2.table1.row1.value=£60,000
+furtherReturnGuidance.stage-b.step1.example2.table1.row1.value={0}
 furtherReturnGuidance.stage-b.step1.example2.table1.row2.key=She subtracts her Income Tax Personal Allowance for the tax year
-furtherReturnGuidance.stage-b.step1.example2.table1.row2.value=£12,500
+furtherReturnGuidance.stage-b.step1.example2.table1.row2.value={0}
 furtherReturnGuidance.stage-b.step1.example2.table1.total.key=Taxable income
-furtherReturnGuidance.stage-b.step1.example2.table1.total.value=£47,500
+furtherReturnGuidance.stage-b.step1.example2.table1.total.value={0}
 
 furtherReturnGuidance.stage-b.step2.example2.headingText=Step B2 - Kavita works out the rate of Capital Gains Tax she must pay
 
-furtherReturnGuidance.stage-b.step2.example2.basicRate=Because Kavita’s taxable income is higher than the basic rate threshold for the tax year 2020 to 2021 of £37,500 then all of her net gain (£89,700) will be charged at the higher rate. This means she does not need to calculate how much will be charged at the basic rate, as that will be £0.
+furtherReturnGuidance.stage-b.step2.example2.basicRate=Because Kavita’s taxable income is higher than the basic rate threshold for the tax year {0} to {1} of {2} then all of her net gain ({3}) will be charged at the higher rate. This means she does not need to calculate how much will be charged at the basic rate, as that will be {4}.
 
 furtherReturnGuidance.stage-b.step3.example2.headingText=Step B3 - Kavita works out her overall Capital Gains Tax liability on her UK property-related disposals for the tax year so far
 
 furtherReturnGuidance.stage-b.step3.example2.table1.row1.key=She starts with her net gain
-furtherReturnGuidance.stage-b.step3.example2.table1.row1.value=£89,700
+furtherReturnGuidance.stage-b.step3.example2.table1.row1.value={0}
 furtherReturnGuidance.stage-b.step3.example2.table1.row2.key=She subtracts the amount of income to be charged at the basic rate (not available as all has been used up by taxable income as per above)
-furtherReturnGuidance.stage-b.step3.example2.table1.row2.value=£0
+furtherReturnGuidance.stage-b.step3.example2.table1.row2.value={0}
 furtherReturnGuidance.stage-b.step3.example2.table1.total.key=Amount of net gain to be taxed at the higher rate
-furtherReturnGuidance.stage-b.step3.example2.table1.total.value=£89,700
+furtherReturnGuidance.stage-b.step3.example2.table1.total.value={0}
 
 furtherReturnGuidance.stage-b.step3.example2.table2.p1=She takes the amount of net gain to be taxed at the basic rate of tax
 
 furtherReturnGuidance.stage-b.step3.example2.table2.row1.key=She takes the amount of net gain to be taxed at the higher rate
-furtherReturnGuidance.stage-b.step3.example2.table2.row1.value=£89,700
+furtherReturnGuidance.stage-b.step3.example2.table2.row1.value={0}
 furtherReturnGuidance.stage-b.step3.example2.table2.row2.key=She multiplies the amount to the taxed at the higher rate by the rate of tax
-furtherReturnGuidance.stage-b.step3.example2.table2.row2.value=28%
+furtherReturnGuidance.stage-b.step3.example2.table2.row2.value={0}
 furtherReturnGuidance.stage-b.step3.example2.table2.total.key=Amount of tax to pay at the higher rate
-furtherReturnGuidance.stage-b.step3.example2.table2.total.value=£25,116
+furtherReturnGuidance.stage-b.step3.example2.table2.total.value={0}
 
 furtherReturnGuidance.stage-b.step3.example2.table3.row1.key=She takes the amount to pay at the basic rate
-furtherReturnGuidance.stage-b.step3.example2.table3.row1.value=£0
+furtherReturnGuidance.stage-b.step3.example2.table3.row1.value={0}
 furtherReturnGuidance.stage-b.step3.example2.table3.row2.key=She adds it to the amount to pay at the higher rate
-furtherReturnGuidance.stage-b.step3.example2.table3.row2.value=£25,116
+furtherReturnGuidance.stage-b.step3.example2.table3.row2.value={0}
 furtherReturnGuidance.stage-b.step3.example2.table3.total.key=Kavita’s new overall Capital Gains Tax liability on her UK property-related disposals for the tax year so far
-furtherReturnGuidance.stage-b.step3.example2.table3.total.value=£25,116
+furtherReturnGuidance.stage-b.step3.example2.table3.total.value={0}
 
-furtherReturnGuidance.trust.stage-b.example3.headingText=Bianca works out Square Trust’s overall Capital Gains Tax liability for residential property in tax year 2020 to 2021.
+furtherReturnGuidance.trust.stage-b.example3.headingText=Bianca works out Square Trust’s overall Capital Gains Tax liability for residential property in tax year {0} to {1}.
 
 furtherReturnGuidance.trust.stage-b.example3.table1.row1.key=She starts with the amount of net gain to be taxed
-furtherReturnGuidance.trust.stage-b.example3.table1.row1.value=£73,550
-furtherReturnGuidance.trust.stage-b.example3.table1.row2.key=She multiplies the trust’s net gain on residential gains for the year by the rate of tax for the 2020 to 2021 tax year for type of trust
-furtherReturnGuidance.trust.stage-b.example3.table1.row2.value=28%
+furtherReturnGuidance.trust.stage-b.example3.table1.row1.value={0}
+furtherReturnGuidance.trust.stage-b.example3.table1.row2.key=She multiplies the trust’s net gain on residential gains for the year by the rate of tax for the {0} to {1} tax year for type of trust
+furtherReturnGuidance.trust.stage-b.example3.table1.row2.value={0}
 furtherReturnGuidance.trust.stage-b.example3.table1.total.key=Square Trust’s new overall Capital Gains Tax liability for UK residential property
-furtherReturnGuidance.trust.stage-b.example3.table1.total.value=£20,594
+furtherReturnGuidance.trust.stage-b.example3.table1.total.value={0}
 
 
 
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.p1=Multiply the estate’s net gain for the year by the relevant <a href="{0}" target="_blank">rate of tax for the tax year for the estate (opens in a new window)</a> to work out its overall Capital Gains Tax liability on its UK property-related disposals.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.link=Personal representative Akash sold 2 properties for Taylor family estate
 
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.headingText=Akash works out Taylor family estate’s overall Capital Gains Tax liability for residential property in tax year 2020 to 2021.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.headingText=Akash works out Taylor family estate’s overall Capital Gains Tax liability for residential property in tax year {0} to {1}.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row1.key=He starts with the amount of net gain to be taxed
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row1.value=£67,400
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row2.key=He multiplies the estate’s net gain on residential gains for the year by the rate of tax for the 2020 to 2021 tax year
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row2.value=28%
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row1.value={0}
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row2.key=He multiplies the estate’s net gain on residential gains for the year by the rate of tax for the {0} to {1} tax year
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row2.value={0}
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.key=Taylor family estate’s new overall Capital Gains Tax liability for UK residential property
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.value=£18,872
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.value={0}
 
 
 #===================================================

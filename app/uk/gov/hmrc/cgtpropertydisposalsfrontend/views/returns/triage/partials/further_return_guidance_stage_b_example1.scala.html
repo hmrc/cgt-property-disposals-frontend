@@ -16,38 +16,59 @@
 
 @import play.api.i18n.Messages
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
-    calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
 )
 
-@()(implicit messages:Messages)
+@(taxYear: Option[TaxYear])(implicit messages: Messages)
 
 @key = @{ "furtherReturnGuidance" }
 
 <p>@messages(s"$key.stage-b.step1.example1.p1")</p>
 <h4 class="heading-medium">@messages(s"$key.stage-b.step1.example1.headingText")</h4>
-<p>@messages(s"$key.stage-b.step1.example1.p2")</p>
+<p>@messages(s"$key.stage-b.step1.example1.p2", "£45,000")</p>
+
+@personalAllowance = @{ taxYear.map(_.personalAllowance.inPounds).getOrElse(BigDecimal("12500")) }
+@incomeTaxHigherRateThreshold = @{ taxYear.map(_.incomeTaxHigherRateThreshold.inPounds).getOrElse(BigDecimal("37500")) }
+@netGainChargedAtBasicRate = @{ incomeTaxHigherRateThreshold - (BigDecimal("45000") - personalAllowance) }
+@cgtRateLowerBandResidential = @{ taxYear.map(_.cgtRateLowerBandResidential).getOrElse(BigDecimal("18")) }
+@cgtRateHigherBandResidential = @{ taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28")) }
+@taxAtBasicRate = @{ (netGainChargedAtBasicRate * cgtRateLowerBandResidential) / 100 }
+@taxAtHigherRate = @{ ((BigDecimal("67400") - netGainChargedAtBasicRate) * cgtRateHigherBandResidential) / 100 }
+@taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
+@taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
 
 @calcSum(
-  List(
-    SumPartDisplay(
-        label = messages(s"$key.stage-b.step1.example1.table1.row1.key"),
-        operator = None,
-        amount = messages(s"$key.stage-b.step1.example1.table1.row1.value")
+    List(
+        SumPartDisplay(
+            label = messages(s"$key.stage-b.step1.example1.table1.row1.key"),
+            operator = None,
+            amount = messages(
+                s"$key.stage-b.step1.example1.table1.row1.value",
+                "£45,000"
+            )
+        ),
+        SumPartDisplay(
+            label = messages(s"$key.stage-b.step1.example1.table1.row2.key"),
+            operator = Some("-"),
+            amount = messages(
+                s"$key.stage-b.step1.example1.table1.row2.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance)
+            )
+        )
     ),
     SumPartDisplay(
-        label = messages(s"$key.stage-b.step1.example1.table1.row2.key"),
-        operator = Some("-"),
-        amount = messages(s"$key.stage-b.step1.example1.table1.row2.value")
+        label = messages(s"$key.stage-b.step1.example1.table1.total.key"),
+        operator = Some("="),
+        amount = messages(
+            s"$key.stage-b.step1.example1.table1.total.value",
+            MoneyUtils.formatAmountOfMoneyWithPoundSign(BigDecimal("45000") - personalAllowance)
+        ),
+        total = true
     )
-  ),
-  SumPartDisplay(
-    label = messages(s"$key.stage-b.step1.example1.table1.total.key"),
-    operator = Some("="),
-    amount = messages(s"$key.stage-b.step1.example1.table1.total.value"),
-    total = true
-  )
 )
 
 <h4 class="heading-medium">@messages(s"$key.stage-b.step2.example1.headingText")</h4>
@@ -56,44 +77,71 @@
 @calcSum(
     List(
         SumPartDisplay(
-            label = messages(s"$key.stage-b.step2.example1.table1.row1.key"),
+            label = messages(
+                s"$key.stage-b.step2.example1.table1.row1.key",
+                taxYearStartYear,
+                taxYearEndYear
+            ),
             operator = None,
-            amount = messages(s"$key.stage-b.step2.example1.table1.row1.value")
+            amount = messages(
+                s"$key.stage-b.step2.example1.table1.row1.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(incomeTaxHigherRateThreshold)
+            )
         ),
         SumPartDisplay(
             label = messages(s"$key.stage-b.step2.example1.table1.row2.key"),
             operator = Some("-"),
-            amount = messages(s"$key.stage-b.step2.example1.table1.row2.value")
+            amount = messages(
+                s"$key.stage-b.step2.example1.table1.row2.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(BigDecimal("45000") - personalAllowance)
+            )
         )
     ),
     SumPartDisplay(
         label = messages(s"$key.stage-b.step2.example1.table1.total.key"),
         operator = Some("="),
-        amount = messages(s"$key.stage-b.step2.example1.table1.total.value"),
+        amount = messages(
+            s"$key.stage-b.step2.example1.table1.total.value",
+            MoneyUtils.formatAmountOfMoneyWithPoundSign(netGainChargedAtBasicRate)
+        ),
         total = true
     )
 )
 
 <h5 class="heading-small">@messages(s"$key.stage-b.step2.example1.p2")</h5>
-<p>@messages(s"$key.stage-b.step2.example1.p3")</p>
+<p>
+@messages(
+    s"$key.stage-b.step2.example1.p3",
+    MoneyUtils.formatAmountOfMoneyWithPoundSign(67400)
+)
+</p>
 
 @calcSum(
     List(
         SumPartDisplay(
             label = messages(s"$key.stage-b.step2.example1.table2.row1.key"),
             operator = None,
-            amount = messages(s"$key.stage-b.step2.example1.table2.row1.value")
+            amount = messages(
+                s"$key.stage-b.step2.example1.table2.row1.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(67400)
+            )
         ),
         SumPartDisplay(
             label = messages(s"$key.stage-b.step2.example1.table2.row2.key"),
             operator = Some("-"),
-            amount = messages(s"$key.stage-b.step2.example1.table2.row2.value")
+            amount = messages(
+                s"$key.stage-b.step2.example1.table2.row2.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(netGainChargedAtBasicRate)
+            )
         )
     ),
     SumPartDisplay(
         label = messages(s"$key.stage-b.step2.example1.table2.total.key"),
         operator = Some("="),
-        amount = messages(s"$key.stage-b.step2.example1.table2.total.value"),
+        amount = messages(
+            s"$key.stage-b.step2.example1.table2.total.value",
+            MoneyUtils.formatAmountOfMoneyWithPoundSign(BigDecimal("67400") - netGainChargedAtBasicRate)
+        ),
         total = true
     )
 )
@@ -105,18 +153,31 @@
         SumPartDisplay(
             label = messages(s"$key.stage-b.step3.example1.table1.row1.key"),
             operator = None,
-            amount = messages(s"$key.stage-b.step3.example1.table1.row1.value")
+            amount = messages(
+                s"$key.stage-b.step3.example1.table1.row1.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(netGainChargedAtBasicRate)
+            )
         ),
         SumPartDisplay(
-            label = messages(s"$key.stage-b.step3.example1.table1.row2.key"),
+            label = messages(
+                s"$key.stage-b.step3.example1.table1.row2.key",
+                taxYearStartYear,
+                taxYearEndYear
+            ),
             operator = Some("X"),
-            amount = messages(s"$key.stage-b.step3.example1.table1.row2.value")
+            amount = messages(
+                s"$key.stage-b.step3.example1.table1.row2.value",
+                s"${cgtRateLowerBandResidential}%"
+            )
         )
     ),
     SumPartDisplay(
         label = messages(s"$key.stage-b.step3.example1.table1.total.key"),
         operator = Some("="),
-        amount = messages(s"$key.stage-b.step3.example1.table1.total.value"),
+        amount = messages(
+            s"$key.stage-b.step3.example1.table1.total.value",
+            MoneyUtils.formatAmountOfMoneyWithPoundSign(taxAtBasicRate)
+        ),
         total = true
     )
 )
@@ -126,18 +187,31 @@
         SumPartDisplay(
             label = messages(s"$key.stage-b.step3.example1.table2.row1.key"),
             operator = None,
-            amount = messages(s"$key.stage-b.step3.example1.table2.row1.value")
+            amount = messages(
+                s"$key.stage-b.step3.example1.table2.row1.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(BigDecimal("67400") - netGainChargedAtBasicRate)
+            )
         ),
         SumPartDisplay(
-            label = messages(s"$key.stage-b.step3.example1.table2.row2.key"),
+            label = messages(
+                s"$key.stage-b.step3.example1.table2.row2.key",
+                taxYearStartYear,
+                taxYearEndYear
+            ),
             operator = Some("X"),
-            amount = messages(s"$key.stage-b.step3.example1.table2.row2.value")
+            amount = messages(
+                s"$key.stage-b.step3.example1.table2.row2.value",
+                s"${cgtRateHigherBandResidential}%"
+            )
         )
     ),
     SumPartDisplay(
         label = messages(s"$key.stage-b.step3.example1.table2.total.key"),
         operator = Some("="),
-        amount = messages(s"$key.stage-b.step3.example1.table2.total.value"),
+        amount = messages(
+            s"$key.stage-b.step3.example1.table2.total.value",
+            MoneyUtils.formatAmountOfMoneyWithPoundSign(taxAtHigherRate)
+        ),
         total = true
     )
 )
@@ -149,18 +223,27 @@
         SumPartDisplay(
             label = messages(s"$key.stage-b.step3.example1.table3.row1.key"),
             operator = None,
-            amount = messages(s"$key.stage-b.step3.example1.table3.row1.value")
+            amount = messages(
+                s"$key.stage-b.step3.example1.table3.row1.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(taxAtBasicRate)
+            )
         ),
         SumPartDisplay(
             label = messages(s"$key.stage-b.step3.example1.table3.row2.key"),
             operator = Some("+"),
-            amount = messages(s"$key.stage-b.step3.example1.table3.row2.value")
+            amount = messages(
+                s"$key.stage-b.step3.example1.table3.row2.value",
+                MoneyUtils.formatAmountOfMoneyWithPoundSign(taxAtHigherRate)
+            )
         )
     ),
     SumPartDisplay(
         label = messages(s"$key.stage-b.step3.example1.table3.total.key"),
         operator = Some("="),
-        amount = messages(s"$key.stage-b.step3.example1.table3.total.value"),
+        amount = messages(
+            s"$key.stage-b.step3.example1.table3.total.value",
+            MoneyUtils.formatAmountOfMoneyWithPoundSign((taxAtBasicRate + taxAtHigherRate))
+        ),
         total = true
     )
 )

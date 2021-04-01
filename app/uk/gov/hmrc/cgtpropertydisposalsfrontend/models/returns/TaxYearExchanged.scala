@@ -1,0 +1,56 @@
+/*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
+
+import cats.Eq
+import julienrf.json.derived
+import play.api.libs.json.OFormat
+
+sealed trait TaxYearExchanged extends Product with Serializable
+
+object TaxYearExchanged {
+
+  case object TaxYear2021 extends TaxYearExchanged
+
+  case object TaxYear2020 extends TaxYearExchanged
+
+  case object TaxYearBefore2020 extends TaxYearExchanged
+
+  case object DifferentTaxYears extends TaxYearExchanged
+
+  implicit val format: OFormat[TaxYearExchanged] = derived.oformat()
+  implicit val eq: Eq[TaxYearExchanged]          = Eq.fromUniversalEquals
+
+  implicit class TaxYearExchangedOps(private val t: TaxYearExchanged) extends AnyVal {
+    def toTaxYearExchanged(value: String): TaxYearExchanged =
+      value match {
+        case "TaxYear2021"       => TaxYearExchanged.TaxYear2021
+        case "TaxYear2020"       => TaxYearExchanged.TaxYear2020
+        case "TaxYearBefore2020" => TaxYearExchanged.TaxYearBefore2020
+        case "DifferentTaxYears" => TaxYearExchanged.DifferentTaxYears
+      }
+
+    def toSting: String =
+      t match {
+        case TaxYearExchanged.TaxYear2021       => "TaxYear2021"
+        case TaxYearExchanged.TaxYear2020       => "TaxYear2020"
+        case TaxYearExchanged.TaxYearBefore2020 => "TaxYearBefore2020"
+        case TaxYearExchanged.DifferentTaxYears => "DifferentTaxYears"
+      }
+  }
+
+}

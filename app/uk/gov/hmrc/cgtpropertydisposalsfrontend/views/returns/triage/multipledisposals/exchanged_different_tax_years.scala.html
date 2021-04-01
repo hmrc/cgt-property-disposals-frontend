@@ -17,8 +17,8 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
@@ -27,17 +27,18 @@
     backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
-@key = @{ "disposalDateInDifferentTaxYear" }
+@key = @{"multipleDisposalsExchangedInDifferentTaxYears"}
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
+@mainTemplate(title = title, userType = request.userType) {
+
     @backLinkComponent(backLink)
 
     @pageHeading(title)
     <p>@messages(s"$key.p1")</p>
-    <h2>@messages(s"$key.subheading")</h2>
-    <p>@Html(messages(s"$key.p2", appConfig.contactHmrc))</p>
-
+    <p>@messages(s"$key.p2")</p>
+    <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
+    <p>@Html(messages(s"$key.p3", routes.StartController.start().url))</p>
 }

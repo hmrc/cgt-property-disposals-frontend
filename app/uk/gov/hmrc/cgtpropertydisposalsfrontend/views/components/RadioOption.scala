@@ -21,7 +21,9 @@ import play.twirl.api.Html
 final case class RadioOption(
   label: Html,
   content: Option[Html],
-  optionHelpText: Option[Html]
+  optionHelpText: Option[Html],
+  value: String,
+  followedByOr: Boolean
 )
 
 object RadioOption {
@@ -29,8 +31,10 @@ object RadioOption {
   def apply(
     label: String,
     content: Option[Html],
-    optionHelpText: Option[Html]
+    optionHelpText: Option[Html],
+    value: String = "",
+    followedByOr: Boolean = false
   ): RadioOption =
-    RadioOption(Html(label), content, optionHelpText)
+    RadioOption(Html(label), content, optionHelpText, value, followedByOr)
 
 }

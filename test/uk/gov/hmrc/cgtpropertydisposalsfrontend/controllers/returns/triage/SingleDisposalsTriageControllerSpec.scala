@@ -2097,7 +2097,12 @@ class SingleDisposalsTriageControllerSpec
           gainOrLossAfterReliefs = None
         )
 
-      val tomorrow = today.plusDays(1L)
+      val tomorrow = TimeUtils
+        .getMaximumDateForDisposalsAndCompletion(
+          viewConfig.futureDatesEnabled,
+          viewConfig.maxYearForDisposalsAndCompletion
+        )
+        .plusDays(1L)
 
       val taxYear = sample[TaxYear].copy(
         startDateInclusive = LocalDate.of(today.getYear, 4, 6),
@@ -2804,7 +2809,12 @@ class SingleDisposalsTriageControllerSpec
 
       val disposalDate = DisposalDate(today.minusDays(5L), sample[TaxYear])
 
-      val tomorrow = today.plusDays(1L)
+      val tomorrow = TimeUtils
+        .getMaximumDateForDisposalsAndCompletion(
+          viewConfig.futureDatesEnabled,
+          viewConfig.maxYearForDisposalsAndCompletion
+        )
+        .plusDays(1L)
 
       val dayBeforeDisposalDate = disposalDate.value.minusDays(1L)
 
@@ -2845,6 +2855,16 @@ class SingleDisposalsTriageControllerSpec
             requiredPreviousTriageAnswers
           )
 
+        def testWithErrorArgs(formData: Seq[(String, String)], expectedErrorKey: String, arg: String)(
+          requiredPreviousTriageAnswers: SingleDisposalTriageAnswers
+        ): Unit =
+          testFormErrorWithErrorArg(performAction, "completionDate.title")(
+            formData,
+            expectedErrorKey,
+            arg,
+            requiredPreviousTriageAnswers
+          )
+
         "the date is invalid" in {
           dateErrorScenarios("completionDate", "").foreach { scenario =>
             withClue(s"For $scenario: ") {
@@ -2859,7 +2879,8 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+          val futureDate = today.plusYears(2).plusDays(1L)
+          test(formData(futureDate), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
         }
 
         "the completion date is before 01-01-1900" in {
@@ -2877,9 +2898,12 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the completion date is before the disposal date" in {
-          test(
+          val disposalDatInStrFormat =
+            s"${disposalDate.value.getDayOfMonth()} ${disposalDate.value.getMonth().toString.toLowerCase.capitalize} ${disposalDate.value.getYear}"
+          testWithErrorArgs(
             formData(dayBeforeDisposalDate),
-            "completionDate.error.tooFarInPast"
+            "completionDate.error.tooFarInPast",
+            disposalDatInStrFormat
           )(requiredPreviousAnswers)
         }
 
@@ -2898,6 +2922,16 @@ class SingleDisposalsTriageControllerSpec
             )
           )
 
+        def testWithErrorArgs(formData: Seq[(String, String)], expectedErrorKey: String, arg: String)(
+          requiredPreviousTriageAnswers: SingleDisposalTriageAnswers
+        ): Unit =
+          testFormErrorWithErrorArg(performAction, "completionDate.title")(
+            formData,
+            expectedErrorKey,
+            arg,
+            requiredPreviousTriageAnswers
+          )
+
         "the date is invalid" in {
           dateErrorScenarios("completionDate", "").foreach { scenario =>
             withClue(s"For $scenario: ") {
@@ -2930,9 +2964,12 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the completion date is before the disposal date" in {
-          test(
+          val disposalDatInStrFormat =
+            s"${disposalDate.value.getDayOfMonth()} ${disposalDate.value.getMonth().toString.toLowerCase.capitalize} ${disposalDate.value.getYear}"
+          testWithErrorArgs(
             formData(dayBeforeDisposalDate),
-            "completionDate.error.tooFarInPast"
+            "completionDate.error.tooFarInPast",
+            disposalDatInStrFormat
           )(requiredPreviousAnswers)
         }
 
@@ -2951,6 +2988,16 @@ class SingleDisposalsTriageControllerSpec
             )
           )
 
+        def testWithErrorArgs(formData: Seq[(String, String)], expectedErrorKey: String, arg: String)(
+          requiredPreviousTriageAnswers: SingleDisposalTriageAnswers
+        ): Unit =
+          testFormErrorWithErrorArg(performAction, "completionDate.title")(
+            formData,
+            expectedErrorKey,
+            arg,
+            requiredPreviousTriageAnswers
+          )
+
         "the date is invalid" in {
           dateErrorScenarios("completionDate", "").foreach { scenario =>
             withClue(s"For $scenario: ") {
@@ -2983,9 +3030,12 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "the completion date is before the disposal date" in {
-          test(
+          val disposalDatInStrFormat =
+            s"${disposalDate.value.getDayOfMonth()} ${disposalDate.value.getMonth().toString.toLowerCase.capitalize} ${disposalDate.value.getYear}"
+          testWithErrorArgs(
             formData(dayBeforeDisposalDate),
-            "completionDate.error.tooFarInPast"
+            "completionDate.error.tooFarInPast",
+            disposalDatInStrFormat
           )(requiredPreviousAnswers)
         }
 
@@ -4598,8 +4648,8 @@ class SingleDisposalsTriageControllerSpec
             Some(tomorrow.getYear.toString),
             "sharesDisposalDate.error.tooFarInFuture"
           )
-
-          test()(formData(tomorrow), "sharesDisposalDate.error.tooFarInFuture")
+          val futureDate = today.plusYears(2).plusDays(1L)
+          test()(formData(futureDate), "sharesDisposalDate.error.tooFarInFuture")
         }
 
         "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" in {
@@ -5714,6 +5764,29 @@ class SingleDisposalsTriageControllerSpec
     status(result)        shouldBe BAD_REQUEST
     contentAsString(result) should include(messageFromMessageKey(pageTitleKey))
     content                 should include(messageFromMessageKey(expectedErrorMessageKey))
+  }
+
+  def testFormErrorWithErrorArg(
+    performAction: Seq[(String, String)] => Future[Result],
+    pageTitleKey: String
+  )(
+    formData: Seq[(String, String)],
+    expectedErrorMessageKey: String,
+    errorArg: String,
+    currentAnswers: SingleDisposalTriageAnswers,
+    representeeAnswers: Option[RepresenteeAnswers] = None
+  ): Unit = {
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers, representeeAnswers = representeeAnswers)._1)
+    }
+
+    val result  = performAction(formData)
+    val content = contentAsString(result)
+
+    status(result)        shouldBe BAD_REQUEST
+    contentAsString(result) should include(messageFromMessageKey(pageTitleKey))
+    content                 should include(messageFromMessageKey(expectedErrorMessageKey, errorArg))
   }
 
   def displayIndividualTriagePageBehaviorIncompleteJourney(

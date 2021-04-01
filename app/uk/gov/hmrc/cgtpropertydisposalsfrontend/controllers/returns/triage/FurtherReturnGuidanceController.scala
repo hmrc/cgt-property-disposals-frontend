@@ -18,12 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -56,7 +56,8 @@ class FurtherReturnGuidanceController @Inject() (
               ),
               _.subscribedDetails.isATrust
             ),
-            getRepresentativeType(state)
+            getRepresentativeType(state),
+            getTaxYear(state)
           )
         )
       }
@@ -75,13 +76,14 @@ class FurtherReturnGuidanceController @Inject() (
               ),
               _.subscribedDetails.isATrust
             ),
-            getRepresentativeType(state)
+            getRepresentativeType(state),
+            getTaxYear(state)
           )
         )
       }
     }
 
-  def getRepresentativeType(
+  private def getRepresentativeType(
     state: Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
   ): Option[RepresentativeType] =
     state
@@ -95,6 +97,23 @@ class FurtherReturnGuidanceController @Inject() (
         ),
         _.draftReturn.representativeType()
       )
+
+  private def getTaxYear(
+    state: Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
+  ): Option[TaxYear] =
+    state.fold(
+      _.fold(
+        a => Some(a.originalReturn.completeReturn.taxYear()),
+        _.newReturnTriageAnswers.fold(
+          _.fold(_.taxYear, c => Some(c.taxYear)),
+          _.fold(_.disposalDate.map(_.taxYear), c => Some(c.disposalDate.taxYear))
+        )
+      ),
+      _.draftReturn.triageAnswers.fold(
+        _.fold(_.taxYear, c => Some(c.taxYear)),
+        _.fold(_.disposalDate.map(_.taxYear), c => Some(c.disposalDate.taxYear))
+      )
+    )
 
   private def withJourneyState(request: RequestWithSessionData[_])(
     f: (

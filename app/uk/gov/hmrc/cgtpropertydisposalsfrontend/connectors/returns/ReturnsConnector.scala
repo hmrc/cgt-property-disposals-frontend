@@ -83,6 +83,8 @@ trait ReturnsConnector {
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
+  def availableTaxYears()(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+
 }
 
 @Singleton
@@ -239,6 +241,14 @@ class ReturnsConnectorImpl @Inject() (
     EitherT[Future, Error, HttpResponse](
       http
         .GET[HttpResponse](s"$baseUrl/tax-year/${date.format(dateFormatter)}")
+        .map(Right(_))
+        .recover { case e => Left(Error(e)) }
+    )
+
+  def availableTaxYears()(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+    EitherT[Future, Error, HttpResponse](
+      http
+        .GET[HttpResponse](s"$baseUrl/available-tax-years")
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )

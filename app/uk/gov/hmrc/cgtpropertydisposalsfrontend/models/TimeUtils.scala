@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.format.DateTimeFormatter
 import java.time.{Clock, LocalDate, LocalDateTime}
-
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
@@ -26,7 +25,8 @@ import configs.Configs
 import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.i18n.Messages
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.PersonalRepresentativeDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{PersonalRepresentativeDetails, TaxYearExchanged}
 
 import scala.util.Try
 
@@ -39,6 +39,8 @@ object TimeUtils {
   val clock: Clock = Clock.systemUTC()
 
   val minimumDate: LocalDate = LocalDate.of(1900, 1, 1)
+
+  def getTaxYearStartDate(year: Int): LocalDate = LocalDate.of(year, 4, 6)
 
   def today(): LocalDate = LocalDate.now(clock)
 
@@ -128,6 +130,116 @@ object TimeUtils {
 
     }
 
+  def dateFormatterForMultiDisposals(
+    maximumDateInclusive: Option[LocalDate],
+    minimumDateInclusive: Option[LocalDate],
+    dayKey: String,
+    monthKey: String,
+    yearKey: String,
+    dateKey: String,
+    taxYearStartYear: Option[Int] = None,
+    isDateOfDeathValid: Option[Boolean] = Some(false),
+    extraValidation: List[LocalDate => Either[FormError, Unit]] = List.empty
+  ): Formatter[LocalDate] =
+    new Formatter[LocalDate] {
+      def dateFieldStringValues(
+        data: Map[String, String]
+      ): Either[FormError, (String, String, String)] =
+        List(dayKey, monthKey, yearKey)
+          .map(data.get(_).map(_.trim).filter(_.nonEmpty)) match {
+          case Some(dayString) :: Some(monthString) :: Some(
+                yearString
+              ) :: Nil =>
+            Right((dayString, monthString, yearString))
+          case None :: Some(_) :: Some(_) :: Nil =>
+            Left(FormError(dayKey, "error.required"))
+          case Some(_) :: None :: Some(_) :: Nil =>
+            Left(FormError(monthKey, "error.required"))
+          case Some(_) :: Some(_) :: None :: Nil =>
+            Left(FormError(yearKey, "error.required"))
+          case Some(_) :: None :: None :: Nil    =>
+            Left(FormError(monthKey, "error.monthAndYearRequired"))
+          case None :: Some(_) :: None :: Nil    =>
+            Left(FormError(dayKey, "error.dayAndYearRequired"))
+          case None :: None :: Some(_) :: Nil    =>
+            Left(FormError(dayKey, "error.dayAndMonthRequired"))
+          case _                                 => Left(FormError(dateKey, "error.required"))
+        }
+
+      def toValidInt(
+        key: String,
+        stringValue: String,
+        maxValue: Option[Int]
+      ): Either[FormError, Int] =
+        Either.fromOption(
+          Try(BigDecimal(stringValue).toIntExact).toOption.filter(i => i > 0 && maxValue.forall(i <= _)),
+          FormError(key, "error.invalid")
+        )
+
+      override def bind(
+        key: String,
+        data: Map[String, String]
+      ): Either[Seq[FormError], LocalDate] = {
+        val result = for {
+          dateFieldStrings <- dateFieldStringValues(data)
+          day ← toValidInt(dayKey, dateFieldStrings._1, Some(31))
+          month ← toValidInt(monthKey, dateFieldStrings._2, Some(12))
+          year ← toValidInt(yearKey, dateFieldStrings._3, None)
+          date ←
+            Either
+              .fromTry(Try(LocalDate.of(year, month, day)))
+              .leftMap(_ => FormError(dateKey, "error.invalid"))
+              .flatMap(date =>
+                if (maximumDateInclusive.exists(_.isBefore(date)))
+                  Left(FormError(dateKey, "error.tooFarInFuture"))
+                else if (isDateOfDeathValid.exists(d => d && date.isBefore(TaxYear.earliestTaxYearStartDate)))
+                  Left(FormError(dateKey, "error.dateOfDeathBeforeTaxYear"))
+                else if (
+                  isDateOfDeathValid
+                    .exists(d => d && minimumDateInclusive.exists(d => d.isEqual(date) || d.isAfter(date)))
+                )
+                  Left(FormError(dateKey, "error.dateOfDeath"))
+                else if (minimumDateInclusive.exists(_.isAfter(date)))
+                  Left(FormError(dateKey, "error.tooFarInPast"))
+                else if (date.isBefore(minimumDate))
+                  Left(FormError(dateKey, "error.before1900"))
+                else if (
+                  taxYearStartYear
+                    .exists(tyStartYear => !isValidDate(tyStartYear, date, minimumDateInclusive, maximumDateInclusive))
+                )
+                  Left(FormError(dateKey, "error.dateNotWithinTaxYear"))
+                else
+                  extraValidation
+                    .map(_(date))
+                    .find(_.isLeft)
+                    .getOrElse(Right(()))
+                    .map(_ => date)
+              )
+        } yield date
+
+        result.leftMap(Seq(_))
+      }
+
+      override def unbind(key: String, value: LocalDate): Map[String, String] =
+        Map(
+          dayKey   -> value.getDayOfMonth.toString,
+          monthKey -> value.getMonthValue.toString,
+          yearKey  -> value.getYear.toString
+        )
+
+    }
+
+  def isValidDate(
+    taxYearStartYear: Int,
+    completionDate: LocalDate,
+    minimumDateInclusive: Option[LocalDate],
+    maximumDateInclusive: Option[LocalDate]
+  ): Boolean = {
+    val minDateInclusive = minimumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear, 4, 6))
+    val maxDateInclusive = maximumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear + 1, 4, 5))
+    completionDate <= maxDateInclusive && completionDate >= minDateInclusive
+  }
+
   def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
     s"""${date.getDayOfMonth()} ${messages(
       s"date.${date.getMonthValue()}"
@@ -169,5 +281,29 @@ object TimeUtils {
       )
 
     }
+
+  def getMaximumDateForDisposalsAndCompletion(
+    enableFutureDateForDisposalAndCompletion: Boolean,
+    maxYearForDisposalsAndCompletion: Int
+  ): LocalDate =
+    if (enableFutureDateForDisposalAndCompletion)
+      TimeUtils.getMaximumDateOf(TimeUtils.today(), LocalDate.of(maxYearForDisposalsAndCompletion, 4, 5))
+    else
+      TimeUtils.today()
+
+  def getMaximumDateOf(date1: LocalDate, date2: LocalDate): LocalDate =
+    if (date1.isAfter(date2))
+      date1
+    else date2
+
+  def getTaxYearExchangedOfADate(d: LocalDate): TaxYearExchanged = {
+    val taxYear2020StartDate = LocalDate.of(2020, 4, 5)
+    val taxYear2020EndDate   = LocalDate.of(2021, 4, 6)
+    val taxYear2021StartDate = LocalDate.of(2021, 4, 5)
+    val taxYear2021EndDate   = LocalDate.of(2022, 4, 6)
+    if (d.isAfter(taxYear2020StartDate) && d.isBefore(taxYear2020EndDate)) TaxYear2020
+    else if (d.isAfter(taxYear2021StartDate) && d.isBefore(taxYear2021EndDate)) TaxYear2021
+    else TaxYearBefore2020
+  }
 
 }
