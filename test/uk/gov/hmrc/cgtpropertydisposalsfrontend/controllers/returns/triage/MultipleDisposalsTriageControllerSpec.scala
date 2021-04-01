@@ -3919,7 +3919,8 @@ class MultipleDisposalsTriageControllerSpec
           val taxYearExchanged   = getTaxYearExchanged(Some(taxYear))
           val answers            = sample[IncompleteMultipleDisposalsTriageAnswers].copy(
             individualUserType = Some(Self),
-            completionDate = Some(CompletionDate(today))
+            completionDate = Some(CompletionDate(today)),
+            alreadySentSelfAssessment = None
           )
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
@@ -3957,6 +3958,11 @@ class MultipleDisposalsTriageControllerSpec
           endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
         )
 
+        val saFlagStatus = taxYear.startDateInclusive.getYear match {
+          case 2020 => Some(false)
+          case _    => None
+        }
+
         def test(
           currentAnswers: IncompleteMultipleDisposalsTriageAnswers,
           representeeAnswers: Option[RepresenteeAnswers],
@@ -3973,7 +3979,8 @@ class MultipleDisposalsTriageControllerSpec
           val updatedAnswers     = currentAnswers.copy(
             completionDate = Some(CompletionDate(submittedDate)),
             taxYear = taxYear,
-            taxYearExchanged = getTaxYearExchanged(taxYear)
+            taxYearExchanged = getTaxYearExchanged(taxYear),
+            alreadySentSelfAssessment = saFlagStatus
           )
           val updatedDraftReturn =
             updateDraftReturn(draftReturn, updatedAnswers)
@@ -4045,6 +4052,11 @@ class MultipleDisposalsTriageControllerSpec
           endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
         )
 
+        val saFlagStatus = taxYear.startDateInclusive.getYear match {
+          case 2020 => Some(false)
+          case _    => None
+        }
+
         def test(
           currentAnswers: IncompleteMultipleDisposalsTriageAnswers,
           representeeAnswers: Option[RepresenteeAnswers],
@@ -4062,7 +4074,8 @@ class MultipleDisposalsTriageControllerSpec
           val updatedAnswers     = currentAnswers.copy(
             completionDate = Some(CompletionDate(submittedDate)),
             taxYear = taxYear,
-            taxYearExchanged = getTaxYearExchanged(taxYear)
+            taxYearExchanged = getTaxYearExchanged(taxYear),
+            alreadySentSelfAssessment = saFlagStatus
           )
           val updatedDraftReturn =
             updateDraftReturn(draftReturn, updatedAnswers)
