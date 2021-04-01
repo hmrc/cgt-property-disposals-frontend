@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import java.time.LocalDate
 import java.util.UUID
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
@@ -161,13 +162,16 @@ class ReturnsServiceImpl @Inject() (
       (sentDraftReturns, unsentDraftReturns)   = validDraftReturns.partition(hasBeenSent(sentReturns))
       unsentDraftReturnsTaxYearExchanged       = unsentDraftReturns.map(updateTaxYearExchangedToDraftReturn)
 
+      unsentDraftReturnsWithTaxYearExchangedAndSAStatus =
+        unsentDraftReturnsTaxYearExchanged.map(updateSAStatusToDraftReturn)
+
       toDelete = invalidDraftReturns ::: sentDraftReturns
       _       <- if (toDelete.nonEmpty)
                    EitherT.liftF[Future, Error, Unit](
                      deleteSentOrInvalidDraftReturns(toDelete)
                    )
                  else EitherT.rightT[Future, Error](())
-    } yield unsentDraftReturnsTaxYearExchanged
+    } yield unsentDraftReturnsWithTaxYearExchangedAndSAStatus
 
   private def updateTaxYearExchangedToDraftReturn(draftReturn: DraftReturn): DraftReturn =
     draftReturn.fold(
@@ -220,6 +224,69 @@ class ReturnsServiceImpl @Inject() (
       _ => logger.info(s"Deleted draft returns with ids [${ids.mkString(" ")}] ")
     )
   }
+
+  private def updateSAStatusToDraftReturn(draftReturn: DraftReturn): DraftReturn =
+    draftReturn.fold(
+      whenMultiple =>
+        if (isSAStatusUpdatedToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers))
+          whenMultiple
+        else
+          whenMultiple.copy(triageAnswers = unsetSAStatusToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers)),
+      whenSingle =>
+        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingle.triageAnswers))
+          whenSingle
+        else
+          whenSingle.copy(triageAnswers = unsetSAStatusToSingleDisposalTriageAnswers(whenSingle.triageAnswers)),
+      whenSingleIndirect =>
+        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingleIndirect.triageAnswers))
+          whenSingleIndirect
+        else
+          whenSingleIndirect.copy(triageAnswers =
+            unsetSAStatusToSingleDisposalTriageAnswers(whenSingleIndirect.triageAnswers)
+          ),
+      whenMultipleIndirect =>
+        if (isSAStatusUpdatedToMultipleDisposalsTriageAnswers(whenMultipleIndirect.triageAnswers))
+          whenMultipleIndirect
+        else
+          whenMultipleIndirect.copy(triageAnswers =
+            unsetSAStatusToMultipleDisposalsTriageAnswers(whenMultipleIndirect.triageAnswers)
+          ),
+      whenSingleMixedUse =>
+        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingleMixedUse.triageAnswers))
+          whenSingleMixedUse
+        else
+          whenSingleMixedUse.copy(triageAnswers =
+            unsetSAStatusToSingleDisposalTriageAnswers(whenSingleMixedUse.triageAnswers)
+          )
+    )
+
+  private def unsetSAStatusToMultipleDisposalsTriageAnswers(
+    answers: MultipleDisposalsTriageAnswers
+  ): MultipleDisposalsTriageAnswers =
+    answers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+
+  private def unsetSAStatusToSingleDisposalTriageAnswers(
+    answers: SingleDisposalTriageAnswers
+  ): SingleDisposalTriageAnswers =
+    answers.fold(i => i, c => c.unset(_.alreadySentSelfAssessment))
+
+  private def isSAStatusUpdatedToMultipleDisposalsTriageAnswers(answers: MultipleDisposalsTriageAnswers): Boolean =
+    answers.fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined) ||
+      answers
+        .fold(
+          _.taxYear.map(_.isItInLatestTaxYear(viewConfig.futureDatesEnabled)),
+          c => Some(c.taxYear.isItInLatestTaxYear(viewConfig.futureDatesEnabled))
+        )
+        .contains(true)
+
+  private def isSAStatusUpdatedToSingleDisposalTriageAnswers(answers: SingleDisposalTriageAnswers): Boolean =
+    answers.fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined) ||
+      answers
+        .fold(
+          _.disposalDate.map(_.taxYear.isItInLatestTaxYear(viewConfig.futureDatesEnabled)),
+          c => Some(c.disposalDate.taxYear.isItInLatestTaxYear(viewConfig.futureDatesEnabled))
+        )
+        .contains(true)
 
   private def isValid(draftReturn: DraftReturn, cgtReference: CgtReference): Boolean = {
     val dateOfDeath =

@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, SessionData, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -68,8 +68,10 @@ class CommonTriageQuestionsController @Inject() (
   previousReturnExistsWithSameCompletionDateAmendPage: triagePages.previous_return_exists_with_same_completion_date_amend,
   disposalDateInDifferentTaxYearPage: triagePages.disposaldate_in_different_taxyear,
   cannotAmendResidentialStatusForAssetTypePage: triagePages.cannot_amend_residential_status_for_asset_type,
-  exchangeDateIncompatibleTaxyears: triagePages.exchangedate_incompatible_taxyears,
-  whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page
+  whoAreYouSubmittingAmendExitPage: triagePages.amend_who_are_you_submitting_for_exit_page,
+  alreadySentSelfAssessmentPage: triagePages.have_you_already_sent_self_assesment,
+  selfAssessmentExitPage: triagePages.self_assessment_already_submitted,
+  exchangeDateIncompatibleTaxyears: triagePages.exchangedate_incompatible_taxyears
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -523,6 +525,233 @@ class CommonTriageQuestionsController @Inject() (
       Ok(whoAreYouSubmittingAmendExitPage(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()))
     }
 
+  def selfAssessmentAlreadySubmitted(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState { (_, state) =>
+        val taxYear          = getTaxYearFromTriageAnswers(triageAnswersFomState(state))
+        val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)
+
+        Ok(
+          selfAssessmentExitPage(
+            routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
+            state.fold(
+              _.subscribedDetails.isATrust,
+              _.subscribedDetails.isATrust
+            ),
+            taxYearStartYear,
+            getRepresentativeType(state)
+          )
+        )
+      }
+    }
+
+  def haveYouAlreadySentSelfAssessment(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState { (_, state) =>
+        val triageAnswers      = triageAnswersFomState(state)
+        val sentSelfAssessment =
+          triageAnswers.fold(
+            _.fold(
+              _.alreadySentSelfAssessment,
+              _.alreadySentSelfAssessment
+            ),
+            _.fold(
+              _.alreadySentSelfAssessment,
+              _.alreadySentSelfAssessment
+            )
+          )
+
+        val isAmendReturn: Boolean               = state.fold(_ => false, _.isAmendReturn)
+        val originalSubmissionId: Option[String] =
+          state.toOption.flatMap(_.amendReturnData.map(_.originalReturn.summary.submissionId))
+        val form                                 = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
+
+        val backLink = (isAmendReturn, sentSelfAssessment.isEmpty, originalSubmissionId) match {
+          case (true, true, Some(submissionId)) =>
+            controllers.accounts.homepage.routes.HomePageController.viewSentReturn(submissionId)
+          case _                                =>
+            triageAnswers.fold(
+              _.fold(
+                _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+                _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+              ),
+              _.fold(
+                _ => routes.SingleDisposalsTriageController.whenWasDisposalDate(),
+                _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+        }
+
+        val taxYear          = getTaxYearFromTriageAnswers(triageAnswers)
+        val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)
+
+        Ok(
+          alreadySentSelfAssessmentPage(
+            form,
+            backLink,
+            state.isRight,
+            state.fold(
+              _.subscribedDetails.isATrust,
+              _.subscribedDetails.isATrust
+            ),
+            triageAnswers.fold(
+              _.representativeType(),
+              _.representativeType()
+            ),
+            taxYearStartYear
+          )
+        )
+
+      }
+    }
+
+  def haveYouAlreadySentSelfAssessmentSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState { (_, state) =>
+        val triageAnswers = triageAnswersFomState(state)
+        alreadySentSelfAssessmentForm
+          .bindFromRequest()
+          .fold(
+            { formWithErrors =>
+              val backLink         = triageAnswers.fold(
+                _.fold(
+                  _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+                  _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+                ),
+                _.fold(
+                  _ => routes.SingleDisposalsTriageController.whenWasDisposalDate(),
+                  _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+                )
+              )
+              val taxYear          = getTaxYearFromTriageAnswers(triageAnswers)
+              val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)
+              val taxYearEndYear   = taxYear.map(_.endDateExclusive.getYear).getOrElse(2021)
+
+              val updatedFormWithErrors = formWithErrors.errors.map {
+                _.copy(args = Seq(taxYearStartYear.toString, taxYearEndYear.toString))
+              }
+
+              BadRequest(
+                alreadySentSelfAssessmentPage(
+                  formWithErrors.copy(errors = updatedFormWithErrors),
+                  backLink,
+                  state.isRight,
+                  state.fold(
+                    _.subscribedDetails.isATrust,
+                    _.subscribedDetails.isATrust
+                  ),
+                  triageAnswers.fold(
+                    _.representativeType(),
+                    _.representativeType()
+                  ),
+                  taxYearStartYear
+                )
+              )
+            },
+            alreadySentSA => {
+              val alreadySentSelfAssessment = triageAnswers
+                .fold(
+                  _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment),
+                  _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
+                )
+              if (alreadySentSA)
+                Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
+              else if (alreadySentSelfAssessment.contains(alreadySentSA))
+                Redirect(redirectToCheckYourAnswers(state))
+              else {
+                def updateSingleDisposalAnswers(
+                  s: SingleDisposalTriageAnswers
+                ): SingleDisposalTriageAnswers =
+                  s.fold(
+                    _.copy(alreadySentSelfAssessment = Some(alreadySentSA)),
+                    _.copy(alreadySentSelfAssessment = Some(alreadySentSA))
+                  )
+
+                def updateMultipleDisposalAnswers(
+                  m: MultipleDisposalsTriageAnswers
+                ): MultipleDisposalsTriageAnswers =
+                  m.fold[MultipleDisposalsTriageAnswers](
+                    _.copy(alreadySentSelfAssessment = Some(alreadySentSA)),
+                    _.copy(alreadySentSelfAssessment = Some(alreadySentSA))
+                  )
+
+                val updatedState: Either[StartingNewDraftReturn, FillingOutReturn] =
+                  state.bimap(
+                    _.copy(
+                      newReturnTriageAnswers = triageAnswers
+                        .bimap[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers](
+                          updateMultipleDisposalAnswers,
+                          updateSingleDisposalAnswers
+                        )
+                    ),
+                    r =>
+                      r.copy(
+                        draftReturn = r.draftReturn.fold[DraftReturn](
+                          multiple =>
+                            multiple.copy(
+                              triageAnswers = updateMultipleDisposalAnswers(multiple.triageAnswers)
+                            ),
+                          single =>
+                            single.copy(
+                              triageAnswers = updateSingleDisposalAnswers(single.triageAnswers)
+                            ),
+                          singleIndirect =>
+                            singleIndirect.copy(
+                              triageAnswers = updateSingleDisposalAnswers(singleIndirect.triageAnswers)
+                            ),
+                          multipleIndirect =>
+                            multipleIndirect.copy(
+                              triageAnswers = updateMultipleDisposalAnswers(multipleIndirect.triageAnswers)
+                            ),
+                          singleMixedUse =>
+                            singleMixedUse.copy(
+                              triageAnswers = updateSingleDisposalAnswers(singleMixedUse.triageAnswers)
+                            )
+                        )
+                      )
+                  )
+
+                val result =
+                  for {
+                    _ <- updatedState.fold(
+                           _ => EitherT.pure[Future, Error](()),
+                           returnsService.storeDraftReturn(_)
+                         )
+                    _ <- EitherT(
+                           updateSession(sessionStore, request)(
+                             _.copy(journeyStatus = Some(updatedState.merge))
+                           )
+                         )
+                  } yield ()
+
+                result.fold(
+                  { e =>
+                    logger.warn("Could not perform updates", e)
+                    errorHandler.errorResult()
+                  },
+                  _ =>
+                    if (alreadySentSA)
+                      Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
+                    else
+                      Redirect(redirectToCheckYourAnswers(updatedState))
+                )
+              }
+            }
+          )
+      }
+    }
+
+  private def getTaxYearFromTriageAnswers(
+    triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers]
+  ): Option[TaxYear] =
+    triageAnswers.fold(
+      _.fold(_.taxYear, c => Some(c.taxYear)),
+      _.fold(
+        _.disposalDate.map(_.taxYear),
+        c => Some(c.disposalDate.taxYear)
+      )
+    )
+
   private def redirectToCheckYourAnswers(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Call =
@@ -868,5 +1097,11 @@ object CommonTriageQuestionsController {
       )(ShareDisposalDate(_))(d => Some(d.value))
     )
   }
+
+  val alreadySentSelfAssessmentForm: Form[Boolean] = Form(
+    mapping(
+      "alreadySentSelfAssessment" -> of(BooleanFormatter.formatter)
+    )(identity)(Some(_))
+  )
 
 }

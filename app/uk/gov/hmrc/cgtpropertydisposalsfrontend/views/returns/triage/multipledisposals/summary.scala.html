@@ -29,15 +29,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 
 @this(
-cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(
     answers: CompleteMultipleDisposalsTriageAnswers,
     isATrust: Boolean,
-        representeeAnswers: Option[RepresenteeAnswers]
+    representeeAnswers: Option[RepresenteeAnswers]
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @representativeType = @{answers.representativeType()}
@@ -143,7 +143,6 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
       )
   }
 
-
   @if(answers.assetTypes === List(AssetType.IndirectDisposal)) {
     @cyaRow(
       messages("sharesDisposalDate.title"),
@@ -151,7 +150,31 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
       Some(cyaChange(messages("multipleDisposalsCompletionDate.cyaChange"), routes.MultipleDisposalsTriageController.disposalDateOfShares().url)),
       "completionDate"
     )
+    @if(answers.alreadySentSelfAssessment.contains(false)){
+        @cyaRow(
+            messages(
+                s"alreadySentSelfAssessment$userKey.title",
+                answers.taxYear.startDateInclusive.getYear.toString,
+                answers.taxYear.endDateExclusive.getYear.toString
+            ),
+            Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.getOrElse(false).toString}")),
+            Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
+            "alreadySentSelfAssessment"
+        )
+    }
   } else {
+    @if(answers.alreadySentSelfAssessment.contains(false)){
+        @cyaRow(
+            messages(
+                s"alreadySentSelfAssessment$userKey.title",
+                answers.taxYear.startDateInclusive.getYear.toString,
+                answers.taxYear.endDateExclusive.getYear.toString
+            ),
+            Html(messages(s"yesNo.${answers.alreadySentSelfAssessment.getOrElse(false).toString}")),
+            Some(cyaChange(messages("alreadySentSelfAssessment.cyaChange"), routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment().url)),
+            "alreadySentSelfAssessment"
+        )
+    }
     @cyaRow(
       messages("multipleDisposalsCompletionDate.title"),
       Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),

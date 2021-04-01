@@ -30,7 +30,8 @@
   selected: Option[Boolean] = None,
   yesContent: Option[Html] = None,
   noContent: Option[Html] = None,
-  describedBy: Option[String] = None
+  describedBy: Option[String] = None,
+  errorMessage: Option[String] = None
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
@@ -51,8 +52,13 @@
         @text
       </span>
     }
+
     @errorIdWithMessageKey.map { case (id, key) =>
-      @errorInline(id, messages(s"$fieldId.$key"))
+      @if(errorMessage.isDefined){
+        @errorInline(id, errorMessage.getOrElse(messages(s"$fieldId.$key")))
+      }else{
+          @errorInline(id, messages(s"$fieldId.$key"))
+        }
     }
 
     <div class="multiple-choice"@if(yesContent.nonEmpty){ data-target="yes-content" }>
