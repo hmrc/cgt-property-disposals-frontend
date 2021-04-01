@@ -274,8 +274,8 @@ class ReturnsServiceImpl @Inject() (
     answers.fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined) ||
       answers
         .fold(
-          _.taxYear.map(_.isItInLatestTaxYear(viewConfig.enableFutureDates)),
-          c => Some(c.taxYear.isItInLatestTaxYear(viewConfig.enableFutureDates))
+          _.taxYear.map(_.isItInLatestTaxYear(viewConfig.futureDatesEnabled)),
+          c => Some(c.taxYear.isItInLatestTaxYear(viewConfig.futureDatesEnabled))
         )
         .contains(true)
 
@@ -283,8 +283,8 @@ class ReturnsServiceImpl @Inject() (
     answers.fold(_.alreadySentSelfAssessment.isDefined, _.alreadySentSelfAssessment.isDefined) ||
       answers
         .fold(
-          _.disposalDate.map(_.taxYear.isItInLatestTaxYear(viewConfig.enableFutureDates)),
-          c => Some(c.disposalDate.taxYear.isItInLatestTaxYear(viewConfig.enableFutureDates))
+          _.disposalDate.map(_.taxYear.isItInLatestTaxYear(viewConfig.futureDatesEnabled)),
+          c => Some(c.disposalDate.taxYear.isItInLatestTaxYear(viewConfig.futureDatesEnabled))
         )
         .contains(true)
 

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
+
 import cats.syntax.order._
 import cats.data.EitherT
 import cats.instances.boolean._
@@ -857,9 +858,8 @@ class MultipleDisposalsTriageController @Inject() (
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val completionDate =
           answers.fold(_.completionDate, c => Some(c.completionDate))
-
         val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-          viewConfig.enableFutureDates,
+          viewConfig.futureDatesEnabled,
           viewConfig.maxYearForDisposalsAndCompletion
         )
 
@@ -900,15 +900,16 @@ class MultipleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-          viewConfig.enableFutureDates,
+          viewConfig.futureDatesEnabled,
           viewConfig.maxYearForDisposalsAndCompletion
         )
 
         val taxYearExchangedSelected: Option[TaxYearExchanged] =
           answers.fold(_.taxYearExchanged, c => c.taxYearExchanged)
 
-        val taxYearAtStart: Option[Int] =
-          getTaxYearByTaxYearExchanged(taxYearExchangedSelected.getOrElse(TaxYearExchanged.DifferentTaxYears))
+        val taxYearStartYear: Option[Int] = getTaxYearStartYearByTaxYearExchanged(
+          taxYearExchangedSelected.getOrElse(TaxYearExchanged.TaxYear2020)
+        )
 
         val dateOfDeath                            = getDateOfDeath(state)
         val (dateOfDeathValue, isDateOfDeathValid) = dateOfDeath match {
@@ -916,7 +917,7 @@ class MultipleDisposalsTriageController @Inject() (
           case _       => (TaxYear.earliestTaxYearStartDate, Some(false))
         }
 
-        completionDateForm(maxDateAllowed, dateOfDeathValue, isDateOfDeathValid, taxYearAtStart)
+        completionDateForm(maxDateAllowed, dateOfDeathValue, isDateOfDeathValid, taxYearStartYear)
           .bindFromRequest()
           .fold(
             formWithErrors =>
@@ -971,13 +972,12 @@ class MultipleDisposalsTriageController @Inject() (
                     routes.MultipleDisposalsTriageController.checkYourAnswers()
                   )
                 )
-
               }
           )
       }
     }
 
-  private def getTaxYearByTaxYearExchanged(taxYearExhanged: TaxYearExchanged): Option[Int] =
+  private def getTaxYearStartYearByTaxYearExchanged(taxYearExhanged: TaxYearExchanged): Option[Int] =
     taxYearExhanged match {
       case TaxYearExchanged.TaxYear2020 => Some(2020)
       case TaxYearExchanged.TaxYear2021 => Some(2021)
@@ -1023,7 +1023,7 @@ class MultipleDisposalsTriageController @Inject() (
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
           val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-            viewConfig.enableFutureDates,
+            viewConfig.futureDatesEnabled,
             viewConfig.maxYearForDisposalsAndCompletion
           )
           val form = {
@@ -1051,7 +1051,7 @@ class MultipleDisposalsTriageController @Inject() (
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-            viewConfig.enableFutureDates,
+            viewConfig.futureDatesEnabled,
             viewConfig.maxYearForDisposalsAndCompletion
           )
           sharesDisposalDateForm(personalRepDetails, maxDateAllowed)
@@ -1416,7 +1416,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(taxYear),
                 None,
                 _
-              ) if !taxYear.isItInLatestTaxYear(viewConfig.enableFutureDates) =>
+              ) if !taxYear.isItInLatestTaxYear(viewConfig.futureDatesEnabled) =>
             Redirect(
               routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
             )
@@ -1530,7 +1530,7 @@ class MultipleDisposalsTriageController @Inject() (
     taxYearExchanged: TaxYearExchanged,
     originalSubmissionYear: Option[String]
   ): Boolean =
-    getTaxYearByTaxYearExchanged(taxYearExchanged) match {
+    getTaxYearStartYearByTaxYearExchanged(taxYearExchanged) match {
       case Some(tyExchanged) => originalSubmissionYear.exists(y => tyExchanged === y.toInt)
       case _                 => false
     }
@@ -1874,7 +1874,7 @@ object MultipleDisposalsTriageController {
     maximumDateInclusive: LocalDate,
     minimumDateInclusive: LocalDate,
     isDateOfDeathValid: Option[Boolean] = None,
-    taxYearAtStart: Option[Int] = None
+    taxYearStartYear: Option[Int] = None
   ): Form[CompletionDate] =
     Form(
       mapping(
@@ -1886,7 +1886,7 @@ object MultipleDisposalsTriageController {
             "multipleDisposalsCompletionDate-month",
             "multipleDisposalsCompletionDate-year",
             "multipleDisposalsCompletionDate",
-            taxYearAtStart,
+            taxYearStartYear,
             isDateOfDeathValid
           )
         )

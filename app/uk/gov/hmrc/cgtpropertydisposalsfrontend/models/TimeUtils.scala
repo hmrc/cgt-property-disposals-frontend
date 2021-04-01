@@ -21,8 +21,6 @@ import java.time.{Clock, LocalDate, LocalDateTime}
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
-import cats.instances.int._
-import cats.instances.boolean._
 import configs.Configs
 import play.api.data.FormError
 import play.api.data.format.Formatter
@@ -139,7 +137,7 @@ object TimeUtils {
     monthKey: String,
     yearKey: String,
     dateKey: String,
-    taxYearStartSelected: Option[Int] = None,
+    taxYearStartYear: Option[Int] = None,
     isDateOfDeathValid: Option[Boolean] = Some(false),
     extraValidation: List[LocalDate => Either[FormError, Unit]] = List.empty
   ): Formatter[LocalDate] =
@@ -194,15 +192,21 @@ object TimeUtils {
               .flatMap(date =>
                 if (maximumDateInclusive.exists(_.isBefore(date)))
                   Left(FormError(dateKey, "error.tooFarInFuture"))
-                else if (isDateOfDeathValid.exists(d => d === true && date.isBefore(TaxYear.earliestTaxYearStartDate)))
+                else if (isDateOfDeathValid.exists(d => d && date.isBefore(TaxYear.earliestTaxYearStartDate)))
                   Left(FormError(dateKey, "error.dateOfDeathBeforeTaxYear"))
-                else if (isDateOfDeathValid.exists(d => d === true && minimumDateInclusive.exists(_.isAfter(date))))
+                else if (
+                  isDateOfDeathValid
+                    .exists(d => d && minimumDateInclusive.exists(d => d.isEqual(date) || d.isAfter(date)))
+                )
                   Left(FormError(dateKey, "error.dateOfDeath"))
                 else if (minimumDateInclusive.exists(_.isAfter(date)))
                   Left(FormError(dateKey, "error.tooFarInPast"))
                 else if (date.isBefore(minimumDate))
                   Left(FormError(dateKey, "error.before1900"))
-                else if (taxYearStartSelected.exists(x => !isDateWithinTaxYear(x, dateFieldStrings)))
+                else if (
+                  taxYearStartYear
+                    .exists(tyStartYear => !isValidDate(tyStartYear, date, minimumDateInclusive, maximumDateInclusive))
+                )
                   Left(FormError(dateKey, "error.dateNotWithinTaxYear"))
                 else
                   extraValidation
@@ -225,14 +229,15 @@ object TimeUtils {
 
     }
 
-  def isDateWithinTaxYear(
-    taxYearStartSelected: Int,
-    dateFieldStrings: (String, String, String)
+  def isValidDate(
+    taxYearStartYear: Int,
+    completionDate: LocalDate,
+    minimumDateInclusive: Option[LocalDate],
+    maximumDateInclusive: Option[LocalDate]
   ): Boolean = {
-    val userSelectedCompletionDate =
-      LocalDate.of(dateFieldStrings._3.toInt, dateFieldStrings._2.toInt, dateFieldStrings._1.toInt)
-    val userSelectedTaxYear        = taxYearStart(userSelectedCompletionDate)
-    taxYearStartSelected === userSelectedTaxYear.getYear
+    val minDateInclusive = minimumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear, 4, 6))
+    val maxDateInclusive = maximumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear + 1, 4, 5))
+    completionDate <= maxDateInclusive && completionDate >= minDateInclusive
   }
 
   def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =

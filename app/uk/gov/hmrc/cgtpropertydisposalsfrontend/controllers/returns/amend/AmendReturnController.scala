@@ -128,7 +128,7 @@ class AmendReturnController @Inject() (
           .fold(_.alreadySentSelfAssessment, c => c.alreadySentSelfAssessment)
         val originalTaxYear                       = journey.originalReturn.summary.taxYear
         val currentTaxYear                        = TaxYear.thisTaxYearStartDate().getYear.toString
-        val futureDatesEnabled                    = viewConfig.enableFutureDates
+        val futureDatesEnabled                    = viewConfig.futureDatesEnabled
         val isSubmissionInPreviousTaxYear         = originalTaxYear =!= currentTaxYear
 
         (isSAquestionAnswered.isEmpty, futureDatesEnabled, isSubmissionInPreviousTaxYear) match {

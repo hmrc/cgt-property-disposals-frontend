@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.boolean._
 import cats.instances.future._
@@ -452,7 +453,7 @@ class SingleDisposalsTriageController @Inject() (
           )(_ =>
             disposalDateForm(
               TimeUtils.getMaximumDateForDisposalsAndCompletion(
-                viewConfig.enableFutureDates,
+                viewConfig.futureDatesEnabled,
                 viewConfig.maxYearForDisposalsAndCompletion
               ),
               personalRepDetails
@@ -496,7 +497,7 @@ class SingleDisposalsTriageController @Inject() (
             case Some(_) =>
               disposalDateForm(
                 TimeUtils.getMaximumDateForDisposalsAndCompletion(
-                  viewConfig.enableFutureDates,
+                  viewConfig.futureDatesEnabled,
                   viewConfig.maxYearForDisposalsAndCompletion
                 ),
                 personalRepDetails
@@ -685,7 +686,7 @@ class SingleDisposalsTriageController @Inject() (
           completionDateForm(
             disposalDate,
             TimeUtils.getMaximumDateForDisposalsAndCompletion(
-              viewConfig.enableFutureDates,
+              viewConfig.futureDatesEnabled,
               viewConfig.maxYearForDisposalsAndCompletion
             )
           )
@@ -721,7 +722,7 @@ class SingleDisposalsTriageController @Inject() (
           completionDateForm(
             disposalDate,
             TimeUtils.getMaximumDateForDisposalsAndCompletion(
-              viewConfig.enableFutureDates,
+              viewConfig.futureDatesEnabled,
               viewConfig.maxYearForDisposalsAndCompletion
             )
           )
@@ -1078,7 +1079,7 @@ class SingleDisposalsTriageController @Inject() (
       withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-            viewConfig.enableFutureDates,
+            viewConfig.futureDatesEnabled,
             viewConfig.maxYearForDisposalsAndCompletion
           )
           displayTriagePage(state, triageAnswers)(
@@ -1119,7 +1120,7 @@ class SingleDisposalsTriageController @Inject() (
           triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
             case Some(assetType) if assetType === AssetType.IndirectDisposal =>
               val maxDateAllowed = TimeUtils.getMaximumDateForDisposalsAndCompletion(
-                viewConfig.enableFutureDates,
+                viewConfig.futureDatesEnabled,
                 viewConfig.maxYearForDisposalsAndCompletion
               )
               sharesDisposalDateForm(personalRepDetails, maxDateAllowed)
@@ -1458,7 +1459,7 @@ class SingleDisposalsTriageController @Inject() (
                 None,
                 _,
                 _
-              ) if !taxYear.isItInLatestTaxYear(viewConfig.enableFutureDates) =>
+              ) if !taxYear.isItInLatestTaxYear(viewConfig.futureDatesEnabled) =>
             Redirect(
               routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
             )
