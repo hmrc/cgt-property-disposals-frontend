@@ -3528,17 +3528,19 @@ class MultipleDisposalsTriageControllerSpec
           } else {
             TaxYearExchanged.TaxYear2021
           }
+          val selfAssessmentFlag                         = if (taxYearStart.getYear === 2021) true else false
           val answers                                    =
             sample[CompleteMultipleDisposalsTriageAnswers].copy(
               individualUserType = Some(Self),
               taxYearExchanged = Some(taxYearExchangedAdjusted),
-              completionDate = CompletionDate(today)
+              completionDate = CompletionDate(today),
+              alreadySentSelfAssessment = Some(selfAssessmentFlag)
             )
           val (session, journey)                         =
             sessionDataWithStartingNewDraftReturn(answers)
 
           val newCompletionDate =
-            CompletionDate(answers.completionDate.value.minusDays(1L))
+            CompletionDate(answers.completionDate.value.plusDays(1L))
           val updatedAnswers    =
             IncompleteMultipleDisposalsTriageAnswers
               .fromCompleteAnswers(answers)
@@ -3562,22 +3564,38 @@ class MultipleDisposalsTriageControllerSpec
       }
 
       "redirect to the check your answers page" when {
+        val taxYearStart             = TimeUtils.taxYearStart(today)
+        val taxYearExchangedAdjusted =
+          if (taxYearStart.getYear === 2020) TaxYearExchanged.TaxYear2020
+          else TaxYearExchanged.TaxYear2021
+        val selfAssessmentFlag       =
+          if (taxYearStart.getYear === 2020) Some(false)
+          else None
+
+        val taxYear = sample[TaxYear].copy(
+          startDateInclusive =
+            if (taxYearStart.getYear === 2020) LocalDate.of(2020, 4, 6)
+            else LocalDate.of(2021, 4, 6),
+          endDateExclusive =
+            if (taxYearStart.getYear === 2020) LocalDate.of(2021, 4, 6)
+            else LocalDate.of(2022, 4, 6)
+        )
 
         "the user has not started a draft return and" when {
 
           "the user has not answered the question before" in {
-            val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
-            val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
-              TaxYearExchanged.TaxYear2020
-            } else {
-              TaxYearExchanged.TaxYear2021
-            }
-            val answers                                    =
-              IncompleteMultipleDisposalsTriageAnswers.empty.copy(taxYearExchanged = Some(taxYearExchangedAdjusted))
-            val (session, journey)                         =
+
+            val answers            = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+              individualUserType = Some(IndividualUserType.Self),
+              taxYearExchanged = Some(taxYearExchangedAdjusted),
+              taxYear = Some(taxYear),
+              alreadySentSelfAssessment = selfAssessmentFlag,
+              completionDate = None
+            )
+            val (session, journey) =
               sessionDataWithStartingNewDraftReturn(answers)
 
-            val newCompletionDate = CompletionDate(today)
+            val newCompletionDate = CompletionDate(today.plusDays(2L))
             val updatedJourney    =
               journey.copy(newReturnTriageAnswers =
                 Left(
@@ -3602,23 +3620,18 @@ class MultipleDisposalsTriageControllerSpec
 
           "the user has already answered the question" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
-              val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
-              val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
-                TaxYearExchanged.TaxYear2020
-              } else {
-                TaxYearExchanged.TaxYear2021
-              }
-              val answers                                    =
-                c.copy(
-                  individualUserType = Some(Self),
-                  completionDate = CompletionDate(today),
-                  taxYearExchanged = Some(taxYearExchangedAdjusted)
-                )
-              val (session, journey)                         =
+              val answers            = c.copy(
+                individualUserType = Some(Self),
+                completionDate = CompletionDate(today),
+                taxYearExchanged = Some(taxYearExchangedAdjusted),
+                taxYear = taxYear,
+                alreadySentSelfAssessment = selfAssessmentFlag
+              )
+              val (session, journey) =
                 sessionDataWithStartingNewDraftReturn(answers)
 
               val newCompletionDate =
-                CompletionDate(answers.completionDate.value.minusDays(1L))
+                CompletionDate(answers.completionDate.value.plusDays(2L))
               val updatedAnswers    = IncompleteMultipleDisposalsTriageAnswers
                 .fromCompleteAnswers(answers)
                 .copy(completionDate = Some(newCompletionDate))
@@ -3646,12 +3659,6 @@ class MultipleDisposalsTriageControllerSpec
 
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
-              val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
-              val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
-                TaxYearExchanged.TaxYear2020
-              } else {
-                TaxYearExchanged.TaxYear2021
-              }
 
               val currentAnswers  = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 individualUserType = Some(Self),
