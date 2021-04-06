@@ -489,18 +489,19 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
             ) shouldBe Right(List(draftReturn))
           }
 
-          val dateOfDeath = LocalDate.of(2020, 4, 20)
+          val dateOfDeath = LocalDate.now()
 
           val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(dateOfDeath)
 
           val taxYear = sample[TaxYear].copy(
             startDateInclusive = LocalDate.of(dateOfDeath.getYear, 4, 6),
-            endDateExclusive = LocalDate.of(dateOfDeath.getYear + 1, 4, 6)
+            endDateExclusive = LocalDate.of(dateOfDeath.getYear, 4, 6)
           )
 
           val alreadySentSA = taxYearExchanged match {
-            case TaxYear2020 => Some(false)
-            case _           => None
+            case TaxYear2020                            => Some(false)
+            case _ if taxYear.isItInLatestTaxYear(true) => None
+            case _                                      => None
           }
 
           "the user is a period of admin personal rep and" when {
@@ -512,8 +513,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
               sample[CompleteSingleDisposalTriageAnswers].copy(
                 individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
                 disposalDate = DisposalDate(dateOfDeath.plusDays(1L), taxYear),
-                alreadySentSelfAssessment = alreadySentSA,
-                completionDate = CompletionDate(dateOfDeath.plusDays(1L))
+                alreadySentSelfAssessment = alreadySentSA
               )
 
             val multipleDisposalsTriageAnswers =
