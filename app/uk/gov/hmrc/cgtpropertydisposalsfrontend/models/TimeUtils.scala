@@ -235,7 +235,17 @@ object TimeUtils {
     minimumDateInclusive: Option[LocalDate],
     maximumDateInclusive: Option[LocalDate]
   ): Boolean = {
-    val minDateInclusive = minimumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear, 4, 6))
+    val minDatesTaxYearStartYear = minimumDateInclusive match {
+      case Some(d) => taxYearStart(d).getYear
+      case _       => taxYearStartYear
+    }
+
+    val minDateInclusive =
+      if (taxYearStartYear > minDatesTaxYearStartYear)
+        LocalDate.of(taxYearStartYear, 4, 6)
+      else
+        minimumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear, 4, 6))
+
     val maxDateInclusive = maximumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear + 1, 4, 5))
     completionDate <= maxDateInclusive && completionDate >= minDateInclusive
   }
