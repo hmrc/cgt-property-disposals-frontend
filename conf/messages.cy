@@ -4901,3 +4901,53 @@ furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.v
 #===================================================
 #  FR Guidance - END
 #===================================================
+
+
+#===================================================
+#  Self-Assessment SA - START
+#===================================================
+
+alreadySentSelfAssessment.title=A ydych wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} ti 5 Ebrill {1}?
+alreadySentSelfAssessment.agent.title=A yw'ch cleient wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}?
+alreadySentSelfAssessment.trust.title=A yw'r ymddiriedolaeth wedi anfon Hunanasesiad: Ffurflen Dreth Ymddiriedolaeth ac Ystad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}?
+alreadySentSelfAssessment.capacitor.title=A oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn rhwng 6 Ebrill {0} a 5 Ebrill {1}?
+alreadySentSelfAssessment.personalRep.title=A oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn rhwng 6 Ebrill {0} a 5 Ebrill {1}?
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.title=A oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn rhwng 6 Ebrill {0} a 5 Ebrill {1}?
+
+alreadySentSelfAssessment.error.required=Dewiswch a ydych wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 April {0} i 5 April {1}
+alreadySentSelfAssessment.agent.error.required=Dewiswch a anfonodd eich wedi cleient Ffurflen Dreth Hunanasesiad ar gyfer 6 April {0} i 5 April {1}
+alreadySentSelfAssessment.trust.error.required=Dewiswch a yw’r ymddiriedolaeth wedi anfon Hunanasesiad: Ffurflen Dreth Ymddiriedolaeth ac Ystâd ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.capacitor.error.required=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.personalRep.error.required=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.required=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+
+alreadySentSelfAssessment.error.invalid=Dewiswch a ydych wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.agent.error.invalid= Dewiswch a anfonodd eich wedi client Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.trust.error.invalid=Dewiswch a yw’r ymddiriedolaeth wedi anfon Hunanasesiad: Ffurflen Dreth Ymddiriedolaeth ac Ystâd ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.capacitor.error.invalid=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.personalRep.error.invalid=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.invalid=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+
+alreadySentSelfAssessment.cyaChange= A ydych wedi anfon Ffurflen Dreth Hunanasesiad
+
+selfAssessmentAlreadySubmitted.title=Ni allwch ddefnyddio'r gwasanaeth hwn
+
+selfAssessmentAlreadySubmitted.p1= Rydych eisoes wedi anfon eich Ffurflen Dreth Hunanasesiad ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+selfAssessmentAlreadySubmitted.agent.p1=YMae eich cleient eisoes wedi anfon ei Ffurflen Dreth Hunanasesiad ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+selfAssessmentAlreadySubmitted.trust.p1=Mae rhywun eisoes wedi anfon Hunanasesiad yr ymddiriedolaeth: Ffurflen Dreth Ymddiriedolaeth ac Ystâd yr ymddiriedolaeth ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+selfAssessmentAlreadySubmitted.capacitor.p1=Mae rhywun eisoes wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+selfAssessmentAlreadySubmitted.personalRep.p1=Mae rhywun eisoes wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p1=Mae rhywun eisoes wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+
+selfAssessmentAlreadySubmitted.whatNext=Beth fydd angen i chi ei wneud nesaf
+
+selfAssessmentAlreadySubmitted.p2=Bydd angen i<a href="{0}" target="_blank"> chi newid eich Ffurflen Dreth Hunanasesiad</a> trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.agent.p2=Bydd angen i<a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> eich cleient trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.trust.p2=Bydd angen i<a href="{0}" target="_blank">chi newid Hunanasesiad yr ymddiriedolaeth: Ffurflen Dreth Ymddiriedolaeth ac Ystâd</a> yr ymddiriedolaeth trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.capacitor.p2=Bydd angen i<a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.personalRep.p2=Bydd angen i<a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=Bydd angen i<a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+
+#===================================================
+#  Self-Assessment SA - END
+#===================================================
