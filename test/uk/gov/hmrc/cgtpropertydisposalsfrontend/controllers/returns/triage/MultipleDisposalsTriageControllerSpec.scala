@@ -58,6 +58,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsTriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged.TaxYear2020
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, TaxYearExchanged, _}
@@ -2002,13 +2003,23 @@ class MultipleDisposalsTriageControllerSpec
         "the user has started a draft return and" when {
 
           "have completed the section and they enter a figure which is " +
-            "different than one they have already entered" ignore {
+            "different than one they have already entered" in {
+              val taxYear2020 = sample[TaxYear].copy(
+                startDateInclusive = LocalDate.of(2020, 4, 6),
+                endDateExclusive = LocalDate.of(2021, 4, 6)
+              )
+              val taxYear2021 = sample[TaxYear].copy(
+                startDateInclusive = LocalDate.of(2021, 4, 6),
+                endDateExclusive = LocalDate.of(2022, 4, 6)
+              )
               forAll { c: CompleteMultipleDisposalsTriageAnswers =>
                 val amendReturnData                 = sample[AmendReturnData]
                 val answers                         = c.copy(
-                  taxYear = taxYear,
+                  individualUserType = Some(Self),
+                  taxYear = taxYear2021,
                   assetTypes = List(AssetType.Residential),
-                  taxYearExchanged = Some(TaxYearExchanged.TaxYear2021)
+                  taxYearExchanged = Some(TaxYearExchanged.TaxYear2021),
+                  alreadySentSelfAssessment = None
                 )
                 val (session, journey, draftReturn) =
                   sessionDataWithFillingOutReturn(
@@ -2020,7 +2031,8 @@ class MultipleDisposalsTriageControllerSpec
                   .fromCompleteAnswers(answers)
                   .copy(
                     taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
-                    taxYear = None,
+                    taxYear = Some(taxYear2020),
+                    alreadySentSelfAssessment = None,
                     completionDate = None
                   )
                 val updatedDraftReturn = draftReturn.copy(
@@ -2043,6 +2055,7 @@ class MultipleDisposalsTriageControllerSpec
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
                   mockAvailableTaxYears()(Right(List(2020)))
+                  mockGetTaxYear(todayTaxYear2020)(Right(Some(taxYear2020)))
                   mockStoreDraftReturn(updatedJourney)(
                     Right(())
                   )
@@ -2140,7 +2153,9 @@ class MultipleDisposalsTriageControllerSpec
 
         val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           assetTypes = List(AssetType.Residential),
-          taxYear = taxYear
+          taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
+          taxYear = taxYear,
+          alreadySentSelfAssessment = Some(false)
         )
         val (session, journey, draftReturn) =
           sessionDataWithFillingOutReturn(answers)
@@ -2150,7 +2165,8 @@ class MultipleDisposalsTriageControllerSpec
           .copy(
             taxYear = None,
             completionDate = None,
-            taxYearExchanged = Some(TaxYearExchanged.TaxYearBefore2020)
+            taxYearExchanged = Some(TaxYearExchanged.TaxYearBefore2020),
+            alreadySentSelfAssessment = None
           )
         val updatedDraftReturn = draftReturn.copy(
           triageAnswers = updatedAnswers,
@@ -2160,7 +2176,7 @@ class MultipleDisposalsTriageControllerSpec
         )
         val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
-        "there is an error updating the draft return" ignore {
+        "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
@@ -2173,7 +2189,7 @@ class MultipleDisposalsTriageControllerSpec
           checkIsTechnicalErrorPage(performAction(key -> "TaxYearBefore2020"))
         }
 
-        "there is an error updating the session data" ignore {
+        "there is an error updating the session data" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
@@ -3416,7 +3432,10 @@ class MultipleDisposalsTriageControllerSpec
 
       "show a form error" when {
 
-        implicit val messages: Messages = MessagesImpl(lang, messagesApi)
+        val taxYear = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(2020, 4, 6),
+          endDateExclusive = LocalDate.of(2021, 4, 6)
+        )
 
         def testFormError(
           formData: List[(String, String)]
@@ -3426,7 +3445,10 @@ class MultipleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                  individualUserType = Some(Self)
+                  individualUserType = Some(Self),
+                  taxYearExchanged = Some(TaxYear2020),
+                  taxYear = taxYear,
+                  alreadySentSelfAssessment = Some(false)
                 ),
                 representeeAnswers = None
               )._1
@@ -3467,18 +3489,16 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "the date entered is later than today" ignore {
-          testFormError(formData(today.plusYears(2).plusDays(1L)))(
+          testFormError(formData(today.plusYears(2L).plusDays(1L)))(
             "multipleDisposalsCompletionDate.error.tooFarInFuture"
           )
         }
 
         "the date entered is before 06-04-2020" ignore {
-          val date = LocalDate.of(2020, 4, 5)
+          val date = LocalDate.of(2020, 1, 5)
 
-          val param1 = TimeUtils.govDisplayFormat(LocalDate.of(2021, 3, 8))
           testFormError(formData(date))(
-            "multipleDisposalsCompletionDate.error.tooFarInPast",
-            Seq(param1)
+            "multipleDisposalsCompletionDate.error.dateOfDeathBeforeTaxYear"
           )
         }
 
@@ -3521,7 +3541,7 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
-        "there is an error updating the session" ignore {
+        "there is an error updating the session" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
           val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
             TaxYearExchanged.TaxYear2020
@@ -3540,7 +3560,7 @@ class MultipleDisposalsTriageControllerSpec
             sessionDataWithStartingNewDraftReturn(answers)
 
           val newCompletionDate =
-            CompletionDate(answers.completionDate.value.plusDays(1L))
+            CompletionDate(answers.completionDate.value.minusDays(1L))
           val updatedAnswers    =
             IncompleteMultipleDisposalsTriageAnswers
               .fromCompleteAnswers(answers)
@@ -3583,7 +3603,7 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user has not started a draft return and" when {
 
-          "the user has not answered the question before" ignore {
+          "the user has not answered the question before" in {
 
             val answers            = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(IndividualUserType.Self),
@@ -3595,7 +3615,7 @@ class MultipleDisposalsTriageControllerSpec
             val (session, journey) =
               sessionDataWithStartingNewDraftReturn(answers)
 
-            val newCompletionDate = CompletionDate(today.plusDays(2L))
+            val newCompletionDate = CompletionDate(today.minusDays(1L))
             val updatedJourney    =
               journey.copy(newReturnTriageAnswers =
                 Left(
@@ -3618,7 +3638,7 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
 
-          "the user has already answered the question" ignore {
+          "the user has already answered the question" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
               val answers            = c.copy(
                 individualUserType = Some(Self),
@@ -3631,7 +3651,7 @@ class MultipleDisposalsTriageControllerSpec
                 sessionDataWithStartingNewDraftReturn(answers)
 
               val newCompletionDate =
-                CompletionDate(answers.completionDate.value.plusDays(2L))
+                CompletionDate(answers.completionDate.value.minusDays(1L))
               val updatedAnswers    = IncompleteMultipleDisposalsTriageAnswers
                 .fromCompleteAnswers(answers)
                 .copy(completionDate = Some(newCompletionDate))
