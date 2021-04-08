@@ -5106,10 +5106,10 @@ unmetDependency.x2.li1=calculate and then answer questions about any losses, the
 unmetDependency.x2.li2=work out the new amount of tax due
 unmetDependency.x2.li3=upload a document showing how the new amount of tax due was worked out
 
-disposalDateInDifferentTaxYear.title=You cannot change this return online
+disposalDateInDifferentTaxYear.title=You cannot use this service
 disposalDateInDifferentTaxYear.p1=You cannot use the online service to change the tax year for a return that has already been sent
 disposalDateInDifferentTaxYear.subheading=What you’ll need to do next
-disposalDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">contact HMRC</a>
+disposalDateInDifferentTaxYear.p2=You'll need to <a href="{0}">write to us</a> with your change of tax year
 
 #===================================================
 #  AMEND RETURNS - END

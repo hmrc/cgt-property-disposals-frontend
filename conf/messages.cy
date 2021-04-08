@@ -4457,9 +4457,11 @@ unmetDependency.x2.p1=I wneud y newid hwn, bydd angen i chi hefyd wneud y canlyn
 unmetDependency.x2.li1=cyfrifo ac yna ateb cwestiynau am unrhyw golledion, yr ennill neu’r golled net a’r rhwymedigaeth gyffredinol ddiweddaredig
 unmetDependency.x2.li2=cyfrifo swm newydd y dreth sy’n ddyledus
 unmetDependency.x2.li3=uwchlwytho dogfen sy’n dangos sut y cyfrifwyd swm newydd y dreth sy’n ddyledus
-disposalDateInDifferentTaxYear.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
+
+disposalDateInDifferentTaxYear.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 disposalDateInDifferentTaxYear.p1=Ni allwch ddefnyddio’r gwasanaeth ar-lein i newid y flwyddyn dreth ar gyfer Ffurflen Dreth sydd eisoes wedi’i hanfon
-disposalDateInDifferentTaxYear.p2=I newid y manylion hyn, bydd angen i chi <a href=”{0}”>gysylltu â CThEM</a>
+disposalDateInDifferentTaxYear.subheading=Yr hyn y bydd angen i chi ei wneud nesaf
+disposalDateInDifferentTaxYear.p2=Bydd angen i chi <a href=”{0}”>ysgrifennu atom</a> gyda'r newid yn eich blwyddyn dreth
 
 #===================================================
 #  AMEND RETURNS - END
