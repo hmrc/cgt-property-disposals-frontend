@@ -1064,7 +1064,7 @@ disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exc
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
-disposalDate.error.periodOfAdminDeathNotAfterDate=The exchange dates must be either in the same tax year as the date of death or a later tax year
+disposalDate.error.periodOfAdminDeathNotAfterDate=The exchange date must be on or after the date of death
 disposalDate.error.nonPeriodOfAdminDeathAfterDate=The exchange date must be on or before the date of death
 disposalDate.error.before1900=The contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
 
