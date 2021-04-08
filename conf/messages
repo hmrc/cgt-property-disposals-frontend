@@ -797,6 +797,10 @@ cannotAmendResidentialStatusForAssetType.trust.li4=interest and penalty payments
 
 cannotAmendResidentialStatusForAssetType.link=Contact HMRC
 
+#===================================================
+#  Self-Assessment SA - START
+#===================================================
+
 alreadySentSelfAssessment.title=Have you sent a Self Assessment tax return for 6 April {0} to 5 April {1}?
 alreadySentSelfAssessment.agent.title=Has your client sent a Self Assessment tax return for 6 April {0} to 5 April {1}?
 alreadySentSelfAssessment.trust.title=Has the trust sent a Self Assessment: Trust and Estate tax return for 6 April {0} to 5 April {1}?
@@ -838,10 +842,14 @@ selfAssessmentAlreadySubmitted.trust.p2=You’ll need to <a href="{0}" target="_
 selfAssessmentAlreadySubmitted.capacitor.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 selfAssessmentAlreadySubmitted.personalRep.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+#===================================================
+#  Self-Assessment SA - END
+#===================================================
 
 #===================================================
 # COMMON TRIAGE PAGES - END
 #===================================================
+
 
 #===================================================
 # SINGLE DISPOSAL TRIAGE PAGES - START
@@ -1064,8 +1072,8 @@ disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exc
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
-disposalDate.error.periodOfAdminDeathNotAfterDate=The contract exchange date cannot be on or before the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
-disposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+disposalDate.error.periodOfAdminDeathNotAfterDate=The exchange date must be on or after the date of death
+disposalDate.error.nonPeriodOfAdminDeathAfterDate=The exchange date must be on or before the date of death
 disposalDate.error.before1900=The contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
 
 disposalDate-day.error.required=Contract exchange date must include a day
@@ -5106,10 +5114,10 @@ unmetDependency.x2.li1=calculate and then answer questions about any losses, the
 unmetDependency.x2.li2=work out the new amount of tax due
 unmetDependency.x2.li3=upload a document showing how the new amount of tax due was worked out
 
-disposalDateInDifferentTaxYear.title=You cannot change this return online
-disposalDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in
+disposalDateInDifferentTaxYear.title=You cannot use this service
+disposalDateInDifferentTaxYear.p1=You cannot use the online service to change the tax year for a return that has already been sent
 disposalDateInDifferentTaxYear.subheading=What you’ll need to do next
-disposalDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">contact HMRC</a>
+disposalDateInDifferentTaxYear.p2=You'll need to <a href="{0}">write to us</a> with your change of tax year
 
 #===================================================
 #  AMEND RETURNS - END

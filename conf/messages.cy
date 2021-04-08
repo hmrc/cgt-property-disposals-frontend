@@ -690,6 +690,55 @@ previousReturnExistsWithSameCompletionDate.indirectDisposals.title=Gwarediadau a
 previousReturnExistsWithSameCompletionDate.indirectDisposals.p1=Bydd angen i chi newid y Ffurflen Dreth a oedd â chyfranddaliadau gyda’r un dyddiad gwerthu gwarediad â’r gwarediad rydych am roi gwybod amdano nawr.
 
 #===================================================
+#  Self-Assessment SA - START
+#===================================================
+
+alreadySentSelfAssessment.title=A ydych wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}?
+alreadySentSelfAssessment.agent.title=A yw’ch cleient wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}?
+alreadySentSelfAssessment.trust.title=A yw’r ymddiriedolaeth wedi anfon Hunanasesiad: Ffurflen Dreth Ymddiriedolaeth ac Ystad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}?
+alreadySentSelfAssessment.capacitor.title=A oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn rhwng 6 Ebrill {0} a 5 Ebrill {1}?
+alreadySentSelfAssessment.personalRep.title=A oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn rhwng 6 Ebrill {0} a 5 Ebrill {1}?
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.title=A oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn rhwng 6 Ebrill {0} a 5 Ebrill {1}?
+
+alreadySentSelfAssessment.error.required=Dewiswch a ydych wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 April {0} i 5 April {1}
+alreadySentSelfAssessment.agent.error.required=Dewiswch a anfonodd eich wedi cleient Ffurflen Dreth Hunanasesiad ar gyfer 6 April {0} i 5 April {1}
+alreadySentSelfAssessment.trust.error.required=Dewiswch a yw’r ymddiriedolaeth wedi anfon Hunanasesiad: Ffurflen Dreth Ymddiriedolaeth ac Ystâd ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.capacitor.error.required=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.personalRep.error.required=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.required=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+
+alreadySentSelfAssessment.error.invalid=Dewiswch a ydych wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.agent.error.invalid= Dewiswch a anfonodd eich wedi client Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.trust.error.invalid=Dewiswch a yw’r ymddiriedolaeth wedi anfon Hunanasesiad: Ffurflen Dreth Ymddiriedolaeth ac Ystâd ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.capacitor.error.invalid=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.personalRep.error.invalid=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.invalid=Dewiswch a oes unrhyw un wedi anfon Ffurflen Dreth Hunanasesiad ar gyfer 6 Ebrill {0} i 5 Ebrill {1}
+
+alreadySentSelfAssessment.cyaChange= A ydych wedi anfon Ffurflen Dreth Hunanasesiad
+
+selfAssessmentAlreadySubmitted.title=Ni allwch ddefnyddio’r gwasanaeth hwn
+
+selfAssessmentAlreadySubmitted.p1= Rydych eisoes wedi anfon eich Ffurflen Dreth Hunanasesiad ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+selfAssessmentAlreadySubmitted.agent.p1=Mae eich cleient eisoes wedi anfon ei Ffurflen Dreth Hunanasesiad ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+selfAssessmentAlreadySubmitted.trust.p1=Mae rhywun eisoes wedi anfon Hunanasesiad yr ymddiriedolaeth: Ffurflen Dreth Ymddiriedolaeth ac Ystâd yr ymddiriedolaeth ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+selfAssessmentAlreadySubmitted.capacitor.p1=Mae rhywun eisoes wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+selfAssessmentAlreadySubmitted.personalRep.p1=Mae rhywun eisoes wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p1=Mae rhywun eisoes wedi anfon Ffurflen Dreth Hunanasesiad yr unigolyn ar gyfer y flwyddyn dreth 6 Ebrill {0} i 5 Ebrill {1}.
+
+selfAssessmentAlreadySubmitted.whatNext=Beth fydd angen i chi ei wneud nesaf
+
+selfAssessmentAlreadySubmitted.p2=Bydd angen i <a href="{0}" target="_blank"> chi newid eich Ffurflen Dreth Hunanasesiad</a> trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.agent.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> eich cleient trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.trust.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Hunanasesiad yr ymddiriedolaeth: Ffurflen Dreth Ymddiriedolaeth ac Ystâd</a> yr ymddiriedolaeth trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.capacitor.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.personalRep.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+
+#===================================================
+#  Self-Assessment SA - END
+#===================================================
+
+#===================================================
 # COMMON TRIAGE PAGES - END
 #===================================================
 
@@ -882,8 +931,8 @@ disposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
 disposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
 disposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod heddiw neu yn y gorffennol
 disposalDate.error.before1900=Mae’n rhaid i’r dyddiad cyfnewid contractau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEM os yw’r dyddiad cyn hyn
-disposalDate.error.periodOfAdminDeathNotAfterDate=Ni all dyddiad cyfnewid y contract fod ar neu cyn dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r Ffurflen Dreth hon?’
-disposalDate.error.nonPeriodOfAdminDeathAfterDate=Ni all dyddiad cyfnewid y contract fod ar ôl dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r Ffurflen Dreth hon?’
+disposalDate.error.periodOfAdminDeathNotAfterDate=Mae’n rhaid i’r dyddiad cyfnewid fod ar neu ar ôl dyddiad y farwolaeth
+disposalDate.error.nonPeriodOfAdminDeathAfterDate=Mae‘n rhaid i‘r dyddiad cyfnewid fod ar neu cyn dyddiad y farwolaeth
 disposalDate-day.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys diwrnod
 disposalDate-month.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys mis
 disposalDate-year.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys blwyddyn
@@ -4457,9 +4506,11 @@ unmetDependency.x2.p1=I wneud y newid hwn, bydd angen i chi hefyd wneud y canlyn
 unmetDependency.x2.li1=cyfrifo ac yna ateb cwestiynau am unrhyw golledion, yr ennill neu’r golled net a’r rhwymedigaeth gyffredinol ddiweddaredig
 unmetDependency.x2.li2=cyfrifo swm newydd y dreth sy’n ddyledus
 unmetDependency.x2.li3=uwchlwytho dogfen sy’n dangos sut y cyfrifwyd swm newydd y dreth sy’n ddyledus
-disposalDateInDifferentTaxYear.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
-disposalDateInDifferentTaxYear.p1=Mae hyn oherwydd y byddai’r dyddiad cyfnewid contract a nodwyd gennych yn newid y flwyddyn dreth yr oedd y gwarediad ynddi.
-disposalDateInDifferentTaxYear.p2=I newid y manylion hyn, bydd angen i chi <a href=”{0}”>gysylltu â CThEM</a>
+
+disposalDateInDifferentTaxYear.title=Ni allwch ddefnyddio’r gwasanaeth hwn
+disposalDateInDifferentTaxYear.p1=Ni allwch ddefnyddio’r gwasanaeth ar-lein i newid y flwyddyn dreth ar gyfer Ffurflen Dreth sydd eisoes wedi’i hanfon
+disposalDateInDifferentTaxYear.subheading=Yr hyn y bydd angen i chi ei wneud nesaf
+disposalDateInDifferentTaxYear.p2=Bydd angen i chi <a href=”{0}”>ysgrifennu atom</a> gyda'r newid yn eich blwyddyn dreth
 
 #===================================================
 #  AMEND RETURNS - END
