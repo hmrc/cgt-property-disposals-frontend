@@ -798,10 +798,6 @@ cannotAmendResidentialStatusForAssetType.trust.li4=interest and penalty payments
 cannotAmendResidentialStatusForAssetType.link=Contact HMRC
 
 #===================================================
-# COMMON TRIAGE PAGES - END
-#===================================================
-
-#===================================================
 #  Self-Assessment SA - START
 #===================================================
 
@@ -849,6 +845,11 @@ selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=You’ll need to <a
 #===================================================
 #  Self-Assessment SA - END
 #===================================================
+
+#===================================================
+# COMMON TRIAGE PAGES - END
+#===================================================
+
 
 #===================================================
 # SINGLE DISPOSAL TRIAGE PAGES - START
