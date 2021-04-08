@@ -5107,7 +5107,7 @@ unmetDependency.x2.li2=work out the new amount of tax due
 unmetDependency.x2.li3=upload a document showing how the new amount of tax due was worked out
 
 disposalDateInDifferentTaxYear.title=You cannot change this return online
-disposalDateInDifferentTaxYear.p1=This is because the contract exchange date you entered would change the tax year the disposal was in
+disposalDateInDifferentTaxYear.p1=You cannot use the online service to change the tax year for a return that has already been sent
 disposalDateInDifferentTaxYear.subheading=What you’ll need to do next
 disposalDateInDifferentTaxYear.p2=To change these details, you’ll need to <a href="{0}">contact HMRC</a>
 
