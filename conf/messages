@@ -797,6 +797,14 @@ cannotAmendResidentialStatusForAssetType.trust.li4=interest and penalty payments
 
 cannotAmendResidentialStatusForAssetType.link=Contact HMRC
 
+#===================================================
+# COMMON TRIAGE PAGES - END
+#===================================================
+
+#===================================================
+#  Self-Assessment SA - START
+#===================================================
+
 alreadySentSelfAssessment.title=Have you sent a Self Assessment tax return for 6 April {0} to 5 April {1}?
 alreadySentSelfAssessment.agent.title=Has your client sent a Self Assessment tax return for 6 April {0} to 5 April {1}?
 alreadySentSelfAssessment.trust.title=Has the trust sent a Self Assessment: Trust and Estate tax return for 6 April {0} to 5 April {1}?
@@ -838,9 +846,8 @@ selfAssessmentAlreadySubmitted.trust.p2=You’ll need to <a href="{0}" target="_
 selfAssessmentAlreadySubmitted.capacitor.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 selfAssessmentAlreadySubmitted.personalRep.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
-
 #===================================================
-# COMMON TRIAGE PAGES - END
+#  Self-Assessment SA - END
 #===================================================
 
 #===================================================
