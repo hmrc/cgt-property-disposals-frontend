@@ -139,6 +139,7 @@ object TimeUtils {
     dateKey: String,
     taxYearStartYear: Option[Int] = None,
     isDateOfDeathValid: Option[Boolean] = Some(false),
+    isPOA: Boolean = false,
     extraValidation: List[LocalDate => Either[FormError, Unit]] = List.empty
   ): Formatter[LocalDate] =
     new Formatter[LocalDate] {
@@ -192,20 +193,15 @@ object TimeUtils {
               .flatMap(date =>
                 if (maximumDateInclusive.exists(_.isBefore(date)))
                   Left(FormError(dateKey, "error.tooFarInFuture"))
-                else if (isDateOfDeathValid.exists(d => d && date.isBefore(TaxYear.earliestTaxYearStartDate)))
-                  Left(FormError(dateKey, "error.dateOfDeathBeforeTaxYear"))
-                else if (
-                  isDateOfDeathValid
-                    .exists(d => d && minimumDateInclusive.exists(d => d.isEqual(date) || d.isAfter(date)))
-                )
+                else if (isDateOfDeathValid.exists(d => d && isPOA && minimumDateInclusive.exists(_.isAfter(date))))
                   Left(FormError(dateKey, "error.dateOfDeath"))
-                else if (minimumDateInclusive.exists(_.isAfter(date)))
-                  Left(FormError(dateKey, "error.tooFarInPast"))
                 else if (date.isBefore(minimumDate))
                   Left(FormError(dateKey, "error.before1900"))
                 else if (
                   taxYearStartYear
-                    .exists(tyStartYear => !isValidDate(tyStartYear, date, minimumDateInclusive, maximumDateInclusive))
+                    .exists(tyStartYear =>
+                      !isValidDate(tyStartYear, date, minimumDateInclusive, maximumDateInclusive, isPOA)
+                    )
                 )
                   Left(FormError(dateKey, "error.dateNotWithinTaxYear"))
                 else
@@ -233,22 +229,28 @@ object TimeUtils {
     taxYearStartYear: Int,
     completionDate: LocalDate,
     minimumDateInclusive: Option[LocalDate],
-    maximumDateInclusive: Option[LocalDate]
-  ): Boolean = {
-    val minDatesTaxYearStartYear = minimumDateInclusive match {
-      case Some(d) => taxYearStart(d).getYear
-      case _       => taxYearStartYear
+    maximumDateInclusive: Option[LocalDate],
+    isPOA: Boolean
+  ): Boolean =
+    if (isPOA) {
+      val minDatesTaxYearStartYear = minimumDateInclusive match {
+        case Some(d) => taxYearStart(d).getYear
+        case _       => taxYearStartYear
+      }
+
+      val minDateInclusive =
+        if (taxYearStartYear > minDatesTaxYearStartYear)
+          LocalDate.of(taxYearStartYear, 4, 6)
+        else
+          minimumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear, 4, 6))
+
+      val maxDateInclusive = maximumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear + 1, 4, 5))
+      completionDate <= maxDateInclusive && completionDate >= minDateInclusive
+    } else {
+      val minDateInclusive = LocalDate.of(taxYearStartYear, 4, 6)
+      val maxDateInclusive = maximumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear + 1, 4, 5))
+      completionDate <= maxDateInclusive && completionDate >= minDateInclusive
     }
-
-    val minDateInclusive =
-      if (taxYearStartYear > minDatesTaxYearStartYear)
-        LocalDate.of(taxYearStartYear, 4, 6)
-      else
-        minimumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear, 4, 6))
-
-    val maxDateInclusive = maximumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear + 1, 4, 5))
-    completionDate <= maxDateInclusive && completionDate >= minDateInclusive
-  }
 
   def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
     s"""${date.getDayOfMonth()} ${messages(
@@ -282,7 +284,7 @@ object TimeUtils {
     ) { case PersonalRepresentativeDetails(personalRepType, dateOfDeath) =>
       personalRepType.fold(
         _ =>
-          if (date > dateOfDeath.value) Right(())
+          if (date >= dateOfDeath.value) Right(())
           else Left(FormError(formErrorKey, "error.periodOfAdminDeathNotAfterDate")),
         _ =>
           if (date > dateOfDeath.value)

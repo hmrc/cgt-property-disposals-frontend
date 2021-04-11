@@ -2274,10 +2274,10 @@ class SingleDisposalsTriageControllerSpec
           )
         }
 
-        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
+        "the disposal date is before the date of death and the user is a period of admin personal rep" in {
           test(
             Left(PersonalRepresentativeInPeriodOfAdmin),
-            dateOfDeath = DateOfDeath(today.minusDays(1L))
+            dateOfDeath = DateOfDeath(today)
           )(
             formData(today.minusDays(1L)),
             "disposalDate.error.periodOfAdminDeathNotAfterDate"
@@ -4670,12 +4670,12 @@ class SingleDisposalsTriageControllerSpec
           )
         }
 
-        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
+        "the disposal date is before the date of death and the user is a period of admin personal rep" in {
           test(
             Some(PersonalRepresentativeInPeriodOfAdmin),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
           )(
-            formData(today),
+            formData(today.minusDays(1L)),
             "sharesDisposalDate.error.periodOfAdminDeathNotAfterDate"
           )
         }

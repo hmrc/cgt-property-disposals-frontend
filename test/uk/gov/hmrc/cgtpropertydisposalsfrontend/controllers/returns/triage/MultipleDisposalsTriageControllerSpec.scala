@@ -3919,11 +3919,11 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
-        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
+        "the disposal date is before the date of death and the user is a period of admin personal rep" in {
           testFormError(
             Some(PersonalRepresentativeInPeriodOfAdmin),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
-          )(formData(today))(
+          )(formData(today.minusDays(1L)))(
             "sharesDisposalDate.error.periodOfAdminDeathNotAfterDate"
           )
         }

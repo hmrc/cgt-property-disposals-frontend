@@ -1693,11 +1693,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           )
         }
 
-        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
+        "the disposal date is before the date of death and the user is a period of admin personal rep" in {
           testFormError(
             Some(PersonalRepresentativeInPeriodOfAdmin),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(completionDate.value))))
-          )(formData(completionDate.value))(
+          )(formData(completionDate.value.minusDays(1L)))(
             s"$key.error.periodOfAdminDeathNotAfterDate"
           )
         }
