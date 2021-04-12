@@ -917,7 +917,13 @@ class MultipleDisposalsTriageController @Inject() (
           case _       => (TaxYear.earliestTaxYearStartDate, Some(false))
         }
 
-        completionDateForm(maxDateAllowed, dateOfDeathValue, isDateOfDeathValid, taxYearStartYear)
+        completionDateForm(
+          maxDateAllowed,
+          dateOfDeathValue,
+          isDateOfDeathValid,
+          taxYearStartYear,
+          answers.isPeriodOfAdmin()
+        )
           .bindFromRequest()
           .fold(
             formWithErrors =>
@@ -1875,7 +1881,8 @@ object MultipleDisposalsTriageController {
     maximumDateInclusive: LocalDate,
     minimumDateInclusive: LocalDate,
     isDateOfDeathValid: Option[Boolean] = None,
-    taxYearStartYear: Option[Int] = None
+    taxYearStartYear: Option[Int] = None,
+    isPOA: Boolean = false
   ): Form[CompletionDate] =
     Form(
       mapping(
@@ -1888,7 +1895,8 @@ object MultipleDisposalsTriageController {
             "multipleDisposalsCompletionDate-year",
             "multipleDisposalsCompletionDate",
             taxYearStartYear,
-            isDateOfDeathValid
+            isDateOfDeathValid,
+            isPOA
           )
         )
       )(CompletionDate(_))(d => Some(d.value))
