@@ -282,14 +282,19 @@ class HomePageController @Inject() (
     def fromNonCalculatedYtdAnswers(a: CompleteNonCalculatedYTDAnswers): AmountInPence =
       a.yearToDateLiability.getOrElse(a.taxDue)
 
-    def fromCompleteReturn(c: CompleteReturn): AmountInPence =
-      c.fold(
+    def fromCompleteReturn(c: CompleteReturn): AmountInPence = {
+      val x = c.fold(
         multiple => fromNonCalculatedYtdAnswers(multiple.yearToDateLiabilityAnswers),
         single => single.yearToDateLiabilityAnswers.fold(fromNonCalculatedYtdAnswers, _.taxDue),
         singleIndirect => fromNonCalculatedYtdAnswers(singleIndirect.yearToDateLiabilityAnswers),
         multipleIndirect => fromNonCalculatedYtdAnswers(multipleIndirect.yearToDateLiabilityAnswers),
         singleMixedUse => fromNonCalculatedYtdAnswers(singleMixedUse.yearToDateLiabilityAnswers)
       )
+      println("\n\n\n\n")
+      println(s"From Home Controller: calculated previous ytd liability = $x")
+      println("\n\n\n\n")
+      x
+    }
 
     val previousSentReturnsWithDates = previousSentReturns.map(r => r -> r.lastUpdatedDate.getOrElse(r.submissionDate))
     val latestReturnWithData         =
@@ -312,6 +317,9 @@ class HomePageController @Inject() (
 
             case _ =>
               returnsService.displayReturn(cgtReference, latestReturn.submissionId).map { displayReturn =>
+                println("\n\n\n\n")
+                println(s"From Home Controller: displayReturn.completeReturn = ${displayReturn.completeReturn}")
+                println("\n\n\n\n")
                 Some(fromCompleteReturn(displayReturn.completeReturn))
               }
           }

@@ -27,9 +27,12 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
@@ -38,7 +41,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.NoOtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftSingleDisposalReturn, FurtherReturnCalculationData, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, CompleteReturn, DraftSingleDisposalReturn, FurtherReturnCalculationData, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibilityUtilImpl.EligibleData
@@ -97,12 +101,11 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
   )(implicit
     headerCarrier: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, FurtherReturnCalculationEligibility] = {
-
-    val updatedFillingOutReturn = filterPreviousTaxYearReturns(fillingOutReturn)
+  ): EitherT[Future, Error, FurtherReturnCalculationEligibility] =
     for {
-      eligibility   <- determineEligibility(updatedFillingOutReturn)
-      updatedJourney =
+      updatedFillingOutReturn <- filterPreviousTaxYearReturns(fillingOutReturn)
+      eligibility             <- determineEligibility(updatedFillingOutReturn)
+      updatedJourney           =
         updatedFillingOutReturn.copy(
           previousSentReturns = updatedFillingOutReturn.previousSentReturns.map { p =>
             eligibility match {
@@ -120,12 +123,13 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
             }
           }
         )
-      _             <- if (updatedJourney === updatedFillingOutReturn) EitherT.pure[Future, Error](())
-                       else EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+      _                       <- if (updatedJourney === updatedFillingOutReturn) EitherT.pure[Future, Error](())
+                                 else EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
     } yield eligibility
-  }
 
-  def filterPreviousTaxYearReturns(fillingOutReturn: FillingOutReturn): FillingOutReturn = {
+  def filterPreviousTaxYearReturns(
+    fillingOutReturn: FillingOutReturn
+  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, Error, FillingOutReturn] = {
     println("\n\n\n\n")
     println(s"fillingOutReturn = $fillingOutReturn")
     println("\n\n\n\n")
@@ -156,28 +160,92 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
         .map(r => r.summaries.filter(s => originalReturnTaxYearStartYear.contains(s.taxYear)))
         .getOrElse(List.empty[ReturnSummary])
 
-    val previousYearToDate = fillingOutReturn.previousSentReturns.map(_.previousYearToDate).flatten
+    //val previousYearToDate = fillingOutReturn.previousSentReturns.map(_.previousYearToDate).flatten
 
     val previousReturnsImplyEligibilityForCalculation =
       fillingOutReturn.previousSentReturns.map(_.previousReturnsImplyEligibilityForCalculation).flatten
 
     val calculationData = fillingOutReturn.previousSentReturns.map(_.calculationData).flatten
 
-    val updatedFillingOutReturn = fillingOutReturn.copy(
-      previousSentReturns = Some(
-        PreviousReturnData(
-          filteredSummaries,
-          previousYearToDate,
-          previousReturnsImplyEligibilityForCalculation,
-          calculationData
-        )
-      )
-    )
+    val updatedFillingOutReturn = for {
+      newPreviousYearToDate <- getPreviousYearToDateLiability(
+                                 filteredSummaries,
+                                 fillingOutReturn.subscribedDetails.cgtReference
+                               )
+
+      updatedFillingOutReturn = fillingOutReturn.copy(
+                                  previousSentReturns = Some(
+                                    PreviousReturnData(
+                                      filteredSummaries,
+                                      newPreviousYearToDate,
+                                      previousReturnsImplyEligibilityForCalculation,
+                                      calculationData
+                                    )
+                                  )
+                                )
+
+    } yield updatedFillingOutReturn
+
     println("\n\n\n\n")
-    println(s"updatedFillingOutReturn = $updatedFillingOutReturn")
+    updatedFillingOutReturn.toOption.value.onComplete { x =>
+      println(s"updatedFillingOutReturn = $x")
+    }
     println("\n\n\n\n")
 
     updatedFillingOutReturn
+  }
+
+  private def getPreviousYearToDateLiability(
+    previousSentReturns: List[ReturnSummary],
+    cgtReference: CgtReference,
+    returnData: Option[CompleteReturnWithSummary] = None
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[AmountInPence]] = {
+    def fromNonCalculatedYtdAnswers(
+      a: CompleteNonCalculatedYTDAnswers
+    ): AmountInPence = a.yearToDateLiability.getOrElse(a.taxDue)
+
+    def fromCompleteReturn(c: CompleteReturn): AmountInPence =
+      c.fold(
+        multiple => fromNonCalculatedYtdAnswers(multiple.yearToDateLiabilityAnswers),
+        single => single.yearToDateLiabilityAnswers.fold(fromNonCalculatedYtdAnswers, _.taxDue),
+        singleIndirect => fromNonCalculatedYtdAnswers(singleIndirect.yearToDateLiabilityAnswers),
+        multipleIndirect => fromNonCalculatedYtdAnswers(multipleIndirect.yearToDateLiabilityAnswers),
+        singleMixedUse => fromNonCalculatedYtdAnswers(singleMixedUse.yearToDateLiabilityAnswers)
+      )
+    val previousSentReturnsWithDates                         = previousSentReturns.map(r => r -> r.lastUpdatedDate.getOrElse(r.submissionDate))
+    val latestReturnWithData                                 = previousSentReturnsWithDates.sortBy(_._2)(localDateOrder.toOrdering).lastOption
+
+    println("\n\n\n\n")
+    println(s"previousSentReturns = $previousSentReturns")
+    println(s"latestReturnWithData = $latestReturnWithData")
+    println("\n\n\n\n")
+
+    latestReturnWithData match {
+      case None                             => EitherT.pure(None)
+      case Some((latestReturn, latestDate)) =>
+        val moreThanOneReturnOnLatestDate =
+          previousSentReturns
+            .count(r => r.lastUpdatedDate.contains(latestDate) || localDateOrder.eqv(r.submissionDate, latestDate)) > 1
+        if (moreThanOneReturnOnLatestDate)
+          EitherT.pure(None)
+        else
+          returnData match {
+            case Some(CompleteReturnWithSummary(completeReturn, summary, _))
+                if summary.submissionId === latestReturn.submissionId =>
+              val x = fromCompleteReturn(completeReturn)
+              println("\n\n\n\n")
+              println(s"xxxxxxxx = $x")
+              println("\n\n\n\n")
+              EitherT.pure(Some(x))
+            case _ =>
+              returnsService.displayReturn(cgtReference, latestReturn.submissionId).map { displayReturn =>
+                println("\n\n\n\n")
+                println(s"displayReturn = $displayReturn")
+                println("\n\n\n\n")
+                Some(fromCompleteReturn(displayReturn.completeReturn))
+              }
+          }
+    }
   }
 
   private def determineEligibility(
