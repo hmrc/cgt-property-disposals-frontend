@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.NoOtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftSingleDisposalReturn, FurtherReturnCalculationData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, DraftSingleDisposalReturn, FurtherReturnCalculationData, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibilityUtilImpl.EligibleData
@@ -97,12 +97,14 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
   )(implicit
     headerCarrier: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, FurtherReturnCalculationEligibility] =
+  ): EitherT[Future, Error, FurtherReturnCalculationEligibility] = {
+
+    val updatedFillingOutReturn = filterPreviousTaxYearReturns(fillingOutReturn)
     for {
-      eligibility   <- determineEligibility(fillingOutReturn)
+      eligibility   <- determineEligibility(updatedFillingOutReturn)
       updatedJourney =
-        fillingOutReturn.copy(
-          previousSentReturns = fillingOutReturn.previousSentReturns.map { p =>
+        updatedFillingOutReturn.copy(
+          previousSentReturns = updatedFillingOutReturn.previousSentReturns.map { p =>
             eligibility match {
               case e: FurtherReturnCalculationEligibility.Eligible =>
                 p.copy(
@@ -118,9 +120,65 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
             }
           }
         )
-      _             <- if (updatedJourney === fillingOutReturn) EitherT.pure[Future, Error](())
+      _             <- if (updatedJourney === updatedFillingOutReturn) EitherT.pure[Future, Error](())
                        else EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
     } yield eligibility
+  }
+
+  def filterPreviousTaxYearReturns(fillingOutReturn: FillingOutReturn): FillingOutReturn = {
+    println("\n\n\n\n")
+    println(s"fillingOutReturn = $fillingOutReturn")
+    println("\n\n\n\n")
+    val originalReturnTaxYearStartYear: Option[String] =
+      fillingOutReturn.draftReturn
+        .fold(
+          _.triageAnswers
+            .fold(_.taxYear.map(_.startDateInclusive.getYear), c => Some(c.taxYear.startDateInclusive.getYear)),
+          _.triageAnswers.fold(
+            _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+            c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+          ),
+          _.triageAnswers.fold(
+            _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+            c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+          ),
+          _.triageAnswers
+            .fold(_.taxYear.map(_.startDateInclusive.getYear), c => Some(c.taxYear.startDateInclusive.getYear)),
+          _.triageAnswers.fold(
+            _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+            c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+          )
+        )
+        .map(_.toString)
+
+    val filteredSummaries =
+      fillingOutReturn.previousSentReturns
+        .map(r => r.summaries.filter(s => originalReturnTaxYearStartYear.contains(s.taxYear)))
+        .getOrElse(List.empty[ReturnSummary])
+
+    val previousYearToDate = fillingOutReturn.previousSentReturns.map(_.previousYearToDate).flatten
+
+    val previousReturnsImplyEligibilityForCalculation =
+      fillingOutReturn.previousSentReturns.map(_.previousReturnsImplyEligibilityForCalculation).flatten
+
+    val calculationData = fillingOutReturn.previousSentReturns.map(_.calculationData).flatten
+
+    val updatedFillingOutReturn = fillingOutReturn.copy(
+      previousSentReturns = Some(
+        PreviousReturnData(
+          filteredSummaries,
+          previousYearToDate,
+          previousReturnsImplyEligibilityForCalculation,
+          calculationData
+        )
+      )
+    )
+    println("\n\n\n\n")
+    println(s"updatedFillingOutReturn = $updatedFillingOutReturn")
+    println("\n\n\n\n")
+
+    updatedFillingOutReturn
+  }
 
   private def determineEligibility(
     fillingOutReturn: FillingOutReturn
