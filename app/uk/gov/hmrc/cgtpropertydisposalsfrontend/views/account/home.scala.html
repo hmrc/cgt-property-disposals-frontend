@@ -133,7 +133,9 @@
     </span>
    </h2>
 
-   @warning(messages("warning.incorrectcalculation"))
+   <p>
+    @warning(messages("warning.incorrectcalculation"))
+   </p>
 
    @if(subscribed.draftReturns.nonEmpty || subscribed.totalLeftToPay() > AmountInPence.zero) {
     <p>

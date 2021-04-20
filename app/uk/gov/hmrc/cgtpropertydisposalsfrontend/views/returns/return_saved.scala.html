@@ -52,7 +52,9 @@ warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
     @messages("draftReturnSaved.p2")
   </p>
 
+  <div>
     @warning(messages("warning.incorrectcalculation"))
+  </div>
 
   <a class="button" role="button" href="@{accounts.homepage.routes.HomePageController.homepage().url}">
     @messages("button.accountHome")
