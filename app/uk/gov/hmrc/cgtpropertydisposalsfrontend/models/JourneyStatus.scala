@@ -273,28 +273,57 @@ object JourneyStatus {
     triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
     representeeAnswers: Option[RepresenteeAnswers]
   ): Option[Boolean] = {
-    lazy val hasPreviousSentReturns = previousReturnData.exists(_.summaries.nonEmpty)
-    subscribedDetails.name match {
-      case Left(_) =>
-        Some(hasPreviousSentReturns)
 
-      case Right(_) =>
-        val individualUserType = triageAnswers
-          .fold(
-            _.fold(_.individualUserType, _.individualUserType),
-            _.fold(_.individualUserType, _.individualUserType)
-          )
+    // get disposaldate from triageAnswers
+    // if(its none) return NONE
+    // else
+    // summaries: List[ReturnSummary] -- filter only for required taxyear
 
-        individualUserType.flatMap {
-          case _: RepresentativeType =>
-            representeeAnswers
-              .flatMap(
-                _.fold(_.isFirstReturn, complete => Some(complete.isFirstReturn))
-                  .map(!_)
-              )
-          case _                     =>
-            Some(hasPreviousSentReturns)
-        }
+    val taxYear: Option[TaxYear] =
+      triageAnswers.fold(
+        _.fold(
+          _.taxYear,
+          mc => Some(mc.taxYear)
+        ),
+        _.fold(
+          _.disposalDate.map(_.taxYear),
+          sc => Some(sc.disposalDate.taxYear)
+        )
+      )
+
+    val taxYearStartYear: String = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString
+
+    if (!taxYear.isDefined) {
+      None
+    } else {
+
+      val filteredSummaries: Option[List[ReturnSummary]] =
+        previousReturnData.map(r => r.summaries.filter(s => taxYearStartYear.contains(s.taxYear)))
+
+      lazy val hasPreviousSentReturns = filteredSummaries.exists(_.nonEmpty)
+
+      subscribedDetails.name match {
+        case Left(_) =>
+          Some(hasPreviousSentReturns)
+
+        case Right(_) =>
+          val individualUserType = triageAnswers
+            .fold(
+              _.fold(_.individualUserType, _.individualUserType),
+              _.fold(_.individualUserType, _.individualUserType)
+            )
+
+          individualUserType.flatMap {
+            case _: RepresentativeType =>
+              representeeAnswers
+                .flatMap(
+                  _.fold(_.isFirstReturn, complete => Some(complete.isFirstReturn))
+                    .map(!_)
+                )
+            case _                     =>
+              Some(hasPreviousSentReturns)
+          }
+      }
     }
   }
 
