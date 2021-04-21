@@ -34,7 +34,8 @@
   buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
   sentReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.sent_returns_list,
   draftReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_returns_list,
-  totalLeftHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.total_left_to_pay
+  totalLeftHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.total_left_to_pay,
+  warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @(subscribed: Subscribed)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
@@ -123,7 +124,6 @@
   <div class="column-two-thirds account-header">
 
    @pageHeading(title, None)
-
    <h2 id="account-details">
     <span>
      @messages("account.home.accountName", subscribed.subscribedDetails.makeAccountName())
@@ -133,14 +133,16 @@
     </span>
    </h2>
 
+   @warning(messages("warning.incorrectcalculation"))
+
    @if(subscribed.draftReturns.nonEmpty || subscribed.totalLeftToPay() > AmountInPence.zero) {
     <p>
-     <a href="@{controllers.accounts.homepage.routes.HomePageController.startNewReturn().url}">
-      @messages("account.home.button.start-a-new-return")
-     </a>
-    </p>
+      <a href="@{controllers.accounts.homepage.routes.HomePageController.startNewReturn().url}">
+       @messages("account.home.button.start-a-new-return")
+      </a>
+     </p>
    } else {
-      @buttonLink(messages("account.home.button.start-a-new-return"), controllers.accounts.homepage.routes.HomePageController.startNewReturn().url)
+    @buttonLink(messages("account.home.button.start-a-new-return"), controllers.accounts.homepage.routes.HomePageController.startNewReturn().url)
    }
   </div>
   <div class="column-one-third account-due">
