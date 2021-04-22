@@ -297,6 +297,9 @@ object JourneyStatus {
 
       lazy val hasPreviousSentReturns = filteredSummaries.exists(_.nonEmpty)
 
+      println(s"############### filteredSummaries = ${filteredSummaries} ############")
+      println(s"############### hasPreviousSentReturns = ${hasPreviousSentReturns} ############")
+
       subscribedDetails.name match {
         case Left(_) =>
           Some(hasPreviousSentReturns)
