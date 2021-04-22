@@ -27,7 +27,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -134,7 +134,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
     fillingOutReturn: FillingOutReturn
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, Error, FillingOutReturn] = {
 
-    val originalReturnTaxYearStartYear: Option[String] =
+    val originalReturnTaxYearStartYear: Option[Int] =
       fillingOutReturn.draftReturn
         .fold(
           _.triageAnswers
@@ -154,11 +154,23 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
             c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
           )
         )
-        .map(_.toString)
 
-    val filteredSummaries =
+//    val filteredSummaries =
+//      fillingOutReturn.previousSentReturns
+//        .map(r => r.summaries.filter(s => originalReturnTaxYearStartYear.contains(s.taxYear)))
+//        .getOrElse(List.empty[ReturnSummary])
+
+    val filteredSummaries: List[ReturnSummary] =
       fillingOutReturn.previousSentReturns
-        .map(r => r.summaries.filter(s => originalReturnTaxYearStartYear.contains(s.taxYear)))
+        .map(r =>
+          r.summaries.filter { s =>
+            val summariesTaxYearStartYear = TimeUtils.taxYearStart(s.completionDate).getYear
+            println(
+              s"############### FurtherReturnCalculationEligibility: Summaries  taxYearStartYear= $summariesTaxYearStartYear ############"
+            )
+            originalReturnTaxYearStartYear.contains(summariesTaxYearStartYear)
+          }
+        )
         .getOrElse(List.empty[ReturnSummary])
 
     val previousReturnsImplyEligibilityForCalculation =

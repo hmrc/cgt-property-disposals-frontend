@@ -419,10 +419,10 @@ class HomePageController @Inject() (
                       )
     } yield subscribed
 
-    result.toOption.value.onComplete{r =>
+    result.toOption.value.onComplete { r =>
       println(s"$$$$$$$$$$$$ subscribed = $r")
     }
-    
+
     result
       .biSemiflatMap(
         { e =>
