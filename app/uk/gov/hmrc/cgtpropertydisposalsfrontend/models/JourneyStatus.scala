@@ -274,11 +274,6 @@ object JourneyStatus {
     representeeAnswers: Option[RepresenteeAnswers]
   ): Option[Boolean] = {
 
-    // get disposaldate from triageAnswers
-    // if(its none) return NONE
-    // else
-    // summaries: List[ReturnSummary] -- filter only for required taxyear
-
     val taxYear: Option[TaxYear] =
       triageAnswers.fold(
         _.fold(
@@ -291,7 +286,7 @@ object JourneyStatus {
         )
       )
 
-    val taxYearStartYear: String = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString
+    val taxYearStartYear: Option[String] = taxYear.map(_.startDateInclusive.getYear.toString)
 
     if (!taxYear.isDefined) {
       None

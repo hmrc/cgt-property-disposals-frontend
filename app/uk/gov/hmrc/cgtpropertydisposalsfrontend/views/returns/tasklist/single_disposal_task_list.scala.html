@@ -116,6 +116,8 @@
 }
 
 @gainOrLossAfterReliefsState = @{
+    println(s"############### fillingOutReturn.isFurtherReturn = ${fillingOutReturn.isFurtherReturn} ############")
+
     val showGainOrLossAfterReliefs =
         fillingOutReturn.amendReturnData match {
             case Some(amendReturnData) => amendReturnData.shouldDisplayGainOrLossAfterReliefs
