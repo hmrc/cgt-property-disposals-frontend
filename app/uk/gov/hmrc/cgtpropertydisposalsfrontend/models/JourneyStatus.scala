@@ -286,29 +286,16 @@ object JourneyStatus {
         )
       )
 
-    val taxYearStartYear: Option[Int] = taxYear.map(_.startDateInclusive.getYear)
+    val originalReturnTaxYearStartYear: Option[String] = taxYear.map(_.startDateInclusive.getYear.toString)
 
     if (!taxYear.isDefined) {
       None
     } else {
 
       val filteredSummaries: Option[List[ReturnSummary]] =
-        previousReturnData.map(r =>
-          r.summaries.filter { s =>
-            val summariesTaxYearStartYear = TimeUtils.taxYearStart(s.completionDate).getYear
-            println(
-              s"############### JourneyStatus: Summaries  taxYearStartYear= $summariesTaxYearStartYear ############"
-            )
-            taxYearStartYear.contains(summariesTaxYearStartYear)
-          }
-        )
+        previousReturnData.map(r => r.summaries.filter(s => originalReturnTaxYearStartYear.contains(s.taxYear)))
 
       lazy val hasPreviousSentReturns = filteredSummaries.exists(_.nonEmpty)
-
-      println(s"############### taxYear = $taxYear ############")
-      println(s"############### taxYearStartYear = $taxYearStartYear ############")
-      println(s"############### filteredSummaries = $filteredSummaries ############")
-      println(s"############### hasPreviousSentReturns = $hasPreviousSentReturns ############")
 
       subscribedDetails.name match {
         case Left(_) =>
