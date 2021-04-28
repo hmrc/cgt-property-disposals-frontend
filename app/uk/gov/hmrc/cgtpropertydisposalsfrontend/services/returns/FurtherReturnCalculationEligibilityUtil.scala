@@ -93,9 +93,6 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
     extends FurtherReturnCalculationEligibilityUtil
     with SessionUpdates {
 
-//  private val amendAndFurtherReturnCalculationsEnabled: Boolean =
-//    configuration.underlying.getBoolean("amend-and-further-returns-calculator.enabled")
-
   private val maxPreviousReturns: Int =
     configuration.underlying.getInt("amend-and-further-returns-calculator.max-previous-returns")
 
@@ -234,11 +231,6 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
   )(implicit
     headerCarrier: HeaderCarrier
   ): EitherT[Future, Error, FurtherReturnCalculationEligibility] =
-//    if (!amendAndFurtherReturnCalculationsEnabled)
-//      EitherT.pure(
-//        Ineligible(fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation))
-//      )
-//    else
     eligibleGlarCalculation(fillingOutReturn) match {
       case Left(e) => EitherT.leftT(e)
 

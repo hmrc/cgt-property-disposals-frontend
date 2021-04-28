@@ -196,7 +196,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
 
       "return an ineligible response" when {
 
-        "the return is multiple disposal return" ignore new TestEnvironment() {
+        "the return is multiple disposal return" in new TestEnvironment() {
           val previousReturnData = sample[PreviousReturnData].copy(
             previousReturnsImplyEligibilityForCalculation = None,
             calculationData = None
@@ -211,7 +211,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "the return is single mixed use disposal return" ignore new TestEnvironment() {
+        "the return is single mixed use disposal return" in new TestEnvironment() {
           val previousReturnData = sample[PreviousReturnData].copy(
             previousReturnsImplyEligibilityForCalculation = None,
             calculationData = None
@@ -229,7 +229,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "the return is mixed use single indirect return" ignore new TestEnvironment() {
+        "the return is mixed use single indirect return" in new TestEnvironment() {
           val previousReturnData = sample[PreviousReturnData].copy(
             previousReturnsImplyEligibilityForCalculation = None,
             calculationData = None
@@ -247,7 +247,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "the return is mixed use multiple indirect return" ignore new TestEnvironment() {
+        "the return is mixed use multiple indirect return" in new TestEnvironment() {
           val previousReturnData = sample[PreviousReturnData].copy(
             previousReturnsImplyEligibilityForCalculation = None,
             calculationData = None
@@ -265,7 +265,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "Current return has other reliefs" ignore new TestEnvironment() {
+        "Current return has other reliefs" in new TestEnvironment() {
           test(eligibleFillingOutReturn(otherReliefs = Some(sample[OtherReliefs])), Ineligible(None))(service)
         }
 
@@ -281,16 +281,16 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "the current return's user type is Capacitor" ignore new TestEnvironment() {
+        "the current return's user type is Capacitor" in new TestEnvironment() {
           test(eligibleFillingOutReturn(individualUserType = Some(Capacitor)), Ineligible(None))(service)
         }
 
-        "the current return's user type is PersonalRepresentative" ignore new TestEnvironment() {
+        "the current return's user type is PersonalRepresentative" in new TestEnvironment() {
 
           test(eligibleFillingOutReturn(individualUserType = Some(PersonalRepresentative)), Ineligible(None))(service)
         }
 
-        "the current return's user type is PersonalRepresentativeInPeriodOfAdmin" ignore new TestEnvironment() {
+        "the current return's user type is PersonalRepresentativeInPeriodOfAdmin" in new TestEnvironment() {
           test(
             eligibleFillingOutReturn(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
             Ineligible(None)
@@ -299,7 +299,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "there is no IndividualUserType in the current return" ignore new TestEnvironment() {
+        "there is no IndividualUserType in the current return" in new TestEnvironment() {
           test(eligibleFillingOutReturn(individualUserType = None), Ineligible(None))(
             service
           )
@@ -635,7 +635,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           await(result.value) shouldBe a[Left[_, _]]
         }
 
-        "the triage section isn't complete in a DraftSingleDisposalReturn" ignore new TestEnvironment() {
+        "the triage section isn't complete in a DraftSingleDisposalReturn" in new TestEnvironment() {
           testError(
             eligibleFillingOutReturn(
               withCompleteTriageDetails = false,
@@ -645,7 +645,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "the disposal details section is not complete in a DraftSingleDisposalReturn" ignore new TestEnvironment() {
+        "the disposal details section is not complete in a DraftSingleDisposalReturn" in new TestEnvironment() {
           testError(
             eligibleFillingOutReturn(
               withCompleteTriageDetails = false,
@@ -655,7 +655,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "the acquisition details section is not complete in a DraftSingleDisposalReturn" ignore new TestEnvironment() {
+        "the acquisition details section is not complete in a DraftSingleDisposalReturn" in new TestEnvironment() {
           testError(
             eligibleFillingOutReturn(
               withCompleteAcquisitionDetails = false,
@@ -665,7 +665,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "the relief details section is not complete in a DraftSingleDisposalReturn" ignore new TestEnvironment() {
+        "the relief details section is not complete in a DraftSingleDisposalReturn" in new TestEnvironment() {
           testError(
             eligibleFillingOutReturn(
               withCompleteReliefDetails = false,
@@ -675,7 +675,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "there is no property address in the current return" ignore new TestEnvironment() {
+        "there is no property address in the current return" in new TestEnvironment() {
           testError(
             eligibleFillingOutReturn(
               address = None,
@@ -753,6 +753,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
 
       }
     }
+
   }
 
 }
