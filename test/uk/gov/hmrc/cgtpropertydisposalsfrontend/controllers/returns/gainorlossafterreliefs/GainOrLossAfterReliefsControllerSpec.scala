@@ -164,12 +164,23 @@ class GainOrLossAfterReliefsControllerSpec
     subscribedDetails: SubscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
     previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(false)
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
+    val triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+      individualUserType = individualUserType
+    )
+
+    val taxYearStartYear: String =
+      triageAnswers
+        .fold(
+          _.taxYear.map(_.startDateInclusive.getYear),
+          c => Some(c.taxYear.startDateInclusive.getYear)
+        )
+        .map(_.toString)
+        .getOrElse("2020")
+
     val draftReturn = sample[DraftMultipleDisposalsReturn]
       .copy(
         gainOrLossAfterReliefs = gainOrLossAfterReliefs,
-        triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-          individualUserType = individualUserType
-        ),
+        triageAnswers = triageAnswers,
         representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false))
       )
     val journey     = sample[FillingOutReturn].copy(
@@ -177,7 +188,7 @@ class GainOrLossAfterReliefsControllerSpec
       subscribedDetails = subscribedDetails,
       previousSentReturns = Some(
         PreviousReturnData(
-          List(sample[ReturnSummary]),
+          List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
           None,
           previousReturnsImplyEligibilityForFurtherReturnCalculation,
           None
@@ -800,15 +811,32 @@ class GainOrLossAfterReliefsControllerSpec
       "show an error page" when {
 
         "there is an error determining eligibility for calculation" in {
-          val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None, None)
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(Self)
+          )
 
-          val fillingOutReturn =
-            sample[FillingOutReturn].copy(
-              previousSentReturns = Some(previousReturnData),
-              draftReturn = sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
               )
+              .map(_.toString)
+              .getOrElse("2020")
+
+          val previousReturnData = PreviousReturnData(
+            List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+            None,
+            None,
+            None
+          )
+
+          val fillingOutReturn = sample[FillingOutReturn].copy(
+            previousSentReturns = Some(previousReturnData),
+            draftReturn = sample[DraftSingleDisposalReturn].copy(
+              triageAnswers = triageAnswers
             )
+          )
           val sessionData      = SessionData.empty.copy(Some(fillingOutReturn))
 
           inSequence {
