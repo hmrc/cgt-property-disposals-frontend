@@ -164,16 +164,16 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
     val calculationData = fillingOutReturn.previousSentReturns.map(_.calculationData).flatten
 
     val updatedFillingOutReturn = for {
-      newPreviousYearToDate <- getPreviousYearToDateLiability(
-                                 filteredSummaries,
-                                 fillingOutReturn.subscribedDetails.cgtReference
-                               )
+      newPreviousYTDLiability <- getPreviousYearToDateLiability(
+                                   filteredSummaries,
+                                   fillingOutReturn.subscribedDetails.cgtReference
+                                 )
 
       updatedFillingOutReturn = fillingOutReturn.copy(
                                   previousSentReturns = Some(
                                     PreviousReturnData(
                                       filteredSummaries,
-                                      newPreviousYearToDate,
+                                      newPreviousYTDLiability,
                                       previousReturnsImplyEligibilityForCalculation,
                                       calculationData
                                     )
