@@ -106,9 +106,28 @@ class CompanyDetailsControllerSpec
     amendReturnData: Option[AmendReturnData] = None,
     previousReturnData: Option[PreviousReturnData] = None
   ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+    val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+      individualUserType = individualUserType
+    )
+
+    val taxYearStartYear: String =
+      triageAnswers
+        .fold(
+          _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+          c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+        )
+        .map(_.toString)
+        .getOrElse("2020")
+
+    val updatedPreviousReturnData = previousReturnData match {
+      case Some(PreviousReturnData(summaries, l, f, c)) =>
+        val updatedSummaries = summaries.map(_.copy(taxYear = taxYearStartYear))
+        Some(PreviousReturnData(updatedSummaries, l, f, c))
+      case _                                            => previousReturnData
+    }
+
     val draftReturn      = sample[DraftSingleIndirectDisposalReturn].copy(
-      triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-        .copy(individualUserType = individualUserType),
+      triageAnswers = triageAnswers,
       representeeAnswers = if (individualUserType.contains(Self)) None else Some(sample[CompleteRepresenteeAnswers]),
       companyAddress = companyAddress
     )
@@ -119,7 +138,7 @@ class CompanyDetailsControllerSpec
         if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber])
         else None,
       amendReturnData = amendReturnData,
-      previousSentReturns = previousReturnData
+      previousSentReturns = updatedPreviousReturnData
     )
     val sessionData      = SessionData.empty.copy(
       journeyStatus = Some(fillingOutReturn),
@@ -1299,8 +1318,12 @@ class CompanyDetailsControllerSpec
           }
 
           "the user is on a further return journey" in {
-            val (session, journey, draftReturn) = individualState(previousReturnData =
-              Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary])))
+            val (session, journey, draftReturn) = individualState(
+              previousReturnData = Some(
+                sample[PreviousReturnData].copy(
+                  summaries = List(sample[ReturnSummary])
+                )
+              )
             )
             val address                         =
               UkAddress("The Company", None, None, None, Postcode("ZZ10ZZ"))

@@ -186,8 +186,23 @@ class ExemptionAndLossesControllerSpec
     )
 
     val journey = sampleFillingOutReturn(draftReturn, userType).copy(
-      previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
+      previousSentReturns = if (isFurtherReturn) {
+        val taxYearStartYear = disposalDate
+          .map(
+            _.taxYear.startDateInclusive.getYear.toString
+          )
+          .getOrElse("2020")
+
+        Some(
+          PreviousReturnData(
+            List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+            None,
+            None,
+            None
+          )
+        )
+      } else
+        None,
       amendReturnData = None
     )
 
@@ -315,8 +330,19 @@ class ExemptionAndLossesControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
       agentReferenceNumber = setAgentReferenceNumber(userType),
-      previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
+      previousSentReturns = if (isFurtherReturn) {
+        val taxYearStartYear = disposalDate.taxYear.startDateInclusive.getYear.toString
+
+        Some(
+          PreviousReturnData(
+            List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+            None,
+            None,
+            None
+          )
+        )
+      } else
+        None,
       amendReturnData = None
     )
 

@@ -27,22 +27,97 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.taxYearGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Self}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, DisposalDate, DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, ReturnSummary}
+
+import java.time.LocalDate
 
 class JourneyStatusSpec extends WordSpec with Matchers {
+
+  val date    = LocalDate.of(2020, 4, 6)
+  val taxYear = sample[TaxYear].copy(startDateInclusive = date)
 
   "FillingOutReturn" must {
 
     "have a method" which {
 
       "tries to say when a draft is return is a further return" when {
+
+        def getdraftReturn(): DraftReturn = {
+
+          val sampleDisosalDate        = DisposalDate(date, taxYear)
+          val draftReturn: DraftReturn = sample[DraftReturn].fold(
+            _.copy(triageAnswers =
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                taxYear = taxYear
+              )
+            ),
+            _.copy(triageAnswers =
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                disposalDate = sampleDisosalDate
+              )
+            ),
+            _.copy(triageAnswers =
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                disposalDate = sampleDisosalDate
+              )
+            ),
+            _.copy(triageAnswers =
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                taxYear = taxYear
+              )
+            ),
+            _.copy(triageAnswers =
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                disposalDate = sampleDisosalDate
+              )
+            )
+          )
+
+          draftReturn
+        }
+
+        def getPrviousReturnDate(): PreviousReturnData = {
+          val taxYearStartYear: String = getdraftReturn()
+            .fold(
+              _.triageAnswers.fold(
+                _.taxYear.map(_.startDateInclusive.getYear),
+                c => Some(c.taxYear.startDateInclusive.getYear)
+              ),
+              _.triageAnswers.fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              ),
+              _.triageAnswers.fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              ),
+              _.triageAnswers.fold(
+                _.taxYear.map(_.startDateInclusive.getYear),
+                c => Some(c.taxYear.startDateInclusive.getYear)
+              ),
+              _.triageAnswers.fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+            )
+            .getOrElse(2020)
+            .toString
+
+          PreviousReturnData(
+            List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+            None,
+            None,
+            None
+          )
+        }
 
         def fillingOutReturn(
           name: Either[TrustName, IndividualName],
@@ -64,21 +139,21 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             fillingOutReturn(
               Left(sample[TrustName]),
               None,
-              sample[DraftReturn]
+              getdraftReturn()
             ).isFurtherOrAmendReturn shouldBe Some(false)
 
             fillingOutReturn(
               Left(sample[TrustName]),
               Some(PreviousReturnData(List.empty, None, None, None)),
-              sample[DraftReturn]
+              getdraftReturn()
             ).isFurtherOrAmendReturn shouldBe Some(false)
           }
 
           "the user has previously sent returns" in {
             fillingOutReturn(
               Left(sample[TrustName]),
-              Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)),
-              sample[DraftReturn]
+              Some(getPrviousReturnDate()),
+              getdraftReturn()
             ).isFurtherOrAmendReturn shouldBe Some(true)
           }
 
@@ -101,7 +176,8 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             val draftReturn =
               sample[DraftMultipleDisposalsReturn].copy(
                 triageAnswers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-                  individualUserType = Some(Self)
+                  individualUserType = Some(Self),
+                  taxYear = Some(taxYear)
                 )
               )
 
@@ -122,7 +198,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             "the user has previously sent returns" in {
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)),
+                Some(getPrviousReturnDate()),
                 draftReturn
               ).isFurtherOrAmendReturn shouldBe Some(true)
             }

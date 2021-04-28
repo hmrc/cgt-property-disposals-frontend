@@ -105,8 +105,28 @@ class MixedUsePropertyDetailsControllerSpec
     previousReturnData: Option[PreviousReturnData] = None,
     amendReturnData: Option[AmendReturnData] = None
   ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) = {
+    val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+      individualUserType = individualUserType
+    )
+
+    val taxYearStartYear: String =
+      triageAnswers
+        .fold(
+          _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+          c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+        )
+        .map(_.toString)
+        .getOrElse("2020")
+
+    val updatedPreviousReturnData = previousReturnData match {
+      case Some(PreviousReturnData(summaries, l, f, c)) =>
+        val updatedSummaries = summaries.map(_.copy(taxYear = taxYearStartYear))
+        Some(PreviousReturnData(updatedSummaries, l, f, c))
+      case _                                            => previousReturnData
+    }
+
     val draftReturn      = sample[DraftSingleMixedUseDisposalReturn].copy(
-      triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType),
+      triageAnswers = triageAnswers,
       mixedUsePropertyDetailsAnswers = mixedUsePropertyDetailsAnswers,
       representeeAnswers = individualUserType match {
         case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) =>
@@ -123,7 +143,7 @@ class MixedUsePropertyDetailsControllerSpec
       agentReferenceNumber =
         if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber])
         else None,
-      previousSentReturns = previousReturnData,
+      previousSentReturns = updatedPreviousReturnData,
       amendReturnData = amendReturnData
     )
     val sessionData      = SessionData.empty.copy(

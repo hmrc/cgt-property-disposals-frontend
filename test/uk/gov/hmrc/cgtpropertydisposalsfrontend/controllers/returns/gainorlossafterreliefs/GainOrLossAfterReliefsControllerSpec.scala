@@ -114,20 +114,32 @@ class GainOrLossAfterReliefsControllerSpec
     subscribedDetails: SubscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
     previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(false)
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+    val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+      individualUserType = individualUserType
+    )
+
     val draftReturn = sample[DraftSingleDisposalReturn]
       .copy(
         gainOrLossAfterReliefs = gainOrLossAfterReliefs,
-        triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-          individualUserType = individualUserType
-        ),
+        triageAnswers = triageAnswers,
         representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false))
       )
-    val journey     = sample[FillingOutReturn].copy(
+
+    val taxYearStartYear: String =
+      triageAnswers
+        .fold(
+          _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+          c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+        )
+        .map(_.toString)
+        .getOrElse("2020")
+
+    val journey = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
       previousSentReturns = Some(
         PreviousReturnData(
-          List(sample[ReturnSummary]),
+          List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
           None,
           previousReturnsImplyEligibilityForFurtherReturnCalculation,
           None
@@ -658,22 +670,38 @@ class GainOrLossAfterReliefsControllerSpec
               individualUserType: IndividualUserType,
               previousReturnData: PreviousReturnData
             ): (SessionData, FillingOutReturn, DraftReturn, PreviousReturnData) = {
-              val draftReturn = sample[DraftSingleDisposalReturn]
+              val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                individualUserType = Some(individualUserType)
+              )
+              val draftReturn   = sample[DraftSingleDisposalReturn]
                 .copy(
                   gainOrLossAfterReliefs = Some(AmountInPence(1000)),
-                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-                    individualUserType = Some(individualUserType)
-                  ),
+                  triageAnswers = triageAnswers,
                   representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false)),
                   acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
                   reliefDetailsAnswers = Some(sample[CompleteReliefDetailsAnswers]),
                   disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers])
                 )
-              val journey     = sample[FillingOutReturn].copy(
+
+              val taxYearStartYear: String =
+                triageAnswers
+                  .fold(
+                    _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                    c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+                  )
+                  .map(_.toString)
+                  .getOrElse("2020")
+
+              val updatedpreviousReturnData =
+                previousReturnData.copy(
+                  summaries = previousReturnData.summaries.map(_.copy(taxYear = taxYearStartYear))
+                )
+
+              val journey = sample[FillingOutReturn].copy(
                 draftReturn = draftReturn,
                 subscribedDetails = sample[SubscribedDetails]
                   .copy(name = if (userType === Trust) Left(sample[TrustName]) else Right(sample[IndividualName])),
-                previousSentReturns = Some(previousReturnData)
+                previousSentReturns = Some(updatedpreviousReturnData)
               )
 
               (
@@ -683,7 +711,7 @@ class GainOrLossAfterReliefsControllerSpec
                 ),
                 journey,
                 draftReturn,
-                previousReturnData
+                updatedpreviousReturnData
               )
             }
 
@@ -700,7 +728,12 @@ class GainOrLossAfterReliefsControllerSpec
             }
 
             "there is no value for previousReturnsImplyEligibilityForFurtherReturnCalculation in session" in {
-              val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, None, None)
+              val previousReturnData = PreviousReturnData(
+                List(sample[ReturnSummary]),
+                None,
+                None,
+                None
+              )
 
               val state = validCalculatorState(Individual, Self, previousReturnData)
 
@@ -1167,6 +1200,7 @@ class GainOrLossAfterReliefsControllerSpec
         }
 
       }
+
     }
 
     "handling submits on the check your answers page" must {

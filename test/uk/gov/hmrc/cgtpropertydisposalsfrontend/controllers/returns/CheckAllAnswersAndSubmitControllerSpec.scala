@@ -360,11 +360,13 @@ class CheckAllAnswersAndSubmitControllerSpec
               isFirstReturn = false
             )
 
+            val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(PersonalRepresentative)
+            )
+
             val completeReturn = {
               val complete = sample[CompleteSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-                  individualUserType = Some(PersonalRepresentative)
-                ),
+                triageAnswers = triageAnswers,
                 representeeAnswers = Some(representeeAnswers),
                 gainOrLossAfterReliefs = Some(gainOrLossAfterReliefs)
               )
@@ -391,10 +393,25 @@ class CheckAllAnswersAndSubmitControllerSpec
               TimeUtils.today()
             )
 
+            val taxYearStartYear: String =
+              triageAnswers
+                .fold(
+                  _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                  c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+                )
+                .map(_.toString)
+                .getOrElse("2020")
+
             val completeFillingOutReturn = sample[FillingOutReturn].copy(
               draftReturn = completeDraftReturn,
-              previousSentReturns =
-                Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]), None, None)),
+              previousSentReturns = Some(
+                PreviousReturnData(
+                  List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+                  Some(sample[AmountInPence]),
+                  None,
+                  None
+                )
+              ),
               amendReturnData = None
             )
 

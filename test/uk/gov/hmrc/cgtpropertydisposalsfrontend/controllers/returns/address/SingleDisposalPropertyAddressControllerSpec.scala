@@ -696,12 +696,23 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
 
+      val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+        assetType = AssetType.NonResidential,
+        individualUserType = Some(Self)
+      )
+
+      val taxYearStartYear: String =
+        triageAnswers
+          .fold(
+            _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+            c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+          )
+          .map(_.toString)
+          .getOrElse("2020")
+
       val nonResidentialPropertyDraftReturn =
         sample[DraftSingleDisposalReturn].copy(
-          triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-            assetType = AssetType.NonResidential,
-            individualUserType = Some(Self)
-          ),
+          triageAnswers = triageAnswers,
           representeeAnswers = None,
           propertyAddress = None
         )
@@ -857,13 +868,18 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       "show an error page" when {
 
-        val draftReturn = nonResidentialPropertyDraftReturn
-          .copy(propertyAddress = Some(sample[UkAddress]))
+        val draftReturn = nonResidentialPropertyDraftReturn.copy(
+          propertyAddress = Some(sample[UkAddress])
+        )
         val journey     =
           nonResidentialFillingOutReturn
             .copy(
               draftReturn = draftReturn,
-              previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary])))
+              previousSentReturns = Some(
+                sample[PreviousReturnData].copy(
+                  summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))
+                )
+              )
             )
         val newAddress  = UkAddress("1", None, None, None, Postcode("ZZ00ZZ"))
 

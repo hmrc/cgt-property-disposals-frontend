@@ -230,8 +230,19 @@ class YearToDateLiabilityControllerSpec
     ),
     isFurtherReturn: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+    val triageAnswers = singleDisposalTriageAnswers(disposalDate, wasUkResident, individualUserType)
+
+    val taxYearStartYear: String =
+      triageAnswers
+        .fold(
+          _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+          c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+        )
+        .map(_.toString)
+        .getOrElse("2020")
+
     val draftReturn = sample[DraftSingleIndirectDisposalReturn].copy(
-      triageAnswers = singleDisposalTriageAnswers(disposalDate, wasUkResident, individualUserType),
+      triageAnswers = triageAnswers,
       representeeAnswers = representeeAnswers(individualUserType, isFurtherReturn),
       companyAddress = address,
       yearToDateLiabilityAnswers = ytdLiabilityAnswers,
@@ -245,7 +256,16 @@ class YearToDateLiabilityControllerSpec
       ),
       draftReturn = draftReturn,
       previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
+        if (isFurtherReturn)
+          Some(
+            PreviousReturnData(
+              List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+              None,
+              None,
+              None
+            )
+          )
+        else None,
       amendReturnData = None
     )
     (
@@ -281,8 +301,19 @@ class YearToDateLiabilityControllerSpec
     ),
     isFurtherReturn: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) = {
+    val triageAnswers = singleDisposalTriageAnswers(disposalDate, wasUkResident, individualUserType)
+
+    val taxYearStartYear: String =
+      triageAnswers
+        .fold(
+          _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+          c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+        )
+        .map(_.toString)
+        .getOrElse("2020")
+
     val draftReturn = sample[DraftSingleMixedUseDisposalReturn].copy(
-      triageAnswers = singleDisposalTriageAnswers(disposalDate, wasUkResident, individualUserType),
+      triageAnswers = triageAnswers,
       representeeAnswers = representeeAnswers(individualUserType, isFurtherReturn),
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
     )
@@ -293,7 +324,16 @@ class YearToDateLiabilityControllerSpec
       ),
       draftReturn = draftReturn,
       previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
+        if (isFurtherReturn)
+          Some(
+            PreviousReturnData(
+              List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+              None,
+              None,
+              None
+            )
+          )
+        else None,
       amendReturnData = None
     )
     (
@@ -333,8 +373,23 @@ class YearToDateLiabilityControllerSpec
     isFurtherReturn: Boolean = false,
     amendReturnData: Option[AmendReturnData] = None
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+    val triageAnswers = singleDisposalTriageAnswers(
+      disposalDate,
+      wasUkResident,
+      individualUserType
+    )
+
+    val taxYearStartYear: String =
+      triageAnswers
+        .fold(
+          _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+          c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+        )
+        .map(_.toString)
+        .getOrElse("2020")
+
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
-      triageAnswers = singleDisposalTriageAnswers(disposalDate, wasUkResident, individualUserType),
+      triageAnswers = triageAnswers,
       representeeAnswers = representeeAnswers(individualUserType, isFurtherReturn),
       reliefDetailsAnswers = reliefDetailsAnswers,
       yearToDateLiabilityAnswers = ytdLiabilityAnswers,
@@ -349,7 +404,14 @@ class YearToDateLiabilityControllerSpec
       draftReturn = draftReturn,
       previousSentReturns =
         if (isFurtherReturn)
-          Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence]), None, None))
+          Some(
+            PreviousReturnData(
+              List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+              Some(sample[AmountInPence]),
+              None,
+              None
+            )
+          )
         else None,
       amendReturnData = amendReturnData
     )
@@ -387,12 +449,23 @@ class YearToDateLiabilityControllerSpec
     gainOrLossAfterReliefs: Option[AmountInPence] = Some(sample[AmountInPence]),
     exemptionsAndLossesAnswers: Option[ExemptionAndLossesAnswers] = Some(sample[CompleteExemptionAndLossesAnswers])
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
+    val triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+      individualUserType = individualUserType,
+      countryOfResidence = if (wasUkResident) Country.uk else sample[Country],
+      taxYear = taxYear
+    )
+
+    val taxYearStartYear: String =
+      triageAnswers
+        .fold(
+          _.taxYear.map(_.startDateInclusive.getYear),
+          c => Some(c.taxYear.startDateInclusive.getYear)
+        )
+        .map(_.toString)
+        .getOrElse("2020")
+
     val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
-      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-        individualUserType = individualUserType,
-        countryOfResidence = if (wasUkResident) Country.uk else sample[Country],
-        taxYear = taxYear
-      ),
+      triageAnswers = triageAnswers,
       yearToDateLiabilityAnswers = ytdLiabilityAnswers,
       representeeAnswers = representeeAnswers(individualUserType, isFurtherReturn),
       gainOrLossAfterReliefs = gainOrLossAfterReliefs,
@@ -403,7 +476,16 @@ class YearToDateLiabilityControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
       draftReturn = draftReturn,
       previousSentReturns =
-        if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None, None, None)) else None,
+        if (isFurtherReturn)
+          Some(
+            PreviousReturnData(
+              List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+              None,
+              None,
+              None
+            )
+          )
+        else None,
       amendReturnData = amendReturnData
     )
     (
@@ -439,8 +521,10 @@ class YearToDateLiabilityControllerSpec
   ): DraftSingleDisposalReturn =
     DraftSingleDisposalReturn(
       UUID.randomUUID(),
-      sample[CompleteSingleDisposalTriageAnswers]
-        .copy(disposalDate = disposalDate, individualUserType = individualUserType),
+      sample[CompleteSingleDisposalTriageAnswers].copy(
+        disposalDate = disposalDate,
+        individualUserType = individualUserType
+      ),
       Some(sample[UkAddress]),
       Some(sample[CompleteDisposalDetailsAnswers]),
       Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -4264,17 +4348,24 @@ class YearToDateLiabilityControllerSpec
           backLink: Call,
           furtherReturnCalculationEligibility: Option[FurtherReturnCalculationEligibility]
         ): Unit = {
-          val draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
+          val disposalDate = sample[DisposalDate]
+          val draftReturn  = singleDisposalDraftReturnWithCompleteJourneys(
             Some(answers),
-            sample[DisposalDate],
+            disposalDate,
             completeReliefDetailsAnswersWithNoOtherReliefs,
             Some(Self)
           )
-          val journey     = sample[FillingOutReturn].copy(
+
+          val taxYearStartYear = disposalDate.taxYear.startDateInclusive.getYear.toString
+
+          val journey = sample[FillingOutReturn].copy(
             draftReturn = draftReturn,
             previousSentReturns = Some(
               PreviousReturnData(
-                if (furtherReturnCalculationEligibility.isDefined) List(sample[ReturnSummary]) else List.empty,
+                if (furtherReturnCalculationEligibility.isDefined)
+                  List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))
+                else
+                  List.empty,
                 None,
                 None,
                 None
@@ -5617,12 +5708,26 @@ class YearToDateLiabilityControllerSpec
             userType: UserType,
             expectedP1Key: String
           ): Unit = {
+
+            val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self)
+            )
+
+            val taxYearStartYear: String =
+              triageAnswers
+                .fold(
+                  _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                  c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+                )
+                .map(_.toString)
+                .getOrElse("2020")
+
             val sessionData = SessionData.empty.copy(
               userType = Some(userType),
               journeyStatus = Some(
                 sample[FillingOutReturn].copy(
                   draftReturn = sample[DraftSingleDisposalReturn].copy(
-                    triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+                    triageAnswers = triageAnswers,
                     yearToDateLiabilityAnswers = Some(
                       sample[CompleteNonCalculatedYTDAnswers].copy(
                         yearToDateLiability = Some(yearToDateLiability)
@@ -5632,7 +5737,7 @@ class YearToDateLiabilityControllerSpec
                   agentReferenceNumber = if (userType == UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
                   previousSentReturns = Some(
                     sample[PreviousReturnData].copy(
-                      summaries = List(sample[ReturnSummary]),
+                      summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
                       previousYearToDate = Some(previousYearToDateLiability)
                     )
                   ),
@@ -5718,14 +5823,25 @@ class YearToDateLiabilityControllerSpec
             individualUserType: IndividualUserType,
             expectedP1Key: String
           ): Unit = {
+            val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(individualUserType)
+            )
+
+            val taxYearStartYear: String =
+              triageAnswers
+                .fold(
+                  _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                  c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+                )
+                .map(_.toString)
+                .getOrElse("2020")
+
             val sessionData = SessionData.empty.copy(
               userType = Some(userType),
               journeyStatus = Some(
                 sample[FillingOutReturn].copy(
                   draftReturn = sample[DraftSingleDisposalReturn].copy(
-                    triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-                      individualUserType = Some(individualUserType)
-                    ),
+                    triageAnswers = triageAnswers,
                     yearToDateLiabilityAnswers = Some(
                       sample[CompleteNonCalculatedYTDAnswers].copy(
                         yearToDateLiability = Some(yearToDateLiability)
@@ -5736,7 +5852,7 @@ class YearToDateLiabilityControllerSpec
                   agentReferenceNumber = if (userType == UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
                   previousSentReturns = Some(
                     sample[PreviousReturnData].copy(
-                      summaries = List(sample[ReturnSummary]),
+                      summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
                       previousYearToDate = None
                     )
                   ),
@@ -6170,23 +6286,37 @@ class YearToDateLiabilityControllerSpec
             answers.taxableGainOrLossCalculation,
             answers.yearToDateLiabilityCalculation
           )
-          val draftReturn                 = sample[DraftSingleDisposalReturn].copy(
-            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(Self)
+          )
+
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = triageAnswers,
             yearToDateLiabilityAnswers = Some(answers),
             gainOrLossAfterReliefs = None
           )
-          val journey                     = sample[FillingOutReturn].copy(
+          val journey     = sample[FillingOutReturn].copy(
             draftReturn = draftReturn,
             previousSentReturns = Some(
               sample[PreviousReturnData].copy(
-                summaries = List(sample[ReturnSummary]),
+                summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
                 previousYearToDate = Some(previousYearToDateLiability)
               )
             ),
             subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
             amendReturnData = None
           )
-          val newJourney                  = journey.copy(
+          val newJourney  = journey.copy(
             draftReturn = draftReturn.copy(
               yearToDateLiabilityAnswers = Some(newAnswers),
               gainOrLossAfterReliefs = None
@@ -6230,25 +6360,37 @@ class YearToDateLiabilityControllerSpec
             answers.taxableGainOrLossCalculation,
             answers.yearToDateLiabilityCalculation
           )
-          val draftReturn         = sample[DraftSingleDisposalReturn].copy(
-            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
-            ),
+
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+          )
+
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = triageAnswers,
             yearToDateLiabilityAnswers = Some(answers),
             representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false))
           )
-          val journey             = sample[FillingOutReturn].copy(
+          val journey     = sample[FillingOutReturn].copy(
             draftReturn = draftReturn,
             previousSentReturns = Some(
               sample[PreviousReturnData].copy(
-                summaries = List(sample[ReturnSummary]),
+                summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
                 previousYearToDate = None
               )
             ),
             subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
             amendReturnData = None
           )
-          val newJourney          = journey.copy(
+          val newJourney  = journey.copy(
             draftReturn = draftReturn.copy(
               yearToDateLiabilityAnswers = Some(newAnswers)
             )
@@ -7580,6 +7722,15 @@ class YearToDateLiabilityControllerSpec
               disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
             )
 
+            val taxYearStartYear: String =
+              triageAnswers
+                .fold(
+                  _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                  c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+                )
+                .map(_.toString)
+                .getOrElse("2020")
+
             val draftReturn = sample[DraftSingleDisposalReturn].copy(
               triageAnswers = triageAnswers,
               yearToDateLiabilityAnswers = Some(requiredPreviousAnswers)
@@ -7591,7 +7742,11 @@ class YearToDateLiabilityControllerSpec
               subscribedDetails = sample[SubscribedDetails].copy(
                 name = Left(sample[TrustName])
               ),
-              previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+              previousSentReturns = Some(
+                sample[PreviousReturnData].copy(
+                  summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))
+                )
+              ),
               amendReturnData = amendReturnData
             )
 
@@ -7660,13 +7815,26 @@ class YearToDateLiabilityControllerSpec
             yearToDateLiabilityAnswers = Some(answers)
           )
 
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
           val fillingOutReturn = sample[FillingOutReturn].copy(
             draftReturn = draftReturn,
             agentReferenceNumber = None,
             subscribedDetails = sample[SubscribedDetails].copy(
               name = Right(sample[IndividualName])
             ),
-            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+            previousSentReturns = Some(
+              sample[PreviousReturnData].copy(
+                summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))
+              )
+            ),
             amendReturnData = Some(sample[AmendReturnData])
           )
 
@@ -7732,9 +7900,22 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the draft return is not a DraftSingleDisposalReturn" in {
+            val triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              individualUserType = Some(Self)
+            )
+
+            val taxYearStartYear: String =
+              triageAnswers
+                .fold(
+                  _.taxYear.map(_.startDateInclusive.getYear),
+                  c => Some(c.taxYear.startDateInclusive.getYear)
+                )
+                .map(_.toString)
+                .getOrElse("2020")
+
             val fillingOutReturn = sample[FillingOutReturn].copy(
               draftReturn = sample[DraftMultipleDisposalsReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self)),
+                triageAnswers = triageAnswers,
                 yearToDateLiabilityAnswers = Some(
                   sample[CompleteNonCalculatedYTDAnswers].copy(
                     estimatedIncome = Some(sample[AmountInPence]),
@@ -7742,7 +7923,11 @@ class YearToDateLiabilityControllerSpec
                   )
                 )
               ),
-              previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+              previousSentReturns = Some(
+                sample[PreviousReturnData].copy(
+                  summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))
+                )
+              ),
               amendReturnData = None
             )
             val session          = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
@@ -8031,6 +8216,15 @@ class YearToDateLiabilityControllerSpec
             disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
           )
 
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
           val calculationRequest = YearToDateLiabilityCalculationRequest(
             triageAnswers,
             taxableGain,
@@ -8071,7 +8265,11 @@ class YearToDateLiabilityControllerSpec
             subscribedDetails = sample[SubscribedDetails].copy(
               name = Right(sample[IndividualName])
             ),
-            previousSentReturns = Some(sample[PreviousReturnData].copy(summaries = List(sample[ReturnSummary]))),
+            previousSentReturns = Some(
+              sample[PreviousReturnData].copy(
+                summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))
+              )
+            ),
             amendReturnData = None
           )
 

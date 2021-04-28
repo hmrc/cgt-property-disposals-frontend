@@ -129,13 +129,34 @@ class CommonTriageQuestionsControllerSpec
     representeeAnswers: Option[RepresenteeAnswers] = None,
     previousSentReturns: Option[PreviousReturnData] = None
   ): (SessionData, StartingNewDraftReturn) = {
+    val taxYearStartYear: String = triageAnswers
+      .fold(
+        _.fold(
+          _.taxYear.map(_.startDateInclusive.getYear),
+          c => Some(c.taxYear.startDateInclusive.getYear)
+        ),
+        _.fold(
+          _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+          c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+        )
+      )
+      .map(_.toString)
+      .getOrElse("2020")
+
+    val updatedPreviousSentReturns = previousSentReturns match {
+      case Some(PreviousReturnData(summaries, l, f, c)) =>
+        val updatedSummaries = summaries.map(_.copy(taxYear = taxYearStartYear))
+        Some(PreviousReturnData(updatedSummaries, l, f, c))
+      case _                                            => previousSentReturns
+    }
+
     val startingNewDraftReturn =
       sample[StartingNewDraftReturn].copy(
         subscribedDetails = sample[SubscribedDetails].copy(name = name),
         newReturnTriageAnswers = triageAnswers,
         agentReferenceNumber = setAgentReferenceNumber(userType),
         representeeAnswers = representeeAnswers,
-        previousSentReturns = previousSentReturns
+        previousSentReturns = updatedPreviousSentReturns
       )
 
     val sessionData = SessionData.empty.copy(
@@ -899,15 +920,29 @@ class CommonTriageQuestionsControllerSpec
       "redirect to the further return number of properties page" when {
 
         "the user is on a further return journey" in {
+          val today            = TimeUtils.today()
+          val taxYearStartDate = TimeUtils.taxYearStart(today)
+          val disposalDate     = DisposalDate(
+            today,
+            sample[TaxYear].copy(
+              startDateInclusive = taxYearStartDate,
+              endDateExclusive = LocalDate.of(taxYearStartDate.getYear + 1, 4, 6)
+            )
+          )
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                Right(IncompleteSingleDisposalTriageAnswers.empty),
+                Right(
+                  IncompleteSingleDisposalTriageAnswers.empty.copy(
+                    disposalDate = Some(disposalDate)
+                  )
+                ),
                 Left(sample[TrustName]),
                 previousSentReturns = Some(
                   sample[PreviousReturnData].copy(
-                    summaries = List(sample[ReturnSummary])
+                    summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartDate.getYear.toString))
                   )
                 )
               )._1
@@ -1179,15 +1214,29 @@ class CommonTriageQuestionsControllerSpec
       "redirect to the further return number of properties page" when {
 
         "the user is on a further return journey" in {
+          val today            = TimeUtils.today()
+          val taxYearStartDate = TimeUtils.taxYearStart(today)
+          val disposalDate     = DisposalDate(
+            today,
+            sample[TaxYear].copy(
+              startDateInclusive = taxYearStartDate,
+              endDateExclusive = LocalDate.of(taxYearStartDate.getYear + 1, 4, 6)
+            )
+          )
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                Right(IncompleteSingleDisposalTriageAnswers.empty),
+                Right(
+                  IncompleteSingleDisposalTriageAnswers.empty.copy(
+                    disposalDate = Some(disposalDate)
+                  )
+                ),
                 Left(sample[TrustName]),
                 previousSentReturns = Some(
                   sample[PreviousReturnData].copy(
-                    summaries = List(sample[ReturnSummary])
+                    summaries = List(sample[ReturnSummary].copy(taxYear = taxYearStartDate.getYear.toString))
                   )
                 )
               )._1
@@ -1602,13 +1651,22 @@ class CommonTriageQuestionsControllerSpec
         def test(
           formData: (String, String)*
         )(expectedErrorKey: String): Unit = {
+          val today            = TimeUtils.today()
+          val taxYearStartDate = TimeUtils.taxYearStart(today)
+          val taxYear          =
+            sample[TaxYear].copy(
+              startDateInclusive = taxYearStartDate,
+              endDateExclusive = LocalDate.of(taxYearStartDate.getYear + 1, 4, 6)
+            )
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 Left(
                   IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-                    individualUserType = Some(IndividualUserType.Capacitor)
+                    individualUserType = Some(IndividualUserType.Capacitor),
+                    taxYear = Some(taxYear)
                   )
                 ),
                 Right(sample[IndividualName]),

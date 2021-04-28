@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import java.time.LocalDate
-
 import org.jsoup.Jsoup.parse
 import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -152,7 +151,7 @@ class TaskListControllerSpec
         sectionLinkHref: Call,
         sectionsStatus: TaskListStatus,
         extraChecks: Document => Unit = _ => (),
-        previousSentReturns: Option[List[ReturnSummary]] = None,
+        previousSentReturns: Option[List[ReturnSummary]] = Some(List(sample[ReturnSummary])),
         amendReturnData: Option[AmendReturnData] = None
       ): Unit =
         withClue(s"For draft return $draftReturn: ") {
@@ -649,11 +648,22 @@ class TaskListControllerSpec
               amendReturnData = amendReturnData
             )
 
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(Self)
+          )
+
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
           val prerequisiteDraftReturn =
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-                individualUserType = Some(Self)
-              ),
+              triageAnswers = triageAnswers,
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -668,7 +678,7 @@ class TaskListControllerSpec
             "the property address section is not been started" in {
               test(
                 prerequisiteDraftReturn.copy(propertyAddress = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -677,7 +687,7 @@ class TaskListControllerSpec
             "the disposal details section is not been started" in {
               test(
                 prerequisiteDraftReturn.copy(disposalDetailsAnswers = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -686,7 +696,7 @@ class TaskListControllerSpec
             "the disposal details section is not complete" in {
               test(
                 prerequisiteDraftReturn.copy(disposalDetailsAnswers = Some(sample[IncompleteDisposalDetailsAnswers])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -695,7 +705,7 @@ class TaskListControllerSpec
             "the acquisition details section is not been started" in {
               test(
                 prerequisiteDraftReturn.copy(acquisitionDetailsAnswers = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -705,7 +715,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn
                   .copy(acquisitionDetailsAnswers = Some(sample[IncompleteAcquisitionDetailsAnswers])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -714,7 +724,7 @@ class TaskListControllerSpec
             "the reliefs section is not been started" in {
               test(
                 prerequisiteDraftReturn.copy(reliefDetailsAnswers = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -723,7 +733,7 @@ class TaskListControllerSpec
             "the reliefs section is not complete" in {
               test(
                 prerequisiteDraftReturn.copy(reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -732,7 +742,7 @@ class TaskListControllerSpec
             "the required sections are now complete but the GLAR section has not been started yet" in {
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.ToDo
               )
@@ -741,7 +751,7 @@ class TaskListControllerSpec
             "the required sections are now complete but the GLAR section has not been completed" in {
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = Some(sample[AmountInPence])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.Complete
               )
@@ -878,11 +888,24 @@ class TaskListControllerSpec
             )
           }
 
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(Self),
+            countryOfResidence = Country.uk
+          )
+
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
           "the reliefs section is complete but the gain or loss after reliefs section is not complete for a further return" in {
             test(
               sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                triageAnswers = triageAnswers,
                 propertyAddress = Some(sample[UkAddress]),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -891,15 +914,14 @@ class TaskListControllerSpec
                 exemptionAndLossesAnswers = None
               ),
               TaskListStatus.CannotStart,
-              Some(List(sample[ReturnSummary]))
+              Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)))
             )
           }
 
           "the reliefs section is complete and the gain or loss after reliefs section is complete for a further return" in {
             test(
               sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                triageAnswers = triageAnswers,
                 propertyAddress = Some(sample[UkAddress]),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -908,7 +930,7 @@ class TaskListControllerSpec
                 exemptionAndLossesAnswers = None
               ),
               TaskListStatus.ToDo,
-              Some(List(sample[ReturnSummary]))
+              Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)))
             )
           }
 
@@ -1400,11 +1422,22 @@ class TaskListControllerSpec
               amendReturnData = amendReturnData
             )
 
+          val triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+            individualUserType = Some(Self)
+          )
+
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.taxYear.map(_.startDateInclusive.getYear),
+                c => Some(c.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
           val prerequisiteDraftReturn =
             sample[DraftMultipleDisposalsReturn].copy(
-              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                individualUserType = Some(Self)
-              ),
+              triageAnswers = triageAnswers,
               examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
               exemptionAndLossesAnswers = None,
               gainOrLossAfterReliefs = None
@@ -1415,7 +1448,7 @@ class TaskListControllerSpec
             "the example property address section is not been started" in {
               test(
                 prerequisiteDraftReturn.copy(examplePropertyDetailsAnswers = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -1424,7 +1457,7 @@ class TaskListControllerSpec
             "the example property address section is not complete" in {
               test(
                 prerequisiteDraftReturn.copy(examplePropertyDetailsAnswers = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -1433,7 +1466,7 @@ class TaskListControllerSpec
             "the required sections are now complete but the GLAR section has not been started yet" in {
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.ToDo
               )
@@ -1442,7 +1475,7 @@ class TaskListControllerSpec
             "the required sections are now complete but the GLAR section has not been completed" in {
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = Some(sample[AmountInPence])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.Complete
               )
@@ -1531,11 +1564,22 @@ class TaskListControllerSpec
 
           }
 
+          val triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+            .copy(individualUserType = Some(Self), countryOfResidence = Country.uk)
+
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.taxYear.map(_.startDateInclusive.getYear),
+                c => Some(c.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
           "the property details section is complete but the gain or loss after reliefs section is not complete for a further return" in {
             testStateOfSection(
               sample[DraftMultipleDisposalsReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                triageAnswers = triageAnswers,
                 examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
                 gainOrLossAfterReliefs = None,
                 exemptionAndLossesAnswers = None
@@ -1546,15 +1590,14 @@ class TaskListControllerSpec
               exemptionandlosses.routes.ExemptionAndLossesController
                 .checkYourAnswers(),
               TaskListStatus.CannotStart,
-              previousSentReturns = Some(List(sample[ReturnSummary]))
+              previousSentReturns = Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)))
             )
           }
 
           "the reliefs section is complete and the gain or loss after reliefs section is complete for a further return" in {
             testStateOfSection(
               sample[DraftMultipleDisposalsReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                triageAnswers = triageAnswers,
                 examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
                 gainOrLossAfterReliefs = Some(sample[AmountInPence]),
                 exemptionAndLossesAnswers = None
@@ -1565,7 +1608,7 @@ class TaskListControllerSpec
               exemptionandlosses.routes.ExemptionAndLossesController
                 .checkYourAnswers(),
               TaskListStatus.ToDo,
-              previousSentReturns = Some(List(sample[ReturnSummary]))
+              previousSentReturns = Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)))
             )
           }
 
@@ -1891,11 +1934,22 @@ class TaskListControllerSpec
               amendReturnData = amendReturnData
             )
 
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(Self)
+          )
+
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
           val prerequisiteDraftReturn =
             sample[DraftSingleIndirectDisposalReturn].copy(
-              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-                individualUserType = Some(Self)
-              ),
+              triageAnswers = triageAnswers,
               companyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -1908,7 +1962,7 @@ class TaskListControllerSpec
             "the company address section is not been started" in {
               test(
                 prerequisiteDraftReturn.copy(companyAddress = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -1917,7 +1971,7 @@ class TaskListControllerSpec
             "the disposal details section is not been started" in {
               test(
                 prerequisiteDraftReturn.copy(disposalDetailsAnswers = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -1926,7 +1980,7 @@ class TaskListControllerSpec
             "the disposal details section is not complete" in {
               test(
                 prerequisiteDraftReturn.copy(disposalDetailsAnswers = Some(sample[IncompleteDisposalDetailsAnswers])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -1935,7 +1989,7 @@ class TaskListControllerSpec
             "the acquisition details section is not been started" in {
               test(
                 prerequisiteDraftReturn.copy(acquisitionDetailsAnswers = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -1945,7 +1999,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn
                   .copy(acquisitionDetailsAnswers = Some(sample[IncompleteAcquisitionDetailsAnswers])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -1954,7 +2008,7 @@ class TaskListControllerSpec
             "the required sections are now complete but the GLAR section has not been started yet" in {
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.ToDo
               )
@@ -1963,7 +2017,7 @@ class TaskListControllerSpec
             "the required sections are now complete but the GLAR section has not been completed" in {
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = Some(sample[AmountInPence])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.Complete
               )
@@ -2097,12 +2151,23 @@ class TaskListControllerSpec
             )
           }
 
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+            .copy(individualUserType = Some(Self), countryOfResidence = Country.uk)
+
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
           "the company address, disposal details and acquisition details section are complete " +
             "but the gain or loss after reliefs section is not complete for a further return" in {
               test(
                 sample[DraftSingleIndirectDisposalReturn].copy(
-                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                    .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                  triageAnswers = triageAnswers,
                   companyAddress = Some(sample[UkAddress]),
                   disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
                   acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -2110,7 +2175,7 @@ class TaskListControllerSpec
                   exemptionAndLossesAnswers = None
                 ),
                 TaskListStatus.CannotStart,
-                Some(List(sample[ReturnSummary]))
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)))
               )
             }
 
@@ -2118,8 +2183,7 @@ class TaskListControllerSpec
             "and the gain or loss after reliefs section is complete for a further return" in {
               test(
                 sample[DraftSingleIndirectDisposalReturn].copy(
-                  triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                    .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                  triageAnswers = triageAnswers,
                   companyAddress = Some(sample[UkAddress]),
                   disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
                   acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -2127,7 +2191,7 @@ class TaskListControllerSpec
                   exemptionAndLossesAnswers = None
                 ),
                 TaskListStatus.ToDo,
-                Some(List(sample[ReturnSummary]))
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)))
               )
             }
 
@@ -2492,12 +2556,20 @@ class TaskListControllerSpec
               gainOrLossAfterReliefs = None
             )
 
+          val taxYearStartYear: String = prerequisiteDraftReturn.triageAnswers
+            .fold(
+              _.taxYear.map(_.startDateInclusive.getYear),
+              c => Some(c.taxYear.startDateInclusive.getYear)
+            )
+            .map(_.toString)
+            .getOrElse("2020")
+
           "the return is a further return and" when {
 
             "the example company details section has not been started" in {
               test(
                 prerequisiteDraftReturn.copy(exampleCompanyDetailsAnswers = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -2507,7 +2579,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn
                   .copy(exampleCompanyDetailsAnswers = Some(sample[IncompleteExampleCompanyDetailsAnswers])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -2516,7 +2588,7 @@ class TaskListControllerSpec
             "the required section is now complete but the GLAR section has not been started yet" in {
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.ToDo
               )
@@ -2525,7 +2597,7 @@ class TaskListControllerSpec
             "the required section is now complete but the GLAR section has not been completed" in {
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = Some(sample[AmountInPence])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.Complete
               )
@@ -2613,11 +2685,24 @@ class TaskListControllerSpec
             )
           }
 
+          val triageAnswers =
+            sample[CompleteMultipleDisposalsTriageAnswers]
+              .copy(individualUserType = Some(Self), countryOfResidence = Country.uk)
+
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.taxYear.map(_.startDateInclusive.getYear),
+                c => Some(c.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
           "the company details sections is complete but the gain or loss after reliefs section is not complete for a further return" in {
+
             testStateOfSection(
               sample[DraftMultipleIndirectDisposalsReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                triageAnswers = triageAnswers,
                 exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers]),
                 gainOrLossAfterReliefs = None,
                 exemptionAndLossesAnswers = None
@@ -2628,15 +2713,14 @@ class TaskListControllerSpec
               exemptionandlosses.routes.ExemptionAndLossesController
                 .checkYourAnswers(),
               TaskListStatus.CannotStart,
-              previousSentReturns = Some(List(sample[ReturnSummary]))
+              previousSentReturns = Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)))
             )
           }
 
           "the company details sections is complete and the gain or loss after reliefs section is complete for a further return" in {
             testStateOfSection(
               sample[DraftMultipleIndirectDisposalsReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                triageAnswers = triageAnswers,
                 exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers]),
                 gainOrLossAfterReliefs = Some(sample[AmountInPence]),
                 exemptionAndLossesAnswers = None
@@ -2647,7 +2731,7 @@ class TaskListControllerSpec
               exemptionandlosses.routes.ExemptionAndLossesController
                 .checkYourAnswers(),
               TaskListStatus.ToDo,
-              previousSentReturns = Some(List(sample[ReturnSummary]))
+              previousSentReturns = Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)))
             )
           }
 
@@ -2888,12 +2972,21 @@ class TaskListControllerSpec
               gainOrLossAfterReliefs = None
             )
 
+          val taxYearStartYear: String =
+            prerequisiteDraftReturn.triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
           "the return is a further return and" when {
 
             "the property details section is not been started" in {
               test(
                 prerequisiteDraftReturn.copy(mixedUsePropertyDetailsAnswers = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -2903,7 +2996,7 @@ class TaskListControllerSpec
               test(
                 prerequisiteDraftReturn
                   .copy(mixedUsePropertyDetailsAnswers = Some(sample[IncompleteMixedUsePropertyDetailsAnswers])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.CannotStart
               )
@@ -2912,7 +3005,7 @@ class TaskListControllerSpec
             "the required section is now complete but the GLAR section has not been started yet" in {
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = None),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.ToDo
               )
@@ -2921,7 +3014,7 @@ class TaskListControllerSpec
             "the required sections are now complete but the GLAR section has not been completed" in {
               test(
                 prerequisiteDraftReturn.copy(gainOrLossAfterReliefs = Some(sample[AmountInPence])),
-                Some(List(sample[ReturnSummary])),
+                Some(List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))),
                 None,
                 TaskListStatus.Complete
               )
@@ -2961,6 +3054,7 @@ class TaskListControllerSpec
               TaskListStatus.ToDo
             )
           }
+
         }
 
         "display the page with the enter losses and exemptions section status" when {
@@ -3009,10 +3103,24 @@ class TaskListControllerSpec
           }
 
           "the reliefs section is complete but the gain or loss after reliefs section is not complete for a further return" in {
+
+            val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(
+                individualUserType = Some(Self),
+                countryOfResidence = Country.uk,
+                disposalDate = sample[DisposalDate]
+              )
+
+            val taxYearStartYear = triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear.toString),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear.toString)
+              )
+              .getOrElse("2020")
+
             testStateOfSection(
               sample[DraftSingleMixedUseDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = Some(Self), countryOfResidence = Country.uk),
+                triageAnswers = triageAnswers,
                 mixedUsePropertyDetailsAnswers = Some(sample[CompleteMixedUsePropertyDetailsAnswers]),
                 gainOrLossAfterReliefs = None,
                 exemptionAndLossesAnswers = None
@@ -3020,10 +3128,13 @@ class TaskListControllerSpec
             )(
               "exemptionsAndLosses",
               messageFromMessageKey("task-list.exemptions-and-losses.link"),
-              exemptionandlosses.routes.ExemptionAndLossesController
-                .checkYourAnswers(),
+              exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers(),
               TaskListStatus.CannotStart,
-              previousSentReturns = Some(List(sample[ReturnSummary]))
+              previousSentReturns = Some(
+                List(
+                  sample[ReturnSummary].copy(taxYear = taxYearStartYear)
+                )
+              )
             )
           }
 
@@ -3105,5 +3216,7 @@ class TaskListControllerSpec
       }
 
     }
+
   }
+
 }
