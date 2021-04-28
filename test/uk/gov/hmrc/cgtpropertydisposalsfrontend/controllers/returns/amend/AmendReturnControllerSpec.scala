@@ -396,7 +396,7 @@ class AmendReturnControllerSpec
           )
         )
 
-        "the user is not an agent" in {
+        "the user is not an agent" ignore {
           test(
             SessionData.empty.copy(
               journeyStatus = Some(
@@ -410,7 +410,7 @@ class AmendReturnControllerSpec
           )
         }
 
-        "the user is an agent" in {
+        "the user is an agent" ignore {
           test(
             SessionData.empty.copy(
               journeyStatus = Some(
