@@ -230,7 +230,7 @@ class ReturnsServiceImpl @Inject() (
                       returnSummary.charges,
                       returnSummary.isRecentlyAmended
                     )
-                    (false, updatedReturnSummary)
+                    (true, updatedReturnSummary)
                   }
                 }
     } yield result
