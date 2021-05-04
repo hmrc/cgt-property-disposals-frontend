@@ -347,7 +347,7 @@ class StartController @Inject() (
                      ggCredId,
                      None,
                      updatedDraftReturns,
-                     usentDraftReturnFlagAndUpdatedSentReturns._2
+                     unsetDraftReturnFlagAndUpdatedSentReturns._2
                    )
                  )
                )
