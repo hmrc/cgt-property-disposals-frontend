@@ -127,7 +127,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
                                  else EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
     } yield eligibility
 
-  def filterPreviousTaxYearReturns(
+  private def filterPreviousTaxYearReturns(
     fillingOutReturn: FillingOutReturn
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, Error, FillingOutReturn] = {
 

@@ -24,6 +24,7 @@ import cats.instances.future._
 import cats.instances.int._
 import cats.syntax.either._
 import cats.syntax.order._
+import cats.instances.string._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import play.api.i18n.Lang
@@ -78,6 +79,13 @@ trait ReturnsService {
   def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, DisplayReturn]
+
+  def updateCorrectTaxYearToSentReturns(
+    cgtReference: CgtReference,
+    returnSummary: List[ReturnSummary]
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, (Boolean, List[ReturnSummary])]
+
+  def unsetUnwantedSectionsToDraftReturn(draftReturn: DraftReturn): DraftReturn
 
 }
 
@@ -172,6 +180,94 @@ class ReturnsServiceImpl @Inject() (
                    )
                  else EitherT.rightT[Future, Error](())
     } yield unsentDraftReturnsWithTaxYearExchangedAndSAStatus
+
+  def updateCorrectTaxYearToSentReturns(
+    cgtReference: CgtReference,
+    returnSummary: List[ReturnSummary]
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, (Boolean, List[ReturnSummary])] = {
+    import cats.instances.list._
+    import cats.syntax.traverse._
+    for {
+      result              <- returnSummary
+                               .map(r => updateCorrectTaxYearToSentReturn(r, cgtReference))
+                               .sequence[EitherT[Future, Error, *], (Boolean, ReturnSummary)]
+      usentDraftReturnFlag = result.map(_._1).contains(true)
+      updatedSentReturns   = result.map(_._2)
+    } yield (usentDraftReturnFlag, updatedSentReturns)
+  }
+
+  private def updateCorrectTaxYearToSentReturn(
+    returnSummary: ReturnSummary,
+    cgtReference: CgtReference
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, (Boolean, ReturnSummary)] =
+    for {
+      result <- displayReturn(cgtReference, returnSummary.submissionId).map { r =>
+                  val expectedTaxYear: String =
+                    r.completeReturn
+                      .fold(
+                        _.triageAnswers.taxYear.startDateInclusive.getYear,
+                        _.triageAnswers.disposalDate.taxYear.startDateInclusive.getYear,
+                        _.triageAnswers.disposalDate.taxYear.startDateInclusive.getYear,
+                        _.triageAnswers.taxYear.startDateInclusive.getYear,
+                        _.triageAnswers.disposalDate.taxYear.startDateInclusive.getYear
+                      )
+                      .toString
+
+                  val actualTaxYear = returnSummary.taxYear
+
+                  if (expectedTaxYear === actualTaxYear)
+                    (false, returnSummary)
+                  else {
+                    val updatedReturnSummary = ReturnSummary(
+                      returnSummary.submissionId,
+                      returnSummary.submissionDate,
+                      returnSummary.completionDate,
+                      returnSummary.lastUpdatedDate,
+                      expectedTaxYear,
+                      returnSummary.mainReturnChargeAmount,
+                      returnSummary.mainReturnChargeReference,
+                      returnSummary.propertyAddress,
+                      returnSummary.charges,
+                      returnSummary.isRecentlyAmended
+                    )
+                    (true, updatedReturnSummary)
+                  }
+                }
+    } yield result
+
+  def unsetUnwantedSectionsToDraftReturn(draftReturn: DraftReturn): DraftReturn =
+    draftReturn.fold(
+      _.copy(
+        gainOrLossAfterReliefs = None,
+        exemptionAndLossesAnswers = None,
+        yearToDateLiabilityAnswers = None,
+        supportingEvidenceAnswers = None
+      ),
+      _.copy(
+        gainOrLossAfterReliefs = None,
+        exemptionAndLossesAnswers = None,
+        yearToDateLiabilityAnswers = None,
+        supportingEvidenceAnswers = None
+      ),
+      _.copy(
+        gainOrLossAfterReliefs = None,
+        exemptionAndLossesAnswers = None,
+        yearToDateLiabilityAnswers = None,
+        supportingEvidenceAnswers = None
+      ),
+      _.copy(
+        gainOrLossAfterReliefs = None,
+        exemptionAndLossesAnswers = None,
+        yearToDateLiabilityAnswers = None,
+        supportingEvidenceAnswers = None
+      ),
+      _.copy(
+        gainOrLossAfterReliefs = None,
+        exemptionAndLossesAnswers = None,
+        yearToDateLiabilityAnswers = None,
+        supportingEvidenceAnswers = None
+      )
+    )
 
   private def updateTaxYearExchangedToDraftReturn(draftReturn: DraftReturn): DraftReturn =
     draftReturn.fold(
