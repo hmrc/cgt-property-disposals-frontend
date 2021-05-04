@@ -328,12 +328,12 @@ class StartController @Inject() (
                                                    )(EitherT.pure(_))
       sentReturns                               <- returnsService.listReturns(cgtReference)
       draftReturns                              <- returnsService.getDraftReturns(cgtReference, sentReturns)
-      usentDraftReturnFlagAndUpdatedSentReturns <- returnsService.updateCorrectTaxYearToSentReturns(
+      unsetDraftReturnFlagAndUpdatedSentReturns <- returnsService.updateCorrectTaxYearToSentReturns(
                                                      subscribedDetails.cgtReference,
                                                      sentReturns
                                                    )
 
-      updatedDraftReturns = if (usentDraftReturnFlagAndUpdatedSentReturns._1)
+      updatedDraftReturns = if (unsetDraftReturnFlagAndUpdatedSentReturns._1)
                               draftReturns.map(returnsService.unsetUnwantedSectionsToDraftReturn)
                             else draftReturns
 
