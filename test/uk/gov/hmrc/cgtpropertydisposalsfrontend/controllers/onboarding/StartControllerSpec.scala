@@ -139,6 +139,19 @@ class StartControllerSpec
       .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
+  def mockUpdateCorrectTaxYearToSentReturns(
+    cgtReference: CgtReference,
+    sentReturns: List[ReturnSummary]
+  )(
+    response: Either[Error, (Boolean, List[ReturnSummary])]
+  ) =
+    (mockReturnsService
+      .updateCorrectTaxYearToSentReturns(_: CgtReference, _: List[ReturnSummary])(
+        _: HeaderCarrier
+      ))
+      .expects(cgtReference, sentReturns, *)
+      .returning(EitherT.fromEither[Future](response))
+
   def mockSendAuditEvent[A : Writes](
     event: A,
     auditType: String,
@@ -2624,6 +2637,9 @@ class StartControllerSpec
                 mockGetDraftReturns(cgtReference, sentReturns)(
                   Right(draftReturns)
                 )
+                mockUpdateCorrectTaxYearToSentReturns(cgtReference, sentReturns)(
+                  Right((false, sentReturns))
+                )
                 mockStoreSession(
                   sessionWithSubscribed
                     .copy(userType = Some(UserType.Individual))
@@ -2656,6 +2672,9 @@ class StartControllerSpec
                 )
                 mockGetDraftReturns(cgtReference, sentReturns)(
                   Right(draftReturns)
+                )
+                mockUpdateCorrectTaxYearToSentReturns(cgtReference, sentReturns)(
+                  Right((false, sentReturns))
                 )
                 mockStoreSession(
                   sessionWithSubscribed.copy(userType = Some(UserType.Individual))
@@ -3191,6 +3210,9 @@ class StartControllerSpec
             )
             mockGetDraftReturns(subscribedDetails.cgtReference, sentReturns)(
               Right(draftReturns)
+            )
+            mockUpdateCorrectTaxYearToSentReturns(subscribedDetails.cgtReference, sentReturns)(
+              Right((false, sentReturns))
             )
             mockStoreSession(
               sessionWithSubscribed.copy(userType = Some(UserType.Individual))

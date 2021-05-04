@@ -314,36 +314,45 @@ class StartController @Inject() (
     request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     val result = for {
-      subscribedDetails <- subscribedDetails.fold(
-                             subscriptionService
-                               .getSubscribedDetails(cgtReference)
-                               .subflatMap(
-                                 Either.fromOption(
-                                   _,
-                                   Error(
-                                     s"Could not find subscribed details for cgt reference ${cgtReference.value}"
-                                   )
-                                 )
-                               )
-                           )(EitherT.pure(_))
-      sentReturns       <- returnsService.listReturns(cgtReference)
-      draftReturns      <- returnsService.getDraftReturns(cgtReference, sentReturns)
-      _                 <- EitherT(
-                             updateSession(sessionStore, request)(
-                               _.copy(
-                                 userType = request.authenticatedRequest.userType,
-                                 journeyStatus = Some(
-                                   Subscribed(
-                                     subscribedDetails,
-                                     ggCredId,
-                                     None,
-                                     draftReturns,
-                                     sentReturns
-                                   )
-                                 )
-                               )
-                             )
-                           )
+      subscribedDetails                         <- subscribedDetails.fold(
+                                                     subscriptionService
+                                                       .getSubscribedDetails(cgtReference)
+                                                       .subflatMap(
+                                                         Either.fromOption(
+                                                           _,
+                                                           Error(
+                                                             s"Could not find subscribed details for cgt reference ${cgtReference.value}"
+                                                           )
+                                                         )
+                                                       )
+                                                   )(EitherT.pure(_))
+      sentReturns                               <- returnsService.listReturns(cgtReference)
+      draftReturns                              <- returnsService.getDraftReturns(cgtReference, sentReturns)
+      usentDraftReturnFlagAndUpdatedSentReturns <- returnsService.updateCorrectTaxYearToSentReturns(
+                                                     subscribedDetails.cgtReference,
+                                                     sentReturns
+                                                   )
+
+      updatedDraftReturns = if (usentDraftReturnFlagAndUpdatedSentReturns._1)
+                              draftReturns.map(returnsService.unsetUnwantedSectionsToDraftReturn)
+                            else draftReturns
+
+      _ <- EitherT(
+             updateSession(sessionStore, request)(
+               _.copy(
+                 userType = request.authenticatedRequest.userType,
+                 journeyStatus = Some(
+                   Subscribed(
+                     subscribedDetails,
+                     ggCredId,
+                     None,
+                     updatedDraftReturns,
+                     usentDraftReturnFlagAndUpdatedSentReturns._2
+                   )
+                 )
+               )
+             )
+           )
     } yield ()
 
     result.fold(
