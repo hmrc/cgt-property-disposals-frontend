@@ -215,7 +215,6 @@ accessibilityStatement.howWeTested.title=How we tested this service
 accessibilityStatement.howWeTested.p1=The service was tested on 15 May 2020 and checked for compliance with WCAG 2.1 AAA. It was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>.
 accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 14 September 2020.
 
-warning.incorrectcalculation=Due to a temporary problem with the service, you cannot complete a draft return for the tax year 2021 to 2022 if you started it on or after 6 April 2021 and also completed a return for tax year 2020 to 2021.<br/><br/>If you do, the calculation may be wrong.<br/><br/>The problem will be resolved shortly. In the meantime, contact us and ask for a paper return.
 #===================================================
 # SERVICE WIDE AND GENERIC - END
 #===================================================
