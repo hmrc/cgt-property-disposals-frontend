@@ -224,23 +224,33 @@ class AgentAccessController @Inject() (
           val result = for {
             sentReturns  <- returnsService.listReturns(cgtReference)
             draftReturns <- returnsService.getDraftReturns(cgtReference, sentReturns)
-            _            <- EitherT(
-                              updateSession(sessionStore, request)(
-                                _.copy(
-                                  journeyStatus = Some(
-                                    Subscribed(
-                                      verifierMatchingDetails.clientDetails,
-                                      agentSupplyingClientDetails.agentGGCredId,
-                                      Some(
-                                        agentSupplyingClientDetails.agentReferenceNumber
-                                      ),
-                                      draftReturns,
-                                      sentReturns
-                                    )
-                                  )
-                                )
-                              )
-                            )
+
+            unsetDraftReturnFlagAndUpdatedSentReturns <- returnsService.updateCorrectTaxYearToSentReturns(
+                                                           cgtReference,
+                                                           sentReturns
+                                                         )
+
+            updatedDraftReturns = if (unsetDraftReturnFlagAndUpdatedSentReturns._1)
+                                    draftReturns.map(returnsService.unsetUnwantedSectionsToDraftReturn)
+                                  else draftReturns
+
+            _ <- EitherT(
+                   updateSession(sessionStore, request)(
+                     _.copy(
+                       journeyStatus = Some(
+                         Subscribed(
+                           verifierMatchingDetails.clientDetails,
+                           agentSupplyingClientDetails.agentGGCredId,
+                           Some(
+                             agentSupplyingClientDetails.agentReferenceNumber
+                           ),
+                           updatedDraftReturns,
+                           unsetDraftReturnFlagAndUpdatedSentReturns._2
+                         )
+                       )
+                     )
+                   )
+                 )
           } yield ()
 
           result.fold(

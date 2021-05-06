@@ -102,6 +102,19 @@ class HomePageControllerSpec
       .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
+  def mockUpdateCorrectTaxYearToSentReturns(
+    cgtReference: CgtReference,
+    sentReturns: List[ReturnSummary]
+  )(
+    response: Either[Error, (Boolean, List[ReturnSummary])]
+  ) =
+    (mockReturnsService
+      .updateCorrectTaxYearToSentReturns(_: CgtReference, _: List[ReturnSummary])(
+        _: HeaderCarrier
+      ))
+      .expects(cgtReference, sentReturns, *)
+      .returning(EitherT.fromEither[Future](response))
+
   def mockGetReturnsList(cgtReference: CgtReference)(
     response: Either[Error, List[ReturnSummary]]
   ) =
@@ -1262,6 +1275,9 @@ class HomePageControllerSpec
               )(
                 Right(subscribed.draftReturns)
               )
+              mockUpdateCorrectTaxYearToSentReturns(subscribed.subscribedDetails.cgtReference, subscribed.sentReturns)(
+                Right((false, subscribed.sentReturns))
+              )
               mockStoreSession(
                 SessionData.empty.copy(
                   journeyStatus = Some(subscribed),
@@ -1297,6 +1313,12 @@ class HomePageControllerSpec
                     subscribed.sentReturns
                   )(
                     Right(subscribed.draftReturns)
+                  )
+                  mockUpdateCorrectTaxYearToSentReturns(
+                    subscribed.subscribedDetails.cgtReference,
+                    subscribed.sentReturns
+                  )(
+                    Right((false, subscribed.sentReturns))
                   )
                   mockStoreSession(
                     SessionData.empty.copy(
