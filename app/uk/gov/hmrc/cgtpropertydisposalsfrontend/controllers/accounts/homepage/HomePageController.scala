@@ -345,14 +345,23 @@ class HomePageController @Inject() (
     request: RequestWithSessionData[_]
   ): Future[Result] = {
     val result = for {
-      sentReturns  <- returnsService.listReturns(cgtReference)
-      draftReturns <- returnsService.getDraftReturns(cgtReference, sentReturns)
-      subscribed    = uplift(journey, draftReturns, sentReturns)
-      _            <- EitherT(
-                        updateSession(sessionStore, request)(
-                          _.copy(journeyStatus = Some(subscribed))
-                        )
-                      )
+      sentReturns                               <- returnsService.listReturns(cgtReference)
+      draftReturns                              <- returnsService.getDraftReturns(cgtReference, sentReturns)
+      unsetDraftReturnFlagAndUpdatedSentReturns <- returnsService.updateCorrectTaxYearToSentReturns(
+                                                     cgtReference,
+                                                     sentReturns
+                                                   )
+
+      updatedDraftReturns = if (unsetDraftReturnFlagAndUpdatedSentReturns._1)
+                              draftReturns.map(returnsService.unsetUnwantedSectionsToDraftReturn)
+                            else draftReturns
+
+      subscribed = uplift(journey, updatedDraftReturns, unsetDraftReturnFlagAndUpdatedSentReturns._2)
+      _         <- EitherT(
+                     updateSession(sessionStore, request)(
+                       _.copy(journeyStatus = Some(subscribed))
+                     )
+                   )
     } yield subscribed
 
     result

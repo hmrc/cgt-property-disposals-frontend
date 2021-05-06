@@ -187,6 +187,19 @@ class AgentAccessControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
+  def mockUpdateCorrectTaxYearToSentReturns(
+    cgtReference: CgtReference,
+    sentReturns: List[ReturnSummary]
+  )(
+    response: Either[Error, (Boolean, List[ReturnSummary])]
+  ) =
+    (mockReturnsService
+      .updateCorrectTaxYearToSentReturns(_: CgtReference, _: List[ReturnSummary])(
+        _: HeaderCarrier
+      ))
+      .expects(cgtReference, sentReturns, *)
+      .returning(EitherT.fromEither[Future](response))
+
   "AgentAccessController" when {
 
     "handling requests to display the enter client's cgt reference page" must {
@@ -1426,6 +1439,9 @@ class AgentAccessControllerSpec
             mockGetDraftReturns(ukClientDetails.cgtReference, returnsList)(
               Right(draftReturns)
             )
+            mockUpdateCorrectTaxYearToSentReturns(ukClientDetails.cgtReference, returnsList)(
+              Right((false, returnsList))
+            )
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus =
@@ -1461,6 +1477,9 @@ class AgentAccessControllerSpec
             mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
             mockGetDraftReturns(ukClientDetails.cgtReference, returnsList)(
               Right(draftReturns)
+            )
+            mockUpdateCorrectTaxYearToSentReturns(ukClientDetails.cgtReference, returnsList)(
+              Right((false, returnsList))
             )
             mockStoreSession(
               SessionData.empty.copy(
