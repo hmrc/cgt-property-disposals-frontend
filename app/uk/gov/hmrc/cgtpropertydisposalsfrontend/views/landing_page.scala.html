@@ -22,7 +22,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @()(implicit messages: Messages, appConfig: ViewConfig, request: Request[_])
@@ -124,6 +125,8 @@
         <li>@messages("landingPage.beforeYouStart.list1.bullet8")</li>
         <li>@messages("landingPage.beforeYouStart.list1.bullet9")</li>
     </ul>
+
+   @warning(messages("warning.incorrectcalculation"))
 
     <p>
         <a href="@{
