@@ -100,7 +100,11 @@
         @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
     }
 
-    @returnToSummaryLink(!isAmendReturn)
+    @if(isAmendReturn){
+        @returnToSummaryLink(false)
+    } else {
+        @returnToSummaryLink(hasCreatedDraftReturn)
+    }
 
 }
 
