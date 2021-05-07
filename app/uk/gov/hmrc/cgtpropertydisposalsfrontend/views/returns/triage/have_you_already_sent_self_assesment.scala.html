@@ -43,7 +43,8 @@
     hasCreatedDraftReturn: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    taxYearStartYear: Int
+    taxYearStartYear: Int,
+    isAmendReturn: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"alreadySentSelfAssessment"}
@@ -99,7 +100,7 @@
         @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
     }
 
-    @returnToSummaryLink(hasCreatedDraftReturn)
+    @returnToSummaryLink(!isAmendReturn)
 
 }
 
