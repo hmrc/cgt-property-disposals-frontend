@@ -598,7 +598,8 @@ class CommonTriageQuestionsController @Inject() (
               _.representativeType(),
               _.representativeType()
             ),
-            taxYearStartYear
+            taxYearStartYear,
+            isAmendReturn
           )
         )
 
@@ -631,6 +632,8 @@ class CommonTriageQuestionsController @Inject() (
                 _.copy(args = Seq(taxYearStartYear.toString, taxYearEndYear.toString))
               }
 
+              val isAmendReturn = state.fold(_ => false, _.isAmendReturn)
+
               BadRequest(
                 alreadySentSelfAssessmentPage(
                   formWithErrors.copy(errors = updatedFormWithErrors),
@@ -644,7 +647,8 @@ class CommonTriageQuestionsController @Inject() (
                     _.representativeType(),
                     _.representativeType()
                   ),
-                  taxYearStartYear
+                  taxYearStartYear,
+                  isAmendReturn
                 )
               )
             },
