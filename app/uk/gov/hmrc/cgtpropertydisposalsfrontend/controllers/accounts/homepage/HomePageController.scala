@@ -186,11 +186,15 @@ class HomePageController @Inject() (
             NotFound
           } { returnSummary =>
             val result = for {
-              sentReturn <- returnsService
-                              .displayReturn(
-                                subscribed.subscribedDetails.cgtReference,
-                                returnSummary.submissionId
-                              )
+              sentReturn       <- returnsService
+                                    .displayReturn(
+                                      subscribed.subscribedDetails.cgtReference,
+                                      returnSummary.submissionId
+                                    )
+              updatedSentReturn = returnsService.updateSAStatusToSentReturn(
+                                    returnSummary.submissionDate,
+                                    sentReturn
+                                  )
 
               _ <- EitherT(
                      updateSession(sessionStore, request)(
@@ -200,8 +204,8 @@ class HomePageController @Inject() (
                              subscribed.subscribedDetails,
                              subscribed.ggCredId,
                              subscribed.agentReferenceNumber,
-                             sentReturn.completeReturn,
-                             sentReturn.returnType,
+                             updatedSentReturn.completeReturn,
+                             updatedSentReturn.returnType,
                              returnSummary,
                              Some(
                                PreviousReturnData(
