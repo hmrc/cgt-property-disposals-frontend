@@ -124,19 +124,17 @@ class AmendReturnController @Inject() (
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withStartingToAmendReturn(request) { journey =>
-        val isSAquestionAnswered: Option[Boolean] = journey.originalReturn.completeReturn.triageAnswers
-          .fold(_.alreadySentSelfAssessment, c => c.alreadySentSelfAssessment)
-        val originalTaxYear                       = journey.originalReturn.summary.taxYear
-        val currentTaxYear                        = TaxYear.thisTaxYearStartDate().getYear.toString
-        val futureDatesEnabled                    = viewConfig.futureDatesEnabled
-        val isSubmissionInPreviousTaxYear         = originalTaxYear =!= currentTaxYear
+        val originalTaxYear               = journey.originalReturn.summary.taxYear
+        val currentTaxYear                = TaxYear.thisTaxYearStartDate().getYear.toString
+        val futureDatesEnabled            = viewConfig.futureDatesEnabled
+        val isSubmissionInPreviousTaxYear = originalTaxYear =!= currentTaxYear
 
-        (isSAquestionAnswered.isEmpty, futureDatesEnabled, isSubmissionInPreviousTaxYear) match {
-          case (true, false, true) | (true, true, _) =>
+        (futureDatesEnabled, isSubmissionInPreviousTaxYear) match {
+          case (false, true) | (true, _) =>
             Redirect(
               controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
             )
-          case _                                     =>
+          case _                         =>
             Ok(
               checkYourAnswersPage(
                 journey.originalReturn.completeReturn,

@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import java.time.LocalDate
 import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
@@ -41,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TimeUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
@@ -86,6 +85,8 @@ trait ReturnsService {
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, (Boolean, List[ReturnSummary])]
 
   def unsetUnwantedSectionsToDraftReturn(draftReturn: DraftReturn): DraftReturn
+
+  def updateSAStatusToSentReturn(submissionDate: LocalDate, sentReturn: DisplayReturn): DisplayReturn
 
 }
 
@@ -318,6 +319,96 @@ class ReturnsServiceImpl @Inject() (
           e
         ),
       _ => logger.info(s"Deleted draft returns with ids [${ids.mkString(" ")}] ")
+    )
+  }
+
+  def updateSAStatusToSentReturn(submissionDate: LocalDate, sentReturn: DisplayReturn): DisplayReturn =
+    sentReturn.completeReturn.fold(
+      whenMultiple =>
+        if (
+          isSAStatusRequiredToUpdateSentMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers, submissionDate)
+            .contains(true)
+        )
+          sentReturn.copy(
+            completeReturn = whenMultiple.copy(
+              triageAnswers = whenMultiple.triageAnswers.copy(alreadySentSelfAssessment = Some(false))
+            )
+          )
+        else sentReturn,
+      whenSingle =>
+        if (
+          isSAStatusRequiredToUpdateSentSingleDisposalTriageAnswers(whenSingle.triageAnswers, submissionDate)
+            .contains(true)
+        )
+          sentReturn.copy(
+            completeReturn = whenSingle.copy(
+              triageAnswers = whenSingle.triageAnswers.copy(alreadySentSelfAssessment = Some(false))
+            )
+          )
+        else sentReturn,
+      whenSingleIndirect =>
+        if (
+          isSAStatusRequiredToUpdateSentSingleDisposalTriageAnswers(whenSingleIndirect.triageAnswers, submissionDate)
+            .contains(true)
+        )
+          sentReturn.copy(
+            completeReturn = whenSingleIndirect.copy(
+              triageAnswers = whenSingleIndirect.triageAnswers.copy(alreadySentSelfAssessment = Some(false))
+            )
+          )
+        else sentReturn,
+      whenMultipleIndirect =>
+        if (
+          isSAStatusRequiredToUpdateSentMultipleDisposalsTriageAnswers(
+            whenMultipleIndirect.triageAnswers,
+            submissionDate
+          ).contains(true)
+        )
+          sentReturn.copy(
+            completeReturn = whenMultipleIndirect.copy(
+              triageAnswers = whenMultipleIndirect.triageAnswers.copy(alreadySentSelfAssessment = Some(false))
+            )
+          )
+        else sentReturn,
+      whenSingleMixedUse =>
+        if (
+          isSAStatusRequiredToUpdateSentSingleDisposalTriageAnswers(whenSingleMixedUse.triageAnswers, submissionDate)
+            .contains(true)
+        )
+          sentReturn.copy(
+            completeReturn = whenSingleMixedUse.copy(
+              triageAnswers = whenSingleMixedUse.triageAnswers.copy(alreadySentSelfAssessment = Some(false))
+            )
+          )
+        else sentReturn
+    )
+
+  private def isSAStatusRequiredToUpdateSentMultipleDisposalsTriageAnswers(
+    answers: MultipleDisposalsTriageAnswers,
+    submissionDate: LocalDate
+  ): Option[Boolean] = {
+    val taxYear = answers.fold(_.taxYear, c => Some(c.taxYear))
+    isSAStatusRequiredToUpdateSentReturn(taxYear, submissionDate)
+  }
+
+  private def isSAStatusRequiredToUpdateSentSingleDisposalTriageAnswers(
+    answers: SingleDisposalTriageAnswers,
+    submissionDate: LocalDate
+  ): Option[Boolean] = {
+    val taxYear = answers.fold(_.disposalDate, c => Some(c.disposalDate)).map(_.taxYear)
+    isSAStatusRequiredToUpdateSentReturn(taxYear, submissionDate)
+  }
+
+  private def isSAStatusRequiredToUpdateSentReturn(
+    taxYear: Option[TaxYear],
+    submissionDate: LocalDate
+  ): Option[Boolean] = {
+    val disposalDateTaxYearStartYear   = taxYear.map(_.startDateInclusive.getYear)
+    val todaysTaxYearStartYear         = TimeUtils.taxYearStart(TimeUtils.today()).getYear
+    val submissionDateTaxYearStartYear = TimeUtils.taxYearStart(submissionDate).getYear
+
+    disposalDateTaxYearStartYear.map(startYear =>
+      startYear < submissionDateTaxYearStartYear && startYear < todaysTaxYearStartYear
     )
   }
 
