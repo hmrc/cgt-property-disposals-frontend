@@ -561,34 +561,15 @@ class CommonTriageQuestionsController @Inject() (
             )
           )
 
-        val isAmendReturn: Boolean               = state.fold(_ => false, _.isAmendReturn)
-        val originalSubmissionId: Option[String] =
-          state.toOption.flatMap(_.amendReturnData.map(_.originalReturn.summary.submissionId))
-        val form                                 = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
-
-        val backLink = (isAmendReturn, sentSelfAssessment.isEmpty, originalSubmissionId) match {
-          case (true, true, Some(submissionId)) =>
-            controllers.accounts.homepage.routes.HomePageController.viewSentReturn(submissionId)
-          case _                                =>
-            triageAnswers.fold(
-              _.fold(
-                _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
-                _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-              ),
-              _.fold(
-                _ => routes.SingleDisposalsTriageController.whenWasDisposalDate(),
-                _ => routes.SingleDisposalsTriageController.checkYourAnswers()
-              )
-            )
-        }
-
+        val isAmendReturn    = state.fold(_ => false, _.isAmendReturn)
+        val form             = sentSelfAssessment.fold(alreadySentSelfAssessmentForm)(alreadySentSelfAssessmentForm.fill)
         val taxYear          = getTaxYearFromTriageAnswers(triageAnswers)
         val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)
 
         Ok(
           alreadySentSelfAssessmentPage(
             form,
-            backLink,
+            backLinkForHaveYouAlreadySentSelfAssessment(state),
             state.isRight,
             state.fold(
               _.subscribedDetails.isATrust,
@@ -614,16 +595,6 @@ class CommonTriageQuestionsController @Inject() (
           .bindFromRequest()
           .fold(
             { formWithErrors =>
-              val backLink         = triageAnswers.fold(
-                _.fold(
-                  _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
-                  _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-                ),
-                _.fold(
-                  _ => routes.SingleDisposalsTriageController.whenWasDisposalDate(),
-                  _ => routes.SingleDisposalsTriageController.checkYourAnswers()
-                )
-              )
               val taxYear          = getTaxYearFromTriageAnswers(triageAnswers)
               val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)
               val taxYearEndYear   = taxYear.map(_.endDateExclusive.getYear).getOrElse(2021)
@@ -637,7 +608,7 @@ class CommonTriageQuestionsController @Inject() (
               BadRequest(
                 alreadySentSelfAssessmentPage(
                   formWithErrors.copy(errors = updatedFormWithErrors),
-                  backLink,
+                  backLinkForHaveYouAlreadySentSelfAssessment(state),
                   state.isRight,
                   state.fold(
                     _.subscribedDetails.isATrust,
@@ -744,6 +715,30 @@ class CommonTriageQuestionsController @Inject() (
           )
       }
     }
+
+  private def backLinkForHaveYouAlreadySentSelfAssessment(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Call = {
+    val triageAnswers        = triageAnswersFomState(state)
+    val isAmendReturn        = state.fold(_ => false, _.isAmendReturn)
+    val originalSubmissionId = state.toOption.flatMap(_.amendReturnData.map(_.originalReturn.summary.submissionId))
+
+    (isAmendReturn, originalSubmissionId) match {
+      case (true, Some(submissionId)) =>
+        controllers.accounts.homepage.routes.HomePageController.viewSentReturn(submissionId)
+      case _                          =>
+        triageAnswers.fold(
+          _.fold(
+            _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+            _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+          ),
+          _.fold(
+            _ => routes.SingleDisposalsTriageController.whenWasDisposalDate(),
+            _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+          )
+        )
+    }
+  }
 
   private def getTaxYearFromTriageAnswers(
     triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers]
