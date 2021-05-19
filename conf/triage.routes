@@ -13,6 +13,7 @@ GET  /change-return/already-sent-self-assessment            uk.gov.hmrc.cgtprope
 POST /change-return/already-sent-self-assessment            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendsHaveYouAlreadySentSelfAssessmentSubmit()
 
 GET /multiple-disposals/exit-self-assessment                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted()
+GET /change-return/exit-self-assessment                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendsSelfAssessmentAlreadySubmitted()
 
 # Single disposals
 GET  /before-start/how-disposed-of-property                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.howDidYouDisposeOfProperty()

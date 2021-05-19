@@ -73,6 +73,7 @@ class CommonTriageQuestionsController @Inject() (
   alreadySentSelfAssessmentPage: triagePages.have_you_already_sent_self_assesment,
   amendsAlreadySentSelfAssessmentPage: amendPages.have_you_already_sent_self_assesment,
   selfAssessmentExitPage: triagePages.self_assessment_already_submitted,
+  amendsSelfAssessmentExitPage: amendPages.self_assessment_already_submitted,
   exchangeDateIncompatibleTaxyears: triagePages.exchangedate_incompatible_taxyears
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -527,15 +528,15 @@ class CommonTriageQuestionsController @Inject() (
       Ok(whoAreYouSubmittingAmendExitPage(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()))
     }
 
-  def selfAssessmentAlreadySubmitted(): Action[AnyContent] =
+  def amendsSelfAssessmentAlreadySubmitted(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
         val taxYear          = getTaxYearFromTriageAnswers(triageAnswersFomState(state))
         val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)
 
         Ok(
-          selfAssessmentExitPage(
-            routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
+          amendsSelfAssessmentExitPage(
+            routes.CommonTriageQuestionsController.amendsHaveYouAlreadySentSelfAssessment(),
             state.fold(
               _.subscribedDetails.isATrust,
               _.subscribedDetails.isATrust
@@ -627,7 +628,7 @@ class CommonTriageQuestionsController @Inject() (
                   _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
                 )
               if (alreadySentSA)
-                Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
+                Redirect(routes.CommonTriageQuestionsController.amendsSelfAssessmentAlreadySubmitted())
               else if (alreadySentSelfAssessment.contains(alreadySentSA))
                 Redirect(redirectToCheckYourAnswers(state))
               else {
@@ -710,6 +711,26 @@ class CommonTriageQuestionsController @Inject() (
               }
             }
           )
+      }
+    }
+
+  def selfAssessmentAlreadySubmitted(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState { (_, state) =>
+        val taxYear          = getTaxYearFromTriageAnswers(triageAnswersFomState(state))
+        val taxYearStartYear = taxYear.map(_.startDateInclusive.getYear).getOrElse(2020)
+
+        Ok(
+          selfAssessmentExitPage(
+            routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment(),
+            state.fold(
+              _.subscribedDetails.isATrust,
+              _.subscribedDetails.isATrust
+            ),
+            taxYearStartYear,
+            getRepresentativeType(state)
+          )
+        )
       }
     }
 
