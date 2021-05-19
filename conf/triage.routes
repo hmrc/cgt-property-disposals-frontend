@@ -6,6 +6,14 @@ POST /before-start/properties-in-return                     uk.gov.hmrc.cgtprope
 GET  /before-start/further-return/properties-in-return      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.howManyPropertiesFurtherReturn()
 POST /before-start/further-return/properties-in-return      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.howManyPropertiesFurtherReturnSubmit()
 
+GET  /multiple-disposals/already-sent-self-assessment       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+POST /multiple-disposals/already-sent-self-assessment       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessmentSubmit()
+
+GET  /change-return/already-sent-self-assessment            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendsHaveYouAlreadySentSelfAssessment()
+POST /change-return/already-sent-self-assessment            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.amendsHaveYouAlreadySentSelfAssessmentSubmit()
+
+GET /multiple-disposals/exit-self-assessment                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted()
+
 # Single disposals
 GET  /before-start/how-disposed-of-property                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
 POST /before-start/how-disposed-of-property                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.howDidYouDisposeOfPropertySubmit()
@@ -59,11 +67,6 @@ POST /multiple-disposals/tax-year-exchanged                 uk.gov.hmrc.cgtprope
 
 GET  /multiple-disposals/property-types                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.assetTypeForNonUkResidents()
 POST /multiple-disposals/property-types                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.assetTypeForNonUkResidentsSubmit()
-
-GET  /multiple-disposals/already-sent-self-assessment       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
-POST /multiple-disposals/already-sent-self-assessment       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessmentSubmit()
-
-GET /multiple-disposals/exit-self-assessment               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted()
 
 GET  /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDate()
 POST /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDateSubmit()

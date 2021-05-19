@@ -132,7 +132,7 @@ class AmendReturnController @Inject() (
         (futureDatesEnabled, isSubmissionInPreviousTaxYear) match {
           case (false, true) | (true, _) =>
             Redirect(
-              controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
+              controllers.returns.triage.routes.CommonTriageQuestionsController.amendsHaveYouAlreadySentSelfAssessment()
             )
           case _                         =>
             Ok(
