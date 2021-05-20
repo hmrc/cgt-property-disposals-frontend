@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
 import java.util.UUID
-
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{Matchers, WordSpec}
@@ -30,8 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{ar
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SessionDataGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStoreSpec.{TestEnvironment, _}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.DatabaseUpdate
 
 import scala.concurrent.ExecutionContext.Implicits.global

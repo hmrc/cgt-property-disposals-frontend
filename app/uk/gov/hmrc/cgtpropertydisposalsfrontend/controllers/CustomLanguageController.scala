@@ -27,7 +27,7 @@ class CustomLanguageController @Inject() (
   configuration: Configuration,
   languageUtils: LanguageUtils,
   cc: MessagesControllerComponents
-) extends LanguageController(configuration, languageUtils, cc) {
+) extends LanguageController(languageUtils, cc) {
 
   private val english: Lang = Lang("en")
   private val welsh: Lang   = Lang("cy")

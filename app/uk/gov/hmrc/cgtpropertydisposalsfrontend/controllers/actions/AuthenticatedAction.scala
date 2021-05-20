@@ -23,7 +23,7 @@ import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,7 +44,7 @@ class AuthenticatedAction @Inject() (
   ): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter
-        .fromHeadersAndSession(request.headers, Some(request.session))
+        .fromRequestAndSession(request, request.session)
 
     auth.authorised()(Future.successful(Right(AuthenticatedRequest(request))))
   }

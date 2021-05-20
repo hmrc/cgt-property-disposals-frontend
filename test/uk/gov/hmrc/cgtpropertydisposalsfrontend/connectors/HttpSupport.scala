@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
-import org.scalamock.handlers.CallHandler4
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.Matchers
 import play.api.libs.json.Writes
@@ -33,9 +32,9 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
     url: String
   )(
     response: Option[A]
-  ): CallHandler4[String, HttpReads[A], HeaderCarrier, ExecutionContext, Future[A]] =
+  ) =
     (mockHttp
-      .GET(_: String)( //TODO: make one for accepting only URL
+      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
         _: HttpReads[A],
         _: HeaderCarrier,
         _: ExecutionContext
@@ -43,20 +42,21 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
       .expects(where {
         (
           u: String,
+          q: Seq[(String, String)],
+          r: Seq[(String, String)],
           _: HttpReads[A],
-          _: HeaderCarrier,
+          h: HeaderCarrier,
           _: ExecutionContext
         ) ⇒
           // use matchers here to get useful error messages when the following predicates
           // are not satisfied - otherwise it is difficult to tell in the logs what went wrong
-          u shouldBe url
+          u              shouldBe url
+          q              shouldBe Seq.empty
+          r              shouldBe Seq.empty
+          h.extraHeaders shouldBe Seq.empty
           true
       })
-      .returning(
-        response.fold(
-          Future.failed[A](new Exception("Test exception message"))
-        )(Future.successful)
-      )
+      .returning(response.fold(Future.failed[A](new Exception("Test exception message")))(Future.successful))
 
   def mockGetWithQueryWithHeaders[A](
     url: String,
