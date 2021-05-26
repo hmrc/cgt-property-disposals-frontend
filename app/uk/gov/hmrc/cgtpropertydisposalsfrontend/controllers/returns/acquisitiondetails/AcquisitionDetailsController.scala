@@ -1398,7 +1398,7 @@ class AcquisitionDetailsController @Inject() (
 
 object AcquisitionDetailsController {
 
-  val noAnswersRequired = true
+  val noAnswersRequired: Boolean = true
 
   val acquisitionMethodForm: Form[AcquisitionMethod] = {
     val formatter: Formatter[AcquisitionMethod] = {

@@ -15,7 +15,7 @@ resolvers += Resolver.bintrayRepo("hmrc", "releases")
 
 lazy val wartremoverSettings =
   Seq(
-    wartremoverErrors in (Compile, compile) ++= Warts.allBut(
+    (Compile / compile / wartremoverErrors) ++= Warts.allBut(
       Wart.DefaultArguments,
       Wart.ImplicitConversion,
       Wart.ImplicitParameter,
@@ -23,8 +23,8 @@ lazy val wartremoverSettings =
       Wart.Overloading,
       Wart.ToString
     ),
-    wartremoverExcluded in (Compile, compile) ++=
-      routes.in(Compile).value ++
+    wartremover.WartRemover.autoImport.wartremoverExcluded ++=
+      (Compile / routes).value ++
         (baseDirectory.value ** "*.sc").get ++
         Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala"),
     wartremoverErrors in (Test, compile) --= Seq(Wart.Any, Wart.NonUnitStatements, Wart.Null, Wart.PublicInference)
@@ -49,9 +49,9 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"))
   .settings(addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.full))
-  .settings(addCompilerPlugin("com.github.ghik" % "silencer-plugin" % "1.6.0" cross CrossVersion.full))
+  .settings(addCompilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.0" cross CrossVersion.full))
   .settings(addCompilerPlugin(scalafixSemanticdb))
-  .settings(scalaVersion := "2.12.10")
+  .settings(scalaVersion := "2.12.11")
   .settings(
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
