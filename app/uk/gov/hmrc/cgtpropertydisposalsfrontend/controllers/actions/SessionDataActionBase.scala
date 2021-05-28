@@ -46,7 +46,7 @@ trait SessionDataActionBase[R[_] <: Request[_], P[_] <: Request[_]] extends Acti
   ): Future[Either[Result, P[A]]] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter
-        .fromRequestAndSession(request.withTag("", ""), request.session)
+        .fromRequestAndSession(request.withHeaders(request.headers), request.session)
 
     sessionStore
       .get()
