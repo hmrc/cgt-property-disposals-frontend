@@ -25,7 +25,7 @@ import play.api.mvc.Results.Ok
 import play.api.mvc.{MessagesRequest, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.ConfidenceLevel.{L0, L100, L50}
+import uk.gov.hmrc.auth.core.ConfidenceLevel.{L50}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
@@ -591,7 +591,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         "indicate so in the result" in {
           for {
-            cl        <- List[ConfidenceLevel](L0, L50, L100)
+            cl        <- List[ConfidenceLevel](L50)
             mayBeNino <- List[Option[NINO]](Some(NINO("nino")), None)
           } withClue(s"For confidence level $cl ") {
             val retrievalsResult = Future successful (
