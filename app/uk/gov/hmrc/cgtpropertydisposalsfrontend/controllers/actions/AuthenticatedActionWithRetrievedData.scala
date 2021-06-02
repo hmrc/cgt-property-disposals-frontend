@@ -21,7 +21,6 @@ import cats.instances.future._
 import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.traverse._
-
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
@@ -37,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RetrievedUserType, UserT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -64,7 +63,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
 
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter
-        .fromHeadersAndSession(request.headers, Some(request.session))
+        .fromRequestAndSession(request, request.session)
 
     auth
       .authorised()

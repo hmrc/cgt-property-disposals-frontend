@@ -541,11 +541,11 @@ class AgentAccessController @Inject() (
 
 object AgentAccessController {
 
-  val cgtReferenceKey = "cgtReference"
+  val cgtReferenceKey: String = "cgtReference"
 
-  val postcodeKey = "postcode"
+  val postcodeKey: String = "postcode"
 
-  val countryKey = "countryCode"
+  val countryKey: String = "countryCode"
 
   val cgtReferenceForm: Form[CgtReference] = Form(
     mapping(

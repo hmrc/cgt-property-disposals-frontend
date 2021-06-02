@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -59,7 +59,7 @@ class SubscriptionReadyAction @Inject() (
     request: AuthenticatedRequest[A]
   ): Future[Either[Result, RequestWithSubscriptionReady[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter
-      .fromHeadersAndSession(request.headers, Some(request.session))
+      .fromRequestAndSession(request, request.session)
 
     sessionStore
       .get()

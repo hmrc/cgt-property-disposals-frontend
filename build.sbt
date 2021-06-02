@@ -1,9 +1,8 @@
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
-import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import wartremover.Wart
-import wartremover.WartRemover.autoImport.{wartremoverErrors, wartremoverExcluded}
+import wartremover.WartRemover.autoImport.wartremoverErrors
 
 val appName = "cgt-property-disposals-frontend"
 
@@ -15,7 +14,7 @@ resolvers += Resolver.bintrayRepo("hmrc", "releases")
 
 lazy val wartremoverSettings =
   Seq(
-    wartremoverErrors in (Compile, compile) ++= Warts.allBut(
+    (Compile / compile / wartremoverErrors) ++= Warts.allBut(
       Wart.DefaultArguments,
       Wart.ImplicitConversion,
       Wart.ImplicitParameter,
@@ -23,35 +22,28 @@ lazy val wartremoverSettings =
       Wart.Overloading,
       Wart.ToString
     ),
-    wartremoverExcluded in (Compile, compile) ++=
-      routes.in(Compile).value ++
+    wartremover.WartRemover.autoImport.wartremoverExcluded ++=
+      (Compile / routes).value ++
         (baseDirectory.value ** "*.sc").get ++
         Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala"),
-    wartremoverErrors in (Test, compile) --= Seq(Wart.Any, Wart.NonUnitStatements, Wart.Null, Wart.PublicInference)
+    (Test / compile / wartremoverErrors) --= Seq(Wart.Any, Wart.NonUnitStatements, Wart.Null, Wart.PublicInference)
   )
 
 lazy val scoverageSettings =
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;.*(config|testonly|views).*;.*(BuildInfo|Routes).*",
-    ScoverageKeys.coverageMinimum := 80.00,
+    ScoverageKeys.coverageMinimumStmtTotal := 80.00,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(
-    play.sbt.PlayScala,
-    SbtAutoBuildPlugin,
-    SbtGitVersioning,
-    SbtDistributablesPlugin,
-    SbtArtifactory
-  )
+  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"))
   .settings(addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.full))
-  .settings(addCompilerPlugin("com.github.ghik" % "silencer-plugin" % "1.6.0" cross CrossVersion.full))
   .settings(addCompilerPlugin(scalafixSemanticdb))
-  .settings(scalaVersion := "2.12.10")
+  .settings(scalaVersion := "2.12.12")
   .settings(
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test

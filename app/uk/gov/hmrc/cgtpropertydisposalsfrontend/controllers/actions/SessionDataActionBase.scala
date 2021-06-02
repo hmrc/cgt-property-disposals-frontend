@@ -24,7 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -46,7 +46,7 @@ trait SessionDataActionBase[R[_] <: Request[_], P[_] <: Request[_]] extends Acti
   ): Future[Either[Result, P[A]]] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter
-        .fromHeadersAndSession(request.headers, Some(request.session))
+        .fromRequestAndSession(request.withHeaders(request.headers), request.session)
 
     sessionStore
       .get()
