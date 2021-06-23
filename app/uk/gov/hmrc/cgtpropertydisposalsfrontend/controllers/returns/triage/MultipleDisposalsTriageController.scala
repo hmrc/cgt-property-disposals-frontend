@@ -1342,6 +1342,22 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
+                assetTypes,
+                _,
+                _,
+                _,
+                Some(completionDate)
+              )
+              if assetTypes.contains(List(IndirectDisposal)) &&
+                !isAValidCGTTaxTear(TimeUtils.getTaxYearExchangedOfADate(completionDate.value)) =>
+            Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly())
+
+          case IncompleteMultipleDisposalsTriageAnswers(
+                _,
+                _,
+                _,
+                _,
+                _,
                 _,
                 None,
                 _,
