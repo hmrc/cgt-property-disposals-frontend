@@ -903,15 +903,20 @@ class CommonTriageQuestionsController @Inject() (
   private def backLinkForHaveYouAlreadySentSelfAssessment(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Call = {
-    val triageAnswers = triageAnswersFomState(state)
+    val triageAnswers      = triageAnswersFomState(state)
+    val isIndirectDisposal = triageAnswers.fold(_.isIndirectDisposal(), _.isIndirectDisposal())
 
     triageAnswers.fold(
       _.fold(
-        _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+        _ =>
+          if (isIndirectDisposal) routes.MultipleDisposalsTriageController.disposalDateOfShares()
+          else routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
         _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
       ),
       _.fold(
-        _ => routes.SingleDisposalsTriageController.whenWasDisposalDate(),
+        _ =>
+          if (isIndirectDisposal) routes.SingleDisposalsTriageController.disposalDateOfShares()
+          else routes.SingleDisposalsTriageController.whenWasDisposalDate(),
         _ => routes.SingleDisposalsTriageController.checkYourAnswers()
       )
     )
