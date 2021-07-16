@@ -42,6 +42,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
@@ -55,6 +61,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged.TaxYear2020
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
@@ -188,6 +195,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
         }
 
       }
+
     }
 
     "handling requests to get draft returns" must {
@@ -871,6 +879,45 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory wit
         }
 
       }
+
+    }
+
+    "handling requests to unsetUnwantedSectionsToDraftReturn" must {
+
+      val draftReturn = sample[DraftReturn]
+
+      "unset unwanted sections to the draft return" in {
+
+        val result = service.unsetUnwantedSectionsToDraftReturn(draftReturn)
+
+        result.gainOrLossAfterReliefs     shouldBe None
+        result.exemptionAndLossesAnswers  shouldBe None
+        result.yearToDateLiabilityAnswers shouldBe None
+        result.fold(
+          _.supportingEvidenceAnswers,
+          _.supportingEvidenceAnswers,
+          _.supportingEvidenceAnswers,
+          _.supportingEvidenceAnswers,
+          _.supportingEvidenceAnswers
+        )                                 shouldBe None
+
+      }
+
+    }
+
+    "handling requests to updateCorrectTaxYearToSentReturns" must {
+      val taxDue         = sample[AmountInPence]
+      val completeReturn = sample[CompleteSingleDisposalReturn].copy(
+        yearToDateLiabilityAnswers = Right(sample[CompleteCalculatedYTDAnswers].copy(taxDue = taxDue))
+      )
+      val displayReturn  = DisplayReturn(completeReturn, ReturnType.FirstReturn)
+
+      val taxYear = sample[TaxYear]
+
+      val cgtReference = sample[CgtReference]
+      val returnSummary =  List(sample[ReturnSummary].copy(
+        taxYear = "2021"
+      ))
 
     }
 
