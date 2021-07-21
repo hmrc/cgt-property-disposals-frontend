@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
@@ -29,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.TaxYearResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.{AvailableTaxYearsResponse, TaxYearResponse}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,6 +46,12 @@ class TaxYearServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrive
     (mockReturnsConnector
       .taxYear(_: LocalDate)(_: HeaderCarrier))
       .expects(date, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockAvailableTaxYears()(response: Either[Error, HttpResponse]) =
+    (mockReturnsConnector
+      .availableTaxYears()(_: HeaderCarrier))
+      .expects(*)
       .returning(EitherT.fromEither[Future](response))
 
   "TaxYearServiceImpl" when {
@@ -102,6 +107,64 @@ class TaxYearServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrive
             Right(HttpResponse(200, Json.toJson(TaxYearResponse(None)), Map[String, Seq[String]]().empty))
           )
           await(service.taxYear(date).value) shouldBe Right(None)
+        }
+
+      }
+
+    }
+
+    "handling requests to get available tax years" must {
+
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      "return an error" when {
+
+        "there is an error making the http call" in {
+          mockAvailableTaxYears()(Left(Error("")))
+
+          await(service.availableTaxYears().value).isLeft shouldBe true
+        }
+
+        "the http call comes back with a status other than 200" in {
+          mockAvailableTaxYears()(Right(HttpResponse(500, emptyJsonBody)))
+
+          await(service.availableTaxYears().value).isLeft shouldBe true
+        }
+
+        "the http call comes back with status 200 but the body cannot be parsed" in {
+          mockAvailableTaxYears()(
+            Right(HttpResponse(200, JsString("hello"), Map[String, Seq[String]]().empty))
+          )
+
+          await(service.availableTaxYears().value).isLeft shouldBe true
+        }
+
+      }
+
+      "return the available tax years" when {
+
+        "the call is successful and a tax year was found" in {
+          val taxYears = List(2020, 2021)
+          mockAvailableTaxYears()(
+            Right(
+              HttpResponse(
+                200,
+                Json.toJson(AvailableTaxYearsResponse(taxYears)),
+                Map[String, Seq[String]]().empty
+              )
+            )
+          )
+
+          await(service.availableTaxYears().value) shouldBe Right(taxYears)
+        }
+
+        "the call is successful and a tax year was not found" in {
+          mockAvailableTaxYears()(
+            Right(
+              HttpResponse(200, Json.toJson(AvailableTaxYearsResponse(List.empty)), Map[String, Seq[String]]().empty)
+            )
+          )
+          await(service.availableTaxYears().value) shouldBe Right(List.empty)
         }
 
       }
