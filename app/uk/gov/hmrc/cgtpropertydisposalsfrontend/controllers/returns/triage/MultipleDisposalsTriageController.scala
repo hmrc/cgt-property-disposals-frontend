@@ -1546,10 +1546,10 @@ class MultipleDisposalsTriageController @Inject() (
       }
     }
 
-  def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged): Boolean =
+  private def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged): Boolean =
     !(taxYearExchanged === TaxYearExchanged.TaxYearBefore2020 || taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
 
-  def isTaxYearWithinOriginalSubmissionTaxYear(
+  private def isTaxYearWithinOriginalSubmissionTaxYear(
     taxYearExchanged: TaxYearExchanged,
     originalSubmissionYear: Option[String]
   ): Boolean =

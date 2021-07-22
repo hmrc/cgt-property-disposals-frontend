@@ -3508,6 +3508,81 @@ class CommonTriageQuestionsControllerSpec
 
     }
 
+    "handling requests to display the disposals of shares too early page" must {
+
+      def performAction(): Future[Result] =
+        controller.disposalsOfSharesTooEarly()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalsOfSharesTooEarly(),
+        mockUUIDGenerator
+      )
+
+      "display the page" when {
+
+        "the user is starting a new single disposal draft return and" +
+          "the user has not answered any triage questions yet" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(IncompleteSingleDisposalTriageAnswers.empty),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("disposalDateTooEarly.non-uk.title"),
+              { doc =>
+                doc
+                  .select("h2.heading-medium")
+                  .text() shouldBe messageFromMessageKey("disposalDateTooEarly.non-uk.h2")
+
+                doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                  .disposalDateOfShares()
+                  .url
+              }
+            )
+          }
+
+        "the user is starting a new multiple disposal draft return and" +
+          "the user has not answered any triage questions yet" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(IncompleteMultipleDisposalsTriageAnswers.empty),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("disposalDateTooEarly.non-uk.title"),
+              { doc =>
+                doc
+                  .select("h2.heading-medium")
+                  .text() shouldBe messageFromMessageKey("disposalDateTooEarly.non-uk.h2")
+
+                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .disposalDateOfShares()
+                  .url
+              }
+            )
+          }
+
+      }
+
+    }
+
   }
 
   def testSuccessfulUpdateStartingNewDraftReturn(
