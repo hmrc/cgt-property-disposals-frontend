@@ -180,5 +180,14 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       )
     }
 
+    "handling requests to get available tax years" must {
+      val expectedUrl = s"http://host:123/available-tax-years"
+
+      behave like connectorBehaviour(
+        mockGet[HttpResponse](expectedUrl),
+        () => connector.availableTaxYears()
+      )
+    }
+
   }
 }

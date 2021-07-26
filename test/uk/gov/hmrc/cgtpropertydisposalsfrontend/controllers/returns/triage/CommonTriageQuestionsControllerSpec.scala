@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.{Clock, LocalDate}
-
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -29,7 +28,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
@@ -262,7 +261,8 @@ class CommonTriageQuestionsControllerSpec
 
   def sessionDataWithFillingOutReturnForMultpleDisposals(
     multipleDisposalsTriageAnswers: MultipleDisposalsTriageAnswers,
-    isAmend: Boolean = false
+    isAmend: Boolean = false,
+    amendReturnData: Option[AmendReturnData] = None
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn      = sample[DraftMultipleDisposalsReturn].copy(
       triageAnswers = multipleDisposalsTriageAnswers
@@ -271,8 +271,8 @@ class CommonTriageQuestionsControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
       amendReturnData =
-        if (isAmend)
-          Some(sample[AmendReturnData])
+        if (amendReturnData.isDefined) amendReturnData
+        else if (isAmend) Some(sample[AmendReturnData])
         else None,
       previousSentReturns = None
     )
@@ -1294,7 +1294,6 @@ class CommonTriageQuestionsControllerSpec
 
         "the option submitted has not been recognised" in {
           test("numberOfProperties" -> "2")("numberOfProperties.error.invalid")
-
         }
 
       }
@@ -2867,6 +2866,721 @@ class CommonTriageQuestionsControllerSpec
               .url
         )
       }
+
+    }
+
+    "handling requests to display the amends self assessment exit page" must {
+
+      def performAction(): Future[Result] =
+        controller.amendsSelfAssessmentAlreadySubmitted()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.amendsSelfAssessmentAlreadySubmitted(),
+        mockUUIDGenerator
+      )
+
+      "display the page" in {
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithFillingOutReturn(
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                disposalDate = sample[DisposalDate],
+                alreadySentSelfAssessment = Some(true)
+              ),
+              amendReturnData = Some(sample[AmendReturnData])
+            )._1
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("selfAssessmentAlreadySubmitted.title"),
+          { doc =>
+            doc
+              .select("h2.heading-medium")
+              .text() shouldBe messageFromMessageKey("selfAssessmentAlreadySubmitted.whatNext")
+
+            doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
+              .amendsHaveYouAlreadySentSelfAssessment()
+              .url
+          }
+        )
+
+      }
+
+    }
+
+    "handling requests to display the amends self assessment page" must {
+
+      def performAction(): Future[Result] =
+        controller.amendsHaveYouAlreadySentSelfAssessment()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.amendsHaveYouAlreadySentSelfAssessment(),
+        mockUUIDGenerator
+      )
+
+      "display the page" in {
+
+        val startDateInclusive = LocalDate.of(2020, 4, 6)
+        val endDateExclusive   = LocalDate.of(2021, 4, 6)
+        val taxYear            = sample[TaxYear].copy(
+          startDateInclusive = startDateInclusive,
+          endDateExclusive = endDateExclusive
+        )
+        val submissionId       = "ABC"
+
+        val originalReturn  = sample[CompleteReturnWithSummary].copy(
+          summary = sample[ReturnSummary].copy(
+            submissionId = submissionId
+          )
+        )
+        val amendReturnData = sample[AmendReturnData].copy(
+          originalReturn = originalReturn
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithFillingOutReturn(
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                individualUserType = Some(IndividualUserType.Self),
+                disposalDate = sample[DisposalDate].copy(taxYear = taxYear),
+                alreadySentSelfAssessment = Some(true)
+              ),
+              amendReturnData = Some(amendReturnData)
+            )._1
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(
+            "alreadySentSelfAssessment.title",
+            startDateInclusive.getYear.toString,
+            endDateExclusive.getYear.toString
+          ),
+          { doc =>
+            doc
+              .select("#content > article > form")
+              .attr(
+                "action"
+              ) shouldBe routes.CommonTriageQuestionsController
+              .amendsHaveYouAlreadySentSelfAssessmentSubmit()
+              .url
+
+            doc.select("#back").attr("href") shouldBe homePageRoutes.HomePageController
+              .viewSentReturn(submissionId)
+              .url
+
+            doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.saveAndContinue")
+          }
+        )
+
+      }
+
+    }
+
+    "handling submitted requests to the amends self assessment page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.amendsHaveYouAlreadySentSelfAssessmentSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*)
+        )
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(),
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.amendsHaveYouAlreadySentSelfAssessmentSubmit(),
+        mockUUIDGenerator
+      )
+
+      val key = "alreadySentSelfAssessment"
+
+      "show a form error" when {
+
+        val startDateInclusive = LocalDate.of(2020, 4, 6)
+        val endDateExclusive   = LocalDate.of(2021, 4, 6)
+
+        val taxYear = sample[TaxYear].copy(
+          startDateInclusive = startDateInclusive,
+          endDateExclusive = endDateExclusive
+        )
+
+        val submissionId = "ABC"
+
+        val originalReturn  = sample[CompleteReturnWithSummary].copy(
+          summary = sample[ReturnSummary].copy(
+            submissionId = submissionId
+          )
+        )
+        val amendReturnData = sample[AmendReturnData].copy(
+          originalReturn = originalReturn
+        )
+
+        def test(formData: (String, String)*)(expectedErrorKey: String): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                sample[CompleteSingleDisposalTriageAnswers].copy(
+                  individualUserType = Some(IndividualUserType.Self),
+                  disposalDate = sample[DisposalDate].copy(taxYear = taxYear),
+                  alreadySentSelfAssessment = Some(true)
+                ),
+                amendReturnData = Some(amendReturnData)
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey(
+              s"$key.title",
+              startDateInclusive.getYear.toString,
+              endDateExclusive.getYear.toString
+            ),
+            { doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorKey,
+                startDateInclusive.getYear.toString,
+                endDateExclusive.getYear.toString
+              )
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
+                .amendsHaveYouAlreadySentSelfAssessmentSubmit()
+                .url
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "nothing has been submitted" in {
+          test()(s"$key.error.required")
+        }
+
+        "the option submitted has not been recognised" in {
+          test(key -> "2")(s"$key.error.boolean")
+        }
+
+      }
+
+      "handle valid data" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user is on a single disposal journey and hasn't answered the question yet and " +
+            "they haven't completed the triage section" in {
+              testSuccessfulUpdateStartingNewDraftReturn(
+                performAction(key -> "false"),
+                Right(
+                  IncompleteSingleDisposalTriageAnswers.empty.copy(
+                    hasConfirmedSingleDisposal = true,
+                    wasAUKResident = Some(true)
+                  )
+                ),
+                Left(sample[TrustName])
+              )(
+                Right(
+                  IncompleteSingleDisposalTriageAnswers.empty.copy(
+                    hasConfirmedSingleDisposal = true,
+                    wasAUKResident = Some(true),
+                    alreadySentSelfAssessment = Some(false)
+                  )
+                ),
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            }
+
+          "the user is on a single disposal journey and they haven't completed the triage section" in {
+            testSuccessfulUpdateStartingNewDraftReturn(
+              performAction(key -> "false"),
+              Right(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType = Some(IndividualUserType.Self),
+                  hasConfirmedSingleDisposal = true,
+                  wasAUKResident = Some(true)
+                )
+              ),
+              Right(sample[IndividualName])
+            )(
+              Right(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType = Some(IndividualUserType.Self),
+                  wasAUKResident = Some(true),
+                  hasConfirmedSingleDisposal = true,
+                  alreadySentSelfAssessment = Some(false)
+                )
+              ),
+              routes.SingleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "the user is on a multiple disposals journey and they haven't completed the triage section" in {
+            testSuccessfulUpdateStartingNewDraftReturn(
+              performAction(key -> "false"),
+              Left(
+                IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                  individualUserType = None,
+                  wasAUKResident = Some(true)
+                )
+              ),
+              Left(sample[TrustName])
+            )(
+              Left(
+                IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                  individualUserType = None,
+                  wasAUKResident = Some(true),
+                  alreadySentSelfAssessment = Some(false)
+                )
+              ),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling requests to display the self assessment exit page" must {
+
+      def performAction(): Future[Result] =
+        controller.selfAssessmentAlreadySubmitted()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.selfAssessmentAlreadySubmitted(),
+        mockUUIDGenerator
+      )
+
+      "display the page" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user has not answered any triage questions yet" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(IncompleteSingleDisposalTriageAnswers.empty),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("selfAssessmentAlreadySubmitted.title"),
+              { doc =>
+                doc
+                  .select("h2.heading-medium")
+                  .text() shouldBe messageFromMessageKey("selfAssessmentAlreadySubmitted.whatNext")
+
+                doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
+                  .haveYouAlreadySentSelfAssessment()
+                  .url
+              }
+            )
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling requests to display the self assessment page" must {
+
+      def performAction(): Future[Result] =
+        controller.haveYouAlreadySentSelfAssessment()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.haveYouAlreadySentSelfAssessment(),
+        mockUUIDGenerator
+      )
+
+      "display the page" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user has not answered any triage questions yet" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(IncompleteSingleDisposalTriageAnswers.empty),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("alreadySentSelfAssessment.title", "2020", "2021"),
+              { doc =>
+                doc
+                  .select("#content > article > form")
+                  .attr(
+                    "action"
+                  ) shouldBe routes.CommonTriageQuestionsController
+                  .haveYouAlreadySentSelfAssessmentSubmit()
+                  .url
+
+                doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                  .whenWasDisposalDate()
+                  .url
+
+                doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.continue")
+              }
+            )
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling submitted requests to the self assessment page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.haveYouAlreadySentSelfAssessmentSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*)
+        )
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(),
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.haveYouAlreadySentSelfAssessmentSubmit(),
+        mockUUIDGenerator
+      )
+
+      val key = "alreadySentSelfAssessment"
+
+      "show a form error" when {
+
+        val startDateInclusive = LocalDate.of(2020, 4, 6)
+        val endDateExclusive   = LocalDate.of(2021, 4, 6)
+
+        val taxYear = sample[TaxYear].copy(
+          startDateInclusive = startDateInclusive,
+          endDateExclusive = endDateExclusive
+        )
+
+        def test(formData: (String, String)*)(expectedErrorKey: String): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Left(
+                  IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                    individualUserType = Some(IndividualUserType.Self),
+                    taxYear = Some(taxYear)
+                  )
+                ),
+                Right(sample[IndividualName])
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey(
+              s"$key.title",
+              startDateInclusive.getYear.toString,
+              endDateExclusive.getYear.toString
+            ),
+            { doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorKey,
+                startDateInclusive.getYear.toString,
+                endDateExclusive.getYear.toString
+              )
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
+                .haveYouAlreadySentSelfAssessmentSubmit()
+                .url
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "nothing has been submitted" in {
+          test()(s"$key.error.required")
+        }
+
+        "the option submitted has not been recognised" in {
+          test(key -> "2")(s"$key.error.boolean")
+        }
+
+      }
+
+      "handle valid data" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user is on a single disposal journey and hasn't answered the question yet and " +
+            "they haven't completed the triage section" in {
+              testSuccessfulUpdateStartingNewDraftReturn(
+                performAction(key -> "false"),
+                Right(
+                  IncompleteSingleDisposalTriageAnswers.empty.copy(
+                    hasConfirmedSingleDisposal = true,
+                    wasAUKResident = Some(true)
+                  )
+                ),
+                Left(sample[TrustName])
+              )(
+                Right(
+                  IncompleteSingleDisposalTriageAnswers.empty.copy(
+                    hasConfirmedSingleDisposal = true,
+                    wasAUKResident = Some(true),
+                    alreadySentSelfAssessment = Some(false)
+                  )
+                ),
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            }
+
+          "the user is on a single disposal journey and they haven't completed the triage section" in {
+            testSuccessfulUpdateStartingNewDraftReturn(
+              performAction(key -> "false"),
+              Right(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType = Some(IndividualUserType.Self),
+                  hasConfirmedSingleDisposal = true,
+                  wasAUKResident = Some(true)
+                )
+              ),
+              Right(sample[IndividualName])
+            )(
+              Right(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType = Some(IndividualUserType.Self),
+                  wasAUKResident = Some(true),
+                  hasConfirmedSingleDisposal = true,
+                  alreadySentSelfAssessment = Some(false)
+                )
+              ),
+              routes.SingleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "the user is on a multiple disposals journey and they haven't completed the triage section" in {
+            testSuccessfulUpdateStartingNewDraftReturn(
+              performAction(key -> "false"),
+              Left(
+                IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                  individualUserType = None,
+                  wasAUKResident = Some(true)
+                )
+              ),
+              Left(sample[TrustName])
+            )(
+              Left(
+                IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                  individualUserType = None,
+                  wasAUKResident = Some(true),
+                  alreadySentSelfAssessment = Some(false)
+                )
+              ),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling requests to display the amends exchangedYearIncompatibleWithTaxYear page" must {
+
+      def performAction(): Future[Result] =
+        controller.exchangedYearIncompatibleWithTaxYear()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.exchangedYearIncompatibleWithTaxYear(),
+        mockUUIDGenerator
+      )
+
+      "display the page" in {
+
+        val startDateInclusive             = LocalDate.of(2020, 4, 6)
+        val endDateExclusive               = LocalDate.of(2021, 4, 6)
+        val taxYear                        = sample[TaxYear].copy(
+          startDateInclusive = startDateInclusive,
+          endDateExclusive = endDateExclusive
+        )
+        val multipleDisposalsTriageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          individualUserType = Some(IndividualUserType.Self),
+          taxYear = taxYear,
+          alreadySentSelfAssessment = Some(false)
+        )
+        val completeReturn                 = sample[CompleteMultipleDisposalsReturn].copy(
+          triageAnswers = multipleDisposalsTriageAnswers
+        )
+        val newTaxYear                     = sample[TaxYear].copy(
+          startDateInclusive = startDateInclusive.plusYears(1),
+          endDateExclusive = endDateExclusive.plusYears(1)
+        )
+        val submissionId                   = "ABC"
+
+        val originalReturn  = sample[CompleteReturnWithSummary].copy(
+          summary = sample[ReturnSummary].copy(
+            submissionId = submissionId
+          ),
+          completeReturn = completeReturn
+        )
+        val amendReturnData = sample[AmendReturnData].copy(
+          originalReturn = originalReturn
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithFillingOutReturnForMultpleDisposals(
+              multipleDisposalsTriageAnswers.copy(
+                taxYear = newTaxYear
+              ),
+              true,
+              amendReturnData = Some(amendReturnData)
+            )._1
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(
+            "multipleDisposalsExchangeDateInDifferentTaxYear.title",
+            startDateInclusive.getYear.toString,
+            endDateExclusive.getYear.toString
+          ),
+          doc =>
+            doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+              .whenWereContractsExchanged()
+              .url
+        )
+
+      }
+
+    }
+
+    "handling requests to display the disposals of shares too early page" must {
+
+      def performAction(): Future[Result] =
+        controller.disposalsOfSharesTooEarly()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.disposalsOfSharesTooEarly(),
+        mockUUIDGenerator
+      )
+
+      "display the page" when {
+
+        "the user is starting a new single disposal draft return and" +
+          "the user has not answered any triage questions yet" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(IncompleteSingleDisposalTriageAnswers.empty),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("disposalDateTooEarly.non-uk.title"),
+              { doc =>
+                doc
+                  .select("h2.heading-medium")
+                  .text() shouldBe messageFromMessageKey("disposalDateTooEarly.non-uk.h2")
+
+                doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                  .disposalDateOfShares()
+                  .url
+              }
+            )
+          }
+
+        "the user is starting a new multiple disposal draft return and" +
+          "the user has not answered any triage questions yet" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(IncompleteMultipleDisposalsTriageAnswers.empty),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("disposalDateTooEarly.non-uk.title"),
+              { doc =>
+                doc
+                  .select("h2.heading-medium")
+                  .text() shouldBe messageFromMessageKey("disposalDateTooEarly.non-uk.h2")
+
+                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .disposalDateOfShares()
+                  .url
+              }
+            )
+          }
+
+      }
+
     }
 
   }
