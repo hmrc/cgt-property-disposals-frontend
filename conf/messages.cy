@@ -3455,6 +3455,9 @@ repayment.capacitor.title=Yn seiliedig ar y manylion yn y Ffurflen Dreth hon, a 
 repayment.personalRep.title=Yn seiliedig ar y manylion yn y Ffurflen Dreth hon, a oes ad-daliad yn ddyledus i’r cynrychiolydd personol?
 repayment.personalRepInPeriodOfAdmin.title=Yn seiliedig ar y manylion yn y Ffurflen Dreth hon, a oes ad-daliad yn ddyledus i’r ystâd?
 repayment.personalRepInPeriodOfAdmin.agent.title=Yn seiliedig ar y manylion yn y Ffurflen Dreth hon, a oes ad-daliad yn ddyledus i’r ystâd?
+
+repayment.yes.content=If you paid by debit card, we will attempt to refund it. If you paid by another method, you’ll be asked for your bank details on a later page.
+
 repayment.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i chi, bydd CThEM yn ad-dalu’r arian i chi cyn pen 30 diwrnod. Os nad oes ad-daliad yn ddyledus i chi, ni chysylltir â chi.
 repayment.agent.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’ch cleient, bydd CThEM yn ad-dalu’r arian iddo cyn pen 30 diwrnod. Os nad oes ad-daliad yn ddyledus iddo, ni chysylltir ag ef.
 repayment.trust.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r ymddiriedolaeth, bydd CThEM yn ad-dalu’r arian cyn pen 30 diwrnod. Os nad oes ad-daliad yn ddyledus iddi, ni chysylltir â chi.
