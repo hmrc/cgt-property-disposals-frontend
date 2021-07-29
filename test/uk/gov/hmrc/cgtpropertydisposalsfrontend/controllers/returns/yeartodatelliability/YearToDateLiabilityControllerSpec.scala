@@ -4343,6 +4343,8 @@ class YearToDateLiabilityControllerSpec
 
       "display the page" when {
 
+        val key = "mandatoryEvidence"
+
         def test(
           answers: YearToDateLiabilityAnswers,
           backLink: Call,
@@ -4411,19 +4413,25 @@ class YearToDateLiabilityControllerSpec
             )(Right(()))
           }
 
+          val repaymentDue = controller.isReplaymentDue(answers)
+
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("mandatoryEvidence.title"),
+            messageFromMessageKey(s"$key.title"),
             { doc =>
               doc.select("#back").attr("href")                            shouldBe backLink.url
               doc.select("#content > article > p#upload-guidance").text() shouldBe messageFromMessageKey(
-                "mandatoryEvidence.guidance.p1"
+                s"$key.guidance.p1"
               )
+
+              if (repaymentDue)
+                doc.select("div > strong.bold-small").text() shouldBe messageFromMessageKey(s"$key.alert")
+
               doc
                 .select("#content > article > form")
                 .attr(
                   "action"
-                )                                                         shouldBe upscanUpload.upscanUploadMeta.uploadRequest.href
+                ) shouldBe upscanUpload.upscanUploadMeta.uploadRequest.href
             }
           )
         }
@@ -4513,6 +4521,7 @@ class YearToDateLiabilityControllerSpec
               None
             )
           }
+
         }
 
       }
