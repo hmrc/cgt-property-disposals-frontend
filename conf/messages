@@ -3911,6 +3911,8 @@ hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any sup
 
 mandatoryEvidence.title=Upload a document showing how the Capital Gains Tax due was worked out
 
+mandatoryEvidence.alert=If you’re due a repayment, you’ll be asked for your bank details on a later page. Do not upload them here.
+
 mandatoryEvidence.guidance.p1=It will need to include these details:
 mandatoryEvidence.multiple.guidance.p1=It will need to include these details for each property or disposal:
 
