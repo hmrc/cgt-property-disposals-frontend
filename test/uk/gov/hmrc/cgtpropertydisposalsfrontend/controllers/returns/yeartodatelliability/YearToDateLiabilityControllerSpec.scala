@@ -4343,6 +4343,8 @@ class YearToDateLiabilityControllerSpec
 
       "display the page" when {
 
+        val key = "mandatoryEvidence"
+
         def test(
           answers: YearToDateLiabilityAnswers,
           backLink: Call,
@@ -4411,27 +4413,34 @@ class YearToDateLiabilityControllerSpec
             )(Right(()))
           }
 
+          val repaymentDue = controller.isReplaymentDue(answers)
+
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("mandatoryEvidence.title"),
+            messageFromMessageKey(s"$key.title"),
             { doc =>
               doc.select("#back").attr("href")                            shouldBe backLink.url
               doc.select("#content > article > p#upload-guidance").text() shouldBe messageFromMessageKey(
-                "mandatoryEvidence.guidance.p1"
+                s"$key.guidance.p1"
               )
+
+              if (repaymentDue)
+                doc.select("div > strong.bold-small").text() shouldBe messageFromMessageKey(s"$key.alert")
+
               doc
                 .select("#content > article > form")
                 .attr(
                   "action"
-                )                                                         shouldBe upscanUpload.upscanUploadMeta.uploadRequest.href
+                ) shouldBe upscanUpload.upscanUploadMeta.uploadRequest.href
             }
           )
         }
 
         "the user is on a calculated journey and" when {
 
-          val calculatedTaxDue = sample[GainCalculatedTaxDue]
-            .copy(amountOfTaxDue = AmountInPence(100L))
+          val calculatedTaxDue = sample[GainCalculatedTaxDue].copy(
+            amountOfTaxDue = AmountInPence(100L)
+          )
 
           "the section is incomplete" in {
             test(
@@ -4460,6 +4469,7 @@ class YearToDateLiabilityControllerSpec
               None
             )
           }
+
         }
 
         "the user is on a non-calculated journey and" when {

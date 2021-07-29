@@ -1333,6 +1333,17 @@ class YearToDateLiabilityController @Inject() (
       }
     }
 
+  def isReplaymentDue(answers: YearToDateLiabilityAnswers): Boolean = answers match {
+    case nonCalculatedYTDAnswers: NonCalculatedYTDAnswers =>
+      nonCalculatedYTDAnswers
+        .fold(
+          _.checkForRepayment,
+          _.checkForRepayment
+        )
+        .getOrElse(false)
+    case _                                                => false
+  }
+
   def uploadMandatoryEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
@@ -1367,7 +1378,8 @@ class YearToDateLiabilityController @Inject() (
                   backLink,
                   fillingOutReturn.isFurtherOrAmendReturn,
                   fillingOutReturn.isAmendReturn,
-                  fillingOutReturn.draftReturn.triageAnswers.isLeft
+                  fillingOutReturn.draftReturn.triageAnswers.isLeft,
+                  isReplaymentDue(answers)
                 )
               )
           )
@@ -2321,7 +2333,6 @@ class YearToDateLiabilityController @Inject() (
 
         }
       }
-
     }
 
   def repaymentSubmit(): Action[AnyContent] =

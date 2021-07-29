@@ -3403,6 +3403,9 @@ hasSupportingDocsToUpload.error.required=Dewiswch ‘Iawn’ os hoffech uwchlwyt
 hasSupportingDocsToUpload.error.boolean=Dewiswch ‘Iawn’ os hoffech uwchlwytho unrhyw ddogfennau ategol
 
 mandatoryEvidence.title=Uwchlwythwch ddogfen sy’n dangos sut y cyfrifwyd y Dreth Enillion Cyfalaf sy’n ddyledus
+
+mandatoryEvidence.alert=If you’re due a repayment, you’ll be asked for your bank details on a later page. Do not upload them here.
+
 mandatoryEvidence.guidance.p1=Bydd angen iddo gynnwys y manylion hyn:
 mandatoryEvidence.multiple.guidance.p1=Bydd angen iddo gynnwys y manylion hyn ar gyfer pob eiddo neu warediad:
 mandatoryEvidence.multiple.guidance.bullet1=cyfeiriad pob eiddo - ar gyfer gwaredu eiddo

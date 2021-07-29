@@ -30,7 +30,8 @@
     fileInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.file_input,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
+    insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel,
+    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @(
@@ -38,7 +39,8 @@
     backLink: Call,
     isFurtherOrAmendReturn: Option[Boolean],
     isAmend: Boolean,
-    isMultipleDisposal: Boolean
+    isMultipleDisposal: Boolean,
+    isRepaymentDue: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
     @key = @{ "mandatoryEvidence" }
@@ -47,6 +49,7 @@
     @meta = @{upscanUpload.upscanUploadMeta.uploadRequest.fields}
     @href = @{upscanUpload.upscanUploadMeta.uploadRequest.href}
     @amendKey = @{if(isAmend) ".amend" else ""}
+
     @guidance = {
       @if(isMultipleDisposal) {
         <p id="upload-guidance">
@@ -80,6 +83,10 @@
       @caption(messages(s"ytdLiability${if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}.caption"))
 
       @pageHeading(title)
+
+      @if(isRepaymentDue){
+        @warning(messages(s"$key.alert"))
+      }
 
       @guidance
 
