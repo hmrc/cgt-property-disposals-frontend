@@ -33,7 +33,7 @@
   noContent: Option[Html] = None,
   describedBy: Option[String] = None,
   errorMessage: Option[String] = None,
-  warningField: Option[String]= None
+  yesWarningField: Option[String] = None
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
@@ -63,15 +63,17 @@
         }
     }
 
-      @if(warningField.isDefined){
+    @if(yesWarningField.isDefined){
+      <div id="yes-warning" class="js-hidden" aria-hidden="true">
         @warning(
-            warningField.getOrElse("")
+            yesWarningField.getOrElse("")
         )
-      }
+      </div>
+    }
 
-    <div class="multiple-choice"@if(yesContent.nonEmpty){ data-target="yes-content" }>
+    <div class="multiple-choice"@if(yesContent.nonEmpty){ data-target="yes-content" } @if(yesWarningField.isDefined){ data-target="yes-warning" }>
       <input id="@{fieldId}-true"
-       name="@fieldId"
+       name="@{fieldId.replace('.','_')}"
        value="true"
        type="radio"
       @if(selected.contains(true)) { checked="checked" }
@@ -85,7 +87,7 @@
 
    <div class="multiple-choice"@if(noContent.nonEmpty){ data-target="no-content" }>
       <input id="@{fieldId}-false"
-       name="@fieldId"
+       name="@{fieldId.replace('.','_')}"
        value="false"
        type="radio"
       @if(selected.contains(false)) { checked="checked" }
