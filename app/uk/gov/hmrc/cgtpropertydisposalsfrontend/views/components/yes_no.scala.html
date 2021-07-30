@@ -18,7 +18,8 @@
 @import play.twirl.api.Html
 
 @this(
-  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
+  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline,
+  warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @(
@@ -31,7 +32,8 @@
   yesContent: Option[Html] = None,
   noContent: Option[Html] = None,
   describedBy: Option[String] = None,
-  errorMessage: Option[String] = None
+  errorMessage: Option[String] = None,
+  warningField: Option[String]= None
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
@@ -60,6 +62,12 @@
           @errorInline(id, messages(s"$fieldId.$key"))
         }
     }
+
+      @if(warningField.isDefined){
+        @warning(
+            warningField.getOrElse("")
+        )
+      }
 
     <div class="multiple-choice"@if(yesContent.nonEmpty){ data-target="yes-content" }>
       <input id="@{fieldId}-true"

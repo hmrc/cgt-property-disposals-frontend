@@ -61,7 +61,8 @@
                 hasErrors = hasErrors,
                 selected = form.value,
                 helpText = Some(Html(messages(s"$key.help-text"))),
-                yesContent = None
+                yesContent = None,
+                warningField= Some(messages(s"$key.hint"))
             )
 
             @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))

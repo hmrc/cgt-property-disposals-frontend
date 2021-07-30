@@ -4020,6 +4020,7 @@ supporting-evidence.do-you-want-to-upload.error.required=Select yes if you want 
 supporting-evidence.do-you-want-to-upload.error.boolean=Select yes if you want to upload supporting evidence
 supporting-evidence.do-you-want-to-upload.caption=Supporting evidence
 supporting-evidence.do-you-want-to-upload.help-text=Up to 2 documents can be uploaded. For example, spreadsheets with calculations, invoices, receipts or valuations.
+supporting-evidence.do-you-want-to-upload.hint=Select yes if you’re due a repayment. You’ll be asked to upload a document including your payment details on the next page.
 
 supporting-evidence.check-your-answers.title=Check your answers
 supporting-evidence.check-your-answers.caption=Supporting evidence
