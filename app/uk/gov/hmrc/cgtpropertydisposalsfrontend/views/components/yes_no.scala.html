@@ -64,16 +64,14 @@
     }
 
     @if(yesWarningField.isDefined){
-      <div id="yes-warning" class="js-hidden" aria-hidden="true">
         @warning(
             yesWarningField.getOrElse("")
         )
-      </div>
     }
 
-    <div class="multiple-choice"@if(yesContent.nonEmpty){ data-target="yes-content" } @if(yesWarningField.isDefined){ data-target="yes-warning" }>
+    <div class="multiple-choice"@if(yesContent.nonEmpty){ data-target="yes-content" }>
       <input id="@{fieldId}-true"
-       name="@{fieldId.replace('.','_')}"
+       name="@fieldId"
        value="true"
        type="radio"
       @if(selected.contains(true)) { checked="checked" }
@@ -87,7 +85,7 @@
 
    <div class="multiple-choice"@if(noContent.nonEmpty){ data-target="no-content" }>
       <input id="@{fieldId}-false"
-       name="@{fieldId.replace('.','_')}"
+       name="@fieldId"
        value="false"
        type="radio"
       @if(selected.contains(false)) { checked="checked" }

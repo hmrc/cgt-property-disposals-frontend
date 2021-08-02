@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -142,7 +143,13 @@ class SupportingEvidenceController @Inject() (
             c => doYouWantToUploadForm.fill(c.doYouWantToUploadSupportingEvidence)
           )
         )(
-          page = doYouWantToUploadPage(_, _, f.isAmendReturn)
+          page = doYouWantToUploadPage(
+            _,
+            _,
+            f.isAmendReturn,
+
+          //  YearToDateLiabilityController.repaymentForm.value.getOrElse(false)
+          )
         )(
           requiredPreviousAnswer = { _ => Some(()) },
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -159,7 +166,8 @@ class SupportingEvidenceController @Inject() (
               doYouWantToUploadPage(
                 errors,
                 controllers.returns.routes.TaskListController.taskList(),
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+    //            YearToDateLiabilityController.repaymentForm.value.getOrElse(false)
               )
             ),
           newDoYouWantToUploadSupportingEvidenceAnswer =>
