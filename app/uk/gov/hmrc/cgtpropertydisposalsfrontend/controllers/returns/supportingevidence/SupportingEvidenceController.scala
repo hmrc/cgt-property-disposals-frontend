@@ -33,11 +33,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
@@ -116,6 +116,18 @@ class SupportingEvidenceController @Inject() (
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
+  def isReplaymentDue(optionalAnswers: Option[YearToDateLiabilityAnswers]): Boolean =
+    optionalAnswers.getOrElse(false) match {
+    case nonCalculatedYTDAnswers: NonCalculatedYTDAnswers =>
+      nonCalculatedYTDAnswers
+        .fold(
+          _.checkForRepayment,
+          _.checkForRepayment
+        )
+        .getOrElse(false)
+    case _                                                => false
+  }
+
   private def commonDisplayBehaviour[A, P : Writeable, R](
     currentAnswers: SupportingEvidenceAnswers
   )(form: SupportingEvidenceAnswers => Form[A])(
@@ -147,8 +159,7 @@ class SupportingEvidenceController @Inject() (
             _,
             _,
             f.isAmendReturn,
-
-          //  YearToDateLiabilityController.repaymentForm.value.getOrElse(false)
+            isReplaymentDue(f.draftReturn.yearToDateLiabilityAnswers)
           )
         )(
           requiredPreviousAnswer = { _ => Some(()) },
@@ -167,7 +178,7 @@ class SupportingEvidenceController @Inject() (
                 errors,
                 controllers.returns.routes.TaskListController.taskList(),
                 fillingOutReturn.isAmendReturn,
-    //            YearToDateLiabilityController.repaymentForm.value.getOrElse(false)
+                isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers)
               )
             ),
           newDoYouWantToUploadSupportingEvidenceAnswer =>
