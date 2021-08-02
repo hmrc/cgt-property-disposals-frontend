@@ -33,7 +33,7 @@
   noContent: Option[Html] = None,
   describedBy: Option[String] = None,
   errorMessage: Option[String] = None,
-  yesWarningField: Option[String] = None
+  warningField: Option[String] = None
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
@@ -63,9 +63,9 @@
         }
     }
 
-    @if(yesWarningField.isDefined){
+    @if(warningField.isDefined){
         @warning(
-            yesWarningField.getOrElse("")
+            warningField.getOrElse("")
         )
     }
 

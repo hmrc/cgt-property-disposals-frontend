@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence
 
+import cats.Foldable.ops.toAllFoldableOps
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
@@ -117,16 +118,16 @@ class SupportingEvidenceController @Inject() (
     }
 
   def isReplaymentDue(optionalAnswers: Option[YearToDateLiabilityAnswers]): Boolean =
-    optionalAnswers.getOrElse(false) match {
-    case nonCalculatedYTDAnswers: NonCalculatedYTDAnswers =>
-      nonCalculatedYTDAnswers
-        .fold(
-          _.checkForRepayment,
-          _.checkForRepayment
-        )
-        .getOrElse(false)
-    case _                                                => false
-  }
+    optionalAnswers.fold(ifEmpty = false) {
+      case nonCalculatedYTDAnswers: NonCalculatedYTDAnswers =>
+        nonCalculatedYTDAnswers
+          .fold(
+            _.checkForRepayment,
+            _.checkForRepayment
+          )
+          .getOrElse(false)
+      case _                                                => false
+    }
 
   private def commonDisplayBehaviour[A, P : Writeable, R](
     currentAnswers: SupportingEvidenceAnswers

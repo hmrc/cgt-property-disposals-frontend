@@ -62,7 +62,7 @@
                 selected = form.value,
                 helpText = Some(Html(messages(s"$key.help-text"))),
                 yesContent = None,
-                yesWarningField = if(dueRepayment){Some(messages(s"$key.hint"))}else{None}
+                warningField = if(dueRepayment){Some(messages(s"$key.hint"))}else{None}
             )
 
             @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
