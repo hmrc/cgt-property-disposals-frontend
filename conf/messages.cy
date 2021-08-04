@@ -3514,6 +3514,25 @@ supporting-evidence.upload.caption=Tystiolaeth ategol
 supporting-evidence.upload.error.required=Uwchlwytho ffeil gyda’ch tystiolaeth ategol
 supporting-evidence.upload.help-text=Gall y ffeil fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, a JPG.
 supporting-evidence.upload.amendReturn.help-text=Gall y ffeil fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, a JPG.
+
+supporting-evidence.upload.heading1=Supporting evidence
+supporting-evidence.upload.p1=You can upload up to 2 documents. For example:
+supporting-evidence.upload.li1=spreadsheets with calculations
+supporting-evidence.upload.li2=invoices
+supporting-evidence.upload.li3=receipts
+supporting-evidence.upload.li4=valuations
+supporting-evidence.upload.heading2=Repayments
+supporting-evidence.upload.p2=If you’re due a repayment, your document must include the:
+supporting-evidence.upload.li5=name of account holder
+supporting-evidence.upload.li6=bank name
+supporting-evidence.upload.li7=sort code
+supporting-evidence.upload.li8=account number
+supporting-evidence.upload.li9=amount you want to reclaim
+supporting-evidence.upload.p3=If you don’t have a UK bank account, you must also include the:
+supporting-evidence.upload.li10=International Bank Account Number (IBAN)
+supporting-evidence.upload.li11=Bank Identifier Code (BIC, also known as SWIFT code)
+supporting-evidence.upload.li12=account name
+
 file.error.required=Dewiswch ffeil sy''n cynnwys eich tystiolaeth ategol
 supporting-evidence.expired.title=Er eich diogelwch, gwnaethom ddileu’r dogfennau hyn
 supporting-evidence.expired.p1=Rydym yn cadw dogfennau am 5 diwrnod.

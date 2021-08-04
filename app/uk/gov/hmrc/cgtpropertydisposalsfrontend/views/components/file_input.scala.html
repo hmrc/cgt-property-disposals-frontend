@@ -20,31 +20,35 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
-        errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
+    errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
 )
 
 @(
-        fieldId: String,
-        label: Html,
-        autoComplete: AutoCompleteType,
-        hasErrors: Boolean,
-        errorKey: Option[String],
-        helpText: Option[Html] = None,
-        labelAsHeading: Boolean = false,
-        extraContent: Option[Html] = None,
-        inputClass: Option[String] = None,
-        labelClass: Option[String] = None,
-        isMandatoryUpload: Boolean = false
+    fieldId: String,
+    label: Html,
+    autoComplete: AutoCompleteType,
+    hasErrors: Boolean,
+    errorKey: Option[String],
+    helpText: Option[Html] = None,
+    labelAsHeading: Boolean = false,
+    extraContent: Option[Html] = None,
+    inputClass: Option[String] = None,
+    labelClass: Option[String] = None,
+    isMandatoryUpload: Boolean = false,
+    bodyText: Option[Html] = None
 )(implicit messages: Messages)
 
 @classBuilder(s: Option[String]*) = @{s.toList.collect{case Some(s) => s}.mkString(" ")}
 
-@classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
-@inputClasses = @{if(hasErrors) {
-  classBuilder(Some("form-control"), Some("form-control-error"), inputClass)
-} else {
-  classBuilder(Some("form-control"), inputClass)
-}}
+@classes = @{ if(hasErrors) "form-group form-group-error" else "form-group" }
+
+@inputClasses = @{
+    if(hasErrors) {
+      classBuilder(Some("form-control"), Some("form-control-error"), inputClass)
+    } else {
+      classBuilder(Some("form-control"), inputClass)
+    }
+}
 
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
 @extraContentKey = @{s"${{fieldId}}-extra-content"}
@@ -55,29 +59,35 @@
 @labelClasses = @{classBuilder(Some("form-label"), labelClass)}
 
 @describedByKeys = @{
-  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")
+}
 
 @fieldLabel = {
-@if(labelAsHeading) {
-  <h1 class="govuk-label-wrapper">
-    <label for="@{fieldId}" class="heading-xlarge">@{label}</label>
-  </h1>
-} else {
-  <label for="@{fieldId}" class="@{labelClasses}">@{label}</label>
-}
+    @if(labelAsHeading) {
+      <h1 class="govuk-label-wrapper">
+        <label for="@{fieldId}" class="heading-xlarge">@{label}</label>
+      </h1>
+    } else {
+      <label for="@{fieldId}" class="@{labelClasses}">@{label}</label>
+    }
 }
 
 <div class="@classes">
   @fieldLabel
   @extraContentIdWithContent.map { case (id, text) =>
-  <div id="@id">
-  @text
-  </div>
+    <div id="@id">
+        @text
+    </div>
   }
   @hintIdWithHintText.map { case (id, text) =>
-  <span id="@id" class="form-hint">
-  @text
-  </span>
+    <span id="@id" class="form-hint">
+        @text
+    </span>
+  }
+  @bodyText.map { text =>
+    <span id="bodyText-id" class="form-hint">
+        @text
+    </span>
   }
   @errorIdWithMessageKey.map { case (id, key) =>
     @errorInline(id, messages(s"$fieldId.$key"))
