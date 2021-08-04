@@ -4032,11 +4032,30 @@ supporting-evidence.check-your-answers.assistive=the file named {0}
 supporting-evidence.check-your-answers.cya-delete=Delete
 supporting-evidence.check-your-answers.add-another-file=Add another file
 
-supporting-evidence.upload.title=Upload a document with your supporting evidence
+supporting-evidence.upload.title=Upload a document with supporting evidence
 supporting-evidence.upload.caption=Supporting evidence
 supporting-evidence.upload.error.required=Upload a file containing your supporting evidence
 supporting-evidence.upload.help-text=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG. Any files you upload to a draft return will be saved for 5 days.
 supporting-evidence.upload.amendReturn.help-text=The file can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, and JPG.
+
+supporting-evidence.upload.heading1=Supporting evidence
+supporting-evidence.upload.p1=You can upload up to 2 documents. For example:
+supporting-evidence.upload.li1=spreadsheets with calculations
+supporting-evidence.upload.li2=invoices
+supporting-evidence.upload.li3=receipts
+supporting-evidence.upload.li4=valuations
+supporting-evidence.upload.heading2=Repayments
+supporting-evidence.upload.p2=If you’re due a repayment, your document must include the:
+supporting-evidence.upload.li5=name of account holder
+supporting-evidence.upload.li6=bank name
+supporting-evidence.upload.li7=sort code
+supporting-evidence.upload.li8=account number
+supporting-evidence.upload.li9=amount you want to reclaim
+supporting-evidence.upload.p3=If you don’t have a UK bank account, you must also include the:
+supporting-evidence.upload.li10=International Bank Account Number (IBAN)
+supporting-evidence.upload.li11=Bank Identifier Code (BIC, also known as SWIFT code)
+supporting-evidence.upload.li12=account name
+
 file.error.required=Select a file containing your supporting evidence
 
 supporting-evidence.expired.title=For your security, we deleted these documents
