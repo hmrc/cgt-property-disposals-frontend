@@ -4036,7 +4036,7 @@ supporting-evidence.upload.title=Upload a document with supporting evidence
 supporting-evidence.upload.caption=Supporting evidence
 supporting-evidence.upload.error.required=Upload a file containing your supporting evidence
 supporting-evidence.upload.help-text=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG. Any files you upload to a draft return will be saved for 5 days.
-supporting-evidence.upload.amendReturn.help-text=The file can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, and JPG.
+supporting-evidence.upload.amendReturn.help-text=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG.
 
 supporting-evidence.upload.heading1=Supporting evidence
 supporting-evidence.upload.p1=You can upload up to 2 documents. For example:
