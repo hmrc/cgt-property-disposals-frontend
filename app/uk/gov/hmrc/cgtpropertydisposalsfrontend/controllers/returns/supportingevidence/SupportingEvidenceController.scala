@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence
 
+import cats.Foldable.ops.toAllFoldableOps
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
@@ -37,6 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOut
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
@@ -115,6 +117,18 @@ class SupportingEvidenceController @Inject() (
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
+  def isReplaymentDue(optionalAnswers: Option[YearToDateLiabilityAnswers]): Boolean =
+    optionalAnswers.fold(ifEmpty = false) {
+      case nonCalculatedYTDAnswers: NonCalculatedYTDAnswers =>
+        nonCalculatedYTDAnswers
+          .fold(
+            _.checkForRepayment,
+            _.checkForRepayment
+          )
+          .getOrElse(false)
+      case _                                                => false
+    }
+
   private def commonDisplayBehaviour[A, P : Writeable, R](
     currentAnswers: SupportingEvidenceAnswers
   )(form: SupportingEvidenceAnswers => Form[A])(
@@ -142,7 +156,12 @@ class SupportingEvidenceController @Inject() (
             c => doYouWantToUploadForm.fill(c.doYouWantToUploadSupportingEvidence)
           )
         )(
-          page = doYouWantToUploadPage(_, _, f.isAmendReturn)
+          page = doYouWantToUploadPage(
+            _,
+            _,
+            f.isAmendReturn,
+            isReplaymentDue(f.draftReturn.yearToDateLiabilityAnswers)
+          )
         )(
           requiredPreviousAnswer = { _ => Some(()) },
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -159,7 +178,8 @@ class SupportingEvidenceController @Inject() (
               doYouWantToUploadPage(
                 errors,
                 controllers.returns.routes.TaskListController.taskList(),
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers)
               )
             ),
           newDoYouWantToUploadSupportingEvidenceAnswer =>
