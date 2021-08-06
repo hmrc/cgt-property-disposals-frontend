@@ -301,9 +301,9 @@ class SupportingEvidenceController @Inject() (
                 Ok(
                   uploadPage(
                     uploadUpscan,
-                    routes.SupportingEvidenceController
-                      .doYouWantToUploadSupportingEvidence(),
-                    f.isAmendReturn
+                    routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
+                    f.isAmendReturn,
+                    isReplaymentDue(f.draftReturn.yearToDateLiabilityAnswers)
                   )
                 )
             )
