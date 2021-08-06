@@ -3404,7 +3404,7 @@ hasSupportingDocsToUpload.error.boolean=Dewiswch ‘Iawn’ os hoffech uwchlwyth
 
 mandatoryEvidence.title=Uwchlwythwch ddogfen sy’n dangos sut y cyfrifwyd y Dreth Enillion Cyfalaf sy’n ddyledus
 
-mandatoryEvidence.alert=If you’re due a repayment, you’ll be asked for your bank details on a later page. Do not upload them here.
+mandatoryEvidence.alert=Os oes ad-daliad yn ddyledus i chi, gofynnir i chi am eich manylion banc ar dudalen arall yn nes ymlaen. Peidiwch â’u huwchlwytho yma.
 
 mandatoryEvidence.guidance.p1=Bydd angen iddo gynnwys y manylion hyn:
 mandatoryEvidence.multiple.guidance.p1=Bydd angen iddo gynnwys y manylion hyn ar gyfer pob eiddo neu warediad:
@@ -3415,8 +3415,10 @@ mandatoryEvidence.multiple.guidance.bullet4=unrhyw gostau gwella, caffael neu wa
 mandatoryEvidence.guidance.bullet5=unrhyw golledion, rhyddhad neu lwfansau sy’n cael eu hawlio
 mandatoryEvidence.guidance.bullet6=sut y cafodd unrhyw enillion neu golledion eu cyfrifo
 mandatoryEvidence.guidance.bullet7=sut y cafodd swm y Dreth Enillion Cyfalaf a oedd yn ddyledus ei gyfrifo
-mandatoryEvidence.notice=Gall gymryd ychydig funudau i ddogfennau uwchlwytho. Peidiwch ag adnewyddu’r dudalen na ‘mynd yn ôl’ tra bod ffeil yn uwchlwytho. Bydd unrhyw ffeiliau rydych yn eu huwchlwytho i Ffurflen Dreth ddrafft yn cael eu cadw am 5 diwrnod.
+
+mandatoryEvidence.notice=Gall gymryd ychydig funudau i’ch dogfen uwchlwytho. Peidiwch ag adnewyddu’r dudalen na ‘mynd yn ôl’ tra bo ffeil yn uwchlwytho. Bydd unrhyw ffeiliau rydych yn eu huwchlwytho i Ffurflen Dreth ddrafft yn cael eu cadw am 5 diwrnod.
 mandatoryEvidence.amend.notice=Gall gymryd ychydig funudau i ddogfennau uwchlwytho. Peidiwch ag adnewyddu’r dudalen na ‘mynd yn ôl’ tra bod ffeil yn uwchlwytho.
+
 mandatoryEvidence.helpText=Gall ffeiliau fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT a JPG.
 mandatoryEvidence.label=Uwchlwytho dogfen
 mandatoryEvidence.amendReturn.helpText=Gall ffeiliau fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT a JPG.
@@ -3459,7 +3461,7 @@ repayment.personalRep.title=Yn seiliedig ar y manylion yn y Ffurflen Dreth hon, 
 repayment.personalRepInPeriodOfAdmin.title=Yn seiliedig ar y manylion yn y Ffurflen Dreth hon, a oes ad-daliad yn ddyledus i’r ystâd?
 repayment.personalRepInPeriodOfAdmin.agent.title=Yn seiliedig ar y manylion yn y Ffurflen Dreth hon, a oes ad-daliad yn ddyledus i’r ystâd?
 
-repayment.yes.content=If you paid by debit card, we will attempt to refund it. If you paid by another method, you’ll be asked for your bank details on a later page.
+repayment.yes.content=Os gwnaethoch dalu â cherdyn debyd, byddwn yn ceisio eich ad-dalu. Os gwnaethoch dalu drwy ddull arall, gofynnir am eich manylion banc ar dudalen arall yn nes ymlaen.
 
 repayment.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i chi, bydd CThEM yn ad-dalu’r arian i chi cyn pen 30 diwrnod. Os nad oes ad-daliad yn ddyledus i chi, ni chysylltir â chi.
 repayment.agent.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’ch cleient, bydd CThEM yn ad-dalu’r arian iddo cyn pen 30 diwrnod. Os nad oes ad-daliad yn ddyledus iddo, ni chysylltir ag ef.
@@ -3500,7 +3502,8 @@ supporting-evidence.do-you-want-to-upload.title=A ydych eisiau uwchlwytho unrhyw
 supporting-evidence.do-you-want-to-upload.error.required=Dewiswch ‘Iawn’ os ydych eisiau uwchlwytho tystiolaeth ategol
 supporting-evidence.do-you-want-to-upload.error.boolean=Dewiswch ‘Iawn’ os ydych eisiau uwchlwytho tystiolaeth ategol
 supporting-evidence.do-you-want-to-upload.caption=Tystiolaeth ategol
-supporting-evidence.do-you-want-to-upload.help-text=Gallwch uwchlwytho hyd at 2 ddogfen. Er enghraifft, taenlenni gyda chyfrifiadau, anfonebau, derbynebau neu brisiadau.
+supporting-evidence.do-you-want-to-upload.help-text=Gallwch uwchlwytho hyd at ddwy ddogfen. Er enghraifft, taenlenni gyda chyfrifiadau, anfonebau, derbynebau neu brisiadau.
+supporting-evidence.do-you-want-to-upload.hint=Dewiswch ‘Iawn’ os oes ad-daliad yn ddyledus i chi. Gofynnir i chi uwchlwytho dogfen gan gynnwys eich manylion talu ar y dudalen nesaf.
 supporting-evidence.check-your-answers.title=Gwiriwch eich atebion
 supporting-evidence.check-your-answers.caption=Tystiolaeth ategol
 supporting-evidence.check-your-answers.file-label=Dogfen {0}
@@ -3509,29 +3512,30 @@ supporting-evidence.check-your-answers.cya-change=Newid
 supporting-evidence.check-your-answers.assistive=y ffeil dan yr enw {0}
 supporting-evidence.check-your-answers.cya-delete=Dileu
 supporting-evidence.check-your-answers.add-another-file=Ychwanegu ffeil arall
-supporting-evidence.upload.title=Uwchlwytho dogfen gyda’ch tystiolaeth ategol
+supporting-evidence.upload.title=Uwchlwytho dogfen gyda thystiolaeth ategol
 supporting-evidence.upload.caption=Tystiolaeth ategol
 supporting-evidence.upload.error.required=Uwchlwytho ffeil gyda’ch tystiolaeth ategol
 supporting-evidence.upload.help-text=Gall y ffeil fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, a JPG.
 supporting-evidence.upload.amendReturn.help-text=Gall y ffeil fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, a JPG.
 
-supporting-evidence.upload.heading1=Supporting evidence
-supporting-evidence.upload.p1=You can upload up to 2 documents. For example:
-supporting-evidence.upload.li1=spreadsheets with calculations
-supporting-evidence.upload.li2=invoices
-supporting-evidence.upload.li3=receipts
-supporting-evidence.upload.li4=valuations
-supporting-evidence.upload.heading2=Repayments
-supporting-evidence.upload.p2=If you’re due a repayment, your document must include the:
-supporting-evidence.upload.li5=name of account holder
-supporting-evidence.upload.li6=bank name
-supporting-evidence.upload.li7=sort code
-supporting-evidence.upload.li8=account number
-supporting-evidence.upload.li9=amount you want to reclaim
-supporting-evidence.upload.p3=If you don’t have a UK bank account, you must also include the:
-supporting-evidence.upload.li10=International Bank Account Number (IBAN)
-supporting-evidence.upload.li11=Bank Identifier Code (BIC, also known as SWIFT code)
-supporting-evidence.upload.li12=account name
+supporting-evidence.upload.heading1=Tystiolaeth ategol
+supporting-evidence.upload.p1=Gallwch uwchlwytho hyd at ddwy ddogfen. Er enghraifft:
+supporting-evidence.upload.li1=taenlenni gyda chyfrifiadau
+supporting-evidence.upload.li2=anfonebau
+supporting-evidence.upload.li3=derbynebau
+supporting-evidence.upload.li4=prisiadau
+
+supporting-evidence.upload.heading2=Ad-daliadau
+supporting-evidence.upload.p2=Os oes ad-daliad yn ddyledus i chi, mae’n rhaid i’ch dogfen gynnwys:
+supporting-evidence.upload.li5=enw deiliad y cyfrif
+supporting-evidence.upload.li6=enw’r banc
+supporting-evidence.upload.li7=y cod didoli
+supporting-evidence.upload.li8=rhif y cyfrif
+supporting-evidence.upload.li9=y swm rydych am ei adennill
+supporting-evidence.upload.p3=Os nad oes gennych gyfrif banc yn y DU, mae’n rhaid i chi gynnwys:
+supporting-evidence.upload.li10=y Rhif Cyfrif Banc Rhyngwladol (IBAN)
+supporting-evidence.upload.li11=Cod Adnabod y Banc (BIC, a elwir hefyd yn god SWIFT)
+supporting-evidence.upload.li12=enw’r cyfrif
 
 file.error.required=Dewiswch ffeil sy''n cynnwys eich tystiolaeth ategol
 supporting-evidence.expired.title=Er eich diogelwch, gwnaethom ddileu’r dogfennau hyn
