@@ -31,7 +31,12 @@
     fileInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.file_input
 )
 
-@(upscanUpload : UpscanUpload, backLink: Call, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(
+    upscanUpload : UpscanUpload,
+    backLink: Call,
+    isAmend: Boolean,
+    isReplaymentDue: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
     @key = @{"supporting-evidence.upload"}
     @field = @{"file"}
@@ -42,33 +47,35 @@
     @helpText = @{ if(isAmend) messages(s"$key.amendReturn.help-text") else messages(s"$key.help-text")}
 
     @bodyText = @{
-        Html(
-          s"""
-            <h2 class="heading-medium">${messages(s"$key.heading1")}</h2>
-            <p>${messages(s"$key.p1")}</p>
-            <ul class="list list-bullet">
-                <li>${messages(s"$key.li1")}</li>
-                <li>${messages(s"$key.li2")}</li>
-                <li>${messages(s"$key.li3")}</li>
-                <li>${messages(s"$key.li4")}</li>
-            </ul>
-            <h2 class="heading-medium">${messages(s"$key.heading2")}</h2>
-            <p>${messages(s"$key.p2")}</p>
-            <ul class="list list-bullet">
-                <li>${messages(s"$key.li5")}</li>
-                <li>${messages(s"$key.li6")}</li>
-                <li>${messages(s"$key.li7")}</li>
-                <li>${messages(s"$key.li8")}</li>
-                <li>${messages(s"$key.li9")}</li>
-            </ul>
-            <p>${messages(s"$key.p3")}</p>
-            <ul class="list list-bullet">
-                <li>${messages(s"$key.li10")}</li>
-                <li>${messages(s"$key.li11")}</li>
-                <li>${messages(s"$key.li12")}</li>
-            </ul>
-          """
-        )
+        if(isReplaymentDue){
+            Some(Html(
+              s"""
+                <h2 class="heading-medium">${messages(s"$key.heading1")}</h2>
+                <p>${messages(s"$key.p1")}</p>
+                <ul class="list list-bullet">
+                    <li>${messages(s"$key.li1")}</li>
+                    <li>${messages(s"$key.li2")}</li>
+                    <li>${messages(s"$key.li3")}</li>
+                    <li>${messages(s"$key.li4")}</li>
+                </ul>
+                <h2 class="heading-medium">${messages(s"$key.heading2")}</h2>
+                <p>${messages(s"$key.p2")}</p>
+                <ul class="list list-bullet">
+                    <li>${messages(s"$key.li5")}</li>
+                    <li>${messages(s"$key.li6")}</li>
+                    <li>${messages(s"$key.li7")}</li>
+                    <li>${messages(s"$key.li8")}</li>
+                    <li>${messages(s"$key.li9")}</li>
+                </ul>
+                <p>${messages(s"$key.p3")}</p>
+                <ul class="list list-bullet">
+                    <li>${messages(s"$key.li10")}</li>
+                    <li>${messages(s"$key.li11")}</li>
+                    <li>${messages(s"$key.li12")}</li>
+                </ul>
+              """
+            ))
+        } else None
     }
 
     @mainTemplate(title = title, userType = request.userType) {
@@ -91,7 +98,7 @@
                 errorKey = None,
                 labelAsHeading = true,
                 autoComplete = AutoCompleteType.On,
-                bodyText = Some(bodyText)
+                bodyText = bodyText
             )
 
             @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
