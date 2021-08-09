@@ -75,7 +75,20 @@
                 </ul>
               """
             ))
-        } else None
+        } else {
+            Some(Html(
+            s"""
+            <h2 class="heading-medium">${messages(s"$key.heading1")}</h2>
+            <p>${messages(s"$key.p1")}</p>
+            <ul class="list list-bullet">
+                <li>${messages(s"$key.li1")}</li>
+                <li>${messages(s"$key.li2")}</li>
+                <li>${messages(s"$key.li3")}</li>
+                <li>${messages(s"$key.li4")}</li>
+            </ul>
+            """
+            ))
+        }
     }
 
     @mainTemplate(title = title, userType = request.userType) {
