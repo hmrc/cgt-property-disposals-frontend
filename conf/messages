@@ -2833,6 +2833,8 @@ lettingsRelief.trust.helpText=The trust might be able to claim this relief if th
 lettingsRelief.capacitor.helpText=The person might be able to claim this relief if the property was their main home and they also let it out for a time.
 lettingsRelief.personalRep.helpText=The person might have been able to claim this relief if the property was their main home and they also let it out for a time.
 
+lettingsRelief.warningMsg=Letting Relief changed on 6 April 2020. Please make sure you understand the new rules.
+
 lettingsRelief.error.required=Select yes if you are claiming Letting Relief
 lettingsRelief.agent.error.required=Select yes if your client is entitled to claim Letting Relief
 lettingsRelief.trust.error.required=Select yes if the trust is entitled to claim Letting Relief

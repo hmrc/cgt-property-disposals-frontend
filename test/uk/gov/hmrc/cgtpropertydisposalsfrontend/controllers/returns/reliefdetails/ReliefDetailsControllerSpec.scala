@@ -725,7 +725,10 @@ class ReliefDetailsControllerSpec
                 checkPageIsDisplayed(
                   performAction(),
                   messageFromMessageKey(s"$key$userKey.title"),
-                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
+                  doc => {
+                    doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
+                    doc.select("div > strong#warning").text shouldBe messages(s"$key.warningMsg")
+                  }
                 )
             }
           }
