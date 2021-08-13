@@ -19,10 +19,10 @@
 @this()
 
 @(
-        summary: String,
-        content: Html,
-        assistiveText: Option[String] = None,
-        assistivePrefix: Option[String] = None
+    summary: String,
+    content: Html,
+    assistiveText: Option[String] = None,
+    assistivePrefix: Option[String] = None
 )
 
 <details>
@@ -33,7 +33,7 @@
       @assistiveText.map(a => Html(s""" <span class="visuallyhidden">${a}</span>"""))
     </span>
   </summary>
-  <div class="panel panel-border-narrow">
+  <div>
     @content
   </div>
 </details>

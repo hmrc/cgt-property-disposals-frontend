@@ -67,9 +67,7 @@
       @warning(warningMsg)
     }
     @bodyContent.map { bodyMsg =>
-      <div id="body-content">
        @bodyMsg
-      </div>
     }
 
     @errorIdWithError.map { case (id, e) =>
