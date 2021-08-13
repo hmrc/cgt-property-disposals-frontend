@@ -38,7 +38,8 @@
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
     radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
     unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(
@@ -101,6 +102,28 @@
 })
 }
 
+@bodyContent = @{
+    details(
+        messages(s"$key.details.link"),
+        Html(s"""
+            | <p>
+                |    ${messages(s"$key.details.body.p1")}
+                | </p>
+            | <ul class="list-bullet">
+                |    <li>${messages(s"$key.details.body.li1")}</li>
+                |    <li>${messages(s"$key.details.body.li2")}</li>
+                |    <li>${messages(s"$key.details.body.li3")}</li>
+                | </ul>
+            |<p>
+                |<a href="${appConfig.lettingReliefInfo}" target="_blank">
+                |    ${messages(s"$key.details.body.link")}
+                |</a>
+                |</p>
+            """.stripMargin
+        )
+    )
+}
+
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
 @backLinkComponent(backLink)
@@ -120,13 +143,10 @@
         options = options,
         helpText = Some(Html(messages(s"$key$userKey.helpText"))),
         customErrorKey = Some(customErrorKey),
-        warningContent = Some(messages(s"$key.warningMsg"))
+        warningContent = Some(messages(s"$key.warningMsg")),
+        bodyContent =  Some(bodyContent)
     )
-    <p>
-      <a href="@{appConfig.lettingReliefInfo}" target="_blank">
-        @messages(s"$key.furtherInfoLink")
-      </a>
-    </p>
+
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
 }
 
