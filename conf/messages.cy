@@ -2465,7 +2465,7 @@ lettingsRelief.details.link=Help with Letting Relief
 lettingsRelief.details.body.p1=If you lived in your home <strong class="bold">at the same time</strong> as your tenants, you may qualify for the lowest of:
 lettingsRelief.details.body.li1=the same amount you got in Private Residence Relief
 lettingsRelief.details.body.li2=£40,000
-lettingsRelief.details.body.li3=the same amount as the chargeable gain you made while letting our part of your home
+lettingsRelief.details.body.li3=the same amount as the chargeable gain you made while letting out part of your home
 lettingsRelief.details.body.link=Find out about Letting Relief (opens in a new window)
 
 lettingsRelief.error.required=Dewiswch ‘Iawn’ os ydych yn hawlio Rhyddhad Gosod
