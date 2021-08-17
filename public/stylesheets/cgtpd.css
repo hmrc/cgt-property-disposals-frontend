@@ -179,6 +179,10 @@ fieldset .form-hint {
     margin-bottom: 1.875em;
 }
 
+.form-group .panel-border-narrow:last-child.with-bottom-margin {
+  margin-bottom: 1.875em;
+}
+
 .with-top-margin {
     margin-top: 1em;
 }
