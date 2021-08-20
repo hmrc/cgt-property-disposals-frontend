@@ -2760,6 +2760,15 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Private Residence 
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=the property had been the only home of a beneficiary, both before and after the deceased’s death
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=that beneficiary was also entitled to at least 75% of the proceeds of the disposal of the property (assuming that none of the proceeds are needed to meet any liabilities of the deceased person’s estate)
 
+privateResidentsRelief.warningMsg=Private Residence Relief changed on 6 April 2020. Please make sure you understand the new roles.
+
+privateResidentsRelief.details.link=Help with Private Residence Relief
+privateResidentsRelief.details.body.p1=If you let out your home, you get full relief for the:
+privateResidentsRelief.details.body.li1=years your lived there
+privateResidentsRelief.details.body.li2=last 9 months you owned it - even if you were not living there at the time
+privateResidentsRelief.details.body.p2=Some exceptions apply.
+privateResidentsRelief.details.body.link=Find out about Private Residence Relief (opens in a new window)
+
 privateResidentsReliefValue.label=Amount of Private Residence Relief you are entitled to
 privateResidentsReliefValue.agent.label=Amount of Private Residence Relief your client is entitled to
 privateResidentsReliefValue.trust.label=Amount of Private Residence Relief the trust is entitled to

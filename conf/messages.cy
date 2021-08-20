@@ -2396,6 +2396,16 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.agent.helpText.li2=oedd gan y 
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Gellir ond hawlio Rhyddhad Preswylfan Preifat os:
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=mai’r eiddo oedd unig gartref buddiolwr, cyn ac ar ôl marwolaeth yr ymadawedig
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=oedd gan y buddiolwr hwnnw hawl hefyd i o leiaf 75% o dderbyniadau gwaredu’r eiddo (gan dybio nad oedd angen unrhyw un o’r derbyniadau er mwyn bodloni unrhyw rwymedigaethau ystâd yr ymadawedig)
+
+privateResidentsRelief.warningMsg=Private Residence Relief changed on 6 April 2020. Please make sure you understand the new roles.
+
+privateResidentsRelief.details.link=Help with Private Residence Relief
+privateResidentsRelief.details.body.p1=If you let out your home, you get full relief for the:
+privateResidentsRelief.details.body.li1=years your lived there
+privateResidentsRelief.details.body.li2=last 9 months you owned it - even if you were not living there at the time
+privateResidentsRelief.details.body.p2=Some exceptions apply.
+privateResidentsRelief.details.body.link=Find out about Private Residence Relief (opens in a new window)
+
 privateResidentsReliefValue.label=Swm y Rhyddhad Preswylfan Preifat y mae gennych hawl iddo
 privateResidentsReliefValue.agent.label=Swm y Rhyddhad Preswylfan Preifat y mae gan eich cleient hawl iddo
 privateResidentsReliefValue.trust.label=Swm y Rhyddhad Preswylfan Preifat y mae gan yr ymddiriedolaeth hawl iddo
