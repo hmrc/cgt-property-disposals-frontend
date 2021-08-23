@@ -182,7 +182,7 @@ timed-out.button=Sign in
 
 recruitment-banner.message=Help improve HMRC services on GOV.UK
 recruitment-banner.dismiss=No thanks
-recruitment-banner.link=Help make this service better by <a target="_blank" rel="noreferrer noopener" href="{0}">taking part in a survey (opens in a new window)</a>. This should take less than 5 minutes to complete and a prize draw of 2 £25 vouchers is on offer.
+recruitment-banner.link=Help make this service better by <a target="_blank" rel="noreferrer noopener" href="{0}">taking part in a survey (opens in a new tab)</a>. This should take less than 5 minutes to complete and a prize draw of 2 £25 vouchers is on offer.
 
 accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
 accessibilityStatement.title=Accessibility statement
