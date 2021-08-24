@@ -62,8 +62,9 @@
     case _ => false
   }
 }
-
-@warning(messages("reliefDetails.cya.warningMsg"))
+@if(answers.privateResidentsRelief.value =!= 0L || answers.lettingsRelief.value =!= 0L){
+  @warning(messages("reliefDetails.cya.warningMsg"))
+}
 
 @cyaSection() {
   @if(answers.privateResidentsRelief.value === 0L) {
