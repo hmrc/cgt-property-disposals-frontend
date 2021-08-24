@@ -31,7 +31,8 @@
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
     cyaRow:     uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-    cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+    cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+    warning:    uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @(
@@ -61,6 +62,8 @@
     case _ => false
   }
 }
+
+@warning(messages("reliefDetails.cya.warningMsg"))
 
 @cyaSection() {
   @if(answers.privateResidentsRelief.value === 0L) {
