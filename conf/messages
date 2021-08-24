@@ -3978,8 +3978,8 @@ repayment.personalRepInPeriodOfAdmin.agent.title=Based on the details in this re
 repayment.yes.content=If you paid by debit card, we will attempt to refund it. If you paid by another method, you’ll be asked for your bank details on a later page.
 
 repayment.helpText=If you select ‘yes’ and are due a repayment of Capital Gains Tax, HMRC will repay you the money. If you are not due a repayment, you will not be contacted.
-repayment.agent.helpText=If you select ‘yes’ and your client is due a repayment of Capital Gains Tax, HMRC will repay them the money within 30 days. If they are not due a repayment they will not be contacted.
-repayment.trust.helpText=If you select ‘yes’ and the trust is due a repayment of Capital Gains Tax, HMRC will repay the money within 30 days. If it is not due a repayment you will not be contacted.
+repayment.agent.helpText=If you select ‘yes’ and your client is due a repayment of Capital Gains Tax, HMRC will repay them the money. If they are not due a repayment they will not be contacted.
+repayment.trust.helpText=If you select ‘yes’ and the trust is due a repayment of Capital Gains Tax, HMRC will repay the money. If it is not due a repayment you will not be contacted.
 repayment.capacitor.helpText=If you select ‘yes’ and the person is due a repayment of Capital Gains Tax, HMRC will repay them the money within 30 days. If they are not due a repayment they will not be contacted.
 repayment.personalRep.helpText=If you select ‘yes’ and the personal representative is due a repayment of Capital Gains Tax, HMRC will repay them the money within 30 days. If they are not due a repayment they will not be contacted.
 repayment.personalRepInPeriodOfAdmin.helpText=If you select ‘yes’ and the estate is due a repayment of Capital Gains Tax, HMRC will repay the money within 30 days. If the estate is not due a repayment you will not be contacted.
