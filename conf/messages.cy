@@ -2604,7 +2604,7 @@ otherReliefs.cyaChange=os yw rhyddhad arall yn cael ei hawlio
 otherReliefsName.cyaChange=enwau’r rhyddhad arall sy’n cael ei hawlio
 otherReliefsAmount.cyaChange=swm y rhyddhad arall sy’n cael ei hawlio
 reliefDetails.cya.title=Gwiriwch eich atebion
-
+reliefDetails.cya.warningMsg=WelshMessage
 #===================================================
 #  RELIEFS PAGES - END
 #===================================================
