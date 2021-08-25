@@ -2998,6 +2998,7 @@ otherReliefsName.cyaChange=the names of other reliefs being claimed
 otherReliefsAmount.cyaChange=the amount of other reliefs being claimed
 
 reliefDetails.cya.title=Check your answers
+reliefDetails.cya.warningMsg=Private Residence Relief and Letting Relief changed on 6 April 2020. Please make sure you understand the new rules.
 
 #===================================================
 #  RELIEFS PAGES - END

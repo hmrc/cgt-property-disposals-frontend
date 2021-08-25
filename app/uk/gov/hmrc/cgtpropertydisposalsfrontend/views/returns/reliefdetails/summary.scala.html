@@ -31,7 +31,8 @@
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
     cyaRow:     uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-    cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+    cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+    warning:    uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @(
@@ -60,6 +61,9 @@
     case Some(PersonalRepresentativeInPeriodOfAdmin) => true
     case _ => false
   }
+}
+@if(answers.privateResidentsRelief.value =!= 0L || answers.lettingsRelief.value =!= 0L){
+  @warning(messages("reliefDetails.cya.warningMsg"))
 }
 
 @cyaSection() {
