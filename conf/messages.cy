@@ -2397,7 +2397,7 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Gellir ond hawlio 
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=mai’r eiddo oedd unig gartref buddiolwr, cyn ac ar ôl marwolaeth yr ymadawedig
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=oedd gan y buddiolwr hwnnw hawl hefyd i o leiaf 75% o dderbyniadau gwaredu’r eiddo (gan dybio nad oedd angen unrhyw un o’r derbyniadau er mwyn bodloni unrhyw rwymedigaethau ystâd yr ymadawedig)
 
-privateResidentsRelief.warningMsg=Newidiodd Rhyddhad Preswylfa Breifat a Rhyddhad Gosod ar 6 Ebrill 2020. Gwnewch yn siŵr eich bod yn deall y rheolau newydd.
+privateResidentsRelief.warningMsg=Newidiodd Rhyddhad Preswylfa Breifat ar 6 Ebrill 2020. Gwnewch yn siŵr eich bod yn deall y rheolau newydd.
 
 privateResidentsRelief.details.link=Help gyda Rhyddhad Preswylfa Breifat
 privateResidentsRelief.details.body.p1=Os ydych yn rhoi eich cartref ar osod, byddwch yn cael rhyddhad llawn ar gyfer:
@@ -2472,7 +2472,7 @@ lettingsRelief.personalRep.helpText=Mae’n bosibl y gall y person hawlio’r rh
 lettingsRelief.warningMsg=Newidiodd Rhyddhad Gosod ar 6 Ebrill 2020.  Gwnewch yn siŵr eich bod yn deall y rheolau newydd.
 
 lettingsRelief.details.link=Help gyda Rhyddhad Gosod
-lettingsRelief.details.body.p1=Os oeddech yn byw yn eich cartref <strong class="bold">ar yr un pryd</strong> â’ch tenantiaid, efallai y byddwch yn gymwys i gael yr isaf o'r canlynol:
+lettingsRelief.details.body.p1=Os oeddech yn byw yn eich cartref <strong class="bold">ar yr un pryd</strong> â’ch tenantiaid, efallai y byddwch yn gymwys i gael yr isaf o’r canlynol:
 lettingsRelief.details.body.li1=yr un swm a gawsoch mewn Rhyddhad Preswylfa Breifat
 lettingsRelief.details.body.li2=£40,000
 lettingsRelief.details.body.li3=yr un swm â’r enillion trethadwy a wnaethoch wrth roi rhan o’ch cartref ar osod
@@ -2604,7 +2604,7 @@ otherReliefs.cyaChange=os yw rhyddhad arall yn cael ei hawlio
 otherReliefsName.cyaChange=enwau’r rhyddhad arall sy’n cael ei hawlio
 otherReliefsAmount.cyaChange=swm y rhyddhad arall sy’n cael ei hawlio
 reliefDetails.cya.title=Gwiriwch eich atebion
-reliefDetails.cya.warningMsg=Newidiodd Rhyddhad Gosod ar 6 Ebrill 2020.  Gwnewch yn siŵr eich bod yn deall y rheolau newydd.
+reliefDetails.cya.warningMsg=Newidiodd Rhyddhad Preswylfa Breifat a Rhyddhad Gosod ar 6 Ebrill 2020. Gwnewch yn siŵr eich bod yn deall y rheolau newydd.
 #===================================================
 #  RELIEFS PAGES - END
 #===================================================
