@@ -39,7 +39,8 @@
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
     cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
     warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-    buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link
+    buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(justSubmittedReturn: JustSubmittedReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -292,8 +293,20 @@
           case Some(PersonalRepresentativeInPeriodOfAdmin) => {
             <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
 
-            <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
+            <p id="howToPay">@messages(s"$key.admin.howToPay.p1")</p>
 
+            @warning(messages(s"$key.Admin.warning"))
+
+            <p id="howToPay">@messages(s"$key.admin.howToPay.p2")</p>
+
+            @details(
+            summary = messages(s"$key.admin.ifSa"),
+            content = Html(
+            s"""
+            | <p>${messages(s"$key.admin.howToPay.p3")}</p>
+            |""".stripMargin
+            )
+           )
           }
 
 
@@ -333,16 +346,20 @@
     }
   }
 
+    @if(!isPeriodOfAdmin){
     <div class="panel panel-border-wide">
         <h2 class="heading-medium" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
         <p>@Html(messages(s"$key$userKey.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
     </div>
+    }
 
     @{
       if(isAgent)
         buttonLink(messages("button.clients.accountHome"), accountRoutes.HomePageController.homepage().url)
       else if(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
-          buttonLink(messages("button.accountHome"), accountRoutes.HomePageController.homepage().url)
+        <p>
+            <a href="@{accountRoutes.HomePageController.homepage().url}">{messages("button.accountHome")}</a>
+        </p>
       else
         justSubmittedReturn.submissionResponse.charge.fold(
             buttonLink(messages("button.accountHome"), accountRoutes.HomePageController.homepage().url)
