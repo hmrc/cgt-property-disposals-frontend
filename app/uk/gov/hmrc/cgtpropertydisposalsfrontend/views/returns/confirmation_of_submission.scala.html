@@ -294,17 +294,17 @@
           case Some(PersonalRepresentativeInPeriodOfAdmin) => {
             <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
 
-            <p id="howToPay">@messages(s"$key.admin.howToPay.p1")</p>
+            <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
 
             @warning(messages(s"$key.Admin.warning"))
 
-            <p id="howToPay">@messages(s"$key.admin.howToPay.p2")</p>
+            <p id="howToPay2">@messages(s"$key$userKey.howToPay.p2")</p>
 
             @details(
-            summary = messages(s"$key.admin.ifSa"),
+            summary = messages(s"$key$userKey.ifSa"),
             content = Html(
             s"""
-            | <p>${messages(s"$key.admin.howToPay.p3")}</p>
+            | <p>${messages(s"$key$userKey.howToPay.p3")}</p>
             |""".stripMargin
             )
            )
