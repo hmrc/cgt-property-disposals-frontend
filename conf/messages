@@ -4187,7 +4187,8 @@ confirmationOfSubmission.trust.inset.p1=If the trust needs to send a Self Assess
 
 confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
 confirmationOfSubmission.agent.ifSa=Self Assessment
-confirmationOfSubmission.admin.ifSa=Self Assessment
+confirmationOfSubmission.personalRepInPeriodOfAdmin.sA=Self Assessment
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.sA=Self Assessment
 confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment tax return
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
