@@ -40,7 +40,8 @@
     cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
     warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
     buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+    link: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.link
 )
 
 @(justSubmittedReturn: JustSubmittedReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -357,9 +358,7 @@
       if(isAgent)
         buttonLink(messages("button.clients.accountHome"), accountRoutes.HomePageController.homepage().url)
       else if(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
-        <p>
-            <a href="@{accountRoutes.HomePageController.homepage().url}">{messages("button.accountHome")}</a>
-        </p>
+            link(accountRoutes.HomePageController.homepage().url,messages("button.accountHome"),"account-home-link")
       else
         justSubmittedReturn.submissionResponse.charge.fold(
             buttonLink(messages("button.accountHome"), accountRoutes.HomePageController.homepage().url)
