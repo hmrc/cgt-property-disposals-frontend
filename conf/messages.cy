@@ -3670,8 +3670,6 @@ confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.sA=Hunanasesiad
 confirmationOfSubmission.trust.ifSa=Os oes angen i’r ymddiriedolaeth anfon Ffurflen Dreth Hunanasesiad
 confirmationOfSubmission.capacitor.ifSa=Hunanasesiad
 confirmationOfSubmission.personalRep.ifSa=Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer y person
-confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa=
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=
 confirmationOfSubmission.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn eich <a href="{0}" target="_blank">Ffurflen Dreth Hunanasesiad nesaf (yn agor ffenestr newydd)</a>.
 confirmationOfSubmission.agent.ifSa.p1=Os oes angen i’ch cleient anfon Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.
 confirmationOfSubmission.trust.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn Ffurflen Dreth Hunanasesiad nesaf yr ymddiriedolaeth.

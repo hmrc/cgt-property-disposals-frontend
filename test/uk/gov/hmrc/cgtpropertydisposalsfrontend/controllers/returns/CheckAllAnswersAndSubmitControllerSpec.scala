@@ -2048,12 +2048,13 @@ class CheckAllAnswersAndSubmitControllerSpec
                     s"confirmationOfSubmission$userKey.howToPay.p1",
                     chargeReference
                   )
-
-                  doc
-                    .select("#ifSaHeading")
-                    .text() shouldBe messageFromMessageKey(
-                    s"confirmationOfSubmission$userKey.ifSa"
-                  )
+                  if (!userKey.contains("personalRepInPeriodOfAdmin")) {
+                    doc
+                      .select("#ifSaHeading")
+                      .text() shouldBe messageFromMessageKey(
+                      s"confirmationOfSubmission$userKey.ifSa"
+                    )
+                  }
                 }
               )
             }

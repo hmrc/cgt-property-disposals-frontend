@@ -4192,8 +4192,6 @@ confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.sA=Self Assessment
 confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment tax return
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
-confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa=
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=
 
 confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
 confirmationOfSubmission.agent.ifSa.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
