@@ -1998,6 +1998,62 @@ class MultipleDisposalsTriageControllerSpec
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
+
+          "personalRepAdmin user has not answered the tax year exchanged section, date of death is 1-1-2018 " +
+            "and selects tax year exchanged as 2021/22" in {
+
+              val taxYear = sample[TaxYear].copy(
+                startDateInclusive = LocalDate.of(2021, 4, 6),
+                endDateExclusive = LocalDate.of(2022, 4, 6)
+              )
+              val answers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(
+                individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+                numberOfProperties = Some(2),
+                wasAUKResident = Some(true),
+                countryOfResidence = Some(Country.uk),
+                wereAllPropertiesResidential = Some(true),
+                assetTypes = Some(List(AssetType.Residential)),
+                taxYearExchanged = None,
+                taxYear = None,
+                alreadySentSelfAssessment = None,
+                completionDate = None
+              )
+
+              val dateOfDeath        = DateOfDeath(LocalDate.of(2018, 1, 1))
+              val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath))
+
+              val (session, journey) = sessionDataWithStartingNewDraftReturn(
+                answers,
+                representeeAnswers = Some(representeeAnswers)
+              )
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockAvailableTaxYears()(Right(List(2021)))
+                mockGetTaxYear(todayTaxYear2021)(Right(Some(taxYear)))
+                mockStoreSession(
+                  session.copy(journeyStatus =
+                    Some(
+                      journey.copy(
+                        newReturnTriageAnswers = Left(
+                          answers.copy(
+                            taxYearExchanged = getTaxYearExchanged(Some(taxYear)),
+                            taxYear = Some(taxYear)
+                          )
+                        )
+                      )
+                    )
+                  )
+                )(Right(()))
+              }
+
+              checkIsRedirect(
+                performAction(key -> "TaxYear2021"),
+                routes.MultipleDisposalsTriageController.checkYourAnswers()
+              )
+            }
+
         }
 
         "the user has started a draft return and" when {
@@ -2072,6 +2128,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
         }
+
       }
 
       "not update the session" when {
@@ -4226,13 +4283,17 @@ class MultipleDisposalsTriageControllerSpec
         Some(completeAnswersUk.completionDate)
       )
 
+      val taxYear              = sample[TaxYear].copy(
+        startDateInclusive = LocalDate.of(2020, 4, 6),
+        endDateExclusive = LocalDate.of(2021, 4, 6)
+      )
       val completeAnswersNonUk = CompleteMultipleDisposalsTriageAnswers(
         Some(IndividualUserType.Self),
         2,
         sample[Country],
         List(AssetType.Residential),
         Some(TaxYearExchanged.TaxYear2020),
-        sample[TaxYear],
+        taxYear,
         Some(false),
         sample[CompletionDate]
       )
