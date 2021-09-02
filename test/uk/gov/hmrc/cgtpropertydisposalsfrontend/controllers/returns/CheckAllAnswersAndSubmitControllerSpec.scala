@@ -2048,7 +2048,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                     s"confirmationOfSubmission$userKey.howToPay.p1",
                     chargeReference
                   )
-                  if (!userKey.contains("personalRepInPeriodOfAdmin")) {
+
+                  if (!userKey.contains(".personalRepInPeriodOfAdmin")) {
                     doc
                       .select("#ifSaHeading")
                       .text() shouldBe messageFromMessageKey(

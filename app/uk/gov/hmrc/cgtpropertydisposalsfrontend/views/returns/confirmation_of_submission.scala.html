@@ -296,6 +296,8 @@
 
             <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
 
+            if(!isAgent){
+
             @warning(messages(s"$key.Admin.warning"))
 
             <p id="howToPay2">@messages(s"$key$userKey.howToPay.p2")</p>
@@ -309,7 +311,7 @@
             )
            )
           }
-
+        }
 
           case None => {
               <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
@@ -347,7 +349,7 @@
     }
   }
 
-    @if(!isPeriodOfAdmin){
+    @if(!isPeriodOfAdmin || isAgent){
     <div class="panel panel-border-wide">
         <h2 class="heading-medium" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
         <p>@Html(messages(s"$key$userKey.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
