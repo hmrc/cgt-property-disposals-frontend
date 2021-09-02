@@ -101,7 +101,7 @@ class SubscribedChangeContactNameController @Inject() (
     Some(journey.subscribedDetails.contactName)
 
   override protected lazy val backLinkCall: Call               =
-    controllers.accounts.routes.AccountController.manageYourDetails()
+    controllers.accounts.routes.AccountController.manageYourDetails
   override protected lazy val enterContactNameSubmitCall: Call =
     routes.SubscribedChangeContactNameController.enterContactNameSubmit()
   override protected lazy val continueCall: Call               =

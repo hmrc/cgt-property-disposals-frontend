@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Writes
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse}
 

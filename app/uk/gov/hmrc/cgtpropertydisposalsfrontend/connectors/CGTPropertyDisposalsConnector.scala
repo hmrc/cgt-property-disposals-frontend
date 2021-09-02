@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import controllers.Assets.ACCEPT_LANGUAGE
+import play.api.http.HeaderNames
 import play.api.i18n.Lang
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
@@ -91,8 +91,10 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (
 
   override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]                             =
-    makeCall(_.POST[JsValue, HttpResponse](bprUrl, Json.toJson(request), Seq(ACCEPT_LANGUAGE -> lang.language)))
+  ): EitherT[Future, Error, HttpResponse] =
+    makeCall(
+      _.POST[JsValue, HttpResponse](bprUrl, Json.toJson(request), Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language))
+    )
 
   override def subscribe(
     subscriptionDetails: SubscriptionDetails,
@@ -102,7 +104,7 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (
       _.POST[JsValue, HttpResponse](
         subscribeUrl,
         Json.toJson(subscriptionDetails),
-        Seq(ACCEPT_LANGUAGE -> lang.language)
+        Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language)
       )
     )
 

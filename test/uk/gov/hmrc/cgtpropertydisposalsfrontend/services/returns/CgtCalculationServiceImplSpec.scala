@@ -19,7 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
@@ -36,7 +37,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class CgtCalculationServiceImplSpec
-    extends WordSpec
+    extends AnyWordSpec
     with Matchers
     with ScalaCheckDrivenPropertyChecks
     with MockFactory {

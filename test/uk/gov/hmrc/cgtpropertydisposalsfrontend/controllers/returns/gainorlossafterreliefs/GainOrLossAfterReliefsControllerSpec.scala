@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossa
 
 import cats.syntax.order._
 import org.jsoup.nodes.Document
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind

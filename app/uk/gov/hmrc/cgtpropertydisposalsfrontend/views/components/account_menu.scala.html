@@ -28,7 +28,7 @@
   <a href="@{accounts.homepage.routes.HomePageController.homepage().url}" class="as-link@if(activeLink.exists(_.is[AccountMenuItem.Home])){-home }">
     @messages("account.menu.home")
   </a>
-  <a href="@{accounts.routes.AccountController.manageYourDetails().url}" class="as-link@if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){-active }">
+  <a href="@{accounts.routes.AccountController.manageYourDetails.url}" class="as-link@if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){-active }">
     @messages("account.menu.manageYourDetails")
   </a>
   <a href="@{appConfig.signOutUrl}?continue=@{accounts.routes.AccountController.signedOut().url}" class="as-link">

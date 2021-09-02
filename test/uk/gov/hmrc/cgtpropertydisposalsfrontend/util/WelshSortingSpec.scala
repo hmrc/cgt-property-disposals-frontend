@@ -17,10 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.WelshSorting.WelshStringOps
 
-class WelshSortingSpec extends WordSpec with Matchers with MockFactory {
+class WelshSortingSpec extends AnyWordSpec with Matchers with MockFactory {
 
   "WelshSortingSpec" when {
 

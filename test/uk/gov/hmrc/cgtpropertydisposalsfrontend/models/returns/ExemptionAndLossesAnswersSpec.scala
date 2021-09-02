@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 
-class ExemptionAndLossesAnswersSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
+class ExemptionAndLossesAnswersSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   "IncompleteExemptionAndLossesAnswers" must {
 

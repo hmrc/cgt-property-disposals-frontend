@@ -17,9 +17,10 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 
 import com.typesafe.config.ConfigFactory
-import controllers.Assets.ACCEPT_LANGUAGE
+import play.api.http.HeaderNames
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import play.api.i18n.Lang
 import play.api.libs.json.Json
@@ -42,7 +43,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class CGTPropertyDisposalsConnectorImplSpec
-    extends WordSpec
+    extends AnyWordSpec
     with Matchers
     with MockFactory
     with HttpSupport
@@ -139,7 +140,7 @@ class CGTPropertyDisposalsConnectorImplSpec
       val lang       = Lang.defaultLang
 
       behave like connectorBehaviour(
-        mockPost(bprUrl, Seq(ACCEPT_LANGUAGE -> lang.language), Json.toJson(bprRequest))(_),
+        mockPost(bprUrl, Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language), Json.toJson(bprRequest))(_),
         () => connector.getBusinessPartnerRecord(bprRequest, lang)
       )
 
@@ -153,7 +154,7 @@ class CGTPropertyDisposalsConnectorImplSpec
       behave like connectorBehaviour(
         mockPost(
           "http://host:123/cgt-property-disposals/subscription",
-          Seq(ACCEPT_LANGUAGE -> lang.language),
+          Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language),
           Json.toJson(subscriptionDetails)
         )(_),
         () => connector.subscribe(subscriptionDetails, lang)

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
 import org.jsoup.nodes.Document
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind

@@ -21,7 +21,7 @@ import java.time.{Clock, LocalDate, LocalDateTime}
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
-import configs.Configs
+import configs.ConfigReader
 import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.i18n.Messages
@@ -32,7 +32,7 @@ import scala.util.Try
 
 object TimeUtils {
 
-  implicit val configs: Configs[LocalDate] = Configs.fromTry { case (config, key) =>
+  implicit val configs: ConfigReader[LocalDate] = ConfigReader.fromTry { case (config, key) =>
     LocalDate.parse(config.getString(key), DateTimeFormatter.ISO_DATE)
   }
 

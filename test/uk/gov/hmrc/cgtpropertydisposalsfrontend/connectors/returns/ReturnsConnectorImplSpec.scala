@@ -21,7 +21,8 @@ import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import play.api.i18n.Lang
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
@@ -38,7 +39,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
+class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
 
   val config = Configuration(
     ConfigFactory.parseString(

@@ -22,7 +22,7 @@ import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.nodes.Document
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -4728,8 +4728,7 @@ class SingleDisposalsTriageControllerSpec
                 ),
               checkIsRedirect(
                 _,
-                routes.CommonTriageQuestionsController
-                  .disposalsOfSharesTooEarly()
+                routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly
               ),
               () => mockGetTaxYear(today)(Right(None))
             )

@@ -21,7 +21,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import configs.Configs
+import configs.ConfigReader
 import configs.syntax._
 import play.api.Configuration
 import play.api.data.Form
@@ -79,7 +79,7 @@ class SupportingEvidenceController @Inject() (
     with SessionUpdates
     with StartingToAmendToFillingOutReturnBehaviour {
 
-  private def getUpscanInitiateConfig[A : Configs](key: String): A =
+  private def getUpscanInitiateConfig[A : ConfigReader](key: String): A =
     configuration.underlying
       .get[A](s"microservice.services.upscan-initiate.$key")
       .value

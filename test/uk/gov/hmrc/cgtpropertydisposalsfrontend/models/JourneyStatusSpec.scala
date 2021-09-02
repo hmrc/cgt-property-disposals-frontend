@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
@@ -39,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData,
 
 import java.time.LocalDate
 
-class JourneyStatusSpec extends WordSpec with Matchers {
+class JourneyStatusSpec extends AnyWordSpec with Matchers {
 
   val date    = LocalDate.of(2020, 4, 6)
   val taxYear = sample[TaxYear].copy(startDateInclusive = date)

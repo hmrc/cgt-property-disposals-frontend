@@ -18,7 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossa
 
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import play.api.i18n.DefaultMessagesApi
 import play.api.mvc.MessagesRequest
@@ -62,7 +63,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class FurtherReturnCalculationEligibilityUtilSpec
-    extends WordSpec
+    extends AnyWordSpec
     with Matchers
     with MockFactory
     with ReturnsServiceSupport

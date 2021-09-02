@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import configs.Configs
+import configs.ConfigReader
 import configs.syntax._
 import play.api.Configuration
 import play.api.libs.json.{Format, JsValue, Json}
@@ -50,7 +50,7 @@ class EmailVerificationConnectorImpl @Inject() (
 )(implicit ec: ExecutionContext)
     extends EmailVerificationConnector {
 
-  def getEmailVerificationConfig[A : Configs](key: String): A =
+  def getEmailVerificationConfig[A : ConfigReader](key: String): A =
     config.underlying
       .get[A](s"microservice.services.email-verification.$key")
       .value

@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 
-class AddressSpec extends WordSpec with Matchers {
+class AddressSpec extends AnyWordSpec with Matchers {
 
   "Address" must {
 

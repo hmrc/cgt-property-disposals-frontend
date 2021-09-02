@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails;
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
@@ -29,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonRes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 
-class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
+class RebasingEligibilityUtilSpec extends AnyWordSpec with Matchers {
 
   object uk {
     val beforeCutoff = sample[CompleteAcquisitionDetailsAnswers]

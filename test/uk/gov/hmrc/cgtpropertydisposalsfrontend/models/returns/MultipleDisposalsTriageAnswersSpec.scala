@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
@@ -24,7 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestion
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 
-class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
+class MultipleDisposalsTriageAnswersSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   "IncompleteMultipleDisposalsTriageAnswers" must {
 

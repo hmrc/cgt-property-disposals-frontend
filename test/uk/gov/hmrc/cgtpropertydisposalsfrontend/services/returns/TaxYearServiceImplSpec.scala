@@ -20,7 +20,8 @@ import java.time.LocalDate
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
@@ -34,7 +35,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TaxYearServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks with MockFactory {
+class TaxYearServiceImplSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks with MockFactory {
 
   val mockReturnsConnector = mock[ReturnsConnector]
 

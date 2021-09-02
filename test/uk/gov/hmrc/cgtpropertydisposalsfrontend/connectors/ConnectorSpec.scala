@@ -17,7 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import cats.data.EitherT
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
@@ -25,7 +26,7 @@ import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
-trait ConnectorSpec { this: Matchers with WordSpec =>
+trait ConnectorSpec { this: Matchers with AnyWordSpec =>
 
   def connectorBehaviour(
     mockResponse: Option[HttpResponse] => Unit,

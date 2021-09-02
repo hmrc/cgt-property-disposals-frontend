@@ -21,7 +21,8 @@ import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.Lang
 import play.api.libs.json.{JsNumber, JsString, Json}
@@ -68,7 +69,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory with GuiceOneAppPerSuite {
+class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory with GuiceOneAppPerSuite {
 
   val mockConnector = mock[ReturnsConnector]
   val config        = app.injector.instanceOf[ViewConfig]

@@ -142,7 +142,7 @@ class SubscribedChangeEmailController @Inject() (
     changingAccountEmail.journey.subscribedDetails.contactName
 
   override lazy protected val backLinkCall: Option[Call]      = Some(
-    controllers.accounts.routes.AccountController.manageYourDetails()
+    controllers.accounts.routes.AccountController.manageYourDetails
   )
   override lazy protected val enterEmailCall: Call            =
     routes.SubscribedChangeEmailController.enterEmail()

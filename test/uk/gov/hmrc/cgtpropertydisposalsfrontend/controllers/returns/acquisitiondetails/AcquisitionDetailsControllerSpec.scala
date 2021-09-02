@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}

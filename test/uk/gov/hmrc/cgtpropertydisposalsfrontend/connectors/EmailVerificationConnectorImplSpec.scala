@@ -18,7 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Call
@@ -30,7 +31,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
+class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport {
 
   val (protocol, host, port) = ("http", "host", "port")
   val templateId             = "id"
