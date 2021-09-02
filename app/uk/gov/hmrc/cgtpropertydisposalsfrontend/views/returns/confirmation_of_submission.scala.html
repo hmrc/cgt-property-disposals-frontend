@@ -296,7 +296,7 @@
 
             <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
 
-            if(!isAgent){
+            @if(!isAgent){
 
             @warning(messages(s"$key.Admin.warning"))
 

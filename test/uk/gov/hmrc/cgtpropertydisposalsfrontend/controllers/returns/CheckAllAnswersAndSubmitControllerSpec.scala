@@ -2049,7 +2049,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                     chargeReference
                   )
 
-                  if (!userKey.contains(".personalRepInPeriodOfAdmin")) {
+                  if (!userKey.contains("personalRepInPeriodOfAdmin") || (userType === UserType.Agent)) {
                     doc
                       .select("#ifSaHeading")
                       .text() shouldBe messageFromMessageKey(
