@@ -4144,7 +4144,7 @@ confirmationOfSubmission.whatNext=What you need to do next
 confirmationOfSubmission.agent.whatNext=What happens next
 confirmationOfSubmission.trust.whatNext=What happens next
 confirmationOfSubmission.capacitor.whatNext=What happens next
-confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=What happens next
+confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=What you’ll need to do next
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=What happens next
 
 confirmationOfSubmission.warning=You may be charged interest on late payments.
@@ -4155,6 +4155,7 @@ confirmationOfSubmission.trust.warning=The trust may be charged interest on late
 confirmationOfSubmission.trust.penalty.warning=The trust may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
 confirmationOfSubmission.capacitor.warning=The person may be charged interest on late payments.
 confirmationOfSubmission.capacitor.penalty.warning=The person may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
+confirmationOfSubmission.Admin.warning=Do not pay until we contact you.
 
 confirmationOfSubmission.howToPay.heading=How to pay
 confirmationOfSubmission.agent.howToPay.heading.p1=Find out how your client can <a href="{0}"><strong class="bold">pay their tax bill</strong></a>.
@@ -4163,9 +4164,11 @@ confirmationOfSubmission.howToPay.p1=You can pay online or by bank transfer. You
 confirmationOfSubmission.agent.howToPay.p1=They will need to provide their payment reference number <strong class="bold">{0}</strong>.
 confirmationOfSubmission.trust.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=HMRC will contact you using the details you provided. They will tell you how and when you need to pay the tax.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=HMRC will contact you using the details you provided. They will tell you how and when you need to pay the tax.
+confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=Wait for us to contact you with details of when and how to pay the tax.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=This return will not appear on your account home page. You can now sign out.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p3=If you need to do a Self Assessment tax return for the estate, you will need to provide details from this return.
 
 confirmationOfSubmission.paymentNotice=It takes 3 to 5 days for payments or charges to show in your account.
 confirmationOfSubmission.agent.paymentNotice=It takes 3 to 5 days for payments or charges to show in your client’s account.
@@ -4182,11 +4185,11 @@ confirmationOfSubmission.trust.inset.p1=If the trust needs to send a Self Assess
 
 confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
 confirmationOfSubmission.agent.ifSa=Self Assessment
+confirmationOfSubmission.personalRepInPeriodOfAdmin.sA=Self Assessment
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=If your client needs to do a Self Assessment tax return for the estate
 confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment tax return
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
-confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa=If you need to do a Self Assessment tax return for the estate
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=If your client needs to do a Self Assessment tax return for the estate
 
 confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
 confirmationOfSubmission.agent.ifSa.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.

@@ -3629,7 +3629,7 @@ confirmationOfSubmission.whatNext=Yr hyn y mae angen i chi ei wneud nesaf
 confirmationOfSubmission.agent.whatNext=Yr hyn sy’n digwydd nesaf
 confirmationOfSubmission.trust.whatNext=Yr hyn sy’n digwydd nesaf
 confirmationOfSubmission.capacitor.whatNext=Yr hyn sy’n digwydd nesaf
-confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=Yr hyn sy’n digwydd nesaf
+confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=Yr hyn y bydd angen i chi ei wneud nesaf
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=Yr hyn sy’n digwydd nesaf
 confirmationOfSubmission.warning=Efallai y codir llog arnoch am daliadau hwyr.
 confirmationOfSubmission.penalty.warning=Efallai y cewch gosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
@@ -3639,6 +3639,7 @@ confirmationOfSubmission.trust.warning=Efallai y codir llog ar yr ymddiriedolaet
 confirmationOfSubmission.trust.penalty.warning=Efallai y bydd yr ymddiriedolaeth yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
 confirmationOfSubmission.capacitor.warning=Efallai y codir llog ar y person am daliadau hwyr.
 confirmationOfSubmission.capacitor.penalty.warning=Efallai y bydd y person yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na roddwyd gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
+confirmationOfSubmission.Admin.warning=Peidiwch â thalu tan i ni gysylltu â chi.
 confirmationOfSubmission.howToPay.heading=Sut i dalu
 confirmationOfSubmission.agent.howToPay.heading.p1=Dysgwch sut y gall eich cleient <a href="{0}"><strong class="bold">dalu ei fil treth</strong></a>.
 confirmationOfSubmission.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong class="bold">{0}</strong>.
@@ -3646,8 +3647,10 @@ confirmationOfSubmission.agent.howToPay.p1=Bydd angen iddo ddarparu ei gyfeirnod
 confirmationOfSubmission.trust.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.capacitor.howToPay.p1=Gall y person dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen ei gyfeirnod talu arno: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.personalRep.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=Bydd CThEM yn cysylltu â chi gan ddefnyddio’r manylion a ddarparwyd gennych. Byddant yn dweud wrthych sut a phryd y bydd angen i chi dalu’r dreth.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=Bydd CThEM yn cysylltu â chi gan ddefnyddio’r manylion a ddarparwyd gennych. Byddant yn dweud wrthych sut a phryd y bydd angen i chi dalu’r dreth.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=Arhoswch i ni gysylltu â chi gyda manylion ynghylch pryd a sut i dalu’r dreth.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=Ni fydd y Ffurflen Dreth hon yn ymddangos ar hafan eich cyfrif. Gallwch allgofnodi nawr.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p3=Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd, bydd angen i chi roi manylion o’r Ffurflen Dreth hon.
 confirmationOfSubmission.paymentNotice=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yn eich cyfrif.
 confirmationOfSubmission.agent.paymentNotice=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yng nghyfrif eich cleient.
 confirmationOfSubmission.trust.paymentNotice=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yng nghyfrif yr ymddiriedolaeth.
@@ -3660,11 +3663,11 @@ confirmationOfSubmission.agent.inset.p1=Os oes angen i’ch cleient anfon Ffurfl
 confirmationOfSubmission.trust.inset.p1=Os oes angen i’r ymddiriedolaeth anfon Ffurflen Dreth Hunanasesiad
 confirmationOfSubmission.ifSa=Os oes angen i chi gyflwyno Ffurflen Dreth Hunanasesiad
 confirmationOfSubmission.agent.ifSa=Hunanasesiad
+confirmationOfSubmission.personalRepInPeriodOfAdmin.sA=Hunanasesiad
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=Os oes angen i’ch cleient lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd
 confirmationOfSubmission.trust.ifSa=Os oes angen i’r ymddiriedolaeth anfon Ffurflen Dreth Hunanasesiad
 confirmationOfSubmission.capacitor.ifSa=Hunanasesiad
 confirmationOfSubmission.personalRep.ifSa=Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer y person
-confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa=Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=Os oes angen i’ch cleient lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd
 confirmationOfSubmission.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn eich <a href="{0}" target="_blank">Ffurflen Dreth Hunanasesiad nesaf (yn agor ffenestr newydd)</a>.
 confirmationOfSubmission.agent.ifSa.p1=Os oes angen i’ch cleient anfon Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.
 confirmationOfSubmission.trust.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn Ffurflen Dreth Hunanasesiad nesaf yr ymddiriedolaeth.
