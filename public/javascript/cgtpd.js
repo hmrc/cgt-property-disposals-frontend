@@ -47,7 +47,7 @@
 
   var urBanner = document.querySelector('.ur-banner')
   if (urBanner) {
-    var urBannerCookieName = 'mtdpurr'
+    var urBannerCookieName = 'mtdplatefilingsurvey'
     var hasDismissed = GOVUK.getCookie(urBannerCookieName)
 
     function removeUrBanner () {

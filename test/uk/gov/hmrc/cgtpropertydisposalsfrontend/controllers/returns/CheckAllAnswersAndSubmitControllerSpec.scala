@@ -2049,11 +2049,13 @@ class CheckAllAnswersAndSubmitControllerSpec
                     chargeReference
                   )
 
-                  doc
-                    .select("#ifSaHeading")
-                    .text() shouldBe messageFromMessageKey(
-                    s"confirmationOfSubmission$userKey.ifSa"
-                  )
+                  if (!userKey.contains("personalRepInPeriodOfAdmin") || (userType === UserType.Agent)) {
+                    doc
+                      .select("#ifSaHeading")
+                      .text() shouldBe messageFromMessageKey(
+                      s"confirmationOfSubmission$userKey.ifSa"
+                    )
+                  }
                 }
               )
             }
