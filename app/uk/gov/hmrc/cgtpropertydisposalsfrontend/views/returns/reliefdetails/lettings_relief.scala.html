@@ -119,7 +119,8 @@
         error = form.error(key),
         options = options,
         helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-        customErrorKey = Some(customErrorKey)
+        customErrorKey = Some(customErrorKey),
+        warningContent = Some(messages(s"$key.warningMsg"))
     )
     <p>
       <a href="@{appConfig.lettingReliefInfo}" target="_blank">

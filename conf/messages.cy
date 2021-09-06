@@ -2458,6 +2458,9 @@ lettingsRelief.agent.helpText=Mae’n bosibl y gall eich cleient hawlio’r rhyd
 lettingsRelief.trust.helpText=Mae’n bosibl y gall yr ymddiriedolaeth hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i fod hefyd wedi’i roi ar osod am gyfnod.
 lettingsRelief.capacitor.helpText=Mae’n bosibl y gall yr ymddiriedolaeth hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i bod hefyd wedi’i roi ar osod am gyfnod.
 lettingsRelief.personalRep.helpText=Mae’n bosibl y gall y person hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i fod hefyd wedi’i roi ar osod am gyfnod.
+
+lettingsRelief.warningMsg=Letting Relief changed on 6 April 2020. Please make sure you understand the new rules.
+
 lettingsRelief.error.required=Dewiswch ‘Iawn’ os ydych yn hawlio Rhyddhad Gosod
 lettingsRelief.agent.error.required=Dewiswch ‘Iawn’ os oes gan eich cleient hawl i Ryddhad Gosod
 lettingsRelief.trust.error.required=Dewiswch ‘Iawn’ os oes gan yr ymddiriedolaeth hawl i Ryddhad Gosod
