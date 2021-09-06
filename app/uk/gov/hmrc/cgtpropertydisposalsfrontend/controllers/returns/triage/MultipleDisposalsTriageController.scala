@@ -1812,10 +1812,19 @@ object MultipleDisposalsTriageController {
     representativeType: Option[RepresentativeType]
   ): Form[TaxYearExchanged] = {
     val conditionExpr1 = !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2021)
-    val conditionExpr2 = !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2020)
+
+    val conditionExpr2 =
+      !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2020 ||
+        taxYearOfDateOfDeath === TaxYearExchanged.TaxYearBefore2020)
+
     val conditionExpr3 =
       !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2021 ||
         taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2020)
+
+    val conditionExpr4 =
+      !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2021 ||
+        taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2020 ||
+        taxYearOfDateOfDeath === TaxYearExchanged.TaxYearBefore2020)
 
     val taxYearExchangedFormFormatter: Formatter[TaxYearExchanged] =
       new Formatter[TaxYearExchanged] {
@@ -1828,7 +1837,7 @@ object MultipleDisposalsTriageController {
               case "TaxYear2021"       =>
                 if (representativeType.contains(PersonalRepresentative) && conditionExpr1)
                   Left(FormError(key, "error.before.invalid"))
-                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr3)
+                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr4)
                   Left(FormError(key, "error.after.invalid"))
                 else
                   Right(TaxYearExchanged.TaxYear2021)
