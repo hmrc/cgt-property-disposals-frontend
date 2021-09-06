@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.Jsoup
@@ -55,11 +54,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{Delta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.DirectDebit
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.completeReliefDetailsAnswersGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, ReturnSummary, ReturnType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -324,7 +325,11 @@ class ViewReturnControllerSpec
             triageAnswers = c.triageAnswers.copy(individualUserType = None),
             propertyAddress = address,
             representeeAnswers = None,
-            gainOrLossAfterReliefs = None
+            gainOrLossAfterReliefs = None,
+            reliefDetails = sample[CompleteReliefDetailsAnswers].copy(
+              privateResidentsRelief = AmountInPence(0L),
+              lettingsRelief = AmountInPence(0L)
+            )
           )
 
           val sampleViewingReturn = sample[ViewingReturn]
@@ -441,7 +446,11 @@ class ViewReturnControllerSpec
             triageAnswers = c.triageAnswers.copy(individualUserType = None),
             propertyAddress = address,
             representeeAnswers = None,
-            gainOrLossAfterReliefs = None
+            gainOrLossAfterReliefs = None,
+            reliefDetails = sample[CompleteReliefDetailsAnswers].copy(
+              privateResidentsRelief = AmountInPence(0L),
+              lettingsRelief = AmountInPence(0L)
+            )
           )
 
           val sampleViewingReturn = sample[ViewingReturn]
