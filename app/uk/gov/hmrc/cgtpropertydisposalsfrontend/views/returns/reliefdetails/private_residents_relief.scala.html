@@ -38,7 +38,8 @@
   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
   radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
   unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+  details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(
@@ -81,6 +82,30 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @customErrorKey = @{if(form.error(valueKey).nonEmpty) s"$valueKey$userKey" else s"$key$userKey"}
+
+@bodyContent = @{
+    details(
+        messages(s"$key.details.link"),
+        Html(s"""
+            | <p>
+                |    ${messages(s"$key.details.body.p1")}
+                | </p>
+            | <ul class="list-bullet">
+                |    <li>${messages(s"$key.details.body.li1")}</li>
+                |    <li>${messages(s"$key.details.body.li2")}</li>
+                | </ul>
+            | <p>
+                |    ${messages(s"$key.details.body.p2")}
+                | </p>
+            | <p>
+                | <a href="${appConfig.lettingReliefInfo}" target="_blank">
+                |    ${messages(s"$key.details.body.link")}
+                | </a>
+                | </p>
+            """.stripMargin
+        )
+    )
+}
 
 @options = @{List(
    RadioOption(
@@ -141,14 +166,10 @@
         error = form.error(key),
         options = options,
         helpText = helpText,
-        customErrorKey = Some(customErrorKey)
+        customErrorKey = Some(customErrorKey),
+        warningContent = Some(messages(s"$key.warningMsg")),
+        bodyContent =  Some(bodyContent)
      )
-
-     <p>
-      <a href="@{appConfig.lettingReliefInfo}" target="_blank">
-       @messages(s"$key.furtherInfoLink")
-      </a>
-     </p>
 
      @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
 }

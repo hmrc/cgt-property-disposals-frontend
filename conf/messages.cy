@@ -1199,7 +1199,7 @@ draftReturnSaved.warning=Ar ôl {0}, bydd yr holl fanylion ar eich Ffurflen Dret
 draftReturnSaved.trust.warning=Ar ôl {0}, bydd yr holl fanylion ar Ffurflen Dreth Enillion Cyfalaf ar eiddo yn y DU yr ymddiriedolaeth yn cael eu dileu.
 draftReturnSaved.agent.warning=Ar ôl {0}, bydd yr holl fanylion ar Ffurflen Dreth Enillion Cyfalaf ar eiddo yn y DU eich cleient yn cael eu dileu.
 draftReturnSaved.p1=Ar ôl y dyddiad hwnnw, bydd angen i chi ddechrau eto.
-draftReturnSaved.p2=Byddwn yn cadw Ffurflen Dreth sydd wedi’i nodi fel un sydd wrthi’n cael ei llenwi am 30 diwrnod o’r dyddiad y cafodd ei chadw ddiwethaf. Byddwn ond yn cadw dogfennau sydd wedi’u huwchlwytho am 5 diwrnod  o’r diwrnod olaf y cawsant eu cadw.
+draftReturnSaved.p2=Byddwn yn cadw Ffurflen Dreth sydd wedi’i nodi fel un sydd wrthi’n cael ei llenwi am 30 diwrnod o’r dyddiad y cafodd ei chadw ddiwethaf. Byddwn ond yn cadw dogfennau sydd wedi’u huwchlwytho am 5 diwrnod o’r diwrnod olaf y cawsant eu cadw.
 
 #===================================================
 #  TASK LIST AND SAVE DRAFT PAGES - END
@@ -2261,7 +2261,7 @@ rebaseAcquisitionPrice.personalRep.dropdown.p2=I gyfrifo enillion neu golledion 
 rebaseAcquisitionPrice.indirect.dropdown.p2=<a href="{0}" target="_blank">Dysgwch am ail-sylfaenu (yn agor ffenestr neu dab newydd)</a>
 rebaseAcquisitionPrice.dropdown.p3=Yr enw ar y broses hon yw ail-sylfaenu.
 rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Dysgwch sut i ofyn i CThEM wirio gwerth marchnadol eiddo (yn agor ffenestr newydd)</a>.
-rebaseAcquisitionPrice.dropdown.p5=Mae’n cymryd o leiaf 3 mis i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y dylech nodi amcangyfrif nawr ac, os bydd angen i chi newid y swm, gwnewch hynny’n nes ymlaen gan ddefnyddio’r gwasanaeth hwn. Neu os ydych eisoes wedi  llenwi Ffurflen Dreth Hunanasesiad, gallwch roi’r gwerth marchnadol cywir yn eich Ffurflen Dreth Hunanasesiad nesaf.
+rebaseAcquisitionPrice.dropdown.p5=Mae’n cymryd o leiaf 3 mis i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y dylech nodi amcangyfrif nawr ac, os bydd angen i chi newid y swm, gwnewch hynny’n nes ymlaen gan ddefnyddio’r gwasanaeth hwn. Neu os ydych eisoes wedi llenwi Ffurflen Dreth Hunanasesiad, gallwch roi’r gwerth marchnadol cywir yn eich Ffurflen Dreth Hunanasesiad nesaf.
 rebaseAcquisitionPrice.agent.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’ch cleient allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
 rebaseAcquisitionPrice.trust.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’r ymddiriedolaeth allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
 rebaseAcquisitionPrice.capacitor.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’r person allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
@@ -2396,6 +2396,16 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.agent.helpText.li2=oedd gan y 
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Gellir ond hawlio Rhyddhad Preswylfan Preifat os:
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=mai’r eiddo oedd unig gartref buddiolwr, cyn ac ar ôl marwolaeth yr ymadawedig
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=oedd gan y buddiolwr hwnnw hawl hefyd i o leiaf 75% o dderbyniadau gwaredu’r eiddo (gan dybio nad oedd angen unrhyw un o’r derbyniadau er mwyn bodloni unrhyw rwymedigaethau ystâd yr ymadawedig)
+
+privateResidentsRelief.warningMsg=Private Residence Relief changed on 6 April 2020. Please make sure you understand the new rules.
+
+privateResidentsRelief.details.link=Help with Private Residence Relief
+privateResidentsRelief.details.body.p1=If you let out your home, you get full relief for the:
+privateResidentsRelief.details.body.li1=years your lived there
+privateResidentsRelief.details.body.li2=last <strong class="bold">9 months</strong> you owned it - even if you were not living there at the time
+privateResidentsRelief.details.body.p2=Some exceptions apply.
+privateResidentsRelief.details.body.link=Find out about Private Residence Relief (opens in a new window)
+
 privateResidentsReliefValue.label=Swm y Rhyddhad Preswylfan Preifat y mae gennych hawl iddo
 privateResidentsReliefValue.agent.label=Swm y Rhyddhad Preswylfan Preifat y mae gan eich cleient hawl iddo
 privateResidentsReliefValue.trust.label=Swm y Rhyddhad Preswylfan Preifat y mae gan yr ymddiriedolaeth hawl iddo
@@ -2839,7 +2849,7 @@ annualExemptAmount.details.1.body=Bob blwyddyn dreth, mae ymddiriedolaeth yn cae
 annualExemptAmount.details.2.header=Pwy yw buddiolwyr sy’n agored i niwed?
 annualExemptAmount.details.2.body=<a href="{0}" target="_blank">Gallai buddiolwr sy’n agored i niwed (yn agor ffenestr newydd)</a> fod yn rhywun o dan 18 oed y mae ei rieni wedi marw. Gallai hefyd fod yn berson ag anabledd sy’n gymwys ar gyfer budd-daliadau penodol.
 annualExemptAmount.details.3.header=Beth yw’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth?
-annualExemptAmount.details.3.body=Mae’r <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a> yn lwfans rhydd o dreth blynyddol. Mae ar gael i rai pobl sydd angen talu Treth Enillion Cyfalaf.  Dim ond ar eu henillion ar gyfer y flwyddyn dreth sydd dros y Swm Blynyddol sydd wedi ei Eithrio rhag Treth y mae’n rhaid i’r rhan fwyaf o bobl dalu Treth Enillion Cyfalaf. Mae’n rhaid i unrhyw golledion neu ryddhad fod wedi’u tynnu oddi ar yr enillion eisoes.
+annualExemptAmount.details.3.body=Mae’r <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a> yn lwfans rhydd o dreth blynyddol. Mae ar gael i rai pobl sydd angen talu Treth Enillion Cyfalaf. Dim ond ar eu henillion ar gyfer y flwyddyn dreth sydd dros y Swm Blynyddol sydd wedi ei Eithrio rhag Treth y mae’n rhaid i’r rhan fwyaf o bobl dalu Treth Enillion Cyfalaf. Mae’n rhaid i unrhyw golledion neu ryddhad fod wedi’u tynnu oddi ar yr enillion eisoes.
 annualExemptAmount.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a>.
 annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yn ystod y cyfnod gweinyddu (yn agor ffenestr newydd)</a>.
 annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yn ystod y cyfnod gweinyddu (yn agor ffenestr newydd)</a>.
