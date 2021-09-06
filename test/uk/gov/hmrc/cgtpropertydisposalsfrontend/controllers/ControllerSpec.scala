@@ -35,7 +35,7 @@ import play.api.test.Helpers._
 import play.api.{Application, Configuration, Environment, Logging, Play}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.{Metrics, MockMetrics}
-import play.api.mvc.Cookie.SameSite
+
 import scala.concurrent.Future
 import scala.reflect.ClassTag
 import com.google.inject.{Inject, Singleton}
@@ -47,14 +47,14 @@ class TestMessagesApi(
   langCookieName: String,
   langCookieSecure: Boolean,
   langCookieHttpOnly: Boolean,
-  sameSite: Option[SameSite]
+  httpConfiguration: HttpConfiguration
 ) extends DefaultMessagesApi(
-      messages,
-      langs,
-      langCookieName,
-      langCookieSecure,
-      langCookieHttpOnly,
-      sameSite
+      messages = messages,
+      langs = langs,
+      langCookieName = langCookieName,
+      langCookieSecure = langCookieSecure,
+      langCookieHttpOnly = langCookieHttpOnly,
+      httpConfiguration = httpConfiguration
     )
     with Logging {
 
@@ -70,8 +70,7 @@ class TestDefaultMessagesApiProvider @Inject() (
   environment: Environment,
   config: Configuration,
   langs: Langs,
-  httpConfiguration: HttpConfiguration,
-  sameSite: Option[SameSite]
+  httpConfiguration: HttpConfiguration
 ) extends DefaultMessagesApiProvider(environment, config, langs, httpConfiguration) {
 
   override lazy val get: MessagesApi = {
@@ -81,7 +80,7 @@ class TestDefaultMessagesApiProvider @Inject() (
       langCookieName = langCookieName,
       langCookieSecure = langCookieSecure,
       langCookieHttpOnly = langCookieHttpOnly,
-      sameSite = sameSite
+      httpConfiguration = httpConfiguration
     )
   }
 }
