@@ -1203,7 +1203,7 @@ class SingleDisposalsTriageController @Inject() (
                             )
                           case None                         =>
                             Redirect(
-                              routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
+                              routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly
                             )
                         }
                       }

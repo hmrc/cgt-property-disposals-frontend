@@ -21,7 +21,8 @@ import cats.instances.future._
 import com.typesafe.config.ConfigFactory
 import org.scalacheck.Gen
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import play.api.i18n.Lang
 import play.api.libs.json.{Reads, Writes}
@@ -56,7 +57,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect._
 
-class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFactory {
+class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
   val bprService: BusinessPartnerRecordService =
     mock[BusinessPartnerRecordService]

@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGeneratorImpl
 
-class UUIDGeneratorImplSpec extends WordSpec with Matchers {
+class UUIDGeneratorImplSpec extends AnyWordSpec with Matchers {
 
   "UUIDIDGeneratorImpl" must {
 

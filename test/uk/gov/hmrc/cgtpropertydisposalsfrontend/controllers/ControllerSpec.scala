@@ -23,14 +23,16 @@ import com.typesafe.config.ConfigFactory
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.http.HttpConfiguration
 import play.api.i18n.{DefaultMessagesApi, DefaultMessagesApiProvider, Lang, Langs, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.mvc.{Call, Result}
 import play.api.test.Helpers._
-import play.api.{Application, Configuration, Environment, Logger, Play}
+import play.api.{Application, Configuration, Environment, Logging, Play}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.{Metrics, MockMetrics}
 
@@ -47,18 +49,20 @@ class TestMessagesApi(
   langCookieHttpOnly: Boolean,
   httpConfiguration: HttpConfiguration
 ) extends DefaultMessagesApi(
-      messages,
-      langs,
-      langCookieName,
-      langCookieSecure,
-      langCookieHttpOnly,
-      httpConfiguration
-    ) {
+      messages = messages,
+      langs = langs,
+      langCookieName = langCookieName,
+      langCookieSecure = langCookieSecure,
+      langCookieHttpOnly = langCookieHttpOnly,
+      httpConfiguration = httpConfiguration
+    )
+    with Logging {
 
   override protected def noMatch(key: String, args: Seq[Any])(implicit lang: Lang): String = {
-    Logger.error(s"Could not find message for key: $key ${args.mkString("-")}")
+    logger.error(s"Could not find message for key: $key ${args.mkString("-")}")
     s"""not_found_message("$key")"""
   }
+
 }
 
 @Singleton
@@ -81,7 +85,7 @@ class TestDefaultMessagesApiProvider @Inject() (
   }
 }
 
-trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with MockFactory {
+trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with MockFactory {
 
   implicit val lang: Lang = Lang("en")
 
@@ -103,7 +107,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
               | microservice.upscan-initiate.upscan-store.expiry-time = 1
           """.stripMargin
           )
-        ) ++ additionalConfig
+        ).withFallback(additionalConfig)
       )
       .disable[uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore]
       .overrides(metricsBinding :: overrideBindings: _*)

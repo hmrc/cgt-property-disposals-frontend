@@ -1350,7 +1350,7 @@ class MultipleDisposalsTriageController @Inject() (
               )
               if assetTypes.contains(List(IndirectDisposal)) &&
                 !isAValidCGTTaxTear(TimeUtils.getTaxYearExchangedOfADate(completionDate.value)) =>
-            Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly())
+            Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly)
 
           case IncompleteMultipleDisposalsTriageAnswers(
                 _,
@@ -1405,7 +1405,7 @@ class MultipleDisposalsTriageController @Inject() (
               if (isAmendReturn(state))
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               else if (assetTypes.contains(List(IndirectDisposal)))
-                routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
+                routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly
               else if (taxYearExchanged === TaxYearExchanged.DifferentTaxYears)
                 routes.MultipleDisposalsTriageController.exchangedInDifferentTaxYears()
               else

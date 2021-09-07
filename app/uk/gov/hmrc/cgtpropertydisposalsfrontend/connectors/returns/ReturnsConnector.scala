@@ -22,7 +22,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.http.HeaderNames.ACCEPT_LANGUAGE
+import play.api.http.HeaderNames
 import play.api.i18n.Lang
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
@@ -160,7 +160,7 @@ class ReturnsConnectorImpl @Inject() (
         .POST[SubmitReturnRequest, HttpResponse](
           submitReturnUrl,
           submitReturnRequest,
-          Seq(ACCEPT_LANGUAGE -> lang.language)
+          Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language)
         )
         .map(Right(_))
         .recover { case NonFatal(e) =>

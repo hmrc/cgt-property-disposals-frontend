@@ -32,7 +32,7 @@ lazy val wartremoverSettings =
 lazy val scoverageSettings =
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;.*(config|testonly|views).*;.*(BuildInfo|Routes).*",
-    ScoverageKeys.coverageMinimumStmtTotal := 80.00,
+    ScoverageKeys.coverageMinimumStmtTotal := 89.00,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
@@ -55,12 +55,11 @@ lazy val microservice = Project(appName, file("."))
       "-Yrangepos",
       "-language:postfixOps"
     ),
-    scalacOptions in Test --= Seq("-Ywarn-value-discard")
+    Test / scalacOptions --= Seq("-Ywarn-value-discard")
   )
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
-  .settings(resolvers += Resolver.jcenterRepo)
   .settings(wartremoverSettings: _*)
   .settings(scoverageSettings: _*)
   .settings(PlayKeys.playDefaultPort := 7020)

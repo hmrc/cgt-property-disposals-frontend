@@ -18,9 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.LocalDate
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 
-class TimeUtilsSpec extends WordSpec with Matchers {
+class TimeUtilsSpec extends AnyWordSpec with Matchers {
 
   "TimeUtils" must {
 

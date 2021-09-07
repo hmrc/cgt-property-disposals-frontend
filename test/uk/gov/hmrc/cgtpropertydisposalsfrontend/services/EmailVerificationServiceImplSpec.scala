@@ -19,7 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.mvc.Call
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
@@ -34,7 +35,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockFactory {
+class EmailVerificationServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
   val mockConnector = mock[EmailVerificationConnector]
 

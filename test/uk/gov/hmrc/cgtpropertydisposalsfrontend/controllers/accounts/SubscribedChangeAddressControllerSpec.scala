@@ -230,21 +230,21 @@ class SubscribedChangeAddressControllerSpec
         UserType.Individual,
         None,
         performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails()
+        controllers.accounts.routes.AccountController.manageYourDetails
       )
 
       behave like displaySelectAddress(
         UserType.Agent,
         None,
         performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails()
+        controllers.accounts.routes.AccountController.manageYourDetails
       )
 
       behave like displaySelectAddress(
         UserType.Organisation,
         None,
         performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails()
+        controllers.accounts.routes.AccountController.manageYourDetails
       )
     }
 
@@ -259,7 +259,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like submitSelectAddress(
         performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails(),
+        controllers.accounts.routes.AccountController.manageYourDetails,
         controllers.accounts.routes.AccountController.contactAddressUpdated()
       )
 

@@ -19,7 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 import java.util.UUID
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.Eventually
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.libs.json.{JsNumber, JsObject}
@@ -36,7 +37,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SessionStoreImplSpec
-    extends WordSpec
+    extends AnyWordSpec
     with Matchers
     with MongoSupport
     with Eventually
@@ -91,7 +92,7 @@ class SessionStoreImplSpec
 
 }
 
-class SessionStoreFailureSpec extends WordSpec with Matchers with MongoSupport {
+class SessionStoreFailureSpec extends AnyWordSpec with Matchers with MongoSupport {
 
   val sessionStore = new SessionStoreImpl(reactiveMongoComponent, config)
 

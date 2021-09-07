@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Matchers, Suite}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
+import org.scalatest.matchers.should.Matchers
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
 

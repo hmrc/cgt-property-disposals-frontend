@@ -18,7 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents
 
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.Eventually
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import play.api.libs.json.{JsObject, JsString}
 import play.api.test.Helpers._
@@ -53,7 +54,7 @@ object AgentVerifierMatchRetryStoreImplSpec {
   }
 
 }
-class AgentVerifierMatchRetryStoreImplSpec extends WordSpec with Matchers with MongoSupport with Eventually {
+class AgentVerifierMatchRetryStoreImplSpec extends AnyWordSpec with Matchers with MongoSupport with Eventually {
 
   val retryStore =
     new AgentVerifierMatchRetryStoreImpl(reactiveMongoComponent, config)
@@ -104,7 +105,7 @@ class AgentVerifierMatchRetryStoreImplSpec extends WordSpec with Matchers with M
 
 }
 
-class AgentVerifierMatchRetryStoreImplFailureSpec extends WordSpec with Matchers with MongoSupport {
+class AgentVerifierMatchRetryStoreImplFailureSpec extends AnyWordSpec with Matchers with MongoSupport {
 
   val retryStore =
     new AgentVerifierMatchRetryStoreImpl(reactiveMongoComponent, config)

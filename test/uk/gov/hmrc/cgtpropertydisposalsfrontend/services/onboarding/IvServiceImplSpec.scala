@@ -21,7 +21,8 @@ import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{JsObject, JsString}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.IvConnector
@@ -33,7 +34,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class IvServiceImplSpec extends WordSpec with Matchers with MockFactory {
+class IvServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
   val mockConnector = mock[IvConnector]
 

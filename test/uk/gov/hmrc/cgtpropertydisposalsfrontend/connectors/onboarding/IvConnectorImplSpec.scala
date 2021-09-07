@@ -20,7 +20,8 @@ import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -28,7 +29,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class IvConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
+class IvConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
 
   val config = Configuration(
     ConfigFactory.parseString(

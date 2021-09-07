@@ -19,7 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan
 import cats.data.EitherT
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import play.api.libs.json.JsString
 import play.api.mvc.Call
@@ -36,7 +37,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
+class UpscanConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport {
 
   val config = Configuration(
     ConfigFactory.parseString(

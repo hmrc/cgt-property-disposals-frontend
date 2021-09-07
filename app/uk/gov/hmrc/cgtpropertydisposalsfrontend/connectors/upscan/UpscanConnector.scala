@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import configs.Configs
+import configs.ConfigReader
 import configs.syntax._
 import play.api.Configuration
 import play.api.mvc.Call
@@ -65,7 +65,7 @@ class UpscanConnectorImpl @Inject() (
 ) extends UpscanConnector
     with Logging {
 
-  private def getUpscanInitiateConfig[A : Configs](key: String): A =
+  private def getUpscanInitiateConfig[A : ConfigReader](key: String): A =
     config.underlying
       .get[A](s"microservice.services.upscan-initiate.$key")
       .value

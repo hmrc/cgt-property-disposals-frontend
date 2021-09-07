@@ -23,7 +23,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.order._
 import org.jsoup.nodes.Document
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
