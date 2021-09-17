@@ -3,6 +3,10 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTimeoutDialogHelper
 @import views.html.helper.CSPNonce
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import play.twirl.api._
+@import play.api.mvc._
+@import play.api.i18n.Messages
+
 
 @this(hmrcLayout: HmrcLayout,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
@@ -11,8 +15,8 @@
 @(pageTitle: String)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @content = {
-contentBlock
-hmrcReportTechnicalIssueHelper()
+@contentBlock
+@hmrcReportTechnicalIssueHelper()
 }
 @hmrcLayout(
     pageTitle = Some(pageTitle),
