@@ -2763,10 +2763,11 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=that beneficiary 
 privateResidentsRelief.warningMsg=Private Residence Relief changed on 6 April 2020. Please make sure you understand the new rules.
 
 privateResidentsRelief.details.link=Help with Private Residence Relief
-privateResidentsRelief.details.body.p1=If you let out your home, you get full relief for the:
+privateResidentsRelief.details.body.p1=If the property was your main home and you lived there for the entire time you owned it, you can claim full relief.
+privateResidentsRelief.details.body.p2=If you did not live in the property for the entire time you owned it, you can claim relief for the:
 privateResidentsRelief.details.body.li1=years your lived there
 privateResidentsRelief.details.body.li2=last <strong class="bold">9 months</strong> you owned it - even if you were not living there at the time
-privateResidentsRelief.details.body.p2=Some exceptions apply.
+privateResidentsRelief.details.body.p3=Some exceptions apply.
 privateResidentsRelief.details.body.link=Find out about Private Residence Relief (opens in a new window)
 
 privateResidentsReliefValue.label=Amount of Private Residence Relief you are entitled to

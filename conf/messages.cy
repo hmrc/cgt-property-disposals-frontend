@@ -2400,10 +2400,11 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=oedd gan y buddio
 privateResidentsRelief.warningMsg=Newidiodd Rhyddhad Preswylfa Breifat ar 6 Ebrill 2020. Gwnewch yn siŵr eich bod yn deall y rheolau newydd.
 
 privateResidentsRelief.details.link=Help gyda Rhyddhad Preswylfa Breifat
-privateResidentsRelief.details.body.p1=Os ydych yn rhoi eich cartref ar osod, byddwch yn cael rhyddhad llawn ar gyfer:
+privateResidentsRelief.details.body.p1=Os mai’ch prif gartref oedd yr eiddo ac os oeddech yn byw yno drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio’r rhyddhad llawn.
+privateResidentsRelief.details.body.p2=Os nad oeddech yn byw yn yr eiddo drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio rhyddhad ar gyfer:
 privateResidentsRelief.details.body.li1=y blynyddoedd roeddech yn byw yno
 privateResidentsRelief.details.body.li2=y <strong class="bold">9 mis</strong> diwethaf roeddech yn berchen arno - hyd yn oed os nad oeddech yn byw yno ar y pryd
-privateResidentsRelief.details.body.p2=Mae rhai eithriadau yn berthnasol.
+privateResidentsRelief.details.body.p3=Mae rhai eithriadau yn berthnasol.
 privateResidentsRelief.details.body.link=Dysgwch am Ryddhad Preswylfa Breifat (yn agor ffenestr newydd)
 
 privateResidentsReliefValue.label=Swm y Rhyddhad Preswylfan Preifat y mae gennych hawl iddo
