@@ -3670,8 +3670,9 @@ confirmationOfSubmission.capacitor.howToPay.p1=Gall y person dalu ar-lein neu dr
 confirmationOfSubmission.personalRep.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=Bydd CThEM yn cysylltu â chi gan ddefnyddio’r manylion a ddarparwyd gennych. Byddant yn dweud wrthych sut a phryd y bydd angen i chi dalu’r dreth.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=Arhoswch i ni gysylltu â chi gyda manylion ynghylch pryd a sut i dalu’r dreth.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=Ni fydd y Ffurflen Dreth hon yn ymddangos ar hafan eich cyfrif. Gallwch allgofnodi nawr.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p3=Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd, bydd angen i chi roi manylion o’r Ffurflen Dreth hon.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=Ni fydd y Ffurflen Dreth hon yn ymddangos ar hafan cyfrif eich cleient. Gallwch allgofnodi nawr.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p3=Os oes angen i’ch cleient lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd, bydd angen iddo roi manylion o’r Ffurflen Dreth hon.
+
 confirmationOfSubmission.paymentNotice=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yn eich cyfrif.
 confirmationOfSubmission.agent.paymentNotice=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yng nghyfrif eich cleient.
 confirmationOfSubmission.trust.paymentNotice=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yng nghyfrif yr ymddiriedolaeth.
