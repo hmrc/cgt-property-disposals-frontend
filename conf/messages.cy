@@ -2402,9 +2402,9 @@ privateResidentsRelief.warningMsg=Newidiodd Rhyddhad Preswylfa Breifat ar 6 Ebri
 privateResidentsRelief.details.link=Help gyda Rhyddhad Preswylfa Breifat
 privateResidentsRelief.details.body.p1=Os mai’ch prif gartref oedd yr eiddo ac os oeddech yn byw yno drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio’r rhyddhad llawn.
 privateResidentsRelief.details.body.p2=Os nad oeddech yn byw yn yr eiddo drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio rhyddhad ar gyfer:
-privateResidentsRelief.details.body.li1=y blynyddoedd roeddech yn byw yno
-privateResidentsRelief.details.body.li2=y <strong class="bold">9 mis</strong> diwethaf roeddech yn berchen arno - hyd yn oed os nad oeddech yn byw yno ar y pryd
-privateResidentsRelief.details.body.p3=Mae rhai eithriadau yn berthnasol.
+privateResidentsRelief.details.body.li1=y blynyddoedd yr oeddech yn byw yno
+privateResidentsRelief.details.body.li2=y <strong class="bold">naw mis</strong> olaf yr oeddech yn berchen arno – hyd yn oed os nad oeddech yn byw yno ar y pryd
+privateResidentsRelief.details.body.p3=Mae rhai eithriadau’n gymwys
 privateResidentsRelief.details.body.link=Dysgwch am Ryddhad Preswylfa Breifat (yn agor ffenestr newydd)
 
 privateResidentsReliefValue.label=Swm y Rhyddhad Preswylfan Preifat y mae gennych hawl iddo
