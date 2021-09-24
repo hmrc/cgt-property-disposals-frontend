@@ -2376,16 +2376,17 @@ loss.label=Swm y golled gychwynnol
 #===================================================
 
 reliefDetails.caption=Rhyddhad
-privateResidentsRelief.title=A oes gennych hawl i Ryddhad Preswylfan Preifat?
-privateResidentsRelief.agent.title=A oes gan eich cleient hawl i Ryddhad Preswylfan Preifat?
-privateResidentsRelief.trust.title=A oes gan yr ymddiriedolaeth hawl i Ryddhad Preswylfan Preifat?
-privateResidentsRelief.capacitor.title=A oes gan y person hawl i Ryddhad Preswylfan Preifat?
-privateResidentsRelief.personalRep.title=A oedd gan y person hawl i Ryddhad Preswylfan Preifat?
-privateResidentsRelief.personalRepInPeriodOfAdmin.agent.title=A yw Rhyddhad Preswylfan Preifat yn cael ei hawlio?
-privateResidentsRelief.personalRepInPeriodOfAdmin.title=A yw Rhyddhad Preswylfan Preifat yn cael ei hawlio?
-privateResidentsRelief.personalRepInPeriodOfAdmin.main.title=Rhowch wybod i ni a yw Rhyddhad Preswylfan Preifat yn cael ei hawlio
-privateResidentsRelief.personalRepInPeriodOfAdmin.agent.main.title=Rhowch wybod i ni a yw Rhyddhad Preswylfan Preifat yn cael ei hawlio
-privateResidentsRelief.helpText=Mae’n bosibl y byddwch yn gymwys i gael y rhyddhad hwn os yw’r eiddo wedi bod yn brif gartref i chi ar ryw adeg.
+privateResidentsRelief.title=A oes gennych hawl i Ryddhad Preswylfa Breifat?
+privateResidentsRelief.agent.title=A oes gan eich cleient hawl i Ryddhad Preswylfa Breifat?
+privateResidentsRelief.trust.title=A oes gan yr ymddiriedolaeth hawl i Ryddhad Preswylfa Breifat?
+privateResidentsRelief.capacitor.title=A oes gan y person hawl i Ryddhad Preswylfa Breifat?
+privateResidentsRelief.personalRep.title=A oedd gan y person hawl i Ryddhad Preswylfa Breifat?
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.title=A yw Rhyddhad Preswylfa Breifat yn cael ei hawlio?
+privateResidentsRelief.personalRepInPeriodOfAdmin.title=A yw Rhyddhad Preswylfa Breifat yn cael ei hawlio?
+privateResidentsRelief.personalRepInPeriodOfAdmin.main.title=Rhowch wybod i ni a yw Rhyddhad Preswylfa Breifat yn cael ei hawlio
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.main.title=Rhowch wybod i ni a yw Rhyddhad Preswylfa Breifat yn cael ei hawlio
+
+privateResidentsRelief.helpText=Mae’n bosibl y byddwch yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref i chi ar ryw adeg.
 privateResidentsRelief.agent.helpText=Mae’n bosibl y bydd eich cleient yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref iddo ar ryw adeg.
 privateResidentsRelief.trust.helpText=Mae’n bosibl y bydd eich cleient yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref iddo ar ryw adeg.
 privateResidentsRelief.capacitor.helpText=Mae’n bosibl y bydd y person yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref iddo ar ryw adeg.
@@ -2404,7 +2405,7 @@ privateResidentsRelief.details.body.p1=Os mai’ch prif gartref oedd yr eiddo ac
 privateResidentsRelief.details.body.p2=Os nad oeddech yn byw yn yr eiddo drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio rhyddhad ar gyfer:
 privateResidentsRelief.details.body.li1=y blynyddoedd yr oeddech yn byw yno
 privateResidentsRelief.details.body.li2=y <strong class="bold">naw mis</strong> olaf yr oeddech yn berchen arno – hyd yn oed os nad oeddech yn byw yno ar y pryd
-privateResidentsRelief.details.body.p3=Mae rhai eithriadau’n gymwys
+privateResidentsRelief.details.body.p3=Mae rhai eithriadau’n gymwys.
 privateResidentsRelief.details.body.link=Dysgwch am Ryddhad Preswylfa Breifat (yn agor ffenestr newydd)
 
 privateResidentsReliefValue.label=Swm y Rhyddhad Preswylfan Preifat y mae gennych hawl iddo
