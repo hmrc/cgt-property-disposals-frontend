@@ -32,8 +32,10 @@
   hasErrors: Boolean
 )(implicit messages: Messages)
 
-@classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
-@inputClasses = @{if(hasErrors) "form-control form-control-error" else "form-control" }
+@classes = @{if(hasErrors) "govuk-form-group govuk-form-group-error" else "govuk-form-group" }
+@inputClasses = @{
+    if(hasErrors) "govuk-input--error govuk-input govuk-date-input__input govuk-input--width"
+    else "govuk-input govuk-date-input__input govuk-input--width" }
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
@@ -42,31 +44,39 @@
   List(hintIdWithHintText.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 <div class="@classes">
-  <fieldset id="@fieldId"@if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <legend>
-      @label
+  <fieldset class="govuk-fieldset" id="@fieldId"@if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+        <h1 class="govuk-fieldset__heading">
+            @label
+        </h1>
     </legend>
     @if(helpText.isDefined) {
-      <span id="@{fieldId}-form-hint" class="form-hint">
+      <span id="@{fieldId}-form-hint" class="govuk-hint">
         @helpText.map(t => t)
       </span>
     }
     @errorIdWithMessageKey.map { case (id, key) =>
       @errorInline(id, messages(key))
     }
-    <div class="form-date">
-      <div class="form-group form-group-day lang-@messages("lang")">
-        <label class="form-label" for="@{fieldId}-day">@messages("generic.day")</label>
-        <input class="@inputClasses" id="@{fieldId}-day" name="@{fieldId}-day" type="text" pattern="[0-9]*" inputmode="numeric" @dayValue.map{d => value="@d"}>
-      </div>
-      <div class="form-group form-group-month">
-        <label class="form-label" for="@{fieldId}-month">@messages("generic.month")</label>
-        <input class="@inputClasses" id="@{fieldId}-month" name="@{fieldId}-month" type="text" pattern="[0-9]*" inputmode="numeric" @monthValue.map{m => value="@m"}>
-      </div>
-      <div class="form-group form-group-year">
-        <label class="form-label" for="@{fieldId}-year">@messages("generic.year")</label>
-        <input class="@inputClasses" id="@{fieldId}-year" name="@{fieldId}-year" type="text" pattern="[0-9]*" inputmode="numeric" @yearValue.map{y => value="@y"}>
-      </div>
+    <div class="govuk-date-input">
+        <div class="govuk-date-input__item">
+          <div class="govuk-form-group">
+            <label class="govuk-label govuk-date-input__label" for="@{fieldId}-day">@messages("generic.day")</label>
+            <input class="@inputClasses-2" id="@{fieldId}-day" name="@{fieldId}-day" type="text" pattern="[0-9]*" inputmode="numeric" @dayValue.map{d => value="@d"}>
+          </div>
+        </div>
+        <div class="govuk-date-input__item">
+          <div class="govuk-form-group">
+            <label class="govuk-label govuk-date-input__label" for="@{fieldId}-month">@messages("generic.month")</label>
+            <input class="@inputClasses-2" id="@{fieldId}-month" name="@{fieldId}-month" type="text" pattern="[0-9]*" inputmode="numeric" @monthValue.map{m => value="@m"}>
+          </div>
+        </div>
+        <div class="govuk-date-input__item">
+          <div class="govuk-form-group">
+            <label class="govuk-label govuk-date-input__label" for="@{fieldId}-year">@messages("generic.year")</label>
+            <input class="@inputClasses-4" id="@{fieldId}-year" name="@{fieldId}-year" type="text" pattern="[0-9]*" inputmode="numeric" @yearValue.map{y => value="@y"}>
+          </div>
+        </div>
     </div>
   </fieldset>
 </div>

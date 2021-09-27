@@ -25,15 +25,15 @@
     assistivePrefix: Option[String] = None
 )
 
-<details>
-  <summary>
-    <span class="summary">
-      @assistivePrefix.map(a => Html(s"""<span class="visuallyhidden">${a} </span>"""))
+<details class="govuk-details" data-module="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      @assistivePrefix.map(a => Html(s"""<span class="govuk-visuallyhidden">${a} </span>"""))
       @summary
-      @assistiveText.map(a => Html(s""" <span class="visuallyhidden">${a}</span>"""))
+      @assistiveText.map(a => Html(s""" <span class="govuk-visuallyhidden">${a}</span>"""))
     </span>
   </summary>
-  <div class="panel panel-border-narrow with-bottom-margin">
+  <div class="govuk-details__text">
     @content
   </div>
 </details>

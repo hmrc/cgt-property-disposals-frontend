@@ -28,13 +28,12 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
     radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
@@ -88,9 +87,9 @@
         controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesSubmit()
   }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(pageTitle = title, withSignOutLink = false, isWelshTranslationAvailable = true) {
 
-    @backLink.map(backLinkComponent(_))
+    <a id="back" class="govuk-back-link" href="@backLink">@messages("generic.back")</a>
 
     @if(hasErrors) {
         @errorSummary(form)
@@ -117,16 +116,16 @@
         @details(
           messages(s"$key.nonResident$userKey.summary"),
           Html(s"""
-           | <h2 class="heading-medium">
+           | <h2 class="govuk-heading-m">
            |    ${messages(s"$key.helpText$userKey.p2.heading")}
            | </h2>
-           | <p>
+           | <p class="govuk-body">
            |    ${messages(s"$key.helpText.p2.text")}
            | </p>
-           | <h2 class="heading-medium">
+           | <h2 class="govuk-heading-m">
            |    ${messages(s"$key.helpText${userKey}.p3.heading")}
            | </h2>
-           | <p>
+           | <p class="govuk-body">
            |    ${messages(s"$key.helpText${userKey}.p3.text")}
            | </p>
            | <ul class="list-bullet">

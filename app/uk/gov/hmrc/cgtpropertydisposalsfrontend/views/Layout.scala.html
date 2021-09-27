@@ -13,7 +13,7 @@
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper)
 
-@(pageTitle: String)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
+@(pageTitle: String, withSignOutLink: Boolean = false, isWelshTranslationAvailable: Boolean = false)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @content = {
 @contentBlock
@@ -21,9 +21,9 @@
 }
 @hmrcLayout(
     pageTitle = Some(pageTitle),
-    isWelshTranslationAvailable = false,
+    isWelshTranslationAvailable = isWelshTranslationAvailable,
     serviceUrl = None,
-    signOutUrl = Some(routes.StartController.signOutAndRegisterForGG.url),
+    signOutUrl = if(withSignOutLink) Some(routes.StartController.signOutAndRegisterForGG.url) else None,
     phaseBanner = None,
     additionalHeadBlock = Some(hmrcTimeoutDialogHelper(signOutUrl = routes.StartController.signOutAndRegisterForGG.url)),
     nonce = CSPNonce.get,

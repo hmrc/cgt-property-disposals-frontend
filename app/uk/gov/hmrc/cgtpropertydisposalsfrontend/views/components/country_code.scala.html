@@ -41,18 +41,17 @@
 )(implicit messages: Messages)
 
 @fieldId = @{"countryCode"}
-@classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
-@inputClasses = @{if(hasErrors) "form-control form-control-error"  else "form-control"}
+@classes = @{if(hasErrors) "govuk-form-group govuk-form-group-error" else "govuk-form-group" }
 @errorId = @{s"${{fieldId}}-inline-error"}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
-@hintTextKey = @{s"${{fieldId}}-form-hint"}
+@hintTextKey = @{s"${{fieldId}}-govuk-hint"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @extraContentId = @{s"${{fieldId}}-extra-content"}
 @extraContentIdWithContent = @{extraContent.map(extraContentId -> _)}
 @fieldLabel = {
   @if(labelAsHeading) {
     <h1 class="govuk-label-wrapper">
-      <label for="@{fieldId}" class="heading-xlarge">@{label}</label>
+      <label for="@{fieldId}" class="govuk-heading-xl">@{label}</label>
     </h1>
   } else {
     <label for="@{fieldId}" class="form-label">@{label}</label>
@@ -77,7 +76,7 @@
    </div>
  }
  @hintIdWithHintText.map { case (id, text) =>
-  <span id="@id" class="form-hint">
+  <span id="@id" class="govuk-hint">
     @text
   </span>
  }
@@ -87,7 +86,7 @@
  <select
    id="@fieldId"
    name="@fieldId"
-   class="@inputClasses"
+   class="govuk-input"
    autocomplete="@{autoComplete.value}"
    @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
     <option value="">@messages("countryCode.placeholder")</option>
