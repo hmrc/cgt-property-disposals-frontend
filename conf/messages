@@ -4189,6 +4189,8 @@ confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank t
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=Wait for us to contact you with details of when and how to pay the tax.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=This return will not appear on your account home page. You can now sign out.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p3=If you need to do a Self Assessment tax return for the estate, you will need to provide details from this return.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p2=This return will not appear on your client’s account home page. You can now sign out.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p3=If your client needs to do a Self Assessment tax return for the estate, they will need to provide details from this return.
 
 confirmationOfSubmission.paymentNotice=It takes 3 to 5 days for payments or charges to show in your account.
 confirmationOfSubmission.agent.paymentNotice=It takes 3 to 5 days for payments or charges to show in your client’s account.
