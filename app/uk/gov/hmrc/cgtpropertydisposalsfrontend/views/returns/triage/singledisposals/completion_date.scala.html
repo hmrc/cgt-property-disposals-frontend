@@ -26,15 +26,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import cats.implicits.catsSyntaxEq
 
 @this(
-  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
   pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
   dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input,
-  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
@@ -66,9 +66,9 @@
 @hasErrors = @{form.hasErrors}
 @errorKey = @{List("completionDate-day", "completionDate-month", "completionDate-year", "completionDate").map(form.error).find(_.isDefined).flatten}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true) {
 
- @backLinkComponent(backLink)
+ <a id="back" class="govuk-back-link" href="@backLink">@messages("generic.back")</a>
 
  @if(hasErrors) {
   @errorSummary(form)
@@ -83,7 +83,7 @@
    yearValue = form.data.get("completionDate-year"),
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
    errorKey = errorKey.map(e => {
-            if(e.message == "error.tooFarInPast") {
+            if(e.message.===("error.tooFarInPast")) {
                 messages(s"${e.key}.${e.message}", s"${e.args(0)}")
             } else {
                 s"${e.key}.${e.message}"

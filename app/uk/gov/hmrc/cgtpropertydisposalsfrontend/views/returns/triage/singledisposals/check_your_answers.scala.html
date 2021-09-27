@@ -16,7 +16,6 @@
 
 @import play.api.i18n.Messages
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
@@ -24,7 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
@@ -38,11 +37,11 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     representeeAnswers: Option[RepresenteeAnswers]
-)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @title = @{messages("triage.check-your-answers.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true) {
 
  @pageHeading(title, Some(messages("triage.caption")))
 
@@ -53,5 +52,4 @@
  }
 
  @returnToSummaryLink(displayReturnToSummaryLink)
-
 }

@@ -59,7 +59,7 @@
       </div>
     }
     @hintIdWithHintText.map { case (id, text) =>
-      <span id="@id" class="form-hint">
+      <span id="@id" class="govuk-hint">
         @text
       </span>
     }
@@ -79,7 +79,7 @@
           <div class="govuk-radios__item" @if(option.content.nonEmpty){ data-target="@{fieldId}-@{index}-content" }>
             <input id="@{fieldId}-@{index}"
               name="@fieldId"
-            class="govuk-radios__input"
+              class="govuk-radios__input"
               value="@index"
               type="radio"
               @if(selected.contains(index)) { checked="checked" }

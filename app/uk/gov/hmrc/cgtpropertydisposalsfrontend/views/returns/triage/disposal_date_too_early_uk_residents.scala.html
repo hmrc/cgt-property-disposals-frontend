@@ -22,9 +22,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
 @(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
@@ -32,9 +31,9 @@
 @key = @{"disposalDateTooEarly"}
 @title = @{messages(s"$key.uk.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true) {
 
-    @backLinkComponent(backLink)
+    <a id="back" class="govuk-back-link" href="@backLink">@messages("generic.back")</a>
 
     @pageHeading(title)
     <p>

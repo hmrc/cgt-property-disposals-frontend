@@ -19,7 +19,6 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
@@ -27,12 +26,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
     yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
@@ -46,7 +44,7 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @key = @{"didYouDisposeOfResidentialProperty"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -86,9 +84,9 @@
     }
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(pageTitle = title, withSignOutLink = true) {
 
-    @backLinkComponent(backLink)
+    <a id="back" class="govuk-back-link" href="@backLink">@messages("generic.back")</a>
 
     @if(hasErrors) {
       @errorSummary(form, Some(s"$key$userKey"))
