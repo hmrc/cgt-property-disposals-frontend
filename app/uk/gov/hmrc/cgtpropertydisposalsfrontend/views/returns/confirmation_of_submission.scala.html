@@ -346,11 +346,11 @@
     }
   }
 
-    @if(!isPeriodOfAdmin || !isAgent){
-    <div class="panel panel-border-wide">
-        <h2 class="heading-medium" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
-        <p>@Html(messages(s"$key$userKey.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
-    </div>
+    @if(!isPeriodOfAdmin){
+        <div class="panel panel-border-wide">
+            <h2 class="heading-medium" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
+            <p>@Html(messages(s"$key$userKey.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
+        </div>
     }
 
     @{
