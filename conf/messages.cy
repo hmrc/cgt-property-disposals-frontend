@@ -2376,16 +2376,17 @@ loss.label=Swm y golled gychwynnol
 #===================================================
 
 reliefDetails.caption=Rhyddhad
-privateResidentsRelief.title=A oes gennych hawl i Ryddhad Preswylfan Preifat?
-privateResidentsRelief.agent.title=A oes gan eich cleient hawl i Ryddhad Preswylfan Preifat?
-privateResidentsRelief.trust.title=A oes gan yr ymddiriedolaeth hawl i Ryddhad Preswylfan Preifat?
-privateResidentsRelief.capacitor.title=A oes gan y person hawl i Ryddhad Preswylfan Preifat?
-privateResidentsRelief.personalRep.title=A oedd gan y person hawl i Ryddhad Preswylfan Preifat?
-privateResidentsRelief.personalRepInPeriodOfAdmin.agent.title=A yw Rhyddhad Preswylfan Preifat yn cael ei hawlio?
-privateResidentsRelief.personalRepInPeriodOfAdmin.title=A yw Rhyddhad Preswylfan Preifat yn cael ei hawlio?
-privateResidentsRelief.personalRepInPeriodOfAdmin.main.title=Rhowch wybod i ni a yw Rhyddhad Preswylfan Preifat yn cael ei hawlio
-privateResidentsRelief.personalRepInPeriodOfAdmin.agent.main.title=Rhowch wybod i ni a yw Rhyddhad Preswylfan Preifat yn cael ei hawlio
-privateResidentsRelief.helpText=Mae’n bosibl y byddwch yn gymwys i gael y rhyddhad hwn os yw’r eiddo wedi bod yn brif gartref i chi ar ryw adeg.
+privateResidentsRelief.title=A oes gennych hawl i Ryddhad Preswylfa Breifat?
+privateResidentsRelief.agent.title=A oes gan eich cleient hawl i Ryddhad Preswylfa Breifat?
+privateResidentsRelief.trust.title=A oes gan yr ymddiriedolaeth hawl i Ryddhad Preswylfa Breifat?
+privateResidentsRelief.capacitor.title=A oes gan y person hawl i Ryddhad Preswylfa Breifat?
+privateResidentsRelief.personalRep.title=A oedd gan y person hawl i Ryddhad Preswylfa Breifat?
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.title=A yw Rhyddhad Preswylfa Breifat yn cael ei hawlio?
+privateResidentsRelief.personalRepInPeriodOfAdmin.title=A yw Rhyddhad Preswylfa Breifat yn cael ei hawlio?
+privateResidentsRelief.personalRepInPeriodOfAdmin.main.title=Rhowch wybod i ni a yw Rhyddhad Preswylfa Breifat yn cael ei hawlio
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.main.title=Rhowch wybod i ni a yw Rhyddhad Preswylfa Breifat yn cael ei hawlio
+
+privateResidentsRelief.helpText=Mae’n bosibl y byddwch yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref i chi ar ryw adeg.
 privateResidentsRelief.agent.helpText=Mae’n bosibl y bydd eich cleient yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref iddo ar ryw adeg.
 privateResidentsRelief.trust.helpText=Mae’n bosibl y bydd eich cleient yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref iddo ar ryw adeg.
 privateResidentsRelief.capacitor.helpText=Mae’n bosibl y bydd y person yn gymwys i gael y rhyddhad hwn os oedd yr eiddo wedi bod yn brif gartref iddo ar ryw adeg.
@@ -2402,9 +2403,9 @@ privateResidentsRelief.warningMsg=Newidiodd Rhyddhad Preswylfa Breifat ar 6 Ebri
 privateResidentsRelief.details.link=Help gyda Rhyddhad Preswylfa Breifat
 privateResidentsRelief.details.body.p1=Os mai’ch prif gartref oedd yr eiddo ac os oeddech yn byw yno drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio’r rhyddhad llawn.
 privateResidentsRelief.details.body.p2=Os nad oeddech yn byw yn yr eiddo drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio rhyddhad ar gyfer:
-privateResidentsRelief.details.body.li1=y blynyddoedd roeddech yn byw yno
-privateResidentsRelief.details.body.li2=y <strong class="bold">9 mis</strong> diwethaf roeddech yn berchen arno - hyd yn oed os nad oeddech yn byw yno ar y pryd
-privateResidentsRelief.details.body.p3=Mae rhai eithriadau yn berthnasol.
+privateResidentsRelief.details.body.li1=y blynyddoedd yr oeddech yn byw yno
+privateResidentsRelief.details.body.li2=y <strong class="bold">naw mis</strong> olaf yr oeddech yn berchen arno – hyd yn oed os nad oeddech yn byw yno ar y pryd
+privateResidentsRelief.details.body.p3=Mae rhai eithriadau’n gymwys.
 privateResidentsRelief.details.body.link=Dysgwch am Ryddhad Preswylfa Breifat (yn agor ffenestr newydd)
 
 privateResidentsReliefValue.label=Swm y Rhyddhad Preswylfan Preifat y mae gennych hawl iddo
@@ -3670,8 +3671,10 @@ confirmationOfSubmission.capacitor.howToPay.p1=Gall y person dalu ar-lein neu dr
 confirmationOfSubmission.personalRep.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=Bydd CThEM yn cysylltu â chi gan ddefnyddio’r manylion a ddarparwyd gennych. Byddant yn dweud wrthych sut a phryd y bydd angen i chi dalu’r dreth.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=Arhoswch i ni gysylltu â chi gyda manylion ynghylch pryd a sut i dalu’r dreth.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=Ni fydd y Ffurflen Dreth hon yn ymddangos ar hafan cyfrif eich cleient. Gallwch allgofnodi nawr.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p3=Os oes angen i’ch cleient lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd, bydd angen iddo roi manylion o’r Ffurflen Dreth hon.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=Ni fydd y Ffurflen Dreth hon yn ymddangos ar hafan eich cyfrif. Gallwch allgofnodi nawr.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p3=Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd, bydd angen i chi roi manylion o’r Ffurflen Dreth hon.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p2=Ni fydd y Ffurflen Dreth hon yn ymddangos ar hafan cyfrif eich cleient. Gallwch allgofnodi nawr.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p3=Os oes angen i’ch cleient lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd, bydd angen iddo roi manylion o’r Ffurflen Dreth hon.
 
 confirmationOfSubmission.paymentNotice=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yn eich cyfrif.
 confirmationOfSubmission.agent.paymentNotice=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yng nghyfrif eich cleient.
@@ -3686,6 +3689,8 @@ confirmationOfSubmission.trust.inset.p1=Os oes angen i’r ymddiriedolaeth anfon
 confirmationOfSubmission.ifSa=Os oes angen i chi gyflwyno Ffurflen Dreth Hunanasesiad
 confirmationOfSubmission.agent.ifSa=Hunanasesiad
 confirmationOfSubmission.personalRepInPeriodOfAdmin.sA=Hunanasesiad
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.sA=Hunanasesiad
+
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=Os oes angen i’ch cleient lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd
 confirmationOfSubmission.trust.ifSa=Os oes angen i’r ymddiriedolaeth anfon Ffurflen Dreth Hunanasesiad
 confirmationOfSubmission.capacitor.ifSa=Hunanasesiad

@@ -4187,8 +4187,11 @@ confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by b
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=HMRC will contact you using the details you provided. They will tell you how and when you need to pay the tax.
 confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=Wait for us to contact you with details of when and how to pay the tax.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=This return will not appear on your client’s account home page. You can now sign out
-confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p3=If your client needs to do a Self Assessment tax return for the estate, they will need to provide details from this return.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=This return will not appear on your account home page. You can now sign out.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p3=If you need to do a Self Assessment tax return for the estate, you will need to provide details from this return.
+
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p2=This return will not appear on your client’s account home page. You can now sign out.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p3=If your client needs to do a Self Assessment tax return for the estate, they will need to provide details from this return.
 
 confirmationOfSubmission.paymentNotice=It takes 3 to 5 days for payments or charges to show in your account.
 confirmationOfSubmission.agent.paymentNotice=It takes 3 to 5 days for payments or charges to show in your client’s account.
@@ -4206,7 +4209,8 @@ confirmationOfSubmission.trust.inset.p1=If the trust needs to send a Self Assess
 confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
 confirmationOfSubmission.agent.ifSa=Self Assessment
 confirmationOfSubmission.personalRepInPeriodOfAdmin.sA=Self Assessment
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=If your client needs to do a Self Assessment tax return for the estate
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.sA=Self Assessment
+#confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=If your client needs to do a Self Assessment tax return for the estate
 confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment tax return
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
@@ -4217,7 +4221,7 @@ confirmationOfSubmission.trust.ifSa.p1=You’ll need to provide details from thi
 confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment tax return, they will need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.personalRep.ifSa.p1=You’ll need to provide details from this return in the person’s Self Assessment tax return.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa.p1=You’ll need to provide details from this return in the estate’s Self Assessment tax return.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa.p1=Your client will need to provide details from this return in the estate’s Self Assessment tax return.
+#confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa.p1=Your client will need to provide details from this return in the estate’s Self Assessment tax return.
 
 confirmationOfSubmission.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your account when you update a return. You can make a payment at any time.
 confirmationOfSubmission.agent.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your client’s account when you update a return. They can make a payment at any time.
