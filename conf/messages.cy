@@ -3653,7 +3653,7 @@ confirmationOfSubmission.agent.whatNext=Yr hyn sy’n digwydd nesaf
 confirmationOfSubmission.trust.whatNext=Yr hyn sy’n digwydd nesaf
 confirmationOfSubmission.capacitor.whatNext=Yr hyn sy’n digwydd nesaf
 confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=Yr hyn y bydd angen i chi ei wneud nesaf
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=Yr hyn y mae angen i chi ei wneud nesaf
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=Yr hyn y bydd angen i chi ei wneud nesaf
 
 confirmationOfSubmission.warning=Efallai y codir llog arnoch am daliadau hwyr.
 confirmationOfSubmission.penalty.warning=Efallai y cewch gosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
