@@ -4165,7 +4165,7 @@ confirmationOfSubmission.agent.whatNext=What happens next
 confirmationOfSubmission.trust.whatNext=What happens next
 confirmationOfSubmission.capacitor.whatNext=What happens next
 confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=What you’ll need to do next
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=What happens next
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=What you’ll need to do next
 
 confirmationOfSubmission.warning=You may be charged interest on late payments.
 confirmationOfSubmission.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
@@ -4184,7 +4184,7 @@ confirmationOfSubmission.howToPay.p1=You can pay online or by bank transfer. You
 confirmationOfSubmission.agent.howToPay.p1=They will need to provide their payment reference number <strong class="bold">{0}</strong>.
 confirmationOfSubmission.trust.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=HMRC will contact you using the details you provided. They will tell you how and when you need to pay the tax.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=Wait for us to contact you with details of when and how to pay the tax.
 confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=Wait for us to contact you with details of when and how to pay the tax.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=This return will not appear on your account home page. You can now sign out.

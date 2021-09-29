@@ -276,7 +276,6 @@
           case Some(Capacitor) => {
               <h2 class="heading-medium">@messages(s"$key.capacitor.whatNext")</h2>
 
-
                 @warning(messages(s"$key.capacitor.warning"))
 
                 @if(isLateReturn && !amendedReturnWithSameCompletionDate) {
@@ -307,8 +306,8 @@
                     | <p>${messages(s"$key$userKey.howToPay.p3")}</p>
                     |""".stripMargin
                 )
-           )
-        }
+            )
+          }
 
           case None => {
               <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
