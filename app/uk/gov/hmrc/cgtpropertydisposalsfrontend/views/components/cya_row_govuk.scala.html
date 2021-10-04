@@ -19,12 +19,12 @@
 
 @(label: String, value: Html, changeButton: Option[Html], id: String)
 
-<div>
-    <dt class="cya-question" id="@id-question">
-    @label
+<div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key" id="@id-question">
+        @label
     </dt>
-    <dd class="cya-answer" id="@id-answer">
-    @value
+    <dd class="govuk-summary-list__value" id="@id-answer">
+        @value
     </dd>
-    @changeButton.map(b => Html(s"""<dd class="cya-change">$b</dd>"""))
+    @changeButton.map(b => Html(s"""<dd class="govuk-summary-list__actions">$b</dd>"""))
 </div>

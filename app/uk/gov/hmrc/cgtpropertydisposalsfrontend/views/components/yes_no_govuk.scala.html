@@ -18,7 +18,7 @@
 @import play.twirl.api.Html
 
 @this(
-  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline,
+  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline_govuk,
   warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
@@ -36,21 +36,21 @@
   warningField: Option[String] = None
 )(implicit messages: Messages)
 
-@classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
+@classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
 @describedByKeys = @{
-    List(describedBy.map(a => a), hintIdWithHintText.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+  List(describedBy.map(a => a), hintIdWithHintText.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 <div class="@classes">
-  <fieldset id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <legend>
+  <fieldset class="govuk-fieldset" id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
       @label
     </legend>
     @hintIdWithHintText.map { case (id, text) =>
-      <span id="@id" class="form-hint">
+      <span id="@id" class="govuk-hint">
         @text
       </span>
     }
@@ -69,28 +69,30 @@
         )
     }
 
-    <div class="multiple-choice"@if(yesContent.nonEmpty){ data-target="yes-content" }>
+    <div class="govuk-radios__item"@if(yesContent.nonEmpty){ data-target="yes-content" }>
       <input id="@{fieldId}-true"
        name="@fieldId"
+       class="govuk-radios__input"
        value="true"
        type="radio"
       @if(selected.contains(true)) { checked="checked" }
       />
-      <label for="@{fieldId}-true">
+      <label class="govuk-label govuk-radios__label" for="@{fieldId}-true">
         @messages("generic.yes")
       </label>
     </div>
 
     @yesContent.map(content => Html(s"""<div id="yes-content" class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
 
-   <div class="multiple-choice"@if(noContent.nonEmpty){ data-target="no-content" }>
+   <div class="govuk-radios__item"@if(noContent.nonEmpty){ data-target="no-content" }>
       <input id="@{fieldId}-false"
        name="@fieldId"
+       class="govuk-radios__input"
        value="false"
        type="radio"
       @if(selected.contains(false)) { checked="checked" }
       />
-      <label for="@{fieldId}-false">
+      <label class="govuk-label govuk-radios__label" for="@{fieldId}-false">
         @messages("generic.no")
       </label>
     </div>

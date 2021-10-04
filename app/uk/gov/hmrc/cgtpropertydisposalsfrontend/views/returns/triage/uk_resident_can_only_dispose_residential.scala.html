@@ -25,9 +25,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk
 )
 
 @(backLink: Call,
@@ -54,17 +54,17 @@ representativeType: Option[RepresentativeType])(implicit request: RequestWithSes
 
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true) {
 
   @backLinkComponent(backLink)
 
   @pageHeading(title)
 
-  <p>
+  <p class="govuk-body">
     @messages(s"$key$userKey.p1")
   </p>
 
-  <p>
+  <p class="govuk-body">
     @Html(messages(s"$key.p2", appConfig.cgtLegacyUrl))
   </p>
 }

@@ -20,4 +20,4 @@
 
 @(hintText: String, url: String, label: Option[String] = None)(implicit messages: Messages)
 
-<a class="govuk-link" href="@url">@{label.getOrElse(messages("cya.change"))}<span class="govuk-visually-hidden"> @hintText</span></a>
+<a href="@url">@{label.getOrElse(messages("cya.change"))}<span class="visuallyhidden"> @hintText</span></a>

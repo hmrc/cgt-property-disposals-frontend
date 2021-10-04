@@ -15,17 +15,12 @@
  *@
 
 @import play.api.i18n.Messages
-
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+@import play.api.mvc.Call
 
 @this()
 
-@(displayReturnToSummaryLink: Boolean)(implicit messages: Messages)
+@(link: Call)(implicit messages: Messages)
 
-@if(displayReturnToSummaryLink) {
-    <p>
-        <a href="@controllers.returns.routes.TaskListController.taskList().url" id="returnToSummaryLink">
-        @messages("returns.return-to-summary-link")
-        </a>
-    </p>
-}
+<a id="back" class="govuk-back-link" href="@link">
+@messages("generic.back")
+</a>

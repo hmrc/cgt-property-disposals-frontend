@@ -14,18 +14,14 @@
  * limitations under the License.
  *@
 
-@import play.api.i18n.Messages
-
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+@import play.twirl.api.Html
 
 @this()
 
-@(displayReturnToSummaryLink: Boolean)(implicit messages: Messages)
+@(heading: String, caption: Option[String] = None, subtitle: Option[String] = None)
 
-@if(displayReturnToSummaryLink) {
-    <p>
-        <a href="@controllers.returns.routes.TaskListController.taskList().url" id="returnToSummaryLink">
-        @messages("returns.return-to-summary-link")
-        </a>
-    </p>
-}
+ <h1 class="govuk-heading-xl">
+  @caption.map(c => Html(s"""<span class="govuk-caption-xl">$c</span>"""))
+  @heading
+  @subtitle.map(s => Html(s"""<p class="sub-heading">$s</p>"""))
+ </h1>

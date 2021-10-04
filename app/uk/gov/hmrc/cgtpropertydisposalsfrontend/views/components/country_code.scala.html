@@ -25,73 +25,78 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.WelshSorting.WelshStringOps
 
 @this(
-  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
+        errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
 )
 
 @(
-  countryCodes: List[CountryCode],
-  selected: Option[String],
-  label: String,
-  errorKey: Option[String],
-  hasErrors: Boolean,
-  autoComplete: AutoCompleteType,
-  helpText: Option[Html] = None,
-  extraContent: Option[Html] = None,
-  labelAsHeading: Boolean = false
+        countryCodes: List[CountryCode],
+        selected: Option[String],
+        label: String,
+        errorKey: Option[String],
+        hasErrors: Boolean,
+        autoComplete: AutoCompleteType,
+        helpText: Option[Html] = None,
+        extraContent: Option[Html] = None,
+        labelAsHeading: Boolean = false
 )(implicit messages: Messages)
 
 @fieldId = @{"countryCode"}
-@classes = @{if(hasErrors) "govuk-form-group govuk-form-group-error" else "govuk-form-group" }
+@classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
+@inputClasses = @{if(hasErrors) "form-control form-control-error"  else "form-control"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
-@hintTextKey = @{s"${{fieldId}}-govuk-hint"}
+@hintTextKey = @{s"${{fieldId}}-form-hint"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @extraContentId = @{s"${{fieldId}}-extra-content"}
 @extraContentIdWithContent = @{extraContent.map(extraContentId -> _)}
 @fieldLabel = {
-  @if(labelAsHeading) {
+@if(labelAsHeading) {
     <h1 class="govuk-label-wrapper">
-      <label for="@{fieldId}" class="govuk-heading-xl">@{label}</label>
+        <label for="@{fieldId}" class="heading-xlarge">@{label}</label>
     </h1>
-  } else {
+} else {
     <label for="@{fieldId}" class="form-label">@{label}</label>
-  }
+}
 }
 @isWelsh = @{ messages("lang") =!= "en" }
 @sortedCountryCodeOptions = @{
-  val countries = countryCodes.map(countryCode => countryCode -> messages(s"country.$countryCode"))
-      countries.sortWith{ case ((_, countryName1), (_, countryName2)) =>
-          if(isWelsh) countryName1.isBeforeInWelsh(countryName2)
-          else countryName1.compare(countryName2) < 0
-      }
+    val countries = countryCodes.map(countryCode => countryCode -> messages(s"country.$countryCode"))
+    countries.sortWith{ case ((_, countryName1), (_, countryName2)) =>
+        if(isWelsh) countryName1.isBeforeInWelsh(countryName2)
+        else countryName1.compare(countryName2) < 0
+    }
 }
 
 @describedByKeys = @{List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 <div class="@classes country-code-wrapper">
- @fieldLabel
- @extraContent.map { text =>
-   <div id="@extraContentId">
-     @text
-   </div>
- }
- @hintIdWithHintText.map { case (id, text) =>
-  <span id="@id" class="govuk-hint">
+    @fieldLabel
+    @extraContent.map { text =>
+        <div id="@extraContentId">
+        @text
+        </div>
+    }
+    @hintIdWithHintText.map { case (id, text) =>
+    <span id="@id" class="form-hint">
     @text
-  </span>
- }
- @errorIdWithMessageKey.map { case (id, key) =>
-  @errorInline(id, messages(s"$fieldId.$key"))
- }
- <select
-   id="@fieldId"
-   name="@fieldId"
-   class="govuk-input"
-   autocomplete="@{autoComplete.value}"
-   @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <option value="">@messages("countryCode.placeholder")</option>
-     @sortedCountryCodeOptions.map { countryCodeWithCountryName =>
-         <option value="@{countryCodeWithCountryName._1}" @{if(selected.contains(countryCodeWithCountryName._1))"selected"}>@{countryCodeWithCountryName._2}</option>
-     }
- </select>
+    </span>
+    }
+    @errorIdWithMessageKey.map { case (id, key) =>
+        @errorInline(id, messages(s"$fieldId.$key"))
+    }
+    <select
+    id="@fieldId"
+    name="@fieldId"
+    class="@inputClasses"
+    autocomplete="@{autoComplete.value}"
+        @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+        <option value="">@messages("countryCode.placeholder")</option>
+        @for(countryCode <- countryCodes) {
+            <option value="@{countryCode}" @{if(selected.contains(countryCode))"selected"}>@messages(s"country.$countryCode")</option>
+        }
+        @sortedCountryCodeOptions.map { countryCodeWithCountryName =>
+            <option value="@{countryCodeWithCountryName._1}" @{if(selected.contains(countryCodeWithCountryName._1))"selected"}>@{countryCodeWithCountryName._2}</option>
+        }
+    </select>
 </div>
+

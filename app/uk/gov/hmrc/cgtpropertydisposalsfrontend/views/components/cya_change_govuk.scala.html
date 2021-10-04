@@ -16,16 +16,8 @@
 
 @import play.api.i18n.Messages
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-
 @this()
 
-@(displayReturnToSummaryLink: Boolean)(implicit messages: Messages)
+@(hintText: String, url: String, label: Option[String] = None)(implicit messages: Messages)
 
-@if(displayReturnToSummaryLink) {
-    <p>
-        <a href="@controllers.returns.routes.TaskListController.taskList().url" id="returnToSummaryLink">
-        @messages("returns.return-to-summary-link")
-        </a>
-    </p>
-}
+<a class="govuk-link" href="@url">@{label.getOrElse(messages("cya.change"))}<span class="govuk-visually-hidden"> @hintText</span></a>
