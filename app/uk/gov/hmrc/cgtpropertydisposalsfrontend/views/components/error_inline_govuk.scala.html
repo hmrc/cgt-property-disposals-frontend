@@ -16,16 +16,11 @@
 
 @import play.api.i18n.Messages
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-
 @this()
 
-@(displayReturnToSummaryLink: Boolean)(implicit messages: Messages)
+@(id: String, content: String)(implicit messages: Messages)
 
-@if(displayReturnToSummaryLink) {
-    <p>
-        <a href="@controllers.returns.routes.TaskListController.taskList().url" id="returnToSummaryLink">
-        @messages("returns.return-to-summary-link")
-        </a>
-    </p>
-}
+<span class="govuk-error-message" id="@id">
+  <span class="govuk-visually-hidden">@messages("generic.errorPrefix") </span>
+  @content
+</span>

@@ -16,16 +16,14 @@
 
 @import play.api.i18n.Messages
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-
 @this()
 
-@(displayReturnToSummaryLink: Boolean)(implicit messages: Messages)
+@()(implicit messages: Messages)
 
-@if(displayReturnToSummaryLink) {
-    <p>
-        <a href="@controllers.returns.routes.TaskListController.taskList().url" id="returnToSummaryLink">
-        @messages("returns.return-to-summary-link")
-        </a>
-    </p>
-}
+<div class="grid-row returns-list-header">
+  <div class="column-full">
+    <h2 class="govuk-heading-l">
+      @messages("drafts.list.title")
+    </h2>
+  </div>
+</div>

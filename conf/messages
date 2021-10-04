@@ -942,7 +942,7 @@ triage.enterCountry.trust.helpText=It’s usually the day the trust and the new 
 triage.enterCountry.capacitor.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.personalRep.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 
-triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
 triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>.
 triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
 triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.

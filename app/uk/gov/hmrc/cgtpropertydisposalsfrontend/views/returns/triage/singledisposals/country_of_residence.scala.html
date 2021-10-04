@@ -31,12 +31,13 @@
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code,
-    submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
+    submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
@@ -88,7 +89,7 @@
 
 @mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true) {
 
-    <a id="back" class="govuk-back-link" href="@backLink">@messages("generic.back")</a>
+    @backLinkComponent(backLink)
 
     @if(hasErrors) {
         @errorSummary(form)
@@ -109,7 +110,7 @@
             labelAsHeading = true
         )
 
-        <p>@Html(messages(s"$messageKey$userKey.link", appConfig.workOurYouResidenceStatusUrl))</p>
+        <p class="govuk-body">@Html(messages(s"$messageKey$userKey.link", appConfig.workOurYouResidenceStatusUrl))</p>
         @submitButton(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 

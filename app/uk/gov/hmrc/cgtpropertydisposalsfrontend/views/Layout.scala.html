@@ -8,23 +8,32 @@
 @import play.api.i18n.Messages
 
 
+
 @this(
         hmrcLayout: HmrcLayout,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper)
 
-@(pageTitle: String, withSignOutLink: Boolean = false, isWelshTranslationAvailable: Boolean = false)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
+@(pageTitle: String,
+        withSignOutLink: Boolean = false,
+        isWelshTranslationAvailable: Boolean = false,
+        accountMenu: Option[Html] = None,
+)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @content = {
 @contentBlock
 @hmrcReportTechnicalIssueHelper()
 }
+
+@serviceInfoContent = @{accountMenu.fold(Html(""))(s => s)}
+
 @hmrcLayout(
+    beforeContentBlock = Some(serviceInfoContent),
     pageTitle = Some(pageTitle),
     isWelshTranslationAvailable = isWelshTranslationAvailable,
     serviceUrl = None,
     signOutUrl = if(withSignOutLink) Some(routes.StartController.signOutAndRegisterForGG.url) else None,
     phaseBanner = None,
     additionalHeadBlock = Some(hmrcTimeoutDialogHelper(signOutUrl = routes.StartController.signOutAndRegisterForGG.url)),
-    nonce = CSPNonce.get,
+    nonce = CSPNonce.get
 )(content)

@@ -22,37 +22,35 @@
 @(form: Form[_], customErrorKey: Option[String] = None, userKeyOnly: String = "")(implicit messages: Messages)
 
 <div
-class="error-summary"
-id="error-summary-display"
-role="alert"
-aria-labelledby="error-summary-heading"
-tabindex="-1">
+  class="govuk-error-summary"
+  id="error-summary-display"
+  role="alert"
+  aria-labelledby="error-summary-heading"
+  tabindex="-1">
 
-    <h2
+  <h2
     id="error-summary-heading"
-    class="heading-medium error-summary-heading">
-        @messages("error.summary.heading")
-    </h2>
+    class="govuk-error-summary__title">
+    @messages("error.summary.heading")
+  </h2>
 
-    <ul class="error-summary-list">
+  <ul class="govuk-list govuk-error-summary__list">
     @if(form.globalErrors.nonEmpty) {
-        @form.globalErrors.map { error =>
-            <li>
-                <span class="error-message">
-                    @messages(s"${error.message}", error.args: _*)
-                </span>
-            </li>
-        }
+      @form.globalErrors.map { error =>
+        <li>
+          <a>@messages(s"${error.message}", error.args: _*)</a>
+        </li>
+      }
     } else {
-        @form.errors.map { error =>
-            <li>
-                <a href="#@error.key" data-focuses="@error.key">
-                @messages(s"${customErrorKey.getOrElse(error.key)}$userKeyOnly.${error.message}", error.args: _*)
-                </a>
-            </li>
-        }
+      @form.errors.map { error =>
+        <li>
+          <a href="#@error.key" data-focuses="@error.key">
+            @messages(s"${customErrorKey.getOrElse(error.key)}$userKeyOnly.${error.message}", error.args: _*)
+          </a>
+        </li>
+      }
     }
 
-    </ul>
+  </ul>
 
 </div>

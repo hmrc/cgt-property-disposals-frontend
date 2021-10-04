@@ -29,13 +29,14 @@
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_govuk,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
@@ -89,7 +90,7 @@
 
 @mainTemplate(pageTitle = title, withSignOutLink = false, isWelshTranslationAvailable = true) {
 
-    <a id="back" class="govuk-back-link" href="@backLink">@messages("generic.back")</a>
+    @backLink.map(backLinkComponent(_))
 
     @if(hasErrors) {
         @errorSummary(form)

@@ -16,16 +16,18 @@
 
 @import play.api.i18n.Messages
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 
-@this()
+@this(
+        draftListItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_item_govuk,
+        draftReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_header_govuk
+)
 
-@(displayReturnToSummaryLink: Boolean)(implicit messages: Messages)
 
-@if(displayReturnToSummaryLink) {
-    <p>
-        <a href="@controllers.returns.routes.TaskListController.taskList().url" id="returnToSummaryLink">
-        @messages("returns.return-to-summary-link")
-        </a>
-    </p>
-}
+@(draftReturns: List[DraftReturn], showButtonOnDraftReturn: Boolean)(implicit messages:Messages)
+
+@draftReturnsHeader()
+
+<ul class="return-list drafts-list">
+  @draftReturns.map(draftListItem(_, showButtonOnDraftReturn))
+</ul>
