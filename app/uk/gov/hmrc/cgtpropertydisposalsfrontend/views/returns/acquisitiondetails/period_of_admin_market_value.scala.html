@@ -69,7 +69,7 @@
 @title = @{messages(s"$key$assetTypeKey.title", TimeUtils.govDisplayFormat(dateOfDeath.value)) }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 

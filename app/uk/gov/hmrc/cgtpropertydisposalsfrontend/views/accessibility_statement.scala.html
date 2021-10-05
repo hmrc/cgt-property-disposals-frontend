@@ -33,7 +33,7 @@
 @title = @{messages(s"$key.title")}
 @availableAtLocation = @{ s"tax.service.gov.uk${routes.LandingPageController.landingPage().url}" }
 
-@mainTemplate(title = title, userType = None, withSignOutLink = false) {
+@mainTemplate(title = title, userType = None) {
 
  @caption(messages(s"$key.caption"))
 

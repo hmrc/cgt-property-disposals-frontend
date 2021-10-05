@@ -3256,21 +3256,21 @@ class StartControllerSpec
 
         "there is a continue url in session" in {
           val continueUrl = "/continue/url"
+          val session     = SessionData.empty.copy(
+            userType = Some(UserType.Individual),
+            journeyStatus = Some(sample[JourneyStatus]),
+            needMoreDetailsDetails = Some(
+              NeedMoreDetailsDetails(
+                continueUrl,
+                NeedMoreDetailsDetails.AffinityGroup.Individual
+              )
+            )
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                userType = Some(UserType.Individual),
-                journeyStatus = Some(sample[JourneyStatus]),
-                needMoreDetailsDetails = Some(
-                  NeedMoreDetailsDetails(
-                    continueUrl,
-                    NeedMoreDetailsDetails.AffinityGroup.Individual
-                  )
-                )
-              )
-            )
+            mockGetSession(session)
+            mockStoreSession(session.copy(journeyType = Some(OnBoarding)))(Right(()))
           }
 
           val result  = performAction()

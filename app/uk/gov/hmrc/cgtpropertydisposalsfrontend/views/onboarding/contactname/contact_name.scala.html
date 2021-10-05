@@ -48,7 +48,7 @@
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, accountMenu = Some(menu)) {
 
   @backLinkComponent(backLink)
 

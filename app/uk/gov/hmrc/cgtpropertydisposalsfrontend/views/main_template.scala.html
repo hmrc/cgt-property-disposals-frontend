@@ -34,7 +34,6 @@
     bodyClasses: Option[String] = None,
     mainClass: Option[String] = None,
     scriptElem: Option[Html] = None,
-    withSignOutLink: Boolean = true,
     sidebar: Option[Html] = None,
     accountMenu: Option[Html] = None,
     enableUserRecruitmentBannerOnPage:Boolean = false
@@ -55,7 +54,5 @@
     mainContent = uiArticle(mainContent),
     serviceInfoContent = serviceInfoContent,
     scriptElem = scriptElem,
-    withSignOutLink = withSignOutLink,
-    withAccount = accountMenu.nonEmpty,
     enableUserRecruitmentBannerOnPage = enableUserRecruitmentBannerOnPage
 )

@@ -40,7 +40,7 @@
 @title = @{messages("agent.enter-client-cgt-ref.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
 
   @if(hasErrors) {
     @errorSummary(form)
