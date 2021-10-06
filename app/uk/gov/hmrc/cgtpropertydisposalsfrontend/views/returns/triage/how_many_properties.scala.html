@@ -35,7 +35,6 @@
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
     radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_govuk,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk
 )
@@ -88,9 +87,7 @@
         controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesSubmit()
   }
 
-@mainTemplate(pageTitle = title, withSignOutLink = false, isWelshTranslationAvailable = true) {
-
-    @backLink.map(backLinkComponent(_))
+@mainTemplate(pageTitle = title, withSignOutLink = false, isWelshTranslationAvailable = true, backLinkUrl = backLink.map(_.url)) {
 
     @if(hasErrors) {
         @errorSummary(form)

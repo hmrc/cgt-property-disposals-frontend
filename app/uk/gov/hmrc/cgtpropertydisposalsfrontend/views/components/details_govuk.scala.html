@@ -25,7 +25,7 @@
     assistivePrefix: Option[String] = None
 )
 
-<details class="govuk-details" data-module="govuk-details">
+<details class="govuk-details govuk-!-margin-bottom-4" data-module="govuk-details">
   <summary class="govuk-details__summary">
     <span class="govuk-details__summary-text">
       @assistivePrefix.map(a => Html(s"""<span class="govuk-visually-hidden">${a} </span>"""))

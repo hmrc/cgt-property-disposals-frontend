@@ -43,7 +43,7 @@
 
 @fieldId = @{"countryCode"}
 @classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
-@inputClasses = @{if(hasErrors) "form-control form-control-error govuk-input--error autocomplete"  else "form-control govuk-input autocomplete"}
+@inputClasses = @{if(hasErrors) "govuk-select govuk-select--error autocomplete"  else "govuk-select autocomplete"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
 @hintTextKey = @{s"${{fieldId}}-govuk-hint"}
@@ -60,7 +60,7 @@
 @fieldLabel = {
   @if(labelAsHeading) {
     <h1 class="govuk-label-wrapper">
-      <label for="@{fieldId}" class="govuk-heading-xl">@{label}</label>
+      <label for="@{fieldId}" class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-3">@{label}</label>
     </h1>
   } else {
     <label for="@{fieldId}" class="govuk-label govuk-label--l">@{label}</label>
@@ -92,7 +92,7 @@
  @errorIdWithMessageKey.map { case (id, key) =>
   @errorInline(id, messages(s"$fieldId.$key"))
  }
-    <div class="autocomplete-wrapper">
+    <div class="autocomplete__wrapper">
      <select
        id="@fieldId"
        name="@fieldId"
