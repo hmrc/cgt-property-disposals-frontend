@@ -21,12 +21,13 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    formHelper: FormWithCSRF,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary
 )
@@ -47,7 +48,7 @@
 
  @summary(answers, isATrust, representativeType, representeeAnswers)
 
- @formWrapper(routes.SingleDisposalsTriageController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+ @formHelper(routes.SingleDisposalsTriageController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
   @submitButton(messages("button.confirmAndContinue"))
  }
 

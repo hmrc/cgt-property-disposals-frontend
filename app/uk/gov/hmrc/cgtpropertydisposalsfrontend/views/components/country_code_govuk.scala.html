@@ -42,6 +42,7 @@
 
 @fieldId = @{"countryCode"}
 @classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
+@inputClasses = @{if(hasErrors) "form-control form-control-error govuk-input"  else "form-control"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
 @hintTextKey = @{s"${{fieldId}}-govuk-hint"}
@@ -83,15 +84,18 @@
  @errorIdWithMessageKey.map { case (id, key) =>
   @errorInline(id, messages(s"$fieldId.$key"))
  }
- <input
+ <select
    id="@fieldId"
    name="@fieldId"
-   class="govuk-input"
+   class="@inputClasses"
    autocomplete="@{autoComplete.value}"
    @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
     <option value="">@messages("countryCode.placeholder")</option>
+     @for(countryCode <- countryCodes) {
+         <option value="@{countryCode}" @{if(selected.contains(countryCode))"selected"}>@messages(s"country.$countryCode")</option>
+     }
      @sortedCountryCodeOptions.map { countryCodeWithCountryName =>
          <option value="@{countryCodeWithCountryName._1}" @{if(selected.contains(countryCodeWithCountryName._1))"selected"}>@{countryCodeWithCountryName._2}</option>
      }
- </input>
+ </select>
 </div>

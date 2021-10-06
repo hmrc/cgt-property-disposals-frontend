@@ -26,13 +26,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        formHelper: FormWithCSRF,
         radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional_govuk,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
@@ -108,7 +110,7 @@
         @errorSummary(form, Some(s"$key$userKey"))
     }
 
-    @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), 'novalidate -> "novalidate") {
         @radioGroupConditional(
             fieldId = key,
             options = options,
