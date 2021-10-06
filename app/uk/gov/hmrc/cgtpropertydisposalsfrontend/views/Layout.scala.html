@@ -28,8 +28,8 @@
     pageTitle = Some(pageTitle),
     isWelshTranslationAvailable = isWelshTranslationAvailable,
     serviceUrl = None,
-    signOutUrl = if(withSignOutLink) Some(routes.StartController.signOutAndRegisterForGG.url) else None,
+    signOutUrl = if(withSignOutLink) Some(routes.StartController.start().url) else None,
     phaseBanner = None,
-    additionalHeadBlock = Some(hmrcTimeoutDialogHelper(signOutUrl = routes.StartController.signOutAndRegisterForGG.url)),
+    additionalHeadBlock = Some(hmrcTimeoutDialogHelper(signOutUrl = routes.StartController.start().url)),
     nonce = CSPNonce.get
 )(content)
