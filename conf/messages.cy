@@ -785,7 +785,7 @@ wereYouAUKResident.personalRep.title=A oedd y person yn breswylydd yn y DU ar y 
 wereYouAUKResident.agent.title=A oedd eich cleient yn breswylydd yn y DU ar y dyddiad gwaredu?
 wereYouAUKResident.personalRepInPeriodOfAdmin.title=A oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi?
 wereYouAUKResident.helpText=Y dyddiad gwaredu ar gyfer eiddo yn y DU yw’r dyddiad cyfnewid contractau. Mae cyfnewid contractau fel arfer yn digwydd pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd a phan fydd y prynwr yn talu blaendal.
-wereYouAUKResident.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor ffenestr newydd)</a>
@@ -815,9 +815,9 @@ triage.enterCountry.agent.helpText=Fel arfer, dyma’r diwrnod y gwnaeth eich cl
 triage.enterCountry.trust.helpText=Fel arfer, dyma’r diwrnod y gwnaeth yr ymddiriedolaeth a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
 triage.enterCountry.capacitor.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
 triage.enterCountry.personalRep.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
-triage.enterCountry.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>.
+triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>.
 triage.enterCountry.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor ffenestr newydd)</a>.
-triage.enterCountry.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>.
+triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>.
 triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
 triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
 triage.enterCountry.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
@@ -926,7 +926,7 @@ disposalDate.trust.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi
 disposalDate.capacitor.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 disposalDate.personalRep.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 disposalDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
-disposalDate.link=<a href="{0}" target="_blank">Cael gwybod beth sy’n digwydd ar y dyddiad cyfnewid (yn agor ffenestr newydd)</a>.
+disposalDate.link=<a class="govuk-link" href="{0}" target="_blank">Cael gwybod beth sy’n digwydd ar y dyddiad cyfnewid (yn agor ffenestr newydd)</a>.
 disposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
 disposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
 disposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod heddiw neu yn y gorffennol
@@ -955,7 +955,7 @@ completionDate.trust.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r
 completionDate.capacitor.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
 completionDate.personalRep.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
 completionDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
-completionDate.link=<a href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cwblhau (yn agor ffenestr newydd)</a>
+completionDate.link=<a class="govuk-link" href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cwblhau (yn agor ffenestr newydd)</a>
 completionDate.error.required=Nodwch ddyddiad cwblhau
 completionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
 completionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl dyddiad cyfnewid y contract, {0}
@@ -1030,7 +1030,7 @@ multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.title=A oedd y pe
 multipleDisposalsWereYouAUKResident.helpText=Mae ‘cyfnewid’ contractau fel arfer yn digwydd pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
 multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
 multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor ffenestr newydd)</a>
-multipleDisposalsWereYouAUKResident.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>
+multipleDisposalsWereYouAUKResident.trust.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>
 multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person (yn agor ffenestr newydd)</a>
 multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person (yn agor ffenestr newydd)</a>
 multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.

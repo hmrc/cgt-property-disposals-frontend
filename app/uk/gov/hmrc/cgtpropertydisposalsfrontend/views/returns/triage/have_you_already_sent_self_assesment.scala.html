@@ -23,17 +23,17 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    formHelper: FormWithCSRF,
     backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
     yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(
@@ -82,12 +82,10 @@
         @errorSummary(form, Some(s"$key$userKey"))
     }
 
-    @caption(messages("triage.caption"))
-
-    @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessmentSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessmentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
-            label = pageHeading(title),
+            label = pageHeading(title, Some(messages("triage.caption"))),
             errorKey = form.error(key).map(e => s"$userErrorKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,

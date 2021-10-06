@@ -28,12 +28,14 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
     submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    formHelper: FormWithCSRF,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
@@ -97,7 +99,7 @@
 
     @caption(messages("triage.caption"))
 
-    @formWrapper(routes.SingleDisposalsTriageController.countryOfResidenceSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(routes.SingleDisposalsTriageController.countryOfResidenceSubmit(), 'novalidate -> "novalidate") {
 
         @countryCode(
             Country.countryCodes,
