@@ -43,7 +43,7 @@
 
 @fieldId = @{"countryCode"}
 @classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
-@inputClasses = @{if(hasErrors) "form-control form-control-error govuk-input autocomplete"  else "form-control govuk-input autocomplete"}
+@inputClasses = @{if(hasErrors) "form-control form-control-error govuk-input--error autocomplete"  else "form-control govuk-input autocomplete"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
 @hintTextKey = @{s"${{fieldId}}-govuk-hint"}
