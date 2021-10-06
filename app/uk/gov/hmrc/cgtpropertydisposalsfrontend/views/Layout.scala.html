@@ -16,8 +16,7 @@
 
 @(pageTitle: String,
         withSignOutLink: Boolean = false,
-        isWelshTranslationAvailable: Boolean = false,
-        accountMenu: Option[Html] = None,
+        isWelshTranslationAvailable: Boolean = false
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @content = {
@@ -25,10 +24,7 @@
 @hmrcReportTechnicalIssueHelper()
 }
 
-@serviceInfoContent = @{accountMenu.fold(Html(""))(s => s)}
-
 @hmrcLayout(
-    beforeContentBlock = Some(serviceInfoContent),
     pageTitle = Some(pageTitle),
     isWelshTranslationAvailable = isWelshTranslationAvailable,
     serviceUrl = None,

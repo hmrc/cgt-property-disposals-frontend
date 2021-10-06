@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.CountryCode
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.WelshSorting.WelshStringOps
+@import controllers.routes
 
 @this(
   errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline_govuk
@@ -42,13 +43,20 @@
 
 @fieldId = @{"countryCode"}
 @classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
-@inputClasses = @{if(hasErrors) "form-control form-control-error govuk-input"  else "form-control"}
+@inputClasses = @{if(hasErrors) "form-control form-control-error govuk-input autocomplete"  else "form-control govuk-input autocomplete"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
 @hintTextKey = @{s"${{fieldId}}-govuk-hint"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @extraContentId = @{s"${{fieldId}}-extra-content"}
 @extraContentIdWithContent = @{extraContent.map(extraContentId -> _)}
+
+<link
+    rel="stylesheet"
+    type="text/css"
+    href='@routes.Assets.at("stylesheets/accessible-autocomplete.min.css")'
+/>
+
 @fieldLabel = {
   @if(labelAsHeading) {
     <h1 class="govuk-label-wrapper">
@@ -84,18 +92,38 @@
  @errorIdWithMessageKey.map { case (id, key) =>
   @errorInline(id, messages(s"$fieldId.$key"))
  }
- <select
-   id="@fieldId"
-   name="@fieldId"
-   class="@inputClasses"
-   autocomplete="@{autoComplete.value}"
-   @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <option value="">@messages("countryCode.placeholder")</option>
-     @for(countryCode <- countryCodes) {
-         <option value="@{countryCode}" @{if(selected.contains(countryCode))"selected"}>@messages(s"country.$countryCode")</option>
-     }
-     @sortedCountryCodeOptions.map { countryCodeWithCountryName =>
-         <option value="@{countryCodeWithCountryName._1}" @{if(selected.contains(countryCodeWithCountryName._1))"selected"}>@{countryCodeWithCountryName._2}</option>
-     }
- </select>
+    <div class="autocomplete-wrapper">
+     <select
+       id="@fieldId"
+       name="@fieldId"
+       class="@inputClasses"
+       autocomplete="@{autoComplete.value}"
+       @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+        <option value="">@messages("countryCode.placeholder")</option>
+         @sortedCountryCodeOptions.map { countryCodeWithCountryName =>
+             <option value="@{countryCodeWithCountryName._1}" @{if(selected.contains(countryCodeWithCountryName._1))"selected"}>@{countryCodeWithCountryName._2}</option>
+         }
+     </select>
+    </div>
+
+    <script src='@routes.Assets.at("javascript/accessible-autocomplete.min.js")'></script>
+    <script>
+            function convertSelectElementsToAutocomplete() {
+                var selectEl = document.querySelector(".autocomplete");
+                if (selectEl && selectEl.style.display !== "none") {
+                    console.log("enhancing select element");
+                    accessibleAutocomplete.enhanceSelectElement({
+                        id: selectEl.id, // Important that id is the same
+                        minLength: 2,
+                        defaultValue: "",
+                        selectElement: selectEl,
+                        showAllValues: true,
+                    });
+                }
+            }
+
+            convertSelectElementsToAutocomplete();
+            convertSelectElementsToAutocomplete(); // idempotent
+    </script>
+
 </div>
