@@ -33,7 +33,6 @@
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
     yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk
@@ -72,9 +71,7 @@
 @label = @{pageHeading(title, Some(messages("triage.caption")))}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true) {
-
-    @backLinkComponent(backLink)
+@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userMsgKey"))

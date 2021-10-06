@@ -22,9 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
@@ -33,10 +31,10 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 @key = @{ "multipleDisposalsExchangeDateInDifferentTaxYear" }
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
-  @backLinkComponent(backLink)
+@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
+
   @caption(messages("triage.caption"))
-  @pageHeading(title)
+    <h1 class="govuk-heading-xl">@title</h1>
   <p>@messages(s"$key.p1")</p>
   <h2>@messages(s"$key.subheading")</h2>
   <p>@Html(messages(s"$key.p2", appConfig.contactHmrc))</p>

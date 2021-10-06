@@ -36,9 +36,8 @@
     countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
     submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     formHelper: FormWithCSRF,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
@@ -89,9 +88,7 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true) {
-
-    @backLinkComponent(backLink)
+@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 
     @if(hasErrors) {
         @errorSummary(form)

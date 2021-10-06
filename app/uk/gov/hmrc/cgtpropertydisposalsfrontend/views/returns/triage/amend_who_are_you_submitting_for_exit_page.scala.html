@@ -22,9 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
 @(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
@@ -32,11 +30,9 @@
 @key = @{"who-are-you-reporting-for-exit-page"}
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
 
-    @backLinkComponent(backLink)
+ <h1 class="govuk-heading-xl">@title</h1>
 
-
-    @pageHeading(title)
-   <p>@Html(messages(s"$key.helpText", appConfig.contactHmrc))</p>
+   <p class="govuk-body">@Html(messages(s"$key.helpText", appConfig.contactHmrc))</p>
 }

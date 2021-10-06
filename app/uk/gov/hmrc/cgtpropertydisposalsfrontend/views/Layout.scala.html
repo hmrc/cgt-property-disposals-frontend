@@ -2,21 +2,22 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTimeoutDialogHelper
 @import views.html.helper.CSPNonce
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
 @import play.twirl.api._
 @import play.api.mvc._
 @import play.api.i18n.Messages
-
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
 @this(
+        appConfig: ViewConfig,
         hmrcLayout: HmrcLayout,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper)
 
 @(pageTitle: String,
         withSignOutLink: Boolean = false,
-        isWelshTranslationAvailable: Boolean = false
+        isWelshTranslationAvailable: Boolean = false,
+        backLinkUrl: Option[String] = None,
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @content = {
@@ -25,11 +26,12 @@
 }
 
 @hmrcLayout(
+    backLinkUrl = backLinkUrl,
     pageTitle = Some(pageTitle),
     isWelshTranslationAvailable = isWelshTranslationAvailable,
     serviceUrl = None,
-    signOutUrl = if(withSignOutLink) Some(routes.StartController.start().url) else None,
+    signOutUrl = if(withSignOutLink) Some(s"""${appConfig.signOutUrl}?continue${controllerRoutes.StartController.start().url}""") else None,
     phaseBanner = None,
-    additionalHeadBlock = Some(hmrcTimeoutDialogHelper(signOutUrl = routes.StartController.start().url)),
+    additionalHeadBlock = Some(hmrcTimeoutDialogHelper(signOutUrl = controllerRoutes.StartController.start().url)),
     nonce = CSPNonce.get
 )(content)

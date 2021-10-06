@@ -26,8 +26,6 @@
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk
 )
 
 @(backLink: Call,
@@ -54,11 +52,9 @@ representativeType: Option[RepresentativeType])(implicit request: RequestWithSes
 
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true) {
+@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
 
-  @backLinkComponent(backLink)
-
-  @pageHeading(title)
+<h1 class="govuk-heading-xl">@title</h1>
 
   <p class="govuk-body">
     @messages(s"$key$userKey.p1")
