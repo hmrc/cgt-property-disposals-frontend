@@ -24,11 +24,6 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
-  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-  implicit final class AnyOps[A](self: A) {
-    def ===(other: A): Boolean = self == other
-  }
-
   private def getString(key: String): String = servicesConfig.getString(key)
 
   private val basGatewayFrontendUrl: String = getString("bas-gateway-frontend.url")
