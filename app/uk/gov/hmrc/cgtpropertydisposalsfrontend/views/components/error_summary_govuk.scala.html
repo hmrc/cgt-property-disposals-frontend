@@ -38,13 +38,13 @@
     @if(form.globalErrors.nonEmpty) {
       @form.globalErrors.map { error =>
         <li>
-          <a>@messages(s"${error.message}", error.args: _*)</a>
+          <a class="govuk-body">@messages(s"${error.message}", error.args: _*)</a>
         </li>
       }
     } else {
       @form.errors.map { error =>
         <li>
-          <a href="#@error.key" data-focuses="@error.key">
+          <a class="govuk-body" href="#@error.key" data-focuses="@error.key">
             @messages(s"${customErrorKey.getOrElse(error.key)}$userKeyOnly.${error.message}", error.args: _*)
           </a>
         </li>
