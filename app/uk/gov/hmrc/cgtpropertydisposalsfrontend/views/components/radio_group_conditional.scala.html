@@ -46,12 +46,12 @@
 @extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
 @errorIdWithError = @{error.map(errorId -> _)}
 @describedByKeys = @{
-    List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 <div class="@classes">
   <fieldset id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
     <legend>
-        @label
+      @label
     </legend>
     @extraContentIdWithContent.map { case (id, text) =>
       <div id="@id">
@@ -74,22 +74,21 @@
       @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${e.message}", e.args: _*))
     }
 
-  @options.zipWithIndex.map{ case (option, index) =>
+    @options.zipWithIndex.map{ case (option, index) =>
       <div class="multiple-choice"@if(option.content.nonEmpty){ data-target="@{fieldId}-@{index}-content" }>
-          <input id="@{fieldId}-@{index}"
-              name="@fieldId"
-              value="@index"
-              type="radio"
-              @if(selected.contains(index)) { checked="checked" }
-              />
-          <label for="@{fieldId}-@{index}">
-              @option.label
-          </label>
-              @option.optionHelpText.map(helpText => Html(s"""<span class="form-hint">$helpText</span>"""))
+        <input id="@{fieldId}-@{index}"
+          name="@fieldId"
+          value="@index"
+          type="radio"
+          @if(selected.contains(index)) { checked="checked" }
+          />
+        <label for="@{fieldId}-@{index}">
+          @option.label
+        </label>
+        @option.optionHelpText.map(helpText => Html(s"""<span class="form-hint">$helpText</span>"""))
       </div>
-          @option.content.map(content => Html(s"""<div id="${fieldId}-${index}-content" class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
-      }
-
+      @option.content.map(content => Html(s"""<div id="${fieldId}-${index}-content" class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
+    }
 
   </fieldset>
 </div>
