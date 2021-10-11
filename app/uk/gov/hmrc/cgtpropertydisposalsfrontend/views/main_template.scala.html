@@ -36,8 +36,7 @@
     scriptElem: Option[Html] = None,
     withSignOutLink: Boolean = true,
     sidebar: Option[Html] = None,
-    accountMenu: Option[Html] = None,
-    enableUserRecruitmentBannerOnPage:Boolean = false
+    accountMenu: Option[Html] = None
 )(mainContent: Html)(implicit messages: Messages, appConfig: ViewConfig, request: Request[_])
 
 @serviceInfoContent = @{accountMenu.fold(Html(""))(s => s)}
@@ -56,6 +55,5 @@
     serviceInfoContent = serviceInfoContent,
     scriptElem = scriptElem,
     withSignOutLink = withSignOutLink,
-    withAccount = accountMenu.nonEmpty,
-    enableUserRecruitmentBannerOnPage = enableUserRecruitmentBannerOnPage
+    withAccount = accountMenu.nonEmpty
 )

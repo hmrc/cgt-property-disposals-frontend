@@ -54,8 +54,7 @@
   serviceInfoContent: Html = HtmlFormat.empty,
   scriptElem: Option[Html] = None,
   withSignOutLink: Boolean = true,
-  withAccount: Boolean,
-  enableUserRecruitmentBannerOnPage:Boolean = false)(implicit messages: Messages, request: Request[_])
+  withAccount: Boolean)(implicit messages: Messages, request: Request[_])
 
 @head = {
     <script>
@@ -111,7 +110,7 @@
 }
 
 @afterHeader = {
-  @if(appConfig.userRecruitmentBannerEnabled && enableUserRecruitmentBannerOnPage) {
+  @if(appConfig.userRecruitmentBannerEnabled) {
     @userRecruitmentBanner(appConfig.userRecruitmentUrl)
   }
 }
