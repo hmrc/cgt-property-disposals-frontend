@@ -70,8 +70,12 @@
     }
 }
 
-@title = @{messages(s"$key$userKey.title", taxYearStartYear.toString, (taxYearStartYear+1).toString)}
 @hasErrors = @{form.hasErrors}
+@title = @{
+    if(hasErrors){
+        messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title", taxYearStartYear.toString, (taxYearStartYear+1).toString)
+    } else messages(s"$key$userKey.title", taxYearStartYear.toString, (taxYearStartYear+1).toString)
+}
 
 @mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 

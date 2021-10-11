@@ -434,12 +434,12 @@ class ExemptionAndLossesControllerSpec
                 ),
                 { doc =>
                   doc
-                    .select("#back")
+                    .select("#back, .govuk-back-link")
                     .attr("href")   shouldBe returns.routes.TaskListController
                     .taskList()
                     .url
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr("action") shouldBe routes.ExemptionAndLossesController
                     .inYearLossesSubmit()
                     .url
@@ -477,12 +477,12 @@ class ExemptionAndLossesControllerSpec
                 ),
                 { doc =>
                   doc
-                    .select("#back")
+                    .select("#back, .govuk-back-link")
                     .attr("href")   shouldBe routes.ExemptionAndLossesController
                     .checkYourAnswers()
                     .url
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr("action") shouldBe routes.ExemptionAndLossesController
                     .inYearLossesSubmit()
                     .url
@@ -593,12 +593,12 @@ class ExemptionAndLossesControllerSpec
                 ),
                 { doc =>
                   doc
-                    .select("#back")
+                    .select("#back, .govuk-back-link")
                     .attr("href")   shouldBe returns.routes.TaskListController
                     .taskList()
                     .url
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr("action") shouldBe routes.ExemptionAndLossesController
                     .inYearLossesSubmit()
                     .url
@@ -1084,12 +1084,12 @@ class ExemptionAndLossesControllerSpec
                 ),
                 { doc =>
                   doc
-                    .select("#back")
+                    .select("#back, .govuk-back-link")
                     .attr("href")   shouldBe routes.ExemptionAndLossesController
                     .inYearLosses()
                     .url
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr("action") shouldBe routes.ExemptionAndLossesController
                     .previousYearsLossesSubmit()
                     .url
@@ -1122,12 +1122,12 @@ class ExemptionAndLossesControllerSpec
                 ),
                 { doc =>
                   doc
-                    .select("#back")
+                    .select("#back, .govuk-back-link")
                     .attr("href")   shouldBe routes.ExemptionAndLossesController
                     .checkYourAnswers()
                     .url
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr("action") shouldBe routes.ExemptionAndLossesController
                     .previousYearsLossesSubmit()
                     .url
@@ -1620,12 +1620,12 @@ class ExemptionAndLossesControllerSpec
                   messageFromMessageKey(s"$key$userKey.title"),
                   { doc =>
                     doc
-                      .select("#back")
+                      .select("#back, .govuk-back-link")
                       .attr("href")   shouldBe routes.ExemptionAndLossesController
                       .previousYearsLosses()
                       .url
                     doc
-                      .select("#content > article > form")
+                      .select("#content > article > form, #main-content form")
                       .attr("action") shouldBe routes.ExemptionAndLossesController
                       .annualExemptAmountSubmit()
                       .url
@@ -1659,12 +1659,12 @@ class ExemptionAndLossesControllerSpec
                   messageFromMessageKey(s"$key$userKey.title"),
                   { doc =>
                     doc
-                      .select("#back")
+                      .select("#back, .govuk-back-link")
                       .attr("href")                    shouldBe routes.ExemptionAndLossesController
                       .checkYourAnswers()
                       .url
                     doc
-                      .select("#content > article > form")
+                      .select("#content > article > form, #main-content form")
                       .attr("action")                  shouldBe routes.ExemptionAndLossesController
                       .annualExemptAmountSubmit()
                       .url
@@ -2392,7 +2392,7 @@ class ExemptionAndLossesControllerSpec
                       showAnnualExemptAmount = true
                     )
                     doc
-                      .select("#content > article > form")
+                      .select("#content > article > form, #main-content form")
                       .attr(
                         "action"
                       ) shouldBe routes.ExemptionAndLossesController
@@ -2434,7 +2434,7 @@ class ExemptionAndLossesControllerSpec
                     showAnnualExemptAmount = false
                   )
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr(
                       "action"
                     ) shouldBe routes.ExemptionAndLossesController
@@ -2475,7 +2475,7 @@ class ExemptionAndLossesControllerSpec
                     showAnnualExemptAmount = true
                   )
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr(
                       "action"
                     ) shouldBe routes.ExemptionAndLossesController
@@ -2501,7 +2501,7 @@ class ExemptionAndLossesControllerSpec
                 messageFromMessageKey("exemptionsAndLosses.cya.title"),
                 doc =>
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr(
                       "action"
                     ) shouldBe routes.ExemptionAndLossesController

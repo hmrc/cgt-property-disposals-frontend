@@ -73,8 +73,13 @@
     }
 }
 
-@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
+@title = @{
+    if(hasErrors){
+        messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title")
+    } else messages(s"$key$userKey.title")
+}
 
 @helpText = @{
     representativeType match {

@@ -88,7 +88,13 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@titleWithErrorPrefix = @{
+    if(hasErrors){
+        messages("generic.errorPrefix") + " " + title
+    } else title
+}
+
+@mainTemplate(pageTitle = titleWithErrorPrefix, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 
     @if(hasErrors) {
         @errorSummary(form)

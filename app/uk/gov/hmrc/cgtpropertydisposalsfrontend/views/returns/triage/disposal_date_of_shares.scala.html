@@ -38,7 +38,11 @@
 
 @key = @{ "sharesDisposalDate" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@title = @{messages(s"$key.title")}
+@title = @{
+ if(hasErrors){
+  messages("generic.errorPrefix") + " " + messages(s"$key.title")
+ } else messages(s"$key.title")
+}
 @errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", key).map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {

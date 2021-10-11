@@ -647,12 +647,12 @@ class YearToDateLiabilityControllerSpec
             messageFromMessageKey("estimatedIncome.title"),
             { doc =>
               doc
-                .select("#back")
+                .select("#back, .govuk-back-link")
                 .attr("href")   shouldBe returns.routes.TaskListController
                 .taskList()
                 .url
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
                 .estimatedIncomeSubmit()
                 .url
@@ -682,12 +682,12 @@ class YearToDateLiabilityControllerSpec
             messageFromMessageKey("estimatedIncome.agent.title"),
             { doc =>
               doc
-                .select("#back")
+                .select("#back, .govuk-back-link")
                 .attr("href")   shouldBe returns.routes.TaskListController
                 .taskList()
                 .url
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
                 .estimatedIncomeSubmit()
                 .url
@@ -717,12 +717,12 @@ class YearToDateLiabilityControllerSpec
             messageFromMessageKey("estimatedIncome.capacitor.title"),
             { doc =>
               doc
-                .select("#back")
+                .select("#back, .govuk-back-link")
                 .attr("href")   shouldBe returns.routes.TaskListController
                 .taskList()
                 .url
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
                 .estimatedIncomeSubmit()
                 .url
@@ -754,10 +754,10 @@ class YearToDateLiabilityControllerSpec
             messageFromMessageKey("estimatedIncome.personalRep.title"),
             { doc =>
               doc
-                .select("#back")
+                .select("#back, .govuk-back-link")
                 .attr("href")   shouldBe routes.YearToDateLiabilityController.taxableGainOrLoss().url
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
                 .estimatedIncomeSubmit()
                 .url
@@ -810,12 +810,12 @@ class YearToDateLiabilityControllerSpec
               { doc =>
                 doc.select("#estimatedIncome").attr("value") shouldBe "12.34"
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href")                              shouldBe routes.YearToDateLiabilityController
                   .checkYourAnswers()
                   .url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr("action")                            shouldBe routes.YearToDateLiabilityController
                   .estimatedIncomeSubmit()
                   .url
@@ -1243,12 +1243,12 @@ class YearToDateLiabilityControllerSpec
               ),
               { doc =>
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href")   shouldBe routes.YearToDateLiabilityController
                   .estimatedIncome()
                   .url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr("action") shouldBe routes.YearToDateLiabilityController
                   .personalAllowanceSubmit()
                   .url
@@ -1283,12 +1283,12 @@ class YearToDateLiabilityControllerSpec
               { doc =>
                 doc.select("#personalAllowance").attr("value") shouldBe "12.34"
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href")                                shouldBe routes.YearToDateLiabilityController
                   .checkYourAnswers()
                   .url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr("action")                              shouldBe routes.YearToDateLiabilityController
                   .personalAllowanceSubmit()
                   .url
@@ -1713,10 +1713,10 @@ class YearToDateLiabilityControllerSpec
               performAction(),
               messageFromMessageKey("hasEstimatedDetails.title"),
               { doc =>
-                doc.select("#back").attr("href") shouldBe backLink.url
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
                 doc
-                  .select("#content > article > form")
-                  .attr("action")                shouldBe routes.YearToDateLiabilityController
+                  .select("#content > article > form, #main-content form")
+                  .attr("action")                                  shouldBe routes.YearToDateLiabilityController
                   .hasEstimatedDetailsSubmit()
                   .url
               }
@@ -1895,10 +1895,10 @@ class YearToDateLiabilityControllerSpec
               performAction(),
               messageFromMessageKey("hasEstimatedDetails.title"),
               { doc =>
-                doc.select("#back").attr("href") shouldBe backLink.url
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
                 doc
-                  .select("#content > article > form")
-                  .attr("action")                shouldBe routes.YearToDateLiabilityController
+                  .select("#content > article > form, #main-content form")
+                  .attr("action")                                  shouldBe routes.YearToDateLiabilityController
                   .hasEstimatedDetailsSubmit()
                   .url
                 extraChecks(doc)
@@ -2002,10 +2002,10 @@ class YearToDateLiabilityControllerSpec
               performAction(),
               messageFromMessageKey("hasEstimatedDetails.title"),
               { doc =>
-                doc.select("#back").attr("href") shouldBe backLink.url
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
                 doc
-                  .select("#content > article > form")
-                  .attr("action")                shouldBe routes.YearToDateLiabilityController
+                  .select("#content > article > form, #main-content form")
+                  .attr("action")                                  shouldBe routes.YearToDateLiabilityController
                   .hasEstimatedDetailsSubmit()
                   .url
                 extraChecks(doc)
@@ -2729,10 +2729,10 @@ class YearToDateLiabilityControllerSpec
             performAction(),
             messageFromMessageKey("taxDue.title"),
             { doc =>
-              doc.select("#back").attr("href") shouldBe backLink.url
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
               doc
-                .select("#content > article > form")
-                .attr("action")                shouldBe routes.YearToDateLiabilityController
+                .select("#content > article > form, #main-content form")
+                .attr("action")                                  shouldBe routes.YearToDateLiabilityController
                 .taxDueSubmit()
                 .url
             }
@@ -4419,7 +4419,7 @@ class YearToDateLiabilityControllerSpec
             performAction(),
             messageFromMessageKey(s"$key.title"),
             { doc =>
-              doc.select("#back").attr("href")                            shouldBe backLink.url
+              doc.select("#back, .govuk-back-link").attr("href")          shouldBe backLink.url
               doc.select("#content > article > p#upload-guidance").text() shouldBe messageFromMessageKey(
                 s"$key.guidance.p1"
               )
@@ -4428,7 +4428,7 @@ class YearToDateLiabilityControllerSpec
                 doc.select("div > strong.bold-small").text() shouldBe messageFromMessageKey(s"$key.alert")
 
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr(
                   "action"
                 ) shouldBe upscanUpload.upscanUploadMeta.uploadRequest.href
@@ -4665,10 +4665,10 @@ class YearToDateLiabilityControllerSpec
             performAction(),
             messageFromMessageKey(expectedTitleKey),
             { doc =>
-              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form")
-                .attr("action")                shouldBe routes.YearToDateLiabilityController
+                .select("#content > article > form, #main-content form")
+                .attr("action")                                  shouldBe routes.YearToDateLiabilityController
                 .taxableGainOrLossSubmit()
                 .url
               testPage(doc)
@@ -5642,10 +5642,10 @@ class YearToDateLiabilityControllerSpec
               "nonCalculatedTaxDue.title"
             ),
             { doc =>
-              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form")
-                .attr("action")                shouldBe routes.YearToDateLiabilityController
+                .select("#content > article > form, #main-content form")
+                .attr("action")                                  shouldBe routes.YearToDateLiabilityController
                 .nonCalculatedEnterTaxDueSubmit()
                 .url
               testPage(doc)
@@ -5784,7 +5784,9 @@ class YearToDateLiabilityControllerSpec
                   formattedTaxDue
                 )
 
-                doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
+                doc
+                  .select("#content > article > form, #main-content form")
+                  .attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
                   .url
               }
@@ -5885,7 +5887,9 @@ class YearToDateLiabilityControllerSpec
               messageFromMessageKey(s"nonCalculatedTaxDue.furtherReturn.enterTaxDue.title"),
               { doc =>
                 doc.select("#nonCalculatedTaxDue-form-hint") contains expectedP1Key
-                doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
+                doc
+                  .select("#content > article > form, #main-content form")
+                  .attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
                   .url
               }
@@ -6016,7 +6020,9 @@ class YearToDateLiabilityControllerSpec
 
                 doc.select("#content > article > dl > div.sum-total > dd").text() shouldBe formattedTaxDue
 
-                doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
+                doc
+                  .select("#content > article > form, #main-content form")
+                  .attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
                   .url
               }
@@ -6096,9 +6102,11 @@ class YearToDateLiabilityControllerSpec
               performAction(),
               messageFromMessageKey(s"nonCalculatedTaxDue.amendReturn.enterTaxDue$userKey.title"),
               { doc =>
-                doc.select("#back").attr("href")                       shouldBe expectedBackLink.url
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
                 doc.select("#nonCalculatedTaxDue-form-hint") contains expectedP1Key
-                doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
+                doc
+                  .select("#content > article > form, #main-content form")
+                  .attr("action")                                  shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
                   .url
               }
@@ -6651,7 +6659,7 @@ class YearToDateLiabilityControllerSpec
             ),
             doc =>
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
                 .uploadMandatoryEvidence()
                 .url
@@ -7273,7 +7281,7 @@ class YearToDateLiabilityControllerSpec
             performAction(),
             messageFromMessageKey(expectedTitleKey, taxYearStart, taxYearEnd),
             { doc =>
-              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
 
               expectedCalculationChecks match {
                 case None =>
@@ -8388,12 +8396,12 @@ class YearToDateLiabilityControllerSpec
             performAction(),
             messageFromMessageKey(expectedTitleKey),
             { doc =>
-              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
 
               doc.select("#repayment-form-hint").text shouldBe messageFromMessageKey(expectedHelpTextKey)
 
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
                 .repaymentSubmit()
                 .url

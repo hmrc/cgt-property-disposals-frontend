@@ -67,9 +67,14 @@
 
 @isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 
-@title = @{messages(s"$key$userMsgKey.title")}
 @label = @{pageHeading(title, Some(messages("triage.caption")))}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
+@title = @{
+    if(hasErrors){
+        messages("generic.errorPrefix") + " " + messages(s"$key$userMsgKey.title")
+    } else messages(s"$key$userMsgKey.title")
+}
 
 @mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 

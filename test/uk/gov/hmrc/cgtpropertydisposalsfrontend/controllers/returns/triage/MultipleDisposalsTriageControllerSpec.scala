@@ -3814,7 +3814,7 @@ class MultipleDisposalsTriageControllerSpec
 
     }
 
-    "handling requests to display the share disposal page for non uk residents page" must {
+    "handling requests to display the share disposal page for non uk residents page" in {
 
       val requiredPreviousAnswers =
         IncompleteMultipleDisposalsTriageAnswers.empty.copy(
@@ -3854,12 +3854,12 @@ class MultipleDisposalsTriageControllerSpec
               "sharesDisposalDate.helpText"
             )
             doc
-              .select("#back")
+              .select("#back, .govuk-back-link")
               .attr("href")   shouldBe routes.MultipleDisposalsTriageController
               .assetTypeForNonUkResidents()
               .url
             doc
-              .select("#content > article > form")
+              .select("#content > article > form, #main-content form")
               .attr("action") shouldBe routes.MultipleDisposalsTriageController
               .disposalDateOfSharesSubmit()
               .url
@@ -5069,14 +5069,14 @@ class MultipleDisposalsTriageControllerSpec
       performAction(),
       messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs: _*),
       { doc =>
-        doc.select("#back").attr("href")          shouldBe expectedBackLink.url
+        doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
         doc
-          .select("#content > article > form")
-          .attr("action")                         shouldBe expectedSubmit.url
-        doc.select("#submitButton").text()        shouldBe messageFromMessageKey(
+          .select("#content > article > form, #main-content form")
+          .attr("action")                                  shouldBe expectedSubmit.url
+        doc.select("#submitButton").text()                 shouldBe messageFromMessageKey(
           expectedButtonMessageKey
         )
-        doc.select("#returnToSummaryLink").text() shouldBe (
+        doc.select("#returnToSummaryLink").text()          shouldBe (
           if (expectReturnToSummaryLink)
             messageFromMessageKey("returns.return-to-summary-link")
           else ""
@@ -5114,14 +5114,14 @@ class MultipleDisposalsTriageControllerSpec
       performAction(),
       messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs: _*),
       { doc =>
-        doc.select("#back").attr("href")          shouldBe expectedBackLink.url
+        doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
         doc
-          .select("#content > article > form")
-          .attr("action")                         shouldBe expectedSubmit.url
-        doc.select("#submitButton").text()        shouldBe messageFromMessageKey(
+          .select("#content > article > form, #main-content form")
+          .attr("action")                                  shouldBe expectedSubmit.url
+        doc.select("#submitButton").text()                 shouldBe messageFromMessageKey(
           expectedButtonMessageKey
         )
-        doc.select("#returnToSummaryLink").text() shouldBe (
+        doc.select("#returnToSummaryLink").text()          shouldBe (
           if (expectReturnToSummaryLink)
             messageFromMessageKey("returns.return-to-summary-link")
           else ""
