@@ -63,9 +63,13 @@
  }
 }
 
-@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors}
 @errorKey = @{List("completionDate-day", "completionDate-month", "completionDate-year", "completionDate").map(form.error).find(_.isDefined).flatten}
+@title = @{
+ if(hasErrors){
+  messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title")
+ } else messages(s"$key$userKey.title")
+}
 
 @mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 

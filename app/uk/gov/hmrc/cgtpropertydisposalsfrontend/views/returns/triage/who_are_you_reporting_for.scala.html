@@ -41,9 +41,13 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @key = @{"individualUserType"}
-@title = @{messages("who-are-you-reporting-for.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@title = @{
+    if(hasErrors){
+        messages("generic.errorPrefix") + " " + messages("who-are-you-reporting-for.title")
+    } else messages("who-are-you-reporting-for.title")
+}
 
 @optionIndex(value: IndividualUserType) = @{
     value match {

@@ -63,8 +63,14 @@
  }
 }
 
-@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors}
+
+@title = @{
+ if(hasErrors){
+  messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title")
+ } else messages(s"$key$userKey.title")
+}
+
 @mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 
  @if(hasErrors) {

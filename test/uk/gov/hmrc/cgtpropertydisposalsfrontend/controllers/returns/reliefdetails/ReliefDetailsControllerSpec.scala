@@ -2079,7 +2079,7 @@ class ReliefDetailsControllerSpec
                 messageFromMessageKey("reliefDetails.cya.title"),
                 doc =>
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr("action") shouldBe routes.ReliefDetailsController
                     .checkYourAnswersSubmit()
                     .url
@@ -2114,7 +2114,7 @@ class ReliefDetailsControllerSpec
                       isPOA
                     )
                     doc
-                      .select("#content > article > form")
+                      .select("#content > article > form, #main-content form")
                       .attr("action") shouldBe routes.ReliefDetailsController
                       .checkYourAnswersSubmit()
                       .url
@@ -2157,7 +2157,7 @@ class ReliefDetailsControllerSpec
                     isPOA
                   )
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr("action") shouldBe routes.ReliefDetailsController
                     .checkYourAnswersSubmit()
                     .url

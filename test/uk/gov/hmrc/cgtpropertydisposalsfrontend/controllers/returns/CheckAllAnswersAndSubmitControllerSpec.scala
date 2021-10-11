@@ -319,12 +319,12 @@ class CheckAllAnswersAndSubmitControllerSpec
                   furtherReturnCalculationEligibility.forall(_.isEligible)
                 )
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href") shouldBe routes.TaskListController
                   .taskList()
                   .url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
                   )             shouldBe routes.CheckAllAnswersAndSubmitController
@@ -664,12 +664,12 @@ class CheckAllAnswersAndSubmitControllerSpec
                   showAnnualExemptAmount
                 )
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href") shouldBe routes.TaskListController
                   .taskList()
                   .url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
                   )             shouldBe routes.CheckAllAnswersAndSubmitController
@@ -854,12 +854,12 @@ class CheckAllAnswersAndSubmitControllerSpec
                   showAnnualExemptAmount
                 )
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href") shouldBe routes.TaskListController
                   .taskList()
                   .url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
                   )             shouldBe routes.CheckAllAnswersAndSubmitController
@@ -1035,12 +1035,12 @@ class CheckAllAnswersAndSubmitControllerSpec
                   showAnnualExemptAmount
                 )
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href") shouldBe routes.TaskListController
                   .taskList()
                   .url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
                   )             shouldBe routes.CheckAllAnswersAndSubmitController
@@ -1215,12 +1215,12 @@ class CheckAllAnswersAndSubmitControllerSpec
                   showAnnualExemptAmount
                 )
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href") shouldBe routes.TaskListController
                   .taskList()
                   .url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
                   )             shouldBe routes.CheckAllAnswersAndSubmitController
@@ -1643,7 +1643,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               messageFromMessageKey("submitReturnError.title"),
               doc =>
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
                   ) shouldBe routes.CheckAllAnswersAndSubmitController

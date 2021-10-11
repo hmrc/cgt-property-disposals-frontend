@@ -367,7 +367,7 @@ class GainOrLossAfterReliefsControllerSpec
               performAction(),
               messageFromMessageKey(expectedTitleKey),
               { doc =>
-                doc.select("#back").attr("href") shouldBe expectedBackLink.url
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
 
                 doc.select("#content > article > span").text() shouldBe messageFromMessageKey(
                   "gainOrLossAfterReliefs.caption"
@@ -392,7 +392,7 @@ class GainOrLossAfterReliefsControllerSpec
                 )
 
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr("action") shouldBe routes.GainOrLossAfterReliefsController
                   .enterGainOrLossAfterReliefsSubmit()
                   .url
@@ -596,7 +596,7 @@ class GainOrLossAfterReliefsControllerSpec
               performAction(),
               messageFromMessageKey(expectedTitleKey),
               { doc =>
-                doc.select("#back").attr("href") shouldBe expectedBackLink.url
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
 
                 doc.select("#content > article > span").text() shouldBe messageFromMessageKey(
                   "gainOrLossAfterReliefs.caption"
@@ -666,7 +666,7 @@ class GainOrLossAfterReliefsControllerSpec
                 doc.select("#subheading").text() shouldBe messageFromMessageKey(expectedH2Key)
 
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr("action") shouldBe routes.GainOrLossAfterReliefsController
                   .enterGainOrLossAfterReliefsSubmit()
                   .url
@@ -793,7 +793,7 @@ class GainOrLossAfterReliefsControllerSpec
                   doc.text() shouldNot include(messageFromMessageKey("calculator.lettingRelief"))
 
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr("action") shouldBe routes.GainOrLossAfterReliefsController
                     .enterGainOrLossAfterReliefsSubmit()
                     .url
@@ -1149,7 +1149,7 @@ class GainOrLossAfterReliefsControllerSpec
                 .getOrElse("")
 
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.GainOrLossAfterReliefsController
                 .checkYourAnswersSubmit()
                 .url

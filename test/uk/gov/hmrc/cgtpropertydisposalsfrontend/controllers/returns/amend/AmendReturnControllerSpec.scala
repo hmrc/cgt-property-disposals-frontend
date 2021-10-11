@@ -144,10 +144,10 @@ class AmendReturnControllerSpec
             performAction(back),
             messageFromMessageKey("confirmCancelAmendReturn.title"),
             { doc =>
-              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
 
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.AmendReturnController.confirmCancelSubmit(back).url
             }
           )
@@ -231,7 +231,9 @@ class AmendReturnControllerSpec
             performAction(data: _*)(AmendReturnController.ConfirmCancelBackLocations.checkAnswers),
             messageFromMessageKey("confirmCancelAmendReturn.title"),
             { doc =>
-              doc.select("#back").attr("href") shouldBe routes.AmendReturnController.checkYourAnswers().url
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.AmendReturnController
+                .checkYourAnswers()
+                .url
 
               doc
                 .select("#error-summary-display > ul > li > a")
@@ -374,7 +376,9 @@ class AmendReturnControllerSpec
             performAction(),
             messageFromMessageKey(expectedTitle),
             { doc =>
-              doc.select("#back").attr("href") shouldBe controllers.returns.routes.ViewReturnController
+              doc
+                .select("#back, .govuk-back-link")
+                .attr("href") shouldBe controllers.returns.routes.ViewReturnController
                 .displayReturn()
                 .url
 
@@ -499,11 +503,13 @@ class AmendReturnControllerSpec
             performAction(),
             messageFromMessageKey(s"${expectedKey + ".title"}"),
             { doc =>
-              doc.select("#back").attr("href")         shouldBe routes.AmendReturnController.checkYourAnswers().url
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.AmendReturnController
+                .checkYourAnswers()
+                .url
               doc
-                .select("#content > article > form")
-                .attr("action")                        shouldBe routes.AmendReturnController.unmetDependencySubmit().url
-              doc.select("#cancelButton").attr("href") shouldBe routes.AmendReturnController
+                .select("#content > article > form, #main-content form")
+                .attr("action")                                  shouldBe routes.AmendReturnController.unmetDependencySubmit().url
+              doc.select("#cancelButton").attr("href")           shouldBe routes.AmendReturnController
                 .confirmCancelSubmit(AmendReturnController.ConfirmCancelBackLocations.unmetDependency)
                 .url
             }

@@ -50,8 +50,13 @@
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"numberOfProperties"}
-@title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@title = @{
+    if(hasErrors){
+        messages("generic.errorPrefix") + " " + messages(s"$key.title")
+    } else messages(s"$key.title")
+}
+
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
