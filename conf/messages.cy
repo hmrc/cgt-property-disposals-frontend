@@ -3,7 +3,7 @@ multiple-draft.exit.p1=Llenwch eich Ffurflen Dreth ddrafft cyn dechrau un newydd
 who-are-you-reporting-for-exit-page.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
 who-are-you-reporting-for-exit-page.helpText=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod i CThEM fod angen i chi newid pwy ydych yn llenwi’r Ffurflen Dreth hon ar ei gyfer.
 previousReturnExistsWithSameCompletionDate.amend.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
-previousReturnExistsWithSameCompletionDate.amend.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
+previousReturnExistsWithSameCompletionDate.amend.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
 previousReturnExistsWithSameCompletionDate.amend.trust.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
 previousReturnExistsWithSameCompletionDate.amend.agent.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
 previousReturnExistsWithSameCompletionDate.amend.p2=Mae hyn oherwydd bod rhaid i werthiannau neu warediadau sydd â’r un dyddiad cwblhau fod ar yr un Ffurflen Dreth.
@@ -727,7 +727,7 @@ selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p1=Mae rhywun eisoes w
 
 selfAssessmentAlreadySubmitted.whatNext=Beth fydd angen i chi ei wneud nesaf
 
-selfAssessmentAlreadySubmitted.p2=Bydd angen i <a href="{0}" target="_blank"> chi newid eich Ffurflen Dreth Hunanasesiad</a> trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.p2=Bydd angen i <a class="govuk-link" href="{0}" target="_blank"> chi newid eich Ffurflen Dreth Hunanasesiad</a> trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
 selfAssessmentAlreadySubmitted.agent.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> eich cleient trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
 selfAssessmentAlreadySubmitted.trust.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Hunanasesiad yr ymddiriedolaeth: Ffurflen Dreth Ymddiriedolaeth ac Ystâd</a> yr ymddiriedolaeth trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
 selfAssessmentAlreadySubmitted.capacitor.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
@@ -975,7 +975,7 @@ disposalDateTooEarly.non-uk.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 disposalDateTooEarly.non-uk.p1=Mae hyn oherwydd pan gafodd yr eiddo ei werthu neu ei waredu, cyfnewidiwyd contractau cyn 6 Ebrill 2020.
 disposalDateTooEarly.non-uk.p2=Os cafodd gwarediad anuniongyrchol ei wneud, mae hynny oherwydd bod y cyfranddaliadau wedi cael eu gwerthu cyn 6 Ebrill 2020.
 disposalDateTooEarly.non-uk.h2=Yr hyn y bydd angen i chi ei wneud nesaf
-disposalDateTooEarly.non-uk.p3=Bydd angen i chi lenwi <a href="{0}">dibreswyl: ffurflen rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo neu dir yn y DU</a>.
+disposalDateTooEarly.non-uk.p3=Bydd angen i chi lenwi <a class="govuk-link" href="{0}">dibreswyl: ffurflen rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo neu dir yn y DU</a>.
 disposalDateTooEarly.uk.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 disposalDateTooEarly.uk.p1=Mae hyn oherwydd pan gafodd yr eiddo ei werthu neu ei waredu, cyfnewidiwyd contractau cyn 6 Ebrill 2020.
 disposalDateTooEarly.uk.p2=Dysgwch sut i roi gwybod am a thalu Treth Enillion Cyfalaf ar <a href="{0}">werthiannau neu warediadau eiddo yn y DU cyn 6 Ebrill 2020</a>.
@@ -3956,7 +3956,7 @@ multipleDisposalsDisposalDate.cyaChange=dyddiad cyfnewid contractau
 multipleDisposalsExchangeDateInDifferentTaxYear.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 multipleDisposalsExchangeDateInDifferentTaxYear.p1=Ni allwch ddefnyddio’r gwasanaeth ar-lein i newid y flwyddyn dreth ar gyfer Ffurflen Dreth sydd eisoes wedi’i hanfon
 multipleDisposalsExchangeDateInDifferentTaxYear.subheading=Yr hyn y bydd angen i chi ei wneud nesaf
-multipleDisposalsExchangeDateInDifferentTaxYear.p2=Bydd angen i chi <a href="{0}">ysgrifennu atom</a> gyda’r newid yn eich blwyddyn dreth
+multipleDisposalsExchangeDateInDifferentTaxYear.p2=Bydd angen i chi <a class="govuk-link" href="{0}">ysgrifennu atom</a> gyda’r newid yn eich blwyddyn dreth
 
 hasValidPostcode.singleDisposal.title=A oes gan yr eiddo god post yn y DU?
 hasValidPostcode.singleDisposal.error.boolean=Dewiswch p’un a oes gan yr eiddo god post yn y DU
@@ -4573,7 +4573,7 @@ unmetDependency.x2.li3=uwchlwytho dogfen sy’n dangos sut y cyfrifwyd swm newyd
 disposalDateInDifferentTaxYear.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 disposalDateInDifferentTaxYear.p1=Ni allwch ddefnyddio’r gwasanaeth ar-lein i newid y flwyddyn dreth ar gyfer Ffurflen Dreth sydd eisoes wedi’i hanfon
 disposalDateInDifferentTaxYear.subheading=Yr hyn y bydd angen i chi ei wneud nesaf
-disposalDateInDifferentTaxYear.p2=Bydd angen i chi <a href=”{0}”>ysgrifennu atom</a> gyda'r newid yn eich blwyddyn dreth
+disposalDateInDifferentTaxYear.p2=Bydd angen i chi <a class="govuk-link" href=”{0}”>ysgrifennu atom</a> gyda'r newid yn eich blwyddyn dreth
 
 #===================================================
 #  AMEND RETURNS - END
