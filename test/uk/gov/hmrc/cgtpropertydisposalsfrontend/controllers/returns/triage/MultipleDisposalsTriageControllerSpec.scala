@@ -3814,7 +3814,7 @@ class MultipleDisposalsTriageControllerSpec
 
     }
 
-    "handling requests to display the share disposal page for non uk residents page" in {
+    "handling requests to display the share disposal page for non uk residents page" must {
 
       val requiredPreviousAnswers =
         IncompleteMultipleDisposalsTriageAnswers.empty.copy(
