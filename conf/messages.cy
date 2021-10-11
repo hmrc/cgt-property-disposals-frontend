@@ -4,7 +4,7 @@ who-are-you-reporting-for-exit-page.title=Ni allwch newid y Ffurflen Dreth hon a
 who-are-you-reporting-for-exit-page.helpText=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod i CThEM fod angen i chi newid pwy ydych yn llenwi’r Ffurflen Dreth hon ar ei gyfer.
 previousReturnExistsWithSameCompletionDate.amend.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
 previousReturnExistsWithSameCompletionDate.amend.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
-previousReturnExistsWithSameCompletionDate.amend.trust.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
+previousReturnExistsWithSameCompletionDate.amend.trust.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
 previousReturnExistsWithSameCompletionDate.amend.agent.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
 previousReturnExistsWithSameCompletionDate.amend.p2=Mae hyn oherwydd bod rhaid i werthiannau neu warediadau sydd â’r un dyddiad cwblhau fod ar yr un Ffurflen Dreth.
 previousReturnExistsWithSameCompletionDate.amend.p3=Rhowch wybod i CThEM fod angen i chi newid:
