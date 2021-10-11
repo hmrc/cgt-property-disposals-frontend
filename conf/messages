@@ -760,7 +760,7 @@ numberOfProperties.cyaChange=how many properties you want to include in this ret
 previousReturnExistsWithSameCompletionDate.amend.title=You cannot change this return online
 
 previousReturnExistsWithSameCompletionDate.amend.p1=You must <a class="govuk-link" href="{0}">contact HMRC</a>.
-previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>.
+previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a class="govuk-link" href="{0}">contact HMRC</a>.
 previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>.
 previousReturnExistsWithSameCompletionDate.amend.p2=This is because sales or disposals with the same completion date must all be in the same return.
 previousReturnExistsWithSameCompletionDate.amend.p3=Tell HMRC you need to change:

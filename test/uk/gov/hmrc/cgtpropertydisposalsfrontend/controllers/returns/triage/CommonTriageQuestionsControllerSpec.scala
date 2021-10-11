@@ -3210,7 +3210,7 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("selfAssessmentAlreadySubmitted.title"),
               { doc =>
                 doc
-                  .select("h2.govuk-heading-m")
+                  .select("h2.heading-medium")
                   .text() shouldBe messageFromMessageKey("selfAssessmentAlreadySubmitted.whatNext")
 
                 doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.CommonTriageQuestionsController
