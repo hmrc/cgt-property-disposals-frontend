@@ -62,7 +62,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, UserType, Returns => ReturnsJourneyType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -1434,7 +1434,8 @@ class HomePageControllerSpec
                     None,
                     Some(PreviousReturnData(List.empty, None, None, None))
                   )
-                )
+                ),
+                journeyType = Some(ReturnsJourneyType)
               )
             )(Left(Error("")))
           }
@@ -1468,7 +1469,8 @@ class HomePageControllerSpec
                     None,
                     Some(PreviousReturnData(List.empty, None, None, None))
                   )
-                )
+                ),
+                journeyType = Some(ReturnsJourneyType)
               )
             )(Right(()))
           }
@@ -1505,7 +1507,8 @@ class HomePageControllerSpec
                     None,
                     Some(PreviousReturnData(List.empty, None, None, None))
                   )
-                )
+                ),
+                journeyType = Some(ReturnsJourneyType)
               )
             )(Right(()))
           }
@@ -1546,7 +1549,8 @@ class HomePageControllerSpec
                     None,
                     Some(PreviousReturnData(sentReturns, None, None, None))
                   )
-                )
+                ),
+                journeyType = Some(ReturnsJourneyType)
               )
             )(Right(()))
           }
@@ -1687,7 +1691,7 @@ class HomePageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithSubscribed)
             mockStoreSession(
-              SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+              SessionData.empty.copy(journeyStatus = Some(fillingOutReturn), journeyType = Some(ReturnsJourneyType))
             )(Left(Error("")))
           }
 
@@ -1703,7 +1707,7 @@ class HomePageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithSubscribed)
             mockStoreSession(
-              SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+              SessionData.empty.copy(journeyStatus = Some(fillingOutReturn), journeyType = Some(ReturnsJourneyType))
             )(Right(()))
           }
 
@@ -1886,7 +1890,8 @@ class HomePageControllerSpec
                     returnSummary,
                     Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue), None, None))
                   )
-                )
+                ),
+                journeyType = Some(ReturnsJourneyType)
               )
             )(Left(Error("")))
           }
@@ -2196,7 +2201,8 @@ class HomePageControllerSpec
           mockGetSession(sessionDataWithSubscribed(subscribed))
           mockStoreSession(
             SessionData.empty.copy(
-              journeyStatus = Some(toJourneyStatus(None, subscribed))
+              journeyStatus = Some(toJourneyStatus(None, subscribed)),
+              journeyType = Some(ReturnsJourneyType)
             )
           )(Right(()))
         }
@@ -2233,7 +2239,8 @@ class HomePageControllerSpec
           mockGetSession(sessionDataWithSubscribed(subscribed))
           mockStoreSession(
             SessionData.empty.copy(
-              journeyStatus = Some(toJourneyStatus(None, subscribed))
+              journeyStatus = Some(toJourneyStatus(None, subscribed)),
+              journeyType = Some(ReturnsJourneyType)
             )
           )(Right(()))
         }

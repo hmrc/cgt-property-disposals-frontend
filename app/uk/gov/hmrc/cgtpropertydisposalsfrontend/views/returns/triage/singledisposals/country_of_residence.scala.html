@@ -87,7 +87,7 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
 
     @backLinkComponent(backLink)
 

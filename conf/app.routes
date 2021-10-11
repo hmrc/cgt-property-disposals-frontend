@@ -15,4 +15,7 @@ GET /sign-out-and-log-in                                                    uk.g
 GET /exit/we-signed-you-out                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
 GET /keep-alive                                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
 GET /accessibility-statement                                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AccessibilityStatementController.accessibilityStatement()
+
+GET /sign-out                                                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRedirectToFeedback()
+
 GET /assets/*file                                                           controllers.Assets.at(path="/public", file)

@@ -35,7 +35,7 @@
 @key = @{ "agentNoEnrolment" }
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = Some(UserType.Agent), withSignOutLink = false) {
+@mainTemplate(title = title, userType = Some(UserType.Agent)) {
 
     @pageHeading(title)
     <p>@Html(messages(s"$key.p1", viewConfig.createAgentsAccountUrl))</p>
