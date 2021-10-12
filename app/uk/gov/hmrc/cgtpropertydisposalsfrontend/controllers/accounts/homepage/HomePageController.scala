@@ -62,7 +62,19 @@ class HomePageController @Inject() (
 
   def homepage(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser((_, subscribed) => Ok(homePage(subscribed)))(
+      withSubscribedUser { (_, subscribed) =>
+        EitherT(
+          updateSession(sessionStore, request)(
+            _.copy(journeyType = None)
+          )
+        ).fold(
+          { e =>
+            logger.warn("Could not update session", e)
+            errorHandler.errorResult()
+          },
+          _ => Ok(homePage(subscribed))
+        )
+      }(
         withUplift = true
       )
     }
@@ -108,7 +120,8 @@ class HomePageController @Inject() (
                              )
                            )
                          )
-                       )
+                       ),
+                       journeyType = Some(Returns)
                      )
                    )
                  )
@@ -157,7 +170,8 @@ class HomePageController @Inject() (
                              ),
                              None
                            )
-                         )
+                         ),
+                         journeyType = Some(Returns)
                        )
                      )
                    )

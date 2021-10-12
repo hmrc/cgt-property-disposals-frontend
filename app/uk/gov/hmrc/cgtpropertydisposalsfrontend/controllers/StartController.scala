@@ -95,10 +95,20 @@ class StartController @Inject() (
     }
 
   def weNeedMoreDetails(): Action[AnyContent] =
-    authenticatedActionWithSessionData { implicit request =>
+    authenticatedActionWithSessionData.async { implicit request =>
       request.sessionData.flatMap(_.needMoreDetailsDetails) match {
-        case None          => Redirect(routes.StartController.start())
-        case Some(details) => Ok(weNeedMoreDetailsPage(details))
+        case None          => Future.successful(Redirect(routes.StartController.start()))
+        case Some(details) =>
+          updateSession(sessionStore, request)(
+            _.copy(journeyType = Some(OnBoarding))
+          ).map {
+            case Left(e) =>
+              logger.warn("Could not update session", e)
+              errorHandler.errorResult(Some(UserType.Agent))
+
+            case Right(_) =>
+              Ok(weNeedMoreDetailsPage(details))
+          }
       }
     }
 
@@ -126,6 +136,18 @@ class StartController @Inject() (
           Redirect(routes.StartController.start()).withNewSession
         case _                                                              => Redirect(routes.StartController.start())
       }
+    }
+
+  def signOutAndRedirectToFeedback(): Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit request =>
+      val feedbackUrl = request.sessionData.flatMap(_.journeyType) match {
+        case Some(OnBoarding) => viewConfig.onboardingExitSurveyUrl
+        case Some(Returns)    => viewConfig.returnsExitSurveyUrl
+        case Some(Amend)      => viewConfig.amendsExitSurveyUrl
+        case _                => viewConfig.generalExistSurveyUrl
+      }
+
+      Redirect(s"${viewConfig.signOutUrl}?continue=$feedbackUrl")
     }
 
   def keepAlive(): Action[AnyContent] =

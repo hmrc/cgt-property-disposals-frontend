@@ -33,7 +33,7 @@
  @key=@{"multiple-draft.exit"}
  @title = @{messages(s"$key.title")}
 
- @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
+ @mainTemplate(title = title, userType = request.userType) {
 
   @backLinkComponent(backLink)
 

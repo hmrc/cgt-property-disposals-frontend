@@ -16,13 +16,13 @@
 
 @import play.api.i18n.Messages
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this()
 
-@(activeLink: Option[AccountMenuItem])(implicit messages: Messages, appConfig: ViewConfig)
+@(activeLink: Option[AccountMenuItem])(implicit messages: Messages)
 
 <nav class="account-menu is-smaller" role="navigation">
   <a href="@{accounts.homepage.routes.HomePageController.homepage().url}" class="as-link@if(activeLink.exists(_.is[AccountMenuItem.Home])){-home }">
@@ -31,7 +31,7 @@
   <a href="@{accounts.routes.AccountController.manageYourDetails.url}" class="as-link@if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){-active }">
     @messages("account.menu.manageYourDetails")
   </a>
-  <a href="@{appConfig.signOutUrl}?continue=@{accounts.routes.AccountController.signedOut().url}" class="as-link">
+  <a href="@routes.StartController.signOutAndRedirectToFeedback().url" class="as-link">
     @messages("account.menu.signOut")
   </a>
 

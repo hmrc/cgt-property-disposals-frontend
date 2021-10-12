@@ -32,7 +32,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 @title = @{messages("agent.too-many-attempts.title")}
 @enterCgtRefCall = @{routes.AgentAccessController.enterClientsCgtRef()}
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
+@mainTemplate(title = title, userType = request.userType) {
 
     @backLinkComponent(enterCgtRefCall)
 

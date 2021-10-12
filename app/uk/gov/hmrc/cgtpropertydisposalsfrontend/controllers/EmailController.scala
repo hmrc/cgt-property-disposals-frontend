@@ -45,7 +45,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait EmailController[JourneyType <: EmailJourneyType] {
+trait EmailController[T <: EmailJourneyType] {
   this: FrontendController with WithAuthAndSessionDataAction with Logging with SessionUpdates =>
 
   implicit val viewConfig: ViewConfig
@@ -61,33 +61,33 @@ trait EmailController[JourneyType <: EmailJourneyType] {
   val checkYourInboxPage: views.html.onboarding.email.check_your_inbox
   val emailVerifiedPage: views.html.onboarding.email.email_verified
 
-  def updateEmail(journey: JourneyType, email: Email)(implicit
+  def updateEmail(journey: T, email: Email)(implicit
     hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus]
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, JourneyType)]
+  ): Either[Result, (SessionData, T)]
 
   def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, JourneyType)]
+  ): Either[Result, (SessionData, T)]
 
-  def auditEmailVerifiedEvent(journey: JourneyType, email: Email)(implicit
+  def auditEmailVerifiedEvent(journey: T, email: Email)(implicit
     hc: HeaderCarrier,
     request: Request[_]
   ): Unit
 
-  def auditEmailChangeAttempt(journey: JourneyType, email: Email)(implicit
+  def auditEmailChangeAttempt(journey: T, email: Email)(implicit
     hc: HeaderCarrier,
     request: Request[_]
   ): Unit
 
-  def name(journeyStatus: JourneyType): ContactName
+  def name(journeyStatus: T): ContactName
 
   private def withValidJourney(request: RequestWithSessionData[_])(
-    f: (SessionData, JourneyType) => Future[Result]
+    f: (SessionData, T) => Future[Result]
   ): Future[Result] =
     validJourney(request).fold[Future[Result]](toFuture, f.tupled)
 
