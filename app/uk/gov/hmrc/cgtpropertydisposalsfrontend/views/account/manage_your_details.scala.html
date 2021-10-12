@@ -49,7 +49,7 @@
 
 @changeAccountName = @{details.name.fold(_ => Html(""), _ => Html(messages(s"account.manageYourDetails.individual.p2", appConfig.tellHmrcChangeDetails)))}
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
+@mainTemplate(title = title, userType = request.userType, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
 
  @pageHeading(title, Some(messages("account.caption")))
   @cyaSection(None, Some("cya-questions-long no-border")) {

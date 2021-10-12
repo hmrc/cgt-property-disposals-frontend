@@ -276,7 +276,6 @@
           case Some(Capacitor) => {
               <h2 class="heading-medium">@messages(s"$key.capacitor.whatNext")</h2>
 
-
                 @warning(messages(s"$key.capacitor.warning"))
 
                 @if(isLateReturn && !amendedReturnWithSameCompletionDate) {
@@ -296,22 +295,19 @@
 
             <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
 
-            @if(!isAgent){
-
             @warning(messages(s"$key.Admin.warning"))
 
             <p id="howToPay2">@messages(s"$key$userKey.howToPay.p2")</p>
 
             @details(
-            summary = messages(s"$key$userKey.sA"),
-            content = Html(
-            s"""
-            | <p>${messages(s"$key$userKey.howToPay.p3")}</p>
-            |""".stripMargin
+                summary = messages(s"$key$userKey.sA"),
+                content = Html(
+                    s"""
+                    | <p>${messages(s"$key$userKey.howToPay.p3")}</p>
+                    |""".stripMargin
+                )
             )
-           )
           }
-        }
 
           case None => {
               <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
@@ -349,16 +345,16 @@
     }
   }
 
-    @if(!isPeriodOfAdmin || isAgent){
-    <div class="panel panel-border-wide">
-        <h2 class="heading-medium" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
-        <p>@Html(messages(s"$key$userKey.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
-    </div>
+    @if(!isPeriodOfAdmin){
+        <div class="panel panel-border-wide">
+            <h2 class="heading-medium" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
+            <p>@Html(messages(s"$key$userKey.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
+        </div>
     }
 
     @{
       if(isAgent)
-        buttonLink(messages("button.clients.accountHome"), accountRoutes.HomePageController.homepage().url)
+        link(accountRoutes.HomePageController.homepage().url,messages("button.clients.accountHome"),"account-home-link")
       else if(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
             link(accountRoutes.HomePageController.homepage().url,messages("button.accountHome"),"account-home-link")
       else

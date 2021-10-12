@@ -75,7 +75,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 

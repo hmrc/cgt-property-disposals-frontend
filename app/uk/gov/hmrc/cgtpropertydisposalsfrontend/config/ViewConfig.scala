@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -146,35 +146,30 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val trustsAndCgtWorkoutUrl: String       = getString("external-url.trusts-and-cgt-workout")
   val agentGetAuthorisationUrl: String     = getString("external-url.agent-get-authorisation")
   val agentAskClientToAuthoriseUrl: String = getString("external-url.agent-ask-client-to-authorise")
-  val onboardingExitSurveyUrl: String      = "/feedback/CGTPD-REG"
-  val returnsExitSurveyUrl: String         = "/feedback/CGTPD-RET"
-  val amendsExitSurveyUrl: String          = "/feedback/CGTPD-AMEND"
-  val ggCreateAccountUrl: String           =
+
+  private val feedbackFeUrl: String   = getString("microservice.services.feedback-frontend.url")
+  val onboardingExitSurveyUrl: String = s"$feedbackFeUrl/CGTPD-REG"
+  val returnsExitSurveyUrl: String    = s"$feedbackFeUrl/CGTPD-RET"
+  val amendsExitSurveyUrl: String     = s"$feedbackFeUrl/CGTPD-AMEND"
+  val generalExistSurveyUrl: String   = s"$feedbackFeUrl/$contactFormServiceIdentifier"
+
+  val ggCreateAccountUrl: String =
     "/bas-gateway?" +
       "accountType=individual&" +
       "continueUrl=%2Fcapital-gains-tax-uk-property%2Fstart&" +
       "origin=capital-gains-tax-uk-property-frontend"
-  val ggTimeoutSeconds: Long               =
-    servicesConfig.getDuration("gg.timeout").toSeconds
-  val ggCountdownSeconds: Long             =
-    servicesConfig.getDuration("gg.countdown").toSeconds
-  val ggKeepAliveUrl: String               =
-    "/capital-gains-tax-uk-property" + routes.StartController.keepAlive().url
-  val ggTimedOutUrl: String                =
+  val ggTimeoutSeconds: Long     = servicesConfig.getDuration("gg.timeout").toSeconds
+  val ggCountdownSeconds: Long   = servicesConfig.getDuration("gg.countdown").toSeconds
+  val ggKeepAliveUrl: String     = "/capital-gains-tax-uk-property" + routes.StartController.keepAlive().url
+
+  val ggTimedOutUrl: String =
     signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController
       .timedOut()
       .url
-  val ggSignOut: String                    =
-    signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController
-      .start()
-      .url
-  val accountSignOutUrl: String            =
-    signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.AccountController
-      .signedOut()
-      .url
-  val hmrcTelephone: String                = getString("telephone-numbers.hmrc-helpline")
-  val outsideUkPhone: String               = getString("telephone-numbers.outside-uk")
-  val agentDedicatedLine: String           = getString(
+
+  val hmrcTelephone: String      = getString("telephone-numbers.hmrc-helpline")
+  val outsideUkPhone: String     = getString("telephone-numbers.outside-uk")
+  val agentDedicatedLine: String = getString(
     "telephone-numbers.agent-dedicated-line"
   )
 

@@ -49,7 +49,7 @@
 @title = @{messages(s"$key$userKey.title")}
 @errorKey = @{List("multipleDisposalsDisposalDate-day", "multipleDisposalsDisposalDate-month", "multipleDisposalsDisposalDate-year", "multipleDisposalsDisposalDate").map(form.error).find(_.isDefined).flatten}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
  @if(hasErrors) {
    @errorSummary(form)

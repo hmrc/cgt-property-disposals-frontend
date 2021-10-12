@@ -72,7 +72,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     Html(s"""<p><a href="${routes.ViewReturnController.startAmendingReturn().url}" id="$id">${messages(s"$key.changeReturn")}</a></p>""")
 }
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
+@mainTemplate(title = title, userType = request.userType, accountMenu=Some(accountMenu(None))) {
 
   @returnHeading(title, returnSummary, returnType)
   
