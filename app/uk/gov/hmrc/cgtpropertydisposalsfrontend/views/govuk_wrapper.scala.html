@@ -52,8 +52,7 @@
   contentHeader: Option[Html] = None,
   mainContent: Html = HtmlFormat.empty,
   serviceInfoContent: Html = HtmlFormat.empty,
-  scriptElem: Option[Html] = None,
-  enableUserRecruitmentBannerOnPage:Boolean = false)(implicit messages: Messages, request: Request[_])
+  scriptElem: Option[Html] = None)(implicit messages: Messages, request: Request[_])
 
 @head = {
     <script>
@@ -108,7 +107,7 @@
 }
 
 @afterHeader = {
-  @if(appConfig.userRecruitmentBannerEnabled && enableUserRecruitmentBannerOnPage) {
+  @if(appConfig.userRecruitmentBannerEnabled) {
     @userRecruitmentBanner(appConfig.userRecruitmentUrl)
   }
 }

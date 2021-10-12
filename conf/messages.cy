@@ -189,7 +189,7 @@ timed-out.p2=Bydd yn rhaid i chi fewngofnodi er mwyn cael mynediad at eich cyfri
 timed-out.button=Mewngofnodi
 recruitment-banner.message=Helpwch i wella GOV.UK
 recruitment-banner.dismiss=Dim diolch
-recruitment-banner.link=Byddwch yn rhan o wneud gwasanaethau’r llywodraeth yn well (yn agor ffenestr newydd)
+recruitment-banner.link=<a target="_blank" rel="noreferrer noopener" href="{0}">Byddwch yn rhan o wneud gwasanaethau’r llywodraeth yn well (yn agor ffenestr newydd)</a>
 accessibilityStatement.caption=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
 accessibilityStatement.title=Datganiad hygyrchedd
 accessibilityStatement.p1=Mae’r datganiad hygyrchedd hwn yn esbonio pa mor hygyrch yw’r gwasanaeth hwn, beth i’w wneud os ydych yn cael anhawster wrth ei ddefnyddio, a sut i roi gwybod am broblemau hygyrchedd gyda’r gwasanaeth.
