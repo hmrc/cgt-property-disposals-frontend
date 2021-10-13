@@ -1059,7 +1059,7 @@ ukResidentCanOnlyReportResidential.capacitor.p1=You told us the person was a UK 
 ukResidentCanOnlyReportResidential.personalRep.p1=You told us the person was a UK resident on the day they sold or disposed of the UK property. You can only use this service to report UK residential property sales or disposals.
 ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.p1=You told us the person was a UK resident for the tax year in which they died. You can only use this service to report UK residential property sales or disposals.
 ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.agent.p1=You told us your client was a UK resident for the tax year in which they died. You can only use this service to report UK residential property sales or disposals.
-ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
+ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a class="govuk-link" href="{0}">non-residential UK property sales or disposals</a>.
 
 disposalDate.title=What date did you exchange contracts when disposing of the property?
 disposalDate.agent.title=When the property was disposed of, what date were contracts exchanged?
