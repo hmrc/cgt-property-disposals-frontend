@@ -21,6 +21,6 @@
 @(heading: Option[String] = None, classes: Option[String] = Some("cya-questions-long"))(rows: => Html)
 
 @heading.map(h => Html(s"""<h2 class="govuk-heading-m">${h}</h2>"""))
-<dl class="govuk-summary-list @{classes.map(c => s" $c")}">
+<dl class="cgt-cya govuk-summary-list @{classes.map(c => s" $c")}">
   @rows
 </dl>
