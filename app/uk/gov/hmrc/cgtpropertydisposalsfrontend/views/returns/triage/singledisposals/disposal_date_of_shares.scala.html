@@ -19,38 +19,39 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareDisposalDate
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+
 
 @this(
-   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-   pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-   dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input,
-   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+   pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+   formHelper: FormWithCSRF,
+   dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input_govuk,
+   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
-@(form: Form[ShareDisposalDate], backLink: Call, displayReturnToSummaryLink: Boolean, submit: Call, isAmend: Boolean)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[ShareDisposalDate], backLink: Call, displayReturnToSummaryLink: Boolean, submit: Call, isAmend: Boolean)(implicit request:RequestWithSessionData[_], messages: Messages)
 
 @key = @{ "sharesDisposalDate" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@title = @{messages(s"$key.title")}
+@title = @{
+ if(hasErrors){
+  messages("generic.errorPrefix") + " " + messages(s"$key.title")
+ } else messages(s"$key.title")
+}
 @errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", key).map(form.error).find(_.isDefined).flatten}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-
-@backLinkComponent(backLink)
+@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 
 @if(hasErrors) {
 @errorSummary(form)
 }
 
-@formWrapper(submit, 'novalidate -> "novalidate") {
+@formHelper(submit, 'novalidate -> "novalidate") {
  @dateInput(
   fieldId = key,
   label = pageHeading(title, Some(messages("triage.caption"))),
