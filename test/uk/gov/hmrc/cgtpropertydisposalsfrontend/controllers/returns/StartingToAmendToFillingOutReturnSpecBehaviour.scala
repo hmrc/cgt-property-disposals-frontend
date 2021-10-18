@@ -45,7 +45,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
     expectedRedirectToOverride: Option[String] = None
   )(implicit messagesApi: MessagesApi): Unit = {
 
-    "redirect to the same endpoint when converting from a start amend journey to a filling out return journey" should {
+    "redirect to the same endpoint when converting from a start amend journey to a filling out return journey" when {
 
       def test(
         completeReturn: CompleteReturn,

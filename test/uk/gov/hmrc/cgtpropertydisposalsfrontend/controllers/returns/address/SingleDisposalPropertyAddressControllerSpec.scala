@@ -464,10 +464,10 @@ class SingleDisposalPropertyDetailsControllerSpec
             performAction(),
             messageFromMessageKey("hasValidPostcode.singleDisposal.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.PropertyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.PropertyDetailsController
                 .singleDisposalHasUkPostcodeSubmit()
                 .url
             }
@@ -634,10 +634,10 @@ class SingleDisposalPropertyDetailsControllerSpec
             performAction(),
             messageFromMessageKey("enterUPRN.singleDisposal.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.PropertyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.PropertyDetailsController
                 .singleDisposalEnterLandUprnSubmit()
                 .url
             }

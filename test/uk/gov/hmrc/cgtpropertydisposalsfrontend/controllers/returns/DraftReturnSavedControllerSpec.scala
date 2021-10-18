@@ -109,7 +109,7 @@ class DraftReturnSavedControllerSpec
             messageFromMessageKey("draftReturnSaved.title"),
             { doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href") shouldBe returns.routes.TaskListController
                 .taskList()
                 .url

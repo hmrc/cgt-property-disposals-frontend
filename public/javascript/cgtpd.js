@@ -17,7 +17,7 @@
   var countryEl = document.querySelector("#countryCode");
   var lang = GOVUK.getCookie("PLAY_LANG")
   if (countryEl && (!lang || lang === "en")) {
-    accessibleAutocomplete.enhanceSelectElement({
+    openregisterLocationPicker({
       selectElement: countryEl,
       name: 'countryCode-name',
       url: '/capital-gains-tax-uk-property/assets/location-autocomplete-graph.json',

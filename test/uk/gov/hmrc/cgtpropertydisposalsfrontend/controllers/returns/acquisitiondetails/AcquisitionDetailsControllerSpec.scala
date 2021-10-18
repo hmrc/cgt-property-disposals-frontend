@@ -427,12 +427,12 @@ class AcquisitionDetailsControllerSpec
                       messageFromMessageKey(s"$key$userMsgKey$assetTypeKey.title"),
                       { doc =>
                         doc
-                          .select("#back, .govuk-back-link")
+                          .select("#back")
                           .attr("href") shouldBe controllers.returns.routes.TaskListController
                           .taskList()
                           .url
                         doc
-                          .select("#content > article > form, #main-content form")
+                          .select("#content > article > form")
                           .attr(
                             "action"
                           )             shouldBe routes.AcquisitionDetailsController
@@ -475,14 +475,14 @@ class AcquisitionDetailsControllerSpec
                       messageFromMessageKey(s"$key$userKey$assetTypeKey.title"),
                       { doc =>
                         doc
-                          .select("#back, .govuk-back-link")
+                          .select("#back")
                           .attr(
                             "href"
                           )                                shouldBe routes.AcquisitionDetailsController
                           .checkYourAnswers()
                           .url
                         doc
-                          .select("#content > article > form, #main-content form")
+                          .select("#content > article > form")
                           .attr(
                             "action"
                           )                                shouldBe routes.AcquisitionDetailsController
@@ -1063,12 +1063,12 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(s"$key$userKey$assetTypeKey.title"),
                 { doc =>
                   doc
-                    .select("#back, .govuk-back-link")
+                    .select("#back")
                     .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .acquisitionMethod()
                     .url
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionDateSubmit()
                     .url
@@ -1104,12 +1104,12 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(s"$key$userKey$assetTypeKey.title"),
                 { doc =>
                   doc
-                    .select("#back, .govuk-back-link")
+                    .select("#back")
                     .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswers()
                     .url
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionDateSubmit()
                     .url
@@ -1536,12 +1536,12 @@ class AcquisitionDetailsControllerSpec
             ),
             { doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href")   shouldBe controllers.returns.routes.TaskListController
                 .taskList()
                 .url
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.AcquisitionDetailsController
                 .periodOfAdminMarketValueSubmit()
                 .url
@@ -1905,12 +1905,12 @@ class AcquisitionDetailsControllerSpec
               pricePageTitle,
               { doc =>
                 doc
-                  .select("#back, .govuk-back-link")
+                  .select("#back")
                   .attr("href")                    shouldBe routes.AcquisitionDetailsController
                   .acquisitionDate()
                   .url
                 doc
-                  .select("#content > article > form, #main-content form")
+                  .select("#content > article > form")
                   .attr("action")                  shouldBe routes.AcquisitionDetailsController
                   .acquisitionPriceSubmit()
                   .url
@@ -1965,12 +1965,12 @@ class AcquisitionDetailsControllerSpec
             pricePageTitle,
             { doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href")                    shouldBe routes.AcquisitionDetailsController
                 .checkYourAnswers()
                 .url
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .acquisitionPriceSubmit()
                 .url
@@ -2442,12 +2442,12 @@ class AcquisitionDetailsControllerSpec
             ),
             { doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href")                    shouldBe routes.AcquisitionDetailsController
                 .acquisitionDate()
                 .url
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
@@ -2510,12 +2510,12 @@ class AcquisitionDetailsControllerSpec
             ),
             { doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href")                    shouldBe routes.AcquisitionDetailsController
                 .acquisitionPrice()
                 .url
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
@@ -2569,12 +2569,12 @@ class AcquisitionDetailsControllerSpec
             ),
             { doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href")                    shouldBe routes.AcquisitionDetailsController
                 .checkYourAnswers()
                 .url
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
@@ -3043,12 +3043,12 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(s"$key$userKey.title"),
             { doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href")                    shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPrice()
                 .url
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .improvementCostsSubmit()
                 .url
@@ -3092,12 +3092,12 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(s"$key$userKey.title"),
                 { doc =>
                   doc
-                    .select("#back, .govuk-back-link")
+                    .select("#back")
                     .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .acquisitionPrice()
                     .url
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .improvementCostsSubmit()
                     .url
@@ -3135,12 +3135,12 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(s"$key$userKey.title"),
                 { doc =>
                   doc
-                    .select("#back, .govuk-back-link")
+                    .select("#back")
                     .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswers()
                     .url
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .improvementCostsSubmit()
                     .url
@@ -3178,12 +3178,12 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(s"$key$userKey.title"),
                 { doc =>
                   doc
-                    .select("#back, .govuk-back-link")
+                    .select("#back")
                     .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswers()
                     .url
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .improvementCostsSubmit()
                     .url
@@ -3678,12 +3678,12 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(s"$key$userKey.title"),
                 { doc =>
                   doc
-                    .select("#back, .govuk-back-link")
+                    .select("#back")
                     .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .improvementCosts()
                     .url
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
@@ -3725,12 +3725,12 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(s"$key$userKey.rebased.title"),
                 { doc =>
                   doc
-                    .select("#back, .govuk-back-link")
+                    .select("#back")
                     .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .improvementCosts()
                     .url
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
@@ -3770,12 +3770,12 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(s"$key$userKey.title"),
                 { doc =>
                   doc
-                    .select("#back, .govuk-back-link")
+                    .select("#back")
                     .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswers()
                     .url
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
@@ -3813,12 +3813,12 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(s"$key$userKey.rebased.title"),
                 { doc =>
                   doc
-                    .select("#back, .govuk-back-link")
+                    .select("#back")
                     .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswers()
                     .url
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
@@ -3940,12 +3940,12 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(s"$key.personalRep.title"),
                 { doc =>
                   doc
-                    .select("#back, .govuk-back-link")
+                    .select("#back")
                     .attr("href")                    shouldBe routes.AcquisitionDetailsController
                     .improvementCosts()
                     .url
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action")                  shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
@@ -4791,7 +4791,7 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey("acquisitionDetails.cya.title"),
                 doc =>
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action") shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswersSubmit()
                     .url
@@ -4839,7 +4839,7 @@ class AcquisitionDetailsControllerSpec
                     assetType
                   )
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action") shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswersSubmit()
                     .url
@@ -4886,7 +4886,7 @@ class AcquisitionDetailsControllerSpec
                     assetType
                   )
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action") shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswersSubmit()
                     .url
@@ -4933,7 +4933,7 @@ class AcquisitionDetailsControllerSpec
                     assetType
                   )
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action") shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswersSubmit()
                     .url
@@ -4982,7 +4982,7 @@ class AcquisitionDetailsControllerSpec
                     assetType
                   )
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#content > article > form")
                     .attr("action") shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswersSubmit()
                     .url

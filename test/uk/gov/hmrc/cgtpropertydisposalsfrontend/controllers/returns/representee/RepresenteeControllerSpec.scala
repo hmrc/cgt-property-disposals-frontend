@@ -256,13 +256,13 @@ class RepresenteeControllerSpec
             performAction(),
             messageFromMessageKey(expectedTitleKey),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href")          shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.RepresenteeController
+                .select("#content > article > form")
+                .attr("action")                         shouldBe routes.RepresenteeController
                 .changeContactName()
                 .url
-              doc.select("#returnToSummaryLink").text()          shouldBe (
+              doc.select("#returnToSummaryLink").text() shouldBe (
                 if (expectReturnToSummaryLink)
                   messageFromMessageKey("returns.return-to-summary-link")
                 else ""
@@ -446,13 +446,13 @@ class RepresenteeControllerSpec
             performAction(),
             messageFromMessageKey(expectedTitleKey),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href")          shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.RepresenteeController
+                .select("#content > article > form")
+                .attr("action")                         shouldBe routes.RepresenteeController
                 .enterNameSubmit()
                 .url
-              doc.select("#returnToSummaryLink").text()          shouldBe (
+              doc.select("#returnToSummaryLink").text() shouldBe (
                 if (expectReturnToSummaryLink)
                   messageFromMessageKey("returns.return-to-summary-link")
                 else ""
@@ -867,13 +867,13 @@ class RepresenteeControllerSpec
             performAction(),
             messageFromMessageKey(expectedTitleKey),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href")          shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.RepresenteeController
+                .select("#content > article > form")
+                .attr("action")                         shouldBe routes.RepresenteeController
                 .enterDateOfDeathSubmit()
                 .url
-              doc.select("#returnToSummaryLink").text()          shouldBe (
+              doc.select("#returnToSummaryLink").text() shouldBe (
                 if (expectReturnToSummaryLink)
                   messageFromMessageKey("returns.return-to-summary-link")
                 else ""
@@ -1277,13 +1277,13 @@ class RepresenteeControllerSpec
             performAction(),
             messageFromMessageKey("representeeReferenceIdType.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href")          shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.RepresenteeController
+                .select("#content > article > form")
+                .attr("action")                         shouldBe routes.RepresenteeController
                 .enterIdSubmit()
                 .url
-              doc.select("#returnToSummaryLink").text()          shouldBe (
+              doc.select("#returnToSummaryLink").text() shouldBe (
                 if (expectReturnToSummaryLink)
                   messageFromMessageKey("returns.return-to-summary-link")
                 else ""
@@ -1495,30 +1495,30 @@ class RepresenteeControllerSpec
           performAction(),
           messageFromMessageKey("representeeConfirmPerson.title"),
           doc => {
-            doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+            doc.select("#back").attr("href") shouldBe expectedBackLink.url
             doc
               .select("#name-question")
-              .text                                            shouldBe (messageFromMessageKey(
+              .text                          shouldBe (messageFromMessageKey(
               "representeeConfirmPerson.summaryLine1"
             ))
             doc
               .select("#name-answer")
-              .text                                            shouldBe s"${expectedName.firstName} ${expectedName.lastName}"
+              .text                          shouldBe s"${expectedName.firstName} ${expectedName.lastName}"
             if (isCgtRow)
               doc
                 .select("#account-question")
-                .text                                          shouldBe messageFromMessageKey(
+                .text                        shouldBe messageFromMessageKey(
                 "representeeConfirmPerson.summaryLine2.cgtReferenceId"
               )
             else ()
             doc
-              .select("#content > article > form, #main-content form")
-              .attr("action")                                  shouldBe routes.RepresenteeController
+              .select("#content > article > form")
+              .attr("action")                shouldBe routes.RepresenteeController
               .confirmPersonSubmit()
               .url
             doc
               .select("#confirmed > legend > h2")
-              .text()                                          shouldBe messageFromMessageKey(
+              .text()                        shouldBe messageFromMessageKey(
               "representeeConfirmPerson.formTitle"
             )
           }
@@ -2313,7 +2313,7 @@ class RepresenteeControllerSpec
                 .text()                            shouldBe contactDetails.emailAddress.value
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action")                         shouldBe routes.RepresenteeController
                 .checkContactDetailsSubmit()
                 .url
@@ -2771,7 +2771,7 @@ class RepresenteeControllerSpec
             messageFromMessageKey("representee.cya.title"),
             doc => {
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr(
                   "href"
                 ) shouldBe returns.triage.routes.CommonTriageQuestionsController
@@ -2779,7 +2779,7 @@ class RepresenteeControllerSpec
                 .url
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.RepresenteeController
                 .checkYourAnswersSubmit()
                 .url
@@ -2805,13 +2805,13 @@ class RepresenteeControllerSpec
               messageFromMessageKey("representee.cya.title"),
               { doc =>
                 doc
-                  .select("#back, .govuk-back-link")
+                  .select("#back")
                   .attr("href") shouldBe returns.triage.routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresenting()
                   .url
 
                 doc
-                  .select("#content > article > form, #main-content form")
+                  .select("#content > article > form")
                   .attr("action") shouldBe routes.RepresenteeController
                   .checkYourAnswersSubmit()
                   .url
@@ -2936,7 +2936,7 @@ class RepresenteeControllerSpec
           messageFromMessageKey("representeeNameMatchError.title"),
           doc =>
             doc
-              .select("#content > article > form, #main-content form")
+              .select("#content > article > form")
               .attr("action") shouldBe routes.RepresenteeController
               .nameMatchErrorSubmit()
               .url
@@ -2998,11 +2998,11 @@ class RepresenteeControllerSpec
             messageFromMessageKey(expectedTitleKey),
             { doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href") shouldBe expectedBackLink.url
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.RepresenteeController
                 .isFirstReturnSubmit()
                 .url

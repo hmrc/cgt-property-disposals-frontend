@@ -1,6 +1,3 @@
-application.title=Report and pay Capital Gains Tax on UK property
-service.name=Report and pay Capital Gains Tax on UK property
-
 #===================================================
 # TRANSLATION NOT REQUIRED = START
 #===================================================
@@ -759,8 +756,8 @@ numberOfProperties.cyaChange=how many properties you want to include in this ret
 
 previousReturnExistsWithSameCompletionDate.amend.title=You cannot change this return online
 
-previousReturnExistsWithSameCompletionDate.amend.p1=You must <a class="govuk-link" href="{0}">contact HMRC</a>.
-previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a class="govuk-link" href="{0}">contact HMRC</a>.
+previousReturnExistsWithSameCompletionDate.amend.p1=You must <a href="{0}">contact HMRC</a>.
+previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a href="{0}">contact HMRC</a>.
 previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>.
 previousReturnExistsWithSameCompletionDate.amend.p2=This is because sales or disposals with the same completion date must all be in the same return.
 previousReturnExistsWithSameCompletionDate.amend.p3=Tell HMRC you need to change:
@@ -845,7 +842,7 @@ selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p1=Someone has already
 
 selfAssessmentAlreadySubmitted.whatNext=What you’ll need to do next
 
-selfAssessmentAlreadySubmitted.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank">change your Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.p2=You’ll need to <a href="{0}" target="_blank">change your Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 selfAssessmentAlreadySubmitted.agent.p2=You’ll need to <a href="{0}" target="_blank">change your client’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 selfAssessmentAlreadySubmitted.trust.p2=You’ll need to <a href="{0}" target="_blank">change the trust’s Self Assessment: Trust and Estate tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 selfAssessmentAlreadySubmitted.capacitor.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
@@ -907,7 +904,7 @@ wereYouAUKResident.trust.details=If the trust was a non-resident and made an ind
 wereYouAUKResident.capacitor.details=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
 wereYouAUKResident.personalRep.details=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
 
-wereYouAUKResident.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
@@ -942,9 +939,9 @@ triage.enterCountry.trust.helpText=It’s usually the day the trust and the new 
 triage.enterCountry.capacitor.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.personalRep.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 
-triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
+triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
 triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>.
-triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
+triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
 triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
 triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
 triage.enterCountry.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
@@ -1059,7 +1056,7 @@ ukResidentCanOnlyReportResidential.capacitor.p1=You told us the person was a UK 
 ukResidentCanOnlyReportResidential.personalRep.p1=You told us the person was a UK resident on the day they sold or disposed of the UK property. You can only use this service to report UK residential property sales or disposals.
 ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.p1=You told us the person was a UK resident for the tax year in which they died. You can only use this service to report UK residential property sales or disposals.
 ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.agent.p1=You told us your client was a UK resident for the tax year in which they died. You can only use this service to report UK residential property sales or disposals.
-ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a class="govuk-link" href="{0}">non-residential UK property sales or disposals</a>.
+ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
 
 disposalDate.title=What date did you exchange contracts when disposing of the property?
 disposalDate.agent.title=When the property was disposed of, what date were contracts exchanged?
@@ -1077,7 +1074,7 @@ disposalDate.capacitor.helpText=It’s usually when a buyer and seller swap cont
 disposalDate.personalRep.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 disposalDate.personalRepInPeriodOfAdmin.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 
-disposalDate.link=<a class="govuk-link" href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>
+disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
@@ -1111,7 +1108,7 @@ completionDate.capacitor.helpText=It’s usually when the money from the propert
 completionDate.personalRep.helpText=It’s usually when the money from the property sale was transferred and the new owner got the keys. For example, 25 4 2020.
 completionDate.personalRepInPeriodOfAdmin.helpText=It’s usually when the money from the property sale was transferred and the new owner got the keys. For example, 25 4 2020.
 
-completionDate.link=<a class="govuk-link" href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>
+completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
 completionDate.error.tooFarInPast=Completion date must be on or after contract exchange date, {0}
@@ -1134,7 +1131,7 @@ disposalDateTooEarly.non-uk.title=You cannot use this service
 disposalDateTooEarly.non-uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
 disposalDateTooEarly.non-uk.p2=If an indirect disposal was made, it’s because the shares were sold before 6 April 2020.
 disposalDateTooEarly.non-uk.h2=What you’ll need to do next
-disposalDateTooEarly.non-uk.p3=You’ll need to complete a <a class="govuk-link" href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
+disposalDateTooEarly.non-uk.p3=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 
 disposalDateTooEarly.uk.title=You cannot use this service
 disposalDateTooEarly.uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
@@ -1196,7 +1193,7 @@ multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually hap
 
 multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>
-multipleDisposalsWereYouAUKResident.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the persons’s residence status for a tax year (opens in a new window)</a>
@@ -4508,7 +4505,7 @@ multipleDisposalsDisposalDate.cyaChange=the contract exchange date
 multipleDisposalsExchangeDateInDifferentTaxYear.title=You cannot use this service
 multipleDisposalsExchangeDateInDifferentTaxYear.p1=You cannot use the online service to change the tax year for a return that has already been sent
 multipleDisposalsExchangeDateInDifferentTaxYear.subheading=What you’ll need to do next
-multipleDisposalsExchangeDateInDifferentTaxYear.p2=You’ll need to <a class="govuk-link" href="{0}">write to us</a> with your change of tax year
+multipleDisposalsExchangeDateInDifferentTaxYear.p2=You’ll need to <a href="{0}">write to us</a> with your change of tax year
 
 hasValidPostcode.singleDisposal.title=Does the property have a UK postcode?
 hasValidPostcode.singleDisposal.error.boolean=Select whether the property has a UK postcode
@@ -5177,7 +5174,7 @@ unmetDependency.x2.li3=upload a document showing how the new amount of tax due w
 disposalDateInDifferentTaxYear.title=You cannot use this service
 disposalDateInDifferentTaxYear.p1=You cannot use the online service to change the tax year for a return that has already been sent
 disposalDateInDifferentTaxYear.subheading=What you’ll need to do next
-disposalDateInDifferentTaxYear.p2=You’ll need to <a class="govuk-link" href="{0}">write to us</a> with your change of tax year
+disposalDateInDifferentTaxYear.p2=You’ll need to <a href="{0}">write to us</a> with your change of tax year
 
 #===================================================
 #  AMEND RETURNS - END

@@ -248,10 +248,10 @@ class MixedUsePropertyDetailsControllerSpec
                 "singleMixedUse.caption"
               )
 
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.MixedUsePropertyDetailsController
                 .enterPostcodeSubmit()
                 .url
@@ -367,7 +367,7 @@ class MixedUsePropertyDetailsControllerSpec
               )
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.MixedUsePropertyDetailsController
                 .enterUkAddressSubmit()
                 .url
@@ -808,20 +808,20 @@ class MixedUsePropertyDetailsControllerSpec
             performAction(),
             messageFromMessageKey(s"$key.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
                 .select("#content > article > span")
-                .text()                                          shouldBe messageFromMessageKey(
+                .text()                        shouldBe messageFromMessageKey(
                 "singleMixedUse.caption"
               )
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.MixedUsePropertyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.MixedUsePropertyDetailsController
                 .enterDisposalValueSubmit()
                 .url
               doc
                 .select(s"#$key-form-hint")
-                .text()                                          shouldBe messageFromMessageKey(s"$key$userKey.helpText")
+                .text()                        shouldBe messageFromMessageKey(s"$key$userKey.helpText")
             }
           )
         }
@@ -1217,20 +1217,20 @@ class MixedUsePropertyDetailsControllerSpec
             performAction(),
             messageFromMessageKey(s"$key$userKey.title", titleArgs: _*),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
                 .select("#content > article > span")
-                .text()                                          shouldBe messageFromMessageKey(
+                .text()                        shouldBe messageFromMessageKey(
                 "singleMixedUse.caption"
               )
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.MixedUsePropertyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.MixedUsePropertyDetailsController
                 .enterAcquisitionValue()
                 .url
               doc
                 .select(s"#$key-form-hint")
-                .text()                                          shouldBe messageFromMessageKey(s"$key$userKey.helpText")
+                .text()                        shouldBe messageFromMessageKey(s"$key$userKey.helpText")
             }
           )
         }

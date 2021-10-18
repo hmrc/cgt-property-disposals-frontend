@@ -138,12 +138,12 @@ class InitialGainOrLossControllerSpec
                 messageFromMessageKey("initialGainOrLoss.title")
               )
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href")                       shouldBe returns.routes.TaskListController
                 .taskList()
                 .url
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action")                     shouldBe routes.InitialGainOrLossController
                 .submitInitialGainOrLoss()
                 .url
@@ -232,7 +232,7 @@ class InitialGainOrLossControllerSpec
               .select("#initialGainOrLoss-1-content > div > label")
               .text()                                         should be("Initial loss amount")
             doc
-              .select("#back, .govuk-back-link")
+              .select("#back")
               .attr("href")                                 shouldBe routes.InitialGainOrLossController
               .checkYourAnswers()
               .url
@@ -252,7 +252,7 @@ class InitialGainOrLossControllerSpec
               messageFromMessageKey(s"initialGainOrLoss$key.helpText")
             )
             doc
-              .select("#content > article > form, #main-content form")
+              .select("#content > article > form")
               .attr("action")                               shouldBe routes.InitialGainOrLossController
               .submitInitialGainOrLoss()
               .url
@@ -628,7 +628,7 @@ class InitialGainOrLossControllerSpec
               Messages(s"initialGainOrLoss$userKey.title")
             )
             doc
-              .select("#content > article > form, #main-content form")
+              .select("#content > article > form")
               .attr("action")                              shouldBe routes.InitialGainOrLossController
               .checkYourAnswersSubmit()
               .url

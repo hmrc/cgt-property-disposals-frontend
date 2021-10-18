@@ -1,5 +1,3 @@
-->  /hmrc-frontend                                                          hmrcfrontend.Routes
-
 GET /create-account/need-more-details                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
 GET /start/report-pay-capital-gains-tax-uk-property                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
 GET /manage-clients-capital-gains-tax-on-uk-property-account                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.agentsLandingPage()

@@ -369,10 +369,10 @@ class SingleDisposalsTriageControllerSpec
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
-        doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
+        doc.select("#back").attr("href") shouldBe backLink.url
         doc
-          .select("#content > article > form, #main-content form")
-          .attr("action")                                  shouldBe routes.SingleDisposalsTriageController
+          .select("#content > article > form")
+          .attr("action")                shouldBe routes.SingleDisposalsTriageController
           .howDidYouDisposeOfPropertySubmit()
           .url
       }
@@ -832,10 +832,10 @@ class SingleDisposalsTriageControllerSpec
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
-        doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
+        doc.select("#back").attr("href") shouldBe backLink.url
         doc
-          .select("#content > article > form, #main-content form")
-          .attr("action")                                  shouldBe routes.SingleDisposalsTriageController
+          .select("#content > article > form")
+          .attr("action")                shouldBe routes.SingleDisposalsTriageController
           .wereYouAUKResidentSubmit()
           .url
       }
@@ -1354,10 +1354,10 @@ class SingleDisposalsTriageControllerSpec
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
-        doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
+        doc.select("#back").attr("href") shouldBe backLink.url
         doc
-          .select("#content > article > form, #main-content form")
-          .attr("action")                                  shouldBe routes.SingleDisposalsTriageController
+          .select("#content > article > form")
+          .attr("action")                shouldBe routes.SingleDisposalsTriageController
           .didYouDisposeOfAResidentialPropertySubmit()
           .url
 
@@ -2039,10 +2039,10 @@ class SingleDisposalsTriageControllerSpec
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
-        doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
+        doc.select("#back").attr("href") shouldBe backLink.url
         doc
-          .select("#content > article > form, #main-content form")
-          .attr("action")                                  shouldBe routes.SingleDisposalsTriageController
+          .select("#content > article > form")
+          .attr("action")                shouldBe routes.SingleDisposalsTriageController
           .whenWasDisposalDateSubmit()
           .url
       }
@@ -2747,10 +2747,10 @@ class SingleDisposalsTriageControllerSpec
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
-        doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
+        doc.select("#back").attr("href") shouldBe backLink.url
         doc
-          .select("#content > article > form, #main-content form")
-          .attr("action")                                  shouldBe routes.SingleDisposalsTriageController
+          .select("#content > article > form")
+          .attr("action")                shouldBe routes.SingleDisposalsTriageController
           .whenWasCompletionDateSubmit()
           .url
 
@@ -3366,10 +3366,10 @@ class SingleDisposalsTriageControllerSpec
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
-        doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
+        doc.select("#back").attr("href") shouldBe backLink.url
         doc
-          .select("#content > article > form, #main-content form")
-          .attr("action")                                  shouldBe routes.SingleDisposalsTriageController
+          .select("#content > article > form")
+          .attr("action")                shouldBe routes.SingleDisposalsTriageController
           .countryOfResidenceSubmit()
           .url
       }
@@ -3868,10 +3868,10 @@ class SingleDisposalsTriageControllerSpec
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
-        doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
+        doc.select("#back").attr("href") shouldBe backLink.url
         doc
-          .select("#content > article > form, #main-content form")
-          .attr("action")                                  shouldBe routes.SingleDisposalsTriageController
+          .select("#content > article > form")
+          .attr("action")                shouldBe routes.SingleDisposalsTriageController
           .assetTypeForNonUkResidentsSubmit()
           .url
       }
@@ -4509,12 +4509,12 @@ class SingleDisposalsTriageControllerSpec
               "sharesDisposalDate.helpText"
             )
             doc
-              .select("#back, .govuk-back-link")
+              .select("#back")
               .attr("href")   shouldBe routes.SingleDisposalsTriageController
               .assetTypeForNonUkResidents()
               .url
             doc
-              .select("#content > article > form, #main-content form")
+              .select("#content > article > form")
               .attr("action") shouldBe routes.SingleDisposalsTriageController
               .disposalDateOfSharesSubmit()
               .url

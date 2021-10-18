@@ -322,7 +322,7 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.CompanyDetailsController
                 .isUkSubmit()
                 .url
@@ -384,7 +384,7 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.CompanyDetailsController
                 .isUkSubmit()
                 .url
@@ -644,7 +644,7 @@ class CompanyDetailsControllerSpec
               )
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.CompanyDetailsController
                 .enterUkAddressSubmit()
                 .url
@@ -725,7 +725,7 @@ class CompanyDetailsControllerSpec
               )
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.CompanyDetailsController
                 .enterUkAddressSubmit()
                 .url
@@ -1397,7 +1397,7 @@ class CompanyDetailsControllerSpec
               )
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.CompanyDetailsController
                 .enterNonUkAddressSubmit()
                 .url
@@ -1485,7 +1485,7 @@ class CompanyDetailsControllerSpec
               )
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.CompanyDetailsController
                 .enterNonUkAddressSubmit()
                 .url
@@ -2075,15 +2075,15 @@ class CompanyDetailsControllerSpec
             performAction(),
             messageFromMessageKey(s"$key.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.CompanyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.CompanyDetailsController
                 .multipleIndirectDisposalPriceSubmit()
                 .url
               doc
                 .select(s"#$key-form-hint")
-                .text()                                          shouldBe messageFromMessageKey(s"$key.helpText")
+                .text()                        shouldBe messageFromMessageKey(s"$key.helpText")
             }
           )
         }
@@ -2476,15 +2476,15 @@ class CompanyDetailsControllerSpec
             performAction(),
             messageFromMessageKey(s"$key.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.CompanyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.CompanyDetailsController
                 .multipleIndirectAcquisitionPriceSubmit()
                 .url
               doc
                 .select(s"#$key-form-hint")
-                .text()                                          shouldBe messageFromMessageKey(s"$key.helpText")
+                .text()                        shouldBe messageFromMessageKey(s"$key.helpText")
             }
           )
         }

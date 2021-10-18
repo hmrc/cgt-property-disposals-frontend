@@ -258,7 +258,7 @@ class FurtherReturnGuidanceControllerSpec
               messageFromMessageKey(s"taxableGainOrLossGuidance$userKey.title"),
               doc =>
                 doc
-                  .select("#back, .govuk-back-link")
+                  .select("#back")
                   .attr("href") shouldBe returns.yeartodatelliability.routes.YearToDateLiabilityController
                   .taxableGainOrLoss()
                   .url
@@ -318,7 +318,7 @@ class FurtherReturnGuidanceControllerSpec
               messageFromMessageKey(s"taxableGainOrLossGuidance$userKey.title"),
               doc =>
                 doc
-                  .select("#back, .govuk-back-link")
+                  .select("#back")
                   .attr("href") shouldBe returns.yeartodatelliability.routes.YearToDateLiabilityController
                   .taxableGainOrLoss()
                   .url
@@ -378,7 +378,7 @@ class FurtherReturnGuidanceControllerSpec
               messageFromMessageKey(s"yearToDateLiabilityGuidance$userKey.title"),
               doc =>
                 doc
-                  .select("#back, .govuk-back-link")
+                  .select("#back")
                   .attr("href") shouldBe returns.yeartodatelliability.routes.YearToDateLiabilityController
                   .yearToDateLiability()
                   .url
@@ -438,7 +438,7 @@ class FurtherReturnGuidanceControllerSpec
               messageFromMessageKey(s"yearToDateLiabilityGuidance$userKey.title"),
               doc =>
                 doc
-                  .select("#back, .govuk-back-link")
+                  .select("#back")
                   .attr("href") shouldBe returns.yeartodatelliability.routes.YearToDateLiabilityController
                   .yearToDateLiability()
                   .url

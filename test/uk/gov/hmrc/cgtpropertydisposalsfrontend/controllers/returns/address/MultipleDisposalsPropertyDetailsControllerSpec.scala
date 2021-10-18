@@ -269,20 +269,20 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               "property-details.multiple-disposals.guidance.title"
             ),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.PropertyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.PropertyDetailsController
                 .multipleDisposalsGuidanceSubmit()
                 .url
               doc
                 .select("#content > article > p:nth-child(4)")
-                .text()                                          shouldBe messageFromMessageKey(
+                .text()                        shouldBe messageFromMessageKey(
                 s"property-details.multiple-disposals.guidance${messageKey(userType, individualUserType)}.p1"
               )
               doc
                 .select("#content > article > p:nth-child(7)")
-                .text()                                          shouldBe messageFromMessageKey(
+                .text()                        shouldBe messageFromMessageKey(
                 s"property-details.multiple-disposals.guidance${messageKey(userType, individualUserType)}.p3"
               )
             }
@@ -585,10 +585,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             performAction(),
             messageFromMessageKey("hasValidPostcode.multipleDisposals.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.PropertyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.PropertyDetailsController
                 .multipleDisposalsHasUkPostcodeSubmit()
                 .url
             }
@@ -757,10 +757,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             performAction(),
             messageFromMessageKey("enterUPRN.multipleDisposals.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.PropertyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.PropertyDetailsController
                 .multipleDisposalsEnterLandUprnSubmit()
                 .url
             }
@@ -1950,15 +1950,15 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             performAction(),
             messageFromMessageKey(s"multipleDisposalsDisposalPrice.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.PropertyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.PropertyDetailsController
                 .disposalPriceSubmit()
                 .url
               doc
                 .select("#multipleDisposalsDisposalPrice-form-hint")
-                .text()                                          shouldBe messageFromMessageKey(
+                .text()                        shouldBe messageFromMessageKey(
                 s"multipleDisposalsDisposalPrice${messageKey(userType, individualUserType)}.helpText"
               )
             }
@@ -2384,20 +2384,20 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             performAction(),
             messageFromMessageKey(s"multipleDisposalsAcquisitionPrice$userKey.title", arg),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                                  shouldBe routes.PropertyDetailsController
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.PropertyDetailsController
                 .acquisitionPriceSubmit()
                 .url
               doc
                 .select("#multipleDisposalsAcquisitionPrice-form-hint")
-                .text()                                          shouldBe messageFromMessageKey(
+                .text()                        shouldBe messageFromMessageKey(
                 s"multipleDisposalsAcquisitionPrice${messageKey(userType, individualUserType)}.helpText"
               )
               doc
                 .select("#submitButton")
-                .text()                                          shouldBe expectedSubmitText(isAmend)
+                .text()                        shouldBe expectedSubmitText(isAmend)
             }
           )
         }

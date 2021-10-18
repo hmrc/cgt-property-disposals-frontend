@@ -19,22 +19,23 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
-@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    formHelper: FormWithCSRF,
-    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_govuk,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
 @(
@@ -44,7 +45,7 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
@@ -73,13 +74,8 @@
 }
 
 @key = @{"disposalMethod"}
+@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
-@title = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title")
-    } else messages(s"$key$userKey.title")
-}
 
 @optionIndex(value: DisposalMethod) = @{
     value match {
@@ -96,13 +92,15 @@
     ).map(messageKey =>Html(messages(messageKey)))
 }
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+
+    @backLinkComponent(backLink)
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"${key}${userKey}"))
     }
 
-    @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.howDidYouDisposeOfPropertySubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.howDidYouDisposeOfPropertySubmit(), 'novalidate -> "novalidate") {
         @radioGroup(
             fieldId = key,
             options = options,

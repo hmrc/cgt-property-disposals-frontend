@@ -214,12 +214,12 @@ class SupportingEvidenceControllerSpec
             ),
             { doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href")   shouldBe returns.routes.TaskListController
                 .taskList()
                 .url
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.SupportingEvidenceController
                 .doYouWantToUploadSupportingEvidence()
                 .url
@@ -250,12 +250,12 @@ class SupportingEvidenceControllerSpec
             ),
             { doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href")   shouldBe returns.routes.TaskListController
                 .taskList()
                 .url
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content > article > form")
                 .attr("action") shouldBe routes.SupportingEvidenceController
                 .doYouWantToUploadSupportingEvidence()
                 .url
@@ -596,7 +596,7 @@ class SupportingEvidenceControllerSpec
             messageFromMessageKey("supporting-evidence.upload.title"),
             doc =>
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href") shouldBe routes.SupportingEvidenceController
                 .doYouWantToUploadSupportingEvidence()
                 .url

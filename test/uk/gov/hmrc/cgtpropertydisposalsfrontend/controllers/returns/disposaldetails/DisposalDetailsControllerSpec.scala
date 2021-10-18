@@ -1303,7 +1303,7 @@ class DisposalDetailsControllerSpec
                 expectedErrorMessageKey
               )
               doc
-                .select("#back, .govuk-back-link")
+                .select("#back")
                 .attr("href") shouldBe routes.DisposalDetailsController
                 .checkYourAnswers()
                 .url
