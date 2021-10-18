@@ -1,0 +1,82 @@
+@*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
+@this(
+  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline_govuk
+)
+
+@(
+  fieldId: String,
+  label: Html,
+  dayValue: Option[String],
+  monthValue: Option[String],
+  yearValue: Option[String],
+  helpText: Option[Html],
+  errorKey: Option[String],
+  hasErrors: Boolean
+)(implicit messages: Messages)
+
+@classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
+@inputClasses = @{
+    if(hasErrors) "govuk-input--error govuk-input govuk-date-input__input govuk-input--width"
+    else "govuk-input govuk-date-input__input govuk-input--width" }
+@hintTextKey = @{s"${{fieldId}}-form-hint"}
+@errorId = @{s"${{fieldId}}-inline-error"}
+@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
+@errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
+@describedByKeys = @{
+  List(hintIdWithHintText.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+
+<div class="@classes">
+  <fieldset class="govuk-fieldset" id="@fieldId"@if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+        <h1 class="govuk-fieldset__heading">
+            @label
+        </h1>
+    </legend>
+    @if(helpText.isDefined) {
+      <span id="@{fieldId}-form-hint" class="govuk-hint">
+        @helpText.map(t => t)
+      </span>
+    }
+    @errorIdWithMessageKey.map { case (id, key) =>
+      @errorInline(id, messages(key))
+    }
+    <div class="govuk-date-input">
+        <div class="govuk-date-input__item">
+          <div class="govuk-form-group">
+            <label class="govuk-label govuk-date-input__label" for="@{fieldId}-day">@messages("generic.day")</label>
+            <input class="@inputClasses-2" id="@{fieldId}-day" name="@{fieldId}-day" type="text" pattern="[0-9]*" inputmode="numeric" @dayValue.map{d => value="@d"}>
+          </div>
+        </div>
+        <div class="govuk-date-input__item">
+          <div class="govuk-form-group">
+            <label class="govuk-label govuk-date-input__label" for="@{fieldId}-month">@messages("generic.month")</label>
+            <input class="@inputClasses-2" id="@{fieldId}-month" name="@{fieldId}-month" type="text" pattern="[0-9]*" inputmode="numeric" @monthValue.map{m => value="@m"}>
+          </div>
+        </div>
+        <div class="govuk-date-input__item">
+          <div class="govuk-form-group">
+            <label class="govuk-label govuk-date-input__label" for="@{fieldId}-year">@messages("generic.year")</label>
+            <input class="@inputClasses-4" id="@{fieldId}-year" name="@{fieldId}-year" type="text" pattern="[0-9]*" inputmode="numeric" @yearValue.map{y => value="@y"}>
+          </div>
+        </div>
+    </div>
+  </fieldset>
+</div>

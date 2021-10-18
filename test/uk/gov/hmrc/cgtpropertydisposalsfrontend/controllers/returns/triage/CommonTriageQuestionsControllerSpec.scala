@@ -365,7 +365,7 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("who-are-you-reporting-for.title"),
               { doc =>
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
                   ) shouldBe routes.CommonTriageQuestionsController
@@ -373,22 +373,22 @@ class CommonTriageQuestionsControllerSpec
                   .url
 
                 doc
-                  .select("#individualUserType > div:nth-child(2) > label")
+                  .select("label[for='individualUserType-0']")
                   .text()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.Self}"
                 )
                 doc
-                  .select("#individualUserType > div:nth-child(3) > label")
+                  .select("label[for='individualUserType-1']")
                   .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.Capacitor}"
                 )
                 doc
-                  .select("#individualUserType > div:nth-child(4) > label")
+                  .select("label[for='individualUserType-2']")
                   .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.PersonalRepresentative}"
                 )
                 doc
-                  .select("#individualUserType > div:nth-child(5) > label")
+                  .select("label[for='individualUserType-3']")
                   .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.PersonalRepresentativeInPeriodOfAdmin}"
                 )
@@ -414,7 +414,7 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("who-are-you-reporting-for.title"),
               { doc =>
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
                   )                shouldBe routes.CommonTriageQuestionsController
@@ -447,7 +447,7 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("who-are-you-reporting-for.title"),
               { doc =>
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
                   )                                shouldBe routes.CommonTriageQuestionsController
@@ -498,7 +498,7 @@ class CommonTriageQuestionsControllerSpec
                 messageFromMessageKey("who-are-you-reporting-for.title"),
                 { doc =>
                   doc
-                    .select("#content > article > form")
+                    .select("#content > article > form, #main-content form")
                     .attr(
                       "action"
                     ) shouldBe routes.CommonTriageQuestionsController
@@ -509,12 +509,12 @@ class CommonTriageQuestionsControllerSpec
                     .select(s"#individualUserType-$index")
                     .attr("checked")                 shouldBe "checked"
                   doc
-                    .select("#individualUserType > div:nth-child(2) > label")
+                    .select("label[for='individualUserType-0']")
                     .text()                          shouldBe messageFromMessageKey(
                     s"individualUserType.agent.${IndividualUserType.Self}"
                   )
                   doc
-                    .select("#individualUserType > div:nth-child(3) > label")
+                    .select("label[for='individualUserType-1']")
                     .html()                          shouldBe messageFromMessageKey(
                     s"individualUserType.agent.${IndividualUserType.PersonalRepresentative}"
                   )
@@ -971,10 +971,10 @@ class CommonTriageQuestionsControllerSpec
             performAction(),
             messageFromMessageKey("numberOfProperties.title"),
             { doc =>
-              doc.select("#back").attr("href") shouldBe ""
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe ""
               doc
-                .select("#content > article > form")
-                .attr("action")                shouldBe routes.CommonTriageQuestionsController
+                .select("#content > article > form, #main-content form")
+                .attr("action")                                  shouldBe routes.CommonTriageQuestionsController
                 .howManyPropertiesSubmit()
                 .url
 
@@ -1004,10 +1004,10 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("numberOfProperties.title"),
               { doc =>
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href")    shouldBe expectedBacklink
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr("action")  shouldBe routes.CommonTriageQuestionsController
                   .howManyPropertiesSubmit()
                   .url
@@ -1039,12 +1039,12 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("numberOfProperties.title"),
               { doc =>
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr(
                     "href"
                   )                shouldBe expectedBacklink.url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr("action")  shouldBe routes.CommonTriageQuestionsController
                   .howManyPropertiesSubmit()
                   .url
@@ -1077,12 +1077,12 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("numberOfProperties.title"),
               { doc =>
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr(
                     "href"
                   )                shouldBe expectedBacklink.url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr("action")  shouldBe routes.CommonTriageQuestionsController
                   .howManyPropertiesSubmit()
                   .url
@@ -1112,15 +1112,15 @@ class CommonTriageQuestionsControllerSpec
             performAction(),
             messageFromMessageKey("numberOfProperties.title"),
             { doc =>
-              doc.select("#back").attr("href") shouldBe ""
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe ""
               doc
-                .select("#content > article > form")
-                .attr("action")                shouldBe routes.CommonTriageQuestionsController
+                .select("#content > article > form, #main-content form")
+                .attr("action")                                  shouldBe routes.CommonTriageQuestionsController
                 .howManyPropertiesSubmit()
                 .url
               doc
                 .select("#numberOfProperties-1")
-                .attr("checked")               shouldBe "checked"
+                .attr("checked")                                 shouldBe "checked"
             }
           )
         }
@@ -1142,12 +1142,12 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("numberOfProperties.title"),
               { doc =>
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href")    shouldBe routes.SingleDisposalsTriageController
                   .checkYourAnswers()
                   .url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr("action")  shouldBe routes.CommonTriageQuestionsController
                   .howManyPropertiesSubmit()
                   .url
@@ -1174,12 +1174,12 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("numberOfProperties.title"),
               { doc =>
                 doc
-                  .select("#back")
+                  .select("#back, .govuk-back-link")
                   .attr("href")    shouldBe routes.SingleDisposalsTriageController
                   .checkYourAnswers()
                   .url
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr("action")  shouldBe routes.CommonTriageQuestionsController
                   .howManyPropertiesSubmit()
                   .url
@@ -1279,7 +1279,7 @@ class CommonTriageQuestionsControllerSpec
                 .text() shouldBe messageFromMessageKey(expectedErrorKey)
 
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.CommonTriageQuestionsController
                 .howManyPropertiesSubmit()
                 .url
@@ -1576,7 +1576,7 @@ class CommonTriageQuestionsControllerSpec
 
       }
 
-      "display the page" when {
+      "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
@@ -1593,10 +1593,10 @@ class CommonTriageQuestionsControllerSpec
           performAction(),
           messageFromMessageKey("numberOfProperties.title"),
           { doc =>
-            doc.select("#back").attr("href") shouldBe ""
+            doc.select("#back, .govuk-back-link").attr("href") shouldBe ""
             doc
-              .select("#content > article > form")
-              .attr("action")                shouldBe routes.CommonTriageQuestionsController
+              .select("#content > article > form, #main-content form")
+              .attr("action")                                  shouldBe routes.CommonTriageQuestionsController
               .howManyPropertiesFurtherReturnSubmit()
               .url
 
@@ -1683,7 +1683,7 @@ class CommonTriageQuestionsControllerSpec
                 .text() shouldBe messageFromMessageKey(expectedErrorKey)
 
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.CommonTriageQuestionsController
                 .howManyPropertiesFurtherReturnSubmit()
                 .url
@@ -1833,15 +1833,15 @@ class CommonTriageQuestionsControllerSpec
               result,
               messageFromMessageKey("disposalDateTooEarly.uk.title"),
               { doc =>
-                doc.select("#back").attr("href") shouldBe expectedBackLink.url
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
                 doc
-                  .select("#content > article > p:nth-child(3)")
-                  .text()                        shouldBe messageFromMessageKey(
+                  .select("#content > article > p:nth-child(3), #main-content p:nth-child(2)")
+                  .text()                                          shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.uk.p1"
                 )
                 doc
-                  .select("#content > article > p:nth-child(4)")
-                  .html()                        shouldBe messageFromMessageKey(
+                  .select("#content > article > p:nth-child(4), #main-content p:nth-child(3)")
+                  .html()                                          shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.uk.p2",
                   viewConfig.cgtLegacyUrl
                 )
@@ -1893,20 +1893,20 @@ class CommonTriageQuestionsControllerSpec
               result,
               messageFromMessageKey("disposalDateTooEarly.non-uk.title"),
               { doc =>
-                doc.select("#back").attr("href") shouldBe expectedBackLink.url
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
                 doc
-                  .select("#content > article > p:nth-child(3)")
-                  .text()                        shouldBe messageFromMessageKey(
+                  .select("#content > article > p:nth-child(3), #main-content p:nth-child(2)")
+                  .text()                                          shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.non-uk.p1"
                 )
                 doc
-                  .select("#content > article > p:nth-child(4)")
-                  .text()                        shouldBe messageFromMessageKey(
+                  .select("#content > article > p:nth-child(4), #main-content p:nth-child(3)")
+                  .text()                                          shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.non-uk.p2"
                 )
                 doc
-                  .select("#content > article > p:nth-child(6)")
-                  .html()                        shouldBe messageFromMessageKey(
+                  .select("#content > article > p:nth-child(6), #main-content p:nth-child(5)")
+                  .html()                                          shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.non-uk.p3",
                   viewConfig.nrcgtReturn
                 )
@@ -2107,8 +2107,10 @@ class CommonTriageQuestionsControllerSpec
               performAction(),
               messageFromMessageKey("ukResidentCanOnlyReportResidential.title"),
               { doc =>
-                doc.select("#back").attr("href")                         shouldBe expectedBackLink.url
-                doc.select("#content > article > p:nth-child(3)").text() shouldBe messageFromMessageKey(expectedP1Key)
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+                doc
+                  .select("#content > article > p:nth-child(3), #main-content p:nth-child(2)")
+                  .text()                                          shouldBe messageFromMessageKey(expectedP1Key)
               }
             )
 
@@ -2268,8 +2270,8 @@ class CommonTriageQuestionsControllerSpec
               performAction(),
               messageFromMessageKey("cannotAmendResidentialStatusForAssetType.title"),
               { doc =>
-                doc.select("#back").attr("href") shouldBe expectedBackLink.url
-                doc.select("#warning").text()    shouldBe messageFromMessageKey(expectedWarningKey)
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+                doc.select("#warning").text()                      shouldBe messageFromMessageKey(expectedWarningKey)
               }
             )
 
@@ -2406,7 +2408,9 @@ class CommonTriageQuestionsControllerSpec
             performAction(),
             messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
             { doc =>
-              doc.select("#back").attr("href")                         shouldBe routes.MultipleDisposalsTriageController.completionDate().url
+              doc.select("#back, .govuk-back-link").attr("href")       shouldBe routes.MultipleDisposalsTriageController
+                .completionDate()
+                .url
               doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.p1",
                 TimeUtils.govDisplayFormat(date.value)
@@ -2445,7 +2449,7 @@ class CommonTriageQuestionsControllerSpec
             performAction(),
             messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
             { doc =>
-              doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
+              doc.select("#back, .govuk-back-link").attr("href")       shouldBe routes.SingleDisposalsTriageController
                 .whenWasCompletionDate()
                 .url
               doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
@@ -2487,7 +2491,7 @@ class CommonTriageQuestionsControllerSpec
             performAction(),
             messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
             { doc =>
-              doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
+              doc.select("#back, .govuk-back-link").attr("href")       shouldBe routes.SingleDisposalsTriageController
                 .whenWasCompletionDate()
                 .url
               doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
@@ -2530,10 +2534,12 @@ class CommonTriageQuestionsControllerSpec
               TimeUtils.govDisplayFormat(completionDate.value)
             ),
             { doc =>
-              doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.SingleDisposalsTriageController
                 .whenWasCompletionDate()
                 .url
-              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+              doc
+                .select("#content > article > p:nth-child(3), #main-content p:nth-child(2)")
+                .html()                                          shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.amend.p1",
                 viewConfig.contactHmrc
               )
@@ -2566,10 +2572,12 @@ class CommonTriageQuestionsControllerSpec
               TimeUtils.govDisplayFormat(completionDate.value)
             ),
             { doc =>
-              doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.SingleDisposalsTriageController
                 .whenWasCompletionDate()
                 .url
-              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+              doc
+                .select("#content > article > p:nth-child(3), #main-content p:nth-child(2)")
+                .html()                                          shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.amend.trust.p1",
                 viewConfig.contactHmrc
               )
@@ -2601,10 +2609,12 @@ class CommonTriageQuestionsControllerSpec
               TimeUtils.govDisplayFormat(completionDate.value)
             ),
             { doc =>
-              doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.SingleDisposalsTriageController
                 .whenWasCompletionDate()
                 .url
-              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+              doc
+                .select("#content > article > p:nth-child(3), #main-content p:nth-child(2)")
+                .html()                                          shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.amend.p1",
                 viewConfig.contactHmrc
               )
@@ -2634,7 +2644,8 @@ class CommonTriageQuestionsControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
-            _.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController.disposalDateOfShares().url
+            _.select("#back, .govuk-back-link")
+              .attr("href") shouldBe routes.MultipleDisposalsTriageController.disposalDateOfShares().url
           )
         }
 
@@ -2660,7 +2671,8 @@ class CommonTriageQuestionsControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
-            _.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController.disposalDateOfShares().url
+            _.select("#back, .govuk-back-link")
+              .attr("href") shouldBe routes.SingleDisposalsTriageController.disposalDateOfShares().url
           )
         }
 
@@ -2691,7 +2703,7 @@ class CommonTriageQuestionsControllerSpec
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("disposalDateInDifferentTaxYear.title"),
-              doc => doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc => doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
             )
 
           "the user is on a single disposal journey" in {
@@ -2861,7 +2873,7 @@ class CommonTriageQuestionsControllerSpec
           performAction(),
           messageFromMessageKey("who-are-you-reporting-for-exit-page.title"),
           doc =>
-            doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
+            doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.CommonTriageQuestionsController
               .whoIsIndividualRepresenting()
               .url
         )
@@ -2907,7 +2919,7 @@ class CommonTriageQuestionsControllerSpec
               .select("h2.heading-medium")
               .text() shouldBe messageFromMessageKey("selfAssessmentAlreadySubmitted.whatNext")
 
-            doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
+            doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.CommonTriageQuestionsController
               .amendsHaveYouAlreadySentSelfAssessment()
               .url
           }
@@ -2974,14 +2986,14 @@ class CommonTriageQuestionsControllerSpec
           ),
           { doc =>
             doc
-              .select("#content > article > form")
+              .select("#content > article > form, #main-content form")
               .attr(
                 "action"
               ) shouldBe routes.CommonTriageQuestionsController
               .amendsHaveYouAlreadySentSelfAssessmentSubmit()
               .url
 
-            doc.select("#back").attr("href") shouldBe homePageRoutes.HomePageController
+            doc.select("#back, .govuk-back-link").attr("href") shouldBe homePageRoutes.HomePageController
               .viewSentReturn(submissionId)
               .url
 
@@ -3065,7 +3077,7 @@ class CommonTriageQuestionsControllerSpec
               )
 
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.CommonTriageQuestionsController
                 .amendsHaveYouAlreadySentSelfAssessmentSubmit()
                 .url
@@ -3201,7 +3213,7 @@ class CommonTriageQuestionsControllerSpec
                   .select("h2.heading-medium")
                   .text() shouldBe messageFromMessageKey("selfAssessmentAlreadySubmitted.whatNext")
 
-                doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.CommonTriageQuestionsController
                   .haveYouAlreadySentSelfAssessment()
                   .url
               }
@@ -3249,14 +3261,14 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("alreadySentSelfAssessment.title", "2020", "2021"),
               { doc =>
                 doc
-                  .select("#content > article > form")
+                  .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
                   ) shouldBe routes.CommonTriageQuestionsController
                   .haveYouAlreadySentSelfAssessmentSubmit()
                   .url
 
-                doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.SingleDisposalsTriageController
                   .whenWasDisposalDate()
                   .url
 
@@ -3333,7 +3345,7 @@ class CommonTriageQuestionsControllerSpec
               )
 
               doc
-                .select("#content > article > form")
+                .select("#content > article > form, #main-content form")
                 .attr("action") shouldBe routes.CommonTriageQuestionsController
                 .haveYouAlreadySentSelfAssessmentSubmit()
                 .url
@@ -3499,7 +3511,7 @@ class CommonTriageQuestionsControllerSpec
             endDateExclusive.getYear.toString
           ),
           doc =>
-            doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+            doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.MultipleDisposalsTriageController
               .whenWereContractsExchanged()
               .url
         )
@@ -3542,10 +3554,10 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("disposalDateTooEarly.non-uk.title"),
               { doc =>
                 doc
-                  .select("h2.heading-medium")
+                  .select("h2.govuk-heading-m")
                   .text() shouldBe messageFromMessageKey("disposalDateTooEarly.non-uk.h2")
 
-                doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.SingleDisposalsTriageController
                   .disposalDateOfShares()
                   .url
               }
@@ -3569,10 +3581,10 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("disposalDateTooEarly.non-uk.title"),
               { doc =>
                 doc
-                  .select("h2.heading-medium")
+                  .select("h2.govuk-heading-m")
                   .text() shouldBe messageFromMessageKey("disposalDateTooEarly.non-uk.h2")
 
-                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.MultipleDisposalsTriageController
                   .disposalDateOfShares()
                   .url
               }

@@ -3,8 +3,8 @@ multiple-draft.exit.p1=Llenwch eich Ffurflen Dreth ddrafft cyn dechrau un newydd
 who-are-you-reporting-for-exit-page.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
 who-are-you-reporting-for-exit-page.helpText=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod i CThEM fod angen i chi newid pwy ydych yn llenwi’r Ffurflen Dreth hon ar ei gyfer.
 previousReturnExistsWithSameCompletionDate.amend.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
-previousReturnExistsWithSameCompletionDate.amend.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
-previousReturnExistsWithSameCompletionDate.amend.trust.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
+previousReturnExistsWithSameCompletionDate.amend.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
+previousReturnExistsWithSameCompletionDate.amend.trust.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
 previousReturnExistsWithSameCompletionDate.amend.agent.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
 previousReturnExistsWithSameCompletionDate.amend.p2=Mae hyn oherwydd bod rhaid i werthiannau neu warediadau sydd â’r un dyddiad cwblhau fod ar yr un Ffurflen Dreth.
 previousReturnExistsWithSameCompletionDate.amend.p3=Rhowch wybod i CThEM fod angen i chi newid:
@@ -727,7 +727,7 @@ selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p1=Mae rhywun eisoes w
 
 selfAssessmentAlreadySubmitted.whatNext=Beth fydd angen i chi ei wneud nesaf
 
-selfAssessmentAlreadySubmitted.p2=Bydd angen i <a href="{0}" target="_blank"> chi newid eich Ffurflen Dreth Hunanasesiad</a> trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.p2=Bydd angen i <a class="govuk-link" href="{0}" target="_blank"> chi newid eich Ffurflen Dreth Hunanasesiad</a> trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
 selfAssessmentAlreadySubmitted.agent.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> eich cleient trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
 selfAssessmentAlreadySubmitted.trust.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Hunanasesiad yr ymddiriedolaeth: Ffurflen Dreth Ymddiriedolaeth ac Ystâd</a> yr ymddiriedolaeth trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
 selfAssessmentAlreadySubmitted.capacitor.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
@@ -785,7 +785,7 @@ wereYouAUKResident.personalRep.title=A oedd y person yn breswylydd yn y DU ar y 
 wereYouAUKResident.agent.title=A oedd eich cleient yn breswylydd yn y DU ar y dyddiad gwaredu?
 wereYouAUKResident.personalRepInPeriodOfAdmin.title=A oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi?
 wereYouAUKResident.helpText=Y dyddiad gwaredu ar gyfer eiddo yn y DU yw’r dyddiad cyfnewid contractau. Mae cyfnewid contractau fel arfer yn digwydd pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd a phan fydd y prynwr yn talu blaendal.
-wereYouAUKResident.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor ffenestr newydd)</a>
@@ -815,9 +815,9 @@ triage.enterCountry.agent.helpText=Fel arfer, dyma’r diwrnod y gwnaeth eich cl
 triage.enterCountry.trust.helpText=Fel arfer, dyma’r diwrnod y gwnaeth yr ymddiriedolaeth a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
 triage.enterCountry.capacitor.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
 triage.enterCountry.personalRep.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
-triage.enterCountry.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>.
+triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>.
 triage.enterCountry.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor ffenestr newydd)</a>.
-triage.enterCountry.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>.
+triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>.
 triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
 triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
 triage.enterCountry.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
@@ -926,7 +926,7 @@ disposalDate.trust.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi
 disposalDate.capacitor.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 disposalDate.personalRep.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 disposalDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
-disposalDate.link=<a href="{0}" target="_blank">Cael gwybod beth sy’n digwydd ar y dyddiad cyfnewid (yn agor ffenestr newydd)</a>.
+disposalDate.link=<a class="govuk-link" href="{0}" target="_blank">Cael gwybod beth sy’n digwydd ar y dyddiad cyfnewid (yn agor ffenestr newydd)</a>.
 disposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
 disposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
 disposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod heddiw neu yn y gorffennol
@@ -955,7 +955,7 @@ completionDate.trust.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r
 completionDate.capacitor.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
 completionDate.personalRep.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
 completionDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
-completionDate.link=<a href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cwblhau (yn agor ffenestr newydd)</a>
+completionDate.link=<a class="govuk-link" href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cwblhau (yn agor ffenestr newydd)</a>
 completionDate.error.required=Nodwch ddyddiad cwblhau
 completionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
 completionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl dyddiad cyfnewid y contract, {0}
@@ -975,7 +975,7 @@ disposalDateTooEarly.non-uk.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 disposalDateTooEarly.non-uk.p1=Mae hyn oherwydd pan gafodd yr eiddo ei werthu neu ei waredu, cyfnewidiwyd contractau cyn 6 Ebrill 2020.
 disposalDateTooEarly.non-uk.p2=Os cafodd gwarediad anuniongyrchol ei wneud, mae hynny oherwydd bod y cyfranddaliadau wedi cael eu gwerthu cyn 6 Ebrill 2020.
 disposalDateTooEarly.non-uk.h2=Yr hyn y bydd angen i chi ei wneud nesaf
-disposalDateTooEarly.non-uk.p3=Bydd angen i chi lenwi <a href="{0}">dibreswyl: ffurflen rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo neu dir yn y DU</a>.
+disposalDateTooEarly.non-uk.p3=Bydd angen i chi lenwi <a class="govuk-link" href="{0}">dibreswyl: ffurflen rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo neu dir yn y DU</a>.
 disposalDateTooEarly.uk.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 disposalDateTooEarly.uk.p1=Mae hyn oherwydd pan gafodd yr eiddo ei werthu neu ei waredu, cyfnewidiwyd contractau cyn 6 Ebrill 2020.
 disposalDateTooEarly.uk.p2=Dysgwch sut i roi gwybod am a thalu Treth Enillion Cyfalaf ar <a href="{0}">werthiannau neu warediadau eiddo yn y DU cyn 6 Ebrill 2020</a>.
@@ -1030,7 +1030,7 @@ multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.title=A oedd y pe
 multipleDisposalsWereYouAUKResident.helpText=Mae ‘cyfnewid’ contractau fel arfer yn digwydd pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
 multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
 multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor ffenestr newydd)</a>
-multipleDisposalsWereYouAUKResident.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>
+multipleDisposalsWereYouAUKResident.trust.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>
 multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person (yn agor ffenestr newydd)</a>
 multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person (yn agor ffenestr newydd)</a>
 multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
@@ -3956,7 +3956,7 @@ multipleDisposalsDisposalDate.cyaChange=dyddiad cyfnewid contractau
 multipleDisposalsExchangeDateInDifferentTaxYear.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 multipleDisposalsExchangeDateInDifferentTaxYear.p1=Ni allwch ddefnyddio’r gwasanaeth ar-lein i newid y flwyddyn dreth ar gyfer Ffurflen Dreth sydd eisoes wedi’i hanfon
 multipleDisposalsExchangeDateInDifferentTaxYear.subheading=Yr hyn y bydd angen i chi ei wneud nesaf
-multipleDisposalsExchangeDateInDifferentTaxYear.p2=Bydd angen i chi <a href="{0}">ysgrifennu atom</a> gyda’r newid yn eich blwyddyn dreth
+multipleDisposalsExchangeDateInDifferentTaxYear.p2=Bydd angen i chi <a class="govuk-link" href="{0}">ysgrifennu atom</a> gyda’r newid yn eich blwyddyn dreth
 
 hasValidPostcode.singleDisposal.title=A oes gan yr eiddo god post yn y DU?
 hasValidPostcode.singleDisposal.error.boolean=Dewiswch p’un a oes gan yr eiddo god post yn y DU
@@ -4573,7 +4573,7 @@ unmetDependency.x2.li3=uwchlwytho dogfen sy’n dangos sut y cyfrifwyd swm newyd
 disposalDateInDifferentTaxYear.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 disposalDateInDifferentTaxYear.p1=Ni allwch ddefnyddio’r gwasanaeth ar-lein i newid y flwyddyn dreth ar gyfer Ffurflen Dreth sydd eisoes wedi’i hanfon
 disposalDateInDifferentTaxYear.subheading=Yr hyn y bydd angen i chi ei wneud nesaf
-disposalDateInDifferentTaxYear.p2=Bydd angen i chi <a href=”{0}”>ysgrifennu atom</a> gyda'r newid yn eich blwyddyn dreth
+disposalDateInDifferentTaxYear.p2=Bydd angen i chi <a class="govuk-link" href=”{0}”>ysgrifennu atom</a> gyda'r newid yn eich blwyddyn dreth
 
 #===================================================
 #  AMEND RETURNS - END

@@ -1,0 +1,43 @@
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLayout
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTimeoutDialogHelper
+@import views.html.helper.CSPNonce
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
+@import play.twirl.api._
+@import play.api.mvc._
+@import play.api.i18n.Messages
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import controllers.routes
+
+@this(
+        appConfig: ViewConfig,
+        hmrcLayout: HmrcLayout,
+        hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
+        hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper)
+
+@(pageTitle: String,
+        withSignOutLink: Boolean = false,
+        isWelshTranslationAvailable: Boolean = false,
+        backLinkUrl: Option[String] = None,
+)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
+
+@content = {
+@contentBlock
+@hmrcReportTechnicalIssueHelper()
+}
+
+@additionalHeadBlock = {
+@hmrcTimeoutDialogHelper(signOutUrl = controllerRoutes.StartController.start().url)
+    <link rel="stylesheet" href='@routes.Assets.at("stylesheets/cgtpd.css")'/>
+}
+
+@hmrcLayout(
+    backLinkUrl = backLinkUrl,
+    pageTitle = Some(pageTitle),
+    isWelshTranslationAvailable = isWelshTranslationAvailable,
+    serviceUrl = None,
+    signOutUrl = if(withSignOutLink) Some(s"""${appConfig.signOutUrl}?continue${controllerRoutes.StartController.start().url}""") else None,
+    phaseBanner = None,
+    additionalHeadBlock = Some(additionalHeadBlock),
+    nonce = CSPNonce.get
+)(content)

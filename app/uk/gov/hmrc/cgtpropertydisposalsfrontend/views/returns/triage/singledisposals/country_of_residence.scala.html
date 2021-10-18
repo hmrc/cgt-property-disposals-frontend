@@ -28,16 +28,17 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code,
-    submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
+    submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    formHelper: FormWithCSRF,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
@@ -87,9 +88,13 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
+@titleWithErrorPrefix = @{
+    if(hasErrors){
+        messages("generic.errorPrefix") + " " + title
+    } else title
+}
 
-    @backLinkComponent(backLink)
+@mainTemplate(pageTitle = titleWithErrorPrefix, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 
     @if(hasErrors) {
         @errorSummary(form)
@@ -97,7 +102,7 @@
 
     @caption(messages("triage.caption"))
 
-    @formWrapper(routes.SingleDisposalsTriageController.countryOfResidenceSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(routes.SingleDisposalsTriageController.countryOfResidenceSubmit(), 'novalidate -> "novalidate") {
 
         @countryCode(
             Country.countryCodes,
@@ -110,7 +115,7 @@
             labelAsHeading = true
         )
 
-        <p>@Html(messages(s"$messageKey$userKey.link", appConfig.workOurYouResidenceStatusUrl))</p>
+        <p class="govuk-body">@Html(messages(s"$messageKey$userKey.link", appConfig.workOurYouResidenceStatusUrl))</p>
         @submitButton(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
