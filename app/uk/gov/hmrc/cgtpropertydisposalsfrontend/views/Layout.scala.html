@@ -28,12 +28,13 @@
 
 @additionalHeadBlock = {
 @hmrcTimeoutDialogHelper(signOutUrl = controllerRoutes.StartController.start().url)
-    <link rel="stylesheet" href='@routes.Assets.at("stylesheets/cgtpd.css")'/>
+    <link rel="stylesheet" href='@routes.Assets.at("stylesheets/cgtpd-ui-upgrade.css")'/>
 }
 
 @hmrcLayout(
     backLinkUrl = backLinkUrl,
     pageTitle = Some(pageTitle),
+    userResearchBannerUrl = Some(appConfig.userRecruitmentUrl),
     isWelshTranslationAvailable = isWelshTranslationAvailable,
     serviceUrl = None,
     signOutUrl = if(withSignOutLink) Some(s"""${appConfig.signOutUrl}?continue${controllerRoutes.StartController.start().url}""") else None,
