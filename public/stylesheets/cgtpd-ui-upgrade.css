@@ -1,0 +1,179 @@
+.cgt-cya__key {
+    width:50%
+}
+
+
+.cgt-cya.govuk-summary-list {
+    font-family: GDS Transport,arial,sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 1.25;
+    color: #0b0c0c;
+    margin: 0 0 20px
+}
+
+@media print {
+    .cgt-cya.govuk-summary-list {
+        font-family: sans-serif
+    }
+}
+
+@media (min-width: 40.0625em) {
+    .cgt-cya.govuk-summary-list {
+        font-size:19px;
+        font-size: 1.1875rem;
+        line-height: 1.31579
+    }
+}
+
+@media print {
+    .cgt-cya.govuk-summary-list {
+        font-size: 14pt;
+        line-height: 1.15;
+        color: #000
+    }
+}
+
+@media (min-width: 40.0625em) {
+    .cgt-cya.govuk-summary-list {
+        display:table;
+        width: 100%;
+        table-layout: fixed;
+        margin-bottom: 30px
+    }
+}
+
+@media (max-width: 40.0525em) {
+    .cgt-cya .govuk-summary-list__row {
+        margin-bottom:15px;
+        border-bottom: 1px solid #b1b4b6
+    }
+}
+
+@media (min-width: 40.0625em) {
+    .cgt-cya .govuk-summary-list__row {
+        display:table-row
+    }
+}
+
+.cgt-cya .govuk-summary-list__actions,.cgt-cya .govuk-summary-list__key,.cgt-cya .govuk-summary-list__value {
+    margin: 0
+}
+
+@media (min-width: 40.0625em) {
+    .cgt-cya .govuk-summary-list__actions,.cgt-cya .govuk-summary-list__key,.cgt-cya .govuk-summary-list__value {
+        display:table-cell;
+        padding-top: 10px;
+        padding-right: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #b1b4b6
+    }
+}
+
+.cgt-cya .govuk-summary-list__actions {
+    margin-bottom: 15px
+}
+
+@media (min-width: 40.0625em) {
+    .cgt-cya .govuk-summary-list__actions {
+        width:20%;
+        padding-right: 0;
+        text-align: right
+    }
+}
+
+.cgt-cya .govuk-summary-list__key,.cgt-cya .govuk-summary-list__value {
+    word-wrap: break-word;
+    overflow-wrap: break-word
+}
+
+.cgt-cya .govuk-summary-list__key {
+    margin-bottom: 5px;
+    font-weight: 700
+}
+
+@media (min-width: 40.0625em) {
+    .cgt-cya .govuk-summary-list__key {
+        width:50%
+    }
+}
+
+@media (max-width: 40.0525em) {
+    .cgt-cya .govuk-summary-list__value {
+        margin-bottom:15px
+    }
+}
+
+@media (min-width: 40.0625em) {
+    .cgt-cya .govuk-summary-list__value {
+        width:50%
+    }
+}
+
+@media (min-width: 40.0625em) {
+    .cgt-cya .govuk-summary-list__value:last-child {
+        width:70%
+    }
+}
+
+.cgt-cya .govuk-summary-list__value>p {
+    margin-bottom: 10px
+}
+
+.cgt-cya .govuk-summary-list__value>:last-child {
+    margin-bottom: 0
+}
+
+.cgt-cya .govuk-summary-list__actions-list {
+    width: 100%;
+    margin: 0;
+    padding: 0
+}
+
+.cgt-cya .govuk-summary-list__actions-list-item {
+    display: inline;
+    margin-right: 10px;
+    padding-right: 10px
+}
+
+.cgt-cya .govuk-summary-list__actions-list-item:not(:last-child) {
+    border-right: 1px solid #b1b4b6
+}
+
+.cgt-cya .govuk-summary-list__actions-list-item:last-child {
+    margin-right: 0;
+    padding-right: 0;
+    border: 0
+}
+
+@media (max-width: 40.0525em) {
+    .cgt-cya.govuk-summary-list--no-border .govuk-summary-list__row {
+        border:0
+    }
+}
+
+@media (min-width: 40.0625em) {
+    .cgt-cya.govuk-summary-list--no-border .govuk-summary-list__actions,.cgt-cya.govuk-summary-list--no-border .govuk-summary-list__key,.cgt-cya.govuk-summary-list--no-border .govuk-summary-list__value {
+        padding-bottom:11px;
+        border: 0
+    }
+}
+
+@media (max-width: 40.0525em) {
+    .cgt-cya .govuk-summary-list__row--no-border {
+        border:0
+    }
+}
+
+@media (min-width: 40.0625em) {
+    .cgt-cya .govuk-summary-list__row--no-border .govuk-summary-list__actions,.cgt-cya .govuk-summary-list__row--no-border .govuk-summary-list__key,.cgt-cya .govuk-summary-list__row--no-border .govuk-summary-list__value {
+        padding-bottom:11px;
+        border: 0
+    }
+}
+
+
+
