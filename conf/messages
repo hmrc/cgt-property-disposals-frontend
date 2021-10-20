@@ -612,6 +612,8 @@ account.home.right.title=Total amount left to pay
 account.home.right.placeholder=The total amount due for all your Capital Gains Tax on UK property disposals made from 6 April 2020.
 account.home.button.start-a-new-return=Start new return
 
+account.autumn.updates.message=If the sale of a property was completed on or after 27 October 2021, there is now an additional 30 days from the tax due date shown to make payment. The online service is currently being updated and during this period the tax due date may be incorrect in some cases.
+
 account.totalLeftToPay=Total left to pay
 account.make.payment.link=Make a payment
 account.totalLeftToPay.penalties=Includes taxes, penalties and interest owed
