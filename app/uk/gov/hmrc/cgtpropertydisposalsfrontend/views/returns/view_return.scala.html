@@ -129,10 +129,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
       }
     }
 
-    <br/>
-    <div class="panel panel-border-narrow with-bottom-margin">
-        @messages("account.autumn.updates.message")
-    </div>
+    @insetPanel(Html(messages("account.autumn.updates.message")))
 
     <h2 class="heading-large">
         @messages(s"$key.summaryHeading")

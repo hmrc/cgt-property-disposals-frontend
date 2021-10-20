@@ -15,8 +15,11 @@
  *@
 
 @import play.api.i18n.Messages
+@import play.twirl.api.Html
 
-@this()
+@this(
+    insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
+)
 
 @()(implicit messages: Messages)
 
@@ -25,8 +28,6 @@
     <h2 class="heading-large">
       @messages("returns.list.title")
     </h2>
-    <div class="panel panel-border-narrow with-bottom-margin">
-      @messages("account.autumn.updates.message")
-    </div>
+    @insetPanel(Html(messages("account.autumn.updates.message")))
   </div>
 </div>

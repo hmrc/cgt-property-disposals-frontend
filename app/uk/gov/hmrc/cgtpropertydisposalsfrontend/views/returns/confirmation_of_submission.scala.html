@@ -41,7 +41,8 @@
     warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
     buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
-    link: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.link
+    link: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.link,
+    insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
 )
 
 @(justSubmittedReturn: JustSubmittedReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -257,6 +258,8 @@
       </table>
     }
   }
+
+ @insetPanel(Html(messages("account.autumn.updates.message")))
 
   @if(justSubmittedReturn.submissionResponse.charge.isEmpty && isPeriodOfAdmin) {
     <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
