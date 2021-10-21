@@ -560,7 +560,7 @@ account.home.right.title=Y cyfanswm sy’n weddill i’w dalu
 account.home.right.placeholder=Y cyfanswm sy’n ddyledus am eich holl Dreth Enillion Cyfalaf ar warediadau eiddo yn y DU a wnaed o 6 Ebrill 2020.
 account.home.button.start-a-new-return=Dechrau Ffurflen Dreth newydd
 
-account.autumn.updates.message=Os oedd y broses o werthu eiddo wedi’i chwblhau <strong class="bold">ar neu ar ôl 27 Hydref 2021</strong>, mae <strong class="bold">30 diwrnod ychwanegol</strong> bellach ar gael o’r dyddiad cau ar gyfer talu treth a ddangosir i wneud y taliad. Mae’r gwasanaeth ar-lein yn cael ei ddiweddaru ar hyn o bryd ac mae’n bosibl y bydd y dyddiad cau ar gyfer talu treth yn anghywir mewn rhai achosion yn ystod y cyfnod hwn.
+account.autumn.updates.message=Os oedd y broses o werthu eiddo wedi’i chwblhau <strong class="bold">ar neu ar ôl 27 Hydref 2021</strong>, mae <strong class="bold">30 diwrnod ychwanegol</strong> bellach ar gael o’r <strong class="bold">dyddiad cau ar gyfer talu treth a ddangosir</strong> i wneud y taliad. Mae’r gwasanaeth ar-lein yn cael ei ddiweddaru ar hyn o bryd ac mae’n bosibl y bydd y dyddiad cau ar gyfer talu treth yn anghywir mewn rhai achosion yn ystod y cyfnod hwn.
 
 account.totalLeftToPay=Y cyfanswm sy’n weddill i’w dalu
 account.make.payment.link=Gwneud taliad
