@@ -23,6 +23,7 @@ import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector.LookupAddressByPostcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -48,6 +49,8 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
     )
   )
 
+  val addresssLookupUrl = "http://host:123/lookup"
+
   val connector             = new AddressLookupConnectorImpl(
     mockHttp,
     new ServicesConfig(config)
@@ -62,16 +65,22 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
       val postcode                   = Postcode("WC1X9BH")
 
       "do a get http call and return the result" in {
+
+        val lookupAddressByPostcode = LookupAddressByPostcode(
+          postcode.value.replaceAllLiterally(" ", "").toUpperCase,
+          None
+        )
+
         List(
           HttpResponse(200, emptyJsonBody),
           HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty),
           HttpResponse(500, emptyJsonBody)
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
-            mockGetWithQueryWithHeaders(
-              s"http://host:123/v2/uk/addresses",
-              Seq("postcode"   -> postcode.value),
-              Seq("User-Agent" -> "agent")
+            mockPost(
+              addresssLookupUrl,
+              Seq("User-Agent" -> "agent"),
+              lookupAddressByPostcode
             )(Some(httpResponse))
 
             await(connector.lookupAddress(postcode, None).value) shouldBe Right(
@@ -82,12 +91,16 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
       }
 
       "include the filter in the query parameters if one is passed in" in {
-        val filter: String = "8"
-        val httpResponse   = HttpResponse(200, emptyJsonBody)
-        mockGetWithQueryWithHeaders(
-          s"http://host:123/v2/uk/addresses",
-          Seq("postcode"   -> postcode.value, "filter" -> filter),
-          Seq("User-Agent" -> "agent")
+        val filter: String          = "8"
+        val lookupAddressByPostcode = LookupAddressByPostcode(
+          postcode.value.replaceAllLiterally(" ", "").toUpperCase,
+          Some(filter)
+        )
+        val httpResponse            = HttpResponse(200, emptyJsonBody)
+        mockPost(
+          addresssLookupUrl,
+          Seq("User-Agent" -> "agent"),
+          lookupAddressByPostcode
         )(Some(httpResponse))
 
         await(
@@ -97,11 +110,16 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
 
       "get rid of all spaces and turn all lower case letters to upper case letters" in {
         val response = HttpResponse(200, emptyJsonBody)
+        val postcode = Postcode("AB12CD")
 
-        mockGetWithQueryWithHeaders(
-          s"http://host:123/v2/uk/addresses",
-          Seq(("postcode"   -> "AB12CD")),
-          Seq(("User-Agent" -> "agent"))
+        val lookupAddressByPostcode = LookupAddressByPostcode(
+          postcode.value.replaceAllLiterally(" ", "").toUpperCase,
+          None
+        )
+        mockPost(
+          addresssLookupUrl,
+          Seq(("User-Agent" -> "agent")),
+          lookupAddressByPostcode
         )(Some(response))
 
         await(
@@ -110,12 +128,16 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
       }
 
       "return an error" when {
+        val lookupAddressByPostcode = LookupAddressByPostcode(
+          postcode.value.replaceAllLiterally(" ", "").toUpperCase,
+          None
+        )
 
         "the future fails" in {
-          mockGetWithQueryWithHeaders(
-            s"http://host:123/v2/uk/addresses",
-            Seq("postcode"   -> postcode.value),
-            Seq("User-Agent" -> "agent")
+          mockPost(
+            addresssLookupUrl,
+            Seq("User-Agent" -> "agent"),
+            lookupAddressByPostcode
           )(None)
 
           await(

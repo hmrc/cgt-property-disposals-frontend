@@ -57,25 +57,17 @@ class AddressLookupConnectorImpl @Inject() (
   }
 
   override def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
-                                                                         hc: HeaderCarrier
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
-    val queryParameters = {
-      val paramMap:Map[String, String] = Map(
-        "postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase
-      )
-      filter.fold(paramMap)(f => paramMap.updated("filter", URLEncoder.encode(f, "UTF-8")))
-    }.toSeq
-
-    //val lookupAddressByPostcode = LookupAddressByPostcode(Postcode.cleanupPostcode(postcode).get.toString, filter)
 
     val lookupAddressByPostcode = LookupAddressByPostcode(
       postcode.value.replaceAllLiterally(" ", "").toUpperCase,
-      filter.fold(paramMap)(f => paramMap.updated("filter", URLEncoder.encode(f, "UTF-8")))
+      filter.map(f => URLEncoder.encode(f, "UTF-8"))
     )
 
     EitherT[Future, Error, HttpResponse](
       http
-        .GET[HttpResponse](url, queryParameters, headers)
+        .POST[LookupAddressByPostcode, HttpResponse](url, lookupAddressByPostcode, headers)
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
@@ -84,7 +76,7 @@ class AddressLookupConnectorImpl @Inject() (
 
 object AddressLookupConnector {
 
-  case class LookupAddressByPostcode(postcode: String, filter: Option[String])
+  final case class LookupAddressByPostcode(postcode: String, filter: Option[String])
 
   object LookupAddressByPostcode {
     implicit val writes: OFormat[LookupAddressByPostcode] = Json.format[LookupAddressByPostcode]
