@@ -42,6 +42,8 @@ landingPage.title=Rhoi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y DU a’i t
 landingPage.intro.p1=Efallai y bydd yn rhaid i chi dalu <a href="{0}">Treth Enillion Cyfalaf</a> os gwnewch elw (‘ennill’) wrth werthu (neu ‘<a href="{0}">waredu</a>’) eiddo nad yw’n gartref i chi. Er enghraifft, eiddo prynu i osod, tir neu eiddo etifeddol.
 landingPage.intro.p2=Yn y rhan fwyaf o achosion, nid oes angen i chi dalu’r dreth pan fyddwch yn <a href="{0}">gwerthu’ch prif gartref</a>.
 landingPage.warning=Ar gyfer gwarediadau eiddo yn y DU a wnaed o 6 Ebrill 2020 ymlaen, mae gennych 30 diwrnod ar ôl dyddiad cwblhau’r eiddo i roi gwybod am unrhyw Dreth Enillion Cyfalaf sy’n ddyledus ar eich gwarediadau eiddo yn y DU a’i thalu.
+landingPage.autumn.updates.message=Mae’n rhaid i chi roi gwybod am unrhyw Dreth Enillion Cyfalaf sy’n ddyledus ar werthiant eiddo yn y DU, a’i thalu, cyn pen;<ul class="list-bullet"><li>30 diwrnod o’i werthu, os oedd y dyddiad cwblhau rhwng 6 Ebrill 2020 a 26 Hydref 2021</li><li>60 diwrnod o’i werthu, os oedd y dyddiad cwblhau ar neu ar ôl 27 Hydref 2021</li></ul>
+
 landingPage.contents.h2=Cynnwys
 landingPage.intro.h2=Trosolwg
 landingPage.contents.list.bullet1=<a href="{0}">Trosolwg</a>
@@ -559,6 +561,9 @@ account.home.left.placeholder=Cyfanswm eich rhwymedigaeth Treth Enillion Cyfalaf
 account.home.right.title=Y cyfanswm sy’n weddill i’w dalu
 account.home.right.placeholder=Y cyfanswm sy’n ddyledus am eich holl Dreth Enillion Cyfalaf ar warediadau eiddo yn y DU a wnaed o 6 Ebrill 2020.
 account.home.button.start-a-new-return=Dechrau Ffurflen Dreth newydd
+
+account.autumn.updates.message=Os oedd y broses o werthu eiddo wedi’i chwblhau <strong class="bold">ar neu ar ôl 27 Hydref 2021</strong>, mae <strong class="bold">30 diwrnod ychwanegol</strong> bellach ar gael o’r <strong class="bold">dyddiad cau ar gyfer talu treth a ddangosir</strong> i wneud y taliad. Mae’r gwasanaeth ar-lein yn cael ei ddiweddaru ar hyn o bryd ac mae’n bosibl y bydd y dyddiad cau ar gyfer talu treth yn anghywir mewn rhai achosion yn ystod y cyfnod hwn.
+
 account.totalLeftToPay=Y cyfanswm sy’n weddill i’w dalu
 account.make.payment.link=Gwneud taliad
 account.totalLeftToPay.penalties=Mae''n cynnwys trethi, cosbau a llog sy’n ddyledus

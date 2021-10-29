@@ -10,6 +10,7 @@ landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if 
 landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
 
 landingPage.warning=For UK property disposals made from 6 April 2020, you have 30 days after the property’s completion date to report and pay any Capital Gains Tax due on your UK property disposals.
+landingPage.autumn.updates.message=You must report and pay any Capital Gains Tax due on the sale of a UK property within;<ul class="list-bullet"><li>30 days of selling it, if the completion date was between 6 April 2020 and 26 October 2021</li><li>60 days of selling it, if the completion date was on or after 27 October 2021</li></ul>
 
 landingPage.contents.h2=Contents
 landingPage.intro.h2=Overview
@@ -611,6 +612,8 @@ account.home.left.placeholder=Your total Capital Gains Tax liability for UK prop
 account.home.right.title=Total amount left to pay
 account.home.right.placeholder=The total amount due for all your Capital Gains Tax on UK property disposals made from 6 April 2020.
 account.home.button.start-a-new-return=Start new return
+
+account.autumn.updates.message=If the sale of a property was completed <strong class="bold">on or after 27 October 2021</strong>, there is now an <strong class="bold">additional 30 days</strong> from the <strong class="bold">tax due date shown</strong> to make payment. The online service is currently being updated and during this period the tax due date may be incorrect in some cases.
 
 account.totalLeftToPay=Total left to pay
 account.make.payment.link=Make a payment
