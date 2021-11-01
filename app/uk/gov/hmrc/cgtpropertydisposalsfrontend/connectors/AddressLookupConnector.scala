@@ -26,6 +26,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.libs.json.{Json, OFormat}
+import AddressLookupConnector._
 
 @ImplementedBy(classOf[AddressLookupConnectorImpl])
 trait AddressLookupConnector {
@@ -45,7 +47,7 @@ class AddressLookupConnectorImpl @Inject() (
 ) extends AddressLookupConnector {
 
   val url: String =
-    servicesConfig.baseUrl("address-lookup") + "/v2/uk/addresses"
+    servicesConfig.baseUrl("address-lookup") + "/lookup"
 
   val headers: Seq[(String, String)] = {
     val userAgent = servicesConfig.getString(
@@ -57,18 +59,27 @@ class AddressLookupConnectorImpl @Inject() (
   override def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
-    val queryParameters = {
-      val paramMap = Map(
-        "postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase
-      )
-      filter.fold(paramMap)(f => paramMap.updated("filter", URLEncoder.encode(f, "UTF-8")))
-    }.toSeq
+
+    val lookupAddressByPostcode = LookupAddressByPostcode(
+      postcode.value.replaceAllLiterally(" ", "").toUpperCase,
+      filter.map(f => URLEncoder.encode(f, "UTF-8"))
+    )
 
     EitherT[Future, Error, HttpResponse](
       http
-        .GET[HttpResponse](url, queryParameters, headers)
+        .POST[LookupAddressByPostcode, HttpResponse](url, lookupAddressByPostcode, headers)
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
   }
+}
+
+object AddressLookupConnector {
+
+  final case class LookupAddressByPostcode(postcode: String, filter: Option[String])
+
+  object LookupAddressByPostcode {
+    implicit val writes: OFormat[LookupAddressByPostcode] = Json.format[LookupAddressByPostcode]
+  }
+
 }
