@@ -4154,7 +4154,7 @@ confirmationOfSubmission.deltaChargeLabel=Updated tax liability
 
 confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>.
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
-confirmationOfSubmission.taxDue=Tax due by
+confirmationOfSubmission.taxDue=Tax due date
 
 confirmationOfSubmission.printPage=<a href="{0}">Print or save this page as a PDF</a>
 confirmationOfSubmission.agent.printPage=<a href="{0}">Print or save this page as a PDF</a>
