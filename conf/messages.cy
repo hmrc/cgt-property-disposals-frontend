@@ -584,8 +584,8 @@ returns.list.title=Ffurflenni Treth a anfonwyd
 returns.list.ref=Cyfeirnod Ffurflen Dreth:
 returns.list.view=Bwrw golwg dros neu newid Ffurflen Dreth
 returns.list.viewAndPay=Bwrw golwg dros, talu neu newid Ffurflen Dreth
-returns.list.paymentDue=Taliad sy’n ddyledus
-returns.list.nextPaymentDue=Taliad nesaf yn ddyledus
+returns.list.paymentDue=Dyddiad cau ar gyfer talu treth
+returns.list.nextPaymentDue=Y dyddiad cau nesaf ar gyfer talu treth
 returns.list.noTaxDue=Nid oedd unrhyw dreth yn ddyledus gennych am y Ffurflen Dreth hon
 returns.list.leftToPay=Y cyfanswm sy’n weddill i’w dalu
 returns.list.taxOwed=Treth sy’n ddyledus ar gyfer y Ffurflen Dreth
@@ -3637,13 +3637,13 @@ confirmationOfSubmission.returnReference=Cyfeirnod y Ffurflen Dreth
 confirmationOfSubmission.paymentReference=Cyfeirnod y Ffurflen Dreth
 confirmationOfSubmission.propertyAddress=Cyfeiriad yr eiddo
 confirmationOfSubmission.companyAddress=Cyfeiriad y cwmni
-confirmationOfSubmission.dateDue=Dyddiad dyledus
+confirmationOfSubmission.dateDue=Dyddiad cau ar gyfer talu treth
 confirmationOfSubmission.amount=Swm
 confirmationOfSubmission.chargeLabel=Taliad treth
 confirmationOfSubmission.deltaChargeLabel=Rhwymedigaeth treth ddiweddaredig
 confirmationOfSubmission.emailSent=Rydym wedi anfon e-bost cadarnhau i <strong class="bold">{0}</strong>.
 confirmationOfSubmission.sentToHmrc=Ffurflen Dreth wedi’i hanfon i CThEM
-confirmationOfSubmission.taxDue=Treth yn ddyledus erbyn
+confirmationOfSubmission.taxDue=Dyddiad cau ar gyfer talu treth
 confirmationOfSubmission.printPage=<a href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
 confirmationOfSubmission.agent.printPage=<a href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
 confirmationOfSubmission.trust.printPage=<a href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
@@ -3739,7 +3739,7 @@ viewReturn.heading.payment.reference=Cyfeirnod y taliad
 viewReturn.printLink=Ewch ati i argraffu neu gadw’r dudalen hon ar gyfer eich cofnodion
 viewReturn.charges.heading=Taliadau
 viewReturn.charges.description=Disgrifiad
-viewReturn.charges.payBy=Dyddiad cau ar gyfer talu
+viewReturn.charges.payBy=Dyddiad cau ar gyfer talu treth
 viewReturn.charges.amount=Swm
 viewReturn.charges.due=Yn ddyledus
 viewReturn.charges.status=Statws
