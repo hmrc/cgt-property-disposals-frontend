@@ -638,8 +638,8 @@ returns.list.title=Sent returns
 returns.list.ref=Return reference:
 returns.list.view=View or change return
 returns.list.viewAndPay=View, pay or change return
-returns.list.paymentDue=Payment due
-returns.list.nextPaymentDue=Next payment due
+returns.list.paymentDue=Tax due date
+returns.list.nextPaymentDue=Next tax due date
 returns.list.noTaxDue=You did not owe any tax for this return
 returns.list.leftToPay=Total left to pay
 returns.list.taxOwed=Tax owed for return
@@ -4147,14 +4147,14 @@ confirmationOfSubmission.returnReference=Return reference number
 confirmationOfSubmission.paymentReference=Payment reference number
 confirmationOfSubmission.propertyAddress=Property address
 confirmationOfSubmission.companyAddress=Company address
-confirmationOfSubmission.dateDue=Date due
+confirmationOfSubmission.dateDue=Tax due date
 confirmationOfSubmission.amount=Amount
 confirmationOfSubmission.chargeLabel=Tax payment
 confirmationOfSubmission.deltaChargeLabel=Updated tax liability
 
 confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>.
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
-confirmationOfSubmission.taxDue=Tax due by
+confirmationOfSubmission.taxDue=Tax due date
 
 confirmationOfSubmission.printPage=<a href="{0}">Print or save this page as a PDF</a>
 confirmationOfSubmission.agent.printPage=<a href="{0}">Print or save this page as a PDF</a>
@@ -4257,7 +4257,7 @@ viewReturn.heading.payment.reference=Payment reference number
 viewReturn.printLink=Print or save this page for your records
 viewReturn.charges.heading=Payments
 viewReturn.charges.description=Description
-viewReturn.charges.payBy=Pay by
+viewReturn.charges.payBy=Tax due date
 viewReturn.charges.amount=Amount
 viewReturn.charges.due=Due
 viewReturn.charges.status=Status
