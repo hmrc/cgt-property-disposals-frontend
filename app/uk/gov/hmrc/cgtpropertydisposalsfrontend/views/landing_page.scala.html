@@ -22,8 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
 )
 
 @()(implicit messages: Messages, appConfig: ViewConfig, request: Request[_])
@@ -83,7 +82,7 @@
 
     <p>@Html(messages("landingPage.intro.p2", appConfig.taxSellHomeUrl))</p>
 
-    @insetPanel(Html(messages("landingPage.autumn.updates.message")))
+    <p>@messages("landingPage.warning")</p>
 
     <h2 class="heading-medium" id="howTo">@messages("landingPage.howTo.h2")</h2>
 
