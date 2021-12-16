@@ -31,7 +31,7 @@ object Address {
 
   val addressLineAllowedCharacters: List[Char] =
     ('A' to 'Z').toList ::: ('a' to 'z').toList ::: ('0' to '9').toList :::
-      List(' ', '-', ',', '.', '&', '\'')
+      List(' ', '-', ',', '.', '&', '\'', '/')
 
   val addressLineMaxLength: Int = 35
 
