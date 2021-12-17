@@ -136,7 +136,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
 
         val sanitisedAddress = UkAddress(
           "line1 abc",
-          Some("line2, abcdef"),
+          Some("line2, abc/def"),
           Some("line3  abc"),
           Some("line4 1"),
           Postcode("abc")
@@ -168,7 +168,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
 
         val sanitisedAddress = NonUkAddress(
           "line1 abc",
-          Some("line2, abcdef"),
+          Some("line2, abc/def"),
           Some("line3  abc"),
           Some("line4 1"),
           Some("abc"),
