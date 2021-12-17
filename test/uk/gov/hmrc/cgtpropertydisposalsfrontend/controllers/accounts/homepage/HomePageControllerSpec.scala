@@ -248,7 +248,6 @@ class HomePageControllerSpec
       // button on the page for us to check which message it has
       val callToActionButton    = "#content a.button"
       val resumeDraftMessage    = "drafts.list.resume"
-      //val viewAndPayMessage     = "returns.list.viewAndPay"
       val makePaymentMessage    = "account.make.payment.link"
       val startNewReturnMessage = "account.home.button.start-a-new-return"
 
