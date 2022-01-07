@@ -15,6 +15,7 @@
  *@
 
 @import play.api.i18n.Messages
+@import play.twirl.api.Html
 
 @import cats.syntax.order._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
@@ -56,12 +57,16 @@
 </h2>
 
 @if(totalLeftToPay > AmountInPence.zero) {
-  <a aria-describedby="payment-information" href="@homepage.routes.HomePageController.payTotalAmountLeftToPay()">
+  <a aria-describedby="payment-information"
+     class="button"
+     role="button"
+     href="@homepage.routes.HomePageController.payTotalAmountLeftToPay()">
     @messages("account.make.payment.link")
   </a>
 }
 <p>
-  <span class="caption" id="payment-information">
-    @messages("account.totalLeftToPay.payments")
+  <br/>
+  <span id="payment-information">
+    @Html(messages("account.totalLeftToPay.payments"))
   </span>
 </p>

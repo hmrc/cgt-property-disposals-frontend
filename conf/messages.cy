@@ -567,7 +567,7 @@ account.autumn.updates.message=Os oedd y broses o werthu eiddo wedi’i chwblhau
 account.totalLeftToPay=Y cyfanswm sy’n weddill i’w dalu
 account.make.payment.link=Gwneud taliad
 account.totalLeftToPay.penalties=Mae''n cynnwys trethi, cosbau a llog sy’n ddyledus
-account.totalLeftToPay.payments=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yn eich cyfrif
+account.totalLeftToPay.payments=<strong class="bold">Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yn eich cyfrif</strong>
 account.manageYourDetails.title=Rheoli’r cyfrif
 account.manageYourDetails.subtitle=Rhif y cyfrif
 account.manageYourDetails.accountName=Enw’r cyfrif

@@ -248,7 +248,7 @@ class HomePageControllerSpec
       // button on the page for us to check which message it has
       val callToActionButton    = "#content a.button"
       val resumeDraftMessage    = "drafts.list.resume"
-      val viewAndPayMessage     = "returns.list.viewAndPay"
+      val makePaymentMessage    = "account.make.payment.link"
       val startNewReturnMessage = "account.home.button.start-a-new-return"
 
       "display the resume draft link as a button when there is a draft and no sent returns" in {
@@ -450,9 +450,7 @@ class HomePageControllerSpec
             doc
               .select(callToActionButton)
               .text shouldBe
-              messageFromMessageKey(
-                resumeDraftMessage
-              )
+              s"${messageFromMessageKey(makePaymentMessage)} ${messageFromMessageKey(resumeDraftMessage)}"
         )
       }
 
@@ -495,7 +493,7 @@ class HomePageControllerSpec
               .select(callToActionButton)
               .text shouldBe
               messageFromMessageKey(
-                viewAndPayMessage
+                makePaymentMessage
               )
         )
       }
@@ -531,7 +529,7 @@ class HomePageControllerSpec
               .select(callToActionButton)
               .text shouldBe
               messageFromMessageKey(
-                viewAndPayMessage
+                makePaymentMessage
               )
         )
       }
