@@ -185,4 +185,9 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val selfAssessmentTaxReturnsCorrections: String = getString("external-url.sa-tax-returns-corrections")
 
   val numberOfTaxYearsForReturns: Long = servicesConfig.getInt("returns-number-of-tax-years").toLong
+
+  val draftReturnNewDueDateStartYear: Int  = servicesConfig.getInt("draft-return.new-due-date.start-year")
+  val draftReturnNewDueDateStartMonth: Int = servicesConfig.getInt("draft-return.new-due-date.start-month")
+  val draftReturnNewDueDateStartDay: Int   = servicesConfig.getInt("draft-return.new-due-date.start-day")
+
 }
