@@ -76,7 +76,7 @@
 }
 
 @dueDate = @{
-    val dueDateChecker = LocalDate.of(appConfig.draftReturnNewDueDateStartYear, appConfig.draftReturnNewDueDateStartMonth, appConfig.draftReturnNewDueDateStartDay)
+    val dueDateChecker = LocalDate.of(appConfig.draftReturnNewDueDateStartYear, appConfig.draftReturnNewDueDateStartMonth, appConfig.draftReturnNewDueDateStartDay-1)
 
     completionDate._1.map{d =>
         if(d.isAfter(dueDateChecker)){
