@@ -611,7 +611,7 @@ class HomePageControllerSpec
           case _                                      => sys.error("Error")
         }
 
-        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(30)
+        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(60)
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -668,7 +668,7 @@ class HomePageControllerSpec
           case _                                      => sys.error("Error")
         }
 
-        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(30)
+        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(60)
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -749,6 +749,174 @@ class HomePageControllerSpec
               .select(s"#draftReturn-${sampleDraftReturn.id} > h4")
               .text() shouldBe empty
           }
+        )
+      }
+
+      "display draft returns with 30days as due date on the home page" in {
+        val propertyAddress   = sample[UkAddress]
+        val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(LocalDate.of(2021, 10, 27).minusMonths(1)))
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers,
+          lastUpdatedDate = LocalDate.now(),
+          propertyAddress = Some(propertyAddress)
+        )
+        val subscribed        =
+          sample[Subscribed].copy(draftReturns = List(sampleDraftReturn))
+
+        val completionDate: LocalDate = sampleDraftReturn.triageAnswers match {
+          case a: CompleteSingleDisposalTriageAnswers => a.completionDate.value
+          case _                                      => sys.error("Error")
+        }
+
+        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(30)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(s"#draftReturnsendAndPayBy-${sampleDraftReturn.id} > h4")
+              .text() shouldBe
+              messages(
+                "drafts.list.sendAndPayBy"
+              ) + " " + govShortDisplayFormat(expectedDraftReturnSendAndPayBy)
+        )
+      }
+
+      "display draft returns with 60days as due date on the home page" in {
+        val propertyAddress   = sample[UkAddress]
+        val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(LocalDate.of(2021, 10, 27).plusMonths(1)))
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers,
+          lastUpdatedDate = LocalDate.now(),
+          propertyAddress = Some(propertyAddress)
+        )
+        val subscribed        =
+          sample[Subscribed].copy(draftReturns = List(sampleDraftReturn))
+
+        val completionDate: LocalDate = sampleDraftReturn.triageAnswers match {
+          case a: CompleteSingleDisposalTriageAnswers => a.completionDate.value
+          case _                                      => sys.error("Error")
+        }
+
+        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(60)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(s"#draftReturnsendAndPayBy-${sampleDraftReturn.id} > h4")
+              .text() shouldBe
+              messages(
+                "drafts.list.sendAndPayBy"
+              ) + " " + govShortDisplayFormat(expectedDraftReturnSendAndPayBy)
+        )
+      }
+
+      "display draft returns with 30days as due date on the home page when completion date is 26-Oct-2021" in {
+        val propertyAddress   = sample[UkAddress]
+        val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(LocalDate.of(2021, 10, 26)))
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers,
+          lastUpdatedDate = LocalDate.now(),
+          propertyAddress = Some(propertyAddress)
+        )
+        val subscribed        =
+          sample[Subscribed].copy(draftReturns = List(sampleDraftReturn))
+
+        val completionDate: LocalDate = sampleDraftReturn.triageAnswers match {
+          case a: CompleteSingleDisposalTriageAnswers => a.completionDate.value
+          case _                                      => sys.error("Error")
+        }
+
+        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(30)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(s"#draftReturnsendAndPayBy-${sampleDraftReturn.id} > h4")
+              .text() shouldBe
+              messages(
+                "drafts.list.sendAndPayBy"
+              ) + " " + govShortDisplayFormat(expectedDraftReturnSendAndPayBy)
+        )
+      }
+
+      "display draft returns with 60days as due date on the home page when completion date is 27-Oct-2021" in {
+        val propertyAddress   = sample[UkAddress]
+        val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(LocalDate.of(2021, 10, 27)))
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers,
+          lastUpdatedDate = LocalDate.now(),
+          propertyAddress = Some(propertyAddress)
+        )
+        val subscribed        =
+          sample[Subscribed].copy(draftReturns = List(sampleDraftReturn))
+
+        val completionDate: LocalDate = sampleDraftReturn.triageAnswers match {
+          case a: CompleteSingleDisposalTriageAnswers => a.completionDate.value
+          case _                                      => sys.error("Error")
+        }
+
+        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(60)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(s"#draftReturnsendAndPayBy-${sampleDraftReturn.id} > h4")
+              .text() shouldBe
+              messages(
+                "drafts.list.sendAndPayBy"
+              ) + " " + govShortDisplayFormat(expectedDraftReturnSendAndPayBy)
         )
       }
 

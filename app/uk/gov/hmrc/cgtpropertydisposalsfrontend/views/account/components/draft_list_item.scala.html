@@ -15,15 +15,16 @@
  *@
 
 @import play.api.i18n.Messages
-
+@import java.time.LocalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
 @this()
 
-@(draftReturn: DraftReturn, showButtonOnDraftReturn: Boolean)(implicit messages: Messages)
+@(draftReturn: DraftReturn, showButtonOnDraftReturn: Boolean)(implicit messages: Messages, appConfig: ViewConfig)
 
 @key = @{draftReturn.id}
 @completionDate =  @{draftReturn.fold(
@@ -74,7 +75,17 @@
             })
 }
 
-@dueDate = @{completionDate._1.map(d => d.plusDays(30L))}
+@dueDate = @{
+    val dueDateChecker = LocalDate.of(appConfig.draftReturnNewDueDateStartYear, appConfig.draftReturnNewDueDateStartMonth, appConfig.draftReturnNewDueDateStartDay-1)
+
+    completionDate._1.map{d =>
+        if(d.isAfter(dueDateChecker)){
+            d.plusDays(60L)
+        } else {
+            d.plusDays(30L)
+        }
+    }
+}
 
 @getAddressLines(a: Address) = @{
   a.getAddressLines.drop(1).mkString(", ") -> a.getAddressLines.headOption.getOrElse("")

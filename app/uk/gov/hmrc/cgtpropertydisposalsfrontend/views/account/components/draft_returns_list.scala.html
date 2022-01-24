@@ -15,16 +15,15 @@
  *@
 
 @import play.api.i18n.Messages
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 
 @this(
-        draftListItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_item,
-        draftReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_header
+   draftListItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_item,
+   draftReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_header
 )
 
-
-@(draftReturns: List[DraftReturn], showButtonOnDraftReturn: Boolean)(implicit messages:Messages)
+@(draftReturns: List[DraftReturn], showButtonOnDraftReturn: Boolean)(implicit messages:Messages, appConfig: ViewConfig)
 
 @draftReturnsHeader()
 
