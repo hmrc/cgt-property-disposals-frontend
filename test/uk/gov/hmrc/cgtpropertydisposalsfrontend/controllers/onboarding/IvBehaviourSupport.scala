@@ -58,7 +58,7 @@ trait IvBehaviourSupport { this: ControllerSpec =>
 
     checkIsRedirect(
       result,
-      s"$ivUrl/mdtp/uplift?" +
+      s"$ivUrl/uplift?" +
         s"origin=$ivOrigin&" +
         s"confidenceLevel=200&" +
         s"completionURL=${urlEncode(expectedCompletionUrl)}&" +
