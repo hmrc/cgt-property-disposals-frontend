@@ -48,7 +48,7 @@ trait IvBehaviour {
       (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
   }
 
-  val redirectToIvUrl: String = s"$ivUrl/mdtp/uplift"
+  val redirectToIvUrl: String = s"$ivUrl/uplift"
 
   val redirectToIv: Result =
     Redirect(
