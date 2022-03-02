@@ -464,7 +464,7 @@ class DisposalDetailsControllerSpec
             messageFromMessageKey(s"shareOfProperty$userMsgKey.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -1298,7 +1298,7 @@ class DisposalDetailsControllerSpec
             messageFromMessageKey(s"$key$userKey$disposalMethodKey.title"),
             doc => {
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text()       shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -1951,7 +1951,7 @@ class DisposalDetailsControllerSpec
             messageFromMessageKey(s"$key$userKey.indirect$disposalMethodKey.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -2689,7 +2689,7 @@ class DisposalDetailsControllerSpec
             messageFromMessageKey(s"disposalFees$userKey.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),

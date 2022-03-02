@@ -435,7 +435,7 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -517,7 +517,7 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -775,7 +775,7 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -971,7 +971,7 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -1533,7 +1533,7 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -1716,7 +1716,7 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -2307,7 +2307,7 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -2791,7 +2791,7 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),

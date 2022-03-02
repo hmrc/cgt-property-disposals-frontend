@@ -26,7 +26,8 @@
 
 
 @govukErrorSummary(ErrorSummary(
-  title = Text("Hello, " + messages("error.summary.heading")),
+  title = Text(messages("error.summary.heading")),
+  attributes = Map("data-spec" -> "errorSummaryDisplay"),
   errorList = form.errors.map { error =>
       ErrorLink(
       href = Some(s"#${error.key}"),

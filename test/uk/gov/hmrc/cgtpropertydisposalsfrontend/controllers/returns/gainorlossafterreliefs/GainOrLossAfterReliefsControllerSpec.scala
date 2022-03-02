@@ -892,7 +892,7 @@ class GainOrLossAfterReliefsControllerSpec
             messageFromMessageKey(pageTitleKey),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),

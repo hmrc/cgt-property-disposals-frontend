@@ -597,7 +597,7 @@ class CommonTriageQuestionsControllerSpec
             messageFromMessageKey("who-are-you-reporting-for.title"),
             { doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text()                          shouldBe messageFromMessageKey(expectedErrorKey)
               doc.title()                          should startWith("Error:")
               doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.continue")
@@ -1275,7 +1275,7 @@ class CommonTriageQuestionsControllerSpec
             messageFromMessageKey("numberOfProperties.title"),
             { doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(expectedErrorKey)
 
               doc
@@ -1679,7 +1679,7 @@ class CommonTriageQuestionsControllerSpec
             messageFromMessageKey("numberOfProperties.title"),
             { doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(expectedErrorKey)
 
               doc
@@ -3069,7 +3069,7 @@ class CommonTriageQuestionsControllerSpec
             ),
             { doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorKey,
                 startDateInclusive.getYear.toString,
@@ -3337,7 +3337,7 @@ class CommonTriageQuestionsControllerSpec
             ),
             { doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorKey,
                 startDateInclusive.getYear.toString,

@@ -172,7 +172,7 @@ class SupportingEvidenceControllerSpec
       messageFromMessageKey(pageTitleKey, titleArgs: _*),
       { doc =>
         doc
-          .select("#error-summary-display > ul > li > a")
+          .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*

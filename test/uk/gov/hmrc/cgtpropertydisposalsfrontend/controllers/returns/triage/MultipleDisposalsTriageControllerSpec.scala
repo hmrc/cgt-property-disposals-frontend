@@ -248,7 +248,7 @@ class MultipleDisposalsTriageControllerSpec
       messageFromMessageKey(pageTitleKey, titleArgs),
       { doc =>
         doc
-          .select("#error-summary-display > ul > li > a")
+          .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*
@@ -1215,7 +1215,7 @@ class MultipleDisposalsTriageControllerSpec
                 messageFromMessageKey(s"$key${displayType.getSubKey(separatePeriodOfAdminKey = true)}.title"),
                 doc =>
                   doc
-                    .select("#error-summary-display > ul > li > a")
+                    .select("[data-spec='errorSummaryDisplay'] a")
                     .text() shouldBe messageFromMessageKey(
                     s"$key${displayType.getSubKey(separatePeriodOfAdminKey = true)}.error.required"
                   ),
@@ -1617,7 +1617,7 @@ class MultipleDisposalsTriageControllerSpec
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 s"$key.error.required"
               ),
@@ -2189,7 +2189,7 @@ class MultipleDisposalsTriageControllerSpec
             messageFromMessageKey(s"$key.title"),
             { doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 s"$key.error.required"
               )
@@ -2733,7 +2733,7 @@ class MultipleDisposalsTriageControllerSpec
             messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"),
             { doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 s"$key.error.required"
               )
@@ -2763,7 +2763,7 @@ class MultipleDisposalsTriageControllerSpec
             messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"),
             { doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 s"$key.error.notFound"
               )
@@ -3260,7 +3260,7 @@ class MultipleDisposalsTriageControllerSpec
                 ),
                 { doc =>
                   doc
-                    .select("#error-summary-display > ul > li > a")
+                    .select("[data-spec='errorSummaryDisplay'] a")
                     .text() shouldBe messageFromMessageKey(
                     s"$key${displayType.getSubKey(separatePeriodOfAdminKey = true)}.error.required"
                   )
@@ -3517,7 +3517,7 @@ class MultipleDisposalsTriageControllerSpec
             messageFromMessageKey("multipleDisposalsCompletionDate.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
                 args
@@ -3934,7 +3934,7 @@ class MultipleDisposalsTriageControllerSpec
             messageFromMessageKey("sharesDisposalDate.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
