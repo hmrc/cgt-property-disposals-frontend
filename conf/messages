@@ -186,7 +186,7 @@ timed-out.button=Sign in
 
 recruitment-banner.message=Help improve HMRC services on GOV.UK
 recruitment-banner.dismiss=No thanks
-recruitment-banner.link=Help make this service better by <a target="_blank" rel="noreferrer noopener" href="{0}">joining the HMRC user research panel (opens in a new window)</a>. This usually involves being interviewed for your feedback and suggestions. Research participants are normally compensated for their time.
+recruitment-banner.link=Help make this service better by <a target="_blank" rel="noreferrer noopener" href="{0}">joining the HMRC user research panel (opens in a new tab)</a>. This usually involves being interviewed for your feedback and suggestions. Research participants are normally compensated for their time.
 
 accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
 accessibilityStatement.title=Accessibility statement
@@ -208,7 +208,7 @@ accessibilityStatement.howAccessible.title=How accessible this service is
 accessibilityStatement.howAccessible.p1=HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
 accessibilityStatement.howAccessible.p2=This service was tested on 15 May 2020 by the Digital Accessibility Centre. It was found to be compliant with the <a href="{0}">Web Content Accessibility Guidelines version 2.1 AAA standard</a>. Since then, it has been extended. We cannot be certain that it is fully compliant. The full service will be tested by HMRC within the next three months.
 accessibilityStatement.reportingProblems.title=Reporting accessibility problems with this service
-accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a href="{0}" target="_blank">accessibility problem (opens in a new window or tab)</a>.
+accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a href="{0}" target="_blank">accessibility problem (opens in a new tab)</a>.
 accessibilityStatement.notHappy.title=What to do if you are not happy with how we respond to your complaint
 accessibilityStatement.notHappy.p1=The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint, <a href="{0}">contact the Equality Advisory and Support Service (EASS)</a>, or the <a href="{1}">Equality Commission for Northern Ireland (ECNI)</a> if you live in Northern Ireland.
 accessibilityStatement.contactingUs.title=Contacting us by phone or getting a visit from us in person
@@ -511,9 +511,9 @@ enterTrn.tooManyAttempts.title=You’ll need to wait and try again
 enterTrn.tooManyAttempts.p1=You’ve tried to enter your Trust Registration Number and trust name too many times.
 enterTrn.tooManyAttempts.p2=You’ll need to wait 2 hours and try again.
 enterTrn.whatATrnIs=What a Trust Registration Number is
-enterTrn.whatATrnIs.p1=HMRC sends this number to the person who <a href="{0}" target="_blank">registers the trust (opens in a new window)</a>.
+enterTrn.whatATrnIs.p1=HMRC sends this number to the person who <a href="{0}" target="_blank">registers the trust (opens in a new tab)</a>.
 enterTrn.ifYouCannotFind=If you cannot find it
-enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Trust Registration Number number, you can <a href="{0}" target="_blank">contact HMRC (opens in a new window)</a>.
+enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Trust Registration Number number, you can <a href="{0}" target="_blank">contact HMRC (opens in a new tab)</a>.
 
 enterTrustName.label=Name of trust
 trustName.error.required=Enter the name of your trust
@@ -624,8 +624,8 @@ account.manageYourDetails.subtitle=Account number
 account.manageYourDetails.accountName=Account name
 account.manageYourDetails.contactHeading=Contact person’s details
 account.manageYourDetails.p=We only use these details if we need to get in contact about this service.
-account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
-account.manageYourDetails.organisation.p2=If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
+account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new tab)</a>.
+account.manageYourDetails.organisation.p2=If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new tab)</a>.
 account.manageYourDetails.yourName=Your name
 account.manageYourDetails.ContactName.changed=Contact name changed
 account.manageYourDetails.Email.changed=Contact email address changed
@@ -846,12 +846,12 @@ selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p1=Someone has already
 
 selfAssessmentAlreadySubmitted.whatNext=What you’ll need to do next
 
-selfAssessmentAlreadySubmitted.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank">change your Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
-selfAssessmentAlreadySubmitted.agent.p2=You’ll need to <a href="{0}" target="_blank">change your client’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
-selfAssessmentAlreadySubmitted.trust.p2=You’ll need to <a href="{0}" target="_blank">change the trust’s Self Assessment: Trust and Estate tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
-selfAssessmentAlreadySubmitted.capacitor.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
-selfAssessmentAlreadySubmitted.personalRep.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
-selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=You’ll need to <a href="{0}" target="_blank">change the person’s Self Assessment tax return</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank">change your Self Assessment tax return (opens in a new tab)</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.agent.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank">change your client’s Self Assessment tax return (opens in a new tab)</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.trust.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank">change the trust’s Self Assessment: Trust and Estate tax return (opens in a new tab)</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.capacitor.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank">change the person’s Self Assessment tax return (opens in a new tab)</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.personalRep.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank">change the person’s Self Assessment tax return (opens in a new tab)</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank">change the person’s Self Assessment tax return (opens in a new tab)</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 #===================================================
 #  Self-Assessment SA - END
 #===================================================
@@ -908,12 +908,12 @@ wereYouAUKResident.trust.details=If the trust was a non-resident and made an ind
 wereYouAUKResident.capacitor.details=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
 wereYouAUKResident.personalRep.details=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
 
-wereYouAUKResident.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
-wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>
-wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new window)</a>
-wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
-wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
-wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new tab)</a>
+wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new tab)</a>
+wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new tab)</a>
+wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>
+wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>
+wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>
 
 wereYouAUKResident.error.required=Select yes if you were a UK resident when you exchanged contracts
 wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you exchanged contracts
@@ -943,12 +943,12 @@ triage.enterCountry.trust.helpText=It’s usually the day the trust and the new 
 triage.enterCountry.capacitor.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.personalRep.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 
-triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
-triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>.
-triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
-triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
-triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
-triage.enterCountry.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new tab)</a>
+triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new tab)</a>.
+triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status (opens in a new tab)</a>.
+triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
+triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
+triage.enterCountry.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell or dispose of?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
@@ -1035,7 +1035,7 @@ didYouDisposeOfResidentialProperty.details.p1=Residential property includes:
 didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or could live, like a house, flat or other type of dwelling
 didYouDisposeOfResidentialProperty.details.l2=a building that is being built or changed so it can be used as a place where someone could live
 didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
-didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Read a definition of residential property (opens in a new window)</a>.
+didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Read a definition of residential property (opens in a new tab)</a>.
 
 didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a UK residential property
 didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a UK residential property
@@ -1078,7 +1078,7 @@ disposalDate.capacitor.helpText=It’s usually when a buyer and seller swap cont
 disposalDate.personalRep.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 disposalDate.personalRepInPeriodOfAdmin.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 
-disposalDate.link=<a class="govuk-link" href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>
+disposalDate.link=<a class="govuk-link" href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new tab)</a>
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
@@ -1112,7 +1112,7 @@ completionDate.capacitor.helpText=It’s usually when the money from the propert
 completionDate.personalRep.helpText=It’s usually when the money from the property sale was transferred and the new owner got the keys. For example, 25 4 2020.
 completionDate.personalRepInPeriodOfAdmin.helpText=It’s usually when the money from the property sale was transferred and the new owner got the keys. For example, 25 4 2020.
 
-completionDate.link=<a class="govuk-link" href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>
+completionDate.link=<a class="govuk-link" href="{0}" target="_blank">Find out what happens on the completion date (opens in a new tab)</a>
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
 completionDate.error.tooFarInPast=Completion date must be on or after contract exchange date, {0}
@@ -1139,7 +1139,8 @@ disposalDateTooEarly.non-uk.p3=You’ll need to complete a <a class="govuk-link"
 
 disposalDateTooEarly.uk.title=You cannot use this service
 disposalDateTooEarly.uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
-disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
+disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a class="govuk-link" href="{0}">UK property sales or disposals before 6 April 2020</a>.
+disposalDateTooEarly.uk.p2.link=
 
 triage.check-your-answers.title=Check your answers
 triage.cyaChange.countryOfResidence=your country of residence on the day you ‘exchanged’ contracts
@@ -1170,7 +1171,7 @@ multiple-disposals.guidance.p3=You must send separate returns if the contract ex
 multiple-disposals.guidance.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
 multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property.
 multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
-multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
+multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new tab)</a>.
 
 multipleDisposalsNumberOfProperties.title=How many disposals are you including in this return?
 multipleDisposalsNumberOfProperties.p1=The property disposals must all have the same ‘completion’ date. The contract ‘exchange’ dates must all be in the same tax year.
@@ -1178,7 +1179,7 @@ multipleDisposalsNumberOfProperties.p2=If you are reporting the sale of shares e
 multipleDisposalsNumberOfProperties.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
 multipleDisposalsNumberOfProperties.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
 multipleDisposalsNumberOfProperties.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
-multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
+multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new tab)</a>.
 
 multipleDisposalsNumberOfProperties.error.invalid=Amount of disposals must be a number
 multipleDisposalsNumberOfProperties.error.required=Enter the number of disposals you are including in this return
@@ -1195,12 +1196,12 @@ multipleDisposalsWereYouAUKResident.personalRep.title=Was the person a UK reside
 multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.title=Was the person a UK resident for the tax year in which they died?
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
 
-multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
-multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>
-multipleDisposalsWereYouAUKResident.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>
-multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new window)</a>
-multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new window)</a>
-multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the persons’s residence status for a tax year (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new tab)</a>
+multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new tab)</a>
+multipleDisposalsWereYouAUKResident.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status (opens in a new tab)</a>
+multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new tab)</a>
+multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new tab)</a>
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the persons’s residence status for a tax year (opens in a new tab)</a>
 
 multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.error.boolean=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
@@ -1250,7 +1251,7 @@ multipleDisposalsTaxYear.taxyear.2020=All between 6 April 2020 and 5 April 2021
 multipleDisposalsTaxYear.taxyear.before2020=All before 6 April 2020
 multipleDisposalsTaxYear.taxyear.different=The properties were exchanged in different tax years
 
-multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
+multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new tab)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
 multipleDisposalsTaxYear.error.before.invalid=The exchange dates must be either in the same tax year as the date of death or a previous tax year
 multipleDisposalsTaxYear.error.after.invalid=The exchange dates must be either in the same tax year as the date of death or a later tax year
@@ -1260,7 +1261,7 @@ multipleDisposalsExchangedInDifferentTaxYears.title=You cannot use this service
 multipleDisposalsExchangedInDifferentTaxYears.p1=This is because you can only submit a return for properties that were exchanged in a single tax year.
 multipleDisposalsExchangedInDifferentTaxYears.p2=For example, if you exchanged one property in the tax year 2020 to 2021 and another in the tax year 2021 to 2022, you cannot submit them in the same return.
 multipleDisposalsExchangedInDifferentTaxYears.whatNext=What you’ll need to do next
-multipleDisposalsExchangedInDifferentTaxYears.p3=<a href="{0}">Start again</a> and submit a separate return for each tax year.
+multipleDisposalsExchangedInDifferentTaxYears.p3=<a class="govuk-link" href="{0}">Start again</a> and submit a separate return for each tax year.
 
 multipleDisposalsAssetTypeForNonUkResidents.title=What types of property or assets did you dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.agent.title=What types of property or assets did your client dispose of?
@@ -1310,7 +1311,7 @@ multipleDisposalsAssetTypeForNonUkResidents.cyaChange=the types of property or a
 multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
 multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.
 multipleDisposalsCompletionDate.details.summary=What happens on the ‘completion’ date?
-multipleDisposalsCompletionDate.details.p1=The <a href="{0}" target=_blank>‘completion’ date (opens in a new window)</a> is usually the day the new owner gets the keys to the property.
+multipleDisposalsCompletionDate.details.p1=The <a class="govuk-link" href="{0}" target="_blank">‘completion’ date (opens in a new tab)</a> is usually the day the new owner gets the keys to the property.
 multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
@@ -2504,7 +2505,7 @@ acquisitionFees.trust.indirect.rebased.helpText=For example, the cost of paying 
 acquisitionFees.capacitor.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
 acquisitionFees.personalRep.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
 
-acquisitionFees.allowableCostsLinkText=<a href="{0}" target="_blank">Find out about additional allowable costs (opens in a new window)</a>
+acquisitionFees.allowableCostsLinkText=<a href="{0}" target="_blank">Find out about additional allowable costs (opens in a new tab)</a>
 acquisitionFees.details.header=What is rebasing?
 
 acquisitionFees.details.p1=You owned the property on or before {0}.
@@ -2528,7 +2529,7 @@ acquisitionFees.indirect.agent.p2=To work out your client’s Capital Gains Tax,
 acquisitionFees.indirect.trust.details.p2=To work out the trust’s Capital Gains Tax, you must use the market value of the shares on that date. This is instead of using the actual purchase or acquisition amount.
 
 acquisitionFees.details.p3=This process is called rebasing.
-acquisitionFees.non-resident.details.p3=This process is called <a href="{0}" target="_blank">rebasing (opens in a new window)</a>.
+acquisitionFees.non-resident.details.p3=This process is called <a href="{0}" target="_blank">rebasing (opens in a new tab)</a>.
 
 acquisitionFees.cyaChange=if there were any additional acquisition costs
 acquisitionFees.rebased.cyaChange=if there were any additional rebasing costs
@@ -2601,10 +2602,10 @@ rebaseAcquisitionPrice.trust.dropdown.p2=To work out the trust’s gain or loss,
 rebaseAcquisitionPrice.capacitor.dropdown.p2=To work out the person’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 rebaseAcquisitionPrice.personalRep.dropdown.p2=To work out the person’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 
-rebaseAcquisitionPrice.indirect.dropdown.p2=<a href="{0}" target="_blank">Learn about rebasing (opens in a new window or tab)</a>
+rebaseAcquisitionPrice.indirect.dropdown.p2=<a href="{0}" target="_blank">Learn about rebasing (opens in a new tab)</a>
 
 rebaseAcquisitionPrice.dropdown.p3=This process is called rebasing.
-rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to ask HMRC to check a property’s market value (opens in a new window)</a>.
+rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to ask HMRC to check a property’s market value (opens in a new tab)</a>.
 
 rebaseAcquisitionPrice.dropdown.p5=It takes at least 3 months for HMRC to check a property’s market value. This means you should enter an estimate now and if you need to amend the amount do it later using this service. Or if you already complete a Self Assessment tax return you can provide the correct market value in your next Self Assessment.
 rebaseAcquisitionPrice.agent.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so your client can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
@@ -2772,7 +2773,7 @@ privateResidentsRelief.details.body.p2=If you did not live in the property for t
 privateResidentsRelief.details.body.li1=years you lived there
 privateResidentsRelief.details.body.li2=last <strong class="bold">9 months</strong> you owned it - even if you were not living there at the time
 privateResidentsRelief.details.body.p3=Some exceptions apply.
-privateResidentsRelief.details.body.link=Find out about Private Residence Relief (opens in a new window)
+privateResidentsRelief.details.body.link=Find out about Private Residence Relief (opens in a new tab)
 
 privateResidentsReliefValue.label=Amount of Private Residence Relief you are entitled to
 privateResidentsReliefValue.agent.label=Amount of Private Residence Relief your client is entitled to
@@ -2782,7 +2783,7 @@ privateResidentsReliefValue.personalRep.label=Amount of Private Residence Relief
 privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.label=Amount of Private Residence Relief being claimed
 privateResidentsReliefValue.personalRepInPeriodOfAdmin.label=Amount of Private Residence Relief being claimed
 
-privateResidentsRelief.furtherInfoLink=Find out about Private Residence Relief (opens in a new window)
+privateResidentsRelief.furtherInfoLink=Find out about Private Residence Relief (opens in a new tab)
 
 privateResidentsRelief.error.required=Select yes if you are entitled to Private Residence Relief
 privateResidentsRelief.agent.error.required=Select yes if your client is entitled to claim Private Residence Relief
@@ -2854,7 +2855,7 @@ lettingsRelief.details.body.p1=If you lived in your home <strong class="bold">at
 lettingsRelief.details.body.li1=the same amount you got in Private Residence Relief
 lettingsRelief.details.body.li2=£40,000
 lettingsRelief.details.body.li3=the same amount as the chargeable gain you made while letting out part of your home
-lettingsRelief.details.body.link=Find out about Letting Relief (opens in a new window)
+lettingsRelief.details.body.link=Find out about Letting Relief (opens in a new tab)
 
 lettingsRelief.error.required=Select yes if you are claiming Letting Relief
 lettingsRelief.agent.error.required=Select yes if your client is entitled to claim Letting Relief
@@ -2862,7 +2863,7 @@ lettingsRelief.trust.error.required=Select yes if the trust is entitled to claim
 lettingsRelief.capacitor.error.required=Select yes if the person is entitled to Letting Relief
 lettingsRelief.personalRep.error.required=Select yes if the person was entitled to Letting Relief
 
-lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculate it (opens in a new window)
+lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculate it (opens in a new tab)
 
 lettingsReliefValue.label=Amount of Letting Relief
 
@@ -2901,13 +2902,13 @@ otherReliefs.personalRep.helpText2=Do not enter the Annual Exempt Amount, called
 otherReliefs.personalRepInPeriodOfAdmin.agent.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
 otherReliefs.personalRepInPeriodOfAdmin.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
 
-otherReliefs.furtherInfoLink=Find out about reliefs you might qualify for (opens in a new window)
-otherReliefs.agent.furtherInfoLink=Find out about reliefs your client might qualify for (opens in a new window)
-otherReliefs.trust.furtherInfoLink=Find out about reliefs the trust might qualify for (opens in a new window)
-otherReliefs.capacitor.furtherInfoLink=Find out about reliefs the person might qualify for (opens in a new window)
-otherReliefs.personalRep.furtherInfoLink=Find out about reliefs the person might have qualified for (opens in a new window)
-otherReliefs.personalRepInPeriodOfAdmin.agent.furtherInfoLink=Find out about reliefs the person might have qualified for (opens in a new window)
-otherReliefs.personalRepInPeriodOfAdmin.furtherInfoLink=Find out about reliefs the person might have qualified for (opens in a new window)
+otherReliefs.furtherInfoLink=Find out about reliefs you might qualify for (opens in a new tab)
+otherReliefs.agent.furtherInfoLink=Find out about reliefs your client might qualify for (opens in a new tab)
+otherReliefs.trust.furtherInfoLink=Find out about reliefs the trust might qualify for (opens in a new tab)
+otherReliefs.capacitor.furtherInfoLink=Find out about reliefs the person might qualify for (opens in a new tab)
+otherReliefs.personalRep.furtherInfoLink=Find out about reliefs the person might have qualified for (opens in a new tab)
+otherReliefs.personalRepInPeriodOfAdmin.agent.furtherInfoLink=Find out about reliefs the person might have qualified for (opens in a new tab)
+otherReliefs.personalRepInPeriodOfAdmin.furtherInfoLink=Find out about reliefs the person might have qualified for (opens in a new tab)
 
 otherReliefs.error.required=Select yes if you are claiming other reliefs
 otherReliefs.agent.error.required=Select yes if your client is claiming other reliefs
@@ -3047,13 +3048,13 @@ inYearLosses.personalRep.error.invalid=Select yes if the person want to include 
 inYearLosses.personalRepInPeriodOfAdmin.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in the tax year
 inYearLosses.personalRepInPeriodOfAdmin.agent.error.invalid=Select yes if your client wants to include any Capital Gains Tax losses the estate made in the tax year
 
-inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.trust.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.capacitor.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.personalRep.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
+inYearLosses.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
+inYearLosses.trust.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
+inYearLosses.capacitor.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
+inYearLosses.personalRep.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
+inYearLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
+inYearLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
 
 inYearLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 inYearLossesValue.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
@@ -3177,13 +3178,13 @@ previousYearsLosses.personalRep.error.required=Select yes if you want to include
 previousYearsLosses.personalRepInPeriodOfAdmin.error.required=Select yes if you are including any other Capital Gains Tax losses the estate made in previous tax years
 previousYearsLosses.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client is including any other Capital Gains Tax losses the estate made in previous tax years
 
-previousYearsLosses.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
-previousYearsLosses.agent.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
-previousYearsLosses.trust.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
-previousYearsLosses.capacitor.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
-previousYearsLosses.personalRep.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
-previousYearsLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
-previousYearsLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
+previousYearsLosses.agent.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
+previousYearsLosses.trust.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
+previousYearsLosses.capacitor.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
+previousYearsLosses.personalRep.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
+previousYearsLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
+previousYearsLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
 
 previousYearsLossesValue.label=Amount of losses from previous tax years
 previousYearsLossesValue.agent.label=Amount of losses from previous tax years
@@ -3260,7 +3261,7 @@ previousYearsLosses.furtherReturn.personalRep.helpText=You can include previous 
 previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText=You can include previous losses in this return that the estate has already reported to HMRC and has not already used. For example, losses on shares or other UK property.
 previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText=You can include previous losses in this return that the estate has already reported to HMRC and has not already used. For example, losses on shares or other UK property.
 
-previousYearsLosses.furtherReturn.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.furtherReturn.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
 
 annualExemptAmount.title=How much of your Capital Gains Tax Annual Exempt Amount do you want to use?
 annualExemptAmount.agent.title=How much of your client’s Capital Gains Tax Annual Exempt Amount do they want to use?
@@ -3283,15 +3284,15 @@ annualExemptAmount.furtherReturn.agent.helpText=Include the amount your client w
 annualExemptAmount.furtherReturn.trust.helpText=Include the amount the trust wants to use for the whole tax year. Use its whole Annual Exempt Amount even if it included any of it in previous returns.<br><br>In the tax year {0} to {1}, most trustees only have to pay Capital Gains Tax on gains above {2}. This is called the Annual Exempt Amount.<br><br>The Annual Exempt Amount for trusts for vulnerable beneficiaries is {3}.
 
 annualExemptAmount.details.1.header=What is the Annual Exempt Amount?
-annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
+annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new tab)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
 annualExemptAmount.details.2.header=Who are vulnerable beneficiaries?
-annualExemptAmount.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
+annualExemptAmount.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new tab)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
 annualExemptAmount.details.3.header=What is the Annual Exempt Amount?
-annualExemptAmount.details.3.body=The <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> is an annual tax-free allowance. It is available to certain people who need to pay Capital Gains Tax. Most people only have to pay Capital Gains Tax on their gains for the tax year above the Annual Exempt Amount. Any losses or reliefs must have been subtracted from the gain already.
+annualExemptAmount.details.3.body=The <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new tab)</a> is an annual tax-free allowance. It is available to certain people who need to pay Capital Gains Tax. Most people only have to pay Capital Gains Tax on their gains for the tax year above the Annual Exempt Amount. Any losses or reliefs must have been subtracted from the gain already.
 
-annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
-annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new window)</a>.
-annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new window)</a>.
+annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new tab)</a>.
+annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new tab)</a>.
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new tab)</a>.
 
 annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.agent.error.tooLarge=Annual Exempt Amount must be {0} or less
@@ -3621,7 +3622,7 @@ personalAllowance.non-resident.helpText=We’ll use this amount to work out the 
 personalAllowance.agent.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax your client should pay.<br/><br/>You’ll need to check the double tax agreement for the country your client is resident in and the UK. This will tell you if they are entitled to a Personal Allowance.
 personalAllowance.capacitor.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax the person should pay.<br/><br/>The person will need to check the double tax agreement for the country the person is resident in and the UK. This will tell the person if they are entitled to a Personal Allowance.
 personalAllowance.personalRep.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax that should be paid.<br/><br/>You will need to check the double tax agreement for the country the person was resident in and the UK. This will tell you if the person was entitled to a Personal Allowance.
-personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new window)</a>.
+personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new tab)</a>.
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.agent.error.required=Enter your client’s Personal Allowance for the tax year
 personalAllowance.capacitor.error.required=Enter the person’s Personal Allowance for the tax year
@@ -3771,7 +3772,7 @@ taxDue.personalRep.helpText.p1=If you agree with these workings enter <strong cl
 taxDue.helpText.p2=If you want to enter a different amount you will be asked to upload a file later showing your workings.
 taxDue.helpText.p3=If the trust is for vulnerable beneficiaries, you’ll need to work out and enter the amount of tax due.
 taxDue.trustDetails.label=Help for trusts for vulnerable beneficiaries
-taxDue.trustDetails.content=Trusts for vulnerable beneficiaries get special tax treatment. The workings out on this page do not apply to this type of trust. Find out how to <a href="{0}" target="_blank">work out the amount of Capital Gains Tax due (opens in a new window)</a> for this type of trust.
+taxDue.trustDetails.content=Trusts for vulnerable beneficiaries get special tax treatment. The workings out on this page do not apply to this type of trust. Find out how to <a href="{0}" target="_blank">work out the amount of Capital Gains Tax due (opens in a new tab)</a> for this type of trust.
 taxDue.error.required=Enter the amount of Capital Gains Tax due for this return
 taxDue.error.invalid=Amount of Capital Gains Tax due must be an amount of money, for example 493 or 2,040.59
 taxDue.error.tooSmall=Amount of Capital Gains Tax due must be an amount of money between 0 and 50,000,000,000
@@ -3844,9 +3845,9 @@ calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
 nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
-nonCalculatedTaxDue.ukResident.link=Find out how to work out tax when property is sold (opens in a new window)
-nonCalculatedTaxDue.trust.link=Find out how to work out Capital Gains Tax for a trust (opens in a new window)
-nonCalculatedTaxDue.nonResident.link=Find out how to work out tax when property is sold or for indirect disposals (opens in a new window)
+nonCalculatedTaxDue.ukResident.link=Find out how to work out tax when property is sold (opens in a new tab)
+nonCalculatedTaxDue.trust.link=Find out how to work out Capital Gains Tax for a trust (opens in a new tab)
+nonCalculatedTaxDue.nonResident.link=Find out how to work out tax when property is sold or for indirect disposals (opens in a new tab)
 
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
 nonCalculatedTaxDue.error.required=Enter the amount of Capital Gains Tax due for this return
@@ -4219,7 +4220,7 @@ confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
 
-confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
+confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new tab)</a>.
 confirmationOfSubmission.agent.ifSa.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.trust.ifSa.p1=You’ll need to provide details from this return in the trust’s next Self Assessment tax return.
 confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment tax return, they will need to provide details from this return in their next Self Assessment tax return.
@@ -4485,7 +4486,7 @@ multipleDisposalsDisposalDate.personalRep.helpText=It’s usually when a buyer a
 multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.agent.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 
-multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
+multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new tab)</a>.
 
 multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
 multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
@@ -5260,12 +5261,12 @@ furtherReturnGuidance.stage-a.step-a2.li1=Add together all the <strong class="bo
 furtherReturnGuidance.stage-a.step-a2.li2=Subtract any in-year Capital Gains Tax losses that can be deducted.
 furtherReturnGuidance.stage-a.step-a2.li3=Subtract any allowable previous tax years’ Capital Gains Tax losses.
 
-furtherReturnGuidance.stage-a.step-a2.li4=Subtract your <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> you want to use on residential property gains to get your <strong class="bold">net gain</strong>.
-furtherReturnGuidance.agent.stage-a.step-a2.li4=Subtract your client’s <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
-furtherReturnGuidance.capacitor.stage-a.step-a2.li4=Subtract the person’s <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
-furtherReturnGuidance.trust.stage-a.step-a2.li4=Subtract the <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
-furtherReturnGuidance.personalRep.stage-a.step-a2.li4=Subtract the person’s <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.li4=Subtract the <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> to be used on the residential property gains to get the <strong class="bold">net gain</strong>.
+furtherReturnGuidance.stage-a.step-a2.li4=Subtract your <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new tab)</a> you want to use on residential property gains to get your <strong class="bold">net gain</strong>.
+furtherReturnGuidance.agent.stage-a.step-a2.li4=Subtract your client’s <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new tab)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
+furtherReturnGuidance.capacitor.stage-a.step-a2.li4=Subtract the person’s <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new tab)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
+furtherReturnGuidance.trust.stage-a.step-a2.li4=Subtract the <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new tab)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
+furtherReturnGuidance.personalRep.stage-a.step-a2.li4=Subtract the person’s <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new tab)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.li4=Subtract the <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new tab)</a> to be used on the residential property gains to get the <strong class="bold">net gain</strong>.
 
 furtherReturnGuidance.stage-a.step-a2.li5=This result is what the Capital Gains Tax you should be paying now is based on.
 furtherReturnGuidance.agent.stage-a.step-a2.li5=This result is what the Capital Gains Tax that should be paid now is based on.
@@ -5521,11 +5522,11 @@ furtherReturnGuidance.agent.stage-b.step-b1=Step B1 - Work out your client’s t
 furtherReturnGuidance.capacitor.stage-b.step-b1=Step B1 - Work out the person’s taxable income
 furtherReturnGuidance.personalRep.stage-b.step-b1=Step B1 - Work out the person’s taxable income
 
-furtherReturnGuidance.stage-b.step-b1.p1=Do this to help work out your taxable income to find out how much of your net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>.
-furtherReturnGuidance.agent.stage-b.step-b1.p1=Do this to help work out your client’s taxable income to find out how much of their net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>.
-furtherReturnGuidance.capacitor.stage-b.step-b1.p1=Do this to help work out the person’s taxable income to find out how much of the net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>.
-furtherReturnGuidance.personalRep.stage-b.step-b1.p1=Do this to help work out the person’s taxable income to find out how much of the net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>.
-furtherReturnGuidance.trust.stage-b.step-b1.p1=Multiply the trust’s <strong class="bold">net gain</strong> for the year by the relevant <a href="{0}" target="_blank">rate of tax for the tax year for the type of trust (opens in a new window)</a> to work out the trust’s <strong class="bold">overall Capital Gains Tax liability on its UK property-related disposals</strong>.
+furtherReturnGuidance.stage-b.step-b1.p1=Do this to help work out your taxable income to find out how much of your net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new tab)</a>.
+furtherReturnGuidance.agent.stage-b.step-b1.p1=Do this to help work out your client’s taxable income to find out how much of their net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new tab)</a>.
+furtherReturnGuidance.capacitor.stage-b.step-b1.p1=Do this to help work out the person’s taxable income to find out how much of the net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new tab)</a>.
+furtherReturnGuidance.personalRep.stage-b.step-b1.p1=Do this to help work out the person’s taxable income to find out how much of the net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new tab)</a>.
+furtherReturnGuidance.trust.stage-b.step-b1.p1=Multiply the trust’s <strong class="bold">net gain</strong> for the year by the relevant <a href="{0}" target="_blank">rate of tax for the tax year for the type of trust (opens in a new tab)</a> to work out the trust’s <strong class="bold">overall Capital Gains Tax liability on its UK property-related disposals</strong>.
 
 
 furtherReturnGuidance.stage-b.step-b1.li1=Start with your expected taxable <strong class="bold">gross annual income (excluding any capital gains)</strong>.
@@ -5541,10 +5542,10 @@ furtherReturnGuidance.personalRep.stage-b.step-b1.li2=Subtract the person’s in
 
 furtherReturnGuidance.stage-b.step-b2=Step B2 - Work out what basic rate band can be used against the net gain
 
-furtherReturnGuidance.stage-b.step-b2.p1=Do this to see how much of your net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If your taxable income is higher than the basic rate band threshold then none of your net gain will be taxed at the basic rate.
-furtherReturnGuidance.agent.stage-b.step-b2.p1=Do this to see how much of your client’s net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If their taxable income is higher than the basic rate band threshold then none of the net gain will be taxed at the basic rate.
-furtherReturnGuidance.capacitor.stage-b.step-b2.p1=Do this to see how much of the net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If the person’s taxable income is higher than the basic rate band threshold then none of their net gain will be taxed at the basic rate.
-furtherReturnGuidance.personalRep.stage-b.step-b2.p1=Do this to see how much of the net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If the person’s taxable income is higher than the basic rate band threshold then none of their net gain will be taxed at the basic rate.
+furtherReturnGuidance.stage-b.step-b2.p1=Do this to see how much of your net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new tab)</a>. If your taxable income is higher than the basic rate band threshold then none of your net gain will be taxed at the basic rate.
+furtherReturnGuidance.agent.stage-b.step-b2.p1=Do this to see how much of your client’s net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new tab)</a>. If their taxable income is higher than the basic rate band threshold then none of the net gain will be taxed at the basic rate.
+furtherReturnGuidance.capacitor.stage-b.step-b2.p1=Do this to see how much of the net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new tab)</a>. If the person’s taxable income is higher than the basic rate band threshold then none of their net gain will be taxed at the basic rate.
+furtherReturnGuidance.personalRep.stage-b.step-b2.p1=Do this to see how much of the net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new tab)</a>. If the person’s taxable income is higher than the basic rate band threshold then none of their net gain will be taxed at the basic rate.
 
 furtherReturnGuidance.stage-b.step-b2.li1=Start with your <strong class="bold">taxable income</strong>.
 furtherReturnGuidance.agent.stage-b.step-b2.li1=Start with your client’s <strong class="bold">taxable income</strong>.
@@ -5568,12 +5569,12 @@ furtherReturnGuidance.agent.stage-b.step-b3.p1=Do this to get your client’s la
 furtherReturnGuidance.capacitor.stage-b.step-b3.p1=Do this to get the person’s latest overall Capital Gains Tax liability on their UK property-related disposals. This calculation will take into account the disposals in this return.
 furtherReturnGuidance.personalRep.stage-b.step-b3.p1=Do this to get the person’s latest overall Capital Gains Tax liability on their UK property-related disposals. This calculation will take into account the disposals in this return.
 
-furtherReturnGuidance.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a new window)</a> for the UK property-related disposal for that tax year.
-furtherReturnGuidance.agent.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a new window)</a> for the UK property-related disposal for that tax year.
-furtherReturnGuidance.capacitor.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a window)</a> for the UK property-related disposals for that tax year.
-furtherReturnGuidance.personalRep.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a window)</a> for the UK property-related disposals for that tax year.
+furtherReturnGuidance.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a new tab)</a> for the UK property-related disposal for that tax year.
+furtherReturnGuidance.agent.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a new tab)</a> for the UK property-related disposal for that tax year.
+furtherReturnGuidance.capacitor.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a new tab)</a> for the UK property-related disposals for that tax year.
+furtherReturnGuidance.personalRep.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a new tab)</a> for the UK property-related disposals for that tax year.
 
-furtherReturnGuidance.stage-b.step-b3.li2=Multiply the <strong class="bold">amount to be taxed at the</strong> <a href="{0}" target="_blank">higher rate of tax (opens in a new window)</a> <strong class="bold">for property-related disposals</strong> for that tax year.
+furtherReturnGuidance.stage-b.step-b3.li2=Multiply the <strong class="bold">amount to be taxed at the</strong> <a href="{0}" target="_blank">higher rate of tax (opens in a new tab)</a> <strong class="bold">for property-related disposals</strong> for that tax year.
 
 furtherReturnGuidance.stage-b.step-b3.li3=Add these amounts together to get your <strong class="bold">overall Capital Gains Tax liability on your UK property-related disposals</strong>.
 furtherReturnGuidance.agent.stage-b.step-b3.li3=Add these amounts together to get your client’s <strong class="bold">overall Capital Gains Tax liability on their UK property-related disposals</strong>.
@@ -5697,7 +5698,7 @@ furtherReturnGuidance.trust.stage-b.example3.table1.total.value={0}
 
 
 
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.p1=Multiply the estate’s net gain for the year by the relevant <a href="{0}" target="_blank">rate of tax for the tax year for the estate (opens in a new window)</a> to work out its overall Capital Gains Tax liability on its UK property-related disposals.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.p1=Multiply the estate’s net gain for the year by the relevant <a href="{0}" target="_blank">rate of tax for the tax year for the estate (opens in a new tab)</a> to work out its overall Capital Gains Tax liability on its UK property-related disposals.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.link=Personal representative Akash sold 2 properties for Taylor family estate
 
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.headingText=Akash works out Taylor family estate’s overall Capital Gains Tax liability for residential property in tax year {0} to {1}.

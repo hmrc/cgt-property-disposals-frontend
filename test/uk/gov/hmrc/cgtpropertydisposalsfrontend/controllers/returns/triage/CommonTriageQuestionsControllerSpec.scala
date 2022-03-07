@@ -2916,7 +2916,7 @@ class CommonTriageQuestionsControllerSpec
           messageFromMessageKey("selfAssessmentAlreadySubmitted.title"),
           { doc =>
             doc
-              .select("h2.heading-medium")
+              .select("main h2")
               .text() shouldBe messageFromMessageKey("selfAssessmentAlreadySubmitted.whatNext")
 
             doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.CommonTriageQuestionsController
@@ -3210,7 +3210,7 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("selfAssessmentAlreadySubmitted.title"),
               { doc =>
                 doc
-                  .select("h2.heading-medium")
+                  .select("main h2")
                   .text() shouldBe messageFromMessageKey("selfAssessmentAlreadySubmitted.whatNext")
 
                 doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.CommonTriageQuestionsController
@@ -3554,7 +3554,7 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("disposalDateTooEarly.non-uk.title"),
               { doc =>
                 doc
-                  .select("h2.govuk-heading-m")
+                  .select("main h2")
                   .text() shouldBe messageFromMessageKey("disposalDateTooEarly.non-uk.h2")
 
                 doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.SingleDisposalsTriageController
@@ -3581,7 +3581,7 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("disposalDateTooEarly.non-uk.title"),
               { doc =>
                 doc
-                  .select("h2.govuk-heading-m")
+                  .select("main h2")
                   .text() shouldBe messageFromMessageKey("disposalDateTooEarly.non-uk.h2")
 
                 doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.MultipleDisposalsTriageController

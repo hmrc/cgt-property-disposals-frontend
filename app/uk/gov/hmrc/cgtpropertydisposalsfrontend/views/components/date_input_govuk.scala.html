@@ -46,9 +46,7 @@
 <div class="@classes">
   <fieldset class="govuk-fieldset" id="@fieldId"@if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-        <h1 class="govuk-fieldset__heading">
-            @label
-        </h1>
+      @label
     </legend>
     @if(helpText.isDefined) {
       <span id="@{fieldId}-form-hint" class="govuk-hint">

@@ -25,7 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
@@ -34,7 +34,7 @@
     formHelper: FormWithCSRF,
     govukRadios : GovukRadios,
     govukDetails : GovukDetails,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
 )
 
@@ -55,23 +55,14 @@
 }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@toValue(taxYearExchanged: TaxYearExchanged) = @{
-        taxYearExchanged match {
-            case TaxYearExchanged.TaxYear2021 => "TaxYear2021"
-            case TaxYearExchanged.TaxYear2020 => "TaxYear2020"
-            case TaxYearExchanged.TaxYearBefore2020 => "TaxYearBefore2020"
-            case TaxYearExchanged.DifferentTaxYears => "DifferentTaxYears"
-        }
-}
 
 
-@newOptions = @{
+@options = @{
     val defaultOptions = Seq(
         RadioItem(
             content = Text(messages(s"$key.taxyear.before2020")),
             value = Option("TaxYearBefore2020"),
             id = Option(s"${key}-TaxYearBefore2020"),
-            checked = "TaxYearBefore2020".equals(form.value.map(toValue).getOrElse(""))
         ),
         RadioItem(
         divider = Some("or")
@@ -80,7 +71,6 @@
             content = Text(messages(s"$key.taxyear.different")),
             value = Option("DifferentTaxYears"),
             id = Option(s"${key}-DifferentTaxYears"),
-            checked = "DifferentTaxYears".equals(form.value.map(toValue).getOrElse(""))
         )
     )
 
@@ -89,7 +79,6 @@
             content = Text(messages(s"$key.taxyear.$year")),
             value = Option(s"TaxYear$year"),
             id = Option(s"${key}-TaxYear$year"),
-            checked = s"TaxYear$year".equals(form.value.map(toValue).getOrElse(""))
         )
     }
 
@@ -117,10 +106,8 @@
                 ))
             )),
             errorMessage = if(form.hasErrors) Some(ErrorMessage(content = Text(messages(form.errors.map(e => s"$key.${e.message}"))))) else None,
-            idPrefix = Some(key),
-            name = key,
-            items = newOptions
-        ))
+            items = options
+        ).withFormField(form(key)))
 
         @govukDetails(Details(
             summary = Text(messages(s"$key.link")),
