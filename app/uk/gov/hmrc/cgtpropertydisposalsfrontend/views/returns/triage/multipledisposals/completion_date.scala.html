@@ -29,15 +29,14 @@
 
 @this(
   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
   formHelper: FormWithCSRF,
   govukDetails : GovukDetails,
   dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input_govuk,
-  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-  details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
 )
 
 @(
@@ -83,12 +82,6 @@
       content = HtmlContent(s"<p>${messages(s"$key.details.p1", viewConfig.tranferringOwnershipHelp)}</p>")
   ))
 
-
-   @details(messages(s"$key.details.summary"), Html(
-     s"""
-      |<p>${messages(s"$key.details.p1", viewConfig.tranferringOwnershipHelp)}</p>
-    |""".stripMargin
-   ))
 
   @submitButton(messages(if(isAmend) "button.continue" else if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
  }
