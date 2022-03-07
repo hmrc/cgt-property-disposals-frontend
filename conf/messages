@@ -762,7 +762,7 @@ previousReturnExistsWithSameCompletionDate.amend.title=You cannot change this re
 
 previousReturnExistsWithSameCompletionDate.amend.p1=You must <a class="govuk-link" href="{0}">contact HMRC</a>.
 previousReturnExistsWithSameCompletionDate.amend.trust.p1=You must <a class="govuk-link" href="{0}">contact HMRC</a>.
-previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a href="{0}">contact HMRC</a>.
+previousReturnExistsWithSameCompletionDate.amend.agent.p1=You must <a class="govuk-link" href="{0}">contact HMRC</a>.
 previousReturnExistsWithSameCompletionDate.amend.p2=This is because sales or disposals with the same completion date must all be in the same return.
 previousReturnExistsWithSameCompletionDate.amend.p3=Tell HMRC you need to change:
 previousReturnExistsWithSameCompletionDate.amend.li1=A previous return
@@ -909,11 +909,11 @@ wereYouAUKResident.capacitor.details=If the person was a non-resident and made a
 wereYouAUKResident.personalRep.details=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
 
 wereYouAUKResident.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new tab)</a>
-wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new tab)</a>
-wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new tab)</a>
-wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>
-wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>
-wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>
+wereYouAUKResident.agent.link=<a class="govuk-link" href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new tab)</a>
+wereYouAUKResident.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new tab)</a>
+wereYouAUKResident.capacitor.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>
+wereYouAUKResident.personalRep.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>
+wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>
 
 wereYouAUKResident.error.required=Select yes if you were a UK resident when you exchanged contracts
 wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you exchanged contracts
@@ -944,11 +944,11 @@ triage.enterCountry.capacitor.helpText=It’s usually the day the person and the
 triage.enterCountry.personalRep.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 
 triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new tab)</a>
-triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new tab)</a>.
+triage.enterCountry.agent.link=<a class="govuk-link" href="{0}" target="_blank">Work out your client’s residence status (opens in a new tab)</a>.
 triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status (opens in a new tab)</a>.
-triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
-triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
-triage.enterCountry.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
+triage.enterCountry.capacitor.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
+triage.enterCountry.personalRep.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
+triage.enterCountry.personalRepInPeriodOfAdmin.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell or dispose of?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
@@ -1196,12 +1196,12 @@ multipleDisposalsWereYouAUKResident.personalRep.title=Was the person a UK reside
 multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.title=Was the person a UK resident for the tax year in which they died?
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
 
-multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new tab)</a>
-multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new tab)</a>
+multipleDisposalsWereYouAUKResident.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new tab)</a>
+multipleDisposalsWereYouAUKResident.agent.link=<a class="govuk-link" href="{0}" target="_blank">Work out your client’s residence status (opens in a new tab)</a>
 multipleDisposalsWereYouAUKResident.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status (opens in a new tab)</a>
-multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new tab)</a>
-multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new tab)</a>
-multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the persons’s residence status for a tax year (opens in a new tab)</a>
+multipleDisposalsWereYouAUKResident.capacitor.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status (opens in a new tab)</a>
+multipleDisposalsWereYouAUKResident.personalRep.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status (opens in a new tab)</a>
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a class="govuk-link" href="{0}" target="_blank">Work out the persons’s residence status for a tax year (opens in a new tab)</a>
 
 multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.error.boolean=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
