@@ -128,7 +128,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
       "filter out invalid characters in address lines if a uk address is found" in {
         val address = UkAddress(
           "line1 (abc)",
-          Some("line2, abc/def"),
+          Some("line2, abc$def"),
           Some("line3 + abc"),
           Some("line4 #1"),
           Postcode("abc")
@@ -159,7 +159,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
 
         val address = NonUkAddress(
           "line1 (abc)",
-          Some("line2, abc/def"),
+          Some("line2, abc$def"),
           Some("line3 + abc"),
           Some("line4 #1"),
           Some("abc"),
@@ -172,6 +172,68 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
           Some("line3  abc"),
           Some("line4 1"),
           Some("abc"),
+          country
+        )
+
+        def response(a: Address) =
+          BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None, None)
+
+        mockGetBPR(bprRequest, lang)(
+          Right(HttpResponse(200, Json.toJson(response(address)), Map[String, Seq[String]]().empty))
+        )
+
+        await(
+          service.getBusinessPartnerRecord(bprRequest, lang).value
+        ) shouldBe Right(response(sanitisedAddress))
+      }
+
+      "allow character: '/' in address lines if a uk address is found" in {
+        val address = UkAddress(
+          "line1/abc",
+          Some("line2, abc/def"),
+          Some("line3 / abc"),
+          Some("line4 / 1"),
+          Postcode("abc")
+        )
+
+        val sanitisedAddress = UkAddress(
+          "line1/abc",
+          Some("line2, abc/def"),
+          Some("line3 / abc"),
+          Some("line4 / 1"),
+          Postcode("abc")
+        )
+
+        def response(a: Address) =
+          BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None, None)
+
+        mockGetBPR(bprRequest, lang)(
+          Right(HttpResponse(200, Json.toJson(response(address)), Map[String, Seq[String]]().empty))
+        )
+
+        await(
+          service.getBusinessPartnerRecord(bprRequest, lang).value
+        ) shouldBe Right(response(sanitisedAddress))
+      }
+
+      "allow character: '/' in address lines if a non-uk address is found" in {
+        val country = Country("HK")
+
+        val address = NonUkAddress(
+          "line1/abc",
+          Some("line2, abc/def"),
+          Some("line3 / abc"),
+          Some("line4 / 1"),
+          Some("ab/c"),
+          country
+        )
+
+        val sanitisedAddress = NonUkAddress(
+          "line1/abc",
+          Some("line2, abc/def"),
+          Some("line3 / abc"),
+          Some("line4 / 1"),
+          Some("ab/c"),
           country
         )
 
