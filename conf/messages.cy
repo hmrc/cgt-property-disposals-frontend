@@ -113,6 +113,7 @@ landingPage.sidebar.4=Talu’ch treth
 #===================================================
 lang=cy
 service.title=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
+service.name=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
 service.signOut=Allgofnodi
 hmrc_branding=Cyllid a Thollau EM
 exitSurvey.linkText=Rhowch wybod sut y gallwn wella’r gwasanaeth (mae’n cymryd 1 munud)
