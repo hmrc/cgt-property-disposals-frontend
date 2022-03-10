@@ -667,7 +667,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             messageFromMessageKey("hasValidPostcode.multipleDisposals.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 "hasValidPostcode.multipleDisposals.error.required"
               ),
@@ -856,7 +856,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             performAction(formData: _*),
             messageFromMessageKey("enterUPRN.multipleDisposals.title"),
             { doc =>
-              val errors = doc.select("#error-summary-display > ul").first()
+              val errors = doc.select("[data-spec='errorSummaryDisplay'] ul").first()
               errors.children
                 .eachText()
                 .asScala
@@ -1637,7 +1637,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
                 args: _*
@@ -2182,7 +2182,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -2752,7 +2752,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             expectedTitle,
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe expectedErrorMessage,
             BAD_REQUEST
           )

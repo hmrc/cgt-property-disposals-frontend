@@ -448,7 +448,7 @@ class MixedUsePropertyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -1046,7 +1046,7 @@ class MixedUsePropertyDetailsControllerSpec
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -1462,7 +1462,7 @@ class MixedUsePropertyDetailsControllerSpec
             messageFromMessageKey(s"$key$userKey.title", titleArg),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),

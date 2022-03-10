@@ -236,7 +236,7 @@ class AmendReturnControllerSpec
                 .url
 
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )

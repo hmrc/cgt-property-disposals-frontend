@@ -25,9 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
 @(
@@ -55,21 +53,20 @@
 
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
 
-@backLinkComponent(backLink)
 
-@pageHeading(title)
+    <h1 class="govuk-heading-xl">@title</h1>
 
-<p>@messages(s"$key$userKey.p1", taxYearStart.toString, (taxYearStart+1).toString)</p>
+    <p class="govuk-body">@messages(s"$key$userKey.p1", taxYearStart.toString, (taxYearStart+1).toString)</p>
 
-<h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
-<p>@Html(messages(
-        s"$key$userKey.p2",
-        viewConfig.selfAssessmentTaxReturnsCorrections,
-        taxYearStart.toString,
-        (taxYearStart+1).toString
-    ))
-</p>
+    <h2 class="govuk-heading-m">@messages(s"$key.whatNext")</h2>
+    <p class="govuk-body">@Html(messages(
+            s"$key$userKey.p2",
+            viewConfig.selfAssessmentTaxReturnsCorrections,
+            taxYearStart.toString,
+            (taxYearStart+1).toString
+        ))
+    </p>
 
 }

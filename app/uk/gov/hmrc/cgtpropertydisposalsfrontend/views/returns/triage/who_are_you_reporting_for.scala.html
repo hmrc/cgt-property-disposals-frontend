@@ -43,10 +43,11 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 @key = @{"individualUserType"}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@inPageTitle = @{messages("who-are-you-reporting-for.title")}
 @title = @{
     if(hasErrors){
-        messages("generic.errorPrefix") + " " + messages("who-are-you-reporting-for.title")
-    } else messages("who-are-you-reporting-for.title")
+        messages("generic.errorPrefix") + " " + inPageTitle
+    } else inPageTitle
 }
 
 @optionIndex(value: IndividualUserType) = @{
@@ -114,7 +115,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
             fieldId = key,
             options = options,
             selected = form.value.map(optionIndex),
-            label = pageHeading(title, Some(messages("triage.caption"))),
+            label = pageHeading(inPageTitle, Some(messages("triage.caption"))),
             error = form.error(key),
         )
 

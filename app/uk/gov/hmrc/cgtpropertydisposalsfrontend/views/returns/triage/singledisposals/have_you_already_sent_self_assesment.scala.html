@@ -71,10 +71,11 @@
 }
 
 @hasErrors = @{form.hasErrors}
+@inPageTitle = @{messages(s"$key$userKey.title", taxYearStartYear.toString, (taxYearStartYear+1).toString)}
 @title = @{
     if(hasErrors){
-        messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title", taxYearStartYear.toString, (taxYearStartYear+1).toString)
-    } else messages(s"$key$userKey.title", taxYearStartYear.toString, (taxYearStartYear+1).toString)
+        messages("generic.errorPrefix") + " " + inPageTitle
+    } else inPageTitle
 }
 
 @mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
@@ -86,7 +87,7 @@
     @formHelper(controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessmentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
-            label = pageHeading(title, Some(messages("triage.caption"))),
+            label = pageHeading(inPageTitle, Some(messages("triage.caption"))),
             errorKey = form.error(key).map(e => s"$userErrorKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,

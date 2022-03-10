@@ -17,25 +17,25 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
+
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    radioGroupWithValues: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_with_values,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    formHelper: FormWithCSRF,
+    govukRadios : GovukRadios,
+    govukDetails : GovukDetails,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(
@@ -47,50 +47,45 @@
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsTaxYear"}
-@title = @{messages(s"$key.title")}
+@inPageTitle = @{messages(s"$key.title")}
+@title = @{
+    if(hasErrors){
+        messages("generic.errorPrefix") + " " + inPageTitle
+    } else inPageTitle
+}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@toValue(taxYearExchanged: TaxYearExchanged) = @{
-        taxYearExchanged match {
-            case TaxYearExchanged.TaxYear2021 => "TaxYear2021"
-            case TaxYearExchanged.TaxYear2020 => "TaxYear2020"
-            case TaxYearExchanged.TaxYearBefore2020 => "TaxYearBefore2020"
-            case TaxYearExchanged.DifferentTaxYears => "DifferentTaxYears"
-        }
-}
+
 
 @options = @{
-   val defaultOptions = List(
-        RadioOption(
-            label = messages(s"$key.taxyear.before2020"),
-            content = None,
-            optionHelpText = None,
-            value = "TaxYearBefore2020",
-            followedByOr = true
+    val defaultOptions = Seq(
+        RadioItem(
+            content = Text(messages(s"$key.taxyear.before2020")),
+            value = Option("TaxYearBefore2020"),
+            id = Option(s"${key}-TaxYearBefore2020"),
         ),
-        RadioOption(
-            label = messages(s"$key.taxyear.different"),
-            content = None,
-            optionHelpText = None,
-            value = "DifferentTaxYears"
+        RadioItem(
+        divider = Some("or")
+        ),
+        RadioItem(
+            content = Text(messages(s"$key.taxyear.different")),
+            value = Option("DifferentTaxYears"),
+            id = Option(s"${key}-DifferentTaxYears"),
         )
     )
 
     val availableOptions = availableTaxYears.map{year =>
-        RadioOption(
-            label = messages(s"$key.taxyear.$year"),
-            content = None,
-            optionHelpText = None,
-            value = s"TaxYear$year"
+        RadioItem(
+            content = Text(messages(s"$key.taxyear.$year")),
+            value = Option(s"TaxYear$year"),
+            id = Option(s"${key}-TaxYear$year"),
         )
     }
 
-    availableOptions ++ defaultOptions
+    availableOptions ++: defaultOptions
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-    @backLinkComponent(backLink)
+@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 
     @if(hasErrors) {
         @errorSummary(form)
@@ -98,25 +93,26 @@
 
     @caption(messages("triage.caption"))
 
-    @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.whenWereContractsExchangedSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(controllers.returns.triage.routes.MultipleDisposalsTriageController.whenWereContractsExchangedSubmit(), 'novalidate -> "novalidate") {
 
-        @radioGroupWithValues(
-            fieldId = key,
-            options = options,
-            selected = form.value.map(toValue),
-            label = pageHeading(title),
-            error = form.error(key),
-            helpText = None
-        )
 
-        @details(
-            messages(s"$key.link"),
-            Html(
-                s"""
-                | <p>${messages(s"$key.details.p1", viewConfig.tranferringOwnershipHelp)}</p>
-                |""".stripMargin
-            )
-        )
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                attributes = Map("id" -> key),
+                legend = Some(Legend(
+                    content = Text(inPageTitle),
+                    classes = "govuk-fieldset__legend--l",
+                    isPageHeading = true
+                ))
+            )),
+            errorMessage = if(form.hasErrors) Some(ErrorMessage(content = Text(messages(form.errors.map(e => s"$key.${e.message}"))))) else None,
+            items = options
+        ).withFormField(form(key)))
+
+        @govukDetails(Details(
+            summary = Text(messages(s"$key.link")),
+            content = HtmlContent(s"<p>${messages(s"$key.details.p1", viewConfig.tranferringOwnershipHelp)}</p>")
+        ))
 
         @submitButton(messages(if(isAmend) "button.continue" else if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
     }

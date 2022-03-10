@@ -16,41 +16,22 @@
 
 @import play.api.i18n.Messages
 @import play.api.data.Form
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this()
+@this(
+  govukErrorSummary : GovukErrorSummary
+)
 
 @(form: Form[_], customErrorKey: Option[String] = None, userKeyOnly: String = "")(implicit messages: Messages)
 
-<div
-  class="govuk-error-summary"
-  id="error-summary-display"
-  role="alert"
-  aria-labelledby="error-summary-heading"
-  tabindex="-1">
 
-  <h2
-    id="error-summary-heading"
-    class="govuk-error-summary__title">
-    @messages("error.summary.heading")
-  </h2>
-
-  <ul class="govuk-list govuk-error-summary__list">
-    @if(form.globalErrors.nonEmpty) {
-      @form.globalErrors.map { error =>
-        <li>
-          <a class="govuk-body">@messages(s"${error.message}", error.args: _*)</a>
-        </li>
-      }
-    } else {
-      @form.errors.map { error =>
-        <li>
-          <a class="govuk-body" href="#@error.key" data-focuses="@error.key">
-            @messages(s"${customErrorKey.getOrElse(error.key)}$userKeyOnly.${error.message}", error.args: _*)
-          </a>
-        </li>
-      }
-    }
-
-  </ul>
-
-</div>
+@govukErrorSummary(ErrorSummary(
+  title = Text(messages("error.summary.heading")),
+  attributes = Map("data-spec" -> "errorSummaryDisplay"),
+  errorList = form.errors.map { error =>
+      ErrorLink(
+      href = Some(s"#${error.key}"),
+      content = Text(messages(s"${customErrorKey.getOrElse(error.key)}$userKeyOnly.${error.message}", error.args: _*))
+      )
+  }
+))

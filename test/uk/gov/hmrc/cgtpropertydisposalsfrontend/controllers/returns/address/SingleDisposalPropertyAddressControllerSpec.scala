@@ -546,7 +546,7 @@ class SingleDisposalPropertyDetailsControllerSpec
             messageFromMessageKey("hasValidPostcode.singleDisposal.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 "hasValidPostcode.singleDisposal.error.required"
               ),
@@ -741,7 +741,7 @@ class SingleDisposalPropertyDetailsControllerSpec
             performAction(formData: _*),
             messageFromMessageKey("enterUPRN.singleDisposal.title"),
             { doc =>
-              val errors = doc.select("#error-summary-display > ul").first()
+              val errors = doc.select("[data-spec='errorSummaryDisplay'] ul").first()
               errors.children
                 .eachText()
                 .asScala

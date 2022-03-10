@@ -23,30 +23,41 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompletionDate
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  formHelper: FormWithCSRF,
+  govukDetails : GovukDetails,
+  dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input_govuk,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
 )
 
-@(form: Form[CompletionDate], backLink: Call, hasCreatedDraftReturn: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+  form: Form[CompletionDate],
+  backLink: Call,
+  hasCreatedDraftReturn: Boolean,
+  isAmend: Boolean
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsCompletionDate"}
 @hasErrors = @{form.hasErrors}
-@title = @{messages(s"$key.title")}
+@inPageTitle = @{messages(s"$key.title")}
+@title = @{
+   if(hasErrors){
+      messages("generic.errorPrefix") + " " + inPageTitle
+   } else inPageTitle
+}
+
 @errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", key).map(form.error).find(_.isDefined).flatten}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
- @backLinkComponent(backLink)
+@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 
  @if(hasErrors) {
   @errorSummary(form)
@@ -54,10 +65,10 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
   @caption(messages("triage.caption"))
 
- @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.completionDateSubmit(), 'novalidate -> "novalidate") {
+ @formHelper(controllers.returns.triage.routes.MultipleDisposalsTriageController.completionDateSubmit(), 'novalidate -> "novalidate") {
   @dateInput(
    fieldId = key,
-   label = pageHeading(title),
+   label = pageHeading(inPageTitle),
    dayValue = form.data.get(s"$key-day"),
    monthValue = form.data.get(s"$key-month"),
    yearValue = form.data.get(s"$key-year"),
@@ -66,11 +77,11 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
    hasErrors = hasErrors
   )
 
-   @details(messages(s"$key.details.summary"), Html(
-     s"""
-      |<p>${messages(s"$key.details.p1", viewConfig.tranferringOwnershipHelp)}</p>
-    |""".stripMargin
-   ))
+  @govukDetails(Details(
+      summary = Text(messages(s"$key.details.summary")),
+      content = HtmlContent(s"<p>${messages(s"$key.details.p1", viewConfig.tranferringOwnershipHelp)}</p>")
+  ))
+
 
   @submitButton(messages(if(isAmend) "button.continue" else if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
  }

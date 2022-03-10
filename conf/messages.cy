@@ -5,7 +5,7 @@ who-are-you-reporting-for-exit-page.helpText=Rhaid i chi <a href="{0}">gysylltu 
 previousReturnExistsWithSameCompletionDate.amend.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
 previousReturnExistsWithSameCompletionDate.amend.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
 previousReturnExistsWithSameCompletionDate.amend.trust.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
-previousReturnExistsWithSameCompletionDate.amend.agent.p1=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>.
+previousReturnExistsWithSameCompletionDate.amend.agent.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
 previousReturnExistsWithSameCompletionDate.amend.p2=Mae hyn oherwydd bod rhaid i werthiannau neu warediadau sydd â’r un dyddiad cwblhau fod ar yr un Ffurflen Dreth.
 previousReturnExistsWithSameCompletionDate.amend.p3=Rhowch wybod i CThEM fod angen i chi newid:
 previousReturnExistsWithSameCompletionDate.amend.li1=Ffurflen Dreth flaenorol
@@ -113,6 +113,7 @@ landingPage.sidebar.4=Talu’ch treth
 #===================================================
 lang=cy
 service.title=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
+service.name=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
 service.signOut=Allgofnodi
 hmrc_branding=Cyllid a Thollau EM
 exitSurvey.linkText=Rhowch wybod sut y gallwn wella’r gwasanaeth (mae’n cymryd 1 munud)
@@ -191,7 +192,7 @@ timed-out.p2=Bydd yn rhaid i chi fewngofnodi er mwyn cael mynediad at eich cyfri
 timed-out.button=Mewngofnodi
 recruitment-banner.message=Helpwch i wella GOV.UK
 recruitment-banner.dismiss=Dim diolch
-recruitment-banner.link=<a target="_blank" rel="noreferrer noopener" href="{0}">Byddwch yn rhan o wneud gwasanaethau’r llywodraeth yn well (yn agor ffenestr newydd)</a>
+recruitment-banner.link=<a target="_blank" rel="noreferrer noopener" href="{0}">Byddwch yn rhan o wneud gwasanaethau’r llywodraeth yn well (yn agor tab newydd)</a>
 accessibilityStatement.caption=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
 accessibilityStatement.title=Datganiad hygyrchedd
 accessibilityStatement.p1=Mae’r datganiad hygyrchedd hwn yn esbonio pa mor hygyrch yw’r gwasanaeth hwn, beth i’w wneud os ydych yn cael anhawster wrth ei ddefnyddio, a sut i roi gwybod am broblemau hygyrchedd gyda’r gwasanaeth.
@@ -379,7 +380,7 @@ subscribed.p4=Rydym wedi anfon e-bost cadarnhau i <strong class="bold">{0}</stro
 subscribed.buttonText=Ewch i’r cyfrif
 registerTrust.title=Bydd angen i chi gofrestru’r ymddiriedolaeth
 registerTrust.p=I ddefnyddio’r gwasanaeth hwn, bydd angen i chi:
-registerTrust.bullet1=<a href="{0}" target="_blank">Cofrestru’r ymddiriedolaeth (yn agor ffenestr newydd)</a>.
+registerTrust.bullet1=<a href="{0}" target="_blank">Cofrestru’r ymddiriedolaeth (yn agor tab newydd)</a>.
 registerTrust.bullet2=Mewngofnodi i’r gwasanaeth hwn gan ddefnyddio’r Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer Porth y Llywodraeth a ddefnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
 reportCorpTax.title=Rydych wedi ceisio mewngofnodi fel sefydliad
 reportCorpTax.p1=Ymddiriedolaethau yw’r unig sefydliad sy’n gallu defnyddio’r gwasanaeth hwn i roi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y DU.
@@ -469,9 +470,9 @@ enterTrn.tooManyAttempts.title=Bydd angen i chi aros a rhoi cynnig arall arni
 enterTrn.tooManyAttempts.p1=Rydych wedi ceisio nodi eich Rhif Cofrestru Ymddiriedolaeth ac enw’r ymddiriedolaeth gormod o weithiau.
 enterTrn.tooManyAttempts.p2=Bydd angen i chi aros am 2 awr a rhoi cynnig arall arni.
 enterTrn.whatATrnIs=Beth yw Rhif Cofrestru Ymddiriedolaeth?
-enterTrn.whatATrnIs.p1=Mae CThEM yn anfon y rhif hwn i’r person sy’n <a href="{0}" target="_blank">cofrestru’r ymddiriedolaeth (yn agor ffenestr newydd)</a>.
+enterTrn.whatATrnIs.p1=Mae CThEM yn anfon y rhif hwn i’r person sy’n <a href="{0}" target="_blank">cofrestru’r ymddiriedolaeth (yn agor tab newydd)</a>.
 enterTrn.ifYouCannotFind=Os na allwch ddod o hyd iddo
-enterTrn.ifYouCannotFind.p1=Os gwnaethoch gofrestru’r ymddiriedolaeth a ni allwch ddod o hyd i’w Rhif Cofrestru Ymddiriedolaeth, gallwch <a href="{0}" target="_blank">gysylltu â CThEM (yn agor ffenestr newydd)</a>.
+enterTrn.ifYouCannotFind.p1=Os gwnaethoch gofrestru’r ymddiriedolaeth a ni allwch ddod o hyd i’w Rhif Cofrestru Ymddiriedolaeth, gallwch <a href="{0}" target="_blank">gysylltu â CThEM (yn agor tab newydd)</a>.
 enterTrustName.label=Enw’r ymddiriedolaeth
 trustName.error.required=Nodwch enw’ch ymddiriedolaeth
 trustName.error.tooLong=Mae’n rhaid i enw’ch ymddiriedolaeth fod yn llai na 105 o gymeriadau
@@ -570,8 +571,8 @@ account.manageYourDetails.subtitle=Rhif y cyfrif
 account.manageYourDetails.accountName=Enw’r cyfrif
 account.manageYourDetails.contactHeading=Manylion y person cyswllt
 account.manageYourDetails.p=Byddwn dim ond yn defnyddio’r manylion cyswllt hyn os oes angen i ni gysylltu â chi ynghylch y gwasanaeth hwn.
-account.manageYourDetails.individual.p2=Os oes angen i ‘Enw’r cyfrif’ newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEM (yn agor ffenestr newydd)</a>.
-account.manageYourDetails.organisation.p2=Os bydd enw neu gyfeiriad y prif ymddiriedolwr yn newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEM (yn agor ffenestr newydd)</a>.
+account.manageYourDetails.individual.p2=Os oes angen i ‘Enw’r cyfrif’ newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEM (yn agor tab newydd)</a>.
+account.manageYourDetails.organisation.p2=Os bydd enw neu gyfeiriad y prif ymddiriedolwr yn newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEM (yn agor tab newydd)</a>.
 account.manageYourDetails.yourName=Eich enw
 account.manageYourDetails.ContactName.changed=Mae’r enw cyswllt wedi newid
 account.manageYourDetails.Email.changed=Mae’r cyfeiriad e-bost cyswllt wedi newid
@@ -729,12 +730,12 @@ selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p1=Mae rhywun eisoes w
 
 selfAssessmentAlreadySubmitted.whatNext=Beth fydd angen i chi ei wneud nesaf
 
-selfAssessmentAlreadySubmitted.p2=Bydd angen i <a class="govuk-link" href="{0}" target="_blank"> chi newid eich Ffurflen Dreth Hunanasesiad</a> trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
-selfAssessmentAlreadySubmitted.agent.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> eich cleient trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
-selfAssessmentAlreadySubmitted.trust.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Hunanasesiad yr ymddiriedolaeth: Ffurflen Dreth Ymddiriedolaeth ac Ystâd</a> yr ymddiriedolaeth trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
-selfAssessmentAlreadySubmitted.capacitor.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
-selfAssessmentAlreadySubmitted.personalRep.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
-selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=Bydd angen i <a href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.p2=Bydd angen i <a class="govuk-link" href="{0}" target="_blank"> chi newid eich Ffurflen Dreth Hunanasesiad (yn agor tab newydd)</a> trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.agent.p2=Bydd angen i <a class="govuk-link" href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad (yn agor tab newydd)</a> eich cleient trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.trust.p2=Bydd angen i <a class="govuk-link" href="{0}" target="_blank">chi newid Hunanasesiad yr ymddiriedolaeth: Ffurflen Dreth Ymddiriedolaeth ac Ystâd (yn agor tab newydd)</a> yr ymddiriedolaeth trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.capacitor.p2=Bydd angen i <a class="govuk-link" href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad (yn agor tab newydd)</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.personalRep.p2=Bydd angen i <a class="govuk-link" href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad (yn agor tab newydd)</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
+selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=Bydd angen i <a class="govuk-link" href="{0}" target="_blank">chi newid Ffurflen Dreth Hunanasesiad (yn agor tab newydd)</a> yr unigolyn trwy ychwanegu manylion unrhyw werthiannau neu warediadau eiddo yn y DU a wnaed yn ystod y flwyddyn dreth 6 Ebrill {1} i 5 Ebrill {2}.
 
 #===================================================
 #  Self-Assessment SA - END
@@ -787,12 +788,12 @@ wereYouAUKResident.personalRep.title=A oedd y person yn breswylydd yn y DU ar y 
 wereYouAUKResident.agent.title=A oedd eich cleient yn breswylydd yn y DU ar y dyddiad gwaredu?
 wereYouAUKResident.personalRepInPeriodOfAdmin.title=A oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi?
 wereYouAUKResident.helpText=Y dyddiad gwaredu ar gyfer eiddo yn y DU yw’r dyddiad cyfnewid contractau. Mae cyfnewid contractau fel arfer yn digwydd pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd a phan fydd y prynwr yn talu blaendal.
-wereYouAUKResident.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor tab newydd)</a>
+wereYouAUKResident.agent.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient am flwyddyn dreth (yn agor tab newydd)</a>
+wereYouAUKResident.trust.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth am flwyddyn dreth (yn agor tab newydd)</a>
+wereYouAUKResident.capacitor.link=<a class="govuk-link" href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor tab newydd)</a>
+wereYouAUKResident.personalRep.link=<a class="govuk-link" href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor tab newydd)</a>
+wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a class="govuk-link" href="{0}" target="_blank">Pennu statws preswylio’r person am y flwyddyn dreth (yn agor tab newydd)</a>
 wereYouAUKResident.error.required=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU pan wnaethoch gyfnewid contractau
 wereYouAUKResident.error.boolean=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU pan wnaethoch gyfnewid contractau
 wereYouAUKResident.agent.error.required=Dewiswch ‘Iawn’ os oedd eich cleient yn breswylydd yn y DU pan wnaeth gyfnewid contractau
@@ -817,12 +818,12 @@ triage.enterCountry.agent.helpText=Fel arfer, dyma’r diwrnod y gwnaeth eich cl
 triage.enterCountry.trust.helpText=Fel arfer, dyma’r diwrnod y gwnaeth yr ymddiriedolaeth a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
 triage.enterCountry.capacitor.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
 triage.enterCountry.personalRep.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
-triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>.
-triage.enterCountry.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor ffenestr newydd)</a>.
-triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>.
-triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
-triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
-triage.enterCountry.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
+triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor tab newydd)</a>.
+triage.enterCountry.agent.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor tab newydd)</a>.
+triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor tab newydd)</a>.
+triage.enterCountry.capacitor.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor tab newydd)</a>.
+triage.enterCountry.personalRep.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor tab newydd)</a>.
+triage.enterCountry.personalRepInPeriodOfAdmin.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor tab newydd)</a>.
 assetTypeForNonUkResidents.title=Pa fath o eiddo neu ased y gwnaethoch ei werthu neu ei waredu?
 assetTypeForNonUkResidents.agent.title=Pa fath o eiddo, tir neu ased y gwnaeth eich cleient ei werthu neu ei waredu?
 assetTypeForNonUkResidents.trust.title=Pa fath o eiddo, tir neu ased y gwnaeth yr ymddiriedolaeth ei werthu neu ei waredu?
@@ -898,7 +899,7 @@ didYouDisposeOfResidentialProperty.details.p1=Mae eiddo preswyl yn cynnwys:
 didYouDisposeOfResidentialProperty.details.l1=adeilad lle mae rhywun yn byw neu lle gallai fyw, fel tŷ, fflat neu fath arall o annedd
 didYouDisposeOfResidentialProperty.details.l2=adeilad sy’n cael ei adeiladu neu ei newid fel y gellir ei ddefnyddio fel man lle gallai rhywun fyw
 didYouDisposeOfResidentialProperty.details.l3=tir sy’n rhan o ardd neu dir adeilad sy’n cael ei ddefnyddio fel man lle mae rhywun yn byw, neu lle gallai fyw
-didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Darllenwch ddiffiniad o eiddo preswyl (yn agor ffenestr newydd)</a>.
+didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Darllenwch ddiffiniad o eiddo preswyl (yn agor tab newydd)</a>.
 didYouDisposeOfResidentialProperty.error.required=Dewiswch ‘Iawn’ os gwnaethoch werthu neu waredu eiddo preswyl yn y DU
 didYouDisposeOfResidentialProperty.error.boolean=Dewiswch ‘Iawn’ os gwnaethoch werthu neu waredu eiddo preswyl yn y DU
 didYouDisposeOfResidentialProperty.agent.error.required=Dewiswch ‘Iawn’ os gwnaeth eich cleient waredu eiddo preswyl yn y DU
@@ -914,7 +915,7 @@ didYouDisposeOfResidentialProperty.personalRepInPeriodOfAdmin.error.boolean=Dewi
 didYouDisposeOfResidentialProperty.cyaChange=p’un a gafodd eiddo preswyl yn y DU ei waredu
 ukResidentCanOnlyReportResidential.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 ukResidentCanOnlyReportResidential.p1=Gwnaethoch ddweud wrthym eich bod yn breswylydd yn y DU ar y diwrnod y gwnaethoch werthu neu waredu eiddo yn y DU. Dim ond i roi gwybod am eiddo preswyl yn y DU y gallwch ddefnyddio’r gwasanaeth hwn.
-ukResidentCanOnlyReportResidential.p2=Dysgwch sut i roi gwybod am a thalu Treth Enillion Cyfalaf ar <a href="{0}">werthiannau neu warediadau eiddo dibreswyl yn y DU</a>.
+ukResidentCanOnlyReportResidential.p2=Dysgwch sut i roi gwybod am a thalu Treth Enillion Cyfalaf ar <a class="govuk-link" href="{0}">werthiannau neu warediadau eiddo dibreswyl yn y DU</a>.
 disposalDate.title=Ar ba ddyddiad y gwnaethoch gyfnewid contractau wrth waredu’r eiddo?
 disposalDate.agent.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
 disposalDate.trust.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
@@ -928,7 +929,7 @@ disposalDate.trust.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi
 disposalDate.capacitor.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 disposalDate.personalRep.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 disposalDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
-disposalDate.link=<a class="govuk-link" href="{0}" target="_blank">Cael gwybod beth sy’n digwydd ar y dyddiad cyfnewid (yn agor ffenestr newydd)</a>.
+disposalDate.link=<a class="govuk-link" href="{0}" target="_blank">Cael gwybod beth sy’n digwydd ar y dyddiad cyfnewid (yn agor tab newydd)</a>.
 disposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
 disposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
 disposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod heddiw neu yn y gorffennol
@@ -957,7 +958,7 @@ completionDate.trust.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r
 completionDate.capacitor.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
 completionDate.personalRep.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
 completionDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
-completionDate.link=<a class="govuk-link" href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cwblhau (yn agor ffenestr newydd)</a>
+completionDate.link=<a class="govuk-link" href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cwblhau (yn agor tab newydd)</a>
 completionDate.error.required=Nodwch ddyddiad cwblhau
 completionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
 completionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl dyddiad cyfnewid y contract, {0}
@@ -980,7 +981,7 @@ disposalDateTooEarly.non-uk.h2=Yr hyn y bydd angen i chi ei wneud nesaf
 disposalDateTooEarly.non-uk.p3=Bydd angen i chi lenwi <a class="govuk-link" href="{0}">dibreswyl: ffurflen rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo neu dir yn y DU</a>.
 disposalDateTooEarly.uk.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 disposalDateTooEarly.uk.p1=Mae hyn oherwydd pan gafodd yr eiddo ei werthu neu ei waredu, cyfnewidiwyd contractau cyn 6 Ebrill 2020.
-disposalDateTooEarly.uk.p2=Dysgwch sut i roi gwybod am a thalu Treth Enillion Cyfalaf ar <a href="{0}">werthiannau neu warediadau eiddo yn y DU cyn 6 Ebrill 2020</a>.
+disposalDateTooEarly.uk.p2=Dysgwch sut i roi gwybod am a thalu Treth Enillion Cyfalaf ar <a class="govuk-link" href="{0}">werthiannau neu warediadau eiddo yn y DU cyn 6 Ebrill 2020</a>.
 triage.check-your-answers.title=Gwirio’ch atebion
 triage.cyaChange.countryOfResidence=eich gwlad breswyl ar y diwrnod y gwnaethoch ‘gyfnewid’ contractau
 triage.cyaChange.assetTypeForNonUkResidents=y math o eiddo neu ased y gwnaethoch ei werthu
@@ -1010,14 +1011,14 @@ multiple-disposals.guidance.p3=Mae’n rhaid i chi anfon Ffurflenni Treth ar wah
 multiple-disposals.guidance.details.summary=Beth sy’n digwydd ar ddyddiadau ‘cyfnewid’ a ‘chwblhau’?
 multiple-disposals.guidance.details.p1=Fel arfer, y dyddiad ‘cwblhau’ yw’r diwrnod y bydd y perchennog newydd yn cael allwedd i’r eiddo.
 multiple-disposals.guidance.details.p2=Fel arfer, mae ‘cyfnewid’ contract yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
-multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Darllenwch am ‘gyfnewid a ‘chwblhau’ (yn agor ffenestr newydd)</a>.
+multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Darllenwch am ‘gyfnewid a ‘chwblhau’ (yn agor tab newydd)</a>.
 multipleDisposalsNumberOfProperties.title=Faint o warediadau ydych yn eu cynnwys yn y Ffurflen Dreth hon?
 multipleDisposalsNumberOfProperties.p1=Mae’n rhaid i’r holl warediadau eiddo fod â’r un dyddiad ‘cwblhau’. Mae’n rhaid i’r holl ddyddiadau ‘cyfnewid’ contract fod yn yr un flwyddyn dreth.
 multipleDisposalsNumberOfProperties.p2=Os ydych yn rhoi gwybod am werthiant cyfranddaliadau, nodwch nifer y cwmnïau yr oedd y cyfranddaliadau’n cael eu cadw ynddynt. Mae’n rhaid i’r holl gyfranddaliadau fod wedi’u gwerthu ar yr un dyddiad.
 multipleDisposalsNumberOfProperties.details.summary=Beth sy’n digwydd ar ddyddiadau ‘cyfnewid’ a ‘chwblhau’?
 multipleDisposalsNumberOfProperties.details.p1=Fel arfer, y dyddiad ‘cwblhau’ yw’r diwrnod y mae’r perchennog newydd yn cael yr allwedd i’r eiddo,
 multipleDisposalsNumberOfProperties.details.p2=Fel arfer, mae ‘cyfnewid’ contract yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
-multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">Darllenwch am ‘gyfnewid a ‘chwblhau’ (yn agor ffenestr newydd)</a>.
+multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">Darllenwch am ‘gyfnewid a ‘chwblhau’ (yn agor tab newydd)</a>.
 multipleDisposalsNumberOfProperties.error.invalid=Mae’n rhaid i nifer y gwarediadau fod yn rhif
 multipleDisposalsNumberOfProperties.error.required=Nodwch nifer y gwarediadau rydych yn eu cynnwys yn y Ffurflen Dreth hon
 multipleDisposalsNumberOfProperties.error.tooSmall=Mae’n rhaid i nifer y gwarediadau fod yn 2 neu fwy
@@ -1030,12 +1031,12 @@ multipleDisposalsWereYouAUKResident.capacitor.title=A oedd y person yn breswylyd
 multipleDisposalsWereYouAUKResident.personalRep.title=A oedd y person yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau?
 multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.title=A oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi?
 multipleDisposalsWereYouAUKResident.helpText=Mae ‘cyfnewid’ contractau fel arfer yn digwydd pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
-multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
-multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor ffenestr newydd)</a>
-multipleDisposalsWereYouAUKResident.trust.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>
-multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person (yn agor ffenestr newydd)</a>
-multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person (yn agor ffenestr newydd)</a>
-multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
+multipleDisposalsWereYouAUKResident.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor tab newydd)</a>
+multipleDisposalsWereYouAUKResident.agent.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor tab newydd)</a>
+multipleDisposalsWereYouAUKResident.trust.link=<a class="govuk-link" class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor tab newydd)</a>
+multipleDisposalsWereYouAUKResident.capacitor.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person (yn agor tab newydd)</a>
+multipleDisposalsWereYouAUKResident.personalRep.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person (yn agor tab newydd)</a>
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor tab newydd)</a>.
 multipleDisposalsWereYouAUKResident.error.required=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau
 multipleDisposalsWereYouAUKResident.error.boolean=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau
 multipleDisposalsWereYouAUKResident.agent.error.required=Dewiswch ‘Iawn’ os oedd eich cleient yn breswylydd yn y DU ar yr holl ddyddiadau cyfnewid contractau
@@ -1083,7 +1084,7 @@ multipleDisposalsTaxYear.taxyear.2020= Y cyfan rhwng 6 Ebrill 2020 a 5 Ebrill 20
 multipleDisposalsTaxYear.taxyear.before2020=Y cyfan cyn 6 Ebrill 2020
 multipleDisposalsTaxYear.taxyear.different=Cyfnewidiwyd yr eiddo mewn gwahanol flynyddoedd treth
 
-multipleDisposalsTaxYear.details.p1=Fel arfer, mae cyfnewid <a href="{0}" target="_blank">contractau (yn agor ffenestr newydd)</a> yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
+multipleDisposalsTaxYear.details.p1=Fel arfer, mae cyfnewid <a href="{0}" target="_blank">contractau (yn agor tab newydd)</a> yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
 multipleDisposalsTaxYear.error.required=Dewiswch bryd y cyfnewidiwyd y contractau ar yr holl eiddo
 multipleDisposalsTaxYear.error.before.invalid=Mae’n rhaid i’r dyddiadau cyfnewid fod naill ai yn ystod yr un flwyddyn dreth â dyddiad y farwolaeth neu mewn blwyddyn dreth flaenorol
 multipleDisposalsTaxYear.error.after.invalid=Mae’n rhaid i’r dyddiadau cyfnewid fod naill ai yn ystod yr un flwyddyn dreth â dyddiad y farwolaeth neu mewn blwyddyn dreth ddiweddarach
@@ -1093,7 +1094,7 @@ multipleDisposalsExchangedInDifferentTaxYears.title=Ni allwch ddefnyddio’r gwa
 multipleDisposalsExchangedInDifferentTaxYears.p1=Mae hyn oherwydd mai dim ond ar gyfer eiddo a gyfnewidiwyd mewn un flwyddyn dreth y gallwch chi gyflwyno Ffurflen Dreth.
 multipleDisposalsExchangedInDifferentTaxYears.p2=Er enghraifft, os gwnaethoch gyfnewid un eiddo yn y flwyddyn dreth 2020 i 2021 ac un arall yn y flwyddyn dreth 2021 i 2022, ni allwch eu cyflwyno yn yr un Ffurflen Dreth.
 multipleDisposalsExchangedInDifferentTaxYears.whatNext=Beth fydd angen i chi ei wneud nesaf
-multipleDisposalsExchangedInDifferentTaxYears.p3=<a href="{0}">Dechreuwch eto</a> a chyflwynwch Ffurflen Dreth ar wahân ar gyfer pob blwyddyn dreth.
+multipleDisposalsExchangedInDifferentTaxYears.p3=<a class="govuk-link" href="{0}">Dechreuwch eto</a> a chyflwynwch Ffurflen Dreth ar wahân ar gyfer pob blwyddyn dreth.
 
 multipleDisposalsAssetTypeForNonUkResidents.title=Pa fathau o eiddo neu asedion a waredwyd gennych?
 multipleDisposalsAssetTypeForNonUkResidents.agent.title=Pa fathau o eiddo neu asedion a waredwyd gan eich cleient?
@@ -1136,7 +1137,7 @@ multipleDisposalsAssetTypeForNonUkResidents.cyaChange=y mathau o eiddo neu asedi
 multipleDisposalsCompletionDate.title=Beth oedd y dyddiad ‘cwblhau’ ar gyfer yr holl eiddo?
 multipleDisposalsCompletionDate.helpText=Er enghraifft 25, 4, 2020.
 multipleDisposalsCompletionDate.details.summary=Beth sy’n digwydd ar y dyddiad ‘cwblhau’?
-multipleDisposalsCompletionDate.details.p1=Fel arfer, <a href="{0}" target=_blank>y dyddiad ‘cwblhau’ (yn agor ffenestr newydd)</a> yw’r diwrnod y mae’r perchennog newydd yn cael yr allweddi i’r eiddo.
+multipleDisposalsCompletionDate.details.p1=Fel arfer, <a class="govuk-link" href="{0}" target="_blank">y dyddiad ‘cwblhau’ (yn agor tab newydd)</a> yw’r diwrnod y mae’r perchennog newydd yn cael yr allweddi i’r eiddo.
 multipleDisposalsCompletionDate.error.required=Nodwch ddyddiad cwblhau
 multipleDisposalsCompletionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
 multipleDisposalsCompletionDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cwblhau fod heddiw neu yn y gorffennol
@@ -2176,7 +2177,7 @@ acquisitionFees.agent.indirect.rebased.helpText=Er enghraifft, cost talu brocer 
 acquisitionFees.trust.indirect.rebased.helpText=Er enghraifft, cost talu brocer stoc i ddweud wrthych beth oedd gwerth y cyfranddaliadau ar {0}
 acquisitionFees.capacitor.indirect.rebased.helpText=Er enghraifft, cost talu brocer stoc i ddweud wrthych beth oedd gwerth y cyfranddaliadau ar {0}
 acquisitionFees.personalRep.indirect.rebased.helpText=Er enghraifft, cost talu brocer stoc i ddweud wrthych beth oedd gwerth y cyfranddaliadau ar {0}
-acquisitionFees.allowableCostsLinkText=<a href="{0}" target="_blank">Dysgwch am gostau caniataol ychwanegol (yn agor ffenestr newydd)</a>.
+acquisitionFees.allowableCostsLinkText=<a href="{0}" target="_blank">Dysgwch am gostau caniataol ychwanegol (yn agor tab newydd)</a>.
 acquisitionFees.details.header=Beth yw ail-sylfaenu?
 acquisitionFees.details.p1=Roeddech yn berchen ar yr eiddo ar neu cyn {0}.
 acquisitionFees.agent.details.p1=Roedd eich cleient yn berchen ar yr eiddo ar neu cyn {0}.
@@ -2197,7 +2198,7 @@ acquisitionFees.indirect.details.p2=Mae hyn yn golygu, wrth i chi gyfrifo’ch T
 acquisitionFees.indirect.agent.p2=I gyfrifo Treth Enillion Cyfalaf eich cleient, mae’n rhaid i chi ddefnyddio gwerth marchnadol y cyfranddaliadau ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 acquisitionFees.indirect.trust.details.p2=I gyfrifo Treth Enillion Cyfalaf yr ymddiriedolaeth, mae’n rhaid i chi ddefnyddio gwerth marchnadol y cyfranddaliadau ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 acquisitionFees.details.p3=Yr enw ar y broses hon yw ail-sylfaenu.
-acquisitionFees.non-resident.details.p3=Yr enw ar y broses hon yw <a href="{0}" target="_blank">ail-sylfaenu (yn agor ffenestr newydd)</a>.
+acquisitionFees.non-resident.details.p3=Yr enw ar y broses hon yw <a href="{0}" target="_blank">ail-sylfaenu (yn agor tab newydd)</a>.
 acquisitionFees.cyaChange=os oedd unrhyw gostau caffael ychwanegol
 acquisitionFees.rebased.cyaChange=os oedd unrhyw gostau ail-sylfaenu ychwanegol
 acquisitionFees.error.required=Dewiswch ‘Iawn’ os oes costau ychwanegol
@@ -2262,7 +2263,7 @@ rebaseAcquisitionPrice.capacitor.dropdown.p2=I gyfrifo enillion neu golledion y 
 rebaseAcquisitionPrice.personalRep.dropdown.p2=I gyfrifo enillion neu golledion y person, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 rebaseAcquisitionPrice.indirect.dropdown.p2=<a href="{0}" target="_blank">Dysgwch am ail-sylfaenu (yn agor ffenestr neu dab newydd)</a>
 rebaseAcquisitionPrice.dropdown.p3=Yr enw ar y broses hon yw ail-sylfaenu.
-rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Dysgwch sut i ofyn i CThEM wirio gwerth marchnadol eiddo (yn agor ffenestr newydd)</a>.
+rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Dysgwch sut i ofyn i CThEM wirio gwerth marchnadol eiddo (yn agor tab newydd)</a>.
 rebaseAcquisitionPrice.dropdown.p5=Mae’n cymryd o leiaf 3 mis i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y dylech nodi amcangyfrif nawr ac, os bydd angen i chi newid y swm, gwnewch hynny’n nes ymlaen gan ddefnyddio’r gwasanaeth hwn. Neu os ydych eisoes wedi llenwi Ffurflen Dreth Hunanasesiad, gallwch roi’r gwerth marchnadol cywir yn eich Ffurflen Dreth Hunanasesiad nesaf.
 rebaseAcquisitionPrice.agent.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’ch cleient allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
 rebaseAcquisitionPrice.trust.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’r ymddiriedolaeth allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
@@ -2408,7 +2409,7 @@ privateResidentsRelief.details.body.p2=Os nad oeddech yn byw yn yr eiddo drwy gy
 privateResidentsRelief.details.body.li1=y blynyddoedd yr oeddech yn byw yno
 privateResidentsRelief.details.body.li2=y <strong class="bold">naw mis</strong> olaf yr oeddech yn berchen arno – hyd yn oed os nad oeddech yn byw yno ar y pryd
 privateResidentsRelief.details.body.p3=Mae rhai eithriadau’n gymwys.
-privateResidentsRelief.details.body.link=Dysgwch am Ryddhad Preswylfa Breifat (yn agor ffenestr newydd)
+privateResidentsRelief.details.body.link=Dysgwch am Ryddhad Preswylfa Breifat (yn agor tab newydd)
 
 privateResidentsReliefValue.label=Swm y Rhyddhad Preswylfan Preifat y mae gennych hawl iddo
 privateResidentsReliefValue.agent.label=Swm y Rhyddhad Preswylfan Preifat y mae gan eich cleient hawl iddo
@@ -2417,7 +2418,7 @@ privateResidentsReliefValue.capacitor.label=Swm y Rhyddhad Preswylfan Preifat y 
 privateResidentsReliefValue.personalRep.label=Swm y Rhyddhad Preswylfan Preifat yr oedd gan y person hawl iddo
 privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.label=Swm y Rhyddhad Preswylfan Preifat sy’n cael ei hawlio
 privateResidentsReliefValue.personalRepInPeriodOfAdmin.label=Swm y Rhyddhad Preswylfan Preifat sy’n cael ei hawlio
-privateResidentsRelief.furtherInfoLink=Dysgwch ragor am Ryddhad Preswylfan Preifat (yn agor ffenestr newydd)
+privateResidentsRelief.furtherInfoLink=Dysgwch ragor am Ryddhad Preswylfan Preifat (yn agor tab newydd)
 privateResidentsRelief.error.required=Dewiswch ‘Iawn’ os oes gennych hawl i Ryddhad Preswylfan Preifat
 privateResidentsRelief.agent.error.required=Dewiswch ‘Iawn’ os oes gan eich cleient hawl i Ryddhad Preswylfan Preifat
 privateResidentsRelief.trust.error.required=Dewiswch ‘Iawn’ os oes gan yr ymddiriedolaeth hawl i Ryddhad Preswylfan Preifat
@@ -2480,14 +2481,14 @@ lettingsRelief.details.body.p1=Os oeddech yn byw yn eich cartref <strong class="
 lettingsRelief.details.body.li1=yr un swm a gawsoch mewn Rhyddhad Preswylfa Breifat
 lettingsRelief.details.body.li2=£40,000
 lettingsRelief.details.body.li3=yr un swm â’r enillion trethadwy a wnaethoch wrth roi rhan o’ch cartref ar osod
-lettingsRelief.details.body.link=Dysgwch am Ryddhad Gosod (yn agor ffenestr newydd)
+lettingsRelief.details.body.link=Dysgwch am Ryddhad Gosod (yn agor tab newydd)
 
 lettingsRelief.error.required=Dewiswch ‘Iawn’ os ydych yn hawlio Rhyddhad Gosod
 lettingsRelief.agent.error.required=Dewiswch ‘Iawn’ os oes gan eich cleient hawl i Ryddhad Gosod
 lettingsRelief.trust.error.required=Dewiswch ‘Iawn’ os oes gan yr ymddiriedolaeth hawl i Ryddhad Gosod
 lettingsRelief.capacitor.error.required=Dewiswch ‘Iawn’ os oes gan y person hawl i Ryddhad Gosod
 lettingsRelief.personalRep.error.required=Dewiswch ‘Iawn’ os oedd gan y person hawl i Ryddhad Gosod
-lettingsRelief.furtherInfoLink=Dysgwch ragor am Ryddhad Gosod a sut i’w gyfrifo (yn agor ffenestr newydd)
+lettingsRelief.furtherInfoLink=Dysgwch ragor am Ryddhad Gosod a sut i’w gyfrifo (yn agor tab newydd)
 lettingsReliefValue.label=Swm y Rhyddhad Gosod
 lettingsReliefValue.error.required=Nodwch swm y Rhyddhad Gosod, fel 108 neu 2,940.54
 lettingsReliefValue.error.tooSmall=Mae’n rhaid i swm y Rhyddhad Gosod fod yn swm o arian rhwng 0 a 50,000,000,000
@@ -2519,13 +2520,13 @@ otherReliefs.capacitor.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol
 otherReliefs.personalRep.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth, a elwir yn lwfans personol sy’n rhydd o dreth ar gyfer Treth Enillion Cyfalaf, yma.
 otherReliefs.personalRepInPeriodOfAdmin.agent.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth, a elwir yn lwfans personol sy’n rhydd o dreth ar gyfer Treth Enillion Cyfalaf, yma.
 otherReliefs.personalRepInPeriodOfAdmin.helpText2=Peidiwch â nodi colledion na’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth, a elwir yn lwfans personol sy’n rhydd o dreth ar gyfer Treth Enillion Cyfalaf, yma.
-otherReliefs.furtherInfoLink=Dysgwch ragor am ryddhad y gallwch fod yn gymwys i’w gael (yn agor ffenestr newydd)
-otherReliefs.agent.furtherInfoLink=Dysgwch ragor am ryddhad y gall eich cleient fod yn gymwys i’w gael (yn agor ffenestr newydd)
-otherReliefs.trust.furtherInfoLink=Dysgwch ragor am ryddhad y gall yr ymddiriedolaeth fod yn gymwys i’w gael (yn agor ffenestr newydd)
-otherReliefs.capacitor.furtherInfoLink=Dysgwch ragor am ryddhad y gall y person fod yn gymwys i’w gael (yn agor ffenestr newydd)
-otherReliefs.personalRep.furtherInfoLink=Dysgwch ragor am ryddhad y gallai’r person wedi bod yn gymwys i’w gael (yn agor ffenestr newydd)
-otherReliefs.personalRepInPeriodOfAdmin.agent.furtherInfoLink=Dysgwch ragor am ryddhad y gallai’r person wedi bod yn gymwys i’w gael (yn agor ffenestr newydd)
-otherReliefs.personalRepInPeriodOfAdmin.furtherInfoLink=Dysgwch ragor am ryddhad y gallai’r person wedi bod yn gymwys i’w gael (yn agor ffenestr newydd)
+otherReliefs.furtherInfoLink=Dysgwch ragor am ryddhad y gallwch fod yn gymwys i’w gael (yn agor tab newydd)
+otherReliefs.agent.furtherInfoLink=Dysgwch ragor am ryddhad y gall eich cleient fod yn gymwys i’w gael (yn agor tab newydd)
+otherReliefs.trust.furtherInfoLink=Dysgwch ragor am ryddhad y gall yr ymddiriedolaeth fod yn gymwys i’w gael (yn agor tab newydd)
+otherReliefs.capacitor.furtherInfoLink=Dysgwch ragor am ryddhad y gall y person fod yn gymwys i’w gael (yn agor tab newydd)
+otherReliefs.personalRep.furtherInfoLink=Dysgwch ragor am ryddhad y gallai’r person wedi bod yn gymwys i’w gael (yn agor tab newydd)
+otherReliefs.personalRepInPeriodOfAdmin.agent.furtherInfoLink=Dysgwch ragor am ryddhad y gallai’r person wedi bod yn gymwys i’w gael (yn agor tab newydd)
+otherReliefs.personalRepInPeriodOfAdmin.furtherInfoLink=Dysgwch ragor am ryddhad y gallai’r person wedi bod yn gymwys i’w gael (yn agor tab newydd)
 otherReliefs.error.required=Dewiswch ‘Iawn’ os ydych yn hawlio rhyddhad arall
 otherReliefs.agent.error.required=Dewiswch ‘Iawn’ os yw’ch cleient yn hawlio rhyddhad arall
 otherReliefs.trust.error.required=Dewiswch ‘Iawn’ os yw’r ymddiriedolaeth yn hawlio rhyddhad arall
@@ -2647,13 +2648,13 @@ inYearLosses.agent.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw
 inYearLosses.trust.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ymddiriedolaeth yn y flwyddyn dreth
 inYearLosses.agent.error.invalid=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth eich cleient yn y flwyddyn dreth
 inYearLosses.trust.error.invalid=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ymddiriedolaeth yn y flwyddyn dreth
-inYearLosses.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor ffenestr newydd)</a>.
-inYearLosses.agent.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor ffenestr newydd)</a>.
-inYearLosses.trust.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor ffenestr newydd)</a>.
-inYearLosses.capacitor.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor ffenestr newydd)</a>.
-inYearLosses.personalRep.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor ffenestr newydd)</a>.
-inYearLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor ffenestr newydd)</a>.
-inYearLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor ffenestr newydd)</a>.
+inYearLosses.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
+inYearLosses.agent.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
+inYearLosses.trust.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
+inYearLosses.capacitor.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
+inYearLosses.personalRep.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
+inYearLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
+inYearLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
 inYearLossesValue.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
 inYearLossesValue.agent.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
 inYearLossesValue.trust.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
@@ -2761,13 +2762,13 @@ previousYearsLosses.capacitor.error.required=Dewiswch ‘Iawn’ os yw’r perso
 previousYearsLosses.personalRep.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth y person mewn blynyddoedd treth blaenorol
 previousYearsLosses.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os ydych yn cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ystâd mewn blynyddoedd treth blaenorol
 previousYearsLosses.personalRepInPeriodOfAdmin.agent.error.required=Dewiswch ‘Iawn’ os yw’ch cleient yn cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ystâd mewn blynyddoedd treth blaenorol
-previousYearsLosses.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor ffenestr newydd)</a>.
-previousYearsLosses.agent.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor ffenestr newydd)</a>.
-previousYearsLosses.trust.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor ffenestr newydd)</a>.
-previousYearsLosses.capacitor.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor ffenestr newydd)</a>.
-previousYearsLosses.personalRep.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor ffenestr newydd)</a>.
-previousYearsLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor ffenestr newydd)</a>.
-previousYearsLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor ffenestr newydd)</a>.
+previousYearsLosses.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
+previousYearsLosses.agent.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
+previousYearsLosses.trust.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
+previousYearsLosses.capacitor.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
+previousYearsLosses.personalRep.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
+previousYearsLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
+previousYearsLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
 previousYearsLossesValue.label=Swm y colledion o flynyddoedd treth blaenorol
 previousYearsLossesValue.agent.label=Swm y colledion o flynyddoedd treth blaenorol
 previousYearsLossesValue.trust.label=Swm y colledion o flynyddoedd treth blaenorol
@@ -2833,7 +2834,7 @@ previousYearsLosses.furtherReturn.capacitor.helpText=Gallwch gynnwys colledion b
 previousYearsLosses.furtherReturn.personalRep.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r person eisoes wedi rhoi gwybod i CThEM amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
 previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r ystâd eisoes wedi rhoi gwybod i CThEM amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
 previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r ystâd eisoes wedi rhoi gwybod i CThEM amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
-previousYearsLosses.furtherReturn.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor ffenestr newydd)</a>.
+previousYearsLosses.furtherReturn.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
 annualExemptAmount.title=Faint o’ch Swm Blynyddol sydd wedi ei Eithrio rhag Treth Enillion Cyfalaf rydych am ei ddefnyddio?
 annualExemptAmount.agent.title=Faint o Swm Blynyddol eich cleient, sydd wedi ei Eithrio rhag Treth Enillion Cyfalaf, y mae am ei ddefnyddio?
 annualExemptAmount.trust.title=Faint o Swm Blynyddol yr ymddiriedolaeth, sydd wedi ei Eithrio rhag Treth Enillion Cyfalaf, y mae am ei ddefnyddio?
@@ -2849,14 +2850,14 @@ annualExemptAmount.personalRep.helpText=Ym mlwyddyn dreth {0} i {1}, dim ond ar 
 annualExemptAmount.personalRepInPeriodOfAdmin.helpText=Yn ystod y cyfnod gweinyddu, gall yr holl Swm Blynyddol sydd wedi ei Eithrio rhag Treth gael ei gynnwys yn Ffurflen Dreth yr ystâd. Dyma’r achos hyd yn oed os oedd y cyfnod rhwng 6 Ebrill a’r diwrnod y bu farw’r person yn fyr iawn.
 annualExemptAmount.personalRepInPeriodOfAdmin.agent.helpText=Yn ystod y cyfnod gweinyddu, gall yr holl Swm Blynyddol sydd wedi ei Eithrio rhag Treth gael ei gynnwys yn Ffurflen Dreth yr ystâd. Dyma’r achos hyd yn oed os oedd y cyfnod rhwng 6 Ebrill a’r diwrnod y bu farw’r person yn fyr iawn.
 annualExemptAmount.details.1.header=Beth yw’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth?
-annualExemptAmount.details.1.body=Bob blwyddyn dreth, mae ymddiriedolaeth yn cael lwfans rhydd o dreth blynyddol. Gelwir hyn yn <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a>. Mae ymddiriedolwyr ond yn talu Treth Enillion Cyfalaf os yw enillion trethadwy’r ymddiriedolaeth ar gyfer y flwyddyn dreth dros y Swm Blynyddol sydd wedi ei Eithrio rhag Treth.
+annualExemptAmount.details.1.body=Bob blwyddyn dreth, mae ymddiriedolaeth yn cael lwfans rhydd o dreth blynyddol. Gelwir hyn yn <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a>. Mae ymddiriedolwyr ond yn talu Treth Enillion Cyfalaf os yw enillion trethadwy’r ymddiriedolaeth ar gyfer y flwyddyn dreth dros y Swm Blynyddol sydd wedi ei Eithrio rhag Treth.
 annualExemptAmount.details.2.header=Pwy yw buddiolwyr sy’n agored i niwed?
-annualExemptAmount.details.2.body=<a href="{0}" target="_blank">Gallai buddiolwr sy’n agored i niwed (yn agor ffenestr newydd)</a> fod yn rhywun o dan 18 oed y mae ei rieni wedi marw. Gallai hefyd fod yn berson ag anabledd sy’n gymwys ar gyfer budd-daliadau penodol.
+annualExemptAmount.details.2.body=<a href="{0}" target="_blank">Gallai buddiolwr sy’n agored i niwed (yn agor tab newydd)</a> fod yn rhywun o dan 18 oed y mae ei rieni wedi marw. Gallai hefyd fod yn berson ag anabledd sy’n gymwys ar gyfer budd-daliadau penodol.
 annualExemptAmount.details.3.header=Beth yw’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth?
-annualExemptAmount.details.3.body=Mae’r <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a> yn lwfans rhydd o dreth blynyddol. Mae ar gael i rai pobl sydd angen talu Treth Enillion Cyfalaf. Dim ond ar eu henillion ar gyfer y flwyddyn dreth sydd dros y Swm Blynyddol sydd wedi ei Eithrio rhag Treth y mae’n rhaid i’r rhan fwyaf o bobl dalu Treth Enillion Cyfalaf. Mae’n rhaid i unrhyw golledion neu ryddhad fod wedi’u tynnu oddi ar yr enillion eisoes.
-annualExemptAmount.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a>.
-annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yn ystod y cyfnod gweinyddu (yn agor ffenestr newydd)</a>.
-annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yn ystod y cyfnod gweinyddu (yn agor ffenestr newydd)</a>.
+annualExemptAmount.details.3.body=Mae’r <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> yn lwfans rhydd o dreth blynyddol. Mae ar gael i rai pobl sydd angen talu Treth Enillion Cyfalaf. Dim ond ar eu henillion ar gyfer y flwyddyn dreth sydd dros y Swm Blynyddol sydd wedi ei Eithrio rhag Treth y mae’n rhaid i’r rhan fwyaf o bobl dalu Treth Enillion Cyfalaf. Mae’n rhaid i unrhyw golledion neu ryddhad fod wedi’u tynnu oddi ar yr enillion eisoes.
+annualExemptAmount.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a>.
+annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yn ystod y cyfnod gweinyddu (yn agor tab newydd)</a>.
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yn ystod y cyfnod gweinyddu (yn agor tab newydd)</a>.
 annualExemptAmount.error.tooLarge=Mae’n rhaid i’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth fod yn {0} neu lai
 annualExemptAmount.agent.error.tooLarge=Mae’n rhaid i’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth fod yn {0} neu lai
 annualExemptAmount.trust.error.tooLarge=Mae’n rhaid i’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth fod yn {0} neu lai
@@ -3157,7 +3158,7 @@ personalAllowance.non-resident.helpText=Byddwn yn defnyddio’r swm hwn i gyfrif
 personalAllowance.agent.non-resident.helpText=Byddwn yn defnyddio’r swm hwn i gyfrifo cyfradd y Dreth Enillion Cyfalaf y dylai’ch cleient ei thalu. <br/><br/>Bydd angen i chi wirio’r cytundeb trethiant dwbl ar gyfer y wlad mae’ch cleient yn preswylio ynddi a’r DU. Bydd hyn yn rhoi gwybod i chi a oes ganddo hawl i Lwfans Personol.
 personalAllowance.capacitor.non-resident.helpText=Byddwn yn defnyddio’r swm hwn i gyfrifo cyfradd y Dreth Enillion Cyfalaf y dylai’r person ei thalu. <br/><br/>Bydd angen i’r person wirio’r cytundeb trethiant dwbl ar gyfer y wlad y mae’r person yn preswylio ynddi a’r DU. Bydd hyn yn rhoi gwybod i’r person a oes ganddo hawl i Lwfans Personol.
 personalAllowance.personalRep.non-resident.helpText=Byddwn yn defnyddio’r swm hwn i gyfrifo cyfradd y Dreth Enillion Cyfalaf y dylid ei thalu. <br/><br/>Bydd angen i chi wirio’r cytundeb trethiant dwbl ar gyfer y wlad yr oedd y person yn preswylio ynddi a’r DU. Bydd hyn yn rhoi gwybod i chi a oedd gan y person hawl i Lwfans Personol.
-personalAllowance.link=<a href="{0}" target="_blank">Dysgwch am Lwfansau Personol (yn agor ffenestr newydd)</a>.
+personalAllowance.link=<a href="{0}" target="_blank">Dysgwch am Lwfansau Personol (yn agor tab newydd)</a>.
 personalAllowance.error.required=Nodwch faint o’ch Lwfans Personol rydych am ei ddefnyddio
 personalAllowance.agent.error.required=Nodwch Lwfans Personol eich cleient ar gyfer y flwyddyn dreth
 personalAllowance.capacitor.error.required=Nodwch Lwfans Personol y person ar gyfer y flwyddyn dreth
@@ -3297,7 +3298,7 @@ taxDue.personalRep.helpText.p1=Os ydych yn cytuno â’r gwaith cyfrifo hwn, nod
 taxDue.helpText.p2=Os hoffech nodi swm gwahanol, gofynnir i chi uwchlwytho ffeil yn ddiweddarach sy’n dangos eich gwaith cyfrifo.
 taxDue.helpText.p3=Os yw’r ymddiriedolaeth ar gyfer buddiolwyr sy’n agored i niwed, bydd angen i chi gyfrifo a nodi swm y dreth sy’n ddyledus.
 taxDue.trustDetails.label=Cymorth i ymddiriedolaethau ar gyfer buddiolwyr sy’n agored i niwed
-taxDue.trustDetails.content=Mae ymddiriedolaethau ar gyfer buddiolwyr sy’n agored i niwed yn cael triniaeth dreth arbennig. Nid yw’r gwaith cyfrifo ar y dudalen hon yn berthnasol i’r math hwn o ymddiriedolaeth. Dysgwch sut i <a href="{0}" target="_blank">gyfrifo swm y Dreth Enillion Cyfalaf sy’n ddyledus (yn agor ffenestr newydd)</a> ar gyfer y math hwn o ymddiriedolaeth.
+taxDue.trustDetails.content=Mae ymddiriedolaethau ar gyfer buddiolwyr sy’n agored i niwed yn cael triniaeth dreth arbennig. Nid yw’r gwaith cyfrifo ar y dudalen hon yn berthnasol i’r math hwn o ymddiriedolaeth. Dysgwch sut i <a href="{0}" target="_blank">gyfrifo swm y Dreth Enillion Cyfalaf sy’n ddyledus (yn agor tab newydd)</a> ar gyfer y math hwn o ymddiriedolaeth.
 taxDue.error.required=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 taxDue.error.invalid=Mae’n rhaid i swm y Dreth Enillion Cyfalaf sy’n ddyledus fod yn swm o arian, er enghraifft 493 neu 2,040.59
 taxDue.error.tooSmall=Mae’n rhaid i swm y Dreth Enillion Cyfalaf sy’n ddyledus fod yn swm o arian rhwng 0 a 50,000,000,000
@@ -3360,9 +3361,9 @@ calculator.total.amountDueAtHigherRate=Swm y dreth sy’n ddyledus ar y gyfradd 
 calculator.total.taxOwed=Treth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 calculator.noTaxToPay=Does dim treth yn ddyledus ar gyfer y Ffurflen Dreth hon
 nonCalculatedTaxDue.title=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
-nonCalculatedTaxDue.ukResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu (yn agor ffenestr newydd)
-nonCalculatedTaxDue.trust.link=Rhagor o wybodaeth am sut i gyfrifo Treth Enillion Cyfalaf ar gyfer ymddiriedolaeth (yn agor ffenestr newydd)
-nonCalculatedTaxDue.nonResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu neu ar gyfer gwarediadau anuniongyrchol (yn agor ffenestr newydd)
+nonCalculatedTaxDue.ukResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu (yn agor tab newydd)
+nonCalculatedTaxDue.trust.link=Rhagor o wybodaeth am sut i gyfrifo Treth Enillion Cyfalaf ar gyfer ymddiriedolaeth (yn agor tab newydd)
+nonCalculatedTaxDue.nonResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu neu ar gyfer gwarediadau anuniongyrchol (yn agor tab newydd)
 nonCalculatedTaxDue.helpText=Bydd angen i chi gyfrifo’r swm a’i nodi.
 nonCalculatedTaxDue.error.required=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 nonCalculatedTaxDue.error.tooSmall=Mae’n rhaid i swm y Dreth Enillion Cyfalaf sy’n ddyledus fod yn 0 neu fwy
@@ -3701,7 +3702,7 @@ confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=Os oes angen i’
 confirmationOfSubmission.trust.ifSa=Os oes angen i’r ymddiriedolaeth anfon Ffurflen Dreth Hunanasesiad
 confirmationOfSubmission.capacitor.ifSa=Hunanasesiad
 confirmationOfSubmission.personalRep.ifSa=Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer y person
-confirmationOfSubmission.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn eich <a href="{0}" target="_blank">Ffurflen Dreth Hunanasesiad nesaf (yn agor ffenestr newydd)</a>.
+confirmationOfSubmission.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn eich <a href="{0}" target="_blank">Ffurflen Dreth Hunanasesiad nesaf (yn agor tab newydd)</a>.
 confirmationOfSubmission.agent.ifSa.p1=Os oes angen i’ch cleient anfon Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.
 confirmationOfSubmission.trust.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn Ffurflen Dreth Hunanasesiad nesaf yr ymddiriedolaeth.
 confirmationOfSubmission.capacitor.ifSa.p1=Os oes angen i’r person gyflwyno Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.
@@ -3936,7 +3937,7 @@ multipleDisposalsDisposalDate.capacitor.helpText=Mae hyn fel arfer pan fydd pryn
 multipleDisposalsDisposalDate.personalRep.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contractau i''w gilydd ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contractau i''w gilydd ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.agent.helpText=Fel arfer, dyna pan mae prynwr a gwerthwr yn cyfnewid contractau ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
-multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cyfnewid (yn agor ffenestr newydd)</a>.
+multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cyfnewid (yn agor tab newydd)</a>.
 multipleDisposalsDisposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
 multipleDisposalsDisposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
 multipleDisposalsDisposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod yr un fath neu cyn y dyddiad cwblhau
@@ -4575,7 +4576,7 @@ unmetDependency.x2.li3=uwchlwytho dogfen sy’n dangos sut y cyfrifwyd swm newyd
 disposalDateInDifferentTaxYear.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 disposalDateInDifferentTaxYear.p1=Ni allwch ddefnyddio’r gwasanaeth ar-lein i newid y flwyddyn dreth ar gyfer Ffurflen Dreth sydd eisoes wedi’i hanfon
 disposalDateInDifferentTaxYear.subheading=Yr hyn y bydd angen i chi ei wneud nesaf
-disposalDateInDifferentTaxYear.p2=Bydd angen i chi <a class="govuk-link" href=”{0}”>ysgrifennu atom</a> gyda'r newid yn eich blwyddyn dreth
+disposalDateInDifferentTaxYear.p2=Bydd angen i chi <a class="govuk-link" href=”{0}”>ysgrifennu atom</a> gyda’r newid yn eich blwyddyn dreth
 
 #===================================================
 #  AMEND RETURNS - END
@@ -4654,12 +4655,12 @@ furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.p1=Gwnewch hyn 
 furtherReturnGuidance.stage-a.step-a2.li1=Ychwanegwch at ei gilydd yr holl <strong class="bold">enillion ar ôl rhyddhad</strong> o warediadau sy’n gysylltiedig ag eiddo yn y DU.
 furtherReturnGuidance.stage-a.step-a2.li2=Tynnwch unrhyw golledion Treth Enillion Cyfalaf yn ystod y flwyddyn y gellir eu didynnu.
 furtherReturnGuidance.stage-a.step-a2.li3=Tynnwch unrhyw golledion Treth Enillion Cyfalaf caniataol yn ystod blynyddoedd treth blaenorol.
-furtherReturnGuidance.stage-a.step-a2.li4=Tynnwch eich <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a> yr ydych am ei ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">eich ennill net</strong>.
-furtherReturnGuidance.agent.stage-a.step-a2.li4=Tynnwch <a href="{0}" target="_blank">Swm Blynyddol eich cleient sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
-furtherReturnGuidance.capacitor.stage-a.step-a2.li4=Tynnwch <a href="{0}" target="_blank">Swm Blynyddol y person sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
-furtherReturnGuidance.trust.stage-a.step-a2.li4=Tynnwch y <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
-furtherReturnGuidance.personalRep.stage-a.step-a2.li4=Tynnwch <a href="{0}" target="_blank">Swm Blynyddol y person sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.li4=Tynnwch y <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor ffenestr newydd)</a> ac sydd i’w ddefnyddio ar yr enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
+furtherReturnGuidance.stage-a.step-a2.li4=Tynnwch eich <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> yr ydych am ei ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">eich ennill net</strong>.
+furtherReturnGuidance.agent.stage-a.step-a2.li4=Tynnwch <a href="{0}" target="_blank">Swm Blynyddol eich cleient sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
+furtherReturnGuidance.capacitor.stage-a.step-a2.li4=Tynnwch <a href="{0}" target="_blank">Swm Blynyddol y person sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
+furtherReturnGuidance.trust.stage-a.step-a2.li4=Tynnwch y <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
+furtherReturnGuidance.personalRep.stage-a.step-a2.li4=Tynnwch <a href="{0}" target="_blank">Swm Blynyddol y person sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.li4=Tynnwch y <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar yr enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
 furtherReturnGuidance.stage-a.step-a2.li5=Mae’r canlyniad hwn yn seiliedig ar y Dreth Enillion Cyfalaf y dylech fod yn ei thalu nawr.
 furtherReturnGuidance.agent.stage-a.step-a2.li5=Mae’r canlyniad hwn yn seiliedig ar y Dreth Enillion Cyfalaf y dylid ei thalu nawr.
 furtherReturnGuidance.capacitor.stage-a.step-a2.li5=Mae’r canlyniad hwn yn seiliedig ar y Dreth Enillion Cyfalaf y dylid ei thalu nawr.
@@ -4875,11 +4876,11 @@ furtherReturnGuidance.stage-b.step-b1=Cam B1 – Cyfrifwch eich incwm trethadwy
 furtherReturnGuidance.agent.stage-b.step-b1=Cam B1 – Cyfrifwch incwm trethadwy eich cleient
 furtherReturnGuidance.capacitor.stage-b.step-b1=Cam B1 – Cyfrifwch incwm trethadwy’r person
 furtherReturnGuidance.personalRep.stage-b.step-b1=Cam B1 – Cyfrifwch incwm trethadwy’r person
-furtherReturnGuidance.stage-b.step-b1.p1=Gwnewch hyn i helpu i gyfrifo’ch incwm trethadwy er mwyn darganfod faint o’ch ennill net (os o gwbl) y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor ffenestr newydd)</a>.
-furtherReturnGuidance.agent.stage-b.step-b1.p1=Gwnewch hyn i helpu i gyfrifo incwm trethadwy eich cleient er mwyn darganfod faint o’i ennill net (os o gwbl) y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor ffenestr newydd)</a>.
-furtherReturnGuidance.capacitor.stage-b.step-b1.p1=Gwnewch hyn i helpu i gyfrifo incwm trethadwy’r person er mwyn darganfod faint o’r ennill net (os o gwbl) y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor ffenestr newydd)</a>.
-furtherReturnGuidance.personalRep.stage-b.step-b1.p1=Gwnewch hyn i helpu i gyfrifo incwm trethadwy’r person er mwyn darganfod faint o’r ennill net (os o gwbl) y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor ffenestr newydd)</a>.
-furtherReturnGuidance.trust.stage-b.step-b1.p1=Lluoswch <strong class="bold">ennill net</strong> yr ymddiriedolaeth am y flwyddyn â’r <a href="{0}" target="_blank">gyfradd dreth berthnasol ar gyfer y flwyddyn dreth ar gyfer y math o ymddiriedolaeth (yn agor ffenestr newydd)</a> i gyfrifo <strong class="bold">rhwymedigaeth Treth Enillion Cyfalaf gyffredinol yr ymddiriedolaeth ar ei gwarediadau sy’n gysylltiedig ag eiddo yn y DU</strong>.
+furtherReturnGuidance.stage-b.step-b1.p1=Gwnewch hyn i helpu i gyfrifo’ch incwm trethadwy er mwyn darganfod faint o’ch ennill net (os o gwbl) y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor tab newydd)</a>.
+furtherReturnGuidance.agent.stage-b.step-b1.p1=Gwnewch hyn i helpu i gyfrifo incwm trethadwy eich cleient er mwyn darganfod faint o’i ennill net (os o gwbl) y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor tab newydd)</a>.
+furtherReturnGuidance.capacitor.stage-b.step-b1.p1=Gwnewch hyn i helpu i gyfrifo incwm trethadwy’r person er mwyn darganfod faint o’r ennill net (os o gwbl) y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor tab newydd)</a>.
+furtherReturnGuidance.personalRep.stage-b.step-b1.p1=Gwnewch hyn i helpu i gyfrifo incwm trethadwy’r person er mwyn darganfod faint o’r ennill net (os o gwbl) y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor tab newydd)</a>.
+furtherReturnGuidance.trust.stage-b.step-b1.p1=Lluoswch <strong class="bold">ennill net</strong> yr ymddiriedolaeth am y flwyddyn â’r <a href="{0}" target="_blank">gyfradd dreth berthnasol ar gyfer y flwyddyn dreth ar gyfer y math o ymddiriedolaeth (yn agor tab newydd)</a> i gyfrifo <strong class="bold">rhwymedigaeth Treth Enillion Cyfalaf gyffredinol yr ymddiriedolaeth ar ei gwarediadau sy’n gysylltiedig ag eiddo yn y DU</strong>.
 furtherReturnGuidance.stage-b.step-b1.li1=Dechreuwch gyda’ch <strong class="bold">incwm blynyddol gros trethadwy disgwyliedig (ac eithrio unrhyw enillion cyfalaf)</strong>.
 furtherReturnGuidance.agent.stage-b.step-b1.li1=Dechreuwch gydag <strong class="bold">incwm blynyddol gros trethadwy disgwyliedig eich cleient (ac eithrio unrhyw enillion cyfalaf)</strong>.
 furtherReturnGuidance.capacitor.stage-b.step-b1.li1=Dechreuwch gydag <strong class="bold">incwm blynyddol gros trethadwy disgwyliedig y person (ac eithrio unrhyw enillion cyfalaf)</strong>.
@@ -4889,10 +4890,10 @@ furtherReturnGuidance.agent.stage-b.step-b1.li2=Tynnwch <strong class="bold">Lwf
 furtherReturnGuidance.capacitor.stage-b.step-b1.li2=Tynnwch <strong class="bold">Lwfans Personol</strong> treth incwm y person i gael ei <strong class="bold">incwm trethadwy</strong>.
 furtherReturnGuidance.personalRep.stage-b.step-b1.li2=Tynnwch <strong class="bold">Lwfans Personol</strong> treth incwm y person i gael ei <strong class="bold">incwm trethadwy</strong>.
 furtherReturnGuidance.stage-b.step-b2=Cam B2 – Cyfrifwch pa fand cyfradd sylfaenol y gellir ei ddefnyddio yn erbyn yr ennill net
-furtherReturnGuidance.stage-b.step-b2.p1=Gwnewch hyn i ddarganfod faint o’ch ennill net y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor ffenestr newydd)</a>. Os yw’ch incwm trethadwy yn uwch na throthwy’r band cyfradd sylfaenol, yna ni fydd unrhyw ran o’ch ennill net yn cael ei threthu ar y gyfradd sylfaenol.
-furtherReturnGuidance.agent.stage-b.step-b2.p1=Gwnewch hyn i ddarganfod faint o ennill net eich cleient y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor ffenestr newydd)</a>. Os yw ei incwm trethadwy yn uwch na throthwy’r band cyfradd sylfaenol, yna ni fydd unrhyw ran o’r ennill net yn cael ei threthu ar y gyfradd sylfaenol.
-furtherReturnGuidance.capacitor.stage-b.step-b2.p1=Gwnewch hyn i ddarganfod faint o’r ennill net y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor ffenestr newydd)</a>. Os yw incwm trethadwy’r person yn uwch na throthwy’r band cyfradd sylfaenol, yna ni fydd unrhyw ran o’i ennill net yn cael ei threthu ar y gyfradd sylfaenol.
-furtherReturnGuidance.personalRep.stage-b.step-b2.p1=Gwnewch hyn i ddarganfod faint o’r ennill net y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor ffenestr newydd)</a>. Os yw incwm trethadwy’r person yn uwch na throthwy’r band cyfradd sylfaenol, yna ni fydd unrhyw ran o’i ennill net yn cael ei threthu ar y gyfradd sylfaenol.
+furtherReturnGuidance.stage-b.step-b2.p1=Gwnewch hyn i ddarganfod faint o’ch ennill net y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor tab newydd)</a>. Os yw’ch incwm trethadwy yn uwch na throthwy’r band cyfradd sylfaenol, yna ni fydd unrhyw ran o’ch ennill net yn cael ei threthu ar y gyfradd sylfaenol.
+furtherReturnGuidance.agent.stage-b.step-b2.p1=Gwnewch hyn i ddarganfod faint o ennill net eich cleient y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor tab newydd)</a>. Os yw ei incwm trethadwy yn uwch na throthwy’r band cyfradd sylfaenol, yna ni fydd unrhyw ran o’r ennill net yn cael ei threthu ar y gyfradd sylfaenol.
+furtherReturnGuidance.capacitor.stage-b.step-b2.p1=Gwnewch hyn i ddarganfod faint o’r ennill net y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor tab newydd)</a>. Os yw incwm trethadwy’r person yn uwch na throthwy’r band cyfradd sylfaenol, yna ni fydd unrhyw ran o’i ennill net yn cael ei threthu ar y gyfradd sylfaenol.
+furtherReturnGuidance.personalRep.stage-b.step-b2.p1=Gwnewch hyn i ddarganfod faint o’r ennill net y dylid ei godi ar <a href="{0}" target="_blank">y gyfradd sylfaenol (yn agor tab newydd)</a>. Os yw incwm trethadwy’r person yn uwch na throthwy’r band cyfradd sylfaenol, yna ni fydd unrhyw ran o’i ennill net yn cael ei threthu ar y gyfradd sylfaenol.
 furtherReturnGuidance.stage-b.step-b2.li1=Dechreuwch gyda’ch <strong class="bold">incwm trethadwy</strong>.
 furtherReturnGuidance.agent.stage-b.step-b2.li1=Dechreuwch gydag <person class="bold">incwm trethadwy</strong> eich cleient.
 furtherReturnGuidance.capacitor.stage-b.step-b2.li1=Dechreuwch gydag <person class="bold">incwm trethadwy</strong>’r person.
@@ -4910,11 +4911,11 @@ furtherReturnGuidance.stage-b.step-b3.p1=Gwnewch hyn i gael eich rhwymedigaeth T
 furtherReturnGuidance.agent.stage-b.step-b3.p1=Gwnewch hyn i gael rhwymedigaeth Treth Enillion Cyfalaf gyffredinol ddiweddaraf eich cleient ar ei warediadau sy’n gysylltiedig ag eiddo yn y DU. Bydd y cyfrifiad hwn yn ystyried y gwarediadau yn y Ffurflen Dreth hon.
 furtherReturnGuidance.capacitor.stage-b.step-b3.p1=Gwnewch hyn i gael rhwymedigaeth Treth Enillion Cyfalaf gyffredinol ddiweddaraf y person ar ei warediadau sy’n gysylltiedig ag eiddo yn y DU. Bydd y cyfrifiad hwn yn ystyried y gwarediadau yn y Ffurflen Dreth hon.
 furtherReturnGuidance.personalRep.stage-b.step-b3.p1=Gwnewch hyn i gael rhwymedigaeth Treth Enillion Cyfalaf gyffredinol ddiweddaraf y person ar ei warediadau sy’n gysylltiedig ag eiddo yn y DU. Bydd y cyfrifiad hwn yn ystyried y gwarediadau yn y Ffurflen Dreth hon.
-furtherReturnGuidance.stage-b.step-b3.li1=Lluoswch swm yr <strong class="bold">ennill net</strong> sydd i’w drethu ar y <a href="{0}" target="_blank">gyfradd dreth sylfaenol (yn agor ffenestr newydd)</a> ar gyfer y gwarediad sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth honno.
-furtherReturnGuidance.agent.stage-b.step-b3.li1=Lluoswch swm yr <strong class="bold">ennill net</strong> sydd i’w drethu ar y <a href="{0}" target="_blank">gyfradd dreth sylfaenol (yn agor ffenestr newydd)</a> ar gyfer y gwarediad sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth honno.
-furtherReturnGuidance.capacitor.stage-b.step-b3.li1=Lluoswch swm yr <strong class="bold">ennill net</strong> sydd i’w drethu ar y <a href="{0}" target="_blank">gyfradd dreth sylfaenol (yn agor ffenestr newydd)</a> ar gyfer y gwarediadau sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth honno.
-furtherReturnGuidance.personalRep.stage-b.step-b3.li1=Lluoswch swm yr <strong class="bold">ennill net</strong> sydd i’w drethu ar y <a href="{0}" target="_blank">gyfradd dreth sylfaenol (yn agor ffenestr newydd)</a> ar gyfer y gwarediadau sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth honno.
-furtherReturnGuidance.stage-b.step-b3.li2=Lluoswch y <strong class="bold">swm sydd i’w drethu ar y</strong> <a href="{0}"target="_blank">gyfradd dreth uwch (yn agor ffenestr newydd)</a> <strong class="bold">ar gyfer y gwarediadau sy’n gysylltiedig ag eiddo yn y DU</strong> ar gyfer y flwyddyn dreth honno.
+furtherReturnGuidance.stage-b.step-b3.li1=Lluoswch swm yr <strong class="bold">ennill net</strong> sydd i’w drethu ar y <a href="{0}" target="_blank">gyfradd dreth sylfaenol (yn agor tab newydd)</a> ar gyfer y gwarediad sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth honno.
+furtherReturnGuidance.agent.stage-b.step-b3.li1=Lluoswch swm yr <strong class="bold">ennill net</strong> sydd i’w drethu ar y <a href="{0}" target="_blank">gyfradd dreth sylfaenol (yn agor tab newydd)</a> ar gyfer y gwarediad sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth honno.
+furtherReturnGuidance.capacitor.stage-b.step-b3.li1=Lluoswch swm yr <strong class="bold">ennill net</strong> sydd i’w drethu ar y <a href="{0}" target="_blank">gyfradd dreth sylfaenol (yn agor tab newydd)</a> ar gyfer y gwarediadau sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth honno.
+furtherReturnGuidance.personalRep.stage-b.step-b3.li1=Lluoswch swm yr <strong class="bold">ennill net</strong> sydd i’w drethu ar y <a href="{0}" target="_blank">gyfradd dreth sylfaenol (yn agor tab newydd)</a> ar gyfer y gwarediadau sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth honno.
+furtherReturnGuidance.stage-b.step-b3.li2=Lluoswch y <strong class="bold">swm sydd i’w drethu ar y</strong> <a href="{0}"target="_blank">gyfradd dreth uwch (yn agor tab newydd)</a> <strong class="bold">ar gyfer y gwarediadau sy’n gysylltiedig ag eiddo yn y DU</strong> ar gyfer y flwyddyn dreth honno.
 furtherReturnGuidance.stage-b.step-b3.li3=Ychwanegwch y symiau hyn at ei gilydd i gael eich <strong class="bold">rhwymedigaeth Treth Enillion Cyfalaf gyffredinol ar eich gwarediadau sy’n gysylltiedig ag eiddo yn y DU</strong>.
 furtherReturnGuidance.agent.stage-b.step-b3.li3=Ychwanegwch y symiau hyn at ei gilydd i gael <strong class="bold">rhwymedigaeth Treth Enillion Cyfalaf gyffredinol eich cleient ar ei warediadau sy’n gysylltiedig ag eiddo yn y DU</strong>.
 furtherReturnGuidance.capacitor.stage-b.step-b3.li3=Ychwanegwch y symiau hyn at ei gilydd i gael y <strong class="bold">rhwymedigaeth Treth Enillion Cyfalaf gyffredinol ar warediadau’r person sy’n gysylltiedig ag eiddo yn y DU</strong>.
@@ -5004,7 +5005,7 @@ furtherReturnGuidance.trust.stage-b.example3.table1.row2.key=Mae hi’n lluosi e
 furtherReturnGuidance.trust.stage-b.example3.table1.row2.value={0}
 furtherReturnGuidance.trust.stage-b.example3.table1.total.key=Rhwymedigaeth Treth Enillion Cyfalaf gyffredinol newydd Ymddiriedolaeth ‘Square’ ar gyfer eiddo preswyl yn y DU
 furtherReturnGuidance.trust.stage-b.example3.table1.total.value={0}
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.p1=Lluoswch ennill net yr ystâd ar gyfer y flwyddyn â’r <a href="{0}" target="_blank">gyfradd dreth berthnasol ar gyfer y flwyddyn dreth ar gyfer yr ystâd (yn agor ffenestr newydd)</a> er mwyn cyfrifo’i rhwymedigaeth Treth Enillion Cyfalaf gyffredinol ar ei gwarediadau sy’n gysylltiedig ag eiddo yn y DU.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.p1=Lluoswch ennill net yr ystâd ar gyfer y flwyddyn â’r <a href="{0}" target="_blank">gyfradd dreth berthnasol ar gyfer y flwyddyn dreth ar gyfer yr ystâd (yn agor tab newydd)</a> er mwyn cyfrifo’i rhwymedigaeth Treth Enillion Cyfalaf gyffredinol ar ei gwarediadau sy’n gysylltiedig ag eiddo yn y DU.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.link=Gwerthodd Akash, sy’n gynrychiolydd personol, 2 eiddo ar gyfer ystâd teulu Taylor
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.headingText=Mae Akash yn cyfrifo rhwymedigaeth Treth Enillion Cyfalaf gyffredinol ystâd teulu Taylor ar gyfer eiddo preswyl ym mlwyddyn dreth {0} i {1}.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row1.key=Mae’n dechrau gyda swm yr ennill net sydd i’w drethu

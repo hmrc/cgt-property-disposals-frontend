@@ -376,7 +376,7 @@ class ReliefDetailsControllerSpec
             messageFromMessageKey(s"$key$userKey$poaMsgKey.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -848,7 +848,7 @@ class ReliefDetailsControllerSpec
             performAction(data),
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe
+              doc.select("[data-spec='errorSummaryDisplay'] a").text() shouldBe
                 Messages(expectedErrorMessageKey, args: _*),
             BAD_REQUEST
           )
@@ -911,7 +911,7 @@ class ReliefDetailsControllerSpec
                 messageFromMessageKey(s"$key$userKey.title"),
                 doc =>
                   doc
-                    .select("#error-summary-display > ul > li > a")
+                    .select("[data-spec='errorSummaryDisplay'] a")
                     .text() shouldBe messageFromMessageKey(
                     s"$valueKey.error.amountOverPrivateResidenceRelief"
                   ),
@@ -1364,7 +1364,7 @@ class ReliefDetailsControllerSpec
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
               doc
-                .select("#error-summary-display > ul > li > a")
+                .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
@@ -1423,7 +1423,7 @@ class ReliefDetailsControllerSpec
                 case Nil             =>
                 case errorKey :: Nil =>
                   doc
-                    .select("#error-summary-display > ul > li > a")
+                    .select("[data-spec='errorSummaryDisplay'] a")
                     .text() shouldBe messageFromMessageKey(
                     errorKey
                   )
@@ -1432,7 +1432,7 @@ class ReliefDetailsControllerSpec
                     (1 to errorKeys.length).map(i =>
                       doc
                         .select(
-                          s"#error-summary-display > ul > li:nth-child($i) > a"
+                          s"[data-spec='errorSummaryDisplay'] ul > li:nth-child($i) > a"
                         )
                         .text()
                     )
