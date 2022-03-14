@@ -313,8 +313,11 @@ object TimeUtils {
     val taxYear2020EndDate   = LocalDate.of(2021, 4, 6)
     val taxYear2021StartDate = LocalDate.of(2021, 4, 5)
     val taxYear2021EndDate   = LocalDate.of(2022, 4, 6)
+    val taxYear2022StartDate = LocalDate.of(2022, 4, 5)
+    val taxYear2022EndDate   = LocalDate.of(2023, 4, 6)
     if (d.isAfter(taxYear2020StartDate) && d.isBefore(taxYear2020EndDate)) TaxYear2020
     else if (d.isAfter(taxYear2021StartDate) && d.isBefore(taxYear2021EndDate)) TaxYear2021
+    else if (d.isAfter(taxYear2022StartDate) && d.isBefore(taxYear2022EndDate)) TaxYear2022
     else TaxYearBefore2020
   }
 

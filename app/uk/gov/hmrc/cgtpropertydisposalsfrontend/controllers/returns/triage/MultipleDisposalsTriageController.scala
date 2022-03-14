@@ -662,6 +662,8 @@ class MultipleDisposalsTriageController @Inject() (
                   val result =
                     for {
                       taxYear <- taxYearExchanged match {
+                                   case TaxYearExchanged.TaxYear2022 =>
+                                     taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2022))
                                    case TaxYearExchanged.TaxYear2021 =>
                                      taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2021))
                                    case TaxYearExchanged.TaxYear2020 =>
@@ -1169,6 +1171,7 @@ class MultipleDisposalsTriageController @Inject() (
     taxYear match {
       case Some(t) if t.startDateInclusive.getYear === 2020 => Some(TaxYearExchanged.TaxYear2020)
       case Some(t) if t.startDateInclusive.getYear === 2021 => Some(TaxYearExchanged.TaxYear2021)
+      case Some(t) if t.startDateInclusive.getYear === 2022 => Some(TaxYearExchanged.TaxYear2022)
       case _                                                => None
     }
 

@@ -23,6 +23,7 @@ import play.api.libs.json.OFormat
 sealed trait TaxYearExchanged extends Product with Serializable
 
 object TaxYearExchanged {
+  case object TaxYear2022 extends TaxYearExchanged
 
   case object TaxYear2021 extends TaxYearExchanged
 
@@ -38,6 +39,7 @@ object TaxYearExchanged {
   implicit class TaxYearExchangedOps(private val t: TaxYearExchanged) extends AnyVal {
     def toTaxYearExchanged(value: String): TaxYearExchanged =
       value match {
+        case "TaxYear2022"       => TaxYearExchanged.TaxYear2022
         case "TaxYear2021"       => TaxYearExchanged.TaxYear2021
         case "TaxYear2020"       => TaxYearExchanged.TaxYear2020
         case "TaxYearBefore2020" => TaxYearExchanged.TaxYearBefore2020
@@ -46,6 +48,7 @@ object TaxYearExchanged {
 
     def toSting: String =
       t match {
+        case TaxYearExchanged.TaxYear2022       => "TaxYear2022"
         case TaxYearExchanged.TaxYear2021       => "TaxYear2021"
         case TaxYearExchanged.TaxYear2020       => "TaxYear2020"
         case TaxYearExchanged.TaxYearBefore2020 => "TaxYearBefore2020"
