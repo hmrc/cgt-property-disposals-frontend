@@ -662,6 +662,8 @@ class MultipleDisposalsTriageController @Inject() (
                   val result =
                     for {
                       taxYear <- taxYearExchanged match {
+                                   case TaxYearExchanged.TaxYear2022 =>
+                                     taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2022))
                                    case TaxYearExchanged.TaxYear2021 =>
                                      taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2021))
                                    case TaxYearExchanged.TaxYear2020 =>
@@ -987,6 +989,7 @@ class MultipleDisposalsTriageController @Inject() (
     taxYearExhanged match {
       case TaxYearExchanged.TaxYear2020 => Some(2020)
       case TaxYearExchanged.TaxYear2021 => Some(2021)
+      case TaxYearExchanged.TaxYear2022 => Some(2022)
       case _                            => None
     }
 
@@ -1169,6 +1172,7 @@ class MultipleDisposalsTriageController @Inject() (
     taxYear match {
       case Some(t) if t.startDateInclusive.getYear === 2020 => Some(TaxYearExchanged.TaxYear2020)
       case Some(t) if t.startDateInclusive.getYear === 2021 => Some(TaxYearExchanged.TaxYear2021)
+      case Some(t) if t.startDateInclusive.getYear === 2022 => Some(TaxYearExchanged.TaxYear2022)
       case _                                                => None
     }
 
@@ -1834,6 +1838,13 @@ object MultipleDisposalsTriageController {
         ): Either[Seq[FormError], TaxYearExchanged] =
           readValue(key, data, identity)
             .flatMap {
+              case "TaxYear2022"       =>
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr1) // TODO
+                  Left(FormError(key, "error.before.invalid"))
+                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr4) // TODO
+                  Left(FormError(key, "error.after.invalid"))
+                else
+                  Right(TaxYearExchanged.TaxYear2022)
               case "TaxYear2021"       =>
                 if (representativeType.contains(PersonalRepresentative) && conditionExpr1)
                   Left(FormError(key, "error.before.invalid"))
