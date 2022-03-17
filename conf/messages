@@ -1246,6 +1246,7 @@ multipleDisposalsCountryOfResidence.personalRep.helpText=It’s usually the day 
 multipleDisposalsTaxYear.title=When were contracts exchanged on all the properties?
 multipleDisposalsTaxYear.link=What happens on the exchange date?
 
+multipleDisposalsTaxYear.taxyear.2022=All between 6 April 2022 and 5 April 2023
 multipleDisposalsTaxYear.taxyear.2021=All between 6 April 2021 and 5 April 2022
 multipleDisposalsTaxYear.taxyear.2020=All between 6 April 2020 and 5 April 2021
 multipleDisposalsTaxYear.taxyear.before2020=All before 6 April 2020
