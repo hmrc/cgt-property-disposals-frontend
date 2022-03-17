@@ -268,6 +268,7 @@ class MultipleDisposalsTriageControllerSpec
     taxYear match {
       case Some(t) if t.startDateInclusive.getYear === 2020 => Some(TaxYearExchanged.TaxYear2020)
       case Some(t) if t.startDateInclusive.getYear === 2021 => Some(TaxYearExchanged.TaxYear2021)
+      case Some(t) if t.startDateInclusive.getYear === 2022 => Some(TaxYearExchanged.TaxYear2022)
       case _                                                => None
     }
 
@@ -275,6 +276,7 @@ class MultipleDisposalsTriageControllerSpec
     taxYear match {
       case t if t.startDateInclusive.getYear === 2020 => TaxYearExchanged.TaxYear2020
       case t if t.startDateInclusive.getYear === 2021 => TaxYearExchanged.TaxYear2021
+      case t if t.startDateInclusive.getYear === 2022 => TaxYearExchanged.TaxYear2022
       case _                                          => TaxYearExchanged.TaxYearBefore2020
     }
 
@@ -3565,17 +3567,18 @@ class MultipleDisposalsTriageControllerSpec
 
         "there is an error updating the draft return" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
-          val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
-            TaxYearExchanged.TaxYear2020
-          } else {
-            TaxYearExchanged.TaxYear2021
+          val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
+            case 2020 => TaxYearExchanged.TaxYear2020
+            case 2021 => TaxYearExchanged.TaxYear2021
+            case _    => TaxYearExchanged.TaxYear2022
           }
-          val answers                                    = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+
+          val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             individualUserType = Some(Self),
             taxYearExchanged = Some(taxYearExchangedAdjusted),
             completionDate = CompletionDate(today.minusDays(1L))
           )
-          val (session, journey, draftReturn)            =
+          val (session, journey, draftReturn) =
             sessionDataWithFillingOutReturn(answers)
 
           val updatedAnswers     =
@@ -3600,20 +3603,21 @@ class MultipleDisposalsTriageControllerSpec
 
         "there is an error updating the session" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
-          val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
-            TaxYearExchanged.TaxYear2020
-          } else {
-            TaxYearExchanged.TaxYear2021
+          val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
+            case 2020 => TaxYearExchanged.TaxYear2020
+            case 2021 => TaxYearExchanged.TaxYear2021
+            case _    => TaxYearExchanged.TaxYear2022
           }
-          val selfAssessmentFlag                         = if (taxYearStart.getYear === 2021) true else false
-          val answers                                    =
+
+          val selfAssessmentFlag = if (taxYearStart.getYear === 2021) true else false
+          val answers            =
             sample[CompleteMultipleDisposalsTriageAnswers].copy(
               individualUserType = Some(Self),
               taxYearExchanged = Some(taxYearExchangedAdjusted),
               completionDate = CompletionDate(today),
               alreadySentSelfAssessment = Some(selfAssessmentFlag)
             )
-          val (session, journey)                         =
+          val (session, journey) =
             sessionDataWithStartingNewDraftReturn(answers)
 
           val newCompletionDate =
@@ -3642,20 +3646,29 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the check your answers page" when {
         val taxYearStart             = TimeUtils.taxYearStart(today)
-        val taxYearExchangedAdjusted =
-          if (taxYearStart.getYear === 2020) TaxYearExchanged.TaxYear2020
-          else TaxYearExchanged.TaxYear2021
-        val selfAssessmentFlag       =
-          if (taxYearStart.getYear === 2020) Some(false)
-          else None
+        val taxYearExchangedAdjusted = taxYearStart.getYear match {
+          case 2020 => TaxYearExchanged.TaxYear2020
+          case 2021 => TaxYearExchanged.TaxYear2021
+          case _    => TaxYearExchanged.TaxYear2022
+        }
+
+        val selfAssessmentFlag = taxYearStart.getYear match {
+          case 2020 => Some(false)
+          case 2021 => Some(false)
+          case _    => None
+        }
 
         val taxYear = sample[TaxYear].copy(
-          startDateInclusive =
-            if (taxYearStart.getYear === 2020) LocalDate.of(2020, 4, 6)
-            else LocalDate.of(2021, 4, 6),
-          endDateExclusive =
-            if (taxYearStart.getYear === 2020) LocalDate.of(2021, 4, 6)
-            else LocalDate.of(2022, 4, 6)
+          startDateInclusive = taxYearStart.getYear match {
+            case 2020 => LocalDate.of(2020, 4, 6)
+            case 2021 => LocalDate.of(2021, 4, 6)
+            case _    => LocalDate.of(2022, 4, 6)
+          },
+          endDateExclusive = taxYearStart.getYear match {
+            case 2020 => LocalDate.of(2021, 4, 6)
+            case 2021 => LocalDate.of(2022, 4, 6)
+            case _    => LocalDate.of(2023, 4, 6)
+          }
         )
 
         "the user has not started a draft return and" when {
@@ -3786,10 +3799,10 @@ class MultipleDisposalsTriageControllerSpec
 
         "the date submitted is the same as one that already exists in session" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
-          val taxYearExchangedAdjusted: TaxYearExchanged = if (taxYearStart.getYear === 2020) {
-            TaxYearExchanged.TaxYear2020
-          } else {
-            TaxYearExchanged.TaxYear2021
+          val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
+            case 2020 => TaxYearExchanged.TaxYear2020
+            case 2021 => TaxYearExchanged.TaxYear2021
+            case _    => TaxYearExchanged.TaxYear2022
           }
 
           val answers      = sample[CompleteMultipleDisposalsTriageAnswers].copy(
@@ -4044,6 +4057,7 @@ class MultipleDisposalsTriageControllerSpec
 
         val saFlagStatus = taxYear.startDateInclusive.getYear match {
           case 2020 => Some(false)
+          case 2021 => Some(false)
           case _    => None
         }
 
@@ -4101,7 +4115,10 @@ class MultipleDisposalsTriageControllerSpec
 
         "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
           test(
-            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(
+              individualUserType = Some(PersonalRepresentative),
+              alreadySentSelfAssessment = None
+            ),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
             today,
             Some(taxYear)
@@ -4110,7 +4127,10 @@ class MultipleDisposalsTriageControllerSpec
 
         "the disposal date is strictly before the date of death when the user is a non-period of admin personal rep" in {
           test(
-            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(
+              individualUserType = Some(PersonalRepresentative),
+              alreadySentSelfAssessment = None
+            ),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
             today.minusDays(1L),
             Some(taxYear)
@@ -4119,8 +4139,10 @@ class MultipleDisposalsTriageControllerSpec
 
         "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
           test(
-            sample[IncompleteMultipleDisposalsTriageAnswers]
-              .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+              alreadySentSelfAssessment = None
+            ),
             Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
             today,
             Some(taxYear)

@@ -1815,18 +1815,34 @@ object MultipleDisposalsTriageController {
     taxYearOfDateOfDeath: TaxYearExchanged,
     representativeType: Option[RepresentativeType]
   ): Form[TaxYearExchanged] = {
-    val conditionExpr1 = !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2021)
 
-    val conditionExpr2 =
+    // Taxyear 2020/21
+    val conditionExpr1 =
       !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2020 ||
         taxYearOfDateOfDeath === TaxYearExchanged.TaxYearBefore2020)
 
-    val conditionExpr3 =
-      !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2021 ||
+    val conditionExpr2 =
+      !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2022 ||
+        taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2021 ||
         taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2020)
+
+    // Taxyear 2021/22
+    val conditionExpr3 =
+      !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2022 ||
+        taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2021)
 
     val conditionExpr4 =
       !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2021 ||
+        taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2020 ||
+        taxYearOfDateOfDeath === TaxYearExchanged.TaxYearBefore2020)
+
+    // Taxyear 2022/23
+    val conditionExpr5 =
+      !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2022)
+
+    val conditionExpr6 =
+      !(taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2022 ||
+        taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2021 ||
         taxYearOfDateOfDeath === TaxYearExchanged.TaxYear2020 ||
         taxYearOfDateOfDeath === TaxYearExchanged.TaxYearBefore2020)
 
@@ -1839,23 +1855,23 @@ object MultipleDisposalsTriageController {
           readValue(key, data, identity)
             .flatMap {
               case "TaxYear2022"       =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr1) // TODO
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr5)
                   Left(FormError(key, "error.before.invalid"))
-                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr4) // TODO
+                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr6)
                   Left(FormError(key, "error.after.invalid"))
                 else
                   Right(TaxYearExchanged.TaxYear2022)
               case "TaxYear2021"       =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr1)
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr3)
                   Left(FormError(key, "error.before.invalid"))
                 else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr4)
                   Left(FormError(key, "error.after.invalid"))
                 else
                   Right(TaxYearExchanged.TaxYear2021)
               case "TaxYear2020"       =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr3)
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr2)
                   Left(FormError(key, "error.before.invalid"))
-                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr2)
+                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr1)
                   Left(FormError(key, "error.after.invalid"))
                 else
                   Right(TaxYearExchanged.TaxYear2020)
