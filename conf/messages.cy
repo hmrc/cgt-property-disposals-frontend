@@ -3660,14 +3660,17 @@ confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=Yr hyn y bydd angen
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=Yr hyn y bydd angen i chi ei wneud nesaf
 
 confirmationOfSubmission.warning=Efallai y codir llog arnoch am daliadau hwyr.
-confirmationOfSubmission.penalty.warning=Efallai y cewch gosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
 confirmationOfSubmission.agent.warning=Efallai y codir llog ar eich cleient am daliadau hwyr.
-confirmationOfSubmission.agent.penalty.warning=Efallai y bydd eich cleient yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na roddwyd gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
 confirmationOfSubmission.trust.warning=Efallai y codir llog ar yr ymddiriedolaeth am daliadau hwyr.
-confirmationOfSubmission.trust.penalty.warning=Efallai y bydd yr ymddiriedolaeth yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
 confirmationOfSubmission.capacitor.warning=Efallai y codir llog ar y person am daliadau hwyr.
-confirmationOfSubmission.capacitor.penalty.warning=Efallai y bydd y person yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na roddwyd gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
 confirmationOfSubmission.Admin.warning=Peidiwch â thalu tan i ni gysylltu â chi.
+
+confirmationOfSubmission.60days.penalty.warning=Efallai y cewch gosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 60 diwrnod i ddyddiad cwblhau’r eiddo.
+confirmationOfSubmission.agent.60days.penalty.warning=Efallai y bydd eich cleient yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na roddwyd gwybod am y dreth cyn pen 60 diwrnod i ddyddiad cwblhau’r eiddo.
+confirmationOfSubmission.trust.60days.penalty.warning=Efallai y bydd yr ymddiriedolaeth yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 60 diwrnod i ddyddiad cwblhau’r eiddo.
+confirmationOfSubmission.capacitor.60days.penalty.warning=Efallai y bydd y person yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na roddwyd gwybod am y dreth cyn pen 60 diwrnod i ddyddiad cwblhau’r eiddo.
+
+
 confirmationOfSubmission.howToPay.heading=Sut i dalu
 confirmationOfSubmission.agent.howToPay.heading.p1=Dysgwch sut y gall eich cleient <a href="{0}"><strong class="bold">dalu ei fil treth</strong></a>.
 

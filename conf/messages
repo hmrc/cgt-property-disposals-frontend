@@ -4174,14 +4174,21 @@ confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=What you’ll need 
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=What you’ll need to do next
 
 confirmationOfSubmission.warning=You may be charged interest on late payments.
-confirmationOfSubmission.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
 confirmationOfSubmission.agent.warning=Your client may be charged interest on late payments.
-confirmationOfSubmission.agent.penalty.warning=Your client may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
 confirmationOfSubmission.trust.warning=The trust may be charged interest on late payments.
-confirmationOfSubmission.trust.penalty.warning=The trust may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
 confirmationOfSubmission.capacitor.warning=The person may be charged interest on late payments.
-confirmationOfSubmission.capacitor.penalty.warning=The person may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
 confirmationOfSubmission.Admin.warning=Do not pay until we contact you.
+
+confirmationOfSubmission.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
+confirmationOfSubmission.agent.penalty.warning=Your client may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
+confirmationOfSubmission.trust.penalty.warning=The trust may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
+confirmationOfSubmission.capacitor.penalty.warning=The person may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
+
+confirmationOfSubmission.60days.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 60 days of the property’s completion date.
+confirmationOfSubmission.agent.60days.penalty.warning=Your client may receive a late filing penalty. This is because the tax was not reported within 60 days of the property’s completion date.
+confirmationOfSubmission.trust.60days.penalty.warning=The trust may receive a late filing penalty. This is because you did not report the tax within 60 days of the property’s completion date.
+confirmationOfSubmission.capacitor.60days.penalty.warning=The person may receive a late filing penalty. This is because the tax was not reported within 60 days of the property’s completion date.
+
 
 confirmationOfSubmission.howToPay.heading=How to pay
 confirmationOfSubmission.agent.howToPay.heading.p1=Find out how your client can <a href="{0}"><strong class="bold">pay their tax bill</strong></a>.

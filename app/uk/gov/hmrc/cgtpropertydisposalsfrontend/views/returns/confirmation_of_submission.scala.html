@@ -29,6 +29,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
+@import java.time.LocalDate
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -128,6 +129,18 @@
 @amendedReturnWithSameCompletionDate = @{ justSubmittedReturn.amendReturnData.exists(_.originalReturn.completeReturn.completionDate === justSubmittedReturn.completeReturn.completionDate) }
 @showDueDate = @{!amountOwed.equals(BigDecimal(0)) && !isPeriodOfAdmin}
 @taxOwedLabel = @{if(isAmend) "revisedLiability" else "taxOwed"}
+
+
+@is60DaysWarning = @{
+    val dueDateChecker = LocalDate.of(viewConfig.draftReturnNewDueDateStartYear,
+                                    viewConfig.draftReturnNewDueDateStartMonth,
+                                    viewConfig.draftReturnNewDueDateStartDay-1)
+    if(completionDate.value.isAfter(dueDateChecker)){
+       true
+    } else {
+        false
+    }
+}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -279,7 +292,11 @@
                 @warning(messages(s"$key.capacitor.warning"))
 
                 @if(isLateReturn && !amendedReturnWithSameCompletionDate) {
-                    <p id="lfpWarning">@messages(s"$key$userKey.penalty.warning")</p>
+                    @if(is60DaysWarning){
+                        <p id="lfpWarning">@messages(s"$key$userKey.60days.penalty.warning")</p>
+                    } else {
+                        <p id="lfpWarning">@messages(s"$key$userKey.penalty.warning")</p>
+                    }
                 }
 
 
@@ -315,7 +332,11 @@
               @warning(messages(s"$key$userKey.warning"))
 
               @if(isLateReturn && !amendedReturnWithSameCompletionDate){
-                  <p id="lfpWarning">@messages(s"$key$userKey.penalty.warning")</p>
+                    @if(is60DaysWarning){
+                        <p id="lfpWarning">@messages(s"$key$userKey.60days.penalty.warning")</p>
+                    } else {
+                        <p id="lfpWarning">@messages(s"$key$userKey.penalty.warning")</p>
+                    }
               }
 
               @{
