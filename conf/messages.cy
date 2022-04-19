@@ -3665,6 +3665,11 @@ confirmationOfSubmission.trust.warning=Efallai y codir llog ar yr ymddiriedolaet
 confirmationOfSubmission.capacitor.warning=Efallai y codir llog ar y person am daliadau hwyr.
 confirmationOfSubmission.Admin.warning=Peidiwch â thalu tan i ni gysylltu â chi.
 
+confirmationOfSubmission.penalty.warning=Efallai y cewch gosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
+confirmationOfSubmission.agent.penalty.warning=Efallai y bydd eich cleient yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na roddwyd gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
+confirmationOfSubmission.trust.penalty.warning=Efallai y bydd yr ymddiriedolaeth yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
+confirmationOfSubmission.capacitor.penalty.warning=Efallai y bydd y person yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na roddwyd gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
+
 confirmationOfSubmission.60days.penalty.warning=Efallai y cewch gosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 60 diwrnod i ddyddiad cwblhau’r eiddo.
 confirmationOfSubmission.agent.60days.penalty.warning=Efallai y bydd eich cleient yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na roddwyd gwybod am y dreth cyn pen 60 diwrnod i ddyddiad cwblhau’r eiddo.
 confirmationOfSubmission.trust.60days.penalty.warning=Efallai y bydd yr ymddiriedolaeth yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 60 diwrnod i ddyddiad cwblhau’r eiddo.
