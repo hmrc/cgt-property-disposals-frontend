@@ -2328,8 +2328,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         }
       }
 
-      "display the late filing penalty warning for an individual if the completion date is more than 30 days before today" in {
-        val completionDate      = CompletionDate(LocalDate.now().minusDays(31L))
+      "display the 30 days late filing penalty warning for an individual if the completion date is before 27-OCT-2021" in {
+        val completionDate      = CompletionDate(LocalDate.of(2021, 9, 10))
         val justSubmittedReturn = sample[JustSubmittedReturn].copy(
           subscribedDetails = sample[SubscribedDetails].copy(
             name = Right(sample[IndividualName])
@@ -2363,8 +2363,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
       }
 
-      "display the late filing penalty warning for a trust if the completion date is more than 30 days before today" in {
-        val completionDate      = CompletionDate(LocalDate.now().minusDays(31L))
+      "display the 30 days  late filing penalty warning for a trust if the completion date is before 27-OCT-2021" in {
+        val completionDate      = CompletionDate(LocalDate.of(2021, 9, 10))
         val justSubmittedReturn = sample[JustSubmittedReturn].copy(
           subscribedDetails = sample[SubscribedDetails].copy(
             name = Left(sample[TrustName])
@@ -2395,6 +2395,78 @@ class CheckAllAnswersAndSubmitControllerSpec
           performAction(),
           messageFromMessageKey("confirmationOfSubmission.title"),
           _.select("#lfpWarning").text shouldBe messageFromMessageKey("confirmationOfSubmission.trust.penalty.warning")
+        )
+      }
+
+      "display the 60 days late filing penalty warning for an individual if the completion date is after 27-OCT-2021" in {
+        val completionDate      = CompletionDate(LocalDate.now().minusDays(31L))
+        val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+          subscribedDetails = sample[SubscribedDetails].copy(
+            name = Right(sample[IndividualName])
+          ),
+          completeReturn = sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self),
+              completionDate = completionDate
+            ),
+            representeeAnswers = None
+          ),
+          submissionResponse = sample[SubmitReturnResponse].copy(
+            charge = Some(sample[ReturnCharge]),
+            deltaCharge = None
+          ),
+          amendReturnData = None
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithJourney(justSubmittedReturn)
+              .copy(userType = Some(UserType.Individual))
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("confirmationOfSubmission.title"),
+          _.select("#lfpWarning").text shouldBe messageFromMessageKey("confirmationOfSubmission.60days.penalty.warning")
+        )
+      }
+
+      "display the 60 days late filing penalty warning for a trust if the completion date is after 27-OCT-2021" in {
+        val completionDate      = CompletionDate(LocalDate.now().minusDays(31L))
+        val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+          subscribedDetails = sample[SubscribedDetails].copy(
+            name = Left(sample[TrustName])
+          ),
+          completeReturn = sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self),
+              completionDate = completionDate
+            ),
+            representeeAnswers = None
+          ),
+          submissionResponse = sample[SubmitReturnResponse].copy(
+            charge = Some(sample[ReturnCharge]),
+            deltaCharge = None
+          ),
+          amendReturnData = None
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithJourney(justSubmittedReturn)
+              .copy(userType = Some(UserType.Organisation))
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("confirmationOfSubmission.title"),
+          _.select("#lfpWarning").text shouldBe messageFromMessageKey(
+            "confirmationOfSubmission.trust.60days.penalty.warning"
+          )
         )
       }
 
