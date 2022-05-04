@@ -25,7 +25,6 @@ import configs.ConfigReader
 import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.i18n.Messages
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{PersonalRepresentativeDetails, TaxYearExchanged}
 
 import scala.util.Try
@@ -308,17 +307,16 @@ object TimeUtils {
       date1
     else date2
 
-  def getTaxYearExchangedOfADate(d: LocalDate): TaxYearExchanged = {
-    val taxYear2020StartDate = LocalDate.of(2020, 4, 5)
-    val taxYear2020EndDate   = LocalDate.of(2021, 4, 6)
-    val taxYear2021StartDate = LocalDate.of(2021, 4, 5)
-    val taxYear2021EndDate   = LocalDate.of(2022, 4, 6)
-    val taxYear2022StartDate = LocalDate.of(2022, 4, 5)
-    val taxYear2022EndDate   = LocalDate.of(2023, 4, 6)
-    if (d.isAfter(taxYear2020StartDate) && d.isBefore(taxYear2020EndDate)) TaxYear2020
-    else if (d.isAfter(taxYear2021StartDate) && d.isBefore(taxYear2021EndDate)) TaxYear2021
-    else if (d.isAfter(taxYear2022StartDate) && d.isBefore(taxYear2022EndDate)) TaxYear2022
-    else TaxYearBefore2020
+  def getTaxYearExchangedOfADate(d: LocalDate, taxYearsList: List[Int]): TaxYearExchanged = {
+    val year = taxYearsList.sorted.map { year =>
+      val taxYearStartDate = LocalDate.of(year, 4, 5)
+      val taxYearEndDate   = LocalDate.of(year + 1, 4, 6)
+
+      if (d.isAfter(taxYearStartDate) && d.isBefore(taxYearEndDate))
+        Some(TaxYearExchanged(year, false, false))
+      else None
+    }
+    year.collect { case Some(y) => y }.headOption.getOrElse(TaxYearExchanged.taxYearExchangedBefore2020)
   }
 
 }
