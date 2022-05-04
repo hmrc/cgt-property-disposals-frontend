@@ -661,48 +661,56 @@ class MultipleDisposalsTriageController @Inject() (
                       val result =
                         for {
                           taxYear <- taxYearExchanged.year match {
-                            case 2022 => taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2022))
-                            case 2021 => taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2021))
-                            case 2020 => taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2020))
-                            case _    => EitherT.pure[Future, Error](None)
-                          }
+                                       case 2022 => taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2022))
+                                       case 2021 => taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2021))
+                                       case 2020 => taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2020))
+                                       case _    => EitherT.pure[Future, Error](None)
+                                     }
 
                           updatedAnswers <- EitherT.fromEither[Future](
-                            updateTaxYearToAnswers(
-                              taxYearExchanged,
-                              taxYear,
-                              answers
-                            )
-                          )
+                                              updateTaxYearToAnswers(
+                                                taxYearExchanged,
+                                                taxYear,
+                                                answers
+                                              )
+                                            )
                           newState        = updateState(
-                            state,
-                            updatedAnswers,
-                            d =>
-                              d.bimap(
-                                mi => mi.copy(exampleCompanyDetailsAnswers = mi.exampleCompanyDetailsAnswers),
-                                m =>
-                                  m.copy(examplePropertyDetailsAnswers =
-                                    m.examplePropertyDetailsAnswers
-                                      .map(_.unset(_.disposalDate))
-                                  )
-                              ),
-                            forceDisplayGainOrLossAfterReliefsForAmends = true
-                          )
+                                              state,
+                                              updatedAnswers,
+                                              d =>
+                                                d.bimap(
+                                                  mi =>
+                                                    mi.copy(exampleCompanyDetailsAnswers = mi.exampleCompanyDetailsAnswers),
+                                                  m =>
+                                                    m.copy(examplePropertyDetailsAnswers =
+                                                      m.examplePropertyDetailsAnswers
+                                                        .map(_.unset(_.disposalDate))
+                                                    )
+                                                ),
+                                              forceDisplayGainOrLossAfterReliefsForAmends = true
+                                            )
                           _              <- newState.fold(
-                            _ => EitherT.pure[Future, Error](()),
-                            returnsService.storeDraftReturn(_)
-                          )
+                                              _ => EitherT.pure[Future, Error](()),
+                                              returnsService.storeDraftReturn(_)
+                                            )
                           _              <- EitherT(
-                            updateSession(sessionStore, request)(
-                              _.copy(journeyStatus = Some(newState.merge))
-                            )
-                          )
+                                              updateSession(sessionStore, request)(
+                                                _.copy(journeyStatus = Some(newState.merge))
+                                              )
+                                            )
                         } yield ()
 
-                        Redirect(
-                          routes.MultipleDisposalsTriageController
-                            .checkYourAnswers()
-                        )
+                      result.fold(
+                        { e =>
+                          logger.warn("Could not find tax year or update session", e)
+                          errorHandler.errorResult()
+                        },
+                        _ =>
+                          Redirect(
+                            routes.MultipleDisposalsTriageController
+                              .checkYourAnswers()
+                          )
+                      )
                     }
                 )
             }
