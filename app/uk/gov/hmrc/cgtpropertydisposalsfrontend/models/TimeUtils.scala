@@ -307,16 +307,9 @@ object TimeUtils {
       date1
     else date2
 
-  def getTaxYearExchangedOfADate(d: LocalDate, taxYearsList: List[Int]): TaxYearExchanged = {
-    val year = taxYearsList.sorted.map { year =>
-      val taxYearStartDate = LocalDate.of(year, 4, 5)
-      val taxYearEndDate   = LocalDate.of(year + 1, 4, 6)
-
-      if (d.isAfter(taxYearStartDate) && d.isBefore(taxYearEndDate))
-        Some(TaxYearExchanged(year, false, false))
-      else None
-    }
-    year.collect { case Some(y) => y }.headOption.getOrElse(TaxYearExchanged.taxYearExchangedBefore2020)
+  def getTaxYearExchangedOfADate(d: LocalDate): TaxYearExchanged = {
+    val taxYearStartDate = taxYearStart(d)
+    if (taxYearStartDate.getYear < 2020) TaxYearExchanged.taxYearExchangedBefore2020
+    else TaxYearExchanged(taxYearStartDate.getYear)
   }
-
 }

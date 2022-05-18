@@ -151,34 +151,28 @@ class ReturnsServiceImpl @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
     for {
 
-      httpResponse                            <- connector
-                                                   .getDraftReturns(cgtReference)
-                                                   .subflatMap(r =>
-                                                     if (r.status === OK) Right(r)
-                                                     else
-                                                       Left(
-                                                         Error(
-                                                           s"Call to get draft returns came back with status ${r.status}}"
-                                                         )
-                                                       )
-                                                   )
-      draftReturns                            <- EitherT.fromEither(
-                                                   httpResponse
-                                                     .parseJSON[GetDraftReturnResponse]()
-                                                     .leftMap(Error(_))
-                                                     .map(_.draftReturns)
-                                                 )
-      taxYears                                <- connector.availableTaxYears()
-      availableTaxYears                       <- EitherT.fromEither(
-                                                   taxYears
-                                                     .parseJSON[List[Int]]()
-                                                     .leftMap(Error(_))
-                                                     .map(t => t)
-                                                 )
+      httpResponse <- connector
+                        .getDraftReturns(cgtReference)
+                        .subflatMap(r =>
+                          if (r.status === OK) Right(r)
+                          else
+                            Left(
+                              Error(
+                                s"Call to get draft returns came back with status ${r.status}}"
+                              )
+                            )
+                        )
+      draftReturns <- EitherT.fromEither(
+                        httpResponse
+                          .parseJSON[GetDraftReturnResponse]()
+                          .leftMap(Error(_))
+                          .map(_.draftReturns)
+                      )
+
       (validDraftReturns, invalidDraftReturns) = draftReturns.partition(isValid(_, cgtReference))
       (sentDraftReturns, unsentDraftReturns)   = validDraftReturns.partition(hasBeenSent(sentReturns))
       unsentDraftReturnsTaxYearExchanged       = unsentDraftReturns.map { draftReturn =>
-                                                   updateTaxYearExchangedToDraftReturn(draftReturn, availableTaxYears)
+                                                   updateTaxYearExchangedToDraftReturn(draftReturn)
                                                  }
 
       unsentDraftReturnsWithTaxYearExchangedAndSAStatus =
@@ -280,28 +274,25 @@ class ReturnsServiceImpl @Inject() (
       )
     )
 
-  private def updateTaxYearExchangedToDraftReturn(draftReturn: DraftReturn, availableTaxYears: List[Int]): DraftReturn =
+  private def updateTaxYearExchangedToDraftReturn(draftReturn: DraftReturn): DraftReturn =
     draftReturn.fold(
       whenMultiple =>
         whenMultiple.copy(
-          triageAnswers =
-            updateTaxYearExchangedToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers, availableTaxYears)
+          triageAnswers = updateTaxYearExchangedToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers)
         ),
       whenSingle => whenSingle,
       whenSingleIndirect => whenSingleIndirect,
       whenMultipleIndirect =>
         whenMultipleIndirect.copy(
           triageAnswers = updateTaxYearExchangedToMultipleDisposalsTriageAnswers(
-            whenMultipleIndirect.triageAnswers,
-            availableTaxYears
+            whenMultipleIndirect.triageAnswers
           )
         ),
       whenSingleMixedUse => whenSingleMixedUse
     )
 
   private def updateTaxYearExchangedToMultipleDisposalsTriageAnswers(
-    answers: MultipleDisposalsTriageAnswers,
-    availableTaxYears: List[Int]
+    answers: MultipleDisposalsTriageAnswers
   ): MultipleDisposalsTriageAnswers = {
     val actualTaxYearExchanged = answers.fold(_.taxYearExchanged, _.taxYearExchanged)
     if (actualTaxYearExchanged.isDefined)
@@ -310,7 +301,7 @@ class ReturnsServiceImpl @Inject() (
       val taxYear = answers.fold(_.taxYear, c => Some(c.taxYear))
       taxYear match {
         case Some(t) =>
-          val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(t.startDateInclusive, availableTaxYears)
+          val taxYearExchanged = TimeUtils.getTaxYearExchangedOfADate(t.startDateInclusive)
           answers.fold[MultipleDisposalsTriageAnswers](
             _.copy(taxYearExchanged = Some(taxYearExchanged)),
             _.copy(taxYearExchanged = Some(taxYearExchanged))

@@ -58,7 +58,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsTriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged.TaxYear2020
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, TaxYearExchanged, _}
@@ -266,18 +266,18 @@ class MultipleDisposalsTriageControllerSpec
 
   private def getTaxYearExchanged(taxYear: Option[TaxYear]): Option[TaxYearExchanged] =
     taxYear match {
-      case Some(t) if t.startDateInclusive.getYear === 2020 => Some(TaxYearExchanged.TaxYear2020)
-      case Some(t) if t.startDateInclusive.getYear === 2021 => Some(TaxYearExchanged.TaxYear2021)
-      case Some(t) if t.startDateInclusive.getYear === 2022 => Some(TaxYearExchanged.TaxYear2022)
+      case Some(t) if t.startDateInclusive.getYear === 2020 => Some(TaxYearExchanged(2020))
+      case Some(t) if t.startDateInclusive.getYear === 2021 => Some(TaxYearExchanged(2021))
+      case Some(t) if t.startDateInclusive.getYear === 2022 => Some(TaxYearExchanged(2022))
       case _                                                => None
     }
 
   private def getTaxYearExchanged(taxYear: TaxYear): TaxYearExchanged =
     taxYear match {
-      case t if t.startDateInclusive.getYear === 2020 => TaxYearExchanged.TaxYear2020
-      case t if t.startDateInclusive.getYear === 2021 => TaxYearExchanged.TaxYear2021
-      case t if t.startDateInclusive.getYear === 2022 => TaxYearExchanged.TaxYear2022
-      case _                                          => TaxYearExchanged.TaxYearBefore2020
+      case t if t.startDateInclusive.getYear === 2020 => TaxYearExchanged(2020)
+      case t if t.startDateInclusive.getYear === 2021 => TaxYearExchanged(2021)
+      case t if t.startDateInclusive.getYear === 2022 => TaxYearExchanged(2022)
+      case _                                          => TaxYearExchanged.taxYearExchangedBefore2020
     }
 
   "MultipleDisposalsTriageController" when {
@@ -1850,7 +1850,7 @@ class MultipleDisposalsTriageControllerSpec
             wasAUKResident = Some(false),
             countryOfResidence = Some(sample[Country]),
             assetTypes = Some(List(AssetType.IndirectDisposal)),
-            taxYearExchanged = Some(TaxYearExchanged.TaxYear2020)
+            taxYearExchanged = Some(TaxYearExchanged(2020))
           )
 
           inSequence {
@@ -1939,7 +1939,7 @@ class MultipleDisposalsTriageControllerSpec
                     journey.copy(
                       newReturnTriageAnswers = Left(
                         answers.copy(
-                          taxYearExchanged = Some(TaxYearExchanged.TaxYearBefore2020),
+                          taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020),
                           taxYear = None
                         )
                       )
@@ -1964,7 +1964,7 @@ class MultipleDisposalsTriageControllerSpec
                 countryOfResidence = Some(Country.uk),
                 wereAllPropertiesResidential = Some(true),
                 assetTypes = Some(List(AssetType.Residential)),
-                taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
+                taxYearExchanged = Some(TaxYearExchanged(2020)),
                 taxYear = Some(taxYear),
                 alreadySentSelfAssessment = None,
                 completionDate = Some(sample[CompletionDate])
@@ -1983,7 +1983,7 @@ class MultipleDisposalsTriageControllerSpec
                     journey.copy(
                       newReturnTriageAnswers = Left(
                         answers.copy(
-                          taxYearExchanged = Some(TaxYearExchanged.TaxYearBefore2020),
+                          taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020),
                           taxYear = None,
                           completionDate = None,
                           alreadySentSelfAssessment = None
@@ -2076,7 +2076,7 @@ class MultipleDisposalsTriageControllerSpec
                   individualUserType = Some(Self),
                   taxYear = taxYear2021,
                   assetTypes = List(AssetType.Residential),
-                  taxYearExchanged = Some(TaxYearExchanged.TaxYear2021),
+                  taxYearExchanged = Some(TaxYearExchanged(2021)),
                   alreadySentSelfAssessment = None
                 )
                 val (session, journey, draftReturn) =
@@ -2088,7 +2088,7 @@ class MultipleDisposalsTriageControllerSpec
                 val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers
                   .fromCompleteAnswers(answers)
                   .copy(
-                    taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
+                    taxYearExchanged = Some(TaxYearExchanged(2020)),
                     taxYear = Some(taxYear2020),
                     alreadySentSelfAssessment = None,
                     completionDate = None
@@ -2148,7 +2148,7 @@ class MultipleDisposalsTriageControllerSpec
               countryOfResidence = Some(Country.uk),
               wereAllPropertiesResidential = Some(true),
               assetTypes = Some(List(AssetType.Residential)),
-              taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
+              taxYearExchanged = Some(TaxYearExchanged(2020)),
               taxYear = Some(taxYear)
             )
 
@@ -2212,7 +2212,7 @@ class MultipleDisposalsTriageControllerSpec
 
         val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           assetTypes = List(AssetType.Residential),
-          taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
+          taxYearExchanged = Some(TaxYearExchanged(2020)),
           taxYear = taxYear,
           alreadySentSelfAssessment = Some(false)
         )
@@ -2224,7 +2224,7 @@ class MultipleDisposalsTriageControllerSpec
           .copy(
             taxYear = None,
             completionDate = None,
-            taxYearExchanged = Some(TaxYearExchanged.TaxYearBefore2020),
+            taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020),
             alreadySentSelfAssessment = None
           )
         val updatedDraftReturn = draftReturn.copy(
@@ -3505,7 +3505,7 @@ class MultipleDisposalsTriageControllerSpec
               sessionDataWithStartingNewDraftReturn(
                 sample[CompleteMultipleDisposalsTriageAnswers].copy(
                   individualUserType = Some(Self),
-                  taxYearExchanged = Some(TaxYear2020),
+                  taxYearExchanged = Some(TaxYearExchanged(2020)),
                   taxYear = taxYear,
                   alreadySentSelfAssessment = Some(false)
                 ),
@@ -3568,9 +3568,9 @@ class MultipleDisposalsTriageControllerSpec
         "there is an error updating the draft return" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
           val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
-            case 2020 => TaxYearExchanged.TaxYear2020
-            case 2021 => TaxYearExchanged.TaxYear2021
-            case _    => TaxYearExchanged.TaxYear2022
+            case 2020 => TaxYearExchanged(2020)
+            case 2021 => TaxYearExchanged(2021)
+            case _    => TaxYearExchanged(2022)
           }
 
           val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
@@ -3604,9 +3604,9 @@ class MultipleDisposalsTriageControllerSpec
         "there is an error updating the session" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
           val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
-            case 2020 => TaxYearExchanged.TaxYear2020
-            case 2021 => TaxYearExchanged.TaxYear2021
-            case _    => TaxYearExchanged.TaxYear2022
+            case 2020 => TaxYearExchanged(2020)
+            case 2021 => TaxYearExchanged(2021)
+            case _    => TaxYearExchanged(2022)
           }
 
           val selfAssessmentFlag = if (taxYearStart.getYear === 2021) true else false
@@ -3647,9 +3647,9 @@ class MultipleDisposalsTriageControllerSpec
       "redirect to the check your answers page" when {
         val taxYearStart             = TimeUtils.taxYearStart(today)
         val taxYearExchangedAdjusted = taxYearStart.getYear match {
-          case 2020 => TaxYearExchanged.TaxYear2020
-          case 2021 => TaxYearExchanged.TaxYear2021
-          case _    => TaxYearExchanged.TaxYear2022
+          case 2020 => TaxYearExchanged(2020)
+          case 2021 => TaxYearExchanged(2021)
+          case _    => TaxYearExchanged(2022)
         }
 
         val selfAssessmentFlag = taxYearStart.getYear match {
@@ -3800,9 +3800,9 @@ class MultipleDisposalsTriageControllerSpec
         "the date submitted is the same as one that already exists in session" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
           val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
-            case 2020 => TaxYearExchanged.TaxYear2020
-            case 2021 => TaxYearExchanged.TaxYear2021
-            case _    => TaxYearExchanged.TaxYear2022
+            case 2020 => TaxYearExchanged(2020)
+            case 2021 => TaxYearExchanged(2021)
+            case _    => TaxYearExchanged(2022)
           }
 
           val answers      = sample[CompleteMultipleDisposalsTriageAnswers].copy(
@@ -4017,7 +4017,8 @@ class MultipleDisposalsTriageControllerSpec
           val answers            = sample[IncompleteMultipleDisposalsTriageAnswers].copy(
             individualUserType = Some(Self),
             completionDate = Some(CompletionDate(today)),
-            alreadySentSelfAssessment = None
+            alreadySentSelfAssessment = None,
+            taxYearExchanged = taxYearExchanged
           )
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
@@ -4286,7 +4287,7 @@ class MultipleDisposalsTriageControllerSpec
         2,
         Country.uk,
         List(AssetType.Residential),
-        Some(TaxYearExchanged.TaxYear2020),
+        Some(TaxYearExchanged(2020)),
         sample[TaxYear],
         Some(false),
         sample[CompletionDate]
@@ -4299,7 +4300,7 @@ class MultipleDisposalsTriageControllerSpec
         None,
         Some(true),
         Some(completeAnswersUk.assetTypes),
-        Some(TaxYearExchanged.TaxYear2020),
+        Some(TaxYearExchanged(2020)),
         Some(completeAnswersUk.taxYear),
         Some(false),
         Some(completeAnswersUk.completionDate)
@@ -4314,7 +4315,7 @@ class MultipleDisposalsTriageControllerSpec
         2,
         sample[Country],
         List(AssetType.Residential),
-        Some(TaxYearExchanged.TaxYear2020),
+        Some(TaxYearExchanged(2020)),
         taxYear,
         Some(false),
         sample[CompletionDate]
@@ -4327,7 +4328,7 @@ class MultipleDisposalsTriageControllerSpec
         Some(completeAnswersNonUk.countryOfResidence),
         None,
         Some(completeAnswersNonUk.assetTypes),
-        Some(TaxYearExchanged.TaxYear2020),
+        Some(TaxYearExchanged(2020)),
         Some(completeAnswersNonUk.taxYear),
         Some(false),
         Some(completeAnswersNonUk.completionDate)
@@ -4527,7 +4528,7 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user indicated that the tax year was before 6th April 2020" in {
           testRedirectWhenIncomplete(
-            allQuestionsAnsweredUk.copy(taxYearExchanged = Some(TaxYearExchanged.TaxYearBefore2020)),
+            allQuestionsAnsweredUk.copy(taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020)),
             routes.CommonTriageQuestionsController.disposalDateTooEarly()
           )
         }
@@ -4537,7 +4538,7 @@ class MultipleDisposalsTriageControllerSpec
             allQuestionsAnsweredUk
               .copy(
                 assetTypes = Some(List(IndirectDisposal)),
-                taxYearExchanged = Some(TaxYearExchanged.TaxYearBefore2020)
+                taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020)
               ),
             routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly
           )
@@ -4553,7 +4554,7 @@ class MultipleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 allQuestionsAnsweredUk
-                  .copy(taxYearExchanged = Some(TaxYearExchanged.TaxYear2020), taxYear = None),
+                  .copy(taxYearExchanged = Some(TaxYearExchanged(2020)), taxYear = None),
                 Right(sample[IndividualName])
               )._1
             )

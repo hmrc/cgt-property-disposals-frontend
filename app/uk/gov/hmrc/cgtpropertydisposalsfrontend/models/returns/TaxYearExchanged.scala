@@ -20,12 +20,12 @@ import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 
-final case class TaxYearExchanged(year: Int, before2020: Boolean, differentTaxYears: Boolean)
-    extends Product
-    with Serializable
+final case class TaxYearExchanged(year: Int) extends Product with Serializable
 
 object TaxYearExchanged {
-  val taxYearExchangedBefore2020: TaxYearExchanged = TaxYearExchanged(-2020, true, false)
+  val taxYearExchangedBefore2020: TaxYearExchanged = TaxYearExchanged(-2020)
+
+  val differentTaxYears: TaxYearExchanged = TaxYearExchanged(-1)
 
   implicit val format: OFormat[TaxYearExchanged] = derived.oformat()
   implicit val eq: Eq[TaxYearExchanged]          = Eq.fromUniversalEquals
