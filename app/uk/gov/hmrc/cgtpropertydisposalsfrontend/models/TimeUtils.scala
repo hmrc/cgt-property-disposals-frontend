@@ -53,90 +53,6 @@ object TimeUtils {
     monthKey: String,
     yearKey: String,
     dateKey: String,
-    extraValidation: List[LocalDate => Either[FormError, Unit]] = List.empty
-  ): Formatter[LocalDate] =
-    new Formatter[LocalDate] {
-      def dateFieldStringValues(
-        data: Map[String, String]
-      ): Either[FormError, (String, String, String)] =
-        List(dayKey, monthKey, yearKey)
-          .map(data.get(_).map(_.trim).filter(_.nonEmpty)) match {
-          case Some(dayString) :: Some(monthString) :: Some(
-                yearString
-              ) :: Nil =>
-            Right((dayString, monthString, yearString))
-          case None :: Some(_) :: Some(_) :: Nil =>
-            Left(FormError(dayKey, "error.required"))
-          case Some(_) :: None :: Some(_) :: Nil =>
-            Left(FormError(monthKey, "error.required"))
-          case Some(_) :: Some(_) :: None :: Nil =>
-            Left(FormError(yearKey, "error.required"))
-          case Some(_) :: None :: None :: Nil    =>
-            Left(FormError(monthKey, "error.monthAndYearRequired"))
-          case None :: Some(_) :: None :: Nil    =>
-            Left(FormError(dayKey, "error.dayAndYearRequired"))
-          case None :: None :: Some(_) :: Nil    =>
-            Left(FormError(dayKey, "error.dayAndMonthRequired"))
-          case _                                 => Left(FormError(dateKey, "error.required"))
-        }
-
-      def toValidInt(
-        key: String,
-        stringValue: String,
-        maxValue: Option[Int]
-      ): Either[FormError, Int] =
-        Either.fromOption(
-          Try(BigDecimal(stringValue).toIntExact).toOption.filter(i => i > 0 && maxValue.forall(i <= _)),
-          FormError(key, "error.invalid")
-        )
-
-      override def bind(
-        key: String,
-        data: Map[String, String]
-      ): Either[Seq[FormError], LocalDate] = {
-        val result = for {
-          dateFieldStrings <- dateFieldStringValues(data)
-          day ← toValidInt(dayKey, dateFieldStrings._1, Some(31))
-          month ← toValidInt(monthKey, dateFieldStrings._2, Some(12))
-          year ← toValidInt(yearKey, dateFieldStrings._3, None)
-          date ← Either
-                   .fromTry(Try(LocalDate.of(year, month, day)))
-                   .leftMap(_ => FormError(dateKey, "error.invalid"))
-                   .flatMap(date =>
-                     if (maximumDateInclusive.exists(_.isBefore(date)))
-                       Left(FormError(dateKey, "error.tooFarInFuture"))
-                     else if (minimumDateInclusive.exists(_.isAfter(date)))
-                       Left(FormError(dateKey, "error.tooFarInPast"))
-                     else if (date.isBefore(minimumDate))
-                       Left(FormError(dateKey, "error.before1900"))
-                     else
-                       extraValidation
-                         .map(_(date))
-                         .find(_.isLeft)
-                         .getOrElse(Right(()))
-                         .map(_ => date)
-                   )
-        } yield date
-
-        result.leftMap(Seq(_))
-      }
-
-      override def unbind(key: String, value: LocalDate): Map[String, String] =
-        Map(
-          dayKey   -> value.getDayOfMonth.toString,
-          monthKey -> value.getMonthValue.toString,
-          yearKey  -> value.getYear.toString
-        )
-
-    }
-
-  def dateFormatterForMultiDisposals(
-    maximumDateInclusive: Option[LocalDate],
-    minimumDateInclusive: Option[LocalDate],
-    dayKey: String,
-    monthKey: String,
-    yearKey: String,
-    dateKey: String,
     taxYearStartYear: Option[Int] = None,
     isDateOfDeathValid: Option[Boolean] = Some(false),
     isPOA: Boolean = false,
@@ -195,6 +111,8 @@ object TimeUtils {
                   Left(FormError(dateKey, "error.tooFarInFuture"))
                 else if (isDateOfDeathValid.exists(d => d && isPOA && minimumDateInclusive.exists(_.isAfter(date))))
                   Left(FormError(dateKey, "error.dateOfDeath"))
+                else if (minimumDateInclusive.exists(_.isAfter(date)))
+                  Left(FormError(dateKey, "error.tooFarInPast"))
                 else if (date.isBefore(minimumDate))
                   Left(FormError(dateKey, "error.before1900"))
                 else if (

@@ -1939,7 +1939,7 @@ object MultipleDisposalsTriageController {
     Form(
       mapping(
         "" -> of(
-          TimeUtils.dateFormatterForMultiDisposals(
+          TimeUtils.dateFormatter(
             Some(maximumDateInclusive),
             Some(minimumDateInclusive),
             "multipleDisposalsCompletionDate-day",
