@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
-
 import cats.syntax.order._
 import cats.data.EitherT
 import cats.instances.boolean._
@@ -54,11 +53,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, multipledisposals => triagePages}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.{localDateOrder, minimumDate, taxYearStart}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 @Singleton
 class MultipleDisposalsTriageController @Inject() (
@@ -1939,17 +1939,126 @@ object MultipleDisposalsTriageController {
     Form(
       mapping(
         "" -> of(
-          TimeUtils.dateFormatterForMultiDisposals(
-            Some(maximumDateInclusive),
-            Some(minimumDateInclusive),
-            "multipleDisposalsCompletionDate-day",
-            "multipleDisposalsCompletionDate-month",
-            "multipleDisposalsCompletionDate-year",
-            "multipleDisposalsCompletionDate",
-            taxYearStartYear,
-            isDateOfDeathValid,
-            isPOA
-          )
+          new Formatter[LocalDate] {
+            def dateFieldStringValues(
+              data: Map[String, String]
+            ): Either[FormError, (String, String, String)] =
+              List(
+                "multipleDisposalsCompletionDate-day",
+                "multipleDisposalsCompletionDate-month",
+                "multipleDisposalsCompletionDate-year"
+              )
+                .map(data.get(_).map(_.trim).filter(_.nonEmpty)) match {
+                case Some(dayString) :: Some(monthString) :: Some(
+                      yearString
+                    ) :: Nil =>
+                  Right((dayString, monthString, yearString))
+                case None :: Some(_) :: Some(_) :: Nil =>
+                  Left(FormError("multipleDisposalsCompletionDate-day", "error.required"))
+                case Some(_) :: None :: Some(_) :: Nil =>
+                  Left(FormError("multipleDisposalsCompletionDate-month", "error.required"))
+                case Some(_) :: Some(_) :: None :: Nil =>
+                  Left(FormError("multipleDisposalsCompletionDate-year", "error.required"))
+                case Some(_) :: None :: None :: Nil    =>
+                  Left(FormError("multipleDisposalsCompletionDate-month", "error.monthAndYearRequired"))
+                case None :: Some(_) :: None :: Nil    =>
+                  Left(FormError("multipleDisposalsCompletionDate-day", "error.dayAndYearRequired"))
+                case None :: None :: Some(_) :: Nil    =>
+                  Left(FormError("multipleDisposalsCompletionDate-day", "error.dayAndMonthRequired"))
+                case _                                 => Left(FormError("multipleDisposalsCompletionDate", "error.required"))
+              }
+
+            def toValidInt(
+              key: String,
+              stringValue: String,
+              maxValue: Option[Int]
+            ): Either[FormError, Int] =
+              Either.fromOption(
+                Try(BigDecimal(stringValue).toIntExact).toOption.filter(i => i > 0 && maxValue.forall(i <= _)),
+                FormError(key, "error.invalid")
+              )
+
+            def isValidDate(
+              taxYearStartYear: Int,
+              completionDate: LocalDate,
+              minimumDateInclusive: Option[LocalDate],
+              maximumDateInclusive: Option[LocalDate],
+              isPOA: Boolean
+            ): Boolean =
+              if (isPOA) {
+                val minDatesTaxYearStartYear = minimumDateInclusive match {
+                  case Some(d) => taxYearStart(d).getYear
+                  case _       => taxYearStartYear
+                }
+
+                val minDateInclusive =
+                  if (taxYearStartYear > minDatesTaxYearStartYear)
+                    LocalDate.of(taxYearStartYear, 4, 6)
+                  else
+                    minimumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear, 4, 6))
+
+                val maxDateInclusive = maximumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear + 1, 4, 5))
+                completionDate <= maxDateInclusive && completionDate >= minDateInclusive
+              } else {
+                val minDateInclusive = LocalDate.of(taxYearStartYear, 4, 6)
+                val maxDateInclusive = maximumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear + 1, 4, 5))
+                completionDate <= maxDateInclusive && completionDate >= minDateInclusive
+              }
+
+            override def bind(
+              key: String,
+              data: Map[String, String]
+            ): Either[Seq[FormError], LocalDate] = {
+              val result = for {
+                dateFieldStrings <- dateFieldStringValues(data)
+                day ← toValidInt("multipleDisposalsCompletionDate-day", dateFieldStrings._1, Some(31))
+                month ← toValidInt("multipleDisposalsCompletionDate-month", dateFieldStrings._2, Some(12))
+                year ← toValidInt("multipleDisposalsCompletionDate-year", dateFieldStrings._3, None)
+                date ←
+                  Either
+                    .fromTry(Try(LocalDate.of(year, month, day)))
+                    .leftMap(_ => FormError("multipleDisposalsCompletionDate", "error.invalid"))
+                    .flatMap(date =>
+                      if (maximumDateInclusive.isBefore(date))
+                        Left(FormError("multipleDisposalsCompletionDate", "error.tooFarInFuture"))
+                      else if (isDateOfDeathValid.exists(d => d && isPOA && minimumDateInclusive.isAfter(date)))
+                        Left(FormError("multipleDisposalsCompletionDate", "error.dateOfDeath"))
+                      else if (date.isBefore(minimumDate))
+                        Left(FormError("multipleDisposalsCompletionDate", "error.before1900"))
+                      else if (
+                        taxYearStartYear
+                          .exists(tyStartYear =>
+                            !isValidDate(
+                              tyStartYear,
+                              date,
+                              Some(minimumDateInclusive),
+                              Some(maximumDateInclusive),
+                              isPOA
+                            )
+                          )
+                      )
+                        Left(FormError("multipleDisposalsCompletionDate", "error.dateNotWithinTaxYear"))
+                      else
+                        List
+                          .empty[LocalDate => Either[FormError, Unit]]
+                          .map(_(date))
+                          .find(_.isLeft)
+                          .getOrElse(Right(()))
+                          .map(_ => date)
+                    )
+              } yield date
+
+              result.leftMap(Seq(_))
+            }
+
+            override def unbind(key: String, value: LocalDate): Map[String, String] =
+              Map(
+                "multipleDisposalsCompletionDate-day"   -> value.getDayOfMonth.toString,
+                "multipleDisposalsCompletionDate-month" -> value.getMonthValue.toString,
+                "multipleDisposalsCompletionDate-year"  -> value.getYear.toString
+              )
+
+          }
         )
       )(CompletionDate(_))(d => Some(d.value))
     )
