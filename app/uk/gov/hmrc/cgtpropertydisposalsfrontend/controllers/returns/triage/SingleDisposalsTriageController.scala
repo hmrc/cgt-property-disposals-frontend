@@ -1953,6 +1953,9 @@ object SingleDisposalsTriageController {
             "disposalDate-month",
             "disposalDate-year",
             "disposalDate",
+            None,
+            Some(false),
+            false,
             List(
               TimeUtils.personalRepresentativeDateValidation(
                 personalRepresentativeDetails,
