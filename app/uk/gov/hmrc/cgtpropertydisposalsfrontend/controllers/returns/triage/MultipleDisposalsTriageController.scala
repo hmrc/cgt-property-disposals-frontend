@@ -662,12 +662,7 @@ class MultipleDisposalsTriageController @Inject() (
                 else {
                   val result =
                     for {
-                      taxYear <- taxYearExchanged.year match {
-                                   case 2022 => taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2022))
-                                   case 2021 => taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2021))
-                                   case 2020 => taxYearService.taxYear(TimeUtils.getTaxYearStartDate(2020))
-                                   case _    => EitherT.pure[Future, Error](None)
-                                 }
+                      taxYear <- taxYearService.taxYear(TimeUtils.getTaxYearStartDate(taxYearExchanged.year))
 
                       updatedAnswers <- EitherT.fromEither[Future](
                                           updateTaxYearToAnswers(
@@ -1158,10 +1153,9 @@ class MultipleDisposalsTriageController @Inject() (
 
   private def getTaxYearExchanged(taxYear: Option[TaxYear]): Option[TaxYearExchanged] =
     taxYear match {
-      case Some(t) if t.startDateInclusive.getYear === 2020 => Some(TaxYearExchanged(2020))
-      case Some(t) if t.startDateInclusive.getYear === 2021 => Some(TaxYearExchanged(2021))
-      case Some(t) if t.startDateInclusive.getYear === 2022 => Some(TaxYearExchanged(2022))
-      case _                                                => None
+      case Some(t) if t.startDateInclusive.getYear < 2020 => None
+      case Some(t)                                        => Some(TaxYearExchanged(t.startDateInclusive.getYear))
+      case _                                              => None
     }
 
   private def isAmendReturn(state: JourneyState): Boolean =
@@ -1539,7 +1533,7 @@ class MultipleDisposalsTriageController @Inject() (
     }
 
   private def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged): Boolean =
-    !(taxYearExchanged.year === -2020 || taxYearExchanged.year === -1)
+    !(taxYearExchanged === TaxYearExchanged.taxYearExchangedBefore2020 || taxYearExchanged === TaxYearExchanged.differentTaxYears)
 
   private def isTaxYearWithinOriginalSubmissionTaxYear(
     taxYearExchanged: TaxYearExchanged,
