@@ -1894,7 +1894,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "TaxYear2021"),
+              performAction(key -> "2021"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -1923,7 +1923,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "TaxYear2020"),
+              performAction(key -> "2020"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -1950,7 +1950,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "TaxYearBefore2020"),
+              performAction(key -> "-2020"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -1996,7 +1996,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "TaxYearBefore2020"),
+              performAction(key -> "-2020"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -2051,7 +2051,7 @@ class MultipleDisposalsTriageControllerSpec
               }
 
               checkIsRedirect(
-                performAction(key -> "TaxYear2021"),
+                performAction(key -> "2021"),
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
@@ -2123,7 +2123,7 @@ class MultipleDisposalsTriageControllerSpec
                 }
 
                 checkIsRedirect(
-                  performAction(key -> "TaxYear2020"),
+                  performAction(key -> "2020"),
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
               }
@@ -2161,7 +2161,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(key -> "TaxYear2020"),
+            performAction(key -> "2020"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -2245,7 +2245,7 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
 
-          checkIsTechnicalErrorPage(performAction(key -> "TaxYearBefore2020"))
+          checkIsTechnicalErrorPage(performAction(key -> "-2020"))
         }
 
         "there is an error updating the session data" in {
@@ -2261,7 +2261,7 @@ class MultipleDisposalsTriageControllerSpec
             )(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(key -> "TaxYearBefore2020"))
+          checkIsTechnicalErrorPage(performAction(key -> "-2020"))
         }
 
         "a tax year cannot be found when the user selects after April 2020" in {
@@ -2276,7 +2276,7 @@ class MultipleDisposalsTriageControllerSpec
             mockGetTaxYear(todayTaxYear2020)(Right(None))
           }
 
-          checkIsTechnicalErrorPage(performAction(key -> "TaxYear2020"))
+          checkIsTechnicalErrorPage(performAction(key -> "2020"))
         }
 
         "there is an error while getting the tax year when the user selects after April 2020" in {
@@ -2291,7 +2291,7 @@ class MultipleDisposalsTriageControllerSpec
             mockGetTaxYear(todayTaxYear2020)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(key -> "TaxYear2020"))
+          checkIsTechnicalErrorPage(performAction(key -> "2020"))
         }
 
       }
