@@ -59,7 +59,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged.TaxYear2020
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
@@ -475,8 +475,8 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             endDateExclusive = LocalDate.of(dateOfDeath.getYear + 1, 4, 6)
           )
 
-          val alreadySentSA = taxYearExchanged match {
-            case TaxYear2020 => Some(false)
+          val alreadySentSA = taxYearExchanged.year match {
+            case 2020 | 2021 => Some(false)
             case _           => None
           }
 
@@ -789,8 +789,8 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             endDateExclusive = LocalDate.of(dateOfDeath.getYear + 1, 4, 6)
           )
 
-          val alreadySentSA = taxYearExchanged match {
-            case TaxYear2020 => Some(false)
+          val alreadySentSA = taxYearExchanged.year match {
+            case 2020 | 2021 => Some(false)
             case _           => None
           }
 
@@ -1073,8 +1073,8 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             endDateExclusive = LocalDate.of(dateOfDeath.getYear + 1, 4, 6)
           )
 
-          val alreadySentSA = taxYearExchanged match {
-            case TaxYear2020 => Some(false)
+          val alreadySentSA = taxYearExchanged.year match {
+            case 2020 | 2021 => Some(false)
             case _           => None
           }
 
@@ -1384,8 +1384,8 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             endDateExclusive = LocalDate.of(dateOfDeath.getYear + 1, 4, 6)
           )
 
-          val alreadySentSA = taxYearExchanged match {
-            case TaxYear2020 => Some(false)
+          val alreadySentSA = taxYearExchanged.year match {
+            case 2020 | 2021 => Some(false)
             case _           => None
           }
 
@@ -1703,8 +1703,8 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             endDateExclusive = LocalDate.of(dateOfDeath.getYear + 1, 4, 6)
           )
 
-          val alreadySentSA = taxYearExchanged match {
-            case TaxYear2020 => Some(false)
+          val alreadySentSA = taxYearExchanged.year match {
+            case 2020 | 2021 => Some(false)
             case _           => None
           }
 
@@ -2160,7 +2160,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             endDateExclusive = LocalDate.of(2021, 4, 6)
           )
           val multipleDisposalsTriageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-            taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
+            taxYearExchanged = Some(TaxYearExchanged(2020)),
             taxYear = taxYear
           )
           val completeReturn                 = sample[CompleteMultipleDisposalsReturn].copy(
@@ -2195,7 +2195,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             endDateExclusive = LocalDate.of(2022, 4, 6)
           )
           val multipleDisposalsTriageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-            taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
+            taxYearExchanged = Some(TaxYearExchanged(2020)),
             taxYear = taxYear
           )
           val completeReturn                 = sample[CompleteMultipleDisposalsReturn].copy(
@@ -2236,7 +2236,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             endDateExclusive = LocalDate.of(2021, 4, 6)
           )
           val multipleDisposalsTriageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-            taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
+            taxYearExchanged = Some(TaxYearExchanged(2020)),
             taxYear = taxYear,
             alreadySentSelfAssessment = None
           )
@@ -2264,7 +2264,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
           )
 
           val multipleDisposalsTriageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-            taxYearExchanged = Some(TaxYearExchanged.TaxYear2021),
+            taxYearExchanged = Some(TaxYearExchanged(2021)),
             taxYear = taxYear,
             alreadySentSelfAssessment = None
           )
@@ -2418,7 +2418,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
           )
           val multipleDisposalsTriageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             assetTypes = List(AssetType.IndirectDisposal),
-            taxYearExchanged = Some(TaxYearExchanged.TaxYear2020),
+            taxYearExchanged = Some(TaxYearExchanged(2020)),
             taxYear = taxYear,
             alreadySentSelfAssessment = None
           )
@@ -2447,7 +2447,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
           val multipleDisposalsTriageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             assetTypes = List(AssetType.IndirectDisposal),
-            taxYearExchanged = Some(TaxYearExchanged.TaxYear2021),
+            taxYearExchanged = Some(TaxYearExchanged(2021)),
             taxYear = taxYear,
             alreadySentSelfAssessment = None
           )
