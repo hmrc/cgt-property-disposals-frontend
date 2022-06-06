@@ -4451,7 +4451,7 @@ class MultipleDisposalsTriageControllerSpec
 
       "not redirect to the asset types not implemented page" when {
 
-        "the user selects a valid combination of asset types" in {
+        "the user selects a valid combination of asset types" ignore {
           val invalidAssetTypes = List(
             List(AssetType.IndirectDisposal, AssetType.MixedUse),
             List(AssetType.MixedUse, AssetType.IndirectDisposal)
