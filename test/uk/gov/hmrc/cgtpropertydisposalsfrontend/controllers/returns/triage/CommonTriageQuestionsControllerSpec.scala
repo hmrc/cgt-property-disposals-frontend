@@ -1763,7 +1763,7 @@ class CommonTriageQuestionsControllerSpec
           countryOfResidence = None,
           assetTypes = Some(List(AssetType.Residential)),
           wereAllPropertiesResidential = Some(true),
-          taxYearExchanged = Some(TaxYearExchanged.TaxYearBefore2020)
+          taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020)
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(

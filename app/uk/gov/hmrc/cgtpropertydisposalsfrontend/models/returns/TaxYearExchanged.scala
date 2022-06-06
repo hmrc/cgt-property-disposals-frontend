@@ -20,41 +20,13 @@ import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 
-sealed trait TaxYearExchanged extends Product with Serializable
+final case class TaxYearExchanged(year: Int) extends Product with Serializable
 
 object TaxYearExchanged {
+  val taxYearExchangedBefore2020: TaxYearExchanged = TaxYearExchanged(-2020)
 
-  case object TaxYear2022 extends TaxYearExchanged
-
-  case object TaxYear2021 extends TaxYearExchanged
-
-  case object TaxYear2020 extends TaxYearExchanged
-
-  case object TaxYearBefore2020 extends TaxYearExchanged
-
-  case object DifferentTaxYears extends TaxYearExchanged
+  val differentTaxYears: TaxYearExchanged = TaxYearExchanged(-1)
 
   implicit val format: OFormat[TaxYearExchanged] = derived.oformat()
   implicit val eq: Eq[TaxYearExchanged]          = Eq.fromUniversalEquals
-
-  implicit class TaxYearExchangedOps(private val t: TaxYearExchanged) extends AnyVal {
-    def toTaxYearExchanged(value: String): TaxYearExchanged =
-      value match {
-        case "TaxYear2022"       => TaxYearExchanged.TaxYear2022
-        case "TaxYear2021"       => TaxYearExchanged.TaxYear2021
-        case "TaxYear2020"       => TaxYearExchanged.TaxYear2020
-        case "TaxYearBefore2020" => TaxYearExchanged.TaxYearBefore2020
-        case "DifferentTaxYears" => TaxYearExchanged.DifferentTaxYears
-      }
-
-    def toSting: String =
-      t match {
-        case TaxYearExchanged.TaxYear2022       => "TaxYear2022"
-        case TaxYearExchanged.TaxYear2021       => "TaxYear2021"
-        case TaxYearExchanged.TaxYear2020       => "TaxYear2020"
-        case TaxYearExchanged.TaxYearBefore2020 => "TaxYearBefore2020"
-        case TaxYearExchanged.DifferentTaxYears => "DifferentTaxYears"
-      }
-  }
-
 }
