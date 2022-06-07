@@ -17,40 +17,45 @@
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeContactDetails
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Button
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section_govuk,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row_govuk,
+        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change_govuk,
+        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+        govukButton: GovukButton
 )
 
 @(
         contactDetails: RepresenteeContactDetails,
         displayReturnToSummaryLink: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @key = @{ "representeeContactDetails" }
 @title = @{messages(s"$key.title") }
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(pageTitle = title) {
 
     @caption(messages("representee.caption"))
 
     @pageHeading(title)
 
-    <p>@messages(s"$key.p1")</p>
+    <span class="govuk-hint">
+      @messages(s"$key.p1")
+    </span>
+
 
     @cyaSection() {
         @cyaRow(
@@ -74,7 +79,7 @@
     }
 
     @formWrapper(routes.RepresenteeController.checkContactDetailsSubmit(), 'novalidate -> "novalidate") {
-        @submitButton(messages("button.continue"))
+        @govukButton(Button(content = Text(messages("button.continue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

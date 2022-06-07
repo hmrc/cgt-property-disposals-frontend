@@ -19,21 +19,26 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Button
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+
 
 @this(
 formHelper: FormWithCSRF,
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
 pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
 errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional_govuk,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
+radioGroupHints: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_with_hints_govuk,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+govukButton: GovukButton
 )
 
 
@@ -50,14 +55,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
     } else inPageTitle
 }
 
-@optionIndex(value: IndividualUserType) = @{
-    value match {
-        case IndividualUserType.Self => 0
-        case IndividualUserType.Capacitor => 1
-        case IndividualUserType.PersonalRepresentative => if(isAgent) 1 else 2
-        case IndividualUserType.PersonalRepresentativeInPeriodOfAdmin => if(isAgent) 2 else 3
-    }
-}
+
 
 @options = @{
     if(isAgent){
@@ -104,24 +102,27 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
     }
 }
 
-@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, backLinkUrl = backLink.map(_.url)) {
 
+
+@layout(pageTitle = title, isWelshTranslationAvailable = true,backLinkUrl = backLink.map(_.url)) {
+<div>
     @if(hasErrors) {
         @errorSummary(form)
     }
 
-    @formHelper(controllers.returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresentingSubmit(), 'novalidate -> "novalidate") {
-        @radioGroupConditional(
-            fieldId = key,
-            options = options,
-            selected = form.value.map(optionIndex),
-            label = pageHeading(inPageTitle, Some(messages("triage.caption"))),
-            error = form.error(key),
-        )
+    <div class="govuk-form-group">
+        @formHelper(controllers.returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresentingSubmit(), 'novalidate -> "novalidate") {
+            @radioGroupHints(
+                fieldId = key,
+                options = options,
+                label = pageHeading(inPageTitle, Some(messages("triage.caption"))),
+                error = form.error(key)
+            )
 
-        @submitButton(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+        @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
     }
+    </div>
 
     @returnToSummaryLink(displayReturnToSummaryLink)
-
+</div>
 }

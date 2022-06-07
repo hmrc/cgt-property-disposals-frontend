@@ -1,0 +1,87 @@
+@*
+* Copyright 2022 HM Revenue & Customs
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*@
+
+@import play.api.data.FormError
+@import play.twirl.api.Html
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
+
+
+@this(
+govukRadios : GovukRadios,
+)
+
+@(
+fieldId: String,
+label: Html,
+options: List[RadioOption],
+helpText: Option[Html] = None,
+error: Option[FormError] = None,
+extraContent: Option[Html] = None
+)
+
+
+@extraContentKey = @{s"${{fieldId}}-extra-content"}
+@hintTextKey = @{s"${{fieldId}}-govuk-hint"}
+@errorId = @{s"${{fieldId}}-inline-error"}
+@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
+@extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
+@errorIdWithError = @{error.map(errorId -> _)}
+@describedByKeys = @{
+List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+
+
+@hintIdWithHintText.map { case (id, text) =>
+<span id="@id" class="form-hint">
+        @text
+    </span>
+}
+
+@radio = @{options.zipWithIndex.map{ case (option, index) =>
+        RadioItem(
+            content = HtmlContent(option.label.toString),
+            value = Some(index.toString),
+            hint = Some(Hint(
+                content = option.optionHelpText match {case Some(hint) => Text(hint.toString) case None => Text("")}
+            )
+
+        ))
+    }
+}
+
+
+
+<div class="govuk-radios" data-module="govuk-radios">
+    <fieldset class="govuk-fieldset" id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--xl">
+            @label
+        </legend>
+
+        @govukRadios(Radios(
+            errorMessage = error match { case Some(formError) => Some(ErrorMessage(Some(formError.message))) case _ => None}
+            ,
+            hint = Some(Hint(
+            content = Text("You’ll need an account to prove your identity and complete your Self Assessment.")
+            )),
+            idPrefix = Some("sign-in"),
+            name = fieldId,
+            items = radio
+            ))
+
+    </fieldset>
+</div>
+
