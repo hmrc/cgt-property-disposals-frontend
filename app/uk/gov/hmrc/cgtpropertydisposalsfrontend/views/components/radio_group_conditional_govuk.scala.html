@@ -15,15 +15,15 @@
  *@
 
 @import play.api.data.FormError
-@import play.api.i18n.Messages
 @import play.twirl.api.Html
-
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
 
+
 @this(
-    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-    errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline_govuk
-)
+        govukRadios : GovukRadios,
+        govukInput : GovukInput
+        )
 
 @(
     fieldId: String,
@@ -31,70 +31,60 @@
     options: List[RadioOption],
     helpText: Option[Html] = None,
     error: Option[FormError] = None,
-    selected: Option[Int] = None,
-    customErrorKey: Option[String] = None,
-    extraContent: Option[Html] = None,
-    warningContent: Option[String] = None,
-    bodyContent: Option[Html] = None
-)(implicit messages: Messages)
+    extraContent: Option[Html] = None
+)
 
-@classes = @{if(error.nonEmpty) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
-@hintTextKey = @{s"${{fieldId}}-govuk-hint"}
-@extraContentKey = @{s"${{fieldId}}-extra-content"}
-@errorId = @{s"${{fieldId}}-inline-error"}
-@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
-@extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
-@errorIdWithError = @{error.map(errorId -> _)}
-@describedByKeys = @{
-  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
-<div class="@classes">
-  <fieldset class="govuk-fieldset" id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <legend class="govuk-fieldset__legend govuk-fieldset__legend--xl">
-        @label
-    </legend>
-    @extraContentIdWithContent.map { case (id, text) =>
-      <div id="@id">
-        @text
-      </div>
-    }
+    @extraContentKey = @{s"${{fieldId}}-extra-content"}
+    @hintTextKey = @{s"${{fieldId}}-govuk-hint"}
+    @errorId = @{s"${{fieldId}}-inline-error"}
+    @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
+    @extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
+    @errorIdWithError = @{error.map(errorId -> _)}
+    @describedByKeys = @{
+    List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+
+
     @hintIdWithHintText.map { case (id, text) =>
-      <span id="@id" class="govuk-hint">
-        @text
-      </span>
-    }
-    @warningContent.map { warningMsg =>
-      @warning(warningMsg)
-    }
-    @bodyContent.map { bodyMsg =>
-       @bodyMsg
+    <span id="@id" class="form-hint">
+            @text
+    </span>
     }
 
-    @errorIdWithError.map { case (id, e) =>
-      @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${e.message}", e.args: _*))
+    @radio = @{options.zipWithIndex.map{ case (option, index) =>
+
+        RadioItem(
+            content = Text(option.label.toString),
+            value = Some(index.toString),
+            conditionalHtml = Some(govukInput(Input(
+                id = "id",
+                name = "contact-by-email",
+                inputType = "email",
+                label = Label(
+                content = {option.content match {case Some(a) => HtmlContent(a)
+                                                 case None => Empty          }}
+            ),
+            errorMessage = error match { case Some(formError) => Some(ErrorMessage(Some(formError.message))) case _ => None},
+            classes = "govuk-!-width-one-third",
+            autocomplete = Some("email"),
+            spellcheck = Some(false)
+            )))
+        )
+        }
     }
 
     <div class="govuk-radios govuk-radios--conditional" data-module="govuk-radios">
-        @options.zipWithIndex.map{ case (option, index) =>
-          <div class="govuk-radios__item" @if(option.content.nonEmpty){ data-target="@{fieldId}-@{index}-content" }>
-            <input id="@{fieldId}-@{index}"
-              name="@fieldId"
-              class="govuk-radios__input"
-              value="@index"
-              type="radio"
-              @if(selected.contains(index)) { checked="checked" }
-              />
-            <label class="govuk-label govuk-radios__label" for="@{fieldId}-@{index}">
-              @option.label
-            </label>
+        <fieldset class="govuk-fieldset" id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--xl">
+                @label
+            </legend>
 
-            @option.optionHelpText.map(helpText => Html(s"""<span class="govuk-hint govuk-radios__hint">$helpText</span>"""))
-
-          </div>
-          @option.content.map(content => Html(s"""<div id="${fieldId}-${index}-content" class="govuk-radios__conditional govuk-radios__conditional--hidden" aria-hidden="true">$content</div>"""))
-        }
+            @govukRadios(
+                Radios(
+                idPrefix = Some("contact"),
+                name = fieldId,
+                items = radio
+                )
+            )
+        </fieldset>
     </div>
-
-
-  </fieldset>
-</div>

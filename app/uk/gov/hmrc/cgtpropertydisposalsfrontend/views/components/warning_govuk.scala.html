@@ -1,0 +1,18 @@
+
+
+@*
+* Copyright 2021 HM Revenue & Customs
+*
+*@
+@import play.api.i18n.Messages
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+
+@this(govukWarningText : GovukWarningText)
+
+@(warningText: String)(implicit messages: Messages)
+
+
+@govukWarningText(WarningText(
+iconFallbackText = "Warning",
+content = Text(messages(warningText))
+))

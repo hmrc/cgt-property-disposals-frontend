@@ -18,23 +18,25 @@
 @import play.api.data.Form
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Button
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
     summary_for_confirmation: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary_for_confirmation,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+    yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
+    govukButton: GovukButton
 )
 
 @(
@@ -44,7 +46,7 @@
     form: Form[Boolean],
     backLink: Call,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{ messages("representeeConfirmPerson.title") }
 @key = @{ "confirmed"}
@@ -52,7 +54,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @formTitle = @{messages("representeeConfirmPerson.formTitle")}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@layout(pageTitle = title) {
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
@@ -74,7 +76,7 @@
             helpText = None
         )
 
-        @submitButton(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+        @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)
