@@ -18,7 +18,7 @@
 @(pageTitle: String,
         withSignOutLink: Boolean = false,
         isWelshTranslationAvailable: Boolean = false,
-        backLinkUrl: Option[String] = None,
+        backLinkUrl: Option[String] = None
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @content = {
@@ -35,6 +35,7 @@
     backLinkUrl = backLinkUrl,
     pageTitle = Some(pageTitle),
     userResearchBannerUrl = Some(appConfig.userRecruitmentUrl),
+    accessibilityStatementUrl = Some(controllerRoutes.AccessibilityStatementController.accessibilityStatement().url),
     isWelshTranslationAvailable = isWelshTranslationAvailable,
     serviceUrl = None,
     signOutUrl = if(withSignOutLink) Some(s"""${appConfig.signOutUrl}?continue${controllerRoutes.StartController.start().url}""") else None,
