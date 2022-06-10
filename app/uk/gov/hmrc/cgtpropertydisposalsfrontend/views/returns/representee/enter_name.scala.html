@@ -66,17 +66,15 @@
     @if(hasErrors) {
         @errorSummary(form)
     }
-
     @caption(messages("representee.caption"))
-
     @pageHeading(title)
 
-    <span class="govuk-hint">
-      @messages(s"$key$representativeTypeInterpolator.p1")
-    </span>
-
-
     @formWrapper(routes.RepresenteeController.enterNameSubmit(), 'novalidate -> "novalidate") {
+
+        <div class="govuk-hint">
+            @messages(s"$key$representativeTypeInterpolator.p1")
+        </div>
+
 
         @govukInput(Input(
             id = firstNameKey,
