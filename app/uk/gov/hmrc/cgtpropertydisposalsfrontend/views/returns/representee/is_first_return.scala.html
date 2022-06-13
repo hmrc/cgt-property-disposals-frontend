@@ -79,7 +79,8 @@
             Radios(
                 fieldset = Some(Fieldset(
                 legend = None
-                )),
+                    )
+                ),
                 errorMessage = form.error(key).map(e => s"$userKey.${e.message}") match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey))) case _ => None},
                 hint = None,
                 idPrefix = Some(key),

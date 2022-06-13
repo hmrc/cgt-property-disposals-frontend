@@ -104,6 +104,7 @@
                     isPageHeading = true
                     ))
                 )),
+            errorMessage = form.error(key).map(e => e.message) match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey))) case _ => None},
             hint = None,
             idPrefix = Some(key),
             name = key,

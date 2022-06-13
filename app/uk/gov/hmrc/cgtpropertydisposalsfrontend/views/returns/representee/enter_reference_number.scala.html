@@ -102,17 +102,12 @@
     }
 
     @caption(messages("representee.caption"))
-
+    @pageHeading(title)
     @formWrapper(routes.RepresenteeController.enterIdSubmit(), 'novalidate -> "novalidate") {
 
     @govukRadios(Radios(
-            fieldset = Some(Fieldset(
-                legend = Some(Legend(
-                content = HtmlContent(pageHeading(title)),
-                classes = "govuk-fieldset__legend--l",
-                isPageHeading = true
-            ))
-            )),
+            fieldset = None,
+            errorMessage = form.error(key) match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey.toString))) case _ => None},
             hint = Some(Hint(
                 content = Text(messages("representee.caption"))
             )),
