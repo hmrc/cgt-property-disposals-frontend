@@ -246,6 +246,10 @@
       global.location = settings.logout_url
     }
 
-    init()
+    if(document.querySelector('main.no-timeout')){
+      // don't use timeout on pages with no-timeout class eg in-service accessibility statement
+    }else{
+      init()
+    }
   };
 })(window, document);
