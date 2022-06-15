@@ -19,23 +19,21 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    formHelper: FormWithCSRF,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input_govuk,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
@@ -45,7 +43,7 @@
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @key = @{ "disposalFees" }
 @indirectKey = @{ if(isIndirectDisposal) ".indirect" else ""}
@@ -69,20 +67,22 @@
     messages(s"$key$helpTextUserKey$indirectKey.helpText")
 }
 
-@title = @{messages(s"$key$userKey$indirectKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@title = @{
+    if(hasErrors){
+        messages("generic.errorPrefix") + " " + messages(s"$key$userKey$indirectKey.title")
+    } else {
+        messages(s"$key$userKey$indirectKey.title")
+    }
+}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-    @backLinkComponent(backLink)
+@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userKey$indirectKey"))
     }
 
-    @caption(messages("returns.disposal-details.caption"))
-
-    @formWrapper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFeesSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFeesSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),

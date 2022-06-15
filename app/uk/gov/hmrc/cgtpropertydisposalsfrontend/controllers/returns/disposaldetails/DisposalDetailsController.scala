@@ -29,7 +29,7 @@ import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 import play.api.http.Writeable
 import play.api.mvc._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
@@ -65,7 +65,7 @@ class DisposalDetailsController @Inject() (
   disposalPricePage: views.html.returns.disposaldetails.disposal_price,
   disposalFeesPage: views.html.returns.disposaldetails.disposal_fees,
   checkYouAnswers: views.html.returns.disposaldetails.check_your_answers
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+)(implicit ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging

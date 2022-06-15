@@ -1,0 +1,110 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.data.FormError
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+
+@this(
+    errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline_govuk
+)
+
+@(
+    fieldId: String,
+    label: Html,
+    value: String,
+    hasErrors: Boolean,
+    autoComplete: AutoCompleteType,
+    unit: String = "£",
+    aspect: String = "left",
+    assistiveText: String,
+    helpText: Option[Html] = None,
+    labelAsHeading: Boolean = false,
+    formError: Option[FormError] = None,
+    extraContent: Option[Html] = None,
+    inputClass: Option[String] = None,
+    labelClass: Option[String] = None,
+    customErrorKey: Option[String] = None
+)(implicit messages: Messages)
+
+@classBuilder(s: Option[String]*) = @{s.toList.collect{case Some(s) => s}.mkString(" ")}
+
+@classes = @{if(hasErrors) "govuk-form-group govuk-form-group-error" else "govuk-form-group" }
+@inputClasses = @{if(hasErrors) {
+  classBuilder(Some("form-control"), Some("form-control-error"))
+} else {
+  classBuilder(Some("form-control"))
+}}
+
+@hintTextKey = @{s"${{fieldId}}-govuk-hint"}
+@extraContentKey = @{s"${{fieldId}}-extra-content"}
+@assistiveKey = @{s"${{fieldId}}-assistive-text"}
+@errorId = @{s"${{fieldId}}-inline-error"}
+@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
+@extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
+@errorIdWithError = @{formError.map(errorId -> _)}
+@labelClasses = @{classBuilder(Some("govuk-label govuk-label--m"), labelClass)}
+
+@describedByKeys = @{
+  List(Some(assistiveKey), hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+
+@fieldLabel = {
+  @if(labelAsHeading) {
+    <h1 class="govuk-label-wrapper">
+      <label for="@{fieldId}" class="govuk-label govuk-label--l">@{label}</label>
+    </h1>
+  } else {
+    <label for="@{fieldId}" class="@{labelClasses}">@{label}</label>
+  }
+}
+
+<div class="@classes">
+  @fieldLabel
+  @extraContentIdWithContent.map { case (id, text) =>
+    <div id="@id">
+      @text
+    </div>
+  }
+  @hintIdWithHintText.map { case (id, text) =>
+    <span id="@id" class="govuk-hint">
+      @text
+    </span>
+  }
+
+  <div id="@assistiveKey" class="visuallyhidden">
+    @assistiveText
+  </div>
+  @errorIdWithError.map { case (id, error) =>
+    @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${error.message}", error.args: _*))
+  }
+  <div class="hmcts-currency-input custom-input-wrapper @inputClass @aspect">
+    <input
+      value="@value"
+      autocomplete="@autoComplete.value"
+      class="@inputClasses"
+      id="@fieldId"
+      name="@fieldId"
+      type="text"
+      inputmode="decimal"
+      @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+    <div class="hmcts-currency-input__symbol @aspect@if(hasErrors){ form-control--error}" aria-hidden="true">
+    @unit
+    </div>
+  </div>
+
+</div>
