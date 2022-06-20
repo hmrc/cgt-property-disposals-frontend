@@ -17,28 +17,26 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
-@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.govukfrontend.views.Aliases.Button
 @import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 
 @this(
 formHelper: FormWithCSRF,
 layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
 errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-radioGroupHints: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_with_hints_govuk,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-govukButton: GovukButton
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+govukButton: GovukButton,
+govukRadios : GovukRadios
 )
 
 
@@ -57,72 +55,92 @@ govukButton: GovukButton
 
 
 
-@options = @{
-    if(isAgent){
-      List(
-          RadioOption(
-              label = messages(s"$key.agent.Self"),
-              content = None,
-              optionHelpText = Some(Html(messages(s"$key.agent.Self.helpText")))
-          ),
-          RadioOption(
-              label = Html(messages(s"$key.agent.PersonalRepresentative")).toString(),
-              content = None,
-              optionHelpText = Some(Html(messages(s"$key.agent.PersonalRepresentative.helpText")))
-          ),
-          RadioOption(
-              label = Html(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin")).toString,
-              content = None,
-              optionHelpText = Some(Html(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin.helpText")))
-          )
-      )
-    } else {
-        List(
-            RadioOption(
-                label = messages(s"$key.Self"),
-                content = None,
-                optionHelpText = None
+@layout(pageTitle = title, isWelshTranslationAvailable = true,backLinkUrl = backLink.map(_.url)) {
+@formHelper(controllers.returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresentingSubmit(), 'novalidate -> "novalidate") {
+
+
+    @if(hasErrors) {
+        @errorSummary(form)
+    }
+    @caption(messages("triage.caption"))
+    @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text(title),
+                classes = "govuk-fieldset__legend--xl",
+                isPageHeading = true
+            ))
+        )),
+        errorMessage = if(hasErrors){Some(ErrorMessage(content = Text(messages(s"individualUserType.error.required"))))}else None,
+        hint = None,
+        idPrefix = Some(key),
+        name = key,
+        items = if(isAgent){
+         Seq(
+
+            RadioItem(
+                content =   Text(messages(s"$key.agent.Self")),
+                value = Some("0"),
+                hint = Some(Hint(content = Text(messages(s"$key.agent.Self.helpText")))),
+                checked = form("individualUserType").value.contains("0")
             ),
-            RadioOption(
-                label = messages(s"$key.Capacitor"),
-                content = None,
-                optionHelpText = Some(Html(messages(s"$key.Capacitor.helpText")))
+
+            RadioItem(
+                content = HtmlContent(messages(s"$key.agent.PersonalRepresentative")),
+                value = Some("govuk-verify"),
+                hint = Some(Hint(content = Text(messages(s"$key.agent.PersonalRepresentative.helpText")))),
+                checked = form("individualUserType").value.contains("1")
             ),
-            RadioOption(
-                label = Html(messages(s"$key.PersonalRepresentative")).toString,
-                content = None,
-                optionHelpText = Some(Html(messages(s"$key.PersonalRepresentative.helpText")))
+
+            RadioItem(
+            content = Text(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin")),
+            value = Some("govuk-verify"),
+            hint = Some(Hint(content = Text(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin.helpText")))),
+            checked = form("individualUserType").value.contains("2")
             ),
-            RadioOption(
-                label = messages(s"$key.PersonalRepresentativeInPeriodOfAdmin"),
-                content = None,
-                optionHelpText = Some(Html(messages(s"$key.PersonalRepresentativeInPeriodOfAdmin.helpText")))
+
+
+            )}else {
+                 Seq(
+                    RadioItem(
+                    content = Text(messages(s"$key.Self")),
+                    value = Some("0"),
+                    hint = None,
+                    checked = form("individualUserType").value.contains("0")
+                    ),
+
+                    RadioItem(
+                        content = Text(messages(s"$key.Capacitor")),
+                        value = Some("1"),
+                        hint =  Some(Hint(content = Text(messages(s"$key.Capacitor.helpText")))),
+                        checked = form("individualUserType").value.contains("1")
+                    ),
+
+                    RadioItem(
+                    content = HtmlContent(messages(s"$key.PersonalRepresentative")),
+                    value = Some("2"),
+                    hint =  Some(Hint(content = Text(messages(s"$key.PersonalRepresentative.helpText")))),
+                    checked = form("individualUserType").value.contains("2")
+                    ),
+
+                    RadioItem(
+                    content = HtmlContent(messages(s"$key.PersonalRepresentativeInPeriodOfAdmin")),
+                    value = Some("3"),
+                    hint =  Some(Hint(content = Text(messages(s"$key.PersonalRepresentativeInPeriodOfAdmin.helpText")))),
+                    checked = form("individualUserType").value.contains("3")
+                    )
+                )
+            }
+        ))
+
+        @govukButton(
+        Button(
+            content = Text(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue")),
+            preventDoubleClick = true,
+            attributes = Map("id" -> "submitButton")
             )
         )
     }
 }
-
-
-
-@layout(pageTitle = title, isWelshTranslationAvailable = true,backLinkUrl = backLink.map(_.url)) {
-<div>
-    @if(hasErrors) {
-        @errorSummary(form)
-    }
-
-    <div class="govuk-form-group">
-        @formHelper(controllers.returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresentingSubmit(), 'novalidate -> "novalidate") {
-            @radioGroupHints(
-                fieldId = key,
-                options = options,
-                label = pageHeading(inPageTitle, Some(messages("triage.caption"))),
-                error = form.error(key)
-            )
-
-        @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
-    }
-    </div>
-
     @returnToSummaryLink(displayReturnToSummaryLink)
-</div>
-}
+

@@ -29,7 +29,6 @@
 
 @this(
         layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
@@ -57,7 +56,12 @@
 @firstNameKey = @{"representeeFirstName"}
 @lastNameKey = @{"representeeLastName"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@title = @{messages(s"$key$representativeTypeInterpolator.title")}
+@inPageTitle = @{messages(s"$key$representativeTypeInterpolator.title")}
+@title =  @{
+if(hasErrors){
+messages("generic.errorPrefix") + " " + inPageTitle
+} else inPageTitle
+}
 
 @layout(pageTitle = title) {
 
@@ -67,28 +71,29 @@
         @errorSummary(form)
     }
     @caption(messages("representee.caption"))
-    @pageHeading(title)
+
+    <h1 class="govuk-heading-xl">
+        @title
+    </h1>
 
     @formWrapper(routes.RepresenteeController.enterNameSubmit(), 'novalidate -> "novalidate") {
 
         <div class="govuk-hint">
             @messages(s"$key$representativeTypeInterpolator.p1")
         </div>
-
-
         @govukInput(Input(
             id = firstNameKey,
             name = firstNameKey.toString,
             label = Label(
                 isPageHeading = true,
-                classes = "govuk-label--l",
+                classes = "govuk-label--m",
                 content = Text(messages(s"$key.firstName.label"))
             ),
-            hint = Some(Hint(
-                content = Text(messages(s"$firstNameKey.error.required"))
-            )),
+            autocomplete= Some("given-name"),
+            classes = "govuk-input--width-20",
+            hint = None,
             value = form.data.get(firstNameKey),
-            errorMessage = form.error(firstNameKey) match { case Some(formError) => Some(ErrorMessage(Some(formError.message))) case _ => None},
+            errorMessage = form.error(firstNameKey).map(e => ErrorMessage(content =Text(messages(s"$firstNameKey"+"."+ e.message)))),
         ))
 
         @govukInput(Input(
@@ -96,14 +101,14 @@
             name = lastNameKey.toString,
             label = Label(
             isPageHeading = true,
-            classes = "govuk-label--l",
-            content = Text(messages(s"$key.lastName.label"))
+            classes = "govuk-label--m",
+            content = Text(messages(s"$key.lastName.label")),
         ),
-        hint = Some(Hint(
-            content = Text(messages(s"$lastNameKey.error.required"))
-        )),
+            autocomplete= Some("family-name"),
+            classes = "govuk-input--width-20",
+            hint = None,
             value = form.data.get(lastNameKey),
-            errorMessage = form.error(lastNameKey) match { case Some(formError) => Some(ErrorMessage(Some(formError.message))) case _ => None},
+            errorMessage = form.error(lastNameKey).map(e => ErrorMessage(content =Text(messages(s"$lastNameKey"+"."+ e.message)))),
         ))
 
 

@@ -100,11 +100,10 @@
             fieldset = Some(Fieldset(
                 legend = Some(Legend(
                     content = HtmlContent(formTitle),
-                    classes = "govuk-fieldset__legend--l",
-                    isPageHeading = true
+                    classes = "govuk-fieldset__legend--m"
                     ))
                 )),
-            errorMessage = form.error(key).map(e => e.message) match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey))) case _ => None},
+            errorMessage = if(hasErrors){Some(ErrorMessage(content = Text(messages("confirmed.error.required"))))} else  None,
             hint = None,
             idPrefix = Some(key),
             name = key,
@@ -112,12 +111,12 @@
                 RadioItem(
                     content = Text(messages("generic.yes")),
                     value = Some("true"),
-                    hint = None
+                    hint = None,
             ),
             RadioItem(
                 content = Text(messages("generic.no")),
                 value = Some("false"),
-                hint = None
+                hint = None,
                 )
             )
         ))

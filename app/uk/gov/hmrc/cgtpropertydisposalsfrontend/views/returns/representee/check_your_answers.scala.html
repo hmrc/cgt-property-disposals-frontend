@@ -26,7 +26,6 @@
 
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
@@ -49,7 +48,9 @@
 
     @caption(messages("representee.caption"))
 
-    @pageHeading(title)
+    <h1 class="govuk-heading-xl">
+        @title
+    </h1>
 
     @summary(answers, representativeType)
 

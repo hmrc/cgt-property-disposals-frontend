@@ -28,7 +28,6 @@
 @this(
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
         layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
@@ -45,7 +44,13 @@
 @sautrKey = @{ "representeeSautr" }
 @cgtReferenceKey = @{ "representeeCgtRef" }
 
-@title = @{messages(s"$key.title")}
+@inPageTitle = @{messages(s"$key.title")}
+@title = @{
+if(hasErrors){
+messages("generic.errorPrefix") + " " + inPageTitle
+} else inPageTitle
+}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @cgtReferenceKeyHtml = {
@@ -102,14 +107,20 @@
     }
 
     @caption(messages("representee.caption"))
-    @pageHeading(title)
     @formWrapper(routes.RepresenteeController.enterIdSubmit(), 'novalidate -> "novalidate") {
 
     @govukRadios(Radios(
-            fieldset = None,
+            fieldset = Some(Fieldset(
+            legend = Some(Legend(
+            content = Text(title),
+            classes = "govuk-fieldset__legend--xl",
+            isPageHeading = true
+            ))
+            )),
             errorMessage = form.error(key) match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey.toString))) case _ => None},
+
             hint = Some(Hint(
-                content = Text(messages("representee.caption"))
+                content = Text(messages("representeeReferenceIdType.helpText"))
             )),
             idPrefix = Some("contact"),
             name = "representeeReferenceIdType",
@@ -117,24 +128,30 @@
                 RadioItem(
                 content = Text(messages(s"$cgtReferenceKey.label")),
                 value = Some("0"),
-                conditionalHtml = Some(cgtReferenceKeyHtml)
+                conditionalHtml = Some(cgtReferenceKeyHtml),
+                checked = form("representeeReferenceIdType").value.contains("0")
                 ),
                 RadioItem(
                 content = Text(messages(s"$ninoKey.label")),
                 value = Some("1"),
-                conditionalHtml = Some(ninoKeyHtml)
+                conditionalHtml = Some(ninoKeyHtml),
+                checked = form("representeeReferenceIdType").value.contains("1")
                 ),
                 RadioItem(
                 content = Text(messages(s"$sautrKey.label")),
                 value = Some("2"),
-                conditionalHtml = Some(sautrKeyHtml)
+                conditionalHtml = Some(sautrKeyHtml),
+                checked = form("representeeReferenceIdType").value.contains("2")
                 ),
                 RadioItem(
                 content = Text(messages(s"$key.noReferenceId.label")),
                 value = Some("3"),
-                conditionalHtml = None)
+                checked = form("representeeReferenceIdType").value.contains("3"),
+                conditionalHtml = None),
+
             )))
         @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
     }
+
     @returnToSummaryLink(displayReturnToSummaryLink)
 }

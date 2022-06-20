@@ -29,7 +29,6 @@
 
 @this(
         layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
@@ -51,7 +50,12 @@
       if(isAgent) "agent.personalRepInPeriodOfAdmin" else "personalRepInPeriodOfAdmin"
 } }
 
-@title = @{messages(s"$key.$userKey.title")}
+@title = @{
+if(hasErrors){
+messages("generic.errorPrefix") + " " + inPageTitle
+} else inPageTitle
+}
+@inPageTitle = @{messages(s"$key.$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @layout(pageTitle = title) {
@@ -69,32 +73,31 @@
 
     @caption(messages("representee.caption"))
 
-    @pageHeading(title)
-
-    <div class="govuk-hint">
-        @messages(s"$key.helpText")
-    </div>
-
         @govukRadios(
             Radios(
                 fieldset = Some(Fieldset(
-                legend = None
-                    )
-                ),
-                errorMessage = form.error(key).map(e => s"$userKey.${e.message}") match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey))) case _ => None},
-                hint = None,
+                legend = Some(Legend(
+                content = Text(title),
+                classes = "govuk-fieldset__legend--xl",
+                isPageHeading = true
+                ))
+                )),
+                errorMessage = if(hasErrors){Some(ErrorMessage(content = Text(messages("representeeIsFirstReturn.capacitor.error.required"))))} else  None,
+                hint = Some(Hint(content = Text(messages((s"$key.helpText"))))),
                 idPrefix = Some(key),
                 name = key,
                 items = Seq(
                     RadioItem(
                         content = Text(messages("generic.yes")),
                         value = Some("true"),
-                        hint = None
+                        hint = None,
+                        checked = form("representeeIsFirstReturn").value.contains("true")
                     ),
                     RadioItem(
                         content = Text(messages("generic.no")),
                         value = Some("false"),
-                        hint = None
+                        hint = None,
+                        checked = form("representeeIsFirstReturn").value.contains("false")
                         )
                     )
                 )

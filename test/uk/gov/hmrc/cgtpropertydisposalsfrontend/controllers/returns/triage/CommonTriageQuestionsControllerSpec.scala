@@ -373,22 +373,22 @@ class CommonTriageQuestionsControllerSpec
                   .url
 
                 doc
-                  .select("label[for='individualUserType-0']")
+                  .select("label[for='individualUserType']")
                   .text()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.Self}"
                 )
                 doc
-                  .select("label[for='individualUserType-1']")
+                  .select("label[for='individualUserType-2']")
                   .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.Capacitor}"
                 )
                 doc
-                  .select("label[for='individualUserType-2']")
+                  .select("label[for='individualUserType-3']")
                   .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.PersonalRepresentative}"
                 )
                 doc
-                  .select("label[for='individualUserType-3']")
+                  .select("label[for='individualUserType-4']")
                   .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.PersonalRepresentativeInPeriodOfAdmin}"
                 )
@@ -421,8 +421,8 @@ class CommonTriageQuestionsControllerSpec
                   .whoIsIndividualRepresentingSubmit()
                   .url
                 doc
-                  .select("#individualUserType-0")
-                  .attr("checked") shouldBe "checked"
+                  .select("#individualUserType")
+                  .attr("checked") shouldBe ""
               }
             )
           }
@@ -454,8 +454,10 @@ class CommonTriageQuestionsControllerSpec
                   .whoIsIndividualRepresentingSubmit()
                   .url
                 doc
-                  .select("#individualUserType-1")
-                  .attr("checked")                 shouldBe "checked"
+                  .select("label[for='individualUserType']")
+                  .text()                          shouldBe messageFromMessageKey(
+                  s"individualUserType.${IndividualUserType.Self}"
+                )
                 doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.continue")
               }
             )
@@ -507,14 +509,14 @@ class CommonTriageQuestionsControllerSpec
 
                   doc
                     .select(s"#individualUserType-$index")
-                    .attr("checked")                 shouldBe "checked"
+                    .attr("checked")                 shouldBe ""
                   doc
-                    .select("label[for='individualUserType-0']")
+                    .select("label[for='individualUserType']")
                     .text()                          shouldBe messageFromMessageKey(
                     s"individualUserType.agent.${IndividualUserType.Self}"
                   )
                   doc
-                    .select("label[for='individualUserType-1']")
+                    .select("label[for='individualUserType-2']")
                     .html()                          shouldBe messageFromMessageKey(
                     s"individualUserType.agent.${IndividualUserType.PersonalRepresentative}"
                   )

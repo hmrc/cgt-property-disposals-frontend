@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.{Clock, LocalDate}
 import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.nodes.Document
@@ -3722,8 +3721,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.countryOfResidence()
         ),
-        _.select("#assetTypeForNonUkResidents-2")
-          .attr("checked") shouldBe "checked"
+        _.select("#assetTypeForNonUkResidents-2").attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -3742,7 +3740,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController.countryOfResidence()
         ),
         _.select("#assetTypeForNonUkResidents-2")
-          .attr("checked") shouldBe "checked"
+          .attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -3760,7 +3758,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController.countryOfResidence()
         ),
         _.select("#assetTypeForNonUkResidents-2")
-          .attr("checked") shouldBe "checked"
+          .attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
@@ -3780,8 +3778,8 @@ class SingleDisposalsTriageControllerSpec
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
           doc
-            .select("#assetTypeForNonUkResidents-0")
-            .attr("checked") shouldBe "checked"
+            .select("#assetTypeForNonUkResidents")
+            .attr("checked") shouldBe ""
         }
       )
 
@@ -3803,7 +3801,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#assetTypeForNonUkResidents-0")
-            .attr("checked") shouldBe "checked"
+            .attr("checked") shouldBe ""
         }
       )
 
@@ -3825,7 +3823,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#assetTypeForNonUkResidents-0")
-            .attr("checked") shouldBe "checked"
+            .attr("checked") shouldBe ""
         }
       )
 
