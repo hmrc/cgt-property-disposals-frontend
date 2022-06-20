@@ -79,6 +79,7 @@
     <span id="@id" class="govuk-hint">
       @text
     </span>
+    <br/>
   }
   @errorIdWithMessageKey.map { case (id, key) =>
     @errorInline(id, messages(s"$fieldId.$key"))

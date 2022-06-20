@@ -49,12 +49,12 @@ class SubscribedChangeAddressController @Inject() (
   val auditService: AuditService,
   subscriptionService: SubscriptionService,
   cc: MessagesControllerComponents,
-  val enterPostcodePage: views.html.address.enter_postcode,
-  val selectAddressPage: views.html.address.select_address,
-  val enterUkAddressPage: views.html.address.enter_uk_address,
-  val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
+  val enterPostcodePage: views.html.address.enter_postcode_govuk,
+  val selectAddressPage: views.html.address.select_address_govuk,
+  val enterUkAddressPage: views.html.address.enter_uk_address_govuk,
+  val enterNonUkAddressPage: views.html.address.enter_nonUk_address_govuk,
   val isUkPage: views.html.address.isUk,
-  val exitPage: views.html.address.exit_page
+  val exitPage: views.html.address.exit_page_govuk
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
