@@ -21,7 +21,6 @@
 
 @import cats.syntax.eq._
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.NonUkAddress
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
@@ -31,16 +30,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input_govuk,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code,
-    accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+    countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
@@ -49,7 +47,7 @@
     submit: Call,
     addressJourneyType: AddressJourneyType,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @key = @{"nonUkAddress"}
 @line1Key = @{s"$key-line1"}
@@ -93,10 +91,8 @@
   }
 }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 
-
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, accountMenu = Some(menu)) {
+@layout(pageTitle = title) {
 
   @backLinkComponent(backLink)
 
@@ -105,8 +101,8 @@
   }
 
   @formWrapper(submit, 'novalidate -> "novalidate") {
-    <fieldset id="@key">
-      <legend>
+    <fieldset class="govuk-fieldset" id="@key">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
         @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())))
       </legend>
       @textInput(
@@ -115,7 +111,7 @@
         errorKey = form.error(line1Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line1Key, ""),
         hasErrors = form.error(line1Key).nonEmpty,
-        inputClass = Some("form-control-3-4"),
+        inputClass = Some("govuk-input govuk-!-width-two-thirds"),
         autoComplete = AutoCompleteType.AddressLine1
       )
       @textInput(
@@ -124,7 +120,7 @@
         errorKey = form.error(line2Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line2Key, ""),
         hasErrors = form.error(line2Key).nonEmpty,
-        inputClass = Some("form-control-3-4"),
+        inputClass = Some("govuk-input govuk-!-width-two-thirds"),
         autoComplete = AutoCompleteType.AddressLine2
       )
       @textInput(
@@ -133,7 +129,7 @@
         errorKey = form.error(line3Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line3Key, ""),
         hasErrors = form.error(line3Key).nonEmpty,
-        inputClass = Some("form-control-3-4"),
+        inputClass = Some("govuk-input govuk-!-width-two-thirds"),
         autoComplete = AutoCompleteType.AddressLevel2
       )
       @textInput(
@@ -142,7 +138,7 @@
         errorKey = form.error(line4Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line4Key, ""),
         hasErrors = form.error(line4Key).nonEmpty,
-        inputClass = Some("form-control-3-4"),
+        inputClass = Some("govuk-input govuk-!-width-two-thirds"),
         autoComplete = AutoCompleteType.AddressLevel1
       )
 

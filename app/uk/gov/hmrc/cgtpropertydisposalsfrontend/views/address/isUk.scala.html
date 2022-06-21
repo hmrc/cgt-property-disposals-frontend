@@ -18,24 +18,22 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
- errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+ layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+ submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+ errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
- yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
- backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
- accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
+ yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
+ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk
 )
 
-@(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @key = @{"isUk"}
 @isAgent = @{ request.userType.contains(Agent) }
@@ -85,9 +83,8 @@
   }
 }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, accountMenu = Some(menu)) {
+@layout(pageTitle = title) {
   @backLinkComponent(backLink)
 
   @if(hasErrors) {
