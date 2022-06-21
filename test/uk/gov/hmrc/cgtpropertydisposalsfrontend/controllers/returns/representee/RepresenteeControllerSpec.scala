@@ -1305,8 +1305,7 @@ class RepresenteeControllerSpec
                 case NoReferenceId                   =>
                   doc
                     .select("#representeeReferenceIdType-3")
-                    .attr("checked") shouldBe ""
-
+                    .hasAttr("checked")
               }
             }
           )
@@ -3010,7 +3009,7 @@ class RepresenteeControllerSpec
                 .url
 
               expectedPreselectedAnswer.foreach { preselected =>
-                doc.select(s"#representeeIsFirstReturn-$preselected").attr("checked") shouldBe ""
+                doc.select(s"#representeeIsFirstReturn-$preselected").hasAttr("checked")
               }
             }
           )

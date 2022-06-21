@@ -3721,7 +3721,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.countryOfResidence()
         ),
-        _.select("#assetTypeForNonUkResidents-2").attr("checked") shouldBe ""
+        _.select("#assetTypeForNonUkResidents-2").hasAttr("checked")
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -3739,8 +3739,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.countryOfResidence()
         ),
-        _.select("#assetTypeForNonUkResidents-2")
-          .attr("checked") shouldBe ""
+        _.select("#assetTypeForNonUkResidents-2").hasAttr("checked")
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -3758,7 +3757,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController.countryOfResidence()
         ),
         _.select("#assetTypeForNonUkResidents-2")
-          .attr("checked") shouldBe ""
+          .hasAttr("checked")
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
@@ -3779,7 +3778,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#assetTypeForNonUkResidents")
-            .attr("checked") shouldBe ""
+            .hasAttr("checked")
         }
       )
 
@@ -3801,7 +3800,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#assetTypeForNonUkResidents-0")
-            .attr("checked") shouldBe ""
+            .hasAttr("checked")
         }
       )
 
@@ -3823,7 +3822,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#assetTypeForNonUkResidents-0")
-            .attr("checked") shouldBe ""
+            .hasAttr("checked")
         }
       )
 

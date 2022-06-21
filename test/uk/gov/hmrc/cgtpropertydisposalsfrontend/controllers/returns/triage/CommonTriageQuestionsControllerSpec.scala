@@ -417,12 +417,12 @@ class CommonTriageQuestionsControllerSpec
                   .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
-                  )                shouldBe routes.CommonTriageQuestionsController
+                  ) shouldBe routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresentingSubmit()
                   .url
                 doc
                   .select("#individualUserType")
-                  .attr("checked") shouldBe ""
+                  .hasAttr("checked")
               }
             )
           }
@@ -509,7 +509,7 @@ class CommonTriageQuestionsControllerSpec
 
                   doc
                     .select(s"#individualUserType-$index")
-                    .attr("checked")                 shouldBe ""
+                    .hasAttr("checked")
                   doc
                     .select("label[for='individualUserType']")
                     .text()                          shouldBe messageFromMessageKey(
