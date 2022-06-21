@@ -243,7 +243,7 @@ class MixedUsePropertyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             { doc =>
               doc
-                .select("#main-content > div > div > span")
+                .select("#content > article > span")
                 .text() shouldBe messageFromMessageKey(
                 "singleMixedUse.caption"
               )

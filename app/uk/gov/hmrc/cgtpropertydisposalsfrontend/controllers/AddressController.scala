@@ -46,12 +46,12 @@ trait AddressController[A <: AddressJourneyType] {
   val errorHandler: ErrorHandler
   val ukAddressLookupService: UKAddressLookupService
   val sessionStore: SessionStore
-  val enterPostcodePage: views.html.address.enter_postcode_govuk
-  val selectAddressPage: views.html.address.select_address_govuk
-  val enterUkAddressPage: views.html.address.enter_uk_address_govuk
-  val enterNonUkAddressPage: views.html.address.enter_nonUk_address_govuk
+  val enterPostcodePage: views.html.address.enter_postcode
+  val selectAddressPage: views.html.address.select_address
+  val enterUkAddressPage: views.html.address.enter_uk_address
+  val enterNonUkAddressPage: views.html.address.enter_nonUk_address
   val isUkPage: views.html.address.isUk
-  val exitPage: views.html.address.exit_page_govuk
+  val exitPage: views.html.address.exit_page
   val toJourneyStatus: A => JourneyStatus
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
