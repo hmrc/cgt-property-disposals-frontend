@@ -189,9 +189,9 @@ recruitment-banner.dismiss=No thanks
 recruitment-banner.link=Help make this service better by <a target="_blank" rel="noreferrer noopener" href="{0}">joining the HMRC user research panel (opens in a new tab)</a>. This usually involves being interviewed for your feedback and suggestions. Research participants are normally compensated for their time.
 
 accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
-accessibilityStatement.title=Accessibility statement
+accessibilityStatement.title=Accessibility statement for Report and pay Capital Gains Tax on UK property service
 accessibilityStatement.p1=This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
-accessibilityStatement.p2=This service is part of the wider GOV.UK website. There is a separate <a href="{0}">accessibility statement</a> for the main GOV.UK website.
+accessibilityStatement.p2=This service is part of the wider GOV.UK website. There is a separate <a href="{0}">accessibility statement for the main GOV.UK website</a>.
 accessibilityStatement.p3=This page only contains information about the Report and pay Capital Gains Tax on UK property service, available at {0}.
 accessibilityStatement.usingThisService.title=Using this service
 accessibilityStatement.usingThisService.p1=You can use this service to report the disposal of UK residential property or land (made from 6 April 2020). You can also view your previous and current returns.
@@ -203,21 +203,30 @@ accessibilityStatement.usingThisService.li3=get from the start of the service to
 accessibilityStatement.usingThisService.li4=get from the start of the service to the end using speech recognition software
 accessibilityStatement.usingThisService.li5=listen to the service using a screen reader (including the most recent versions of JAWS, NVDA and VoiceOver)
 accessibilityStatement.usingThisService.p4=We have also made the text in the service as simple as possible to understand.
-accessibilityStatement.usingThisService.p5=<a href="{0}">AbilityNet</a> has advice on making your device easier to use if you have a disability.
+accessibilityStatement.usingThisService.making-device-easier.part1=AbilityNet has advice
+accessibilityStatement.usingThisService.making-device-easier.part2=' on making your device easier to use if you have a disability.'
 accessibilityStatement.howAccessible.title=How accessible this service is
 accessibilityStatement.howAccessible.p1=HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
-accessibilityStatement.howAccessible.p2=This service was tested on 15 May 2020 by the Digital Accessibility Centre. It was found to be compliant with the <a href="{0}">Web Content Accessibility Guidelines version 2.1 AAA standard</a>. Since then, it has been extended. We cannot be certain that it is fully compliant. The full service will be tested by HMRC within the next three months.
+accessibilityStatement.howAccessible.p2=This service was tested on 15 May 2020 by the Digital Accessibility Centre. It was found to be compliant with the <a href="{0}">Web Content Accessibility Guidelines version 2.1 AA standard</a>. Since then, it has been extended. We cannot be certain that it is fully compliant. The service will book a full accessibility audit by 31 December 2022.
+
+## Contact
+accessibilityStatement.contact.heading=What to do if you have difficulty using this service
+accessibilityStatement.contact.extra-support.part1='You can '
+accessibilityStatement.contact.extra-support.part2=contact HMRC for extra support
+accessibilityStatement.contact.extra-support.part3=' if you need help with filling in forms or getting a different format, like large print, audio recording or Braille.'
+
+
 accessibilityStatement.reportingProblems.title=Reporting accessibility problems with this service
 accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a href="{0}" target="_blank">accessibility problem (opens in a new tab)</a>.
-accessibilityStatement.notHappy.title=What to do if you are not happy with how we respond to your complaint
+accessibilityStatement.notHappy.title=If you are not happy with our response
 accessibilityStatement.notHappy.p1=The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint, <a href="{0}">contact the Equality Advisory and Support Service (EASS)</a>, or the <a href="{1}">Equality Commission for Northern Ireland (ECNI)</a> if you live in Northern Ireland.
 accessibilityStatement.contactingUs.title=Contacting us by phone or getting a visit from us in person
 accessibilityStatement.contactingUs.p1=We provide a text relay service if you are deaf, hearing impaired or have a speech impediment.
 accessibilityStatement.contactingUs.p2=We can provide a British Sign Language (BSL) interpreter, or you can arrange a visit from an HMRC advisor to help you complete the service.
-accessibilityStatement.contactingUs.p3=Find out how to <a href="{0}">contact us</a>.
+accessibilityStatement.contactingUs.p3=Find out <a href="{0}">how to get extra support from HMRC</a>.
 accessibilityStatement.howWeTested.title=How we tested this service
-accessibilityStatement.howWeTested.p1=The service was tested on 15 May 2020 and checked for compliance with WCAG 2.1 AAA. It was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>.
-accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 14 September 2020.
+accessibilityStatement.howWeTested.p1=The service was tested on 15 May 2020 and checked for compliance with WCAG 2.1 AA. It was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>.
+accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 9 June 2022.
 
 #===================================================
 # SERVICE WIDE AND GENERIC - END
