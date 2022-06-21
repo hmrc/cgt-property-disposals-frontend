@@ -19,7 +19,6 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupRequest
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -29,15 +28,14 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input_govuk,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
@@ -49,7 +47,7 @@
     addressJourneyType: AddressJourneyType,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType]
-)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @key = @{"postcode"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -82,9 +80,8 @@
 }}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, accountMenu = Some(menu)) {
+@layout(pageTitle = title) {
 
  @backLinkComponent(backLink)
 
@@ -94,6 +91,7 @@
 
  @caption(messages(addressJourneyType.captionMessageKey()))
  @pageHeading(title, None)
+    <br/>
 
  @formWrapper(submit, 'novalidate -> "novalidate") {
    @textInput(
@@ -103,6 +101,7 @@
     errorKey = form.error(postcodeFilterKey).map(e => e.message),
     value = form.data.getOrElse(postcodeFilterKey, ""),
     hasErrors = form.error(postcodeFilterKey).nonEmpty,
+    inputClass = Some("govuk-input govuk-!-width-two-thirds"),
     autoComplete = AutoCompleteType.On
    )
    @textInput(
@@ -112,13 +111,13 @@
     errorKey = form.error(key).map(e => e.message),
     value = form.data.getOrElse(key, ""),
     hasErrors = form.error(key).nonEmpty,
-    inputClass = Some("form-control-1-4"),
+    inputClass = Some("govuk-input govuk-!-width-one-thirds"),
     autoComplete = AutoCompleteType.Postcode
    )
 
-   <p>
-     <a href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
-   </p>
+    <p class="govuk-body">
+        <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
+    </p>
 
    @submitButton(messages("button.findAddress"))
  }
