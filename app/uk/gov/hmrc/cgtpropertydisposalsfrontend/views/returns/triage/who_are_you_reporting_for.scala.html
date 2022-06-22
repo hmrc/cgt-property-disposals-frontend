@@ -93,7 +93,7 @@ govukRadios : GovukRadios
             ),
 
             RadioItem(
-            content = Text(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin")),
+            content = HtmlContent(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin")),
             value = Some("govuk-verify"),
             hint = Some(Hint(content = Text(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin.helpText")))),
             checked = form("individualUserType").value.contains("2")
