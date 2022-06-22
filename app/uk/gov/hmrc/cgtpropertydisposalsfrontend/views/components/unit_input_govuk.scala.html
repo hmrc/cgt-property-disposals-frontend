@@ -81,30 +81,30 @@
     </div>
   }
   @hintIdWithHintText.map { case (id, text) =>
-    <span id="@id" class="govuk-hint">
+    <div id="@id" class="govuk-hint">
       @text
-    </span>
+    </div>
   }
 
-  <div id="@assistiveKey" class="visuallyhidden">
+  <div id="@assistiveKey" class="govuk-visually-hidden">
     @assistiveText
   </div>
   @errorIdWithError.map { case (id, error) =>
     @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${error.message}", error.args: _*))
   }
-  <div class="hmcts-currency-input custom-input-wrapper @inputClass @aspect">
-    <input
-      value="@value"
-      autocomplete="@autoComplete.value"
-      class="@inputClasses"
-      id="@fieldId"
-      name="@fieldId"
-      type="text"
-      inputmode="decimal"
-      @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <div class="hmcts-currency-input__symbol @aspect@if(hasErrors){ form-control--error}" aria-hidden="true">
+  <div class="govuk-input__wrapper @inputClass @aspect">
+    <div class="govuk-input__prefix @aspect@if(hasErrors){ form-control--error}" aria-hidden="true">
     @unit
     </div>
+      <input
+              value="@value"
+              autocomplete="@autoComplete.value"
+              class="govuk-input govuk-input--width-10 @inputClasses"
+              id="@fieldId"
+              name="@fieldId"
+              type="text"
+              inputmode="decimal"
+              @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
   </div>
 
 </div>

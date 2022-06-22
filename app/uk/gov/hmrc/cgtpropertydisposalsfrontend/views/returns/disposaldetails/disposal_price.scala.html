@@ -32,6 +32,7 @@
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
@@ -70,13 +71,7 @@
 @key = @{ "disposalPrice" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@title = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + messages(s"$key$userKey$indirectKey$disposalMethodKey.title")
-    } else {
-        messages(s"$key$userKey$indirectKey$disposalMethodKey.title")
-    }
-}
+@title = @{ messages(s"$key$userKey$indirectKey$disposalMethodKey.title") }
 
 @mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
 
@@ -90,7 +85,7 @@
         value = form.data.getOrElse(key, ""),
         formError = form.error(key),
         hasErrors = form.error(key).nonEmpty,
-        label = Html(title),
+        label = pageHeading(title, Some(messages("returns.disposal-details.caption"))),
         labelAsHeading = true,
         helpText = Some(Html(messages(s"$key$userKey$indirectKey$disposalMethodKey.helpText"))),
         autoComplete = AutoCompleteType.On,
