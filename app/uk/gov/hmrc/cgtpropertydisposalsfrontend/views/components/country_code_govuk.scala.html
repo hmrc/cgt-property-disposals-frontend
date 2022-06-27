@@ -42,7 +42,7 @@
 )(implicit messages: Messages)
 
 @fieldId = @{"countryCode"}
-@classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error govuk-!-width-two-thirds" else "govuk-form-group govuk-!-width-two-thirds" }
+@classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
 @inputClasses = @{if(hasErrors) "govuk-select govuk-select--error autocomplete"  else "govuk-select autocomplete"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
