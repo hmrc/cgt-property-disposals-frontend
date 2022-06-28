@@ -17,24 +17,27 @@
 @import play.api.i18n.Messages
 @import play.api.data.Form
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Button
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-    summary_for_confirmation: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary_for_confirmation,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+    govukButton: GovukButton,
+    govukRadios : GovukRadios,
+    govukTable : GovukTable
 )
 
 @(
@@ -44,7 +47,7 @@
     form: Form[Boolean],
     backLink: Call,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{ messages("representeeConfirmPerson.title") }
 @key = @{ "confirmed"}
@@ -52,7 +55,12 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @formTitle = @{messages("representeeConfirmPerson.formTitle")}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@isDisplayedWithLabelAndId = @{
+    id match { case RepresenteeCgtReference(CgtReference(value)) => (true, messages("representeeConfirmPerson.summaryLine2.cgtReferenceId"), value) case _ => (false, "", "")
+    }
+}
+
+@layout(pageTitle = title) {
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
@@ -62,19 +70,58 @@
 
     @pageHeading(title)
 
-    @summary_for_confirmation(id, name)
-
-    @formWrapper(routes.RepresenteeController.confirmPersonSubmit(), 'novalidate -> "novalidate") {
-        @yesNo(
-            fieldId = key,
-            label = Html(s"<h2>$formTitle</h2>"),
-            errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors,
-            selected = form.value,
-            helpText = None
+    @govukTable(
+        Table(
+            rows = Seq(
+            Seq(
+                TableRow(
+                    content = Text(messages("representeeConfirmPerson.summaryLine1"))
+                ),
+                TableRow(
+                    content =  Text(messages((name.firstName + " " +name.lastName).toString )),
+                    format = Some("text")
+                ),
+                TableRow(
+                    content =  if(isDisplayedWithLabelAndId._1){Text(messages(isDisplayedWithLabelAndId._2 + " " +  isDisplayedWithLabelAndId._3))} else Empty,
+                    format = Some("text")
+                ),
+                )
+            ),
+            head = None,
+            caption = None,
+            captionClasses = "govuk-table__caption--m",
+            firstCellIsHeader = true
         )
+    )
 
-        @submitButton(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+@formWrapper(routes.RepresenteeController.confirmPersonSubmit(), 'novalidate -> "novalidate") {
+
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = HtmlContent(formTitle),
+                    classes = "govuk-fieldset__legend--m"
+                    ))
+                )),
+            errorMessage = if(hasErrors){Some(ErrorMessage(content = Text(messages("confirmed.error.required"))))} else  None,
+            hint = None,
+            idPrefix = Some(key),
+            name = key,
+            items = Seq(
+                RadioItem(
+                    content = Text(messages("generic.yes")),
+                    value = Some("true"),
+                    hint = None,
+            ),
+            RadioItem(
+                content = Text(messages("generic.no")),
+                value = Some("false"),
+                hint = None,
+                )
+            )
+        ))
+
+      @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

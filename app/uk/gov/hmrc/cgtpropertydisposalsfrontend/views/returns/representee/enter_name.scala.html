@@ -17,26 +17,25 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Button
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        govukInput : GovukInput,
+        govukButton: GovukButton
 )
 
 @(
@@ -45,7 +44,7 @@
    representativeType: RepresentativeType,
    displayReturnToSummaryLink: Boolean,
    isAmend: Boolean
-)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+)(implicit request:RequestWithSessionData[_], messages: Messages)
 
 @key = @{ "representee.enterName" }
 @representativeTypeInterpolator = @{
@@ -57,42 +56,63 @@
 @firstNameKey = @{"representeeFirstName"}
 @lastNameKey = @{"representeeLastName"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@title = @{messages(s"$key$representativeTypeInterpolator.title")}
+@inPageTitle = @{messages(s"$key$representativeTypeInterpolator.title")}
+@title =  @{
+if(hasErrors){
+messages("generic.errorPrefix") + " " + inPageTitle
+} else inPageTitle
+}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@layout(pageTitle = title) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
         @errorSummary(form)
     }
-
     @caption(messages("representee.caption"))
 
-    @pageHeading(title)
-
-    <p>@messages(s"$key$representativeTypeInterpolator.p1")</p>
+    <h1 class="govuk-heading-xl">
+        @title
+    </h1>
 
     @formWrapper(routes.RepresenteeController.enterNameSubmit(), 'novalidate -> "novalidate") {
-        @textInput(
-            fieldId = firstNameKey,
-            value = form.data.getOrElse(firstNameKey, ""),
-            errorKey = form.error(firstNameKey).map(e => e.message),
-            hasErrors = form.error(firstNameKey).nonEmpty,
-            label = Html(messages(s"$key.firstName.label")),
-            labelClass = Some("govuk-label--m"),
-            autoComplete = AutoCompleteType.FirstName
-        )
-        @textInput(
-            fieldId = lastNameKey,
-            value = form.data.getOrElse(lastNameKey, ""),
-            errorKey = form.error(lastNameKey).map(e => e.message),
-            hasErrors = form.error(lastNameKey).nonEmpty,
-            label = Html(messages(s"$key.lastName.label")),
-            labelClass = Some("govuk-label--m"),
-            autoComplete = AutoCompleteType.LastName
-        )
-        @submitButton(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+
+        <div class="govuk-hint">
+            @messages(s"$key$representativeTypeInterpolator.p1")
+        </div>
+        @govukInput(Input(
+            id = firstNameKey,
+            name = firstNameKey.toString,
+            label = Label(
+                isPageHeading = true,
+                classes = "govuk-label--m",
+                content = Text(messages(s"$key.firstName.label"))
+            ),
+            autocomplete= Some("given-name"),
+            classes = "govuk-input--width-20",
+            hint = None,
+            value = form.data.get(firstNameKey),
+            errorMessage = form.error(firstNameKey).map(e => ErrorMessage(content =Text(messages(s"$firstNameKey"+"."+ e.message)))),
+        ))
+
+        @govukInput(Input(
+            id = lastNameKey,
+            name = lastNameKey.toString,
+            label = Label(
+            isPageHeading = true,
+            classes = "govuk-label--m",
+            content = Text(messages(s"$key.lastName.label")),
+        ),
+            autocomplete= Some("family-name"),
+            classes = "govuk-input--width-20",
+            hint = None,
+            value = form.data.get(lastNameKey),
+            errorMessage = form.error(lastNameKey).map(e => ErrorMessage(content =Text(messages(s"$lastNameKey"+"."+ e.message)))),
+        ))
+
+
+        @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)
