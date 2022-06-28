@@ -31,17 +31,17 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-    radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+    radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional_govuk,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk
 )
 
 @(
@@ -117,7 +117,7 @@
     })
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@layout(pageTitle = title) {
 
     @backLinkComponent(backLink)
 
@@ -138,7 +138,7 @@
             customErrorKey = customErrorKey
         )
         @if(isATrust) {
-          <p>
+          <p class="govuk-body">
             @Html(messages("acquisitionFees.allowableCostsLinkText", appConfig.trustsAllowableCostsUrl))
           </p>
         }
@@ -148,9 +148,9 @@
             summary = messages(s"$key.details.header"),
             content = Html(
               s"""
-                | <p>${messages(s"$key$assetTypeKey$userKey.details.p1", TimeUtils.govDisplayFormat(rebaseCutOffDate))}</p>
-                | <p>${messages(s"$key$assetTypeKey.details.p2")}</p>
-                | <p>${messages(s"$key${if(!wasUkResident) ".non-resident" else ""}.details.p3", appConfig.nonResidentsRebasingUrl)}</p>
+                | <p class="govuk-body">${messages(s"$key$assetTypeKey$userKey.details.p1", TimeUtils.govDisplayFormat(rebaseCutOffDate))}</p>
+                | <p class="govuk-body">${messages(s"$key$assetTypeKey.details.p2")}</p>
+                | <p class="govuk-body">${messages(s"$key${if(!wasUkResident) ".non-resident" else ""}.details.p3", appConfig.nonResidentsRebasingUrl)}</p>
                 |""".stripMargin
             )
           )
