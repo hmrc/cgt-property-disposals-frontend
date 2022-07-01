@@ -26,6 +26,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Button
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
@@ -95,7 +98,7 @@
             customErrorKey = Some(s"$key$userKey$indirectKey")
         )
 
-        @govukButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+        @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
