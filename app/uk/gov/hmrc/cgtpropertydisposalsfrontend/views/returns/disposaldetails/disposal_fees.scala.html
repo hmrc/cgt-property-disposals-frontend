@@ -32,7 +32,7 @@
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    govukButton: GovukButton,
     unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
@@ -95,7 +95,7 @@
             customErrorKey = Some(s"$key$userKey$indirectKey")
         )
 
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+        @govukButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
