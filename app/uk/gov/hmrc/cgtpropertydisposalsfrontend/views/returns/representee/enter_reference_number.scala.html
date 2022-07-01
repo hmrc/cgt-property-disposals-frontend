@@ -17,101 +17,88 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Button
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-        textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        govukButton: GovukButton,
+        govukRadios : GovukRadios,
+        govukInput : GovukInput
 )
 
-@(form: Form[RepresenteeReferenceId], backLink: Call, displayReturnToSummaryLink: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[RepresenteeReferenceId], backLink: Call, displayReturnToSummaryLink: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @key = @{ "representeeReferenceIdType" }
 @ninoKey = @{ "representeeNino" }
 @sautrKey = @{ "representeeSautr" }
 @cgtReferenceKey = @{ "representeeCgtRef" }
 
-@title = @{messages(s"$key.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
-@options = @{List(
-    RadioOption(
-        label = messages(s"$cgtReferenceKey.label"),
-        content = Some(
-            textInput(
-                fieldId = cgtReferenceKey,
-                value = form.data.getOrElse(cgtReferenceKey, ""),
-                label = Html(""),
-                errorKey = form.error(cgtReferenceKey).map(_.message),
-                hasErrors = form.error(cgtReferenceKey).nonEmpty,
-                autoComplete = AutoCompleteType.On,
-                inputClass = Some("small"),
-                helpText = Some(Html(messages(s"$cgtReferenceKey.helpText")))
-        )),
-        optionHelpText = None
-    ),
-    RadioOption(
-        label = messages(s"$ninoKey.label"),
-        content = Some(
-            textInput(
-                fieldId = ninoKey,
-                value = form.data.getOrElse(ninoKey, ""),
-                label = Html(""),
-                errorKey = form.error(ninoKey).map(_.message),
-                hasErrors = form.error(ninoKey).nonEmpty,
-                autoComplete = AutoCompleteType.On,
-                inputClass = Some("small"),
-                helpText = Some(Html(messages(s"$ninoKey.helpText")))
-            )),
-        optionHelpText = None
-    ),
-    RadioOption(
-        label = messages(s"$sautrKey.label"),
-        content = Some(
-            textInput(
-                fieldId = sautrKey,
-                value = form.data.getOrElse(sautrKey, ""),
-                label = Html(""),
-                errorKey = form.error(sautrKey).map(_.message),
-                hasErrors = form.error(sautrKey).nonEmpty,
-                autoComplete = AutoCompleteType.On,
-                inputClass = Some("small"),
-                helpText = Some(Html(messages(s"$sautrKey.helpText")))
-            )),
-        optionHelpText = None
-    ),
-    RadioOption(
-        label = messages(s"$key.noReferenceId.label"),
-        content = None,
-        optionHelpText = None
-    )
-
-)}
-@selectedIndex = @{
-    form.data.get(key).map({
-        case "0" => 0
-        case "1" => 1
-        case "2" => 2
-        case _   => 3
-    })
+@inPageTitle = @{messages(s"$key.title")}
+@title = @{
+if(hasErrors){
+messages("generic.errorPrefix") + " " + inPageTitle
+} else inPageTitle
 }
 
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@cgtReferenceKeyHtml = {
+    @govukInput(Input(
+        id = cgtReferenceKey,
+        name = cgtReferenceKey,
+        inputType = cgtReferenceKey,
+        label = Label(
+        content = HtmlContent(messages(s"$cgtReferenceKey.helpText")),
+        ),
+        errorMessage = if(hasErrors){Some(ErrorMessage(Some(form.error(cgtReferenceKey) match { case Some(message) => (message.message) case None => ""})))} else None,
+        classes = "govuk-!-width-one-third",
+        spellcheck = Some(false),
+        value = form(cgtReferenceKey).value,
+    ))
+}
+
+@ninoKeyHtml = {
+    @govukInput(Input(
+        id = ninoKey,
+        name = ninoKey,
+        inputType = ninoKey,
+        label = Label(
+        content = HtmlContent(messages(s"$ninoKey.helpText")),
+        ),
+        errorMessage = if(hasErrors){Some(ErrorMessage(Some(form.error(ninoKey) match { case Some(message) => (message.message) case None => ""})))} else None,
+        classes = "govuk-!-width-one-third",
+        spellcheck = Some(false),
+        value = form(ninoKey).value
+    ))
+}
+
+@sautrKeyHtml = {
+    @govukInput(Input(
+    id = sautrKey,
+    name = sautrKey,
+    inputType = sautrKey,
+    label = Label(
+    content = HtmlContent(messages(s"$sautrKey.helpText")),
+    ),
+    errorMessage = if(hasErrors){Some(ErrorMessage(Some(form.error(sautrKey) match { case Some(message) => (message.message) case None => ""})))} else None,
+    classes = "govuk-!-width-one-third",
+    spellcheck = Some(false),
+    value = form(sautrKey).value
+    ))
+}
+
+@layout(pageTitle = title) {
 
     @backLinkComponent(backLink)
 
@@ -120,21 +107,51 @@
     }
 
     @caption(messages("representee.caption"))
-
     @formWrapper(routes.RepresenteeController.enterIdSubmit(), 'novalidate -> "novalidate") {
-        @radioGroupConditional(
-            fieldId = key,
-            label = pageHeading(title),
-            selected = selectedIndex,
-            error = form.error(key),
-            options = options,
-            helpText = Some(Html(messages(s"$key.helpText")))
-        )
 
-        @submitButton(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+    @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+            legend = Some(Legend(
+            content = Text(title),
+            classes = "govuk-fieldset__legend--xl",
+            isPageHeading = true
+            ))
+            )),
+            errorMessage = form.error(key) match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey.toString))) case _ => None},
+
+            hint = Some(Hint(
+                content = Text(messages("representeeReferenceIdType.helpText"))
+            )),
+            idPrefix = Some("contact"),
+            name = "representeeReferenceIdType",
+            items = Seq(
+                RadioItem(
+                content = Text(messages(s"$cgtReferenceKey.label")),
+                value = Some("0"),
+                conditionalHtml = Some(cgtReferenceKeyHtml),
+                checked = form("representeeReferenceIdType").value.contains("0")
+                ),
+                RadioItem(
+                content = Text(messages(s"$ninoKey.label")),
+                value = Some("1"),
+                conditionalHtml = Some(ninoKeyHtml),
+                checked = form("representeeReferenceIdType").value.contains("1")
+                ),
+                RadioItem(
+                content = Text(messages(s"$sautrKey.label")),
+                value = Some("2"),
+                conditionalHtml = Some(sautrKeyHtml),
+                checked = form("representeeReferenceIdType").value.contains("2")
+                ),
+                RadioItem(
+                content = Text(messages(s"$key.noReferenceId.label")),
+                value = Some("3"),
+                checked = form("representeeReferenceIdType").value.contains("3"),
+                conditionalHtml = None),
+
+            )))
+        @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
     }
 
-
     @returnToSummaryLink(displayReturnToSummaryLink)
-
 }
