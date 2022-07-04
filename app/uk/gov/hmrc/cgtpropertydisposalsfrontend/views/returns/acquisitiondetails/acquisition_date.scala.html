@@ -72,7 +72,7 @@
 @title = @{messages(s"$key$userKey$assetTypeKey.title")}
 @errorKey = @{List(s"acquisitionDate-day", s"acquisitionDate-month", s"acquisitionDate-year", "acquisitionDate").map(form.error).find(_.isDefined).flatten}
 
-@layout(pageTitle = title) {
+@layout(pageTitle = title, isWelshTranslationAvailable = true, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 

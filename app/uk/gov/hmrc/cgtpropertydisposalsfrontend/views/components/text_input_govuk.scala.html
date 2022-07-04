@@ -42,9 +42,9 @@
 
 @classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
 @inputClasses = @{if(hasErrors) {
-  classBuilder(Some("form-control"), Some("form-control-error"), inputClass)
+  classBuilder(Some("govuk-input"), Some("govuk-input--error"), inputClass)
 } else {
-  classBuilder(Some("form-control"), inputClass)
+  classBuilder(Some("govuk-input"), inputClass)
 }}
 
 @hintTextKey = @{s"${{fieldId}}-govuk-hint"}

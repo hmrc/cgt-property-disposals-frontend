@@ -79,7 +79,7 @@
   case _ => (messages(s"${key}NotBought$userKey$assetTypeKey.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages(s"${key}NotBought$userKey.helpText")), s"acquisitionPriceNotBought$userKey$assetTypeKey")
 }}
 
-@layout(pageTitle = titleWithHelpTextAndContext._1) {
+@layout(pageTitle = titleWithHelpTextAndContext._1, isWelshTranslationAvailable = true, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 

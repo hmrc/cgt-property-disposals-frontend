@@ -44,11 +44,11 @@
 
 @classBuilder(s: Option[String]*) = @{s.toList.collect{case Some(s) => s}.mkString(" ")}
 
-@classes = @{if(hasErrors) "form-group form-group-error govuk-body" else "form-group govuk-body" }
+@classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error govuk-body" else "govuk-form-group govuk-body" }
 @inputClasses = @{if(hasErrors) {
-  classBuilder(Some("form-control"), Some("form-control-error"), Some("govuk-body"))
+  classBuilder( Some("govuk-input--error"), Some("govuk-input govuk-input--width-5"))
 } else {
-  classBuilder(Some("form-control"), Some("govuk-body"))
+  classBuilder(Some("govuk-input govuk-input--width-5"))
 }}
 
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
@@ -58,7 +58,7 @@
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
 @errorIdWithError = @{formError.map(errorId -> _)}
-@labelClasses = @{classBuilder(Some("form-label"), labelClass)}
+@labelClasses = @{classBuilder(Some("form-label"), Some("govuk-label"), labelClass)}
 
 @describedByKeys = @{
   List(Some(assistiveKey), hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
@@ -66,7 +66,7 @@
 @fieldLabel = {
   @if(labelAsHeading) {
     <h1 class="govuk-label-wrapper">
-      <label for="@{fieldId}" class="heading-xlarge">@{label}</label>
+      <label for="@{fieldId}" class="govuk-label govuk-label--xl">@{label}</label>
     </h1>
   } else {
     <label for="@{fieldId}" class="@{labelClasses}">@{label}</label>
@@ -81,18 +81,21 @@
     </div>
   }
   @hintIdWithHintText.map { case (id, text) =>
-    <span id="@id" class="form-hint">
+    <span id="@id" class="govuk-hint">
       @text
     </span>
   }
 
-  <div id="@assistiveKey" class="visuallyhidden">
+  <div id="@assistiveKey" class="govuk-visually-hidden">
     @assistiveText
   </div>
   @errorIdWithError.map { case (id, error) =>
     @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${error.message}", error.args: _*))
   }
-  <div class="hmcts-currency-input custom-input-wrapper @inputClass @aspect">
+  <div class="govuk-input__wrapper @inputClass @aspect">
+      <div class="govuk-input__prefix @aspect@if(hasErrors){ form-control--error}" aria-hidden="true">
+          @unit
+      </div>
     <input
       value="@value"
       autocomplete="@autoComplete.value"
@@ -102,9 +105,6 @@
       type="text"
       inputmode="decimal"
       @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <div class="hmcts-currency-input__symbol @aspect@if(hasErrors){ form-control--error}" aria-hidden="true">
-    @unit
-    </div>
   </div>
 
 </div>

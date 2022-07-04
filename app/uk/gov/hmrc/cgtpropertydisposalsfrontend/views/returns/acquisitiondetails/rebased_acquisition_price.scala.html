@@ -77,7 +77,7 @@
 @title = @{messages(s"$key$assetTypeKey.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@layout(pageTitle = title) {
+@layout(pageTitle = title, isWelshTranslationAvailable = true, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 

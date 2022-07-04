@@ -76,12 +76,13 @@
 
     <div class="govuk-radios govuk-radios--conditional" data-module="govuk-radios">
         @options.zipWithIndex.map{ case (option, index) =>
-          <div class="govuk-radios__item" @if(option.content.nonEmpty){ data-target="@{fieldId}-@{index}-content" }>
+          <div class="govuk-radios__item">
             <input id="@{fieldId}-@{index}"
               name="@fieldId"
               class="govuk-radios__input"
               value="@index"
               type="radio"
+              @if(option.content.nonEmpty) {data-aria-controls="@{fieldId}-@{index}-content"}
               @if(selected.contains(index)) { checked="checked" }
               />
             <label class="govuk-label govuk-radios__label" for="@{fieldId}-@{index}">
@@ -90,8 +91,8 @@
 
             @option.optionHelpText.map(helpText => Html(s"""<span class="govuk-hint govuk-radios__hint">$helpText</span>"""))
 
-          </div>
           @option.content.map(content => Html(s"""<div id="${fieldId}-${index}-content" class="govuk-radios__conditional govuk-radios__conditional--hidden" aria-hidden="true">$content</div>"""))
+          </div>
         }
     </div>
 
