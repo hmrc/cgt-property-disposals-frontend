@@ -72,14 +72,7 @@
     } else messages(s"$key$userKey.title")
 }
 
-@selectedIndex = @{
-  form.data.get(key).map({
-    case "0" => 0
-    case "1" => 1
-    case "2" => 2
-    case _ => 3
-  })
-}
+
 
 @options = @{
     List(
@@ -116,10 +109,8 @@
         @radioGroupConditional(
             fieldId = key,
             options = options,
-            selected = selectedIndex,
             label = pageHeading(title, Some(messages("triage.caption"))),
             error = form.error(key),
-            customErrorKey = Some(s"$key$userKey")
         )
 
         @submitButton(messages(if (isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
