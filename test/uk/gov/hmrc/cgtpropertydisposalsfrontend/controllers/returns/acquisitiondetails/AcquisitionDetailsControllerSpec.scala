@@ -3688,7 +3688,7 @@ class AcquisitionDetailsControllerSpec
                     .acquisitionFeesSubmit()
                     .url
                   doc
-                    .select("#acquisitionFees-form-hint")
+                    .select("#acquisitionFees-govuk-hint")
                     .text()                          shouldBe messageFromMessageKey(s"$key$userKey.helpText")
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
                 }
@@ -3950,7 +3950,7 @@ class AcquisitionDetailsControllerSpec
                     .acquisitionFeesSubmit()
                     .url
                   doc
-                    .select("#acquisitionFees-form-hint")
+                    .select("#acquisitionFees-govuk-hint")
                     .text()                          shouldBe messageFromMessageKey("acquisitionFees.personalRepInPeriodOfAdmin.helpText")
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
                 }

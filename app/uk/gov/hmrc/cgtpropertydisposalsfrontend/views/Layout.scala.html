@@ -8,6 +8,8 @@
 @import play.api.i18n.Messages
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import controllers.routes
+@import cats.instances.string._
+@import cats.syntax.eq._
 
 @this(
         appConfig: ViewConfig,
@@ -18,7 +20,8 @@
 @(pageTitle: String,
         withSignOutLink: Boolean = false,
         isWelshTranslationAvailable: Boolean = false,
-        backLinkUrl: Option[String] = None
+        backLinkUrl: Option[String] = None,
+        hasErrors: Boolean = false
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @content = {
@@ -31,9 +34,13 @@
     <link rel="stylesheet" href='@routes.Assets.at("stylesheets/cgtpd-ui-upgrade.css")'/>
 }
 
+@serviceNameAndHeading = @{if(pageTitle === messages("service.title")) pageTitle else pageTitle + " - " + messages("service.title")}
+@govTitle = @{serviceNameAndHeading + " - GOV.UK"}
+@fullPageTitle = @{if(hasErrors) { messages("generic.errorPrefix") + " " + govTitle } else { govTitle }}
+
 @hmrcLayout(
     backLinkUrl = backLinkUrl,
-    pageTitle = Some(pageTitle),
+    pageTitle = Some(fullPageTitle),
     userResearchBannerUrl = Some(appConfig.userRecruitmentUrl),
     accessibilityStatementUrl = Some(controllerRoutes.AccessibilityStatementController.accessibilityStatement().url),
     isWelshTranslationAvailable = isWelshTranslationAvailable,

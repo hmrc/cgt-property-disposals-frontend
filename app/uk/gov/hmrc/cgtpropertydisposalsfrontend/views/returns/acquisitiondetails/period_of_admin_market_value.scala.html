@@ -68,7 +68,7 @@
 @title = @{messages(s"$key$assetTypeKey.title", TimeUtils.govDisplayFormat(dateOfDeath.value)) }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@layout(pageTitle = title) {
+@layout(pageTitle = title, isWelshTranslationAvailable = true, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 

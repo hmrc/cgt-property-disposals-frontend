@@ -59,7 +59,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @showNrTrustWarning = @{isATrust && !wasAUkResident}
 
-@layout(pageTitle = title) {
+@layout(pageTitle = title, hasErrors = hasErrors) {
 
  @backLinkComponent(backLink)
 
