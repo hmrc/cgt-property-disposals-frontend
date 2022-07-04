@@ -1,45 +1,44 @@
 @*
- * Copyright 2022 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *@
+* Copyright 2022 HM Revenue & Customs
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*@
 
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
-
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Button
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.input.PrefixOrSuffix
 
 @this(
-  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-  radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-  unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    formHelper: FormWithCSRF,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+    govukButton: GovukButton,
+    govukRadios : GovukRadios,
+    govukInput : GovukInput
 )
 
 @(
@@ -48,89 +47,95 @@
     isATrust: Boolean ,
     representativeType: Option[RepresentativeType],
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
     representativeType match {
-      case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
-      case Some(Capacitor) => ".capacitor"
-      case None =>
-          if (isAgent) ".agent"
-          else if (isATrust) ".trust"
-          else ""
-  }
+        case Some(PersonalRepresentative) => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+        case Some(Capacitor) => ".capacitor"
+        case None =>
+            if (isAgent) ".agent"
+            else if (isATrust) ".trust"
+            else ""
+    }
 }
-
 
 @key = @{ "shareOfProperty" }
 @percentageShareKey = @{"percentageShare"}
-@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@options = @{List(
-  RadioOption(
-    label = messages(s"returns.$key.Full"),
-    content = None,
-    optionHelpText = None
-  ),
-  RadioOption(
-    label = messages(s"returns.$key.Half"),
-    content = None,
-    optionHelpText = None
-  ),
-  RadioOption(
-    label = messages(s"returns.$key.Other"),
-    content = Some(unitInput(
-      fieldId = percentageShareKey,
-      value = form.data.getOrElse(percentageShareKey, ""),
-      formError = form.error(percentageShareKey),
-      hasErrors = form.error(percentageShareKey).nonEmpty,
-      label = Html(messages(s"$percentageShareKey$userKey.label")),
-      helpText = None,
-      autoComplete = AutoCompleteType.On,
-      inputClass = Some("small"),
-      aspect = "right",
-      unit = "%",
-      assistiveText = messages("unit-input.assistive.percent"),
-      customErrorKey = Some(s"$percentageShareKey$userKey")
-    )),
-    optionHelpText = None
-  )
+@title = @{ messages(s"$key$userKey.title") }
+
+@otherHtml = {
+    @govukInput(Input(
+        id = percentageShareKey,
+        name = percentageShareKey,
+        inputType = percentageShareKey,
+        label = Label(
+            content =  HtmlContent(messages(s"$percentageShareKey$userKey.label")),
+        ),
+        errorMessage = if(hasErrors){Some(ErrorMessage(Some(form.error(percentageShareKey) match { case Some(message) => (message.message) case None => ""})))} else None,
+        classes = "govuk-!-width-one-third",
+        spellcheck = Some(false),
+        value = form(percentageShareKey).value,
+        suffix = Some(PrefixOrSuffix(content=HtmlContent("%")))
+    ))
+}
+
+
+@items = @{List(
+    RadioItem(
+        content = Text(messages(s"returns.$key.Full")),
+        value = Some("0"),
+        conditionalHtml = None,
+        checked = form(key).value.contains("0")
+    ),
+    RadioItem(
+        content = Text(messages(s"returns.$key.Half")),
+        value = Some("1"),
+        conditionalHtml = None,
+        checked = form(key).value.contains("1")
+    ),
+    RadioItem(
+        content = Text(messages(s"returns.$key.Other")),
+        value = Some("2"),
+        conditionalHtml = Some(otherHtml),
+        checked = form(key).value.contains("2")
+    )
 )}
-  @selectedIndex = @{
-    form.data.get(key).map({
-      case "0" => 0
-      case "1" => 1
-      case _ => 2
-    })
-  }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
 
-    @backLinkComponent(backLink)
+@if(hasErrors) {
+    @errorSummary(form, None, s"$userKey")
+}
 
-    @if(hasErrors) {
-        @errorSummary(form, None, s"$userKey")
-    }
+@formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwnSubmit(), 'novalidate -> "novalidate") {
+<fieldset class="govuk-fieldset" id="@key">
+<legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+    @pageHeading("", Some(messages("returns.disposal-details.caption")))
+</legend>
+    @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text(title),
+                classes = "govuk-fieldset__legend--xl",
+                isPageHeading = true
+            ))
+        )),
+        errorMessage = form.error(key) match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey.toString))) case _ => None},
+        hint = None,
+        idPrefix = None,
+        name = s"$key",
+        items = items
+    ))
 
-    @caption(messages("returns.disposal-details.caption"))
+    @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
+</fieldset>
+}
 
-    @formWrapper(controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwnSubmit(), 'novalidate -> "novalidate") {
-
-      @radioGroupConditional(
-        fieldId = key,
-        label = pageHeading(title),
-        selected = selectedIndex,
-        error = form.error(key),
-        options = options,
-        customErrorKey = Some(s"$key$userKey")
-      )
-
-      @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
-    }
-
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+@returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }
