@@ -136,6 +136,73 @@
     id = line3Key,
     name = line3Key,
     label = Label(
+      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line3.label"))
+    ),
+    errorMessage = errorMessageCheck(line3Key),
+    autocomplete = Some(AutoCompleteType.AddressLevel2.value),
+    classes = "govuk-input govuk-!-width-two-thirds"
+  ))
+
+  @govukInput(Input(
+    id = line4Key,
+    name = line4Key,
+    label = Label(
+      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line4.label"))
+    ),
+    errorMessage = errorMessageCheck(line4Key),
+    autocomplete = Some(AutoCompleteType.AddressLevel1.value),
+    classes = "govuk-input govuk-!-width-two-thirds"
+  ))
+
+  @govukInput(Input(
+    id = postcodeKey,
+    name = postcodeKey,
+    label = Label(
+      content = HtmlContent(messages(s"$key.postcode.label"))
+    ),
+    errorMessage = errorMessageCheck(postcodeKey),
+    autocomplete = Some(AutoCompleteType.Postcode.value),
+    classes = "govuk-input govuk-!-width-one-third"
+  ))
+}
+
+
+
+@errorMessageCheck(fieldId:String) = @{
+  form.error(fieldId).map(e => e.message) match{
+    case Some(message) => Some(ErrorMessage(content = Text(messages(s"$fieldId.$message"))))
+    case None => None
+  }
+}
+
+
+@html = {
+  @govukInput(Input(
+    id = line1Key,
+    name = line1Key,
+    label = Label(
+      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line1.label"))
+    ),
+    errorMessage = errorMessageCheck(line1Key),
+    autocomplete = Some(AutoCompleteType.AddressLine1.value),
+    classes = "govuk-input govuk-!-width-three-thirds"
+  ))
+
+  @govukInput(Input(
+    id = line2Key,
+    name = line2Key,
+    label = Label(
+      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line2.label"))
+    ),
+    errorMessage = errorMessageCheck(line2Key),
+    autocomplete = Some(AutoCompleteType.AddressLine2.value),
+    classes = "govuk-input govuk-!-width-three-thirds"
+  ))
+
+  @govukInput(Input(
+    id = line3Key,
+    name = line3Key,
+    label = Label(
       content = HtmlContent(messages(s"${key}.uk.line3.label"))
     ),
     errorMessage = errorMessageCheck(line3Key),
@@ -193,12 +260,10 @@ classes = "govuk-!-width-two-thirds"
   }
 
   @formWrapper(submit, 'novalidate -> "novalidate") {
-<fieldset class="govuk-fieldset" id="@key">
     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-        @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())), helpText)
+      @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())), helpText)
     </legend>
     @html
-</fieldset>
     @if(showFindAddressLink) {
       <p class="govuk-body"><a class="govuk-link" href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
     }
