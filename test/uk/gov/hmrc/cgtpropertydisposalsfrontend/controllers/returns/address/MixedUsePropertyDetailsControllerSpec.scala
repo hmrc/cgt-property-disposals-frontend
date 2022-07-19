@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
-import java.time.LocalDate
-
 import cats.Eq
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
@@ -32,23 +30,23 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorSc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SingleMixedUseDetailsAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SingleMixedUseDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -61,6 +59,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, Time
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
+import java.time.LocalDate
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 class MixedUsePropertyDetailsControllerSpec
@@ -243,7 +243,7 @@ class MixedUsePropertyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             { doc =>
               doc
-                .select("#content > article > span")
+                .select(".govuk-caption-xl")
                 .text() shouldBe messageFromMessageKey(
                 "singleMixedUse.caption"
               )
@@ -348,22 +348,18 @@ class MixedUsePropertyDetailsControllerSpec
             result,
             messageFromMessageKey(expectedTitleKey),
             { doc =>
+              val labels = doc.select(".govuk-label").iterator().asScala.toList
+              labels.map(_.text()) shouldBe List(
+                messageFromMessageKey("address.uk.line1.label"),
+                messageFromMessageKey("address.uk.line2.label"),
+                messageFromMessageKey("address.uk.line3.label"),
+                messageFromMessageKey("address.uk.line4.label"),
+                messageFromMessageKey("address.postcode.label")
+              )
               doc
-                .select("#address > legend > h1 > span")
-                .text() shouldBe messageFromMessageKey(
+                .select(".govuk-caption-xl")
+                .text()            shouldBe messageFromMessageKey(
                 "singleMixedUse.caption"
-              )
-
-              doc
-                .select("#address > div:nth-child(2) > label")
-                .text() shouldBe messageFromMessageKey(
-                "address.uk.line1.label"
-              )
-
-              doc
-                .select("#address > div:nth-child(3) > label")
-                .text() shouldBe messageFromMessageKey(
-                "address.uk.line2.label"
               )
 
               doc
@@ -810,7 +806,7 @@ class MixedUsePropertyDetailsControllerSpec
             { doc =>
               doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > span")
+                .select(".govuk-caption-xl")
                 .text()                                          shouldBe messageFromMessageKey(
                 "singleMixedUse.caption"
               )
@@ -1219,7 +1215,7 @@ class MixedUsePropertyDetailsControllerSpec
             { doc =>
               doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
               doc
-                .select("#content > article > span")
+                .select(".govuk-caption-xl")
                 .text()                                          shouldBe messageFromMessageKey(
                 "singleMixedUse.caption"
               )
