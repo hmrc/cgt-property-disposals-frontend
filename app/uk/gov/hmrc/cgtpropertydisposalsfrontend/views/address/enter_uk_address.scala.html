@@ -17,7 +17,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -26,16 +25,17 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
   layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
   pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-  textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input_govuk,
   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
-  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+  govukInput : GovukInput
 )
 
 @(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType, isATrust: Boolean, representativeType: Option[RepresentativeType], isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages)
@@ -100,6 +100,73 @@
   case _ => messages(s"$key.uk.title")
 }}
 
+
+@errorMessageCheck(fieldId:String) = @{
+  form.error(fieldId).map(e => e.message) match{
+    case Some(message) => Some(ErrorMessage(content = Text(messages(s"$fieldId.$message"))))
+    case None => None
+  }
+}
+
+
+@html = {
+  @govukInput(Input(
+    id = line1Key,
+    name = line1Key,
+    label = Label(
+      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line1.label"))
+    ),
+    errorMessage = errorMessageCheck(line1Key),
+    autocomplete = Some(AutoCompleteType.AddressLine1.value),
+    classes = "govuk-input govuk-!-width-three-thirds"
+  ))
+
+  @govukInput(Input(
+    id = line2Key,
+    name = line2Key,
+    label = Label(
+      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line2.label"))
+    ),
+    errorMessage = errorMessageCheck(line2Key),
+    autocomplete = Some(AutoCompleteType.AddressLine2.value),
+    classes = "govuk-input govuk-!-width-three-thirds"
+  ))
+
+  @govukInput(Input(
+    id = line3Key,
+    name = line3Key,
+    label = Label(
+      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line3.label"))
+    ),
+    errorMessage = errorMessageCheck(line3Key),
+    autocomplete = Some(AutoCompleteType.AddressLevel2.value),
+    classes = "govuk-input govuk-!-width-two-thirds"
+  ))
+
+  @govukInput(Input(
+    id = line4Key,
+    name = line4Key,
+    label = Label(
+      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line4.label"))
+    ),
+    errorMessage = errorMessageCheck(line4Key),
+    autocomplete = Some(AutoCompleteType.AddressLevel1.value),
+    classes = "govuk-input govuk-!-width-two-thirds"
+  ))
+
+  @govukInput(Input(
+    id = postcodeKey,
+    name = postcodeKey,
+    label = Label(
+      content = HtmlContent(messages(s"$key.postcode.label"))
+    ),
+    errorMessage = errorMessageCheck(postcodeKey),
+    autocomplete = Some(AutoCompleteType.Postcode.value),
+    classes = "govuk-input govuk-!-width-one-third"
+  ))
+}
+
+
 @helpText = @{
   addressJourneyType match {
     case c: AddressJourneyType.Returns.EnteringCompanyDetails if c.draftReturn.isLeft =>
@@ -125,57 +192,10 @@
   }
 
   @formWrapper(submit, 'novalidate -> "novalidate") {
-    <fieldset class="govuk-fieldset" id="@key">
-      <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-        @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())), helpText)
-      </legend>
-      @textInput(
-        fieldId = line1Key,
-        label = Html(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line1.label")),
-        errorKey = form.error(line1Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-        value = form.data.getOrElse(line1Key, ""),
-        hasErrors = form.error(line1Key).nonEmpty,
-        inputClass = Some("govuk-input govuk-!-width-three-thirds"),
-        autoComplete = AutoCompleteType.AddressLine1
-      )
-      @textInput(
-        fieldId = line2Key,
-        label = Html(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line2.label")),
-        errorKey = form.error(line2Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-        value = form.data.getOrElse(line2Key, ""),
-        hasErrors = form.error(line2Key).nonEmpty,
-        inputClass = Some("govuk-input govuk-!-width-three-thirds"),
-        autoComplete = AutoCompleteType.AddressLine2
-      )
-      @textInput(
-        fieldId = line3Key,
-        label = Html(messages(s"$key.uk.line3.label")),
-        errorKey = form.error(line3Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-        value = form.data.getOrElse(line3Key, ""),
-        hasErrors = form.error(line3Key).nonEmpty,
-        inputClass = Some("govuk-input govuk-!-width-two-thirds"),
-        autoComplete = AutoCompleteType.AddressLevel2
-      )
-      @textInput(
-        fieldId = line4Key,
-        label = Html(messages(s"$key.uk.line4.label")),
-        errorKey = form.error(line4Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-        value = form.data.getOrElse(line4Key, ""),
-        hasErrors = form.error(line4Key).nonEmpty,
-        inputClass = Some("govuk-input govuk-!-width-two-thirds"),
-        autoComplete = AutoCompleteType.AddressLevel1
-      )
-      @textInput(
-        fieldId = postcodeKey,
-        label = Html(messages(s"$key.postcode.label")),
-        errorKey = form.error(postcodeKey).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-        value = form.data.getOrElse(postcodeKey, ""),
-        hasErrors = form.error(postcodeKey).nonEmpty,
-        inputClass = Some("govuk-input govuk-!-width-one-third"),
-        autoComplete = AutoCompleteType.Postcode
-      )
-    </fieldset>
-
+    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+      @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())), helpText)
+    </legend>
+    @html
     @if(showFindAddressLink) {
       <p class="govuk-body"><a class="govuk-link" href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
     }
