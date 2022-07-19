@@ -42,6 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnC
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{exemptionandlosses => pages}
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -64,6 +65,7 @@ class ExemptionAndLossesController @Inject() (
   checkYourAnswersPage: pages.check_your_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
+    with WithDefaultFormBinding
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates

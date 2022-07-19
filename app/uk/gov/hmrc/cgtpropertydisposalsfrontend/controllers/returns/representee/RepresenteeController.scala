@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
@@ -52,6 +51,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -77,6 +77,7 @@ class RepresenteeController @Inject() (
   isFirstReturnPage: representeePages.is_first_return
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
+    with WithDefaultFormBinding
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {

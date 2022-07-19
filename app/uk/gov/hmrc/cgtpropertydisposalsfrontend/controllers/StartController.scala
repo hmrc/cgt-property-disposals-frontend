@@ -48,6 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -72,6 +73,7 @@ class StartController @Inject() (
   agentNoEnrolmentPage: views.html.agent_no_enrolment
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
+    with WithDefaultFormBinding
     with WithAuthRetrievalsAndSessionDataAction
     with WithAuthAndSessionDataAction
     with Logging

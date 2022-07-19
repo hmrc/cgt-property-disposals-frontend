@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.uuid._
@@ -41,12 +40,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EmailController[T <: EmailJourneyType] {
-  this: FrontendController with WithAuthAndSessionDataAction with Logging with SessionUpdates =>
+  this: FrontendController
+    with WithAuthAndSessionDataAction
+    with Logging
+    with SessionUpdates
+    with WithDefaultFormBinding =>
 
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext

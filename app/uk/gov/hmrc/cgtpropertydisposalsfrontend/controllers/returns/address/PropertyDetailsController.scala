@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.order._
@@ -47,6 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -79,6 +79,7 @@ class PropertyDetailsController @Inject() (
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
+    with WithDefaultFormBinding
     with Logging
     with SessionUpdates
     with AddressController[FillingOutReturnAddressJourney]

@@ -35,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.SubscriptionReadyAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -58,6 +59,7 @@ class SubscriptionAddressController @Inject() (
     extends FrontendController(cc)
     with Logging
     with WithAuthAndSessionDataAction
+    with WithDefaultFormBinding
     with SessionUpdates
     with AddressController[SubscriptionReadyAddressJourney] {
 

@@ -27,12 +27,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait ContactNameController[J <: JourneyStatus] {
-  this: FrontendController with WithAuthAndSessionDataAction with SessionUpdates with Logging =>
+  this: FrontendController
+    with WithAuthAndSessionDataAction
+    with WithDefaultFormBinding
+    with SessionUpdates
+    with Logging =>
 
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext

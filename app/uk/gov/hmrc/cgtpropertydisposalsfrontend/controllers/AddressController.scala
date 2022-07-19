@@ -36,12 +36,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{EnteringCompanyDetails, EnteringSingleMixedUsePropertyDetails, FillingOutReturnAddressJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.{ManagingSubscription, Onboarding}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AddressController[A <: AddressJourneyType] {
-  this: FrontendController with Logging with WithAuthAndSessionDataAction with SessionUpdates =>
+  this: FrontendController
+    with Logging
+    with WithAuthAndSessionDataAction
+    with WithDefaultFormBinding
+    with SessionUpdates =>
 
   val errorHandler: ErrorHandler
   val ukAddressLookupService: UKAddressLookupService

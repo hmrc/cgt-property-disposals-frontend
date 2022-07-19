@@ -7,7 +7,7 @@ resolvers += Resolver.jcenterRepo
 
 addSbtPlugin("uk.gov.hmrc"               % "sbt-auto-build"     % "3.4.0")
 addSbtPlugin("uk.gov.hmrc"               % "sbt-distributables" % "2.1.0")
-addSbtPlugin("com.typesafe.play"         % "sbt-plugin"         % "2.8.8")
+addSbtPlugin("com.typesafe.play"         % "sbt-plugin"         % "2.8.16")
 addSbtPlugin("org.wartremover"           % "sbt-wartremover"    % "2.4.12")
 addSbtPlugin("org.scalameta"             % "sbt-scalafmt"       % "2.4.0")
 addSbtPlugin("org.scoverage"             % "sbt-scoverage"      % "1.8.0")

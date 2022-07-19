@@ -35,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.Subscription
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -51,6 +52,7 @@ class SubscribedChangeContactNameController @Inject() (
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
+    with WithDefaultFormBinding
     with SessionUpdates
     with Logging
     with ContactNameController[Subscribed] {

@@ -45,6 +45,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -71,6 +72,7 @@ class CompanyDetailsController @Inject() (
   checkYourAnswersPage: views.html.returns.address.single_indirect_disposal_check_your_answers
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
+    with WithDefaultFormBinding
     with Logging
     with WithAuthAndSessionDataAction
     with SessionUpdates
