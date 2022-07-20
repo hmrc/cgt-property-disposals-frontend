@@ -17,7 +17,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupRequest
@@ -31,7 +30,6 @@
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input_govuk,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
@@ -81,35 +79,43 @@
  case _ => messages("enterPostcode.title")
 }}
 
-@journeyErrorKey = @{
-  addressJourneyType match {
-    case _: AddressJourneyType.Returns.EnteringCompanyDetails => ".companyDetails."
-    case _ => ""
+@errorMessageCheck(fieldId:String) = @{
+  form.error(fieldId).map(e => e.message) match{
+    case Some(message) => Some(ErrorMessage(content = Text(messages(s"$fieldId.$message"))))
+    case None => None
   }
 }
 
 @html = {
 
   @govukInput(Input(
-    id = "event-name",
-    name = "event-name",
+    id = postcodeFilterKey,
+    name = postcodeFilterKey,
     label = Label(
-      content = HtmlContent(messages(s"$key${journeyErrorKey.stripSuffix(".")}.postcode.label"))
-    )
+      content = HtmlContent(messages("address.postcodeFilter.label"))
+    ),
+    hint = Some(Hint(
+      content = Text(messages("address.postcodeFilter.helpText"))
+    )),
+    errorMessage = errorMessageCheck(postcodeFilterKey),
+    value = Some(form.data.getOrElse(postcodeFilterKey, "")),
+    classes = "govuk-input govuk-!-width-two-thirds",
+    autocomplete =  Some(AutoCompleteType.Postcode.value)
   ))
 
   @govukInput(Input(
-    id = postcodeFilterKey,
+    id = key,
+    name = key,
     label = Label(
-      content = HtmlContent(messages(s"$key${journeyErrorKey.stripSuffix(".")}.postcode.label"))
-    )
-    hint = Some(Hint = (
-      content = Html(messages("address.postcodeFilter.helpText"))
+      content = HtmlContent(messages(s"address.postcode.label"))
+    ),
+    hint = Some(Hint(
+      content = Text(messages("address.postcode.helpText"))
     )),
-    errorMessage = form.error(postcodeFilterKey).map(e => e.message),
-    value = Some(form.data.getOrElse(postcodeFilterKey, "")),
-    classes = Some("govuk-input govuk-!-width-two-thirds"),
-    autocomplete = AutoCompleteType.On
+    errorMessage = errorMessageCheck(key),
+    value = Some(form.data.getOrElse(key, "")),
+    classes = "govuk-input govuk-!-width-two-thirds",
+    autocomplete =  Some(AutoCompleteType.Postcode.value)
   ))
 
 }
@@ -126,32 +132,13 @@
 
  @caption(messages(addressJourneyType.captionMessageKey()))
  @pageHeading(title, None)
-
+<br>
+<br>
  @formWrapper(submit, 'novalidate -> "novalidate") {
-   @textInput(
-    fieldId = postcodeFilterKey,
-    label = Html(messages("address.postcodeFilter.label")),
-    helpText = Some(Html(messages("address.postcodeFilter.helpText"))),
-    errorKey = form.error(postcodeFilterKey).map(e => e.message),
-    value = form.data.getOrElse(postcodeFilterKey, ""),
-    hasErrors = form.error(postcodeFilterKey).nonEmpty,
-    inputClass = Some("govuk-input govuk-!-width-two-thirds"),
-    autoComplete = AutoCompleteType.On
-   )
-   @textInput(
-    fieldId = key,
-    label = Html(messages("address.postcode.label")),
-    helpText = Some(Html(messages("address.postcode.helpText"))),
-    errorKey = form.error(key).map(e => e.message),
-    value = form.data.getOrElse(key, ""),
-    hasErrors = form.error(key).nonEmpty,
-    inputClass = Some("govuk-input govuk-!-width-one-third"),
-    autoComplete = AutoCompleteType.Postcode
-   )
-
-   <p class="govuk-body">
+    @html
+    <p class="govuk-body">
        <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
-   </p>
+    </p>
 
    @submitButton(messages("button.findAddress"))
  }
