@@ -40,17 +40,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EmailController[T <: EmailJourneyType] {
-  this: FrontendController
-    with WithAuthAndSessionDataAction
-    with Logging
-    with SessionUpdates
-    with WithDefaultFormBinding =>
+  this: FrontendController with WithAuthAndSessionDataAction with Logging with SessionUpdates =>
 
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext

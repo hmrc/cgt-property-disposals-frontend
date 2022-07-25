@@ -200,7 +200,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.doYouWantToReportForATrustSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -524,7 +524,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.doYouHaveATrnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -954,7 +954,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterTrnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())

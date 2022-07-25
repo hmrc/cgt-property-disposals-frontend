@@ -90,7 +90,7 @@ class SubscriptionAddressControllerSpec
     "handling requests to submit the is UK page" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.isUkSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -128,7 +128,7 @@ class SubscriptionAddressControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -154,7 +154,7 @@ class SubscriptionAddressControllerSpec
     "handling requests to submit the enter non UK address page" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterNonUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -180,7 +180,7 @@ class SubscriptionAddressControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -225,7 +225,7 @@ class SubscriptionAddressControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.selectAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))

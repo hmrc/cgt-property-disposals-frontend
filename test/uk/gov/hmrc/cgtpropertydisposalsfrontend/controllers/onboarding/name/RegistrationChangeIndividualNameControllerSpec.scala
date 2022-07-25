@@ -71,7 +71,7 @@ class RegistrationChangeIndividualNameControllerSpec
       behave like enterNameSubmit(
         data =>
           controller.enterIndividualNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
           ),
         controllers.onboarding.routes.RegistrationController.checkYourAnswers()
       )

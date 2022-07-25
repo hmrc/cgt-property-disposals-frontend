@@ -47,7 +47,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{triage => tr
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{amend => amendPages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -77,7 +76,6 @@ class CommonTriageQuestionsController @Inject() (
   exchangeDateIncompatibleTaxyears: triagePages.exchangedate_incompatible_taxyears
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
-    with WithDefaultFormBinding
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates

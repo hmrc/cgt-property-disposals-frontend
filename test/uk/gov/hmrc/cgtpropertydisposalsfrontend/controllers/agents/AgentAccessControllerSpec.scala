@@ -259,7 +259,7 @@ class AgentAccessControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsCgtRefSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -614,7 +614,7 @@ class AgentAccessControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -998,7 +998,7 @@ class AgentAccessControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsCountrySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(

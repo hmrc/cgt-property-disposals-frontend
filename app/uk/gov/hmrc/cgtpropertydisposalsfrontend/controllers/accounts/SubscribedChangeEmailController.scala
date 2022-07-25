@@ -39,7 +39,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -62,7 +61,6 @@ class SubscribedChangeEmailController @Inject() (
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
-    with WithDefaultFormBinding
     with SessionUpdates
     with EmailController[ChangingAccountEmail] {
 

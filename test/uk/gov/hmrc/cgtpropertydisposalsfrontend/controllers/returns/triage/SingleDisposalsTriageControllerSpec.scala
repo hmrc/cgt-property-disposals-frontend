@@ -382,7 +382,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howDidYouDisposeOfPropertySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -845,7 +845,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1368,7 +1368,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.didYouDisposeOfAResidentialPropertySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       val requiredPreviousAnswers =
@@ -2064,7 +2064,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasDisposalDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def formData(date: LocalDate) =
@@ -2773,7 +2773,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasCompletionDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def formData(date: LocalDate) =
@@ -3379,7 +3379,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.countryOfResidenceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -3879,7 +3879,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.assetTypeForNonUkResidentsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -4529,7 +4529,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateOfSharesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def formData(date: LocalDate) =

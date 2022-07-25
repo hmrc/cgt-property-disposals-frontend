@@ -640,7 +640,7 @@ class ExemptionAndLossesControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.inYearLossesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1217,7 +1217,7 @@ class ExemptionAndLossesControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.previousYearsLossesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1916,7 +1916,7 @@ class ExemptionAndLossesControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.annualExemptAmountSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       val maximumAnnualExemptAmount = AmountInPence(10000L)

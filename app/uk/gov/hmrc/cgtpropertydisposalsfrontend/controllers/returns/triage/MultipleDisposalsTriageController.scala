@@ -55,7 +55,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{dispo
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -84,7 +83,6 @@ class MultipleDisposalsTriageController @Inject() (
   checkYourAnswersPage: triagePages.check_you_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
-    with WithDefaultFormBinding
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates

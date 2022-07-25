@@ -504,7 +504,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.acquisitionMethodSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1129,7 +1129,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.acquisitionDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def formData(date: LocalDate): List[(String, String)] =
@@ -1591,7 +1591,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.periodOfAdminMarketValueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       val dateOfDeath = DateOfDeath(LocalDate.ofEpochDay(0L))
@@ -1996,7 +1996,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.acquisitionPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2643,7 +2643,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.rebasedAcquisitionPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       val acquisitionDate = AcquisitionDate(ukResidents.minusDays(1))
@@ -3281,7 +3281,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.improvementCostsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       val acquisitionDate = AcquisitionDate(LocalDate.ofEpochDay(0L))
@@ -3972,7 +3972,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.acquisitionFeesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -4377,7 +4377,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.shouldUseRebaseSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(

@@ -39,7 +39,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnC
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -57,7 +56,6 @@ class GainOrLossAfterReliefsController @Inject() (
   checkYourAnswersPage: views.html.returns.gainorlossafterreliefs.check_your_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
-    with WithDefaultFormBinding
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging

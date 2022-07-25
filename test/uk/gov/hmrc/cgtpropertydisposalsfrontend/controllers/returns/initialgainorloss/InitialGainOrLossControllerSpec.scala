@@ -97,7 +97,7 @@ class InitialGainOrLossControllerSpec
 
     "handling requests to display the initial gain or loss page" must {
       def performAction(): Future[Result] =
-        controller.enterInitialGainOrLoss()(FakeRequest())
+        controller.enterInitialGainOrLoss()(FakeRequest().withFormUrlEncodedBody().withMethod("POST"))
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -265,7 +265,7 @@ class InitialGainOrLossControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.submitInitialGainOrLoss()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(

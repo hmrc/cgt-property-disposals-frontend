@@ -541,7 +541,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whoIsIndividualRepresentingSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -1200,7 +1200,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howManyPropertiesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -1612,7 +1612,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howManyPropertiesFurtherReturnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -3011,7 +3011,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.amendsHaveYouAlreadySentSelfAssessmentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -3289,7 +3289,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.haveYouAlreadySentSelfAssessmentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
