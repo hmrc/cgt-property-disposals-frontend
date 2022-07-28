@@ -1,18 +1,18 @@
 @*
- * Copyright 2022 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+    * Copyright 2022 HM Revenue & Customs
+    *
+    * Licensed under the Apache License, Version 2.0 (the "License");
+    * you may not use this file except in compliance with the License.
+    * You may obtain a copy of the License at
+    *
+    *     http://www.apache.org/licenses/LICENSE-2.0
+    *
+    * Unless required by applicable law or agreed to in writing, software
+    * distributed under the License is distributed on an "AS IS" BASIS,
+    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+*@
 
 @import play.api.data.Form
 @import play.api.i18n.Messages
@@ -136,18 +136,18 @@
     id = line3Key,
     name = line3Key,
     label = Label(
-      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line3.label"))
+      content = HtmlContent(messages(s"${key}.uk.line3.label"))
     ),
     errorMessage = errorMessageCheck(line3Key),
     autocomplete = Some(AutoCompleteType.AddressLevel2.value),
-    classes = "govuk-input govuk-!-width-two-thirds"
+classes = "govuk-!-width-two-thirds"
   ))
 
   @govukInput(Input(
     id = line4Key,
     name = line4Key,
     label = Label(
-      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line4.label"))
+      content = HtmlContent(messages(s"${key}.uk.line4.label"))
     ),
     errorMessage = errorMessageCheck(line4Key),
     autocomplete = Some(AutoCompleteType.AddressLevel1.value),
@@ -260,10 +260,12 @@ classes = "govuk-!-width-two-thirds"
   }
 
   @formWrapper(submit, 'novalidate -> "novalidate") {
+<fieldset class="govuk-fieldset" id="@key">
     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
       @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())), helpText)
     </legend>
     @html
+</fieldset>
     @if(showFindAddressLink) {
       <p class="govuk-body"><a class="govuk-link" href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
     }
