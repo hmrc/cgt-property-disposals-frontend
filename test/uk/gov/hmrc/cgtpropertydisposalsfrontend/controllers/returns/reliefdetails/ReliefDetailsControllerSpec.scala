@@ -323,7 +323,7 @@ class ReliefDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.privateResidentsReliefSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -800,7 +800,7 @@ class ReliefDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.lettingsReliefSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1327,7 +1327,7 @@ class ReliefDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.otherReliefsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))

@@ -181,7 +181,7 @@ class RegistrationControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.selectEntityTypeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       val sessionData =

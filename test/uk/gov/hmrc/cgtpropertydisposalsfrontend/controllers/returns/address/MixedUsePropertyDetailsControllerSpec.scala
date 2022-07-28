@@ -428,7 +428,7 @@ class MixedUsePropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -968,7 +968,7 @@ class MixedUsePropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterDisposalValueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1382,7 +1382,7 @@ class MixedUsePropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterAcquisitionValueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())

@@ -566,7 +566,7 @@ class MultipleDisposalsTriageControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.howManyDisposalsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       val key = "multipleDisposalsNumberOfProperties"
@@ -1002,7 +1002,7 @@ class MultipleDisposalsTriageControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1377,7 +1377,7 @@ class MultipleDisposalsTriageControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.wereAllPropertiesResidentialSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       val key = "multipleDisposalsWereAllPropertiesResidential"
@@ -1812,7 +1812,7 @@ class MultipleDisposalsTriageControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.whenWereContractsExchangedSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       val todayTaxYear2020 = LocalDate.of(2020, 4, 6)
@@ -2502,7 +2502,7 @@ class MultipleDisposalsTriageControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.countryOfResidenceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -2974,7 +2974,7 @@ class MultipleDisposalsTriageControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.assetTypeForNonUkResidentsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -3454,7 +3454,7 @@ class MultipleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.completionDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def formData(d: LocalDate): List[(String, String)] =
@@ -3887,7 +3887,7 @@ class MultipleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateOfSharesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def formData(d: LocalDate): List[(String, String)] =

@@ -309,7 +309,7 @@ class RepresenteeControllerSpec
       def performAction: Seq[(String, String)] => Future[Result] =
         data =>
           controller.changeContactNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
           )
 
       def formDataForContactName(
@@ -589,7 +589,7 @@ class RepresenteeControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterNameSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       val firstNameKey = "representeeFirstName"
@@ -989,7 +989,7 @@ class RepresenteeControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterDateOfDeathSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       val dayKey   = "dateOfDeath-day"
@@ -1617,7 +1617,7 @@ class RepresenteeControllerSpec
     "handling requests to submit the confirm person page" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.confirmPersonSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1750,7 +1750,7 @@ class RepresenteeControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterIdSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       val outerKey        = "representeeReferenceIdType"
@@ -3096,7 +3096,7 @@ class RepresenteeControllerSpec
     "handling submits on the is first return page" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.isFirstReturnSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.isFirstReturnSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST"))
 
       val key = "representeeIsFirstReturn"
 

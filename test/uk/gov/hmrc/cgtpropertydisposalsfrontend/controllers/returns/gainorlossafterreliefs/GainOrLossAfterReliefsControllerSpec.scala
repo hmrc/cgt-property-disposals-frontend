@@ -855,7 +855,7 @@ class GainOrLossAfterReliefsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.enterGainOrLossAfterReliefsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(

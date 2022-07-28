@@ -269,7 +269,7 @@ class SupportingEvidenceControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.doYouWantToUploadSupportingEvidenceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(

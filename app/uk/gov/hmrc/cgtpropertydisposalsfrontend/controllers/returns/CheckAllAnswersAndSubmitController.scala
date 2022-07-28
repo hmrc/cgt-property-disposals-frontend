@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import java.util.Base64
-
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}

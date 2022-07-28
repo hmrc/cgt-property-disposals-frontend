@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 
 import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
