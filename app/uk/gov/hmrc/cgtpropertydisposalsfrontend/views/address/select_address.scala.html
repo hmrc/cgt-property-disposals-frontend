@@ -128,7 +128,7 @@
         ))
 
   <p>
-   <a href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
+   <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
   </p>
 
     @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
