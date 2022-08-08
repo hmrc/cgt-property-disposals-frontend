@@ -72,7 +72,6 @@
     @govukInput(Input(
         id = percentageShareKey,
         name = percentageShareKey,
-        inputType = percentageShareKey,
         label = Label(
             content =  HtmlContent(messages(s"$percentageShareKey$userKey.label")),
         ),
@@ -113,16 +112,15 @@
 }
 
 @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwnSubmit(), 'novalidate -> "novalidate") {
-<fieldset class="govuk-fieldset" id="@key">
-<legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-    @pageHeading("", Some(messages("returns.disposal-details.caption")))
-</legend>
+
+    @pageHeading(s"$title", Some(messages("returns.disposal-details.caption")))
+
     @govukRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
                 content = Text(title),
-                classes = "govuk-fieldset__legend--xl",
-                isPageHeading = true
+                classes = "govuk-visually-hidden",
+                isPageHeading = false
             ))
         )),
         errorMessage = form.error(key) match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey.toString))) case _ => None},
@@ -133,7 +131,7 @@
     ))
 
     @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
-</fieldset>
+
 }
 
 @returnToSummaryLink(displayReturnToSummaryLink = true)
