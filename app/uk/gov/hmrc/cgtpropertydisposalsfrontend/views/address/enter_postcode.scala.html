@@ -30,13 +30,13 @@
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
     backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    govukInput : GovukInput
+    govukInput : GovukInput,
+    govukButton: GovukButton
 )
 
 @(
@@ -139,7 +139,7 @@
        <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
     </p>
 
-   @submitButton(messages("button.findAddress"))
+    @govukButton(Button(content = Text(messages("button.findAddress"))))
  }
 
   @returnToSummaryLink(addressJourneyType.showReturnToSummaryLink())
