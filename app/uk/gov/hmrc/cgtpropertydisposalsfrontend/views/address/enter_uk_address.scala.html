@@ -30,12 +30,12 @@
 @this(
   layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
   pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-  govukInput : GovukInput
+  govukInput : GovukInput,
+  govukButton: GovukButton
 )
 
 @(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType, isATrust: Boolean, representativeType: Option[RepresentativeType], isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages)
@@ -200,8 +200,7 @@ classes = "govuk-!-width-two-thirds"
     @if(showFindAddressLink) {
       <p class="govuk-body"><a class="govuk-link" href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
     }
-
-    @submitButton(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+    @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
   }
 
   @returnToSummaryLink(addressJourneyType.showReturnToSummaryLink())
