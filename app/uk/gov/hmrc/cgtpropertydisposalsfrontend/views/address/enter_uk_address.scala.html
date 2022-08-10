@@ -192,11 +192,12 @@ classes = "govuk-!-width-two-thirds"
   }
 
   @formWrapper(submit, 'novalidate -> "novalidate") {
-<div  id="@key">
-    @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())))
-    <p class="govuk-body">@helpText</p>
+<fieldset class="govuk-fieldset" id="@key">
+    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+        @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())), helpText)
+    </legend>
     @html
-</div>
+</fieldset>
     @if(showFindAddressLink) {
       <p class="govuk-body"><a class="govuk-link" href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
     }
