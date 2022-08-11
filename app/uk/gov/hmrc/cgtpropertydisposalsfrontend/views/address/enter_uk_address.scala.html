@@ -11,7 +11,7 @@
     * distributed under the License is distributed on an "AS IS" BASIS,
     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     * See the License for the specific language governing permissions and
- * limitations under the License.
+    * limitations under the License.
 *@
 
 @import play.api.data.Form
@@ -28,38 +28,38 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
-  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-  govukInput : GovukInput,
-  govukButton: GovukButton
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+    govukInput : GovukInput,
+    govukButton: GovukButton
 )
 
-@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType, isATrust: Boolean, representativeType: Option[RepresentativeType], isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType, isATrust: Boolean, representativeType: Option[RepresentativeType], isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @key = @{"address"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @userKey = @{
-  representativeType match {
-      case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent" else ".personalRep"
-      case Some(Capacitor) => ".capacitor"
-      case None =>
-          if (isAgent) ".agent"
-          else if (isATrust) ".trust"
-          else ""
-  }
+    representativeType match {
+        case Some(PersonalRepresentative) => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent" else ".personalRep"
+        case Some(Capacitor) => ".capacitor"
+        case None =>
+        if (isAgent) ".agent"
+        else if (isATrust) ".trust"
+        else ""
+    }
 }
 
 @journeyErrorKey = @{
-  addressJourneyType match {
-    case _: AddressJourneyType.Returns.EnteringCompanyDetails => ".companyDetails."
-    case _ => ""
-  }
+    addressJourneyType match {
+        case _: AddressJourneyType.Returns.EnteringCompanyDetails => ".companyDetails."
+        case _ => ""
+    }
 }
 
 @line1Key = @{s"$key-line1"}
@@ -69,209 +69,141 @@
 @postcodeKey = @{"postcode"}
 
 @title = @{ addressJourneyType match {
-  case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
-    f.draftReturn.fold(
-      _ => messages(s"$key.uk.returns.multipleDisposals.title"),
-      _ => messages(s"$key.uk.returns$userKey.singleDisposal.title")
-    )
-  case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
-    if(c.draftReturn.isLeft)
+        case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+        f.draftReturn.fold(
+        _ => messages(s"$key.uk.returns.multipleDisposals.title"),
+        _ => messages(s"$key.uk.returns$userKey.singleDisposal.title")
+        )
+        case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
+        if(c.draftReturn.isLeft)
         c.representativeType match {
-            case Some(PersonalRepresentativeInPeriodOfAdmin) =>
-                messages(s"$key.uk.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title")
-            case _ => messages(s"$key.uk.companyDetails.multipleIndirect.title")
-        }
+        case Some(PersonalRepresentativeInPeriodOfAdmin) =>
+        messages(s"$key.uk.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title")
+        case _ => messages(s"$key.uk.companyDetails.multipleIndirect.title")
+    }
     else
-        c.representativeType match {
-            case Some(PersonalRepresentative) => messages(s"$key.uk.companyDetails.personalRep.title")
-            case Some(PersonalRepresentativeInPeriodOfAdmin) => messages(s"$key.uk.companyDetails.personalRepInPeriodOfAdmin.title")
-            case Some(Capacitor) => messages(s"$key.uk.companyDetails.capacitor.title")
-            case None =>
-                if(c.isATrust)                                  messages(s"$key.uk.companyDetails.trust.title")
-                else if(isAgent)                                messages(s"$key.uk.companyDetails.agent.title")
-                else                                            messages(s"$key.uk.companyDetails.title")
-        }
+    c.representativeType match {
+        case Some(PersonalRepresentative) => messages(s"$key.uk.companyDetails.personalRep.title")
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => messages(s"$key.uk.companyDetails.personalRepInPeriodOfAdmin.title")
+        case Some(Capacitor) => messages(s"$key.uk.companyDetails.capacitor.title")
+        case None =>
+        if(c.isATrust)                                  messages(s"$key.uk.companyDetails.trust.title")
+        else if(isAgent)                                messages(s"$key.uk.companyDetails.agent.title")
+        else                                            messages(s"$key.uk.companyDetails.title")
+    }
 
-  case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
-      messages(s"$key.uk.returns$userKey.singleDisposal.title")
+case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
+messages(s"$key.uk.returns$userKey.singleDisposal.title")
 
-  case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
-    messages(s"$key.uk.representee.title")
-  case _ => messages(s"$key.uk.title")
+case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+messages(s"$key.uk.representee.title")
+case _ => messages(s"$key.uk.title")
 }}
 
 
 @errorMessageCheck(fieldId:String) = @{
-  form.error(fieldId).map(e => e.message) match{
-    case Some(message) => Some(ErrorMessage(content = Text(messages(s"$fieldId.$message"))))
-    case None => None
-  }
+    form.error(fieldId).map(e => e.message) match{
+        case Some(message) => Some(ErrorMessage(content = Text(messages(s"$fieldId.$message"))))
+        case None => None
+    }
 }
 
 
 @html = {
-  @govukInput(Input(
-    id = line1Key,
-    name = line1Key,
-    label = Label(
-      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line1.label"))
-    ),
-    errorMessage = errorMessageCheck(line1Key),
-    autocomplete = Some(AutoCompleteType.AddressLine1.value),
-    classes = "govuk-input govuk-!-width-three-thirds"
-  ))
+    @govukInput(Input(
+        id = line1Key,
+        name = line1Key,
+        label = Label(
+        content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line1.label"))
+        ),
+        errorMessage = errorMessageCheck(line1Key),
+        autocomplete = Some(AutoCompleteType.AddressLine1.value),
+        classes = "govuk-input govuk-!-width-three-thirds"
+    ))
 
-  @govukInput(Input(
+    @govukInput(Input(
     id = line2Key,
     name = line2Key,
     label = Label(
-      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line2.label"))
+    content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line2.label"))
     ),
     errorMessage = errorMessageCheck(line2Key),
     autocomplete = Some(AutoCompleteType.AddressLine2.value),
     classes = "govuk-input govuk-!-width-three-thirds"
-  ))
+    ))
 
-  @govukInput(Input(
+    @govukInput(Input(
     id = line3Key,
     name = line3Key,
     label = Label(
-      content = HtmlContent(messages(s"${key}.uk.line3.label"))
+    content = HtmlContent(messages(s"${key}.uk.line3.label"))
     ),
     errorMessage = errorMessageCheck(line3Key),
     autocomplete = Some(AutoCompleteType.AddressLevel2.value),
-classes = "govuk-!-width-two-thirds"
-  ))
+    classes = "govuk-!-width-two-thirds"
+    ))
 
-  @govukInput(Input(
+    @govukInput(Input(
     id = line4Key,
     name = line4Key,
     label = Label(
-      content = HtmlContent(messages(s"${key}.uk.line4.label"))
+    content = HtmlContent(messages(s"${key}.uk.line4.label"))
     ),
     errorMessage = errorMessageCheck(line4Key),
     autocomplete = Some(AutoCompleteType.AddressLevel1.value),
     classes = "govuk-input govuk-!-width-two-thirds"
-  ))
+    ))
 
-  @govukInput(Input(
+    @govukInput(Input(
     id = postcodeKey,
     name = postcodeKey,
     label = Label(
-      content = HtmlContent(messages(s"$key.postcode.label"))
+    content = HtmlContent(messages(s"$key.postcode.label"))
     ),
     errorMessage = errorMessageCheck(postcodeKey),
     autocomplete = Some(AutoCompleteType.Postcode.value),
     classes = "govuk-input govuk-!-width-one-third"
-  ))
-}
+    ))
+    }
 
 
+    @helpText = @{
+        addressJourneyType match {
+            case c: AddressJourneyType.Returns.EnteringCompanyDetails if c.draftReturn.isLeft =>
+            Some(messages("companyDetails.isUk.multipleIndirect.helpText"))
+            case _ => None
+        }
+    }
 
-@errorMessageCheck(fieldId:String) = @{
-  form.error(fieldId).map(e => e.message) match{
-    case Some(message) => Some(ErrorMessage(content = Text(messages(s"$fieldId.$message"))))
-    case None => None
-  }
-}
-
-
-@html = {
-  @govukInput(Input(
-    id = line1Key,
-    name = line1Key,
-    label = Label(
-      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line1.label"))
-    ),
-    errorMessage = errorMessageCheck(line1Key),
-    autocomplete = Some(AutoCompleteType.AddressLine1.value),
-    classes = "govuk-input govuk-!-width-three-thirds"
-  ))
-
-  @govukInput(Input(
-    id = line2Key,
-    name = line2Key,
-    label = Label(
-      content = HtmlContent(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line2.label"))
-    ),
-    errorMessage = errorMessageCheck(line2Key),
-    autocomplete = Some(AutoCompleteType.AddressLine2.value),
-    classes = "govuk-input govuk-!-width-three-thirds"
-  ))
-
-  @govukInput(Input(
-    id = line3Key,
-    name = line3Key,
-    label = Label(
-      content = HtmlContent(messages(s"${key}.uk.line3.label"))
-    ),
-    errorMessage = errorMessageCheck(line3Key),
-    autocomplete = Some(AutoCompleteType.AddressLevel2.value),
-classes = "govuk-!-width-two-thirds"
-  ))
-
-  @govukInput(Input(
-    id = line4Key,
-    name = line4Key,
-    label = Label(
-      content = HtmlContent(messages(s"${key}.uk.line4.label"))
-    ),
-    errorMessage = errorMessageCheck(line4Key),
-    autocomplete = Some(AutoCompleteType.AddressLevel1.value),
-    classes = "govuk-input govuk-!-width-two-thirds"
-  ))
-
-  @govukInput(Input(
-    id = postcodeKey,
-    name = postcodeKey,
-    label = Label(
-      content = HtmlContent(messages(s"$key.postcode.label"))
-    ),
-    errorMessage = errorMessageCheck(postcodeKey),
-    autocomplete = Some(AutoCompleteType.Postcode.value),
-    classes = "govuk-input govuk-!-width-one-third"
-  ))
-}
-
-
-@helpText = @{
-  addressJourneyType match {
-    case c: AddressJourneyType.Returns.EnteringCompanyDetails if c.draftReturn.isLeft =>
-      Some(messages("companyDetails.isUk.multipleIndirect.helpText"))
-    case _ => None
-  }
-}
-
-@showFindAddressLink = @{ addressJourneyType match {
-  case _: AddressJourneyType.Returns.EnteringCompanyDetails => false
-  case _ => true
- }
+    @showFindAddressLink = @{ addressJourneyType match {
+        case _: AddressJourneyType.Returns.EnteringCompanyDetails => false
+        case _ => true
+    }
 }
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 
 @layout(pageTitle = title, isWelshTranslationAvailable = true) {
 
-  @backLinkComponent(backLink)
+@backLinkComponent(backLink)
 
-  @if(hasErrors) {
-    @errorSummary(form, userKeyOnly = journeyErrorKey.stripSuffix("."))
-  }
+@if(hasErrors) {
+@errorSummary(form, userKeyOnly = journeyErrorKey.stripSuffix("."))
+}
 
-  @formWrapper(submit, 'novalidate -> "novalidate") {
+@formWrapper(submit, 'novalidate -> "novalidate") {
 <fieldset class="govuk-fieldset" id="@key">
     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
         @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())), helpText)
     </legend>
     @html
 </fieldset>
-    @if(showFindAddressLink) {
-      <p class="govuk-body"><a class="govuk-link" href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
-    }
-    @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
-  }
+@if(showFindAddressLink) {
+<p class="govuk-body"><a class="govuk-link" href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
+}
+@govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
+}
 
-  @returnToSummaryLink(addressJourneyType.showReturnToSummaryLink())
+@returnToSummaryLink(addressJourneyType.showReturnToSummaryLink())
 
 }
