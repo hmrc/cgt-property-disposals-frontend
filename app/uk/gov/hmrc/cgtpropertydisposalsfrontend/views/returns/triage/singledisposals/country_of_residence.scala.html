@@ -1,18 +1,18 @@
 @*
- * Copyright 2022 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *@
+* Copyright 2022 HM Revenue & Customs
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*@
 
 @import play.api.data.Form
 @import play.api.i18n.Messages
@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
@@ -31,23 +32,23 @@
 
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
-    submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
-    formHelper: FormWithCSRF,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
+submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+formHelper: FormWithCSRF,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
-    form: Form[Country],
-    backLink: Call,
-    displayReturnToSummaryLink: Boolean,
-    isATrust: Boolean,
-    representativeType: Option[RepresentativeType],
-    representeeAnswers: Option[RepresenteeAnswers],
-    isAmend: Boolean
+form: Form[Country],
+backLink: Call,
+displayReturnToSummaryLink: Boolean,
+isATrust: Boolean,
+representativeType: Option[RepresentativeType],
+representeeAnswers: Option[RepresenteeAnswers],
+isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"countryCode"}
@@ -55,15 +56,15 @@
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @userKey = @{
-    representativeType match {
-        case Some(PersonalRepresentative) => ".personalRep"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
-        case Some(Capacitor) => ".capacitor"
-        case None =>
-            if (isAgent) ".agent"
-            else if (isATrust) ".trust"
-            else ""
-    }
+representativeType match {
+case Some(PersonalRepresentative) => ".personalRep"
+case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+case Some(Capacitor) => ".capacitor"
+case None =>
+if (isAgent) ".agent"
+else if (isATrust) ".trust"
+else ""
+}
 }
 
 @isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
@@ -71,52 +72,53 @@
 @helpText = @{ if(isPeriodOfAdmin) None else Some(Html(messages(s"$messageKey$userKey.helpText"))) }
 
 @title = @{
-    if(isPeriodOfAdmin){
-        representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)).fold(
-            sys.error("Could not find date of death for personal rep in period of admin")
-        ) { dateOfDeath =>
-            val taxYearStartYear = TimeUtils.taxYearStart(dateOfDeath.value).getYear
-            messages(
-                s"$messageKey$userKey.title",
-                taxYearStartYear.toString,
-                (taxYearStartYear + 1).toString
-            )
-        }
-    } else messages(s"$messageKey$userKey.title")
+if(isPeriodOfAdmin){
+representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)).fold(
+sys.error("Could not find date of death for personal rep in period of admin")
+) { dateOfDeath =>
+val taxYearStartYear = TimeUtils.taxYearStart(dateOfDeath.value).getYear
+messages(
+s"$messageKey$userKey.title",
+taxYearStartYear.toString,
+(taxYearStartYear + 1).toString
+)
+}
+} else messages(s"$messageKey$userKey.title")
 }
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @titleWithErrorPrefix = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + title
-    } else title
+if(hasErrors){
+messages("generic.errorPrefix") + " " + title
+} else title
 }
 
 @mainTemplate(pageTitle = titleWithErrorPrefix, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
 
-    @if(hasErrors) {
-        @errorSummary(form)
-    }
+@if(hasErrors) {
+@errorSummary(form)
+}
 
-    @caption(messages("triage.caption"))
+@caption(messages("triage.caption"))
 
-    @formHelper(routes.SingleDisposalsTriageController.countryOfResidenceSubmit(), 'novalidate -> "novalidate") {
+@formHelper(routes.SingleDisposalsTriageController.countryOfResidenceSubmit(), 'novalidate -> "novalidate") {
 
-        @countryCode(
-            Country.countryCodes,
-            selected = form.data.get(key),
-            label = title,
-            hasErrors = form.error(key).nonEmpty,
-            errorKey = form.error(key).map(e => e.message),
-            helpText = helpText,
-            labelAsHeading = true
-        )
+@countryCode(
+Country.countryCodes,
+selected = form.data.get(key),
+label = title,
+hasErrors = form.error(key).nonEmpty,
+errorKey = form.error(key).map(e => e.message),
+autoComplete = AutoCompleteType.Country,
+helpText = helpText,
+labelAsHeading = true
+)
 
-        <p class="govuk-body">@Html(messages(s"$messageKey$userKey.link", appConfig.workOurYouResidenceStatusUrl))</p>
-        @submitButton(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
-    }
+<p class="govuk-body">@Html(messages(s"$messageKey$userKey.link", appConfig.workOurYouResidenceStatusUrl))</p>
+@submitButton(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+}
 
-    @returnToSummaryLink(displayReturnToSummaryLink)
+@returnToSummaryLink(displayReturnToSummaryLink)
 
 }
