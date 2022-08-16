@@ -54,32 +54,36 @@
 @key = @{"address-select"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
-  representativeType match {
-    case Some(PersonalRepresentative) => ".personalRep."
-    case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent." else ".personalRep."
-    case Some(Capacitor) => ".capacitor."
-    case None =>
-       if (isAgent) ".agent."
-       else if (isATrust) ".trust."
-       else ""
-  }
+representativeType match {
+case Some(PersonalRepresentative) => ".personalRep."
+case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent." else ".personalRep."
+case Some(Capacitor) => ".capacitor."
+case None =>
+if (isAgent) ".agent."
+else if (isATrust) ".trust."
+else ""
+}
 }
 
+@journeyErrorKey = @{ addressJourneyType match {
+case _:AddressJourneyType.Returns.FillingOutReturnAddressJourney => ".returns."
+case _ => ""
+}}
 
 @title = @{ addressJourneyType match {
-    case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
-        f.draftReturn.fold(
-            _ => messages(s"$key.returns.multipleDisposals.title"),
-            _ => messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
-        )
+case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+f.draftReturn.fold(
+_ => messages(s"$key.returns.multipleDisposals.title"),
+_ => messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
+)
 
-    case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
-        messages("address-select.representee.title")
+case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+messages("address-select.representee.title")
 
-    case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
-        messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
+case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
+messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
 
-    case _ => messages("address-select.title")
+case _ => messages("address-select.title")
 }}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -93,15 +97,13 @@
     }
 }
 
-
-
 @layout(pageTitle = title, isWelshTranslationAvailable = true) {
 
  @backLinkComponent(backLink)
 
- @if(hasErrors) {
-    @errorSummary(form, Some(messages(s"$key.returns")))
- }
+@if(hasErrors) {
+@errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}"))
+}
 
  @formWrapper(submit, 'novalidate -> "novalidate") {
 
