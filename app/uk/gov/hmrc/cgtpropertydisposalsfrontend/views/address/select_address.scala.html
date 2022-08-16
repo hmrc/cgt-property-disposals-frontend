@@ -34,7 +34,6 @@
   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
   addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
-  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
   govukRadios : GovukRadios,
   govukButton: GovukButton
@@ -66,10 +65,6 @@
   }
 }
 
-@journeyErrorKey = @{ addressJourneyType match {
-    case _:AddressJourneyType.Returns.FillingOutReturnAddressJourney => ".returns."
-    case _ => ""
-}}
 
 @title = @{ addressJourneyType match {
     case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
@@ -104,9 +99,8 @@
 
  @backLinkComponent(backLink)
 
-@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }
  @if(hasErrors) {
-    @errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}"))
+    @errorSummary(form, Some(messages(s"$key.returns")))
  }
 
  @formWrapper(submit, 'novalidate -> "novalidate") {
