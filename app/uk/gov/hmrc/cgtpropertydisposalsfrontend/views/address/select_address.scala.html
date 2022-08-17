@@ -65,10 +65,7 @@ else ""
 }
 }
 
-@journeyErrorKey = @{ addressJourneyType match {
-case _:AddressJourneyType.Returns.FillingOutReturnAddressJourney => ".returns."
-case _ => ""
-}}
+
 
 @title = @{ addressJourneyType match {
 case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
@@ -102,7 +99,7 @@ case _ => messages("address-select.title")
  @backLinkComponent(backLink)
 
 @if(hasErrors) {
-@errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}"))
+    @errorSummary(form, Some(messages(s"$key.returns")))
 }
 
  @formWrapper(submit, 'novalidate -> "novalidate") {
