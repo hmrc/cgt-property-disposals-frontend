@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
 
 import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}

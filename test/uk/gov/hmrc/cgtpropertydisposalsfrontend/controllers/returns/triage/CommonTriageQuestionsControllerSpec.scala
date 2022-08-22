@@ -373,22 +373,22 @@ class CommonTriageQuestionsControllerSpec
                   .url
 
                 doc
-                  .select("label[for='individualUserType-0']")
+                  .select("label[for='individualUserType']")
                   .text()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.Self}"
                 )
                 doc
-                  .select("label[for='individualUserType-1']")
+                  .select("label[for='individualUserType-2']")
                   .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.Capacitor}"
                 )
                 doc
-                  .select("label[for='individualUserType-2']")
+                  .select("label[for='individualUserType-3']")
                   .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.PersonalRepresentative}"
                 )
                 doc
-                  .select("label[for='individualUserType-3']")
+                  .select("label[for='individualUserType-4']")
                   .html()                          shouldBe messageFromMessageKey(
                   s"individualUserType.${IndividualUserType.PersonalRepresentativeInPeriodOfAdmin}"
                 )
@@ -417,12 +417,12 @@ class CommonTriageQuestionsControllerSpec
                   .select("#content > article > form, #main-content form")
                   .attr(
                     "action"
-                  )                shouldBe routes.CommonTriageQuestionsController
+                  ) shouldBe routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresentingSubmit()
                   .url
                 doc
-                  .select("#individualUserType-0")
-                  .attr("checked") shouldBe "checked"
+                  .select("#individualUserType")
+                  .hasAttr("checked")
               }
             )
           }
@@ -454,8 +454,10 @@ class CommonTriageQuestionsControllerSpec
                   .whoIsIndividualRepresentingSubmit()
                   .url
                 doc
-                  .select("#individualUserType-1")
-                  .attr("checked")                 shouldBe "checked"
+                  .select("label[for='individualUserType']")
+                  .text()                          shouldBe messageFromMessageKey(
+                  s"individualUserType.${IndividualUserType.Self}"
+                )
                 doc.select("#submitButton").text() shouldBe messageFromMessageKey("button.continue")
               }
             )
@@ -507,14 +509,14 @@ class CommonTriageQuestionsControllerSpec
 
                   doc
                     .select(s"#individualUserType-$index")
-                    .attr("checked")                 shouldBe "checked"
+                    .hasAttr("checked")
                   doc
-                    .select("label[for='individualUserType-0']")
+                    .select("label[for='individualUserType']")
                     .text()                          shouldBe messageFromMessageKey(
                     s"individualUserType.agent.${IndividualUserType.Self}"
                   )
                   doc
-                    .select("label[for='individualUserType-1']")
+                    .select("label[for='individualUserType-2']")
                     .html()                          shouldBe messageFromMessageKey(
                     s"individualUserType.agent.${IndividualUserType.PersonalRepresentative}"
                   )
@@ -539,7 +541,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whoIsIndividualRepresentingSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -1198,7 +1200,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howManyPropertiesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -1610,7 +1612,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howManyPropertiesFurtherReturnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -3009,7 +3011,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.amendsHaveYouAlreadySentSelfAssessmentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -3287,7 +3289,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.haveYouAlreadySentSelfAssessmentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(

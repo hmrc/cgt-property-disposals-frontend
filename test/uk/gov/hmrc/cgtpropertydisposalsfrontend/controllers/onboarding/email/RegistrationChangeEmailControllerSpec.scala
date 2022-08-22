@@ -104,7 +104,7 @@ class RegistrationChangeEmailControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.enterEmailSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())

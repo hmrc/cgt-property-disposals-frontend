@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.{Clock, LocalDate}
 import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.nodes.Document
@@ -383,7 +382,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howDidYouDisposeOfPropertySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -846,7 +845,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1369,7 +1368,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.didYouDisposeOfAResidentialPropertySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       val requiredPreviousAnswers =
@@ -2065,7 +2064,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasDisposalDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def formData(date: LocalDate) =
@@ -2774,7 +2773,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasCompletionDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def formData(date: LocalDate) =
@@ -3380,7 +3379,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.countryOfResidenceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -3722,8 +3721,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.countryOfResidence()
         ),
-        _.select("#assetTypeForNonUkResidents-2")
-          .attr("checked") shouldBe "checked"
+        _.select("#assetTypeForNonUkResidents-2").hasAttr("checked")
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -3741,8 +3739,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.countryOfResidence()
         ),
-        _.select("#assetTypeForNonUkResidents-2")
-          .attr("checked") shouldBe "checked"
+        _.select("#assetTypeForNonUkResidents-2").hasAttr("checked")
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -3760,7 +3757,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController.countryOfResidence()
         ),
         _.select("#assetTypeForNonUkResidents-2")
-          .attr("checked") shouldBe "checked"
+          .hasAttr("checked")
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
@@ -3780,8 +3777,8 @@ class SingleDisposalsTriageControllerSpec
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
           doc
-            .select("#assetTypeForNonUkResidents-0")
-            .attr("checked") shouldBe "checked"
+            .select("#assetTypeForNonUkResidents")
+            .hasAttr("checked")
         }
       )
 
@@ -3803,7 +3800,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#assetTypeForNonUkResidents-0")
-            .attr("checked") shouldBe "checked"
+            .hasAttr("checked")
         }
       )
 
@@ -3825,7 +3822,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#assetTypeForNonUkResidents-0")
-            .attr("checked") shouldBe "checked"
+            .hasAttr("checked")
         }
       )
 
@@ -3882,7 +3879,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.assetTypeForNonUkResidentsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -4532,7 +4529,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateOfSharesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def formData(date: LocalDate) =

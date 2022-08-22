@@ -211,7 +211,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.doYouHaveNINOSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like commonBehaviour(() => performAction())
@@ -317,6 +317,7 @@ class InsufficientConfidenceLevelControllerSpec
                 FakeRequest()
                   .withFormUrlEncodedBody("hasNino" -> "true")
                   .withCSRFToken
+                  .withMethod("POST")
               )
             checkIsRedirectToIv(result, true)
           }
@@ -508,7 +509,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.doYouHaveSaUtrSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like commonBehaviour(() => performAction())
@@ -826,7 +827,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterSautrAndNameSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like commonBehaviour(() => performAction())

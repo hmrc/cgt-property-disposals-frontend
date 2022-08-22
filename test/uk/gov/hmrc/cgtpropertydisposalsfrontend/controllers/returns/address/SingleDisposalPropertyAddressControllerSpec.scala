@@ -174,7 +174,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -215,7 +215,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -274,7 +274,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.selectAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -506,7 +506,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.singleDisposalHasUkPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -675,7 +675,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.singleDisposalEnterLandUprnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       def formData(ukAddress: UkAddress): List[(String, String)] =

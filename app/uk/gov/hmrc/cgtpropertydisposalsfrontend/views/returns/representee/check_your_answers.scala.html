@@ -16,43 +16,46 @@
 
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Button
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+    govukButton: GovukButton
 )
 
 @(
     answers: CompleteRepresenteeAnswers,
     representativeType: RepresentativeType,
     backLink: Call
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 
 @title = @{messages("representee.cya.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(pageTitle = title) {
 
     @backLinkComponent(backLink)
 
     @caption(messages("representee.caption"))
 
-    @pageHeading(title)
+    <h1 class="govuk-heading-xl">
+        @title
+    </h1>
 
     @summary(answers, representativeType)
 
     @formWrapper(routes.RepresenteeController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
-        @submitButton(messages("button.confirmAndContinue"))
+        @govukButton(Button(content = Text(messages("button.confirmAndContinue"))))
     }
 
 }

@@ -93,7 +93,7 @@ class SubscribedChangeContactNameControllerSpec
       behave like enterContactNameSubmit(
         data =>
           controller.enterContactNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
           ),
         controllers.accounts.routes.AccountController.contactNameUpdated()
       )

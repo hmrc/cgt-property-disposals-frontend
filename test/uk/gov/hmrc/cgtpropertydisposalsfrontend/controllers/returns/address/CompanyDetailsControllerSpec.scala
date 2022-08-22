@@ -415,7 +415,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.isUkSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -755,7 +755,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1513,7 +1513,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterNonUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2233,7 +2233,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleIndirectDisposalPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2717,7 +2717,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleIndirectAcquisitionPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())

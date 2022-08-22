@@ -880,7 +880,7 @@ class YearToDateLiabilityControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.estimatedIncomeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1306,7 +1306,7 @@ class YearToDateLiabilityControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.personalAllowanceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2082,7 +2082,7 @@ class YearToDateLiabilityControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.hasEstimatedDetailsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like markUnmetDependencyBehaviour(controller.hasEstimatedDetailsSubmit())
@@ -2926,7 +2926,7 @@ class YearToDateLiabilityControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.taxDueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -5083,7 +5083,7 @@ class YearToDateLiabilityControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.taxableGainOrLossSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -6211,7 +6211,7 @@ class YearToDateLiabilityControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.nonCalculatedEnterTaxDueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*)
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -8015,7 +8015,7 @@ class YearToDateLiabilityControllerSpec
     "handling submits on the year to date liability page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.yearToDateLiabilitySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.yearToDateLiabilitySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST"))
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -8567,7 +8567,7 @@ class YearToDateLiabilityControllerSpec
     "handling submits on the repayment page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.repaymentSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.repaymentSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST"))
 
       behave like redirectToStartBehaviour(() => performAction())
 

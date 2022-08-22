@@ -407,7 +407,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.howMuchDidYouOwnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1226,7 +1226,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWasDisposalPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1879,7 +1879,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWasDisposalPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -2589,7 +2589,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWereDisposalFeesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*)
+          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
       def updateDraftReturn(

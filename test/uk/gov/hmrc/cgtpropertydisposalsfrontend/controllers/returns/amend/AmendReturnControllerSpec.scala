@@ -187,7 +187,7 @@ class AmendReturnControllerSpec
     "handling submits on the confirm cancellation page" must {
 
       def performAction(formData: (String, String)*)(back: String): Future[Result] =
-        controller.confirmCancelSubmit(back)(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.confirmCancelSubmit(back)(FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST"))
 
       behave like redirectToStartWhenInvalidJourney(
         () => performAction()(AmendReturnController.ConfirmCancelBackLocations.checkAnswers),

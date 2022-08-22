@@ -19,7 +19,6 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
@@ -27,16 +26,19 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Button
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    formHelper: FormWithCSRF,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+    govukButton: GovukButton,
+    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input_govuk,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
@@ -47,7 +49,7 @@
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
@@ -70,26 +72,23 @@
 @indirectKey = @{ if(isIndirectDisposal) ".indirect" else ""}
 
 @key = @{ "disposalPrice" }
-@title = @{ messages(s"$key$userKey$indirectKey$disposalMethodKey.title") }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@title = @{ messages(s"$key$userKey$indirectKey$disposalMethodKey.title") }
 
-    @backLinkComponent(backLink)
+@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userKey$indirectKey$disposalMethodKey"))
     }
 
-    @caption(messages("returns.disposal-details.caption"))
-
-    @formWrapper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPriceSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPriceSubmit(), 'novalidate -> "novalidate") {
       @unitInput(
         fieldId = key,
         value = form.data.getOrElse(key, ""),
         formError = form.error(key),
         hasErrors = form.error(key).nonEmpty,
-        label = Html(title),
+        label = pageHeading(title, Some(messages("returns.disposal-details.caption"))),
         labelAsHeading = true,
         helpText = Some(Html(messages(s"$key$userKey$indirectKey$disposalMethodKey.helpText"))),
         autoComplete = AutoCompleteType.On,
@@ -100,7 +99,7 @@
         customErrorKey = Some(s"$key$userKey$indirectKey$disposalMethodKey")
       )
 
-      @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+      @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
