@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
+import scala.concurrent.duration.Duration
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
 import play.api.libs.json.{Reads, Writes}
-import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.cache.repository.CacheMongoRepository
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
+import uk.gov.hmrc.mongo.{MongoComponent, TimestampSupport}
+import uk.gov.hmrc.mongo.cache.{CacheIdType, MongoCacheRepository}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
@@ -45,22 +46,26 @@ trait NameMatchRetryStore {
 
 @Singleton
 class NameMatchRetryStoreImpl @Inject() (
-  mongo: ReactiveMongoComponent,
-  configuration: Configuration
+  mongo: MongoComponent,
+  configuration: Configuration,
+  timeStampSupport: TimestampSupport
 )(implicit
   ec: ExecutionContext
 ) extends NameMatchRetryStore
     with Repo {
 
-  val cacheRepository: CacheMongoRepository = {
+  val cacheRepository = {
     val expireAfter: FiniteDuration = configuration.underlying
       .get[FiniteDuration]("bpr-name-match.store.expiry-time")
       .value
 
-    new CacheMongoRepository("bpr-name-match-retries", expireAfter.toSeconds)(
-      mongo.mongoConnector.db,
-      ec
-    )
+    new MongoCacheRepository[String](
+      mongo,
+      "bpr-name-match-retries",
+      ttl = Duration.fromNanos(expireAfter.toSeconds),
+      timestampSupport = timeStampSupport,
+      cacheIdType = CacheIdType.SimpleCacheId
+    )(ec)
   }
 
   val sessionKey = "bpr-name-match-retries"

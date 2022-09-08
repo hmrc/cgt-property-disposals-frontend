@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.joda.time.{LocalDate => JodaLocalDate}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
@@ -67,6 +66,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPar
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -178,7 +178,7 @@ class StartControllerSpec
   val nino                 = NINO("AB123456C")
   val name                 = IndividualName("forename", "surname")
   val trustName            = TrustName("trust")
-  val retrievedDateOfBirth = JodaLocalDate.parse("2000-04-10")
+  val retrievedDateOfBirth = LocalDateTime.parse("2000-04-10")
   val emailAddress         = Email("email")
 
   val retrievedGGCredId = Credentials("gg", "GovernmentGateway")

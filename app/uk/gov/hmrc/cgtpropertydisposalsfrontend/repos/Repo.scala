@@ -19,9 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 import cats.data.OptionT
 import cats.instances.either._
 import cats.syntax.either._
-import play.api.libs.json.{Json, Reads, Writes}
-import uk.gov.hmrc.cache.model.Id
-import uk.gov.hmrc.cache.repository.CacheRepository
+import play.api.libs.json.{Reads, Writes}
+import uk.gov.hmrc.mongo.cache.{DataKey, MongoCacheRepository}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.play.http.logging.Mdc.preservingMdc
 
@@ -29,7 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait Repo {
 
-  val cacheRepository: CacheRepository
+  val cacheRepository: MongoCacheRepository[String]
 
   val sessionKey: String
 
@@ -38,11 +37,11 @@ trait Repo {
   )(implicit ec: ExecutionContext): Future[Either[Error, Option[A]]] =
     preservingMdc {
       cacheRepository
-        .findById(Id(id))
+        .findById(id)
         .map { maybeCache =>
           val response: OptionT[Either[Error, *], A] = for {
             cache ← OptionT.fromOption[Either[Error, *]](maybeCache)
-            data ← OptionT.fromOption[Either[Error, *]](cache.data)
+            data ← OptionT.fromOption[Either[Error, *]](Some(cache.data))
             result ← OptionT.liftF[Either[Error, *], A](
                        (data \ sessionKey)
                          .validate[A]
@@ -60,25 +59,9 @@ trait Repo {
         .recover { case e ⇒ Left(Error(e)) }
     }
 
-  protected def store[A : Writes](id: String, a: A)(implicit
-    ec: ExecutionContext
-  ): Future[Either[Error, Unit]] =
-    preservingMdc {
-      cacheRepository
-        .createOrUpdate(Id(id), sessionKey, Json.toJson(a))
-        .map[Either[Error, Unit]] { dbUpdate ⇒
-          if (dbUpdate.writeResult.inError)
-            Left(
-              Error(
-                dbUpdate.writeResult.errmsg.getOrElse(
-                  "unknown error during inserting session data in mongo"
-                )
-              )
-            )
-          else
-            Right(())
-        }
-        .recover { case e ⇒ Left(Error(e)) }
-    }
-
+  protected def store[A : Writes](id: String, a: A)(implicit ec: ExecutionContext): Future[Either[Error, Unit]] =
+    cacheRepository
+      .put(id)(DataKey(sessionKey), a)
+      .map(_ => Right(()))
+      .recover { case e => Left(Error(s"Error in insertion $e")) }
 }

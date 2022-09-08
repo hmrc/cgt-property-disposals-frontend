@@ -20,18 +20,20 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.Eventually
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.libs.json.{JsObject, JsString}
 import play.api.test.Helpers._
-import uk.gov.hmrc.cache.model.{Cache, Id}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.VerifierMatchGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.MongoSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.MongoSupportSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStoreImplSpec._
-import uk.gov.hmrc.mongo.DatabaseUpdate
+import uk.gov.hmrc.mongo.{MongoComponent, TimestampSupport}
+import uk.gov.hmrc.mongo.cache.CacheItem
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -54,10 +56,9 @@ object AgentVerifierMatchRetryStoreImplSpec {
   }
 
 }
-class AgentVerifierMatchRetryStoreImplSpec extends AnyWordSpec with Matchers with MongoSupport with Eventually {
+class AgentVerifierMatchRetryStoreImplSpec extends AnyWordSpec with Matchers with MongoSupportSpec with Eventually {
 
-  val retryStore =
-    new AgentVerifierMatchRetryStoreImpl(reactiveMongoComponent, config)
+  val retryStore = new AgentVerifierMatchRetryStoreImpl(mongoComponent, config)
 
   override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(5.seconds, 500.millis)
@@ -86,17 +87,16 @@ class AgentVerifierMatchRetryStoreImplSpec extends AnyWordSpec with Matchers wit
     "return an error" when {
 
       "the data in mongo cannot be parsed" in new TestEnvironment {
-        val invalidData                           = JsObject(Map("unsuccessfulAttempts" -> JsString("1")))
-        val create: Future[DatabaseUpdate[Cache]] =
-          retryStore.cacheRepository.createOrUpdate(
-            Id(s"${agentGGCredId.value}#${clientCgtReference.value}"),
+        val invalidData               = JsObject(Map("unsuccessfulAttempts" -> JsString("1")))
+        val create: Future[CacheItem] =
+          retryStore.cacheRepository.put(agentGGCredId.value)(
             retryStore.sessionKey,
             invalidData
           )
-        await(create).writeResult.inError shouldBe false
+        await(create) shouldBe false
         await(
           retryStore.get(agentGGCredId, clientCgtReference)
-        ).isLeft                          shouldBe true
+        ).isLeft      shouldBe true
       }
 
     }
@@ -105,12 +105,9 @@ class AgentVerifierMatchRetryStoreImplSpec extends AnyWordSpec with Matchers wit
 
 }
 
-class AgentVerifierMatchRetryStoreImplFailureSpec extends AnyWordSpec with Matchers with MongoSupport {
+class AgentVerifierMatchRetryStoreImplFailureSpec extends AnyWordSpec with Matchers with MongoSupportSpec {
 
-  val retryStore =
-    new AgentVerifierMatchRetryStoreImpl(reactiveMongoComponent, config)
-
-  reactiveMongoComponent.mongoConnector.helper.driver.close()
+  val retryStore = new AgentVerifierMatchRetryStoreImpl(mongoComponent, config)
 
   val mongoIsBrokenAndAttemptingTo = new AfterWord(
     "mongo is broken and attempting to"

@@ -19,10 +19,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
-import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.cache.repository.CacheMongoRepository
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.cache.{CacheIdType, MongoCacheRepository}
+import uk.gov.hmrc.mongo.{MongoComponent, TimestampSupport}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,22 +42,26 @@ trait SessionStore {
 
 @Singleton
 class SessionStoreImpl @Inject() (
-  mongo: ReactiveMongoComponent,
-  configuration: Configuration
+  mongo: MongoComponent,
+  configuration: Configuration,
+  timeStampSupport: TimestampSupport
 )(implicit
   ec: ExecutionContext
 ) extends SessionStore
     with Repo {
 
-  val cacheRepository: CacheMongoRepository = {
+  val cacheRepository = {
     val expireAfter: FiniteDuration = configuration.underlying
       .get[FiniteDuration]("session-store.expiry-time")
       .value
 
-    new CacheMongoRepository("sessions", expireAfter.toSeconds)(
-      mongo.mongoConnector.db,
-      ec
-    )
+    new MongoCacheRepository[String](
+      mongo,
+      "sessions",
+      ttl = Duration.fromNanos(expireAfter.toSeconds),
+      timestampSupport = timeStampSupport,
+      cacheIdType = CacheIdType.SimpleCacheId
+    )(ec)
   }
 
   val sessionKey = "cgtpd-session"

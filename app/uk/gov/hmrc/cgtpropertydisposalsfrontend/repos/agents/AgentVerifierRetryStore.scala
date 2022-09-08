@@ -19,12 +19,13 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
-import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.cache.repository.CacheMongoRepository
+import uk.gov.hmrc.mongo.{CurrentTimestampSupport, MongoComponent}
+
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.Repo
+import uk.gov.hmrc.mongo.cache.{CacheIdType, MongoCacheRepository}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
@@ -46,22 +47,25 @@ trait AgentVerifierMatchRetryStore {
 
 @Singleton
 class AgentVerifierMatchRetryStoreImpl @Inject() (
-  mongo: ReactiveMongoComponent,
+  mongo: MongoComponent,
   configuration: Configuration
 )(implicit
   ec: ExecutionContext
 ) extends AgentVerifierMatchRetryStore
     with Repo {
 
-  val cacheRepository: CacheMongoRepository = {
+  val cacheRepository: MongoCacheRepository[String] = {
     val expireAfter: FiniteDuration = configuration.underlying
       .get[FiniteDuration]("agent-verifier-match.store.expiry-time")
       .value
 
-    new CacheMongoRepository(
-      "agent-verifier-match-retries",
-      expireAfter.toSeconds
-    )(mongo.mongoConnector.db, ec)
+    new MongoCacheRepository[String](
+      mongoComponent = mongo,
+      collectionName = "agent-verifier-match-retries",
+      ttl = expireAfter,
+      timestampSupport = new CurrentTimestampSupport,
+      cacheIdType = CacheIdType.SimpleCacheId
+    )(ec)
   }
 
   val sessionKey = "agent-verifier-match-retries"
