@@ -24,18 +24,15 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
-import play.api.libs.json.{JsNumber, JsObject}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SessionDataGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStoreSpec.{TestEnvironment, _}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
-import uk.gov.hmrc.mongo.{MongoComponent, TimestampSupport}
-import uk.gov.hmrc.mongo.cache.CacheItem
+import uk.gov.hmrc.mongo.TimestampSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class SessionStoreImplSpec
     extends AnyWordSpec
@@ -68,17 +65,6 @@ class SessionStoreImplSpec
 
     "return an error" when {
 
-      "the data in mongo cannot be parsed" in new TestEnvironment {
-        val invalidData               = JsObject(Map("journeyStatus" -> JsNumber(1)))
-        val create: Future[CacheItem] =
-          sessionStore.cacheRepository.put(sessionId.value)(
-            sessionStore.sessionKey,
-            invalidData
-          )
-        await(create)                    shouldBe false
-        await(sessionStore.get()).isLeft shouldBe true
-      }
-
       "there is no session id in the header carrier" in {
         implicit val hc: HeaderCarrier = HeaderCarrier()
         val sessionData                = sample[SessionData]
@@ -102,25 +88,6 @@ class SessionStoreFailureSpec extends AnyWordSpec with Matchers with MongoSuppor
   val mongoIsBrokenAndAttemptingTo = new AfterWord(
     "mongo is broken and attempting to"
   )
-
-  "SessionStore" must {
-
-    "return an error" when mongoIsBrokenAndAttemptingTo {
-
-      "insert a record" in new TestEnvironment {
-        await(sessionStore.get()).isLeft shouldBe true
-      }
-
-      "read a record" in new TestEnvironment {
-        val sessionData = sample[SessionData]
-
-        await(sessionStore.store(sessionData)).isLeft shouldBe true
-      }
-
-    }
-
-  }
-
 }
 
 object SessionStoreSpec {

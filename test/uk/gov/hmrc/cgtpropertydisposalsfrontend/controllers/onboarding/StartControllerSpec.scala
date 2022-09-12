@@ -66,7 +66,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPar
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -175,11 +174,10 @@ class StartControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  val nino                 = NINO("AB123456C")
-  val name                 = IndividualName("forename", "surname")
-  val trustName            = TrustName("trust")
-  val retrievedDateOfBirth = LocalDateTime.parse("2000-04-10")
-  val emailAddress         = Email("email")
+  val nino         = NINO("AB123456C")
+  val name         = IndividualName("forename", "surname")
+  val trustName    = TrustName("trust")
+  val emailAddress = Email("email")
 
   val retrievedGGCredId = Credentials("gg", "GovernmentGateway")
   val ggCredId          = GGCredId(retrievedGGCredId.providerId)

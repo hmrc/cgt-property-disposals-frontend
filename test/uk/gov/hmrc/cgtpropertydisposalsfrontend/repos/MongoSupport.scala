@@ -18,10 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.mongo.{CurrentTimestampSupport, MongoComponent}
 import uk.gov.hmrc.mongo.test.MongoSupport
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait MongoSupportSpec extends MongoSupport with BeforeAndAfterEach with BeforeAndAfterAll { this: Suite with Matchers ⇒
 
