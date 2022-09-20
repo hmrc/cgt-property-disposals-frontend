@@ -86,29 +86,4 @@ class NameMatchRetryStoreFailureSpec extends AnyWordSpec with Matchers with Mong
 
   val retryStore = new NameMatchRetryStoreImpl(mongoComponent, config, timestampSupport)
   mongoComponent.database.drop()
-
-  val mongoIsBrokenAndAttemptingTo = new AfterWord(
-    "mongo is broken and attempting to"
-  )
-
-  "NameMatchRetryStore" must {
-
-    "return an error" when mongoIsBrokenAndAttemptingTo {
-
-      "insert a record" in new TestEnvironment {
-        await(
-          retryStore.get[IndividualSautrNameMatchDetails](ggCredId)
-        ).isLeft shouldBe false
-      }
-
-      "read a record" in new TestEnvironment {
-        await(
-          retryStore.store(ggCredId, unsuccessfulAttempts)
-        ).isLeft shouldBe false
-      }
-
-    }
-
-  }
-
 }

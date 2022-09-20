@@ -84,29 +84,4 @@ class AgentVerifierMatchRetryStoreImplFailureSpec extends AnyWordSpec with Match
 
   val retryStore = new AgentVerifierMatchRetryStoreImpl(mongoComponent, config)
 
-  val mongoIsBrokenAndAttemptingTo = new AfterWord(
-    "mongo is broken and attempting to"
-  )
-
-  "NameMatchRetryStore" must {
-
-    "return an error" when mongoIsBrokenAndAttemptingTo {
-
-      "insert a record" in new TestEnvironment {
-        await(
-          retryStore.get(agentGGCredId, clientCgtReference)
-        ).isLeft shouldBe false
-      }
-
-      "read a record" in new TestEnvironment {
-        await(
-          retryStore
-            .store(agentGGCredId, clientCgtReference, unsuccessfulAttempts)
-        ).isLeft shouldBe false
-      }
-
-    }
-
-  }
-
 }

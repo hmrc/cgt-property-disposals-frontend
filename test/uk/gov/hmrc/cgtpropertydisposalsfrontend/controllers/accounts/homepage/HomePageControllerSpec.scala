@@ -29,6 +29,7 @@ import play.api.mvc.{Call, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
+
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
@@ -2064,7 +2065,6 @@ class HomePageControllerSpec
 
           checkIsTechnicalErrorPage(performAction(returnSummary.submissionId))
         }
-
       }
 
       "redirect to the view return screen" when {

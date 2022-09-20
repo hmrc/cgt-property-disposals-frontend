@@ -63,5 +63,7 @@ trait Repo {
     cacheRepository
       .put(id)(DataKey(sessionKey), a)
       .map(_ => Right(()))
-      .recover { case e => Left(Error(s"Error in insertion $e")) }
+      .recover { case _: Exception =>
+        Left(Error("unknown error during inserting session data in mongo"))
+      }
 }

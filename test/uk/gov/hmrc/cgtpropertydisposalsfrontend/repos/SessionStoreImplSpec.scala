@@ -85,9 +85,6 @@ class SessionStoreFailureSpec extends AnyWordSpec with Matchers with MongoSuppor
 
   val sessionStore = new SessionStoreImpl(mongoComponent, config, timestampSupport)
 
-  val mongoIsBrokenAndAttemptingTo = new AfterWord(
-    "mongo is broken and attempting to"
-  )
 }
 
 object SessionStoreSpec {
