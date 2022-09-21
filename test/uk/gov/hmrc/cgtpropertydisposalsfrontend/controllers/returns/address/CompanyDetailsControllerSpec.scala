@@ -2227,7 +2227,7 @@ class CompanyDetailsControllerSpec
 
     }
 
-    "handling submitted answers to the multiple multiple Indirect Disposals Guidance" must {
+    "handling submitted answers to the multiple Indirect Disposals Guidance" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleIndirectDisposalsGuidance()(
