@@ -18,29 +18,18 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 import org.scalatest.matchers.should.Matchers
-import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
+import uk.gov.hmrc.mongo.test.MongoSupport
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-trait MongoSupport extends MongoSpecSupport with BeforeAndAfterEach with BeforeAndAfterAll { this: Suite with Matchers ⇒
-
-  private def newReactiveMongoComponent(): ReactiveMongoComponent =
-    new ReactiveMongoComponent {
-      override def mongoConnector: MongoConnector = mongoConnectorForTest
-    }
-
-  val reactiveMongoComponent: ReactiveMongoComponent =
-    newReactiveMongoComponent()
+trait MongoSupportSpec extends MongoSupport with BeforeAndAfterEach with BeforeAndAfterAll { this: Suite with Matchers ⇒
 
   abstract override def beforeEach(): Unit = {
     super.beforeEach()
-    mongo().drop()
+    dropDatabase()
   }
 
   abstract override def afterAll(): Unit = {
     super.afterAll()
-    reactiveMongoComponent.mongoConnector.helper.driver.close()
+    mongoComponent.client.close()
   }
 
 }

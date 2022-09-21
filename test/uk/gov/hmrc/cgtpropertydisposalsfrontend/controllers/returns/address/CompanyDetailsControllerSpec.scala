@@ -2227,6 +2227,110 @@ class CompanyDetailsControllerSpec
 
     }
 
+    "handling submitted answers to the multiple Indirect Disposals Guidance" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.multipleIndirectDisposalsGuidance()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+        )
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleIndirectDisposalsGuidance(),
+        mockUUIDGenerator
+      )
+
+      "not update the session" when {
+
+        "the data submitted is the same as one that already exists in session" in {
+
+          val disposalPrice = AmountInPence.fromPounds(1000)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+                      exampleCompanyDetailsAnswers = Some(
+                        sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                          disposalPrice = Some(disposalPrice)
+                        )
+                      )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            controller.multipleIndirectDisposalsGuidance()(FakeRequest()),
+            messageFromMessageKey("company-details.multiple-indirect-disposals.guidance.title")
+          )
+        }
+      }
+
+    }
+
+    "handling submitted answers to the multiple indirect disposal guidance page" must {
+      val key = "multipleIndirectDisposalsDisposalPrice"
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.multipleIndirectDisposalsGuidanceSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+        )
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.multipleIndirectDisposalsGuidanceSubmit(),
+        mockUUIDGenerator
+      )
+
+      "not update the session" when {
+
+        "the data submitted is the same as one that already exists in session" in {
+
+          val disposalPrice = AmountInPence.fromPounds(1000)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+                      exampleCompanyDetailsAnswers = Some(
+                        sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                          disposalPrice = Some(disposalPrice)
+                        )
+                      )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction(key -> "1000"),
+            routes.CompanyDetailsController.isUk()
+          )
+        }
+
+      }
+
+    }
+
     "handling submitted answers to the multiple indirect disposal price page" must {
 
       val key = "multipleIndirectDisposalsDisposalPrice"

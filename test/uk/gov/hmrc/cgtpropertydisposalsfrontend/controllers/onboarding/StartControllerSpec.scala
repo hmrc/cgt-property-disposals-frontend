@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.joda.time.{LocalDate => JodaLocalDate}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
@@ -175,11 +174,10 @@ class StartControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  val nino                 = NINO("AB123456C")
-  val name                 = IndividualName("forename", "surname")
-  val trustName            = TrustName("trust")
-  val retrievedDateOfBirth = JodaLocalDate.parse("2000-04-10")
-  val emailAddress         = Email("email")
+  val nino         = NINO("AB123456C")
+  val name         = IndividualName("forename", "surname")
+  val trustName    = TrustName("trust")
+  val emailAddress = Email("email")
 
   val retrievedGGCredId = Credentials("gg", "GovernmentGateway")
   val ggCredId          = GGCredId(retrievedGGCredId.providerId)
