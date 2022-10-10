@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
-import scala.concurrent.duration.Duration
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
@@ -62,7 +61,7 @@ class NameMatchRetryStoreImpl @Inject() (
     new MongoCacheRepository[String](
       mongo,
       "bpr-name-match-retries",
-      ttl = Duration.fromNanos(expireAfter.toSeconds),
+      ttl = expireAfter,
       timestampSupport = timeStampSupport,
       cacheIdType = CacheIdType.SimpleCacheId
     )(ec)

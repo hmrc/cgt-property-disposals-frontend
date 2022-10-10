@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.{CacheIdType, MongoCacheRepository}
 import uk.gov.hmrc.mongo.{MongoComponent, TimestampSupport}
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[SessionStoreImpl])
@@ -58,7 +58,7 @@ class SessionStoreImpl @Inject() (
     new MongoCacheRepository[String](
       mongo,
       "sessions",
-      ttl = Duration.fromNanos(expireAfter.toSeconds),
+      ttl = expireAfter,
       timestampSupport = timeStampSupport,
       cacheIdType = CacheIdType.SimpleCacheId
     )(ec)
