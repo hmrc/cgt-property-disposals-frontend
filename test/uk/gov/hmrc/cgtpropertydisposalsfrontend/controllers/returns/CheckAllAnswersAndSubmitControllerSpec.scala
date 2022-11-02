@@ -2399,7 +2399,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       }
 
       "display the 60 days late filing penalty warning for an individual if the completion date is after 27-OCT-2021" in {
-        val completionDate      = CompletionDate(LocalDate.now().minusDays(31L))
+        val completionDate      = CompletionDate(LocalDate.now().minusDays(61L))
         val justSubmittedReturn = sample[JustSubmittedReturn].copy(
           subscribedDetails = sample[SubscribedDetails].copy(
             name = Right(sample[IndividualName])
@@ -2434,7 +2434,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       }
 
       "display the 60 days late filing penalty warning for a trust if the completion date is after 27-OCT-2021" in {
-        val completionDate      = CompletionDate(LocalDate.now().minusDays(31L))
+        val completionDate      = CompletionDate(LocalDate.now().minusDays(61L))
         val justSubmittedReturn = sample[JustSubmittedReturn].copy(
           subscribedDetails = sample[SubscribedDetails].copy(
             name = Left(sample[TrustName])
@@ -2467,6 +2467,76 @@ class CheckAllAnswersAndSubmitControllerSpec
           _.select("#lfpWarning").text shouldBe messageFromMessageKey(
             "confirmationOfSubmission.trust.60days.penalty.warning"
           )
+        )
+      }
+
+      "not display the 60 days late filing penalty warning for an individual if the completion date is after 27-OCT-2021 but before 60 days" in {
+        val completionDate      = CompletionDate(LocalDate.now().minusDays(59L))
+        val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+          subscribedDetails = sample[SubscribedDetails].copy(
+            name = Right(sample[IndividualName])
+          ),
+          completeReturn = sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self),
+              completionDate = completionDate
+            ),
+            representeeAnswers = None
+          ),
+          submissionResponse = sample[SubmitReturnResponse].copy(
+            charge = Some(sample[ReturnCharge]),
+            deltaCharge = None
+          ),
+          amendReturnData = None
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithJourney(justSubmittedReturn)
+              .copy(userType = Some(UserType.Individual))
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("confirmationOfSubmission.title"),
+          _.select("#lfpWarning").text shouldBe ""
+        )
+      }
+
+      "not display the 60 days late filing penalty warning for a trust if the completion date is after 27-OCT-2021 but before 60 days" in {
+        val completionDate      = CompletionDate(LocalDate.now().minusDays(59L))
+        val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+          subscribedDetails = sample[SubscribedDetails].copy(
+            name = Left(sample[TrustName])
+          ),
+          completeReturn = sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self),
+              completionDate = completionDate
+            ),
+            representeeAnswers = None
+          ),
+          submissionResponse = sample[SubmitReturnResponse].copy(
+            charge = Some(sample[ReturnCharge]),
+            deltaCharge = None
+          ),
+          amendReturnData = None
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithJourney(justSubmittedReturn)
+              .copy(userType = Some(UserType.Organisation))
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("confirmationOfSubmission.title"),
+          _.select("#lfpWarning").text shouldBe ""
         )
       }
 
