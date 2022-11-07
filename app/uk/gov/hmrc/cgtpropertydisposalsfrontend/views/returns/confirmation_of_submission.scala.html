@@ -125,7 +125,6 @@
   case _ => s"$key$userKey.printPage"
   }}
 
-@isLateReturn = @{completionDate.value.plusDays(30L).isBefore(TimeUtils.today)}
 @amendedReturnWithSameCompletionDate = @{ justSubmittedReturn.amendReturnData.exists(_.originalReturn.completeReturn.completionDate === justSubmittedReturn.completeReturn.completionDate) }
 @showDueDate = @{!amountOwed.equals(BigDecimal(0)) && !isPeriodOfAdmin}
 @taxOwedLabel = @{if(isAmend) "revisedLiability" else "taxOwed"}
@@ -138,6 +137,14 @@
         true
     } else {
         false
+    }
+}
+
+@isLateReturn = @{
+    if(is60DaysWarning){
+        completionDate.value.plusDays(60L).isBefore(TimeUtils.today)
+    } else {
+        completionDate.value.plusDays(30L).isBefore(TimeUtils.today)
     }
 }
 
