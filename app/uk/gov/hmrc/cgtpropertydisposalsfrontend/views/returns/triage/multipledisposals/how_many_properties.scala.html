@@ -54,17 +54,21 @@
 
     @formWrapper(triage.routes.MultipleDisposalsTriageController.howManyDisposalsSubmit()) {
 
+        @pageHeading(title)
+
+        <p>@messages(s"$key.p1")</p>
+        <p>@messages(s"$key.p2")</p>
+
         @textInput(
             fieldId = key,
-            label = pageHeading(title),
+            label = Html(title),
             helpText = None,
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
             value = form.data.getOrElse(key, ""),
             hasErrors = hasErrors,
             autoComplete = AutoCompleteType.On,
             inputClass = Some("input--xsmall"),
-            extraContent = Some(Html(s"""<p>${messages(s"$key.p1")}</p><p>${messages(s"$key.p2")}</p>"""))
+            labelClass = Some("visually-hidden")
         )
         @details(
             messages(s"$key.details.summary"),
