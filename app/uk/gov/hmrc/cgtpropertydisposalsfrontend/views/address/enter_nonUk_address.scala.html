@@ -31,7 +31,6 @@
 
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input_govuk,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
@@ -100,11 +99,9 @@
     @errorSummary(form, userKeyOnly = journeyErrorKey.stripSuffix("."))
   }
 
+  <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
+  <h1 class="govuk-heading-xl">@title</h1>
   @formWrapper(submit, 'novalidate -> "novalidate") {
-    <fieldset class="govuk-fieldset" id="@key">
-      <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-        @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())))
-      </legend>
       @textInput(
         fieldId = line1Key,
         label = Html(messages(s"$key${journeyErrorKey.stripSuffix(".")}.line1.label")),
@@ -150,7 +147,6 @@
         errorKey = form.error(countryCodeKey).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         autoComplete = AutoCompleteType.Country
       )
-    </fieldset>
 
     @submitButton(messages(if(isAmend) "button.continue" else if (addressJourneyType.showReturnToSummaryLink()) "button.saveAndContinue" else "button.continue"))
   }
