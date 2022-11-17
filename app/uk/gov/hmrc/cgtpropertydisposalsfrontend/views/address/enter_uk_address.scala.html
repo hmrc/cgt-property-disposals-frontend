@@ -29,7 +29,6 @@
 
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input_govuk,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
@@ -123,12 +122,10 @@
   @if(hasErrors) {
     @errorSummary(form, userKeyOnly = journeyErrorKey.stripSuffix("."))
   }
-
+  <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
+  <h1 class="govuk-heading-xl">@title</h1>
   @formWrapper(submit, 'novalidate -> "novalidate") {
-    <fieldset class="govuk-fieldset" id="@key">
-      <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-        @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())), helpText)
-      </legend>
+      <p class="govuk-body">@helpText</p>
       @textInput(
         fieldId = line1Key,
         label = Html(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line1.label")),
@@ -174,7 +171,6 @@
         inputClass = Some("govuk-input govuk-!-width-one-third"),
         autoComplete = AutoCompleteType.Postcode
       )
-    </fieldset>
 
     @if(showFindAddressLink) {
       <p class="govuk-body"><a class="govuk-link" href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
