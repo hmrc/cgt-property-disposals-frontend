@@ -35,7 +35,6 @@
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     govukButton: GovukButton,
     govukRadios : GovukRadios,
     govukInput : GovukInput
@@ -72,7 +71,6 @@
     @govukInput(Input(
         id = percentageShareKey,
         name = percentageShareKey,
-        inputType = percentageShareKey,
         label = Label(
             content =  HtmlContent(messages(s"$percentageShareKey$userKey.label")),
         ),
@@ -112,11 +110,8 @@
     @errorSummary(form, None, s"$userKey")
 }
 
+<span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
 @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwnSubmit(), 'novalidate -> "novalidate") {
-<fieldset class="govuk-fieldset" id="@key">
-<legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-    @pageHeading("", Some(messages("returns.disposal-details.caption")))
-</legend>
     @govukRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
@@ -133,7 +128,6 @@
     ))
 
     @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
-</fieldset>
 }
 
 @returnToSummaryLink(displayReturnToSummaryLink = true)
