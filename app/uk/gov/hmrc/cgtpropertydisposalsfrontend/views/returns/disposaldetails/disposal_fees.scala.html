@@ -34,7 +34,6 @@
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     govukButton: GovukButton,
     unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
@@ -80,14 +79,14 @@
         @errorSummary(form, Some(s"$key$userKey$indirectKey"))
     }
 
-
+    <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
     @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFeesSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),
             formError = form.error(key),
             hasErrors = form.error(key).nonEmpty,
-            label = pageHeading(title, Some(messages("returns.disposal-details.caption"))),
+            label = Html(title),
             labelAsHeading = true,
             helpText = Some(Html(helpTextMessage)),
             autoComplete = AutoCompleteType.On,

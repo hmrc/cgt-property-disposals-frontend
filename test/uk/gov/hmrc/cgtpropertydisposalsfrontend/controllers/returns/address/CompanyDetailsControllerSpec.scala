@@ -626,25 +626,25 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             { doc =>
               doc
-                .select("#address > legend > h1 > span")
+                .select(".govuk-caption-xl")
                 .text() shouldBe messageFromMessageKey(
                 "companyDetails.caption"
               )
 
               doc
-                .select("#address > div:nth-child(2) > label")
+                .select("label[for='address-line1']")
                 .text() shouldBe messageFromMessageKey(
                 "address.uk.companyDetails.line1.label"
               )
 
               doc
-                .select("#address > div:nth-child(3) > label")
+                .select("label[for='address-line2']")
                 .text() shouldBe messageFromMessageKey(
                 "address.uk.companyDetails.line2.label"
               )
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content form, #main-content form")
                 .attr("action") shouldBe routes.CompanyDetailsController
                 .enterUkAddressSubmit()
                 .url
@@ -707,25 +707,25 @@ class CompanyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             { doc =>
               doc
-                .select("#address > legend > h1 > span")
+                .select(".govuk-caption-xl")
                 .text() shouldBe messageFromMessageKey(
                 "returns.company-details.multipleIndirectDisposals.caption"
               )
 
               doc
-                .select("#address > div:nth-child(2) > label")
+                .select("label[for='address-line1']")
                 .text() shouldBe messageFromMessageKey(
                 "address.uk.companyDetails.line1.label"
               )
 
               doc
-                .select("#address > div:nth-child(3) > label")
+                .select("label[for='address-line2']")
                 .text() shouldBe messageFromMessageKey(
                 "address.uk.companyDetails.line2.label"
               )
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content form, #main-content form")
                 .attr("action") shouldBe routes.CompanyDetailsController
                 .enterUkAddressSubmit()
                 .url
@@ -1378,26 +1378,27 @@ class CompanyDetailsControllerSpec
             result,
             messageFromMessageKey(expectedTitleKey),
             { doc =>
+              println(doc)
               doc
-                .select("#nonUkAddress > legend > h1 > span")
+                .select(".govuk-caption-xl")
                 .text() shouldBe messageFromMessageKey(
                 "companyDetails.caption"
               )
 
               doc
-                .select("#nonUkAddress > div:nth-child(2) > label")
+                .select("label[for='nonUkAddress-line1']")
                 .text() shouldBe messageFromMessageKey(
                 "nonUkAddress.companyDetails.line1.label"
               )
 
               doc
-                .select("#nonUkAddress > div:nth-child(3) > label")
+                .select("label[for='nonUkAddress-line2']")
                 .text() shouldBe messageFromMessageKey(
                 "nonUkAddress.companyDetails.line2.label"
               )
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content form, #main-content form")
                 .attr("action") shouldBe routes.CompanyDetailsController
                 .enterNonUkAddressSubmit()
                 .url
@@ -1461,25 +1462,25 @@ class CompanyDetailsControllerSpec
             { doc =>
               if (isPeriodOfAdmin)
                 doc
-                  .select("#nonUkAddress > legend > h1 > span")
+                  .select(".govuk-caption-xl")
                   .text() shouldBe messageFromMessageKey(
                   "companyDetails.caption"
                 )
               else
                 doc
-                  .select("#nonUkAddress > legend > h1 > span")
+                  .select(".govuk-caption-xl")
                   .text() shouldBe messageFromMessageKey(
                   "returns.company-details.multipleIndirectDisposals.caption"
                 )
 
               doc
-                .select("#nonUkAddress > div:nth-child(2) > label")
+                .select("label[for='nonUkAddress-line1']")
                 .text() shouldBe messageFromMessageKey(
                 "nonUkAddress.companyDetails.line1.label"
               )
 
               doc
-                .select("#nonUkAddress > div:nth-child(3) > label")
+                .select("label[for='nonUkAddress-line2']")
                 .text() shouldBe messageFromMessageKey(
                 "nonUkAddress.companyDetails.line2.label"
               )

@@ -17,8 +17,6 @@
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-
 @this(
     errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
 )
@@ -26,7 +24,6 @@
 @(
     fieldId: String,
     label: Html,
-    autoComplete: AutoCompleteType,
     hasErrors: Boolean,
     errorKey: Option[String],
     helpText: Option[Html] = None,
@@ -97,8 +94,6 @@
   id="@fieldId"
   type="file"
   name="@fieldId"
-  value=""
   data-is-mandatory-upload="@isMandatoryUpload"
-  autocomplete="@autoComplete.value"
     @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
 </div>

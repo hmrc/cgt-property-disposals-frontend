@@ -349,25 +349,25 @@ class MixedUsePropertyDetailsControllerSpec
             messageFromMessageKey(expectedTitleKey),
             { doc =>
               doc
-                .select("#address > legend > h1 > span")
+                .select(".govuk-caption-xl")
                 .text() shouldBe messageFromMessageKey(
                 "singleMixedUse.caption"
               )
 
               doc
-                .select("#address > div:nth-child(2) > label")
+                .select("label[for='address-line1']")
                 .text() shouldBe messageFromMessageKey(
                 "address.uk.line1.label"
               )
 
               doc
-                .select("#address > div:nth-child(3) > label")
+                .select("label[for='address-line2']")
                 .text() shouldBe messageFromMessageKey(
                 "address.uk.line2.label"
               )
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#content form, #main-content form")
                 .attr("action") shouldBe routes.MixedUsePropertyDetailsController
                 .enterUkAddressSubmit()
                 .url

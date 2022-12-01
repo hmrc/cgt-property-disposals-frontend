@@ -20,7 +20,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUpload
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -105,7 +104,6 @@
           errorKey = None,
           labelAsHeading = false,
           labelClass = Some("heading-medium bold"),
-          autoComplete = AutoCompleteType.On,
           isMandatoryUpload = true
         )
 

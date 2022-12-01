@@ -44,11 +44,11 @@
 
 @classBuilder(s: Option[String]*) = @{s.toList.collect{case Some(s) => s}.mkString(" ")}
 
-@classes = @{if(hasErrors) "govuk-form-group govuk-form-group-error" else "govuk-form-group" }
+@classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
 @inputClasses = @{if(hasErrors) {
-  classBuilder(Some("form-control"), Some("form-control-error"))
+  classBuilder(Some("govuk-input"), Some("govuk-input--error"))
 } else {
-  classBuilder(Some("form-control"))
+  classBuilder(Some("govuk-input"))
 }}
 
 @hintTextKey = @{s"${{fieldId}}-govuk-hint"}
@@ -93,7 +93,7 @@
     @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${error.message}", error.args: _*))
   }
   <div class="govuk-input__wrapper @inputClass @aspect">
-    <div class="govuk-input__prefix @aspect@if(hasErrors){ form-control--error}" aria-hidden="true">
+    <div class="govuk-input__prefix @aspect" aria-hidden="true">
     @unit
     </div>
       <input
@@ -103,7 +103,6 @@
               id="@fieldId"
               name="@fieldId"
               type="text"
-              inputmode="decimal"
               @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
   </div>
 

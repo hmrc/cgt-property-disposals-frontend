@@ -76,10 +76,9 @@
     </div>
   }
   @hintIdWithHintText.map { case (id, text) =>
-    <span id="@id" class="govuk-hint">
+    <div id="@id" class="govuk-hint">
       @text
-    </span>
-    <br/>
+    </div>
   }
   @errorIdWithMessageKey.map { case (id, key) =>
     @errorInline(id, messages(s"$fieldId.$key"))
