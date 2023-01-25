@@ -1,22 +1,22 @@
 multiple-draft.exit.title=Mae gennych Ffurflen Dreth ddrafft sy’n bodoli eisoes
 multiple-draft.exit.p1=Llenwch eich Ffurflen Dreth ddrafft cyn dechrau un newydd.
 who-are-you-reporting-for-exit-page.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
-who-are-you-reporting-for-exit-page.helpText=Rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod i CThEM fod angen i chi newid pwy ydych yn llenwi’r Ffurflen Dreth hon ar ei gyfer.
+who-are-you-reporting-for-exit-page.helpText=Rhaid i chi <a href="{0}">gysylltu â CThEF</a>. Rhowch wybod i CThEF fod angen i chi newid pwy ydych yn llenwi’r Ffurflen Dreth hon ar ei gyfer.
 previousReturnExistsWithSameCompletionDate.amend.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
-previousReturnExistsWithSameCompletionDate.amend.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
-previousReturnExistsWithSameCompletionDate.amend.trust.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
-previousReturnExistsWithSameCompletionDate.amend.agent.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEM</a>.
+previousReturnExistsWithSameCompletionDate.amend.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEF</a>.
+previousReturnExistsWithSameCompletionDate.amend.trust.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEF</a>.
+previousReturnExistsWithSameCompletionDate.amend.agent.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEF</a>.
 previousReturnExistsWithSameCompletionDate.amend.p2=Mae hyn oherwydd bod rhaid i werthiannau neu warediadau sydd â’r un dyddiad cwblhau fod ar yr un Ffurflen Dreth.
-previousReturnExistsWithSameCompletionDate.amend.p3=Rhowch wybod i CThEM fod angen i chi newid:
+previousReturnExistsWithSameCompletionDate.amend.p3=Rhowch wybod i CThEF fod angen i chi newid:
 previousReturnExistsWithSameCompletionDate.amend.li1=Ffurflen Dreth flaenorol
 previousReturnExistsWithSameCompletionDate.amend.li2=y Ffurflen Dreth sydd â’r un dyddiad cwblhau gwaredu â’r un a nodwyd gennych ar y dudalen flaenorol
 previousReturnExistsWithSameCompletionDate.p2=Bydd angen i chi newid <strong class="bold">nifer y gwarediadau yr ydych yn eu cynnwys</strong> ar y Ffurflen Dreth honno
 previousReturnExistsWithSameCompletionDate.caption=Manylion Ffurflen Dreth sy’n bodoli eisoes
 previousReturnExistsWithSameCompletionDate.button.viewAndChange=Bwrw golwg dros a newid Ffurflen Dreth
-cannotAmendResidentialStatusForAssetType.title=Rhaid i chi gysylltu â CThEM
-cannotAmendResidentialStatusForAssetType.warning=Er mwyn newid eich statws preswylio ar gyfer y Ffurflen Dreth hon, mae’n rhaid i chi gysylltu â CThEM cyn gynted â phosibl.
-cannotAmendResidentialStatusForAssetType.agent.warning=Er mwyn newid statws preswylio eich cleient ar gyfer y Ffurflen Dreth hon, mae’n rhaid i chi gysylltu â CThEM cyn gynted â phosibl.
-cannotAmendResidentialStatusForAssetType.trust.warning=Er mwyn newid statws preswylio’r ymddiriedolaeth ar gyfer y Ffurflen Dreth hon, mae’n rhaid i chi gysylltu â CThEM cyn gynted â phosibl.
+cannotAmendResidentialStatusForAssetType.title=Rhaid i chi gysylltu â CThEF
+cannotAmendResidentialStatusForAssetType.warning=Er mwyn newid eich statws preswylio ar gyfer y Ffurflen Dreth hon, mae’n rhaid i chi gysylltu â CThEF cyn gynted â phosibl.
+cannotAmendResidentialStatusForAssetType.agent.warning=Er mwyn newid statws preswylio eich cleient ar gyfer y Ffurflen Dreth hon, mae’n rhaid i chi gysylltu â CThEF cyn gynted â phosibl.
+cannotAmendResidentialStatusForAssetType.trust.warning=Er mwyn newid statws preswylio’r ymddiriedolaeth ar gyfer y Ffurflen Dreth hon, mae’n rhaid i chi gysylltu â CThEF cyn gynted â phosibl.
 cannotAmendResidentialStatusForAssetType.p1=Mae hyn oherwydd y gall y newid hwn effeithio ar y canlynol:
 cannotAmendResidentialStatusForAssetType.li1=y dyddiad y mae angen i chi dalu Treth Enillion Cyfalaf erbyn
 cannotAmendResidentialStatusForAssetType.agent.li1=y dyddiad y mae angen iddynt dalu Treth Enillion Cyfalaf erbyn
@@ -30,7 +30,7 @@ cannotAmendResidentialStatusForAssetType.trust.li3=sut y mae angen rhoi gwybod a
 cannotAmendResidentialStatusForAssetType.li4=llog a thaliadau cosb y mae’n bosibl sydd arnoch yn barod neu mae’n bosibl y codir arnoch yn y dyfodol
 cannotAmendResidentialStatusForAssetType.agent.li4=llog a thaliadau cosb y mae’n bosibl sydd arno yn barod neu mae’n bosibl y codir arno yn y dyfodol
 cannotAmendResidentialStatusForAssetType.trust.li4=llog a thaliadau cosb y mae’n bosibl sydd ar yr ymddiriedolaeth yn barod neu mae’n bosibl y codir arni yn y dyfodol
-cannotAmendResidentialStatusForAssetType.link=Cysylltu â CThEM
+cannotAmendResidentialStatusForAssetType.link=Cysylltu â CThEF
 ukResidentCanOnlyReportResidential.agent.p1=Gwnaethoch roi gwybod i ni fod eich cleient yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
 ukResidentCanOnlyReportResidential.trust.p1=Gwnaethoch roi gwybod i ni fod yr ymddiriedolaeth yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
 ukResidentCanOnlyReportResidential.capacitor.p1=Gwnaethoch roi gwybod i ni fod y person yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
@@ -68,7 +68,7 @@ landingPage.howTo.p5=Os nad ydych yn breswylydd, mae’n rhaid i chi roi gwybod 
 landingPage.startButton=Dechrau
 landingPage.beforeYouStart.h2=Cyn i chi ddechrau
 landingPage.beforeYouStart.p1=I ddefnyddio’r gwasanaeth hwn, bydd angen Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer Porth y Llywodraeth arnoch. Os nad oes gennych Ddynodydd Defnyddiwr, gallwch greu un.
-landingPage.beforeYouStart.p2=Gallwch <a href="{0}">gysylltu â CThEM</a> os oes angen help arnoch i gael at y gwasanaeth.
+landingPage.beforeYouStart.p2=Gallwch <a href="{0}">gysylltu â CThEF</a> os oes angen help arnoch i gael at y gwasanaeth.
 landingPage.beforeYouStart.p3=Sicrhewch fod yr wybodaeth ganlynol wrth law:
 landingPage.beforeYouStart.list1.bullet1=cyfeiriad a chod post yr eiddo
 landingPage.beforeYouStart.list1.bullet2=y dyddiad y cawsoch yr eiddo
@@ -88,7 +88,7 @@ landingPage.capacitorOrPersonalRepresentative.p1=Galluogydd yw rhywun sy’n hel
 landingPage.capacitorOrPersonalRepresentative.p2=I ddefnyddio’r gwasanaeth hwn ar gyfer person arall, bydd angen i chi:
 landingPage.capacitorOrPersonalRepresentative.p4=Mae’n rhaid i’r manylion a roddwch gyd-fynd â’r manylion sydd gennym am y person.
 landingPage.capacitorOrPersonalRepresentative.p5=Os ydych yn gynrychiolydd personol, bydd angen i chi hefyd roi’r dyddiad y bu farw’r person rydych yn ei gynrychioli.
-landingPage.capacitorOrPersonalRepresentative.p6=Dylech lawrlwytho neu argraffu copi o’r Ffurflen Dreth ar gyfer eich cofnodion. Mae hyn oherwydd unwaith y bydd y Ffurflen Dreth wedi’i hanfon i CThEM, ni fydd ar gael ar-lein er mwyn i chi fwrw golwg drosti na’i newid ar-lein.
+landingPage.capacitorOrPersonalRepresentative.p6=Dylech lawrlwytho neu argraffu copi o’r Ffurflen Dreth ar gyfer eich cofnodion. Mae hyn oherwydd unwaith y bydd y Ffurflen Dreth wedi’i hanfon i CThEF, ni fydd ar gael ar-lein er mwyn i chi fwrw golwg drosti na’i newid ar-lein.
 landingPage.capacitorOrPersonalRepresentative.example.title=<strong class="bold">Enghraifft</strong>
 landingPage.capacitorOrPersonalRepresentative.p8=Bu farw Mr Andrews ar 20 Ebrill 2020. Mr Smith yw cynrychiolydd personol ystâd Mr Andrews. Cyn iddo farw, roedd Mr Andrews wedi cytuno i werthu ei eiddo buddsoddi preswyl yn y DU.
 landingPage.capacitorOrPersonalRepresentative.p9=Gwnaeth Mr Andrews gyfnewid contractau ar 15 Ebrill 2020 cyn iddo farw. Ar ôl iddo farw, cwblhaodd Mr Smith y gwerthiant eiddo. Roedd Treth Enillion Cyfalaf yn ddyledus.
@@ -104,7 +104,7 @@ landingPage.capacitorOrPersonalRepresentative.list2.bullet3=ei rif cyfrif Treth 
 landingPage.sidebar.title=Cynnwys cysylltiedig
 landingPage.sidebar.1=Cyfrifo Treth Enillion Cyfalaf
 landingPage.sidebar.2=Treth Enillion Cyfalaf
-landingPage.sidebar.3=Rhoi gwybod i CThEM am Dreth Enillion Cyfalaf ar eiddo neu dir yn y DU os nad ydych yn breswylydd
+landingPage.sidebar.3=Rhoi gwybod i CThEF am Dreth Enillion Cyfalaf ar eiddo neu dir yn y DU os nad ydych yn breswylydd
 landingPage.sidebar.4=Talu’ch treth
 
 
@@ -200,7 +200,7 @@ accessibilityStatement.p2=Mae’r gwasanaeth hwn yn rhan o wefan ehangach GOV.UK
 accessibilityStatement.p3=Mae’r dudalen hon dim ond yn cynnwys gwybodaeth am y gwasanaeth Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU, sydd ar gael yn {0}.
 accessibilityStatement.usingThisService.title=Defnyddio’r gwasanaeth hwn
 accessibilityStatement.usingThisService.p1=Gallwch ddefnyddio’r gwasanaeth hwn i roi gwybod am warediad o dir neu eiddo preswyl yn y DU (a wnaed o 6 Ebrill 2020 ymlaen). Gallwch hefyd fwrw golwg dros eich Ffurflenni Treth blaenorol a’r rhai cyfredol.
-accessibilityStatement.usingThisService.p2=Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EM (CThEM).
+accessibilityStatement.usingThisService.p2=Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EM (CThEF).
 accessibilityStatement.usingThisService.p3=Rydym am i gymaint o bobl â phosibl allu defnyddio’r gwasanaeth hwn. Mae hyn yn golygu y dylech allu:
 accessibilityStatement.usingThisService.li1=newid lliwiau, lefelau cyferbyniad a ffontiau
 accessibilityStatement.usingThisService.li2=chwyddo’r sgrin hyd at 300% heb i’r testun ddisgyn oddi ar y sgrin
@@ -211,13 +211,13 @@ accessibilityStatement.usingThisService.p4=Rydym hefyd wedi sicrhau bod y testun
 accessibilityStatement.usingThisService.making-device-easier.part1=Mae gan AbilityNet gyngor
 accessibilityStatement.usingThisService.making-device-easier.part2=' ar wneud eich dyfais yn haws i’w defnyddio os oes gennych anabledd.'
 accessibilityStatement.howAccessible.title=Pa mor hygyrch yw’r gwasanaeth hwn
-accessibilityStatement.howAccessible.p1=Mae CThEM wedi ymrwymo i wneud y gwasanaeth hwn yn hygyrch, yn unol â Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018.
+accessibilityStatement.howAccessible.p1=Mae CThEF wedi ymrwymo i wneud y gwasanaeth hwn yn hygyrch, yn unol â Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018.
 accessibilityStatement.howAccessible.p2=Cafodd y gwasanaeth hwn ei brofi ar 15 Mai 2020 gan y Ganolfan Hygyrchedd Digidol. Canfuwyd ei fod yn cydymffurfio â <a href="{0}">safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1</a>. Ers hynny, mae’r gwasanaeth wedi’i ehangu. Ni allwn fod yn sicr ei fod yn cydymffurfio’n llawn. Bydd y gwasanaeth yn trefnu archwiliad hygyrchedd llawn erbyn 31 Rhagfyr 2022
 
 ## Contact
 accessibilityStatement.contact.heading=Yr hyn i’w wneud os ydych yn cael anhawster wrth ddefnyddio’r gwasanaeth hwn
 accessibilityStatement.contact.extra-support.part1='Gallwch '
-accessibilityStatement.contact.extra-support.part2=gysylltu â CThEM os oes angen cymorth ychwanegol
+accessibilityStatement.contact.extra-support.part2=gysylltu â CThEF os oes angen cymorth ychwanegol
 accessibilityStatement.contact.extra-support.part3=' arnoch i lenwi ffurflenni, neu i gael fformat gwahanol, megis print bras, recordiad sain neu Braille.'
 
 
@@ -227,8 +227,8 @@ accessibilityStatement.notHappy.title=Os ydych yn anfodlon ar ein hymateb
 accessibilityStatement.notHappy.p1=Mae’r Comisiwn Cydraddoldeb a Hawliau Dynol (EHRC) yn gyfrifol am orfodi Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018 (y ‘rheoliadau hygyrchedd’). Os nad ydych yn fodlon ar sut rydym yn ateb eich cwyn, <a href="{0}">cysylltwch â’r Gwasanaeth Cynghori a Chymorth Cydraddoldeb (EASS)</a>, neu’r <a href="{1}">Equality Commission for Northern Ireland (ECNI)</a> os ydych yn byw yng Ngogledd Iwerddon.
 accessibilityStatement.contactingUs.title=Cysylltu â ni dros y ffôn neu gael ymweliad personol gennym
 accessibilityStatement.contactingUs.p1=Rydym yn cynnig gwasanaeth text relay os ydych yn fyddar, â nam ar eich clyw neu os oes gennych nam ar eich lleferydd.
-accessibilityStatement.contactingUs.p2=Gallwn ddarparu dehonglydd Iaith Arwyddion Prydain (BSL), neu gallwch drefnu ymweliad gan ymgynghorydd CThEM i’ch helpu i gwblhau’r gwasanaeth.
-accessibilityStatement.contactingUs.p3=Dysgwch <a href="{0}">sut i gael cymorth ychwanegol oddi wrth CThEM</a>.
+accessibilityStatement.contactingUs.p2=Gallwn ddarparu dehonglydd Iaith Arwyddion Prydain (BSL), neu gallwch drefnu ymweliad gan ymgynghorydd CThEF i’ch helpu i gwblhau’r gwasanaeth.
+accessibilityStatement.contactingUs.p3=Dysgwch <a href="{0}">sut i gael cymorth ychwanegol oddi wrth CThEF</a>.
 accessibilityStatement.howWeTested.title=Sut gwnaethom brofi’r gwasanaeth hwn
 accessibilityStatement.howWeTested.p1=Cafodd y gwasanaeth ei brofi ar 15 Mai 2020 a gwiriwyd ei fod yn cydymffurfio â safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Cafodd ei adeiladu gan ddefnyddio rhannau a brofwyd gan y <a href="{0}">Ganolfan Hygyrchedd Digidol</a>.
 accessibilityStatement.howWeTested.p2=Paratowyd y dudalen hon ar 6 Ebrill 2020. Cafodd ei diweddaru ddiwethaf ar 9 Mehefin 2022.
@@ -383,8 +383,8 @@ subscribed.individual.p1=Rydych wedi creu cyfrif Treth Enillion Cyfalaf ar eiddo
 subscribed.organisation.p1=Rydych wedi creu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU ar gyfer eich ymddiriedolaeth neu ystâd.
 subscribed.organisation.p2=Rhif cyfrif yr ymddiriedolaeth neu ystâd yw <strong class="bold">{0}</strong>.
 subscribed.individual.p2=Rhif eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU yw <strong class="bold">{0}</strong>.
-subscribed.organisation.p3=Bydd rhaid i chi roi’r rhif hwn i CThEM os oes angen i chi drafod cyfrif yr ymddiriedolaeth neu ystâd.
-subscribed.individual.p3=Bydd rhaid i chi roi’r rhif hwn i CThEM os oes angen i chi drafod eich cyfrif.
+subscribed.organisation.p3=Bydd rhaid i chi roi’r rhif hwn i CThEF os oes angen i chi drafod cyfrif yr ymddiriedolaeth neu ystâd.
+subscribed.individual.p3=Bydd rhaid i chi roi’r rhif hwn i CThEF os oes angen i chi drafod eich cyfrif.
 subscribed.p4=Rydym wedi anfon e-bost cadarnhau i <strong class="bold">{0}</strong>.
 subscribed.buttonText=Ewch i’r cyfrif
 registerTrust.title=Bydd angen i chi gofrestru’r ymddiriedolaeth
@@ -453,7 +453,7 @@ iv.insufficientEvidence.openingTimes=<p>Oriau agor:</p><p>Dydd Llun – Dydd Gwe
 iv.insufficientEvidence.openingTimes.p3=Ar gau ar y penwythnos ac ar wyliau banc.
 iv.insufficientEvidence.helpWithCallCharges=Gwybodaeth am gostau galwadau
 iv.insufficientEvidence.getHelp=Help
-iv.insufficientEvidence.additionalNeedsLink=i ddelio â CThEM os oes gennych anghenion ychwanegol
+iv.insufficientEvidence.additionalNeedsLink=i ddelio â CThEF os oes gennych anghenion ychwanegol
 iv.timeout.title=Mae’ch sesiwn wedi dod i ben
 iv.timeout.p1=Rydych chi wedi bod yn segur yn rhy hir felly rydym wedi dod â’ch sesiwn i ben.
 iv.timeout.p2=Bydd angen i chi ddechrau eto.
@@ -479,9 +479,9 @@ enterTrn.tooManyAttempts.title=Bydd angen i chi aros a rhoi cynnig arall arni
 enterTrn.tooManyAttempts.p1=Rydych wedi ceisio nodi eich Rhif Cofrestru Ymddiriedolaeth ac enw’r ymddiriedolaeth gormod o weithiau.
 enterTrn.tooManyAttempts.p2=Bydd angen i chi aros am 2 awr a rhoi cynnig arall arni.
 enterTrn.whatATrnIs=Beth yw Rhif Cofrestru Ymddiriedolaeth?
-enterTrn.whatATrnIs.p1=Mae CThEM yn anfon y rhif hwn i’r person sy’n <a href="{0}" target="_blank">cofrestru’r ymddiriedolaeth (yn agor tab newydd)</a>.
+enterTrn.whatATrnIs.p1=Mae CThEF yn anfon y rhif hwn i’r person sy’n <a href="{0}" target="_blank">cofrestru’r ymddiriedolaeth (yn agor tab newydd)</a>.
 enterTrn.ifYouCannotFind=Os na allwch ddod o hyd iddo
-enterTrn.ifYouCannotFind.p1=Os gwnaethoch gofrestru’r ymddiriedolaeth a ni allwch ddod o hyd i’w Rhif Cofrestru Ymddiriedolaeth, gallwch <a href="{0}" target="_blank">gysylltu â CThEM (yn agor tab newydd)</a>.
+enterTrn.ifYouCannotFind.p1=Os gwnaethoch gofrestru’r ymddiriedolaeth a ni allwch ddod o hyd i’w Rhif Cofrestru Ymddiriedolaeth, gallwch <a href="{0}" target="_blank">gysylltu â CThEF (yn agor tab newydd)</a>.
 enterTrustName.label=Enw’r ymddiriedolaeth
 trustName.error.required=Nodwch enw’ch ymddiriedolaeth
 trustName.error.tooLong=Mae’n rhaid i enw’ch ymddiriedolaeth fod yn llai na 105 o gymeriadau
@@ -541,7 +541,7 @@ agent.confirm-client.cgt-reference=Rhif cyfrif Treth Enillion Cyfalaf ar eiddo y
 agent.confirm-client.change-client=Newid cleient
 agentNoEnrolment.title=Defnyddiwch eich cyfrif gwasanaethau asiant i fynd at y gwasanaeth hwn
 agentNoEnrolment.p1=Bydd angen i chi fewngofnodi gan ddefnyddio Dynodydd Defnyddiwr (ID) a chyfrinair eich cyfrif gwasanaethau asiant. Os nad oes gennych un, bydd angen i chi <a href="{0}">greu cyfrif gwasanaethau asiant</a>.
-agentNoEnrolment.p2=Peidiwch â defnyddio manylion mewngofnodi ar gyfer cyfrif gwasanaethau ar-lein CThEM ar gyfer asiantau.
+agentNoEnrolment.p2=Peidiwch â defnyddio manylion mewngofnodi ar gyfer cyfrif gwasanaethau ar-lein CThEF ar gyfer asiantau.
 agentNoEnrolment.button.tryAgain=Rhowch gynnig arall arni
 
 #===================================================
@@ -580,8 +580,8 @@ account.manageYourDetails.subtitle=Rhif y cyfrif
 account.manageYourDetails.accountName=Enw’r cyfrif
 account.manageYourDetails.contactHeading=Manylion y person cyswllt
 account.manageYourDetails.p=Byddwn dim ond yn defnyddio’r manylion cyswllt hyn os oes angen i ni gysylltu â chi ynghylch y gwasanaeth hwn.
-account.manageYourDetails.individual.p2=Os oes angen i ‘Enw’r cyfrif’ newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEM (yn agor tab newydd)</a>.
-account.manageYourDetails.organisation.p2=Os bydd enw neu gyfeiriad y prif ymddiriedolwr yn newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEM (yn agor tab newydd)</a>.
+account.manageYourDetails.individual.p2=Os oes angen i ‘Enw’r cyfrif’ newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEF (yn agor tab newydd)</a>.
+account.manageYourDetails.organisation.p2=Os bydd enw neu gyfeiriad y prif ymddiriedolwr yn newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEF (yn agor tab newydd)</a>.
 account.manageYourDetails.yourName=Eich enw
 account.manageYourDetails.ContactName.changed=Mae’r enw cyswllt wedi newid
 account.manageYourDetails.Email.changed=Mae’r cyfeiriad e-bost cyswllt wedi newid
@@ -596,7 +596,7 @@ returns.list.nextPaymentDue=Y dyddiad cau nesaf ar gyfer talu treth
 returns.list.noTaxDue=Nid oedd unrhyw dreth yn ddyledus gennych am y Ffurflen Dreth hon
 returns.list.leftToPay=Y cyfanswm sy’n weddill i’w dalu
 returns.list.taxOwed=Treth sy’n ddyledus ar gyfer y Ffurflen Dreth
-returns.list.sentDate=Anfonwyd i CThEM ar {0}
+returns.list.sentDate=Anfonwyd i CThEF ar {0}
 returns.list.disposalDetails=Manylion y gwarediad
 returns.list.updating-payment-details=Rydym yn diweddaru’r manylion talu
 returns.paymentTakes3Days=Gall taliadau gymryd hyd at 3 diwrnod gwaith i ddangos ar y dudalen hon
@@ -692,8 +692,8 @@ numberOfProperties.cyaChange=faint o eiddo rydych am eu cynnwys yn y Ffurflen Dr
 
 previousReturnExistsWithSameCompletionDate.title=Bydd angen i chi newid Ffurflen Dreth sy’n bodoli eisoes
 previousReturnExistsWithSameCompletionDate.p1=Rydych eisoes wedi anfon Ffurflen Dreth a oedd â gwarediad arni gyda dyddiad cwblhau o <strong class="bold">{0}</strong>. Bydd angen i chi newid y Ffurflen Dreth honno yn hytrach na chreu un newydd.
-previousReturnExistsWithSameCompletionDate.trust.p1=Mae’n rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod iddynt fod angen i chi newid un o Ffurflenni Treth blaenorol eich ymddiriedolaeth.
-previousReturnExistsWithSameCompletionDate.agent.p1=Mae’n rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod iddynt fod angen i chi newid un o Ffurflenni Treth blaenorol eich cleient.
+previousReturnExistsWithSameCompletionDate.trust.p1=Mae’n rhaid i chi <a href="{0}">gysylltu â CThEF</a>. Rhowch wybod iddynt fod angen i chi newid un o Ffurflenni Treth blaenorol eich ymddiriedolaeth.
+previousReturnExistsWithSameCompletionDate.agent.p1=Mae’n rhaid i chi <a href="{0}">gysylltu â CThEF</a>. Rhowch wybod iddynt fod angen i chi newid un o Ffurflenni Treth blaenorol eich cleient.
 previousReturnExistsWithSameCompletionDate.propertyDisposals.title=Gwarediadau eiddo
 previousReturnExistsWithSameCompletionDate.propertyDisposals.p1=Bydd angen i chi newid y Ffurflen Dreth gyda’r eiddo a oedd gan y canlynol:
 previousReturnExistsWithSameCompletionDate.propertyDisposals.li1=yr un dyddiad cwblhau â’r un rydych am roi gwybod amdano nawr
@@ -888,7 +888,7 @@ sharesDisposalDate-month.error.monthAndYearRequired=Mae’n rhaid i’r dyddiad 
 sharesDisposalDate-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad gwaredu gynnwys diwrnod a blwyddyn
 sharesDisposalDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad gwaredu gynnwys diwrnod a mis
 sharesDisposalDate.error.tooFarInFuture=Ni all y dyddiad y gwnaethoch waredu’r cyfranddaliadau fod yn y dyfodol
-sharesDisposalDate.error.before1900=Mae’n rhaid i’r dyddiad y gwnaethoch waredu’r cyfranddaliadau fod ar neu ar ôl 01 01 1900, cysylltwch â CThEM os yw’r dyddiad cyn hyn
+sharesDisposalDate.error.before1900=Mae’n rhaid i’r dyddiad y gwnaethoch waredu’r cyfranddaliadau fod ar neu ar ôl 01 01 1900, cysylltwch â CThEF os yw’r dyddiad cyn hyn
 sharesDisposalDate.error.periodOfAdminDeathNotAfterDate=Ni all y dyddiad gwaredu fod ar neu cyn dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r Ffurflen Dreth hon?’
 sharesDisposalDate.error.nonPeriodOfAdminDeathAfterDate=Ni all y dyddiad gwaredu fod ar ôl dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r Ffurflen Dreth hon?’
 sharesDisposalDate.cyaChange=pryd y gwerthwyd y cyfranddaliadau
@@ -942,7 +942,7 @@ disposalDate.link=<a class="govuk-link" href="{0}" target="_blank">Cael gwybod b
 disposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
 disposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
 disposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod heddiw neu yn y gorffennol
-disposalDate.error.before1900=Mae’n rhaid i’r dyddiad cyfnewid contractau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEM os yw’r dyddiad cyn hyn
+disposalDate.error.before1900=Mae’n rhaid i’r dyddiad cyfnewid contractau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEF os yw’r dyddiad cyn hyn
 disposalDate.error.periodOfAdminDeathNotAfterDate=Mae’n rhaid i’r dyddiad cyfnewid fod ar neu ar ôl dyddiad y farwolaeth
 disposalDate.error.nonPeriodOfAdminDeathAfterDate=Mae‘n rhaid i‘r dyddiad cyfnewid fod ar neu cyn dyddiad y farwolaeth
 disposalDate-day.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys diwrnod
@@ -972,7 +972,7 @@ completionDate.error.required=Nodwch ddyddiad cwblhau
 completionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
 completionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl dyddiad cyfnewid y contract, {0}
 completionDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cwblhau fod heddiw neu yn y gorffennol
-completionDate.error.before1900=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEM os yw’r dyddiad cyn hyn
+completionDate.error.before1900=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEF os yw’r dyddiad cyn hyn
 completionDate-day.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod
 completionDate-month.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys mis
 completionDate-year.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys blwyddyn
@@ -1151,7 +1151,7 @@ multipleDisposalsCompletionDate.details.p1=Fel arfer, <a class="govuk-link" href
 multipleDisposalsCompletionDate.error.required=Nodwch ddyddiad cwblhau
 multipleDisposalsCompletionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
 multipleDisposalsCompletionDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cwblhau fod heddiw neu yn y gorffennol
-multipleDisposalsCompletionDate.error.before1900=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl 01 01 1900, cysylltwch â CThEM os yw’r dyddiad cyn hyn
+multipleDisposalsCompletionDate.error.before1900=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl 01 01 1900, cysylltwch â CThEF os yw’r dyddiad cyn hyn
 multipleDisposalsCompletionDate-day.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod
 multipleDisposalsCompletionDate-month.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys mis
 multipleDisposalsCompletionDate-year.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys blwyddyn
@@ -1851,21 +1851,21 @@ acquisitionDate.agent.error.tooFarInFuture=Mae’n rhaid i’r dyddiad y gwnaeth
 acquisitionDate.trust.error.tooFarInFuture=Mae’n rhaid i’r dyddiad y gwnaeth yr ymddiriedolaeth gaffael yr eiddo fod cyn y dyddiad y gwnaeth waredu’r eiddo
 acquisitionDate.capacitor.error.tooFarInFuture=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael yr eiddo fod cyn y dyddiad y gwnaethoch waredu’r eiddo
 acquisitionDate.personalRep.error.tooFarInFuture=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael yr eiddo fod cyn y dyddiad y gwnaeth waredu’r eiddo
-acquisitionDate.error.before1900=Mae’n rhaid i’r dyddiad y cawsoch yr eiddo fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
-acquisitionDate.agent.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth eich cleient gaffael yr eiddo fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
-acquisitionDate.trust.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth yr ymddiriedolaeth gaffael yr eiddo fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
-acquisitionDate.capacitor.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael yr eiddo fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
-acquisitionDate.personalRep.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael yr eiddo fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
+acquisitionDate.error.before1900=Mae’n rhaid i’r dyddiad y cawsoch yr eiddo fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
+acquisitionDate.agent.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth eich cleient gaffael yr eiddo fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
+acquisitionDate.trust.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth yr ymddiriedolaeth gaffael yr eiddo fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
+acquisitionDate.capacitor.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael yr eiddo fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
+acquisitionDate.personalRep.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael yr eiddo fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
 acquisitionDate.indirect.error.tooFarInFuture=Mae’n rhaid i’r dyddiad y cawsoch y cyfranddaliadau fod cyn y diwrnod y gwnaethoch eu gwerthu neu eu gwaredu
 acquisitionDate.agent.indirect.error.tooFarInFuture=Mae’n rhaid i’r dyddiad y gwnaeth eich cleient gaffael y cyfranddaliadau fod cyn y diwrnod y gwnaeth eu gwerthu neu eu gwaredu
 acquisitionDate.trust.indirect.error.tooFarInFuture=Mae’n rhaid i’r dyddiad y gwnaeth yr ymddiriedolaeth gaffael y cyfranddaliadau fod cyn y diwrnod y gwnaeth eu gwerthu neu eu gwaredu
 acquisitionDate.capacitor.indirect.error.tooFarInFuture=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael y cyfranddaliadau fod cyn y diwrnod y gwnaeth eu gwerthu neu eu gwaredu
 acquisitionDate.personalRep.indirect.error.tooFarInFuture=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael y cyfranddaliadau fod cyn y diwrnod y gwnaeth eu gwerthu neu eu gwaredu
-acquisitionDate.indirect.error.before1900=Mae’n rhaid i’r dyddiad y cawsoch y cyfranddaliadau fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
-acquisitionDate.agent.indirect.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth eich cleient gaffael y cyfranddaliadau fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
-acquisitionDate.trust.indirect.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth yr ymddiriedolaeth gaffael y cyfranddaliadau fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
-acquisitionDate.capacitor.indirect.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael y cyfranddaliadau fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
-acquisitionDate.personalRep.indirect.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael y cyfranddaliadau fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
+acquisitionDate.indirect.error.before1900=Mae’n rhaid i’r dyddiad y cawsoch y cyfranddaliadau fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
+acquisitionDate.agent.indirect.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth eich cleient gaffael y cyfranddaliadau fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
+acquisitionDate.trust.indirect.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth yr ymddiriedolaeth gaffael y cyfranddaliadau fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
+acquisitionDate.capacitor.indirect.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael y cyfranddaliadau fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
+acquisitionDate.personalRep.indirect.error.before1900=Mae’n rhaid i’r dyddiad y gwnaeth y person gaffael y cyfranddaliadau fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
 acquisitionDate-day.error.required=Mae’n rhaid i’r dyddiad y cawsoch yr eiddo gynnwys diwrnod
 acquisitionDate-day.agent.error.required=Mae’n rhaid i’r dyddiad y gwnaeth eich cleient gaffael yr eiddo gynnwys diwrnod
 acquisitionDate-day.trust.error.required=Mae’n rhaid i’r dyddiad y gwnaeth yr ymddiriedolaeth gaffael yr eiddo gynnwys diwrnod
@@ -2273,12 +2273,12 @@ rebaseAcquisitionPrice.capacitor.dropdown.p2=I gyfrifo enillion neu golledion y 
 rebaseAcquisitionPrice.personalRep.dropdown.p2=I gyfrifo enillion neu golledion y person, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 rebaseAcquisitionPrice.indirect.dropdown.p2=<a href="{0}" target="_blank">Dysgwch am ail-sylfaenu (yn agor ffenestr neu dab newydd)</a>
 rebaseAcquisitionPrice.dropdown.p3=Yr enw ar y broses hon yw ail-sylfaenu.
-rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Dysgwch sut i ofyn i CThEM wirio gwerth marchnadol eiddo (yn agor tab newydd)</a>.
-rebaseAcquisitionPrice.dropdown.p5=Mae’n cymryd o leiaf 3 mis i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y dylech nodi amcangyfrif nawr ac, os bydd angen i chi newid y swm, gwnewch hynny’n nes ymlaen gan ddefnyddio’r gwasanaeth hwn. Neu os ydych eisoes wedi llenwi Ffurflen Dreth Hunanasesiad, gallwch roi’r gwerth marchnadol cywir yn eich Ffurflen Dreth Hunanasesiad nesaf.
-rebaseAcquisitionPrice.agent.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’ch cleient allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
-rebaseAcquisitionPrice.trust.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’r ymddiriedolaeth allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
-rebaseAcquisitionPrice.capacitor.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’r person allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
-rebaseAcquisitionPrice.personalRep.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEM wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i chi allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
+rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Dysgwch sut i ofyn i CThEF wirio gwerth marchnadol eiddo (yn agor tab newydd)</a>.
+rebaseAcquisitionPrice.dropdown.p5=Mae’n cymryd o leiaf 3 mis i CThEF wirio gwerth marchnadol eiddo. Mae hyn yn golygu y dylech nodi amcangyfrif nawr ac, os bydd angen i chi newid y swm, gwnewch hynny’n nes ymlaen gan ddefnyddio’r gwasanaeth hwn. Neu os ydych eisoes wedi llenwi Ffurflen Dreth Hunanasesiad, gallwch roi’r gwerth marchnadol cywir yn eich Ffurflen Dreth Hunanasesiad nesaf.
+rebaseAcquisitionPrice.agent.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEF wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’ch cleient allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
+rebaseAcquisitionPrice.trust.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEF wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’r ymddiriedolaeth allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
+rebaseAcquisitionPrice.capacitor.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEF wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’r person allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
+rebaseAcquisitionPrice.personalRep.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEF wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i chi allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
 periodOfAdminMarketValue.title=Beth oedd gwerth marchnadol yr eiddo ar {0}?
 periodOfAdminMarketValue.indirect.title=Beth oedd gwerth marchnadol y cyfranddaliadau ar {0}?
 periodOfAdminMarketValue.helpText=Gallwch roi prisiad gan syrfëwr neu amcangyfrif realistig. Os rhannwyd yr eiddo, nodwch werth marchnadol cyfran yr ystâd yn unig.
@@ -2744,20 +2744,20 @@ previousYearsLosses.capacitor.title=A yw’r person am gynnwys unrhyw golledion 
 previousYearsLosses.personalRep.title=A yw’r person am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth mewn blynyddoedd treth blaenorol?
 previousYearsLosses.personalRepInPeriodOfAdmin.title=A ydych yn cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ystâd mewn blynyddoedd treth blaenorol?
 previousYearsLosses.personalRepInPeriodOfAdmin.agent.title=A yw’ch cleient yn cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ystâd mewn blynyddoedd treth blaenorol?
-previousYearsLosses.uk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng eich enillion. Gallwch ond cynnwys colledion eraill a wnaed ar werthiannau neu warediadau eiddo eraill yn y DU rydych eisoes wedi rhoi gwybod i CThEM amdanynt.
-previousYearsLosses.nonUk.helpText=Gallwch gynnwys colledion blaenorol sy’n agored i dreth y DU yn y Ffurflen Dreth hon. Byddant yn gostwng eich enillion. Gallwch ond cynnwys colledion eraill rydych eisoes wedi rhoi gwybod i CThEM amdanynt.
-previousYearsLosses.agent.uk.helpText=Gall eich cleient gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng ei enillion. Gall ond cynnwys colledion eraill a wnaed ar werthiannau neu warediadau eiddo eraill yn y DU y mae eisoes wedi rhoi gwybod i CThEM amdanynt.
-previousYearsLosses.agent.nonUk.helpText=Gall eich cleient gynnwys colledion blaenorol sy’n agored i dreth y DU yn y Ffurflen Dreth hon. Byddant yn gostwng enillion eich cleient. Gall eich cleient ond cynnwys colledion eraill y mae eisoes wedi rhoi gwybod i CThEM amdanynt.
-previousYearsLosses.trust.uk.helpText=Gall yr ymddiriedolaeth gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng ei henillion. Gall ond cynnwys colledion eraill a wnaed ar werthiannau neu warediadau eiddo eraill yn y DU y mae eisoes wedi rhoi gwybod i CThEM amdanynt.
-previousYearsLosses.trust.nonUk.helpText=Gall yr ymddiriedolaeth gynnwys colledion blaenorol sy’n agored i dreth y DU yn y Ffurflen Dreth hon. Byddant yn gostwng enillion yr ymddiriedolaeth. Gall yr ymddiriedolaeth ond cynnwys colledion eraill y mae eisoes wedi rhoi gwybod i CThEM amdanynt.
-previousYearsLosses.capacitor.uk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion y person. Gallwch ond cynnwys colledion eraill y rhoddwyd gwybod i CThEM amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu ar werthiannau neu warediadau eiddo eraill yn y DU.
-previousYearsLosses.capacitor.nonUk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion y person. Gallwch ond cynnwys colledion eraill y rhoddwyd gwybod i CThEM amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu ar werthiannau neu warediadau eiddo eraill yn y DU.
-previousYearsLosses.personalRep.uk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion y person. Gallwch ond cynnwys colledion eraill y rhoddwyd gwybod i CThEM amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu ar werthiannau neu warediadau eiddo eraill yn y DU.
-previousYearsLosses.personalRep.nonUk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion y person. Gallwch ond cynnwys colledion eraill y rhoddwyd gwybod i CThEM amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu ar werthiannau neu warediadau eiddo eraill yn y DU.
-previousYearsLosses.personalRepInPeriodOfAdmin.uk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion yr ystâd.<br/>Gallwch ond cynnwys colledion eraill yr ystâd os rhoddwyd gwybod i CThEM amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
-previousYearsLosses.personalRepInPeriodOfAdmin.nonUk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion yr ystâd.<br/>Gallwch ond cynnwys colledion eraill yr ystâd os rhoddwyd gwybod i CThEM amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
-previousYearsLosses.personalRepInPeriodOfAdmin.agent.uk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion yr ystâd.<br/>Gallwch ond cynnwys colledion eraill yr ystâd os rhoddwyd gwybod i CThEM amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
-previousYearsLosses.personalRepInPeriodOfAdmin.agent.nonUk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion yr ystâd.<br/>Gallwch ond cynnwys colledion eraill yr ystâd os rhoddwyd gwybod i CThEM amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.uk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng eich enillion. Gallwch ond cynnwys colledion eraill a wnaed ar werthiannau neu warediadau eiddo eraill yn y DU rydych eisoes wedi rhoi gwybod i CThEF amdanynt.
+previousYearsLosses.nonUk.helpText=Gallwch gynnwys colledion blaenorol sy’n agored i dreth y DU yn y Ffurflen Dreth hon. Byddant yn gostwng eich enillion. Gallwch ond cynnwys colledion eraill rydych eisoes wedi rhoi gwybod i CThEF amdanynt.
+previousYearsLosses.agent.uk.helpText=Gall eich cleient gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng ei enillion. Gall ond cynnwys colledion eraill a wnaed ar werthiannau neu warediadau eiddo eraill yn y DU y mae eisoes wedi rhoi gwybod i CThEF amdanynt.
+previousYearsLosses.agent.nonUk.helpText=Gall eich cleient gynnwys colledion blaenorol sy’n agored i dreth y DU yn y Ffurflen Dreth hon. Byddant yn gostwng enillion eich cleient. Gall eich cleient ond cynnwys colledion eraill y mae eisoes wedi rhoi gwybod i CThEF amdanynt.
+previousYearsLosses.trust.uk.helpText=Gall yr ymddiriedolaeth gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng ei henillion. Gall ond cynnwys colledion eraill a wnaed ar werthiannau neu warediadau eiddo eraill yn y DU y mae eisoes wedi rhoi gwybod i CThEF amdanynt.
+previousYearsLosses.trust.nonUk.helpText=Gall yr ymddiriedolaeth gynnwys colledion blaenorol sy’n agored i dreth y DU yn y Ffurflen Dreth hon. Byddant yn gostwng enillion yr ymddiriedolaeth. Gall yr ymddiriedolaeth ond cynnwys colledion eraill y mae eisoes wedi rhoi gwybod i CThEF amdanynt.
+previousYearsLosses.capacitor.uk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion y person. Gallwch ond cynnwys colledion eraill y rhoddwyd gwybod i CThEF amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu ar werthiannau neu warediadau eiddo eraill yn y DU.
+previousYearsLosses.capacitor.nonUk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion y person. Gallwch ond cynnwys colledion eraill y rhoddwyd gwybod i CThEF amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu ar werthiannau neu warediadau eiddo eraill yn y DU.
+previousYearsLosses.personalRep.uk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion y person. Gallwch ond cynnwys colledion eraill y rhoddwyd gwybod i CThEF amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu ar werthiannau neu warediadau eiddo eraill yn y DU.
+previousYearsLosses.personalRep.nonUk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion y person. Gallwch ond cynnwys colledion eraill y rhoddwyd gwybod i CThEF amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu ar werthiannau neu warediadau eiddo eraill yn y DU.
+previousYearsLosses.personalRepInPeriodOfAdmin.uk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion yr ystâd.<br/>Gallwch ond cynnwys colledion eraill yr ystâd os rhoddwyd gwybod i CThEF amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.personalRepInPeriodOfAdmin.nonUk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion yr ystâd.<br/>Gallwch ond cynnwys colledion eraill yr ystâd os rhoddwyd gwybod i CThEF amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.personalRepInPeriodOfAdmin.agent.uk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion yr ystâd.<br/>Gallwch ond cynnwys colledion eraill yr ystâd os rhoddwyd gwybod i CThEF amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.personalRepInPeriodOfAdmin.agent.nonUk.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon er mwyn gostwng enillion yr ystâd.<br/>Gallwch ond cynnwys colledion eraill yr ystâd os rhoddwyd gwybod i CThEF amdanynt eisoes. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
 previousYearsLosses.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
 previousYearsLosses.agent.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
 previousYearsLosses.trust.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
@@ -2837,13 +2837,13 @@ previousYearsLosses.furtherReturn.capacitor.title=A ydych yn cynnwys unrhyw goll
 previousYearsLosses.furtherReturn.personalRep.title=A ydych yn cynnwys unrhyw golledion Treth Enillion Cyfalaf caniataol eraill a wnaed mewn blynyddoedd treth blaenorol?
 previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.title=A ydych yn cynnwys unrhyw golledion Treth Enillion Cyfalaf caniataol eraill a wnaed mewn blynyddoedd treth blaenorol?
 previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.title=A ydych yn cynnwys unrhyw golledion Treth Enillion Cyfalaf caniataol eraill a wnaed mewn blynyddoedd treth blaenorol?
-previousYearsLosses.furtherReturn.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon rydych eisoes wedi rhoi gwybod i CThEM amdanynt ac nad ydych eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
-previousYearsLosses.furtherReturn.agent.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’ch cleient eisoes wedi rhoi gwybod i CThEM amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
-previousYearsLosses.furtherReturn.trust.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r ymddiriedolaeth eisoes wedi rhoi gwybod i CThEM amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
-previousYearsLosses.furtherReturn.capacitor.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r person eisoes wedi rhoi gwybod i CThEM amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
-previousYearsLosses.furtherReturn.personalRep.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r person eisoes wedi rhoi gwybod i CThEM amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
-previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r ystâd eisoes wedi rhoi gwybod i CThEM amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
-previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r ystâd eisoes wedi rhoi gwybod i CThEM amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.furtherReturn.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon rydych eisoes wedi rhoi gwybod i CThEF amdanynt ac nad ydych eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.furtherReturn.agent.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’ch cleient eisoes wedi rhoi gwybod i CThEF amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.furtherReturn.trust.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r ymddiriedolaeth eisoes wedi rhoi gwybod i CThEF amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.furtherReturn.capacitor.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r person eisoes wedi rhoi gwybod i CThEF amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.furtherReturn.personalRep.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r person eisoes wedi rhoi gwybod i CThEF amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r ystâd eisoes wedi rhoi gwybod i CThEF amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
+previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText=Gallwch gynnwys colledion blaenorol yn y Ffurflen Dreth hon y mae’r ystâd eisoes wedi rhoi gwybod i CThEF amdanynt ac nad yw eisoes wedi’u defnyddio. Er enghraifft, colledion ar gyfranddaliadau neu eiddo arall yn y DU.
 previousYearsLosses.furtherReturn.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
 annualExemptAmount.title=Faint o’ch Swm Blynyddol sydd wedi ei Eithrio rhag Treth Enillion Cyfalaf rydych am ei ddefnyddio?
 annualExemptAmount.agent.title=Faint o Swm Blynyddol eich cleient, sydd wedi ei Eithrio rhag Treth Enillion Cyfalaf, y mae am ei ddefnyddio?
@@ -3192,15 +3192,15 @@ personalAllowance.personalRep.error.tooManyDecimals=Mae’n rhaid i’r Lwfans P
 personalAllowance.cyaChange=Lwfans Personol
 
 hasEstimatedDetails.title=A yw unrhyw un o’r symiau yn y Ffurflen Dreth hon wedi’u hamcangyfrif?
-hasEstimatedDetails.helpText=Dewiswch ‘Iawn’ os byddai unrhyw un o’r symiau yn y Ffurflen Dreth hon yn effeithio ar swm y Dreth Enillion Cyfalaf sy’n ddyledus ar hyn o bryd yn y flwyddyn dreth. Er enghraifft, ffioedd cyfreithiwr pan brynwyd eiddo. <br><br>Os byddwch yn dewis ‘Iawn’, bydd angen i chi roi’r symiau terfynol i CThEM yn nes ymlaen.
-hasEstimatedDetails.summary=Sut i roi’r symiau terfynol i CThEM
+hasEstimatedDetails.helpText=Dewiswch ‘Iawn’ os byddai unrhyw un o’r symiau yn y Ffurflen Dreth hon yn effeithio ar swm y Dreth Enillion Cyfalaf sy’n ddyledus ar hyn o bryd yn y flwyddyn dreth. Er enghraifft, ffioedd cyfreithiwr pan brynwyd eiddo. <br><br>Os byddwch yn dewis ‘Iawn’, bydd angen i chi roi’r symiau terfynol i CThEF yn nes ymlaen.
+hasEstimatedDetails.summary=Sut i roi’r symiau terfynol i CThEF
 hasEstimatedDetails.details=Gallwch gadarnhau unrhyw amcangyfrifon drwy’r gwasanaeth hwn. Neu os oes angen llenwi Ffurflen Dreth Hunanasesiad, gellir cadarnhau’r amcangyfrifon yn y Ffurflen Dreth Hunanasesiad nesaf.
 hasEstimatedDetails.yes.content=Gallwch gadarnhau’r symiau drwy’r gwasanaeth hwn. Neu, os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad, gallwch wneud hynny drwy’ch Ffurflen Dreth nesaf.
-hasEstimatedDetails.agent.yes.content=Bydd angen cadarnhau’r symiau gyda CThEM pan fyddant ar gael. Os oes angen i’ch cleient lenwi Ffurflen Dreth Hunanasesiad, gellir gwneud hyn yn ei Ffurflen Dreth Hunanasesiad nesaf. Os na, gellir ei wneud drwy’r gwasanaeth hwn.
-hasEstimatedDetails.trust.yes.content=Bydd angen cadarnhau’r symiau gyda CThEM pan fyddant ar gael. Os oes angen i’ch cleient lenwi Ffurflen Dreth Hunanasesiad, gellir gwneud hyn yn ei Ffurflen Dreth Hunanasesiad nesaf. Os na, gellir ei wneud drwy’r gwasanaeth hwn.
-hasEstimatedDetails.capacitor.yes.content=Bydd angen cadarnhau’r symiau gyda CThEM pan fyddant ar gael. Os oes angen i’r person lenwi Ffurflen Dreth Hunanasesiad, gellir gwneud hyn yn ei Ffurflen Dreth Hunanasesiad nesaf. Os na, gellir ei wneud drwy’r gwasanaeth hwn.
-hasEstimatedDetails.personalRep.yes.content=Bydd angen cadarnhau’r symiau gyda CThEM pan fyddant ar gael. Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer y person, gellir gwneud hyn yn ei Ffurflen Dreth Hunanasesiad nesaf. Os na, gellir ei wneud drwy’r gwasanaeth hwn.
-hasEstimatedDetails.personalRepInPeriodOfAdmin.yes.content=Bydd angen cadarnhau’r symiau gyda CThEM pan fyddant ar gael. Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd, gellir gwneud hyn yn ei Ffurflen Dreth Hunanasesiad nesaf. Os na, gellir ei wneud drwy’r gwasanaeth hwn.
+hasEstimatedDetails.agent.yes.content=Bydd angen cadarnhau’r symiau gyda CThEF pan fyddant ar gael. Os oes angen i’ch cleient lenwi Ffurflen Dreth Hunanasesiad, gellir gwneud hyn yn ei Ffurflen Dreth Hunanasesiad nesaf. Os na, gellir ei wneud drwy’r gwasanaeth hwn.
+hasEstimatedDetails.trust.yes.content=Bydd angen cadarnhau’r symiau gyda CThEF pan fyddant ar gael. Os oes angen i’ch cleient lenwi Ffurflen Dreth Hunanasesiad, gellir gwneud hyn yn ei Ffurflen Dreth Hunanasesiad nesaf. Os na, gellir ei wneud drwy’r gwasanaeth hwn.
+hasEstimatedDetails.capacitor.yes.content=Bydd angen cadarnhau’r symiau gyda CThEF pan fyddant ar gael. Os oes angen i’r person lenwi Ffurflen Dreth Hunanasesiad, gellir gwneud hyn yn ei Ffurflen Dreth Hunanasesiad nesaf. Os na, gellir ei wneud drwy’r gwasanaeth hwn.
+hasEstimatedDetails.personalRep.yes.content=Bydd angen cadarnhau’r symiau gyda CThEF pan fyddant ar gael. Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer y person, gellir gwneud hyn yn ei Ffurflen Dreth Hunanasesiad nesaf. Os na, gellir ei wneud drwy’r gwasanaeth hwn.
+hasEstimatedDetails.personalRepInPeriodOfAdmin.yes.content=Bydd angen cadarnhau’r symiau gyda CThEF pan fyddant ar gael. Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer yr ystâd, gellir gwneud hyn yn ei Ffurflen Dreth Hunanasesiad nesaf. Os na, gellir ei wneud drwy’r gwasanaeth hwn.
 hasEstimatedDetails.error.required=Dewiswch ‘Iawn’ os yw unrhyw un o’r manylion yn y Ffurflen Dreth hon wedi’u hamcangyfrif
 hasEstimatedDetails.error.boolean=Dewiswch ‘Iawn’ os yw unrhyw un o’r manylion yn y Ffurflen Dreth hon wedi’u hamcangyfrif
 hasEstimatedDetails.cyaChange=os yw unrhyw un o’r manylion yn y Ffurflen Dreth hon wedi’u hamcangyfrif
@@ -3498,13 +3498,13 @@ repayment.personalRepInPeriodOfAdmin.agent.title=Yn seiliedig ar y manylion yn y
 
 repayment.yes.content=Os gwnaethoch dalu â cherdyn debyd, byddwn yn ceisio eich ad-dalu. Os gwnaethoch dalu drwy ddull arall, gofynnir am eich manylion banc ar dudalen arall yn nes ymlaen.
 
-repayment.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i chi, bydd CThEM yn ad-dalu’r arian i chi. Os nad oes ad-daliad yn ddyledus i chi, ni chysylltir â chi.
-repayment.agent.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’ch cleient, bydd CThEM yn ad-dalu’r arian iddo. Os nad oes ad-daliad yn ddyledus iddo, ni chysylltir ag ef.
-repayment.trust.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r ymddiriedolaeth, bydd CThEM yn ad-dalu’r arian. Os nad oes ad-daliad yn ddyledus iddi, ni chysylltir â chi.
-repayment.capacitor.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r person, bydd CThEM yn ad-dalu’r arian iddo. Os nad oes ad-daliad yn ddyledus iddo, ni chysylltir ag ef.
-repayment.personalRep.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r cynrychiolydd personol, bydd CThEM yn ad-dalu’r arian iddo. Os nad oes ad-daliad yn ddyledus iddo, ni chysylltir ag ef.
-repayment.personalRepInPeriodOfAdmin.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r ystâd, bydd CThEM yn ad-dalu’r arian. Os nad oes ad-daliad yn ddyledus i’r ystâd, ni chysylltir â chi.
-repayment.personalRepInPeriodOfAdmin.agent.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r ystâd, bydd CThEM yn ad-dalu’r arian. Os nad oes ad-daliad yn ddyledus i’r ystâd, ni chysylltir â chi.
+repayment.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i chi, bydd CThEF yn ad-dalu’r arian i chi. Os nad oes ad-daliad yn ddyledus i chi, ni chysylltir â chi.
+repayment.agent.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’ch cleient, bydd CThEF yn ad-dalu’r arian iddo. Os nad oes ad-daliad yn ddyledus iddo, ni chysylltir ag ef.
+repayment.trust.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r ymddiriedolaeth, bydd CThEF yn ad-dalu’r arian. Os nad oes ad-daliad yn ddyledus iddi, ni chysylltir â chi.
+repayment.capacitor.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r person, bydd CThEF yn ad-dalu’r arian iddo. Os nad oes ad-daliad yn ddyledus iddo, ni chysylltir ag ef.
+repayment.personalRep.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r cynrychiolydd personol, bydd CThEF yn ad-dalu’r arian iddo. Os nad oes ad-daliad yn ddyledus iddo, ni chysylltir ag ef.
+repayment.personalRepInPeriodOfAdmin.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r ystâd, bydd CThEF yn ad-dalu’r arian. Os nad oes ad-daliad yn ddyledus i’r ystâd, ni chysylltir â chi.
+repayment.personalRepInPeriodOfAdmin.agent.helpText=Os dewiswch ‘Iawn’ a bod ad-daliad Treth Enillion Cyfalaf yn ddyledus i’r ystâd, bydd CThEF yn ad-dalu’r arian. Os nad oes ad-daliad yn ddyledus i’r ystâd, ni chysylltir â chi.
 repayment.error.required=Dewiswch ‘Iawn’ os oes ad-daliad yn ddyledus i chi ar sail y manylion yn y Ffurflen Dreth hon
 repayment.agent.error.required=Dewiswch ‘Iawn’ os oes ad-daliad yn ddyledus i’ch cleient ar sail y manylion yn y Ffurflen Dreth hon
 repayment.trust.error.required=Dewiswch ‘Iawn’ os oes ad-daliad yn ddyledus i’r ymddiriedolaeth ar sail y manylion yn y Ffurflen Dreth hon
@@ -3624,11 +3624,11 @@ checkAllAnswers.submissionDetails.nino=Rhif YG y person sy’n cael ei gynrychio
 checkAllAnswers.submissionDetails.sautr=UTR Hunanasesiad y person sy’n cael ei gynrychioli
 checkAllAnswers.submissionDetails.cgt=Cyfeirnod CGT y person sy’n cael ei gynrychioli
 submitReturnError.title=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
-submitReturnError.p1=Efallai na anfonwyd eich Ffurflen Dreth i CThEM.
+submitReturnError.p1=Efallai na anfonwyd eich Ffurflen Dreth i CThEF.
 submitReturnError.p2=Bydd yn rhaid i chi wneud y canlynol:
 submitReturnError.li1=Mynd i hafan eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-submitReturnError.li2=Os yw’ch Ffurflen Dreth yn yr adran ‘Ffurflenni Treth a anfonwyd’, mae CThEM wedi’i chael. Does dim angen i chi ei hanfon eto.
-submitReturnError.li3=Os yw yn yr adran ‘Ffurflenni Treth drafft’, nid yw CThEM wedi’i chael. Bydd angen i chi geisio’i hanfon eto.
+submitReturnError.li2=Os yw’ch Ffurflen Dreth yn yr adran ‘Ffurflenni Treth a anfonwyd’, mae CThEF wedi’i chael. Does dim angen i chi ei hanfon eto.
+submitReturnError.li3=Os yw yn yr adran ‘Ffurflenni Treth drafft’, nid yw CThEF wedi’i chael. Bydd angen i chi geisio’i hanfon eto.
 submitReturnError.p3=Ar gyfer gwarediadau eiddo yn y DU a wnaed o 6 Ebrill 2020 ymlaen, mae gennych 30 diwrnod ar ôl dyddiad cwblhau’r eiddo i roi gwybod am unrhyw Dreth Enillion Cyfalaf sy’n ddyledus ar eich gwarediadau eiddo yn y DU a’i thalu.
 submitReturnError.p4=Ar gyfer gwarediadau a gwblhaodd ar 1 Gorffennaf 2020 neu ar ôl hynny, efallai y byddwch yn cael cosb am gyflwyno’n hwyr ar gyfer Ffurflenni Treth sy’n hwyr. Efallai y codir llog arnoch am daliadau hwyr.
 submitReturnError.button=Ewch i hafan y cyfrif
@@ -3650,7 +3650,7 @@ confirmationOfSubmission.amount=Swm
 confirmationOfSubmission.chargeLabel=Taliad treth
 confirmationOfSubmission.deltaChargeLabel=Rhwymedigaeth treth ddiweddaredig
 confirmationOfSubmission.emailSent=Rydym wedi anfon e-bost cadarnhau i <strong class="bold">{0}</strong>.
-confirmationOfSubmission.sentToHmrc=Ffurflen Dreth wedi’i hanfon i CThEM
+confirmationOfSubmission.sentToHmrc=Ffurflen Dreth wedi’i hanfon i CThEF
 confirmationOfSubmission.taxDue=Dyddiad cau ar gyfer talu treth
 confirmationOfSubmission.printPage=<a href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
 confirmationOfSubmission.agent.printPage=<a href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
@@ -3810,12 +3810,12 @@ viewReturn.charge.clearingReason.OutgoingPayment=wedi ad-dalu
 viewReturn.charge.clearingReason.WriteOff=wedi dileu
 viewReturn.charge.clearingReason.Reversal=wedi gwrthdroi
 viewReturn.charge.clearingReason.MassWriteOff=wedi dileu
-viewReturn.charge.clearingReason.AutomaticClearing=Roeddech eisoes wedi talu’r arian hwn i CThEM. Symudodd CThEM yr arian hwn i’r cyfrif hwn
+viewReturn.charge.clearingReason.AutomaticClearing=Roeddech eisoes wedi talu’r arian hwn i CThEF. Symudodd CThEF yr arian hwn i’r cyfrif hwn
 viewReturn.charge.clearingReason.SomeOtherClearingReason=wedi clirio gan gredyd
 viewReturn.charge.display-error=Mae problem wrth ddangos eich manylion talu.
 viewReturn.organisationNameLine=Ymddiriedolaeth: {0}
 viewReturn.agentNameLine=Cleient: {0}
-viewReturn.sentToHmrc=Ffurflen Dreth wedi’i hanfon i CThEM
+viewReturn.sentToHmrc=Ffurflen Dreth wedi’i hanfon i CThEF
 viewReturn.returnReference=Cyfeirnod y Ffurflen Dreth
 viewReturn.propertyAddress=Cyfeiriad yr eiddo
 viewReturn.companyAddress=Cyfeiriad y cwmni
@@ -3957,7 +3957,7 @@ multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Dysgwch beth sy
 multipleDisposalsDisposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
 multipleDisposalsDisposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
 multipleDisposalsDisposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod yr un fath neu cyn y dyddiad cwblhau
-multipleDisposalsDisposalDate.error.before1900=Mae’n rhaid i’r dyddiad cyfnewid contractau fod ar neu ar ôl 01 01 1900, cysylltwch â CThEM os yw’r dyddiad cyn hyn
+multipleDisposalsDisposalDate.error.before1900=Mae’n rhaid i’r dyddiad cyfnewid contractau fod ar neu ar ôl 01 01 1900, cysylltwch â CThEF os yw’r dyddiad cyn hyn
 multipleDisposalsDisposalDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad fod ym mlwyddyn dreth {0} i {1}
 multipleDisposalsDisposalDate-day.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys diwrnod
 multipleDisposalsDisposalDate-month.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys mis
@@ -4135,7 +4135,7 @@ dateOfDeath-month.error.monthAndYearRequired=Mae’n rhaid i’r dyddiad gynnwys
 dateOfDeath-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad gynnwys diwrnod a blwyddyn
 dateOfDeath-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad gynnwys diwrnod a mis
 dateOfDeath.error.tooFarInFuture=Mae’n rhaid i’r dyddiad fod heddiw neu yn y gorffennol
-dateOfDeath.error.before1900=Mae’n rhaid i’r dyddiad fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEM os yw’r dyddiad cyn hyn
+dateOfDeath.error.before1900=Mae’n rhaid i’r dyddiad fod ar neu ar ôl 01 01 1900 – cysylltwch â CThEF os yw’r dyddiad cyn hyn
 representeeReferenceIdType.title=Dewiswch a oes gennych un o’r cyfeirnodau hyn ar gyfer y person
 representeeReferenceIdType.helpText=Mae’n rhaid i’r cyfeirnod a nodwch gyd-fynd â’r enw a nodwyd gennych a’r manylion sydd gennym am y person.
 representeeReferenceIdType.error.required=Dewiswch a oes gennych un o’r cyfeirnodau hyn ar gyfer y person
@@ -4567,7 +4567,7 @@ youNeedToCalculate.li1=cyfrifo’ch rhwymedigaeth Treth Enillion Cyfalaf ar eich
 youNeedToCalculate.li2=uwchlwytho dogfen sy’n dangos sut y gwnaethoch gyfrifo swm y Dreth Enillion Cyfalaf sy’n ddyledus
 youNeedToCalculate.link1=Sut i gyfrifo’r symiau sydd eu hangen ar gyfer y Ffurflen Dreth hon
 youNeedToCalculate.h2=Os oes angen help arnoch
-youNeedToCalculate.link2=<a href="{0}">cysylltu â CThEM</a>.
+youNeedToCalculate.link2=<a href="{0}">cysylltu â CThEF</a>.
 confirmCancelAmendReturn.title=A ydych yn siŵr eich bod am ganslo’r newidiadau?
 confirmCancelAmendReturn.helpText=Os byddwch yn canslo a’ch bod wedi gwneud rhai newidiadau, ni fyddant yn cael eu cadw.
 confirmCancelAmendReturn.error.required=Dewiswch ‘Iawn’ os ydych am ganslo
