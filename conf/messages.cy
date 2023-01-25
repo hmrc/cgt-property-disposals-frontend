@@ -115,7 +115,7 @@ lang=cy
 service.title=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
 service.name=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
 service.signOut=Allgofnodi
-hmrc_branding=Cyllid a Thollau EM
+hmrc_branding=Cyllid a Thollau EF
 exitSurvey.linkText=Rhowch wybod sut y gallwn wella’r gwasanaeth (mae’n cymryd 1 munud)
 
 button.startNow=Dechrau nawr
@@ -200,7 +200,7 @@ accessibilityStatement.p2=Mae’r gwasanaeth hwn yn rhan o wefan ehangach GOV.UK
 accessibilityStatement.p3=Mae’r dudalen hon dim ond yn cynnwys gwybodaeth am y gwasanaeth Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU, sydd ar gael yn {0}.
 accessibilityStatement.usingThisService.title=Defnyddio’r gwasanaeth hwn
 accessibilityStatement.usingThisService.p1=Gallwch ddefnyddio’r gwasanaeth hwn i roi gwybod am warediad o dir neu eiddo preswyl yn y DU (a wnaed o 6 Ebrill 2020 ymlaen). Gallwch hefyd fwrw golwg dros eich Ffurflenni Treth blaenorol a’r rhai cyfredol.
-accessibilityStatement.usingThisService.p2=Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EM (CThEF).
+accessibilityStatement.usingThisService.p2=Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EF (CThEF).
 accessibilityStatement.usingThisService.p3=Rydym am i gymaint o bobl â phosibl allu defnyddio’r gwasanaeth hwn. Mae hyn yn golygu y dylech allu:
 accessibilityStatement.usingThisService.li1=newid lliwiau, lefelau cyferbyniad a ffontiau
 accessibilityStatement.usingThisService.li2=chwyddo’r sgrin hyd at 300% heb i’r testun ddisgyn oddi ar y sgrin
