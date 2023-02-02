@@ -4054,9 +4054,10 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the check your answers page" when {
 
-        val taxYear = sample[TaxYear].copy(
-          startDateInclusive = LocalDate.of(today.getYear, 4, 6),
-          endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+        val taxYearStartDate = TimeUtils.taxYearStart(today)
+        val taxYear          = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(taxYearStartDate.getYear, 4, 6),
+          endDateExclusive = LocalDate.of(taxYearStartDate.getYear + 1, 4, 6)
         )
 
         val saFlagStatus = taxYear.startDateInclusive.getYear match {
@@ -4157,9 +4158,10 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the amend return disposaldate different taxyear page" when {
 
-        val taxYear = sample[TaxYear].copy(
-          startDateInclusive = LocalDate.of(today.getYear, 4, 6),
-          endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+        val taxYearStartDate = TimeUtils.taxYearStart(today)
+        val taxYear          = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(taxYearStartDate.getYear, 4, 6),
+          endDateExclusive = LocalDate.of(taxYearStartDate.getYear + 1, 4, 6)
         )
 
         val saFlagStatus = taxYear.startDateInclusive.getYear match {
