@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -4054,9 +4054,10 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the check your answers page" when {
 
-        val taxYear = sample[TaxYear].copy(
-          startDateInclusive = LocalDate.of(today.getYear, 4, 6),
-          endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+        val taxYearStartDate = TimeUtils.taxYearStart(today)
+        val taxYear          = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(taxYearStartDate.getYear, 4, 6),
+          endDateExclusive = LocalDate.of(taxYearStartDate.getYear + 1, 4, 6)
         )
 
         val saFlagStatus = taxYear.startDateInclusive.getYear match {
@@ -4157,9 +4158,10 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the amend return disposaldate different taxyear page" when {
 
-        val taxYear = sample[TaxYear].copy(
-          startDateInclusive = LocalDate.of(today.getYear, 4, 6),
-          endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
+        val taxYearStartDate = TimeUtils.taxYearStart(today)
+        val taxYear          = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(taxYearStartDate.getYear, 4, 6),
+          endDateExclusive = LocalDate.of(taxYearStartDate.getYear + 1, 4, 6)
         )
 
         val saFlagStatus = taxYear.startDateInclusive.getYear match {

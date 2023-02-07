@@ -10,7 +10,6 @@ addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
 addCommandAlias("fix", "all compile:scalafix test:scalafix")
 
-resolvers += Resolver.bintrayRepo("hmrc", "releases")
 lazy val wartremoverSettings =
   Seq(
     (Compile / compile / wartremoverErrors) ++= Warts.allBut(
