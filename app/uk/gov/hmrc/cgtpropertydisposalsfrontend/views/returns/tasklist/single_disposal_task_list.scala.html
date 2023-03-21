@@ -14,29 +14,21 @@
  * limitations under the License.
  *@
 
+@import cats.syntax.eq._
 @import play.api.i18n.Messages
-
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{RebasingCutoffDates, ViewConfig}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
-@import cats.syntax.eq._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionDetailsAnswers, AssetType, DraftSingleDisposalReturn, IndividualUserType, RepresentativeType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,

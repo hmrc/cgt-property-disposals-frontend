@@ -20,8 +20,8 @@ import cats.data.OptionT
 import cats.instances.either._
 import cats.syntax.either._
 import play.api.libs.json.{Reads, Writes}
-import uk.gov.hmrc.mongo.cache.{DataKey, MongoCacheRepository}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.mongo.cache.{DataKey, MongoCacheRepository}
 import uk.gov.hmrc.play.http.logging.Mdc.preservingMdc
 
 import scala.concurrent.{ExecutionContext, Future}

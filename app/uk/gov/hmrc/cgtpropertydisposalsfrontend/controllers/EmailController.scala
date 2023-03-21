@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.uuid._
@@ -42,6 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EmailController[T <: EmailJourneyType] {

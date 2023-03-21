@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
-import java.util.UUID
-
 import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
@@ -36,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 @Singleton

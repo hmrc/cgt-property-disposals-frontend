@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 
-import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
@@ -41,6 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 class HomePageController @Inject() (

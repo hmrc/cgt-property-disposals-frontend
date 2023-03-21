@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email
 
-import java.util.UUID
-
 import play.api.libs.json.{Format, Json}
+
+import java.util.UUID
 
 final case class EmailToBeVerified(
   email: Email,

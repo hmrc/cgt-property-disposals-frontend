@@ -14,19 +14,17 @@
  * limitations under the License.
  *@
 
-@import play.api.i18n.Messages
-@import play.twirl.api.Html
 @import cats.instances.long._
 @import cats.syntax.eq._
-
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{OtherReliefsOption, RepresentativeType}
 
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,

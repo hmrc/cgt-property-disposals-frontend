@@ -16,18 +16,17 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
 
-import java.util.Locale
-
 import cats.instances.bigDecimal._
 import cats.instances.char._
 import cats.syntax.either._
 import cats.syntax.eq._
+import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
-import play.api.data.Forms.{mapping, of}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, NumberUtils}
 
+import java.util.Locale
 import scala.util.Try
 
 object MoneyUtils {

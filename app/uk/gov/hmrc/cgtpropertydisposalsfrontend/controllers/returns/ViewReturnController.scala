@@ -27,8 +27,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.{routes => amendRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Amend, CompleteReturnWithSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{StartingToAmendReturn, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Amend, CompleteReturnWithSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._

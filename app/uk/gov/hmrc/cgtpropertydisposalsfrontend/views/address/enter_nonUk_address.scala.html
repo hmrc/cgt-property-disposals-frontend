@@ -30,20 +30,18 @@
  * limitations under the License.
  *@
 
+@import cats.syntax.eq._
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-
-@import cats.syntax.eq._
-
- @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
- @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.NonUkAddress
- @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
- @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
- @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
- @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
- @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.NonUkAddress
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,

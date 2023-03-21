@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
@@ -48,6 +45,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 

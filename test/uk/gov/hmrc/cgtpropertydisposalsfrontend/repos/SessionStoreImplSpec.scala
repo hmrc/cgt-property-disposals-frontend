@@ -16,22 +16,22 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
-import java.util.UUID
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.Eventually
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.test.Helpers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SessionDataGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStoreSpec.{TestEnvironment, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStoreSpec._
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.TimestampSupport
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionStoreImplSpec

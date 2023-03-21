@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
-import java.net.URLEncoder
-
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpReads.Implicits._
+
+import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.libs.json.{Json, OFormat}
-import AddressLookupConnector._
 
 @ImplementedBy(classOf[AddressLookupConnectorImpl])
 trait AddressLookupConnector {

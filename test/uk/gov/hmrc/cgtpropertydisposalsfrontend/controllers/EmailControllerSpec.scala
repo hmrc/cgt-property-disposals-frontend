@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.handlers.CallHandler0
@@ -39,6 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationServic
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

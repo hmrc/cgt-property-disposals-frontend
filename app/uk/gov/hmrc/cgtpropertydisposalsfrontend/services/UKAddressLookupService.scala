@@ -26,13 +26,13 @@ import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
-import play.api.libs.json.{JsResult, JsValue, Json, OFormat, Reads}
+import play.api.libs.json._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode.postcodeRegexPredicate
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.{AddressLookupResponse, RawAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier

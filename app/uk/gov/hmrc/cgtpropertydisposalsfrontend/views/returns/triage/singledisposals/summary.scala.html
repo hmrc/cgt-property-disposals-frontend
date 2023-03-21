@@ -14,19 +14,15 @@
  * limitations under the License.
  *@
 
+@import cats.syntax.eq._
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-
-@import cats.syntax.eq._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, RepresentativeType, RepresenteeAnswers}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,

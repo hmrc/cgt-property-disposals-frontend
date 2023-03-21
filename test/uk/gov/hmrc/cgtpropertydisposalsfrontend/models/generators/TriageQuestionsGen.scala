@@ -19,8 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompletionDate, DisposalDate, IndividualUserType, NumberOfProperties, SingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 
 object TriageQuestionsGen extends HigherPriorityTriageQuestionsGen with GenUtils
 

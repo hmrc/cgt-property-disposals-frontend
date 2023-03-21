@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
 
-import java.time.LocalDate
-
 import play.api.libs.json.{Json, OFormat}
+
+import java.time.LocalDate
 
 final case class Charge(
   chargeType: ChargeType,

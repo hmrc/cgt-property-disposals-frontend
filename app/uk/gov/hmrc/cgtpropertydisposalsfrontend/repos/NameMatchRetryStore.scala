@@ -20,11 +20,11 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
 import play.api.libs.json.{Reads, Writes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UnsuccessfulNameMatchAttempts}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
-import uk.gov.hmrc.mongo.{MongoComponent, TimestampSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.mongo.cache.{CacheIdType, MongoCacheRepository}
+import uk.gov.hmrc.mongo.{MongoComponent, TimestampSupport}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics
 
 import com.codahale.metrics.{Counter, Timer}
-import com.kenshoo.play.metrics.{Metrics ⇒ PlayMetrics}
+import com.kenshoo.play.metrics.{Metrics => PlayMetrics}
 import org.scalamock.scalatest.MockFactory
 
 object MockMetrics extends MockFactory {
