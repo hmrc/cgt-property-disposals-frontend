@@ -19,13 +19,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
-import uk.gov.hmrc.mongo.{CurrentTimestampSupport, MongoComponent}
-
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.Repo
 import uk.gov.hmrc.mongo.cache.{CacheIdType, MongoCacheRepository}
+import uk.gov.hmrc.mongo.{CurrentTimestampSupport, MongoComponent}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}

@@ -21,7 +21,7 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.BuildSubscriptionDataError
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
-import javax.inject.{Inject, Singleton}
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results.InternalServerError
 import play.api.mvc.{Request, Result}
@@ -25,6 +24,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithS
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class ErrorHandler @Inject() (

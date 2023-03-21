@@ -16,15 +16,12 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, DisposalDate, RepresentativeType}
 
 @this(
         singleDisposalTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary,

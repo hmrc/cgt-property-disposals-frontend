@@ -19,12 +19,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding
 import cats.Eq
 import cats.syntax.either._
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TelephoneNumber, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TelephoneNumber, UserType}
 
 final case class SubscribedDetails(
   name: Either[TrustName, IndividualName],

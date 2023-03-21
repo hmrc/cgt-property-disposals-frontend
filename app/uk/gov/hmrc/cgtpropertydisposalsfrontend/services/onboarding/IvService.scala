@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding
 
-import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
@@ -34,6 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[IvServiceImpl])

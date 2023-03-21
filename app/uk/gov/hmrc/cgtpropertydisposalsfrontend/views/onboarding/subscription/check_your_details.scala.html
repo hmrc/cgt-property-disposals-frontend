@@ -16,15 +16,11 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSubscriptionReady
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{address, email, name, routes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,

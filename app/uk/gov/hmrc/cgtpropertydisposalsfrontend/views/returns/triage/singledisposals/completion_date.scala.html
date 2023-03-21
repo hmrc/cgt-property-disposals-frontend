@@ -14,19 +14,17 @@
  * limitations under the License.
  *@
 
+@import cats.implicits.catsSyntaxEq
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompletionDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
-@import cats.implicits.catsSyntaxEq
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompletionDate, RepresentativeType}
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(

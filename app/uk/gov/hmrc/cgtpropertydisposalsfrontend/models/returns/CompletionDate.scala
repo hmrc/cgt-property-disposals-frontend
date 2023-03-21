@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import java.time.LocalDate
-
 import cats.Eq
 import play.api.libs.json.{Json, OFormat}
+
+import java.time.LocalDate
 
 final case class CompletionDate(value: LocalDate) extends AnyVal
 

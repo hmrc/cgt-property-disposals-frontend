@@ -17,8 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.WelshSorting.WelshStringOps
 
 class WelshSortingSpec extends AnyWordSpec with Matchers with MockFactory {

@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {

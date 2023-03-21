@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneId}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.stringGen
 import org.scalacheck.{Arbitrary, Gen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.stringGen
+
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneId}
 
 trait GenUtils {
 

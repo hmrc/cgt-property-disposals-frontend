@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import java.time.LocalDate
-
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+
+import java.time.LocalDate
 
 class TimeUtilsSpec extends AnyWordSpec with Matchers {
 

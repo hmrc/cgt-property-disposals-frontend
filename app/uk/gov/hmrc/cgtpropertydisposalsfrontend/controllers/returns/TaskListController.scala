@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
-import java.time.LocalDateTime
-
 import cats.data.{EitherT, NonEmptyList}
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
@@ -40,6 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{tasklist => 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.time.LocalDateTime
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 

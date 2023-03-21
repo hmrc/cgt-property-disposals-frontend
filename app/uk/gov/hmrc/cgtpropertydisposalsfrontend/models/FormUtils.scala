@@ -18,10 +18,11 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Eq
 import cats.instances.int._
-import cats.syntax.eq._
 import cats.syntax.either._
+import cats.syntax.eq._
 import play.api.data.FormError
 import play.api.data.format.Formatter
+
 import scala.util.Try
 
 object FormUtils {

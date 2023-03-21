@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
-import java.time.LocalDate
 import cats.data.EitherT
 import cats.instances.boolean._
 import cats.instances.future._
@@ -55,6 +54,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{singl
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

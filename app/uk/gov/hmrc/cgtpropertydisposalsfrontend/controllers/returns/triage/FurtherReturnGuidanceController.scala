@@ -19,12 +19,11 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController

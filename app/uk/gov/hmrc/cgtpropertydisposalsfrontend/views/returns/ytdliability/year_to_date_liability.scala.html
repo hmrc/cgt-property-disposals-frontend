@@ -14,22 +14,21 @@
  * limitations under the License.
  *@
 
+@import cats.instances.string._
+@import cats.syntax.eq._
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-
-@import cats.instances.string._
-@import cats.syntax.eq._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor }
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, YearToDateLiabilityCalculation}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, YearToDateLiabilityCalculation}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence
 
-import cats.Foldable.ops.toAllFoldableOps
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
@@ -27,7 +26,7 @@ import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
-import play.api.mvc.{Result, _}
+import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates

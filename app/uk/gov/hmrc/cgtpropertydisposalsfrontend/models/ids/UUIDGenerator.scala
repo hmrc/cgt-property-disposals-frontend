@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-import java.util.UUID
-
 import com.google.inject.{ImplementedBy, Singleton}
+
+import java.util.UUID
 
 @ImplementedBy(classOf[UUIDGeneratorImpl])
 trait UUIDGenerator {
