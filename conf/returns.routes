@@ -1,27 +1,27 @@
--> /  triage.Routes
--> /  disposal_details.Routes
--> /  acquisition_details.Routes
--> /  relief_details.Routes
--> /  exemptions_losses.Routes
--> /  ytd_liability_firstreturn.Routes
--> /  initial_gain_or_loss.Routes
--> /  property_details.Routes
--> /  supporting_evidence.Routes
--> /  gain_or_loss_after_reliefs.Routes
+->          /                                 triage.Routes
+->          /                                 disposal_details.Routes
+->          /                                 acquisition_details.Routes
+->          /                                 relief_details.Routes
+->          /                                 exemptions_losses.Routes
+->          /                                 ytd_liability_firstreturn.Routes
+->          /                                 initial_gain_or_loss.Routes
+->          /                                 property_details.Routes
+->          /                                 supporting_evidence.Routes
+->          /                                 gain_or_loss_after_reliefs.Routes
 
-GET  /task-list                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.TaskListController.taskList()
+GET         /task-list                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.TaskListController.taskList()
 
-GET   /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.checkAllAnswers()
-POST  /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit()
+GET         /check-answers-accept-send        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.checkAllAnswers()
+POST        /check-answers-accept-send        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit()
 
-GET   /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
-POST  /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.payReturn()
+GET         /return-sent-confirmation         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
+POST        /return-sent-confirmation         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.payReturn()
 
-GET   /return                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.displayReturn()
-GET   /pay-charge-in-return              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.payCharge(chargeRefrence: String)
-GET   /change-return                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.startAmendingReturn()
+GET         /return                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.displayReturn()
+GET         /pay-charge-in-return             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.payCharge(chargeRefrence: String)
+GET         /change-return                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.startAmendingReturn()
 
 
-GET   /check-if-return-was-sent          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.submissionError()
-POST  /check-if-return-was-sent          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.submissionErrorSubmit()
-GET   /exit/return-saved                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.DraftReturnSavedController.draftReturnSaved()
+GET         /check-if-return-was-sent         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.submissionError()
+POST        /check-if-return-was-sent         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.submissionErrorSubmit()
+GET         /exit/return-saved                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.DraftReturnSavedController.draftReturnSaved()

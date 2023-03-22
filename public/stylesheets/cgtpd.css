@@ -2,16 +2,18 @@
 h1.heading-xlarge, h1 {
     margin-bottom: 50px;
 }
-h1>label.heading-xlarge,
-legend>h1.heading-xlarge,
-legend>h2.heading-medium {
+
+h1 > label.heading-xlarge,
+legend > h1.heading-xlarge,
+legend > h2.heading-medium {
     margin-bottom: 15px;
 }
-legend>h2.heading-medium,
-legend>h2,
+
+legend > h2.heading-medium,
+legend > h2,
 .form-label.heading-medium,
-.form-group-error legend>h1.heading-xlarge,
-.form-group-error h1>label.heading-xlarge,
+.form-group-error legend > h1.heading-xlarge,
+.form-group-error h1 > label.heading-xlarge,
 h1 > span.heading-medium,
 .column-half > .heading-medium,
 .govuk-box-highlight > h1,
@@ -23,12 +25,15 @@ h1 > span.heading-medium,
 .returns-list-header h3 {
     margin-top: 0;
 }
+
 h1 + .govuk-caption-xl {
     padding-top: 0;
 }
-ul+form legend>h2.heading-medium {
+
+ul + form legend > h2.heading-medium {
     margin-top: 1.125em;
 }
+
 .form-label.heading-medium {
     font-size: 24px;
 }
@@ -46,22 +51,27 @@ ul+form legend>h2.heading-medium {
     margin-top: 1em;
     padding-bottom: 30px;
 }
+
 .returns-list-header h3 {
     font-size: 24px;
 }
+
 .govuk-box-highlight > h1,
 .account-header h1.heading-xlarge {
     margin-bottom: 10px;
 }
+
 .account-header h1.heading-xlarge {
     margin-top: 0;
 }
+
 .account-header h2 {
     margin-top: 0;
     font-size: 1em;
     font-weight: normal;
     margin-bottom: 30px;
 }
+
 .account-header h2 > span {
     display: block;
 }
@@ -105,6 +115,7 @@ ul+form legend>h2.heading-medium {
 .govuk-box-highlight > p > span {
     margin: 0;
 }
+
 .govuk-box-highlight > p > span.heading-large.tax-owed-label {
     font-weight: normal;
 }
@@ -117,7 +128,7 @@ ul+form legend>h2.heading-medium {
     margin: 0;
 }
 
-.govuk-check-your-answers.no-border>*>* {
+.govuk-check-your-answers.no-border > * > * {
     border-bottom: none;
 }
 
@@ -134,7 +145,7 @@ ul+form legend>h2.heading-medium {
     background-color: #00703c;
 }
 
-div>p.lede,
+div > p.lede,
 .form-hint {
     margin-bottom: 15px;
     margin-top: 0;
@@ -157,7 +168,7 @@ fieldset .form-hint {
     border-width: 4px;
 }
 
-.govuk-list>li, .error-summary-list>li {
+.govuk-list > li, .error-summary-list > li {
     margin-bottom: 5px;
 }
 
@@ -180,7 +191,7 @@ fieldset .form-hint {
 }
 
 .form-group .panel-border-narrow:last-child.with-bottom-margin {
-  margin-bottom: 1.875em;
+    margin-bottom: 1.875em;
 }
 
 .with-top-margin {
@@ -210,7 +221,9 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     display: none !important;
 }
 
-.govuk-check-your-answers { margin: 30px 0 60px 0; }
+.govuk-check-your-answers {
+    margin: 30px 0 60px 0;
+}
 
 /* misalignment of panel border on radios with revealing content */
 .multiple-choice + .panel-indent {
@@ -260,6 +273,7 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     border-top: 10px solid #005ea5;
     padding-top: 5px;
 }
+
 .govuk-related-items h2 {
     margin-top: 0.55556em;
 }
@@ -325,7 +339,7 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     font-size: 16px;
 }
 
-.account-menu+.beta-banner {
+.account-menu + .beta-banner {
     border-bottom: none;
 }
 
@@ -381,7 +395,7 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     padding: 0 15px 0 0;
 }
 
-.account-menu__link  {
+.account-menu__link {
     color: rgb(29, 112, 184);
 }
 
@@ -428,6 +442,7 @@ details {
     color: #144e81;
     background: #d2e2f1;
 }
+
 .govuk-tag--grey {
     color: #383f43;
     background: #eeefef;
@@ -608,11 +623,11 @@ input:focus + .hmcts-currency-input__symbol.form-control--error {
     background-color: #005ea5;
 }
 
-main>div>.service-info {
+main > div > .service-info {
     border-top-color: #005ea5;
 }
 
-.ur-banner+div+main>div>.service-info {
+.ur-banner + div + main > div > .service-info {
     border: none;
 }
 
@@ -625,16 +640,16 @@ main>div>.service-info {
 }
 
 .ur-banner p a,
-.ur-banner p a:link
-{
+.ur-banner p a:link {
     color: white;
 }
+
 .ur-banner p a:focus,
 .ur-banner p a:link:focus {
     color: #0b0c0c;
 }
 
-@media screen and (-webkit-min-device-pixel-ratio:0) {
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
     ::i-block-chrome, input:focus + .hmcts-currency-input__symbol.form-control--error {
         border-width: 4px;
         padding: 8px;
@@ -693,6 +708,7 @@ details dl.govuk-check-your-answers {
     display: block;
     font-weight: normal;
 }
+
 .return-list li .caption,
 .charge .caption,
 .account-due .caption {
@@ -772,6 +788,7 @@ details dl.govuk-check-your-answers {
         text-align: left;
         padding-bottom: 1em;
     }
+
     .return-list li .financial-summary h5,
     .submission-meta {
         text-align: left;
@@ -793,6 +810,7 @@ details dl.govuk-check-your-answers {
     table, thead, tbody, th, td, tr, .mobile-only {
         display: block;
     }
+
     thead tr {
         position: absolute;
         top: -9999px;
@@ -802,6 +820,7 @@ details dl.govuk-check-your-answers {
     tr {
         border: 1px solid #cccccc;
     }
+
     td {
         border: none;
         border-bottom: 1px solid #eee;
@@ -809,6 +828,7 @@ details dl.govuk-check-your-answers {
         padding-left: 200px;
         margin-left: 150px;
     }
+
     td:before {
         position: absolute;
         top: 12px;
@@ -819,18 +839,40 @@ details dl.govuk-check-your-answers {
         margin-left: -150px;
     }
 
-    table.view-return-charges td:nth-of-type(1):before { content: "Description"; }
-    table.view-return-charges td:nth-of-type(2):before { content: "Pay by"; }
-    table.view-return-charges td:nth-of-type(3):before { content: "Amount"; }
-    table.view-return-charges td:nth-of-type(4):before { content: "Due";}
-    table.view-return-charges td:nth-of-type(5):before { content: "Status";}
+    table.view-return-charges td:nth-of-type(1):before {
+        content: "Description";
+    }
 
-    table.delta-table td:nth-of-type(1):before { content: ""; }
-    table.delta-table td:nth-of-type(2):before { content: "Date due"; }
-    table.delta-table td:nth-of-type(3):before { content: "Amount"; }
+    table.view-return-charges td:nth-of-type(2):before {
+        content: "Pay by";
+    }
+
+    table.view-return-charges td:nth-of-type(3):before {
+        content: "Amount";
+    }
+
+    table.view-return-charges td:nth-of-type(4):before {
+        content: "Due";
+    }
+
+    table.view-return-charges td:nth-of-type(5):before {
+        content: "Status";
+    }
+
+    table.delta-table td:nth-of-type(1):before {
+        content: "";
+    }
+
+    table.delta-table td:nth-of-type(2):before {
+        content: "Date due";
+    }
+
+    table.delta-table td:nth-of-type(3):before {
+        content: "Amount";
+    }
 
     td.allocations:nth-of-type(1):before {
-        content: "Allocations"!important;
+        content: "Allocations" !important;
     }
 
     .cya-change.cya-extra-action {
@@ -864,9 +906,9 @@ details dl.govuk-check-your-answers {
     padding-left: 1em;
 }
 
- .account-home-link {
-        padding-bottom:3em;
-    }
+.account-home-link {
+    padding-bottom: 3em;
+}
 
 @media only screen and (max-width: 930px) {
     .calc-total {
@@ -882,6 +924,7 @@ details dl.govuk-check-your-answers {
         display: block;
         text-align: left;
     }
+
     .column-one-third.account-due .govuk-caption-xl {
         padding-top: 0;
     }
@@ -892,10 +935,11 @@ details dl.govuk-check-your-answers {
     }
 }
 
-@media (min-width: 900px) and (max-width: 1023px){
+@media (min-width: 900px) and (max-width: 1023px) {
     .account-due h2.regular-number {
         font-size: 36px;
     }
+
     .account-due h2.large-number {
         font-size: 32px;
     }
@@ -905,6 +949,7 @@ details dl.govuk-check-your-answers {
     .account-due h2.regular-number {
         font-size: 48px;
     }
+
     .account-due h2.large-number {
         font-size: 36px;
     }
@@ -925,37 +970,46 @@ details dl.govuk-check-your-answers {
         margin-bottom: 60px;
         padding-left: 30px;
     }
+
     .app-task-list__section {
         font-size: 24px;
         line-height: 1.25;
     }
+
     .app-task-list__section-number {
         min-width: 30px;
         padding-right: 0;
     }
+
     .app-task-list {
         min-width: 550px;
     }
+
     .govuk-tag {
         font-size: 16px;
         line-height: 1.25;
     }
+
     .govuk-caption-xl {
         padding-top: 40px;
         font-size: 27px;
         line-height: 1.11111;
     }
+
     .hmcts-banner__message {
         font-size: 19px;
         line-height: 1.31579;
     }
+
     .govuk-label--m {
         font-size: 24px;
         line-height: 1.25;
     }
+
     .account-due {
         text-align: right;
     }
+
     .column-three-quarters {
         width: 75%;
         float: left;

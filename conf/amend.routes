@@ -1,7 +1,7 @@
-GET  /change-return/cancel                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.confirmCancel(back: String)
-POST /change-return/cancel                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.confirmCancelSubmit(back: String)
+GET         /change-return/cancel                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.confirmCancel(back: String)
+POST        /change-return/cancel                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.confirmCancelSubmit(back: String)
 
-GET  /change-return/check-answers                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.checkYourAnswers()
+GET         /change-return/check-answers                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.checkYourAnswers()
 
-GET  /change-return/answer-other-questions-first  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.unmetDependency()
-POST /change-return/answer-other-questions-first  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.unmetDependencySubmit()
+GET         /change-return/answer-other-questions-first        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.unmetDependency()
+POST        /change-return/answer-other-questions-first        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.unmetDependencySubmit()
