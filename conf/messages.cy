@@ -1088,6 +1088,7 @@ assetTypeNotYetImplemented.p2=Bydd angen i chi lenwi <a href="{0}">dibreswyl: rh
 multipleDisposalsTaxYear.title=Pryd y cyfnewidiwyd contractau ar yr holl eiddo?
 multipleDisposalsTaxYear.link=Beth sy’n digwydd ar y dyddiad cyfnewid?
 
+multipleDisposalsTaxYear.taxyear.2023= Y cyfan rhwng 6 Ebrill 2023 a 5 Ebrill 2024
 multipleDisposalsTaxYear.taxyear.2022= Y cyfan rhwng 6 Ebrill 2022 a 5 Ebrill 2023
 multipleDisposalsTaxYear.taxyear.2021= Y cyfan rhwng 6 Ebrill 2021 a 5 Ebrill 2022
 multipleDisposalsTaxYear.taxyear.2020= Y cyfan rhwng 6 Ebrill 2020 a 5 Ebrill 2021
