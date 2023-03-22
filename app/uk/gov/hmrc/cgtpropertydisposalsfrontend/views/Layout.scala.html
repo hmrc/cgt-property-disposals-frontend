@@ -14,48 +14,69 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLayout
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTimeoutDialogHelper
+@import controllers.routes
 @import views.html.helper.CSPNonce
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
 @import play.twirl.api._
 @import play.api.mvc._
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import controllers.routes
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 
 @this(
-        appConfig: ViewConfig,
-        hmrcLayout: HmrcLayout,
-        hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-        hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper)
+        hmrcStandardPage: HmrcStandardPage,
+        twoThirdsOneThirdMainContent: TwoThirdsOneThirdMainContent,
+        hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
+        hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
+)
 
-@(pageTitle: String,
+
+@(
+        pageTitle: String,
         withSignOutLink: Boolean = false,
-        isWelshTranslationAvailable: Boolean = false,
-        backLinkUrl: Option[String] = None
+        isWelshTranslationAvailable: Boolean = true,
+        backLinkUrl: Option[String] = None,
+        hasErrors: Boolean = false,
+        sidebar: Option[Html] = None
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
-@content = {
-@contentBlock
-@hmrcReportTechnicalIssueHelper()
-}
+@signOutUrl = @{controllerRoutes.StartController.signOutAndRedirectToFeedback().url}
 
 @additionalHeadBlock = {
-@hmrcTimeoutDialogHelper(signOutUrl = controllerRoutes.StartController.start().url)
-    <link rel="stylesheet" href='@routes.Assets.at("stylesheets/cgtpd-ui-upgrade.css")'/>
+  @if(withSignOutLink) {
+    @hmrcTimeoutDialogHelper(signOutUrl)
+  }
+  <link rel="stylesheet" media="all" href="@routes.Assets.at("stylesheets/cgtpd-ui-upgrade.css")" />
 }
 
-@hmrcLayout(
-    backLinkUrl = backLinkUrl,
-    pageTitle = Some(pageTitle),
-    userResearchBannerUrl = Some(appConfig.userRecruitmentUrl),
-    accessibilityStatementUrl = Some(controllerRoutes.AccessibilityStatementController.accessibilityStatement().url),
+@content = {
+  <div class="govuk-!-margin-bottom-6">
+    @contentBlock
+  </div>
+  <div class="govuk-!-display-none-print">
+    @hmrcReportTechnicalIssueHelper()
+  </div>
+}
+
+@gdsTitle = @{
+  s"""${if(hasErrors){ s"""${messages("generic.errorPrefix")}: """ } else ""}$pageTitle - ${messages("service.title")} - GOV.UK"""
+}
+
+@hmrcStandardPage(
+  HmrcStandardPageParams(
+    serviceURLs = ServiceURLs(
+      signOutUrl = if (withSignOutLink) Some(signOutUrl) else None,
+      accessibilityStatementUrl = Some(controllerRoutes.AccessibilityStatementController.accessibilityStatement().url)
+    ),
+    templateOverrides = TemplateOverrides(
+      additionalHeadBlock = Some(additionalHeadBlock),
+      mainContentLayout = sidebar.map(s => twoThirdsOneThirdMainContent(s)),
+
+    ),
+    backLink = backLinkUrl.map(url => BackLink(url)),
+    serviceName = Some(messages("service.title")),
+    pageTitle = Some(gdsTitle),
     isWelshTranslationAvailable = isWelshTranslationAvailable,
-    serviceUrl = None,
-    signOutUrl = if(withSignOutLink) Some(s"""${appConfig.signOutUrl}?continue${controllerRoutes.StartController.start().url}""") else None,
-    phaseBanner = None,
-    additionalHeadBlock = Some(additionalHeadBlock),
-    nonce = CSPNonce.get
-)(content)
+    cspNonce = CSPNonce.get
+  ))(content)

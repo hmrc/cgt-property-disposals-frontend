@@ -136,7 +136,7 @@ govukRadios : GovukRadios
         @govukButton(
         Button(
             content = Text(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue")),
-            preventDoubleClick = true,
+            preventDoubleClick = Some(true),
             attributes = Map("id" -> "submitButton")
             )
         )
