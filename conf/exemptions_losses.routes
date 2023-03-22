@@ -1,11 +1,11 @@
-GET  /losses-allowances-exemptions/losses-this-tax-year          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.inYearLosses()
-POST /losses-allowances-exemptions/losses-this-tax-year          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.inYearLossesSubmit()
+GET         /losses-allowances-exemptions/losses-this-tax-year             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.inYearLosses()
+POST        /losses-allowances-exemptions/losses-this-tax-year             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.inYearLossesSubmit()
 
-GET  /losses-allowances-exemptions/losses-previous-tax-years     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.previousYearsLosses()
-POST /losses-allowances-exemptions/losses-previous-tax-years     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.previousYearsLossesSubmit()
+GET         /losses-allowances-exemptions/losses-previous-tax-years        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.previousYearsLosses()
+POST        /losses-allowances-exemptions/losses-previous-tax-years        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.previousYearsLossesSubmit()
 
-GET  /losses-allowances-exemptions/annual-exempt-amount-used     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.annualExemptAmount()
-POST /losses-allowances-exemptions/annual-exempt-amount-used     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.annualExemptAmountSubmit()
+GET         /losses-allowances-exemptions/annual-exempt-amount-used        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.annualExemptAmount()
+POST        /losses-allowances-exemptions/annual-exempt-amount-used        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.annualExemptAmountSubmit()
 
-GET  /losses-allowances-exemptions/check-you-answers             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.checkYourAnswers()
-POST /losses-allowances-exemptions/check-you-answers             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.checkYourAnswersSubmit()
+GET         /losses-allowances-exemptions/check-you-answers                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.checkYourAnswers()
+POST        /losses-allowances-exemptions/check-you-answers                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.checkYourAnswersSubmit()

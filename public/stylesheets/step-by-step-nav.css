@@ -311,6 +311,7 @@ button.app-step-nav__button--title {
     font-weight: bold;
     line-height: 28px;
 }
+
 @media (min-width: 40.0625em) {
     .app-step-nav--large .app-step-nav__circle--logic {
         font-size: 19px;

@@ -321,8 +321,7 @@ select:focus,
 }
 
 .autocomplete__input:focus,
-.form-control:focus
-{
+.form-control:focus {
     outline: 3px solid #fd0;
     outline-offset: 0;
     -webkit-box-shadow: inset 0 0 0 2px;
@@ -335,15 +334,18 @@ select:focus,
     width: 44px;
     height: 44px;
 }
+
 .multiple-choice [type="radio"] + label::before {
     width: 40px;
     height: 40px;
     box-sizing: border-box;
 }
+
 .multiple-choice [type="radio"]:focus + label::before {
     border-width: 4px;
 }
-.multiple-choice [type=radio]+label::after {
+
+.multiple-choice [type=radio] + label::after {
     top: 10px;
     left: 10px;
 }
@@ -398,7 +400,7 @@ textarea:focus {
 }
 
 .govuk-radios__divider {
-    font-family: "GDS Transport",arial,sans-serif;
+    font-family: "GDS Transport", arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-weight: 400;
