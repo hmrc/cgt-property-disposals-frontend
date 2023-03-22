@@ -16,7 +16,6 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 
@@ -58,5 +57,4 @@
             <dd class="cya-change"><a href="@{routes.SupportingEvidenceController.deleteSupportingEvidence(document.uploadReference, addNew = false).url}">@messages("cya.remove")<span class="visuallyhidden"> @messages("supporting-evidence.check-your-answers.assistive", document.fileName)</span></a></dd>
         </div>
     }
-
 }

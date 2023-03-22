@@ -16,14 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
-import java.time.LocalDate
-import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
+import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.order._
-import cats.instances.string._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import play.api.i18n.Lang
@@ -39,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcod
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
@@ -48,6 +46,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[ReturnsServiceImpl])

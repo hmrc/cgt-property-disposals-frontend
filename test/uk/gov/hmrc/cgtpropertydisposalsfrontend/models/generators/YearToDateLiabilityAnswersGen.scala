@@ -22,9 +22,9 @@ import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedTaxDue, MandatoryEvidence, YearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.{CompleteCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedTaxDue, MandatoryEvidence, YearToDateLiabilityAnswers}
 
 object YearToDateLiabilityAnswersGen extends HigherPriorityYearToDateLiabilityAnswersGen with GenUtils
 

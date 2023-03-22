@@ -1,23 +1,23 @@
-->  /hmrc-frontend                                                          hmrcfrontend.Routes
+->         /hmrc-frontend                                                  hmrcfrontend.Routes
 
-GET /create-account/need-more-details                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
-GET /start/report-pay-capital-gains-tax-uk-property                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
-GET /manage-clients-capital-gains-tax-on-uk-property-account                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.agentsLandingPage()
-GET /start/report-pay-capital-gains-tax-uk-property/sign-in                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.signInPage()
+GET        /create-account/need-more-details                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
+GET        /start/report-pay-capital-gains-tax-uk-property                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
+GET        /manage-clients-capital-gains-tax-on-uk-property-account        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.agentsLandingPage()
+GET        /start/report-pay-capital-gains-tax-uk-property/sign-in         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.signInPage()
 
-GET /switch-to-welsh-language                                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.CustomLanguageController.switchToWelsh
-GET /switch-to-english-language                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.CustomLanguageController.switchToEnglish
+GET        /switch-to-welsh-language                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.CustomLanguageController.switchToWelsh
+GET        /switch-to-english-language                                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.CustomLanguageController.switchToEnglish
 
-GET /exit/get-a-hmrc-agent-services-account                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.agentNoEnrolment()
-GET /exit/cannot-check-details                                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weOnlySupportGG()
+GET        /exit/get-a-hmrc-agent-services-account                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.agentNoEnrolment()
+GET        /exit/cannot-check-details                                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weOnlySupportGG()
 
-GET /start                                                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
-GET /sign-out-and-register-for-gg                                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRegisterForGG()
-GET /sign-out-and-log-in                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
-GET /exit/we-signed-you-out                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
-GET /keep-alive                                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
-GET /accessibility-statement                                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AccessibilityStatementController.accessibilityStatement()
+GET        /start                                                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
+GET        /sign-out-and-register-for-gg                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRegisterForGG()
+GET        /sign-out-and-log-in                                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
+GET        /exit/we-signed-you-out                                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
+GET        /keep-alive                                                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
+GET        /accessibility-statement                                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AccessibilityStatementController.accessibilityStatement()
 
-GET /sign-out                                                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRedirectToFeedback()
+GET        /sign-out                                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRedirectToFeedback()
 
-GET /assets/*file                                                           controllers.Assets.at(path="/public", file)
+GET        /assets/*file                                                   controllers.Assets.at(path="/public", file)

@@ -16,15 +16,10 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.NINO
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeSautr
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeNino
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.NoReferenceId
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section_govuk,

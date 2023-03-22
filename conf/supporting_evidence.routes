@@ -1,19 +1,19 @@
-GET    /supporting-evidence/supporting-evidence                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.doYouWantToUploadSupportingEvidence()
-POST   /supporting-evidence/supporting-evidence                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.doYouWantToUploadSupportingEvidenceSubmit()
+GET         /supporting-evidence/supporting-evidence                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.doYouWantToUploadSupportingEvidence()
+POST        /supporting-evidence/supporting-evidence                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.doYouWantToUploadSupportingEvidenceSubmit()
 
-GET    /supporting-evidence/upload-supporting-evidence                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.uploadSupportingEvidence()
+GET         /supporting-evidence/upload-supporting-evidence            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.uploadSupportingEvidence()
 
-GET    /supporting-evidence/scan-progress/:id                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.scanProgress(id : uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference)
-POST   /supporting-evidence/scan-progress                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.scanProgressSubmit(id : String)
+GET         /supporting-evidence/scan-progress/:id                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.scanProgress(id : uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference)
+POST        /supporting-evidence/scan-progress                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.scanProgressSubmit(id : String)
 
-GET    /supporting-evidence/delete-supporting-evidence/:id                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.deleteSupportingEvidence(id: uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference, addNew: Boolean)
+GET         /supporting-evidence/delete-supporting-evidence/:id        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.deleteSupportingEvidence(id: uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference, addNew: Boolean)
 
-GET    /supporting-evidence/documents-deleted                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.supportingEvidenceExpired()
-POST   /supporting-evidence/documents-deleted                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.supportingEvidenceExpiredSubmit()
+GET         /supporting-evidence/documents-deleted                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.supportingEvidenceExpired()
+POST        /supporting-evidence/documents-deleted                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.supportingEvidenceExpiredSubmit()
 
-GET    /supporting-evidence/check-your-answers                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.checkYourAnswers()
-POST   /supporting-evidence/check-your-answers                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.checkYourAnswersSubmit()
+GET         /supporting-evidence/check-your-answers                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.checkYourAnswers()
+POST        /supporting-evidence/check-your-answers                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.checkYourAnswersSubmit()
 
-GET    /supporting-evidence/handle-upscan-error-redirect                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.handleUpscanErrorRedirect()
-GET    /supporting-evidence/document-did-not-upload                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.documentDidNotUpload()
-GET    /supporting-evidence/problem-with-document                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.handleUpscanCallBackFailures()
+GET         /supporting-evidence/handle-upscan-error-redirect          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.handleUpscanErrorRedirect()
+GET         /supporting-evidence/document-did-not-upload               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.documentDidNotUpload()
+GET         /supporting-evidence/problem-with-document                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.handleUpscanCallBackFailures()

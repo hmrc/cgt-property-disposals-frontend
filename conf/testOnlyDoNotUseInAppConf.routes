@@ -10,11 +10,11 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
-->          /                                                                       prod.Routes
-GET         /capital-gains-tax-uk-property/test-only/set-return-state               uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController.setReturnState()
-POST        /capital-gains-tax-uk-property/test-only/set-return-state               uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController.setReturnStateSubmit()
+->            /                                                                         prod.Routes
+GET           /capital-gains-tax-uk-property/test-only/set-return-state                 uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController.setReturnState()
+POST          /capital-gains-tax-uk-property/test-only/set-return-state                 uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController.setReturnStateSubmit()
 
-DELETE      /capital-gains-tax-uk-property/test-only/draftReturn/:cgtReference      uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.TestOnlyDraftReturnsController.deleteDraftReturn(cgtReference: String)
+DELETE        /capital-gains-tax-uk-property/test-only/draftReturn/:cgtReference        uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.TestOnlyDraftReturnsController.deleteDraftReturn(cgtReference: String)
 
 # UPSCAN
-GET         /capital-gains-tax-uk-property/test-only/dms-submission                 uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.DmsSubmissionController.testSubmitToDms()
+GET           /capital-gains-tax-uk-property/test-only/dms-submission                   uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.DmsSubmissionController.testSubmitToDms()

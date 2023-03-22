@@ -16,29 +16,28 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import java.net.URLEncoder
-
 import akka.stream.Materializer
+import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.ConfigFactory
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.BeforeAndAfterAll
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.http.HttpConfiguration
-import play.api.i18n.{DefaultMessagesApi, DefaultMessagesApiProvider, Lang, Langs, MessagesApi}
+import play.api.i18n._
 import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.mvc.{Call, Result}
 import play.api.test.Helpers._
-import play.api.{Application, Configuration, Environment, Logging, Play}
+import play.api._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.{Metrics, MockMetrics}
 
+import java.net.URLEncoder
 import scala.concurrent.Future
 import scala.reflect.ClassTag
-import com.google.inject.{Inject, Singleton}
 
 @Singleton
 class TestMessagesApi(
@@ -141,8 +140,8 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
   def checkIsTechnicalErrorPage(
     result: Future[Result]
   )(implicit messagesApi: MessagesApi): Unit = {
-    import cats.syntax.eq._
     import cats.instances.int._
+    import cats.syntax.eq._
     if (status(result) =!= INTERNAL_SERVER_ERROR) println(contentAsString(result))
 
     (status(result), redirectLocation(result)) shouldBe (INTERNAL_SERVER_ERROR -> None)
@@ -155,8 +154,8 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
     result: Future[Result],
     expectedRedirectUrl: String
   ): Unit = {
-    import cats.syntax.eq._
     import cats.instances.int._
+    import cats.syntax.eq._
     if (status(result) =!= SEE_OTHER) println(contentAsString(result))
 
     status(result)           shouldBe SEE_OTHER

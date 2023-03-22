@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import java.time.format.DateTimeFormatter
-import java.time.{Clock, LocalDate, LocalDateTime}
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
@@ -27,6 +25,8 @@ import play.api.data.format.Formatter
 import play.api.i18n.Messages
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{PersonalRepresentativeDetails, TaxYearExchanged}
 
+import java.time.format.DateTimeFormatter
+import java.time.{Clock, LocalDate, LocalDateTime}
 import scala.util.Try
 
 object TimeUtils {

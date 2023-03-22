@@ -1,6 +1,4 @@
 import play.core.PlayVersion.current
-import play.sbt.PlayImport._
-import sbt.Keys.libraryDependencies
 import sbt._
 
 object AppDependencies {
@@ -24,15 +22,15 @@ object AppDependencies {
   )
 
   val test = Seq(
-    "org.scalatest"              %% "scalatest"                 % "3.2.9"               % "test",
-    "org.jsoup"                   % "jsoup"                     % "1.12.1"              % "test",
-    "com.typesafe.play"          %% "play-test"                 % current               % "test",
-    "org.scalamock"              %% "scalamock"                 % "4.2.0"               % "test",
-    "org.scalatestplus"          %% "scalatestplus-scalacheck"  % "3.1.0.0-RC2"         % "test, it",
-    "com.vladsch.flexmark"        % "flexmark-all"                % "0.35.10"             % "test",
-    "uk.gov.hmrc.mongo"          %% "hmrc-mongo-test-play-28"   % "0.70.0"              % "test",
-    "com.github.alexarchambault" %% "scalacheck-shapeless_1.14" % "1.2.1"               % "test",
-    "org.scalatestplus.play"     %% "scalatestplus-play"        % "5.1.0"               % "test, it"
+    "org.scalatest"              %% "scalatest"                 % "3.2.9"       % "test",
+    "org.jsoup"                   % "jsoup"                     % "1.12.1"      % "test",
+    "com.typesafe.play"          %% "play-test"                 % current       % "test",
+    "org.scalamock"              %% "scalamock"                 % "4.2.0"       % "test",
+    "org.scalatestplus"          %% "scalatestplus-scalacheck"  % "3.1.0.0-RC2" % "test, it",
+    "com.vladsch.flexmark"        % "flexmark-all"              % "0.35.10"     % "test",
+    "uk.gov.hmrc.mongo"          %% "hmrc-mongo-test-play-28"   % "0.70.0"      % "test",
+    "com.github.alexarchambault" %% "scalacheck-shapeless_1.14" % "1.2.1"       % "test",
+    "org.scalatestplus.play"     %% "scalatestplus-play"        % "5.1.0"       % "test, it"
   )
 
 }

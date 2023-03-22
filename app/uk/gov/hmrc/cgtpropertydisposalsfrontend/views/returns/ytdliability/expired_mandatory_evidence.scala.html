@@ -17,8 +17,8 @@
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MandatoryEvidence
 
 @this(
@@ -57,7 +57,3 @@
     <p>@messages(s"$key.p2")</p>
     <a href="@{routes.YearToDateLiabilityController.uploadMandatoryEvidence().url}" class="button" role="button">@messages("mandatoryEvidenceExpired.button.text")</a>
 }
-
-
-
-

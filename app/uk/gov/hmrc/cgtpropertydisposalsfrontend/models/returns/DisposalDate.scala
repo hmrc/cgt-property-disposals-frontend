@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import java.time.LocalDate
-
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
+
+import java.time.LocalDate
 
 final case class DisposalDate(value: LocalDate, taxYear: TaxYear)
 

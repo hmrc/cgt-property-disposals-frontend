@@ -15,11 +15,12 @@
  *@
 
 @import controllers.routes
-@import views.html.helper.CSPNonce
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
-@import play.twirl.api._
-@import play.api.mvc._
 @import play.api.i18n.Messages
+@import play.api.mvc._
+@import play.twirl.api._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcReportTechnicalIssueHelper, HmrcTimeoutDialogHelper}
+@import views.html.helper.CSPNonce
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
@@ -30,7 +31,6 @@
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
 )
-
 
 @(
         pageTitle: String,

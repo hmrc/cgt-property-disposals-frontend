@@ -16,18 +16,16 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary, ReturnType}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, RepresentativeType, ReturnSummary, ReturnType}
 
 @this(
   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,

@@ -14,12 +14,10 @@
  * limitations under the License.
  *@
 
-@import play.api.i18n.Messages
-
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType
 @import cats.syntax.eq._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.Charge
+@import play.api.i18n.Messages
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{Charge, ChargeType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnType
 
 @this(
   chargeItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.charge_item,
@@ -67,4 +65,3 @@
     }
     </tbody>
   </table>
-

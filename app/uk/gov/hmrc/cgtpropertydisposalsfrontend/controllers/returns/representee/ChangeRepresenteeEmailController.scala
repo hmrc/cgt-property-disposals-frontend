@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 
-import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
@@ -42,6 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 class ChangeRepresenteeEmailController @Inject() (

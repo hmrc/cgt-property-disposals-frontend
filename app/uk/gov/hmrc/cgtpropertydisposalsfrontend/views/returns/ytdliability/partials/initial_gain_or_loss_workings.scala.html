@@ -15,13 +15,11 @@
  *@
 
 @import play.api.i18n.Messages
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedTaxDue, Source}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.Source
 
 @this(
     calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
@@ -130,5 +128,3 @@
       )
     )
   }
-
-

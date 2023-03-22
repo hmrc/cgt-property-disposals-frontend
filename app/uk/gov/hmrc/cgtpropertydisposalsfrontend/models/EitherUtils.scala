@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.Applicative
 import cats.instances.either._
 import cats.syntax.traverse._
-import play.api.libs.json.{Format, JsObject, JsResult, JsValue, Json}
+import play.api.libs.json._
 
 object EitherUtils {
 

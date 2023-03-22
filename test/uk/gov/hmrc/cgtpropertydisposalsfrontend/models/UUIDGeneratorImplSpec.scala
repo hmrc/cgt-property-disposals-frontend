@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGeneratorImpl
 
 class UUIDGeneratorImplSpec extends AnyWordSpec with Matchers {

@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
-import java.util.function.Predicate
-
 import play.api.data.Forms.nonEmptyText
 import play.api.data.Mapping
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
+
+import java.util.function.Predicate
 
 final case class Postcode(value: String) extends AnyVal
 
