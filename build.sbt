@@ -1,6 +1,5 @@
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import wartremover.Wart
 import wartremover.WartRemover.autoImport.wartremoverErrors
 
@@ -55,7 +54,6 @@ lazy val microservice = Project(appName, file("."))
     ),
     Test / scalacOptions --= Seq("-Ywarn-value-discard")
   )
-  .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
   .settings(wartremoverSettings: _*)

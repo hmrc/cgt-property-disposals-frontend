@@ -1815,6 +1815,13 @@ object MultipleDisposalsTriageController {
     val conditionExpr6 = !(taxYearOfDateOfDeath.year === 2022 || taxYearOfDateOfDeath.year === 2021 ||
       taxYearOfDateOfDeath.year === 2020 || taxYearOfDateOfDeath.year === 2020)
 
+    // Taxyear 2023/24
+    val conditionExpr7 = !(taxYearOfDateOfDeath.year === 2023)
+
+    val conditionExpr8 =
+      !(taxYearOfDateOfDeath.year === 2023 || taxYearOfDateOfDeath.year === 2022 || taxYearOfDateOfDeath.year === 2021 ||
+        taxYearOfDateOfDeath.year === 2020 || taxYearOfDateOfDeath.year === 2020)
+
     val taxYearExchangedFormFormatter: Formatter[TaxYearExchanged] =
       new Formatter[TaxYearExchanged] {
         override def bind(
@@ -1823,6 +1830,13 @@ object MultipleDisposalsTriageController {
         ): Either[Seq[FormError], TaxYearExchanged] =
           readValue(key, data, identity)
             .flatMap {
+              case "2023"  =>
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr7)
+                  Left(FormError(key, "error.before.invalid"))
+                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr8)
+                  Left(FormError(key, "error.after.invalid"))
+                else
+                  Right(TaxYearExchanged(2023))
               case "2022"  =>
                 if (representativeType.contains(PersonalRepresentative) && conditionExpr5)
                   Left(FormError(key, "error.before.invalid"))
