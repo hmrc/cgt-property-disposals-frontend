@@ -20,9 +20,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+
 @this(
-  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-  form: FormWithCSRF,
+  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+  formWithCSRF: FormWithCSRF,
   govukButton: GovukButton,
 )
 
@@ -38,6 +40,8 @@
 @layout(title) {
   <h1 class="govuk-heading-xl">@{messages(s"$key.title")}</h1>
 
+  <h1 class="govuk-heading-xl">@{messages(s"$key.title")}</h1>
+
   <p class="govuk-body">
     @Html(messages(s"$key.p1", viewConfig.createAgentsAccountUrl))
   </p>
@@ -45,6 +49,12 @@
   <p class="govuk-body">
     @messages(s"$key.p2")
   </p>
+
+  @formWithCSRF(routes.StartController.signOutAndSignIn(), 'novalidate -> "novalidate") {
+    @govukButton(Button(
+      content = Text(messages(s"$key.button.tryAgain"))
+    ))
+  }
 
   @form(routes.StartController.signOutAndSignIn(), 'novalidate -> "novalidate") {
     @govukButton(Button(

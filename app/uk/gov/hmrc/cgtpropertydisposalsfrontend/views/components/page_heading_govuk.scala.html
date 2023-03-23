@@ -20,8 +20,8 @@
 
 @(heading: String, caption: Option[String] = None, subtitle: Option[String] = None)
 
- <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-0">
-  @caption.map(c => Html(s"""<span class="govuk-caption-xl">$c</span>"""))
+@caption.map(c => Html(s"""<span class="govuk-caption-xl">$c</span>"""))
+<h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-0">
   @heading
-  @subtitle.map(s => Html(s"""<p class="sub-heading">$s</p>"""))
- </h1>
+</h1>
+@subtitle.map(s => Html(s"""<p class="sub-heading">$s</p>"""))
