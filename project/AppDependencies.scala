@@ -6,19 +6,19 @@ object AppDependencies {
   val playVersion = "play-28"
 
   val compile = Seq(
-    "uk.gov.hmrc"                %% "play-frontend-hmrc"                % s"6.8.0-$playVersion",
-    "uk.gov.hmrc"                %% "govuk-template"                    % s"5.68.0-$playVersion",
-    "uk.gov.hmrc"                %% "play-ui"                           % s"9.4.0-$playVersion",
-    "uk.gov.hmrc"                %% s"bootstrap-frontend-$playVersion"  % "5.24.0",
-    "uk.gov.hmrc.mongo"          %% s"hmrc-mongo-$playVersion"          % "0.70.0",
-    "uk.gov.hmrc"                %% "domain"                            % s"6.1.0-$playVersion",
-    "org.typelevel"              %% "cats-core"                         % "2.6.0",
-    "com.github.kxbmap"          %% "configs"                            % "0.6.1",
-    "org.julienrf"               %% "play-json-derived-codecs"          % "10.0.2",
-    "com.github.julien-truffaut" %% "monocle-core"                      % "2.0.0",
-    "com.github.julien-truffaut" %% "monocle-macro"                     % "2.0.0",
-    compilerPlugin("com.github.ghik" % "silencer-plugin"    % "1.7.1" cross CrossVersion.full),
-    "com.github.ghik"             % "silencer-lib"                      % "1.7.1" % Provided cross CrossVersion.full
+    "uk.gov.hmrc"                %% "play-frontend-hmrc"               % s"6.8.0-$playVersion",
+    "uk.gov.hmrc"                %% "govuk-template"                   % s"5.68.0-$playVersion",
+    "uk.gov.hmrc"                %% "play-ui"                          % s"9.4.0-$playVersion",
+    "uk.gov.hmrc"                %% s"bootstrap-frontend-$playVersion" % "5.24.0",
+    "uk.gov.hmrc.mongo"          %% s"hmrc-mongo-$playVersion"         % "0.70.0",
+    "uk.gov.hmrc"                %% "domain"                           % s"6.1.0-$playVersion",
+    "org.typelevel"              %% "cats-core"                        % "2.6.0",
+    "com.github.kxbmap"          %% "configs"                          % "0.6.1",
+    "org.julienrf"               %% "play-json-derived-codecs"         % "10.0.2",
+    "com.github.julien-truffaut" %% "monocle-core"                     % "2.0.0",
+    "com.github.julien-truffaut" %% "monocle-macro"                    % "2.0.0",
+    compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.1" cross CrossVersion.full),
+    "com.github.ghik"             % "silencer-lib"                     % "1.7.1" % Provided cross CrossVersion.full
   )
 
   val test = Seq(
