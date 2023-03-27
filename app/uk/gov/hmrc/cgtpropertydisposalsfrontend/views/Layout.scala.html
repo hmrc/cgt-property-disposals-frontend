@@ -34,7 +34,7 @@
 
 @(
         pageTitle: String,
-        withSignOutLink: Boolean = false,
+        withSignOutLink: Boolean = true,
         isWelshTranslationAvailable: Boolean = true,
         backLinkUrl: Option[String] = None,
         hasErrors: Boolean = false,
@@ -60,7 +60,7 @@
 }
 
 @gdsTitle = @{
-  s"""${if(hasErrors){ s"""${messages("generic.errorPrefix")}: """ } else ""}$pageTitle - ${messages("service.title")} - GOV.UK"""
+  s"""${if(hasErrors){ s"""${messages("generic.errorPrefix")} """ } else ""}$pageTitle - ${messages("service.title")} - GOV.UK"""
 }
 
 @hmrcStandardPage(
