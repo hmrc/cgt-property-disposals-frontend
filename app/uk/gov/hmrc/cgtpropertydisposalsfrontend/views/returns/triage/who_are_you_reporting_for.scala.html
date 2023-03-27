@@ -69,45 +69,44 @@ govukRadios : GovukRadios
                 content =   Text(messages(s"$key.agent.Self")),
                 value = Some("0"),
                 hint = Some(Hint(content = Text(messages(s"$key.agent.Self.helpText")))),
-                checked = form("individualUserType").value.contains("0")
+                checked = form(key).value.contains("0")
             ),
             RadioItem(
                 content = HtmlContent(messages(s"$key.agent.PersonalRepresentative")),
                 value = Some("1"),
                 hint = Some(Hint(content = Text(messages(s"$key.agent.PersonalRepresentative.helpText")))),
-                checked = form("individualUserType").value.contains("1")
+                checked = form(key).value.contains("1")
             ),
             RadioItem(
                 content = HtmlContent(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin")),
                 value = Some("2"),
                 hint = Some(Hint(content = Text(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin.helpText")))),
-                checked = form("individualUserType").value.contains("2")
+                checked = form(key).value.contains("2")
             )
          )} else {
            Seq(
               RadioItem(
               content = Text(messages(s"$key.Self")),
               value = Some("0"),
-              hint = None,
-              checked = form("individualUserType").value.contains("0")
+              checked = form(key).value.contains("0")
               ),
               RadioItem(
                   content = Text(messages(s"$key.Capacitor")),
                   value = Some("1"),
                   hint =  Some(Hint(content = Text(messages(s"$key.Capacitor.helpText")))),
-                  checked = form("individualUserType").value.contains("1")
+                  checked = form(key).value.contains("1")
               ),
               RadioItem(
                 content = HtmlContent(messages(s"$key.PersonalRepresentative")),
                 value = Some("2"),
                 hint =  Some(Hint(content = Text(messages(s"$key.PersonalRepresentative.helpText")))),
-                checked = form("individualUserType").value.contains("2")
+                checked = form(key).value.contains("2")
               ),
               RadioItem(
                 content = HtmlContent(messages(s"$key.PersonalRepresentativeInPeriodOfAdmin")),
                 value = Some("3"),
                 hint =  Some(Hint(content = Text(messages(s"$key.PersonalRepresentativeInPeriodOfAdmin.helpText")))),
-                checked = form("individualUserType").value.contains("3")
+                checked = form(key).value.contains("3")
               )
           )}
         ))

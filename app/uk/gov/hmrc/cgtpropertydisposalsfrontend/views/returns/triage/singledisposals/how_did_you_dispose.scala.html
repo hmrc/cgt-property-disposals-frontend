@@ -23,16 +23,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalMethod, RepresentativeType}
-@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    formHelper: FormWithCSRF,
     radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_govuk,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+    formHelper: FormWithCSRF,
+    govukButton: GovukButton
 )
 
 @(
@@ -73,11 +72,7 @@
 @key = @{"disposalMethod"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@title = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title")
-    } else messages(s"$key$userKey.title")
-}
+@title = @{messages(s"$key$userKey.title")}
 
 @optionIndex(value: DisposalMethod) = @{
     value match {
@@ -94,23 +89,30 @@
     ).map(messageKey =>Html(messages(messageKey)))
 }
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@layout(
+  pageTitle = title,
+  backLinkUrl = Some(backLink.url),
+  hasErrors = hasErrors
+) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"${key}${userKey}"))
     }
 
-    @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.howDidYouDisposeOfPropertySubmit(), 'novalidate -> "novalidate") {
+    <span class="govuk-caption-xl">@messages("triage.caption")</span>
+
+    @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.howDidYouDisposeOfPropertySubmit()) {
         @radioGroup(
             fieldId = key,
             options = options,
             selected = form.value.map(optionIndex),
-            label = pageHeading(title, Some(messages("triage.caption"))),
+            label = Html(title),
             errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}"),
             hasErrors = hasErrors
         )
-
-        @submitButton(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+        @govukButton(Button(
+          content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+        ))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

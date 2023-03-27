@@ -52,7 +52,7 @@
     @errorIdWithMessageKey.map { case (id, key) =>
       @errorInline(id, messages(s"$fieldId.$key"))
     }
-     <div class="govuk-radios">
+     <div class="govuk-radios" data-module="govuk-radios">
         @options.zipWithIndex.map{ case (option, index) =>
           <div class="govuk-radios__item">
             <input id="@{fieldId}-@{index}"
