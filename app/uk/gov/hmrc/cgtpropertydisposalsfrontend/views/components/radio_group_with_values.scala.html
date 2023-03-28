@@ -69,7 +69,7 @@
           name="@fieldId"
           value="@{option.value}"
           type="radio"
-          @if(selected.contains(option.value)) { checked="checked" }
+          @if(selected.contains(option.value)) { checked }
           />
         <label for="@{fieldId}-@{option.value}">
           @option.label

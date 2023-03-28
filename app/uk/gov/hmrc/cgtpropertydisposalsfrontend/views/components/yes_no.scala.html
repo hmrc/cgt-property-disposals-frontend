@@ -74,7 +74,7 @@
        name="@fieldId"
        value="true"
        type="radio"
-      @if(selected.contains(true)) { checked="checked" }
+      @if(selected.contains(true)) { checked }
       />
       <label for="@{fieldId}-true">
         @messages("generic.yes")
@@ -88,7 +88,7 @@
        name="@fieldId"
        value="false"
        type="radio"
-      @if(selected.contains(false)) { checked="checked" }
+      @if(selected.contains(false)) { checked }
       />
       <label for="@{fieldId}-false">
         @messages("generic.no")

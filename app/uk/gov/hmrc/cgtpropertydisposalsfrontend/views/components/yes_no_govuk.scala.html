@@ -75,7 +75,7 @@
        class="govuk-radios__input"
        value="true"
        type="radio"
-      @if(selected.contains(true)) { checked="checked" }
+      @if(selected.contains(true)) { checked }
       />
       <label class="govuk-label govuk-radios__label" for="@{fieldId}-true">
         @messages("generic.yes")
@@ -90,7 +90,7 @@
        class="govuk-radios__input"
        value="false"
        type="radio"
-      @if(selected.contains(false)) { checked="checked" }
+      @if(selected.contains(false)) { checked }
       />
       <label class="govuk-label govuk-radios__label" for="@{fieldId}-false">
         @messages("generic.no")

@@ -521,7 +521,7 @@ class ExemptionAndLossesControllerSpec
                 doc =>
                   doc
                     .select("#inYearLosses-1")
-                    .attr("checked") shouldBe "checked"
+                    .attr("checked") shouldBe ""
               )
           }
         }
@@ -557,7 +557,7 @@ class ExemptionAndLossesControllerSpec
                 { doc =>
                   doc
                     .select("#inYearLosses-0")
-                    .attr("checked")                             shouldBe "checked"
+                    .attr("checked")                             shouldBe ""
                   doc.select("#inYearLossesValue").attr("value") shouldBe "10"
                 }
               )
@@ -1164,7 +1164,7 @@ class ExemptionAndLossesControllerSpec
                 doc =>
                   doc
                     .select("#previousYearsLosses-1")
-                    .attr("checked") shouldBe "checked"
+                    .attr("checked") shouldBe ""
               )
           }
         }
@@ -1199,7 +1199,7 @@ class ExemptionAndLossesControllerSpec
                 { doc =>
                   doc
                     .select("#previousYearsLosses-0")
-                    .attr("checked")                      shouldBe "checked"
+                    .attr("checked")                      shouldBe ""
                   doc.select(s"#$valueKey").attr("value") shouldBe "10"
                 }
               )

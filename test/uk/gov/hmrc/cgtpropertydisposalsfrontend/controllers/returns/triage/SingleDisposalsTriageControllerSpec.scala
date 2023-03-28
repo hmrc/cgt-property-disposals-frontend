@@ -231,7 +231,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.CommonTriageQuestionsController.howManyProperties()
         ),
-        _.select("#disposalMethod-0").attr("checked") shouldBe "checked"
+        _.select("#disposalMethod-0").attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -248,7 +248,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.CommonTriageQuestionsController.howManyProperties()
         ),
-        _.select("#disposalMethod-0").attr("checked") shouldBe "checked"
+        _.select("#disposalMethod-0").attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -266,7 +266,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.CommonTriageQuestionsController.howManyProperties()
         ),
-        _.select("#disposalMethod-0").attr("checked") shouldBe "checked"
+        _.select("#disposalMethod-0").attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
@@ -283,7 +283,7 @@ class SingleDisposalsTriageControllerSpec
             doc,
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
-          doc.select("#disposalMethod-1").attr("checked") shouldBe "checked"
+          doc.select("#disposalMethod-1").attr("checked") shouldBe ""
         }
       )
 
@@ -301,7 +301,7 @@ class SingleDisposalsTriageControllerSpec
             doc,
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
-          doc.select("#disposalMethod-1").attr("checked") shouldBe "checked"
+          doc.select("#disposalMethod-1").attr("checked") shouldBe ""
         }
       )
 
@@ -319,7 +319,7 @@ class SingleDisposalsTriageControllerSpec
             doc,
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
-          doc.select("#disposalMethod-1").attr("checked") shouldBe "checked"
+          doc.select("#disposalMethod-1").attr("checked") shouldBe ""
         }
       )
 
@@ -678,7 +678,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
         ),
-        _.select("#wereYouAUKResident-false").attr("checked") shouldBe "checked"
+        _.select("#wereYouAUKResident-false").attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -697,7 +697,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
         ),
-        _.select("#wereYouAUKResident-false").attr("checked") shouldBe "checked"
+        _.select("#wereYouAUKResident-false").attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -715,7 +715,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
         ),
-        _.select("#wereYouAUKResident-false").attr("checked") shouldBe "checked"
+        _.select("#wereYouAUKResident-false").attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
@@ -735,7 +735,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#wereYouAUKResident-true")
-            .attr("checked") shouldBe "checked"
+            .attr("checked") shouldBe ""
         }
       )
 
@@ -756,7 +756,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#wereYouAUKResident-true")
-            .attr("checked") shouldBe "checked"
+            .attr("checked") shouldBe ""
         }
       )
 
@@ -777,7 +777,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#wereYouAUKResident-true")
-            .attr("checked") shouldBe "checked"
+            .attr("checked") shouldBe ""
         }
       )
 
@@ -1208,7 +1208,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController.wereYouAUKResident()
         ),
         _.select("#didYouDisposeOfResidentialProperty-false")
-          .attr("checked") shouldBe "checked"
+          .attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1228,7 +1228,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController.wereYouAUKResident()
         ),
         _.select("#didYouDisposeOfResidentialProperty-false")
-          .attr("checked") shouldBe "checked"
+          .attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1248,7 +1248,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController.wereYouAUKResident()
         ),
         _.select("#didYouDisposeOfResidentialProperty-false")
-          .attr("checked") shouldBe "checked"
+          .attr("checked") shouldBe ""
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
@@ -1268,7 +1268,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#didYouDisposeOfResidentialProperty-true")
-            .attr("checked") shouldBe "checked"
+            .attr("checked") shouldBe ""
         }
       )
 
@@ -1289,7 +1289,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#didYouDisposeOfResidentialProperty-true")
-            .attr("checked") shouldBe "checked"
+            .attr("checked") shouldBe ""
         }
       )
 
@@ -1310,7 +1310,7 @@ class SingleDisposalsTriageControllerSpec
           )
           doc
             .select("#didYouDisposeOfResidentialProperty-true")
-            .attr("checked") shouldBe "checked"
+            .attr("checked") shouldBe ""
         }
       )
 
