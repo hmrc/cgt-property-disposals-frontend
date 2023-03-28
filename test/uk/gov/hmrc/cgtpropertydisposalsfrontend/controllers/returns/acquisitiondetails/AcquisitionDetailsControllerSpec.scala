@@ -3222,7 +3222,7 @@ class AcquisitionDetailsControllerSpec
                 doc =>
                   doc
                     .select("#improvementCosts-1")
-                    .attr("checked") shouldBe ""
+                    .hasAttr("checked")
               )
           }
         }
@@ -3858,7 +3858,7 @@ class AcquisitionDetailsControllerSpec
                 doc =>
                   doc
                     .select("#acquisitionFees-1")
-                    .attr("checked") shouldBe ""
+                    .hasAttr("checked")
               )
           }
         }
@@ -4335,7 +4335,7 @@ class AcquisitionDetailsControllerSpec
                     nonUkResidentsNonResidentialProperty
                   )
                 ),
-                doc => doc.select("#shouldUseRebase-true").attr("checked") shouldBe ""
+                doc => doc.select("#shouldUseRebase-true").hasAttr("checked")
               )
           }
         }

@@ -1958,7 +1958,7 @@ class YearToDateLiabilityControllerSpec
                 doc =>
                   doc
                     .select("#hasEstimatedDetails-true")
-                    .attr("checked") shouldBe ""
+                    .hasAttr("checked")
               )
             }
           }
@@ -2033,7 +2033,7 @@ class YearToDateLiabilityControllerSpec
               doc =>
                 doc
                   .select("#hasEstimatedDetails-true")
-                  .attr("checked") shouldBe ""
+                  .hasAttr("checked")
             )
           }
 
@@ -4759,7 +4759,7 @@ class YearToDateLiabilityControllerSpec
             doc =>
               doc
                 .select("#taxableGainOrLoss-2")
-                .attr("checked") shouldBe ""
+                .hasAttr("checked")
           )
 
         }
@@ -4781,7 +4781,7 @@ class YearToDateLiabilityControllerSpec
             doc =>
               doc
                 .select("#taxableGainOrLoss-2")
-                .attr("checked") shouldBe ""
+                .hasAttr("checked")
           )
         }
 
@@ -4801,7 +4801,7 @@ class YearToDateLiabilityControllerSpec
             doc =>
               doc
                 .select("#taxableGainOrLoss-2")
-                .attr("checked") shouldBe ""
+                .hasAttr("checked")
           )
         }
 

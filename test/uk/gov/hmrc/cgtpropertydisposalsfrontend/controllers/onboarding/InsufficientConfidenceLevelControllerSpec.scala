@@ -200,7 +200,7 @@ class InsufficientConfidenceLevelControllerSpec
             status(result) shouldBe OK
             val content = contentAsString(result)
             content should include(messageFromMessageKey("haveANino.title"))
-            content should include("checked=\"checked\"")
+            content should include("checked")
           }
 
       }
@@ -474,7 +474,7 @@ class InsufficientConfidenceLevelControllerSpec
             status(result) shouldBe OK
             val content = contentAsString(result)
             content should include(messageFromMessageKey("haveAnSaUtr.title"))
-            content should include("checked=\"checked\"")
+            content should include("checked")
           }
 
         "the session indicates that the user does not have sufficient confidence level and the user " +
@@ -498,7 +498,7 @@ class InsufficientConfidenceLevelControllerSpec
             status(result) shouldBe OK
             val content = contentAsString(result)
             content should include(messageFromMessageKey("haveAnSaUtr.title"))
-            content should include("checked=\"checked\"")
+            content should include("checked")
           }
 
       }

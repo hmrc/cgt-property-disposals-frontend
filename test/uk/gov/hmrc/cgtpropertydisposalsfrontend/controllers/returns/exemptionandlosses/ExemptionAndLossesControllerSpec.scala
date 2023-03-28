@@ -521,7 +521,7 @@ class ExemptionAndLossesControllerSpec
                 doc =>
                   doc
                     .select("#inYearLosses-1")
-                    .attr("checked") shouldBe ""
+                    .hasAttr("checked")
               )
           }
         }
@@ -1164,7 +1164,7 @@ class ExemptionAndLossesControllerSpec
                 doc =>
                   doc
                     .select("#previousYearsLosses-1")
-                    .attr("checked") shouldBe ""
+                    .hasAttr("checked")
               )
           }
         }

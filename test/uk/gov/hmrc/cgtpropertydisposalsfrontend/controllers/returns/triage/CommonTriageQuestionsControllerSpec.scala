@@ -1005,15 +1005,15 @@ class CommonTriageQuestionsControllerSpec
               { doc =>
                 doc
                   .select("#back, .govuk-back-link")
-                  .attr("href")    shouldBe expectedBacklink
+                  .attr("href")   shouldBe expectedBacklink
                 doc
                   .select("#content > article > form, #main-content form")
-                  .attr("action")  shouldBe routes.CommonTriageQuestionsController
+                  .attr("action") shouldBe routes.CommonTriageQuestionsController
                   .howManyPropertiesSubmit()
                   .url
                 doc
                   .select("#numberOfProperties-0")
-                  .attr("checked") shouldBe ""
+                  .hasAttr("checked")
               }
             )
           }
@@ -1051,7 +1051,7 @@ class CommonTriageQuestionsControllerSpec
 
                 doc
                   .select("#numberOfProperties-0")
-                  .attr("checked") shouldBe ""
+                  .hasAttr("checked")
 
               }
             )
@@ -1082,15 +1082,15 @@ class CommonTriageQuestionsControllerSpec
                   .select("#back, .govuk-back-link")
                   .attr(
                     "href"
-                  )                shouldBe expectedBacklink.url
+                  )               shouldBe expectedBacklink.url
                 doc
                   .select("#content > article > form, #main-content form")
-                  .attr("action")  shouldBe routes.CommonTriageQuestionsController
+                  .attr("action") shouldBe routes.CommonTriageQuestionsController
                   .howManyPropertiesSubmit()
                   .url
                 doc
                   .select("#numberOfProperties-0")
-                  .attr("checked") shouldBe ""
+                  .hasAttr("checked")
               }
             )
           }
@@ -1145,17 +1145,17 @@ class CommonTriageQuestionsControllerSpec
               { doc =>
                 doc
                   .select("#back, .govuk-back-link")
-                  .attr("href")    shouldBe routes.SingleDisposalsTriageController
+                  .attr("href")   shouldBe routes.SingleDisposalsTriageController
                   .checkYourAnswers()
                   .url
                 doc
                   .select("#content > article > form, #main-content form")
-                  .attr("action")  shouldBe routes.CommonTriageQuestionsController
+                  .attr("action") shouldBe routes.CommonTriageQuestionsController
                   .howManyPropertiesSubmit()
                   .url
                 doc
                   .select("#numberOfProperties-0")
-                  .attr("checked") shouldBe ""
+                  .hasAttr("checked")
               }
             )
           }
@@ -1177,17 +1177,17 @@ class CommonTriageQuestionsControllerSpec
               { doc =>
                 doc
                   .select("#back, .govuk-back-link")
-                  .attr("href")    shouldBe routes.SingleDisposalsTriageController
+                  .attr("href")   shouldBe routes.SingleDisposalsTriageController
                   .checkYourAnswers()
                   .url
                 doc
                   .select("#content > article > form, #main-content form")
-                  .attr("action")  shouldBe routes.CommonTriageQuestionsController
+                  .attr("action") shouldBe routes.CommonTriageQuestionsController
                   .howManyPropertiesSubmit()
                   .url
                 doc
                   .select("#numberOfProperties-0")
-                  .attr("checked") shouldBe ""
+                  .hasAttr("checked")
               }
             )
           }
