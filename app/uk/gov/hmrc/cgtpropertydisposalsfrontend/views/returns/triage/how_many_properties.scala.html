@@ -99,10 +99,9 @@
             fieldId = key,
             options = options,
             selected = form.value.map(optionIndex),
-            label = Html(title),
+            label = title,
             helpText = Some(Html(messages(s"$key.helpText.p1.text"))),
-            errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors
+            errorKey = form.error(key).map(e => e.message)
         )
 
       @govukDetails(Details(
@@ -133,6 +132,7 @@
       ))
 
       @govukButton(Button(
+        attributes = Map("id" -> "submitBUtton"),
         content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
       ))
     }

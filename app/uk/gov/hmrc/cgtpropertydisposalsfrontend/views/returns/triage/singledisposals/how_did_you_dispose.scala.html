@@ -106,11 +106,11 @@
             fieldId = key,
             options = options,
             selected = form.value.map(optionIndex),
-            label = Html(title),
-            errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}"),
-            hasErrors = hasErrors
+            label = title,
+            errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}")
         )
         @govukButton(Button(
+          attributes = Map("id" -> "submitBUtton"),
           content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
         ))
     }

@@ -27,7 +27,6 @@
 
 @this(
   layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
@@ -94,15 +93,14 @@
  @if(hasErrors) {
     @errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}"))
  }
-
+  <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
  @formWrapper(submit, 'novalidate -> "novalidate") {
   @radioGroup(
     fieldId = key,
     options = addresses.map(a => addressDisplay(a, Line)),
     selected = form.value.map(addresses.indexOf(_)),
-    label = pageHeading(title, Some(messages(addressJourneyType.captionMessageKey()))),
-    errorKey = form.error(key).map(e => s"${journeyErrorKey.stripPrefix(".")}${userKey.stripPrefix(".")}${e.message}"),
-    hasErrors = hasErrors
+    label = title,
+    errorKey = form.error(key).map(e => s"${journeyErrorKey.stripPrefix(".")}${userKey.stripPrefix(".")}${e.message}")
   )
 
   <p class="govuk-body">
