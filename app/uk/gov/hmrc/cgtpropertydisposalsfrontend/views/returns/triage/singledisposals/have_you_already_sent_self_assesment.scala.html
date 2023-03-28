@@ -25,8 +25,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
@@ -70,25 +69,21 @@
 }
 
 @hasErrors = @{form.hasErrors}
-@inPageTitle = @{messages(s"$key$userKey.title", taxYearStartYear.toString, (taxYearStartYear+1).toString)}
-@title = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + inPageTitle
-    } else inPageTitle
-}
+@title = @{messages(s"$key$userKey.title", taxYearStartYear.toString, (taxYearStartYear+1).toString)}
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url)) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userKey"))
     }
 
-    @formHelper(controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessmentSubmit(), 'novalidate -> "novalidate") {
+    <span class="govuk-caption-xl">@messages("triage.caption")</span>
+
+    @formHelper(controllers.returns.triage.routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessmentSubmit()) {
         @yesNo(
             fieldId = key,
-            label = pageHeading(inPageTitle, Some(messages("triage.caption"))),
+            label = title,
             errorKey = form.error(key).map(e => s"$userErrorKey${e.message}"),
-            hasErrors = hasErrors,
             selected = form.value,
             helpText = None,
             errorMessage = form.error(key).map(e => messages(s"${e.key}.$userErrorKey${e.message}", e.args:_*) )

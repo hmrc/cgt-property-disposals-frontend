@@ -17,7 +17,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -29,11 +28,11 @@
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     formHelper: FormWithCSRF,
     govukDetails: GovukDetails,
-    govukButton: GovukButton
+    govukButton: GovukButton,
+    govukRadios: GovukRadios
 )
 
 @(
@@ -72,7 +71,7 @@
     List(
         s"$key.One",
         s"$key.MoreThanOne"
-    ).map(messageKey =>Html(messages(messageKey)))
+    ).map(messageKey =>messages(messageKey))
 }
 
 @submitLocation = @{
@@ -95,14 +94,32 @@
     <span class="govuk-caption-xl">@messages("triage.caption")</span>
 
     @formHelper(submitLocation) {
-        @radioGroup(
-            fieldId = key,
-            options = options,
-            selected = form.value.map(optionIndex),
-            label = title,
-            helpText = Some(Html(messages(s"$key.helpText.p1.text"))),
-            errorKey = form.error(key).map(e => e.message)
+
+      @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
+            content = Text(title),
+            classes = "govuk-fieldset__legend--xl",
+            isPageHeading = true
+          ))
+        )),
+        name = key,
+        items = options.zipWithIndex.map { case (option, index) =>
+          RadioItem(
+            content = Text(option),
+            value = Some(index.toString),
+            checked = form.value.map(optionIndex).contains(index)
+          )
+        }.toSeq,
+        hint = Some(Hint(
+          content = HtmlContent(messages(s"$key.helpText.p1.text"))
+        )),
+        errorMessage = form.error(key).map(e =>
+          ErrorMessage(
+            content = Text(messages(s"$key$userKey${e.message}"))
+          )
         )
+      ))
 
       @govukDetails(Details(
         summary = Text(messages(s"$key.details.summary")),

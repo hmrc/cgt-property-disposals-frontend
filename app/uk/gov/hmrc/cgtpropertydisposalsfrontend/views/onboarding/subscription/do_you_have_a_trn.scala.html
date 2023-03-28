@@ -51,7 +51,6 @@
             fieldId = key,
             label = pageHeading(title, Some(messages("subscription.caption"))),
             errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors,
             selected = form.value,
             helpText = Some(Html(messages("haveATrn.helpText")))
         )

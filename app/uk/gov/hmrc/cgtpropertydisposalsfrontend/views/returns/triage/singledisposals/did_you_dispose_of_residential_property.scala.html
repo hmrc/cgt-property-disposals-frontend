@@ -27,7 +27,6 @@
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
     yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
@@ -74,11 +73,7 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@title = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title")
-    } else messages(s"$key$userKey.title")
-}
+@title = @{messages(s"$key$userKey.title")}
 
 @helpText = @{
     representativeType match {
@@ -94,12 +89,13 @@
       @errorSummary(form, Some(s"$key$userKey"))
     }
 
+    <span class="govuk-caption-xl">@messages("triage.caption")</span>
+
     @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialPropertySubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
-            label = pageHeading(title, Some(messages("triage.caption"))),
+            label = title,
             errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}"),
-            hasErrors = hasErrors,
             selected = form.value,
             helpText = Some(Html(helpText))
         )
