@@ -1013,7 +1013,7 @@ class CommonTriageQuestionsControllerSpec
                   .url
                 doc
                   .select("#numberOfProperties-0")
-                  .attr("checked") shouldBe "checked"
+                  .attr("checked") shouldBe ""
               }
             )
           }
@@ -1042,15 +1042,17 @@ class CommonTriageQuestionsControllerSpec
                   .select("#back, .govuk-back-link")
                   .attr(
                     "href"
-                  )                shouldBe expectedBacklink.url
+                  )               shouldBe expectedBacklink.url
                 doc
                   .select("#content > article > form, #main-content form")
-                  .attr("action")  shouldBe routes.CommonTriageQuestionsController
+                  .attr("action") shouldBe routes.CommonTriageQuestionsController
                   .howManyPropertiesSubmit()
                   .url
+
                 doc
                   .select("#numberOfProperties-0")
-                  .attr("checked") shouldBe "checked"
+                  .attr("checked") shouldBe ""
+
               }
             )
           }
@@ -1088,7 +1090,7 @@ class CommonTriageQuestionsControllerSpec
                   .url
                 doc
                   .select("#numberOfProperties-0")
-                  .attr("checked") shouldBe "checked"
+                  .attr("checked") shouldBe ""
               }
             )
           }
@@ -1120,7 +1122,7 @@ class CommonTriageQuestionsControllerSpec
                 .url
               doc
                 .select("#numberOfProperties-1")
-                .attr("checked")                                 shouldBe "checked"
+                .attr("checked")                                 shouldBe ""
             }
           )
         }
@@ -1153,7 +1155,7 @@ class CommonTriageQuestionsControllerSpec
                   .url
                 doc
                   .select("#numberOfProperties-0")
-                  .attr("checked") shouldBe "checked"
+                  .attr("checked") shouldBe ""
               }
             )
           }
@@ -1185,7 +1187,7 @@ class CommonTriageQuestionsControllerSpec
                   .url
                 doc
                   .select("#numberOfProperties-0")
-                  .attr("checked") shouldBe "checked"
+                  .attr("checked") shouldBe ""
               }
             )
           }

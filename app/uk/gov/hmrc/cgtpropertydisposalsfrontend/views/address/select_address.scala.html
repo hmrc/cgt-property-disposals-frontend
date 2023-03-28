@@ -24,16 +24,16 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
   layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-  radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_govuk,
+  formWrapper: FormWithCSRF,
   addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display_govuk,
-  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
-  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+  govukRadios: GovukRadios,
+  govukButton: GovukButton
 )
 
 @(
@@ -85,29 +85,44 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-
-@layout(pageTitle = title) {
-
- @backLinkComponent(backLink)
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url)) {
 
  @if(hasErrors) {
     @errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}"))
  }
-  <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
- @formWrapper(submit, 'novalidate -> "novalidate") {
-  @radioGroup(
-    fieldId = key,
-    options = addresses.map(a => addressDisplay(a, Line)),
-    selected = form.value.map(addresses.indexOf(_)),
-    label = title,
-    errorKey = form.error(key).map(e => s"${journeyErrorKey.stripPrefix(".")}${userKey.stripPrefix(".")}${e.message}")
-  )
+ <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
+ @formWrapper(submit) {
+   @govukRadios(Radios(
+     fieldset = Some(Fieldset(
+       legend = Some(Legend(
+         content = Text(title),
+         classes = "govuk-fieldset__legend--xl",
+         isPageHeading = true
+       ))
+     )),
+     name = key,
+     items = addresses.zipWithIndex.map { case (option, index) =>
+       RadioItem(
+         content = HtmlContent(addressDisplay(option, Line)),
+         value = Some(index.toString),
+         checked = form.value.map(addresses.indexOf(_)).contains(index)
+       )
+     }.toSeq,
+     errorMessage = form.error(key).map(e =>
+       ErrorMessage(
+         content = Text(messages(s"$key$journeyErrorKey${userKey.stripPrefix(".")}${e.message}"))
+       )
+     )
+   ))
 
-  <p class="govuk-body">
+   <p class="govuk-body">
     <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
-  </p>
+   </p>
 
-  @submitButton(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+   @govukButton(Button(
+     attributes = Map("id" -> "submitButton"),
+     content = Text(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+   ))
  }
 
   @returnToSummaryLink(addressJourneyType.showReturnToSummaryLink())
