@@ -3861,7 +3861,7 @@ class MultipleDisposalsTriageControllerSpec
           messageFromMessageKey("sharesDisposalDate.title"),
           doc => {
             doc
-              .select("#sharesDisposalDate-form-hint")
+              .select("#sharesDisposalDate-hint")
               .text()         shouldBe messageFromMessageKey(
               "sharesDisposalDate.helpText"
             )
