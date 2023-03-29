@@ -49,7 +49,7 @@
 
 @errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", key).map(form.error).find(_.isDefined).flatten}
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@mainTemplate(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
  @if(hasErrors) {
   @errorSummary(form)

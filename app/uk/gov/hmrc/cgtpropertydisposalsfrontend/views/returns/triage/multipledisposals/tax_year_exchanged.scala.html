@@ -82,7 +82,7 @@
     availableOptions ++: defaultOptions
 }
 
-@layout(pageTitle = title, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form)
