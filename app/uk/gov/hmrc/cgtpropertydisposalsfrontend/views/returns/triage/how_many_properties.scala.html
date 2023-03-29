@@ -116,7 +116,7 @@
         )),
         errorMessage = form.error(key).map(e =>
           ErrorMessage(
-            content = Text(messages(s"$key$userKey${e.message}"))
+            content = Text(messages(s"$key.${e.message}"))
           )
         )
       ))

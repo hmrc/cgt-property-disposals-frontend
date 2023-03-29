@@ -54,16 +54,15 @@
     content = HtmlContent(hint)
   )),
   name = fieldId,
+  idPrefix = Some(fieldId),
   items = Seq(
     RadioItem(
-      id = Some(s"$fieldId-true"),
       content = Text(messages("generic.yes")),
       value = Some("true"),
       checked = selected.contains(true),
       conditionalHtml = yesContent
     ),
     RadioItem(
-      id = Some(s"$fieldId-false"),
       content = Text(messages("generic.no")),
       value = Some("false"),
       checked = selected.contains(false),
