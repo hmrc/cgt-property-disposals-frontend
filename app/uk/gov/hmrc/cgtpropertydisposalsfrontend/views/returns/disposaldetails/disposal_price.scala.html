@@ -28,7 +28,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, _}
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
     govukButton: GovukButton,
@@ -71,7 +71,7 @@
 
 @title = @{ messages(s"$key$userKey$indirectKey$disposalMethodKey.title") }
 
-@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userKey$indirectKey$disposalMethodKey"))
@@ -79,7 +79,7 @@
     <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">@Html(messages(s"$key$userKey$indirectKey$disposalMethodKey.helpText"))</p>
-    @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPriceSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPriceSubmit()) {
       @unitInput(
         fieldId = key,
         value = form.data.getOrElse(key, ""),

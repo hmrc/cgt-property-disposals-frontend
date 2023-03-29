@@ -42,14 +42,14 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input_govuk,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
+    formWrapper: FormWithCSRF,
     countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
@@ -105,9 +105,7 @@
 }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
- @layout(pageTitle = title) {
-
-  @backLinkComponent(backLink)
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
   @if(hasErrors) {
     @errorSummary(form, userKeyOnly = journeyErrorKey.stripSuffix("."))
@@ -115,7 +113,7 @@
 
   <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
   <h1 class="govuk-heading-xl">@title</h1>
-  @formWrapper(submit, 'novalidate -> "novalidate") {
+  @formWrapper(submit) {
       @textInput(
         fieldId = line1Key,
         label = Html(messages(s"$key${journeyErrorKey.stripSuffix(".")}.line1.label")),

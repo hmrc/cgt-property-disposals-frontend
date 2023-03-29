@@ -27,7 +27,6 @@
     formHelper: FormWithCSRF,
     govukButton: GovukButton,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary_govuk
 )
 
@@ -41,9 +40,10 @@
 
 @title = @{messages("returns.disposal-details.cya.title")}
 
-@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true) {
+@mainTemplate(pageTitle = title) {
 
-    @pageHeading(title, Some(messages("returns.disposal-details.caption")))
+  <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
+  <h1 class="govuk-heading-xl">@title</h1>
 
     @summary(answers, disposalMethod, isATrust, representativeType, isIndirectDisposal)
 
