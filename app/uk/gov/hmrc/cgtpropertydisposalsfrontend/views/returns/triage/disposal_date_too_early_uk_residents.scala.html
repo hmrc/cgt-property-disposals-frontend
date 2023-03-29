@@ -29,13 +29,13 @@
 @key = @{"disposalDateTooEarly"}
 @title = @{messages(s"$key.uk.title")}
 
-@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
+@mainTemplate(pageTitle = title, backLinkUrl = Some(backLink.url)) {
 
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">
-    @messages(s"$key.uk.p1")
+      @messages(s"$key.uk.p1")
     </p>
     <p class="govuk-body">
-    @Html(messages(s"$key.uk.p2", appConfig.cgtLegacyUrl))
+      @Html(messages(s"$key.uk.p2", appConfig.cgtLegacyUrl))
     </p>
 }

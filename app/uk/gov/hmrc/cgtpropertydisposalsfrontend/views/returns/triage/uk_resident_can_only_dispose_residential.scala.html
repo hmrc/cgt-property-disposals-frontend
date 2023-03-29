@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
 @(backLink: Call,
@@ -51,9 +51,9 @@ representativeType: Option[RepresentativeType])(implicit request: RequestWithSes
 
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url)) {
 
-    <h1 class="govuk-heading-xl">@title</h1>
+  <h1 class="govuk-heading-xl">@title</h1>
 
   <p class="govuk-body">
     @messages(s"$key$userKey.p1")

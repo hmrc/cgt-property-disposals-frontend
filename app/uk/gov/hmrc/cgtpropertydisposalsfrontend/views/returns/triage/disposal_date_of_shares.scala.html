@@ -17,64 +17,61 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareDisposalDate
-@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
-
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-   pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
-   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-   formHelper: FormWithCSRF,
-   dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input_govuk,
-   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        formHelper: FormWithCSRF,
+        govukDateInput: GovukDateInput,
+        govukButton: GovukButton
 )
 
 @(
-   form: Form[ShareDisposalDate],
-   backLink: Call,
-   displayReturnToSummaryLink: Boolean,
-   submit: Call,
-   isAmend: Boolean
+        form: Form[ShareDisposalDate],
+        backLink: Call,
+        displayReturnToSummaryLink: Boolean,
+        submit: Call,
+        isAmend: Boolean
 )(implicit request:RequestWithSessionData[_], messages: Messages)
 
 @key = @{ "sharesDisposalDate" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@inPageTitle = @{messages(s"$key.title")}
-@title = @{
-   if(hasErrors){
-      messages("generic.errorPrefix") + " " + inPageTitle
-   } else inPageTitle
-}
-
-
+@title = @{messages(s"$key.title")}
 @errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", key).map(form.error).find(_.isDefined).flatten}
 
- @mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
+  @if(hasErrors) {
+   @errorSummary(form)
+  }
+  <span class="govuk-caption-xl">@messages("triage.caption")</span>
+  @formHelper(submit) {
+   @govukDateInput(DateInput(
+    id = key,
+    namePrefix = Some(key),
+    hint = Some(Hint(
+     content = Text(messages(s"$key.helpText"))
+    )),
+    errorMessage = errorKey.map(e => ErrorMessage(
+     content = Text(messages(s"${e.key}.${e.message}"))
+    )),
+    fieldset = Some(Fieldset(
+     legend = Some(Legend(
+      content = Text("When was your passport issued?")
+     ))
+    ))
+   ))
+   @govukButton(Button(
+    attributes = Map("id" -> "submitButton"),
+    content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+   ))
+  }
 
-@if(hasErrors) {
-@errorSummary(form)
-}
-
-@formHelper(submit, 'novalidate -> "novalidate") {
- @dateInput(
-  fieldId = key,
-  label = pageHeading(inPageTitle, Some(messages("triage.caption"))),
-  dayValue = form.data.get(s"$key-day"),
-  monthValue = form.data.get(s"$key-month"),
-  yearValue = form.data.get(s"$key-year"),
-  helpText = Some(Html(messages(s"$key.helpText"))),
-  errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
-  hasErrors = hasErrors
- )
- @submitButton(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
-}
-
-@returnToSummaryLink(displayReturnToSummaryLink)
+  @returnToSummaryLink(displayReturnToSummaryLink)
 
 }

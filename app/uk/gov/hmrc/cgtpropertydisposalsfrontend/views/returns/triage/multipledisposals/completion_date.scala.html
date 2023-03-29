@@ -46,12 +46,7 @@
 
 @key = @{"multipleDisposalsCompletionDate"}
 @hasErrors = @{form.hasErrors}
-@inPageTitle = @{messages(s"$key.title")}
-@title = @{
-   if(hasErrors){
-      messages("generic.errorPrefix") + " " + inPageTitle
-   } else inPageTitle
-}
+@title = @{messages(s"$key.title")}
 
 @errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", key).map(form.error).find(_.isDefined).flatten}
 
@@ -66,7 +61,7 @@
  @formHelper(controllers.returns.triage.routes.MultipleDisposalsTriageController.completionDateSubmit(), 'novalidate -> "novalidate") {
   @dateInput(
    fieldId = key,
-   label = pageHeading(inPageTitle),
+   label = title,
    dayValue = form.data.get(s"$key-day"),
    monthValue = form.data.get(s"$key-month"),
    yearValue = form.data.get(s"$key-year"),
