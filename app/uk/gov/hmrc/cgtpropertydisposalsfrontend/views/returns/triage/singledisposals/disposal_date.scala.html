@@ -75,7 +75,7 @@
  @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.whenWasDisposalDateSubmit(), 'novalidate -> "novalidate") {
   @dateInput(
    fieldId = key,
-   label = title,,
+   label = title,
    dayValue = form.data.get("disposalDate-day"),
    monthValue = form.data.get("disposalDate-month"),
    yearValue = form.data.get("disposalDate-year"),
