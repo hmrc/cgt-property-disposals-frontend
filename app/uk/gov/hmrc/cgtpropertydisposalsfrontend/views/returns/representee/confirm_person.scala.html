@@ -28,12 +28,10 @@
 
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
     govukButton: GovukButton,
     govukRadios : GovukRadios,
     govukTable : GovukTable
@@ -67,7 +65,7 @@
     }
     @caption(messages("representee.caption"))
 
-    @pageHeading(title)
+    <h1 class="govuk-heading-xl">@title</h1>
 
     @govukTable(
         Table(

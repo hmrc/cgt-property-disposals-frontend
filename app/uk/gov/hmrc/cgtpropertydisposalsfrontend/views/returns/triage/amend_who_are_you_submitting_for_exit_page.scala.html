@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
 @(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
@@ -29,9 +29,9 @@
 @key = @{"who-are-you-reporting-for-exit-page"}
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url)) {
 
  <h1 class="govuk-heading-xl">@title</h1>
 
-   <p class="govuk-body">@Html(messages(s"$key.helpText", appConfig.contactHmrc))</p>
+ <p class="govuk-body">@Html(messages(s"$key.helpText", appConfig.contactHmrc))</p>
 }

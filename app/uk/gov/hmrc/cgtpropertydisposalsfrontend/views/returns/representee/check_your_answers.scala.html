@@ -28,7 +28,6 @@
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
     govukButton: GovukButton
 )
 
@@ -41,9 +40,7 @@
 
 @title = @{messages("representee.cya.title")}
 
-@layout(pageTitle = title) {
-
-    @backLinkComponent(backLink)
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url)) {
 
     @caption(messages("representee.caption"))
 

@@ -27,7 +27,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
@@ -66,7 +66,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @title = @{messages(s"$key$userMsgKey.title")}
 
-@mainTemplate(pageTitle = title, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userMsgKey"))

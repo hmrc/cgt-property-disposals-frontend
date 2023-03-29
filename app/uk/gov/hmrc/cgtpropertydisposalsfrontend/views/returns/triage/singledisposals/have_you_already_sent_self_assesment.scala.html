@@ -71,7 +71,7 @@
 @hasErrors = @{form.hasErrors}
 @title = @{messages(s"$key$userKey.title", taxYearStartYear.toString, (taxYearStartYear+1).toString)}
 
-@layout(pageTitle = title, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userKey"))

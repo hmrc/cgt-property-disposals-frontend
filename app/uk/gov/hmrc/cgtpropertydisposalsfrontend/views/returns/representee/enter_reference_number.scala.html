@@ -24,7 +24,6 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk,
         layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
@@ -96,9 +95,7 @@ messages("generic.errorPrefix") + " " + inPageTitle
     ))
 }
 
-@layout(pageTitle = title) {
-
-    @backLinkComponent(backLink)
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form)
