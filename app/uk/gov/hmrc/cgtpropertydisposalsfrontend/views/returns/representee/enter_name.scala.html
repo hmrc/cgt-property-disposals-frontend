@@ -53,16 +53,9 @@
 @firstNameKey = @{"representeeFirstName"}
 @lastNameKey = @{"representeeLastName"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@inPageTitle = @{messages(s"$key$representativeTypeInterpolator.title")}
-@title =  @{
-if(hasErrors){
-messages("generic.errorPrefix") + " " + inPageTitle
-} else inPageTitle
-}
+@title = @{messages(s"$key$representativeTypeInterpolator.title")}
 
-@layout(pageTitle = title) {
-
-    @backLinkComponent(backLink)
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form)

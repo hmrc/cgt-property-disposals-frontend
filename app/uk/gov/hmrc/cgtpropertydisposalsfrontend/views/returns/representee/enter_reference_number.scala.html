@@ -41,12 +41,7 @@
 @sautrKey = @{ "representeeSautr" }
 @cgtReferenceKey = @{ "representeeCgtRef" }
 
-@inPageTitle = @{messages(s"$key.title")}
-@title = @{
-if(hasErrors){
-messages("generic.errorPrefix") + " " + inPageTitle
-} else inPageTitle
-}
+@title = @{messages(s"$key.title")}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -58,7 +53,11 @@ messages("generic.errorPrefix") + " " + inPageTitle
         label = Label(
         content = HtmlContent(messages(s"$cgtReferenceKey.helpText")),
         ),
-        errorMessage = if(hasErrors){Some(ErrorMessage(Some(form.error(cgtReferenceKey) match { case Some(message) => (message.message) case None => ""})))} else None,
+        errorMessage = form.error(cgtReferenceKey).map(e =>
+          ErrorMessage(
+            content = Text(messages(s"$cgtReferenceKey.${e.message}"))
+          )
+        ),
         classes = "govuk-!-width-one-third",
         spellcheck = Some(false),
         value = form(cgtReferenceKey).value,
@@ -73,7 +72,11 @@ messages("generic.errorPrefix") + " " + inPageTitle
         label = Label(
         content = HtmlContent(messages(s"$ninoKey.helpText")),
         ),
-        errorMessage = if(hasErrors){Some(ErrorMessage(Some(form.error(ninoKey) match { case Some(message) => (message.message) case None => ""})))} else None,
+        errorMessage = form.error(ninoKey).map(e =>
+          ErrorMessage(
+            content = Text(messages(s"$ninoKey.${e.message}"))
+          )
+        ),
         classes = "govuk-!-width-one-third",
         spellcheck = Some(false),
         value = form(ninoKey).value
@@ -88,7 +91,11 @@ messages("generic.errorPrefix") + " " + inPageTitle
     label = Label(
     content = HtmlContent(messages(s"$sautrKey.helpText")),
     ),
-    errorMessage = if(hasErrors){Some(ErrorMessage(Some(form.error(sautrKey) match { case Some(message) => (message.message) case None => ""})))} else None,
+    errorMessage = form.error(sautrKey).map(e =>
+      ErrorMessage(
+        content = Text(messages(s"$sautrKey.${e.message}"))
+      )
+    ),
     classes = "govuk-!-width-one-third",
     spellcheck = Some(false),
     value = form(sautrKey).value
@@ -112,36 +119,39 @@ messages("generic.errorPrefix") + " " + inPageTitle
             isPageHeading = true
             ))
             )),
-            errorMessage = form.error(key) match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey.toString))) case _ => None},
-
+            errorMessage = form.error(key).map(e =>
+              ErrorMessage(
+                content = Text(messages(s"$key.${e.message}"))
+              )
+            ),
             hint = Some(Hint(
-                content = Text(messages("representeeReferenceIdType.helpText"))
+              content = Text(messages(s"$key.helpText"))
             )),
-            idPrefix = Some("contact"),
-            name = "representeeReferenceIdType",
+            idPrefix = Some(key),
+            name = key,
             items = Seq(
                 RadioItem(
                 content = Text(messages(s"$cgtReferenceKey.label")),
                 value = Some("0"),
                 conditionalHtml = Some(cgtReferenceKeyHtml),
-                checked = form("representeeReferenceIdType").value.contains("0")
+                checked = form(key).value.contains("0")
                 ),
                 RadioItem(
                 content = Text(messages(s"$ninoKey.label")),
                 value = Some("1"),
                 conditionalHtml = Some(ninoKeyHtml),
-                checked = form("representeeReferenceIdType").value.contains("1")
+                checked = form(key).value.contains("1")
                 ),
                 RadioItem(
                 content = Text(messages(s"$sautrKey.label")),
                 value = Some("2"),
                 conditionalHtml = Some(sautrKeyHtml),
-                checked = form("representeeReferenceIdType").value.contains("2")
+                checked = form(key).value.contains("2")
                 ),
                 RadioItem(
                 content = Text(messages(s"$key.noReferenceId.label")),
                 value = Some("3"),
-                checked = form("representeeReferenceIdType").value.contains("3"),
+                checked = form(key).value.contains("3"),
                 conditionalHtml = None),
 
             )))

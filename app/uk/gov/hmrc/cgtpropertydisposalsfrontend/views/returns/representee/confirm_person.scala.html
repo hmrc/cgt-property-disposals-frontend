@@ -57,8 +57,7 @@
     }
 }
 
-@layout(pageTitle = title) {
-    @backLinkComponent(backLink)
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form)
