@@ -591,6 +591,7 @@ account.manageYourDetails.Address.changed=Mae’r cyfeiriad cyswllt wedi newid
 account.manageYourDetails.changed.p=Byddwn yn defnyddio hwn i gysylltu â chi ynghylch eich Treth Enillion Cyfalaf ar werthiannau neu warediadau o eiddo yn y DU.
 returns.list.title=Ffurflenni Treth a anfonwyd
 returns.list.ref=Cyfeirnod Ffurflen Dreth:
+returns.list.viewExpired=Gweld y Ffurflen Dreth
 returns.list.view=Bwrw golwg dros neu newid Ffurflen Dreth
 returns.list.viewAndPay=Bwrw golwg dros, talu neu newid Ffurflen Dreth
 returns.list.paymentDue=Dyddiad cau ar gyfer talu treth
@@ -3825,6 +3826,7 @@ viewReturn.trust.warning.subtext=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gos
 viewReturn.clearingNotice=Pan fyddwch yn diweddaru Ffurflen Dreth, bydd yn cymryd 24 awr i’ch balans sy’n weddill gael ei ddiweddaru yn eich cyfrif. Gallwch wneud taliad unrhyw bryd.
 viewReturn.agent.clearingNotice=Pan fyddwch yn diweddaru Ffurflen Dreth, bydd yn cymryd 24 awr i’r balans sy’n weddill gael ei ddiweddaru yng nghyfrif eich cleient. Gall eich cleient wneud taliad unrhyw bryd.
 viewReturn.trust.clearingNotice=Pan fyddwch yn diweddaru Ffurflen Dreth, bydd yn cymryd 24 awr i’r balans sy’n weddill gael ei ddiweddaru yng nghyfrif yr ymddiriedolaeth. Gallwch wneud taliad unrhyw bryd.
+viewReturn.expired=Ni allwch wneud newidiadau i’r Ffurflen Dreth hon gan fod y dyddiad cau i’w diwygio wedi mynd heibio
 viewReturn.changeReturn=Newid y Ffurflen Dreth
 
 #===================================================

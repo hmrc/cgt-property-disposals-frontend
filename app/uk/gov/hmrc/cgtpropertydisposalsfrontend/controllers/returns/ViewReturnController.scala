@@ -83,28 +83,32 @@ class ViewReturnController @Inject() (
   def startAmendingReturn(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withViewingReturn() { viewingReturn =>
-        val newJourneyStatus = StartingToAmendReturn(
-          viewingReturn.subscribedDetails,
-          viewingReturn.ggCredId,
-          viewingReturn.agentReferenceNumber,
-          CompleteReturnWithSummary(
-            viewingReturn.completeReturn,
-            viewingReturn.returnSummary,
-            viewingReturn.returnType
-          ),
-          viewingReturn.returnType.isFirstReturn,
-          viewingReturn.previousSentReturns,
-          None
-        )
+        if (viewingReturn.returnSummary.expired) {
+          Redirect(routes.ViewReturnController.displayReturn().url)
+        } else {
+          val newJourneyStatus = StartingToAmendReturn(
+            viewingReturn.subscribedDetails,
+            viewingReturn.ggCredId,
+            viewingReturn.agentReferenceNumber,
+            CompleteReturnWithSummary(
+              viewingReturn.completeReturn,
+              viewingReturn.returnSummary,
+              viewingReturn.returnType
+            ),
+            viewingReturn.returnType.isFirstReturn,
+            viewingReturn.previousSentReturns,
+            None
+          )
 
-        updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourneyStatus), journeyType = Some(Amend)))
-          .map {
-            case Left(e)  =>
-              logger.warn("Could not start amending a return", e)
-              errorHandler.errorResult()
-            case Right(_) =>
-              Redirect(amendRoutes.AmendReturnController.checkYourAnswers())
-          }
+          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourneyStatus), journeyType = Some(Amend)))
+            .map {
+              case Left(e)  =>
+                logger.warn("Could not start amending a return", e)
+                errorHandler.errorResult()
+              case Right(_) =>
+                Redirect(amendRoutes.AmendReturnController.checkYourAnswers())
+            }
+        }
       }
     }
 

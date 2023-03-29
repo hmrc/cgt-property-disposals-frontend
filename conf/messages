@@ -644,6 +644,7 @@ account.manageYourDetails.changed.p=We’ll use this to contact you about your C
 
 returns.list.title=Sent returns
 returns.list.ref=Return reference:
+returns.list.viewExpired=View return
 returns.list.view=View or change return
 returns.list.viewAndPay=View, pay or change return
 returns.list.paymentDue=Tax due date
@@ -4351,7 +4352,7 @@ viewReturn.trust.warning.subtext=It takes 3 to 5 days for payments or charges to
 viewReturn.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your account when you update a return. You can make a payment at any time.
 viewReturn.agent.clearingNotice=It takes 24 hours for the outstanding balance to be updated in your client’s account when you update a return. They can make a payment at any time.
 viewReturn.trust.clearingNotice=It takes 24 hours for the outstanding balance to be updated in the trust’s account when you update a return. You can make a payment at any time.
-
+viewReturn.expired=You cannot make changes to this return because the deadline to amend has passed.
 viewReturn.changeReturn=Change return
 
 #===================================================

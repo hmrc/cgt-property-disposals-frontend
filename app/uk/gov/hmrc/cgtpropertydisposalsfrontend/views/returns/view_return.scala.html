@@ -160,7 +160,14 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         @messages(s"$key.summaryHeading")
     </h2>
 
-    @changeReturnLink("amend-link-1")
+    @if(returnSummary.expired) {
+        <p class="govuk-inset-text">
+            @messages("viewReturn.expired")
+        </p>
+    } else {
+        @changeReturnLink("amend-link-1")
+    }
+
 
     @completeReturnSummary(
         completeReturn,
