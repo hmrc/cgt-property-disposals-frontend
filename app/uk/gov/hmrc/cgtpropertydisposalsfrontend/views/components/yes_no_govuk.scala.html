@@ -36,11 +36,6 @@
   warningField: Option[String] = None
 )(implicit messages: Messages)
 
-@warningField.map(warningText => govukWarningText(WarningText(
-  iconFallbackText = messages("generic.warning"),
-  content = Text(warningText)
-)))
-
 @govukRadios(Radios(
   fieldset = Some(Fieldset(
     legend = Some(Legend(
@@ -75,3 +70,8 @@
     )
   )
 ))
+
+@warningField.map(warningText => govukWarningText(WarningText(
+  iconFallbackText = messages("generic.warning"),
+  content = Text(warningText)
+)))
