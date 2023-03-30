@@ -36,6 +36,13 @@
   warningField: Option[String] = None
 )(implicit messages: Messages)
 
+@warningId = @{"single-warning"}
+@describedByKeys = @{
+  if(describedBy.isDefined | warningField.isDefined)
+    Some(s"""${describedBy.map(d => s"$d ")}${warningField.map(_ => warningId)}""".trim)
+  else None
+}
+
 @govukRadios(Radios(
   fieldset = Some(Fieldset(
     legend = Some(Legend(
@@ -43,7 +50,7 @@
       classes = "govuk-fieldset__legend--xl",
       isPageHeading = true
     )),
-    describedBy = describedBy.map(d => d)
+    describedBy = describedByKeys
   )),
   hint = helpText.map(hint => Hint(
     content = HtmlContent(hint)
@@ -72,6 +79,7 @@
 ))
 
 @warningField.map(warningText => govukWarningText(WarningText(
+  attributes = Map("id" -> warningId),
   iconFallbackText = messages("generic.warning"),
   content = Text(warningText)
 )))
