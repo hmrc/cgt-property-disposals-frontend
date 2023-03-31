@@ -163,8 +163,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val ggCountdownSeconds: Long   = servicesConfig.getDuration("gg.countdown").toSeconds
   val ggKeepAliveUrl: String     = "/capital-gains-tax-uk-property" + routes.StartController.keepAlive().url
 
-  val ggTimedOutUrl: String =
-    signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController
+  val ggTimedOutUrl: String      = "/capital-gains-tax-uk-property" + routes.StartController
       .timedOut()
       .url
 
