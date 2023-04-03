@@ -30,7 +30,8 @@
         hmrcStandardPage: HmrcStandardPage,
         twoThirdsOneThirdMainContent: TwoThirdsOneThirdMainContent,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
-        hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
+        hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
+        viewConfig: ViewConfig
 )
 
 
@@ -41,7 +42,7 @@
         backLinkUrl: Option[String] = None,
         hasErrors: Boolean = false,
         sidebar: Option[Html] = None
-)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages, viewConfig: ViewConfig)
+)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @signOutUrl = @{controllerRoutes.StartController.signOutAndRedirectToFeedback().url}
 
