@@ -47,12 +47,7 @@
       if(isAgent) "agent.personalRepInPeriodOfAdmin" else "personalRepInPeriodOfAdmin"
 } }
 
-@title = @{
-if(hasErrors){
-messages("generic.errorPrefix") + " " + inPageTitle
-} else inPageTitle
-}
-@inPageTitle = @{messages(s"$key.$userKey.title")}
+@title = @{messages(s"$key.$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
