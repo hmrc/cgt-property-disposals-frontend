@@ -18,6 +18,7 @@
 @import play.api.i18n.Messages
 @import play.api.mvc._
 @import play.twirl.api._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcReportTechnicalIssueHelper, HmrcTimeoutDialogHelper}
 @import views.html.helper.CSPNonce
@@ -32,6 +33,7 @@
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
 )
 
+
 @(
         pageTitle: String,
         withSignOutLink: Boolean = true,
@@ -39,13 +41,13 @@
         backLinkUrl: Option[String] = None,
         hasErrors: Boolean = false,
         sidebar: Option[Html] = None
-)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
+)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages, viewConfig: ViewConfig)
 
 @signOutUrl = @{controllerRoutes.StartController.signOutAndRedirectToFeedback().url}
 
 @additionalHeadBlock = {
   @if(withSignOutLink) {
-    @hmrcTimeoutDialogHelper(signOutUrl)
+    @hmrcTimeoutDialogHelper(signOutUrl, timeoutUrl = Some(viewConfig.ggTimedOutUrl))
   }
   <link rel="stylesheet" media="all" href="@routes.Assets.at("stylesheets/cgtpd-ui-upgrade.css")" />
 }
