@@ -174,3 +174,25 @@
         border: 0
     }
 }
+
+.list-item--dashed {
+    position: relative;
+    padding-left: 25px;
+    padding-right: 25px;
+}
+
+.list-item--dashed:before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    width: 20px;
+    overflow: hidden;
+}
+
+.govuk-related-items {
+    border-top: 10px solid #005ea5;
+    padding-top: 5px;
+}
+
+
+

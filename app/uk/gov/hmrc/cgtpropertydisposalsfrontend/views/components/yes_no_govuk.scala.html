@@ -16,18 +16,18 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline_govuk,
-  warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+  govukRadios: GovukRadios,
+  govukWarningText: GovukWarningText
 )
 
 @(
   fieldId: String,
-  label: Html,
+  label: String,
   helpText: Option[Html] = None,
   errorKey: Option[String] = None,
-  hasErrors: Boolean = false,
   selected: Option[Boolean] = None,
   yesContent: Option[Html] = None,
   noContent: Option[Html] = None,
@@ -36,67 +36,50 @@
   warningField: Option[String] = None
 )(implicit messages: Messages)
 
-@classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
-@hintTextKey = @{s"${{fieldId}}-form-hint"}
-@errorId = @{s"${{fieldId}}-inline-error"}
-@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
-@errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
+@warningId = @{"single-warning"}
 @describedByKeys = @{
-  List(describedBy.map(a => a), hintIdWithHintText.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+  if(describedBy.isDefined | warningField.isDefined)
+    Some(s"""${describedBy.map(d => s"$d ")}${warningField.map(_ => warningId)}""".trim)
+  else None
+}
 
-<div class="@classes">
-  <fieldset class="govuk-fieldset" id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-      @label
-    </legend>
-    @hintIdWithHintText.map { case (id, text) =>
-      <div id="@id" class="govuk-hint">
-        @text
-      </div>
-    }
+@govukRadios(Radios(
+  fieldset = Some(Fieldset(
+    legend = Some(Legend(
+      content = Text(label),
+      classes = "govuk-fieldset__legend--xl",
+      isPageHeading = true
+    )),
+    describedBy = describedByKeys
+  )),
+  hint = helpText.map(hint => Hint(
+    content = HtmlContent(hint)
+  )),
+  name = fieldId,
+  idPrefix = Some(fieldId),
+  items = Seq(
+    RadioItem(
+      content = Text(messages("generic.yes")),
+      value = Some("true"),
+      checked = selected.contains(true),
+      conditionalHtml = yesContent
+    ),
+    RadioItem(
+      content = Text(messages("generic.no")),
+      value = Some("false"),
+      checked = selected.contains(false),
+      conditionalHtml = noContent
+    )
+  ),
+  errorMessage = errorKey.map(key =>
+    ErrorMessage(
+      content = Text(errorMessage.getOrElse(messages(s"$fieldId.$key")))
+    )
+  )
+))
 
-    @errorIdWithMessageKey.map { case (id, key) =>
-      @if(errorMessage.isDefined){
-        @errorInline(id, errorMessage.getOrElse(messages(s"$fieldId.$key")))
-      }else{
-          @errorInline(id, messages(s"$fieldId.$key"))
-        }
-    }
-
-    @if(warningField.isDefined){
-        @warning(
-            warningField.getOrElse("")
-        )
-    }
-
-    <div class="govuk-radios__item"@if(yesContent.nonEmpty){ data-target="yes-content" }>
-      <input id="@{fieldId}-true"
-       name="@fieldId"
-       class="govuk-radios__input"
-       value="true"
-       type="radio"
-      @if(selected.contains(true)) { checked="checked" }
-      />
-      <label class="govuk-label govuk-radios__label" for="@{fieldId}-true">
-        @messages("generic.yes")
-      </label>
-    </div>
-
-    @yesContent.map(content => Html(s"""<div id="yes-content" class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
-
-   <div class="govuk-radios__item"@if(noContent.nonEmpty){ data-target="no-content" }>
-      <input id="@{fieldId}-false"
-       name="@fieldId"
-       class="govuk-radios__input"
-       value="false"
-       type="radio"
-      @if(selected.contains(false)) { checked="checked" }
-      />
-      <label class="govuk-label govuk-radios__label" for="@{fieldId}-false">
-        @messages("generic.no")
-      </label>
-    </div>
-    @noContent.map(content => Html(s"""<div id="no-content" class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
-
-  </fieldset>
-</div>
+@warningField.map(warningText => govukWarningText(WarningText(
+  attributes = Map("id" -> warningId),
+  iconFallbackText = messages("generic.warning"),
+  content = Text(warningText)
+)))

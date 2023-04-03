@@ -28,8 +28,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(
-  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
   formHelper: FormWithCSRF,
@@ -63,22 +62,18 @@
 
 @hasErrors = @{form.hasErrors}
 @errorKey = @{List("completionDate-day", "completionDate-month", "completionDate-year", "completionDate").map(form.error).find(_.isDefined).flatten}
-@title = @{
- if(hasErrors){
-  messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title")
- } else messages(s"$key$userKey.title")
-}
+@title = @{messages(s"$key$userKey.title")}
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
  @if(hasErrors) {
   @errorSummary(form)
  }
-
- @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.whenWasCompletionDateSubmit(), 'novalidate -> "novalidate") {
+<span class="govuk-caption-xl">@messages("triage.caption")</span>
+ @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.whenWasCompletionDateSubmit()) {
   @dateInput(
    fieldId = key,
-   label = pageHeading(title, Some(messages("triage.caption"))),
+   label = title,
    dayValue = form.data.get("completionDate-day"),
    monthValue = form.data.get("completionDate-month"),
    yearValue = form.data.get("completionDate-year"),

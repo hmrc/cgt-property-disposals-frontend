@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
 @(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
@@ -29,7 +29,7 @@
 @key = @{"previousReturnExistsWithSameCompletionDate.amend"}
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url)) {
 
     <h1 class="govuk-heading-xl">@title</h1>
 
@@ -37,10 +37,8 @@
     <p class="govuk-body">@Html(messages(s"$key.p2"))</p>
     <p class="govuk-body">@Html(messages(s"$key.p3"))</p>
 
-    <ul class="class=govuk-list">
+    <ul class="govuk-list govuk-list--bullet">
       <li>@messages(s"$key.li1")</li>
       <li>@messages(s"$key.li2")</li>
     </ul>
-
-
 }

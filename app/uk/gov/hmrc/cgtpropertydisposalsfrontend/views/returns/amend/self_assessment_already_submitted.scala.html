@@ -52,8 +52,7 @@
 
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
-
+@mainTemplate(pageTitle = title, backLinkUrl = Some(backLink.url)) {
 
     <h1 class="govuk-heading-xl">@title</h1>
 

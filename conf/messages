@@ -6,20 +6,20 @@ service.name=Report and pay Capital Gains Tax on UK property
 #===================================================
 
 landingPage.title=Report and pay Capital Gains Tax on UK property
-landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home. For example, buy-to-let properties, land or inherited property.
-landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
+landingPage.intro.p1=You may have to pay <a class="govuk-link" href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a class="govuk-link" href="{0}">dispose of</a>’) property that’s not your home. For example, buy-to-let properties, land or inherited property.
+landingPage.intro.p2=In most cases you do not need to pay the tax when you <a class="govuk-link" href="{0}">sell your main home</a>.
 
 landingPage.warning=For UK property disposals made from 6 April 2020, you have 30 days after the property’s completion date to report and pay any Capital Gains Tax due on your UK property disposals.
-landingPage.autumn.updates.message=You must report and pay any Capital Gains Tax due on the sale of a UK property within;<ul class="list-bullet"><li>30 days of selling it, if the completion date was between 6 April 2020 and 26 October 2021</li><li>60 days of selling it, if the completion date was on or after 27 October 2021</li></ul>
+landingPage.autumn.updates.message=You must report and pay any Capital Gains Tax due on the sale of a UK property within;<ul class="govuk-list govuk-list--bullet"><li>30 days of selling it, if the completion date was between 6 April 2020 and 26 October 2021</li><li>60 days of selling it, if the completion date was on or after 27 October 2021</li></ul>
 
 landingPage.contents.h2=Contents
 landingPage.intro.h2=Overview
-landingPage.contents.list.bullet1=<a href="{0}">Overview</a>
-landingPage.contents.list.bullet2=<a href="{0}">How to report and pay the tax</a>
-landingPage.contents.list.bullet3=<a href="{0}">Before you start</a>
-landingPage.contents.list.bullet4=<a href="{0}">If you’re an agent</a>
-landingPage.contents.list.bullet5=<a href="{0}">If you’re representing a trust</a>
-landingPage.contents.list.bullet6=<a href="{0}">If you’re a capacitor or personal representative</a>
+landingPage.contents.list.bullet1=<a class="govuk-link" href="{0}">Overview</a>
+landingPage.contents.list.bullet2=<a class="govuk-link" href="{0}">How to report and pay the tax</a>
+landingPage.contents.list.bullet3=<a class="govuk-link" href="{0}">Before you start</a>
+landingPage.contents.list.bullet4=<a class="govuk-link" href="{0}">If you’re an agent</a>
+landingPage.contents.list.bullet5=<a class="govuk-link" href="{0}">If you’re representing a trust</a>
+landingPage.contents.list.bullet6=<a class="govuk-link" href="{0}">If you’re a capacitor or personal representative</a>
 
 landingPage.howTo.h2=How to report and pay the tax
 landingPage.howTo.p1=You’ll need to create a Capital Gains Tax on UK property account before you can report and pay the tax using this service.
@@ -38,7 +38,7 @@ landingPage.howTo.p5=If you’re a non-resident, you must report all sales or di
 landingPage.startButton=Start
 landingPage.beforeYouStart.h2=Before you start
 landingPage.beforeYouStart.p1=To use this service, you’ll need a Government Gateway user ID and password. If you do not have a user ID, you can create one.
-landingPage.beforeYouStart.p2=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
+landingPage.beforeYouStart.p2=You can <a class="govuk-link" href="{0}">contact HMRC</a> if you need help accessing the service.
 landingPage.beforeYouStart.p3=Get the following information ready:
 landingPage.beforeYouStart.list1.bullet1=property address and postcode
 landingPage.beforeYouStart.list1.bullet2=date you got the property
@@ -51,11 +51,11 @@ landingPage.beforeYouStart.list1.bullet8=details of any tax reliefs, allowances 
 landingPage.beforeYouStart.list1.bullet9=property type, if you’re a non-resident
 
 landingPage.ifAgent.h2=If you’re an agent
-landingPage.ifAgent.p1=Find out how to <a href="{0}">report your client’s Capital Gains Tax on UK property disposals</a>.
+landingPage.ifAgent.p1=Find out how to <a class="govuk-link" href="{0}">report your client’s Capital Gains Tax on UK property disposals</a>.
 landingPage.ifTrust.h2=If you’re representing a trust
-landingPage.ifTrust.p1=The trust must be <a href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Trust Registration Number.
+landingPage.ifTrust.p1=The trust must be <a class="govuk-link" href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Trust Registration Number.
 landingPage.capacitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
-landingPage.capacitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. A <a href="{0}">personal representative</a> is someone responsible for settling the affairs of someone who has died.
+landingPage.capacitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. A <a class="govuk-link" href="{0}">personal representative</a> is someone responsible for settling the affairs of someone who has died.
 landingPage.capacitorOrPersonalRepresentative.p2=To use this service for another person you’ll need to:
 landingPage.capacitorOrPersonalRepresentative.p4=The details you provide must match the details we hold about the person.
 landingPage.capacitorOrPersonalRepresentative.p5=If you’re a personal representative, you’ll also need to provide the date the person you’re representing died.
@@ -68,7 +68,7 @@ landingPage.capacitorOrPersonalRepresentative.list1.bullet1=sign in to your own 
 landingPage.capacitorOrPersonalRepresentative.list1.bullet2=start a new return from your account
 landingPage.capacitorOrPersonalRepresentative.list1.bullet3=select that you’re completing the return for someone else or someone who has died
 landingPage.capacitorOrPersonalRepresentative.list1.bullet4=enter the person’s full name and, if available, one of the following:
-landingPage.capacitorOrPersonalRepresentative.list1.bullet5=provide evidence that you have the authority to act on their behalf, for example a <a href="{0}">lasting power of attorney (LPA)</a> document
+landingPage.capacitorOrPersonalRepresentative.list1.bullet5=provide evidence that you have the authority to act on their behalf, for example a <a class="govuk-link" href="{0}">lasting power of attorney (LPA)</a> document
 landingPage.capacitorOrPersonalRepresentative.list2.bullet1=their National Insurance number
 landingPage.capacitorOrPersonalRepresentative.list2.bullet2=their Self Assessment Unique Taxpayer Reference
 landingPage.capacitorOrPersonalRepresentative.list2.bullet3=their Capital Gains Tax on UK property account number

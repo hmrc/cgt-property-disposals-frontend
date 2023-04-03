@@ -16,57 +16,41 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(
-  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline_govuk
-)
+@this(govukRadios: GovukRadios)
 
 @(
   fieldId: String,
-  label: Html,
+  label: String,
   options: List[Html],
   helpText: Option[Html] = None,
   errorKey: Option[String] = None,
-  hasErrors: Boolean = false,
   selected: Option[Int] = None
 )(implicit messages: Messages)
 
-@classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error" else "govuk-form-group" }
-@hintTextKey = @{s"${{fieldId}}-form-hint"}
-@errorId = @{s"${{fieldId}}-inline-error"}
-@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
-@errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
-@describedByKeys = @{
-  List(hintIdWithHintText.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
-
-<div class="@classes">
-  <fieldset class="govuk-fieldset" id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <legend class="govuk-fieldset__legend govuk-fieldset__legend--xl">
-      @label
-    </legend>
-    @hintIdWithHintText.map { case (id, text) =>
-      <div id="@id" class="govuk-hint">
-        @text
-      </div>
-    }
-    @errorIdWithMessageKey.map { case (id, key) =>
-      @errorInline(id, messages(s"$fieldId.$key"))
-    }
-     <div class="govuk-radios">
-        @options.zipWithIndex.map{ case (option, index) =>
-          <div class="govuk-radios__item">
-            <input id="@{fieldId}-@{index}"
-             name="@fieldId"
-             class="govuk-radios__input"
-             value="@index"
-             type="radio"
-            @if(selected.contains(index)) { checked="checked" }
-            />
-            <label class="govuk-label govuk-radios__label" for="@{fieldId}-@{index}">
-              @option
-            </label>
-          </div>
-        }
-     </div>
-  </fieldset>
-</div>
+@govukRadios(Radios(
+  fieldset = Some(Fieldset(
+    legend = Some(Legend(
+      content = Text(label.toString),
+      classes = "govuk-fieldset__legend--xl",
+      isPageHeading = true
+    ))
+  )),
+  hint = helpText.map(hint => Hint(
+    content = HtmlContent(hint)
+  )),
+  name = fieldId,
+  items = options.zipWithIndex.map { case (option, index) =>
+    RadioItem(
+      content = HtmlContent(option),
+      value = Some(index.toString),
+      checked = selected.contains(index)
+    )
+  }.toSeq,
+  errorMessage = errorKey.map(key =>
+    ErrorMessage(
+      content = Text(messages(s"$fieldId.$key"))
+    )
+  )
+))

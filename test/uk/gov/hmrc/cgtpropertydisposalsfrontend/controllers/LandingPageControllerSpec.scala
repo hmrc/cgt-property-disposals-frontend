@@ -35,7 +35,7 @@ class LandingPageControllerSpec extends ControllerSpec {
           messageFromMessageKey("landingPage.title"),
           doc =>
             doc
-              .select(".button")
+              .select(".govuk-button")
               .attr("href") shouldBe s"${routes.StartController.start()}"
         )
       }

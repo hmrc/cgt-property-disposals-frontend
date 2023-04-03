@@ -19,10 +19,11 @@
 @import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        govukButton: GovukButton
 )
 
 @()(implicit messages: Messages, appConfig: ViewConfig, request: Request[_])
@@ -33,28 +34,28 @@
 
 @sidebarContent = {
     <div class="sidebar">
-        <nav class="govuk-related-items ">
-            <h2 class="heading-medium" id="subsection-title">
-            @messages("landingPage.sidebar.title")
+        <nav class="govuk-related-items">
+            <h2 class="govuk-heading-m" id="subsection-title">
+                @messages("landingPage.sidebar.title")
             </h2>
-            <ul class="section__ul--link-list sidebar__list">
-                <li class="sidebar__list-item">
-                    <a href="@{
+            <ul class="govuk-list govuk-list--spaced govuk-!-font-size-16">
+                <li>
+                    <a class="govuk-link" href="@{
                         appConfig.calculateCgt
                     }">@messages("landingPage.sidebar.1")</a>
                 </li>
-                <li class="sidebar__list-item">
-                    <a href="@{
+                <li>
+                    <a class="govuk-link" href="@{
                         appConfig.cgtUrl
                     }">@messages("landingPage.sidebar.2")</a>
                 </li>
-                <li class="sidebar__list-item">
-                    <a href="@{
+                <li>
+                    <a class="govuk-link" href="@{
                         appConfig.legacyCgtNonResidentUrl
                     }">@messages("landingPage.sidebar.3")</a>
                 </li>
-                <li class="sidebar__list-item">
-                    <a href="@{
+                <li>
+                    <a class="govuk-link" href="@{
                         appConfig.payYourTax
                     }">@messages("landingPage.sidebar.4")</a>
                 </li>
@@ -63,12 +64,15 @@
     </div>
 }
 
-@mainTemplate(title = title, userType = None, sidebar = Some(sidebarContent)) {
+@layout(
+    title,
+    sidebar = Some(sidebarContent)
+) {
 
-    <h1 class="heading-xlarge">@title</h1>
+    <h1 class="govuk-heading-xl">@title</h1>
 
-    <h2 class="heading-medium">@messages("landingPage.contents.h2")</h2>
-    <ol>
+    <h2 class="govuk-heading-m">@messages("landingPage.contents.h2")</h2>
+    <ol class="govuk-list">
         <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet1", "#overview"))</li>
         <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet2", "#howTo"))</li>
         <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet3", "#beforeYouStart"))</li>
@@ -76,44 +80,46 @@
         <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet5", "#ifTrust"))</li>
         <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet6", "#capacitorOrPersonalRepresentative"))</li>
     </ol>
-    <h2 class="heading-medium" id="overview">@messages("landingPage.intro.h2")</h2>
+    <h2 class="govuk-heading-m" id="overview">@messages("landingPage.intro.h2")</h2>
     
-    <p>@Html(messages("landingPage.intro.p1", appConfig.cgtUrl))</p>
+    <p class="govuk-body">@Html(messages("landingPage.intro.p1", appConfig.cgtUrl))</p>
 
-    <p>@Html(messages("landingPage.intro.p2", appConfig.taxSellHomeUrl))</p>
+    <p class="govuk-body">@Html(messages("landingPage.intro.p2", appConfig.taxSellHomeUrl))</p>
 
-    @insetPanel(Html(messages("landingPage.autumn.updates.message")))
+    <div class="govuk-inset-text">
+        @Html(messages("landingPage.autumn.updates.message"))
+    </div>
 
-    <h2 class="heading-medium" id="howTo">@messages("landingPage.howTo.h2")</h2>
+    <h2 class="govuk-heading-m" id="howTo">@messages("landingPage.howTo.h2")</h2>
 
-    <p>@messages("landingPage.howTo.p1")</p>
-    <p>@messages("landingPage.howTo.p2")</p>
+    <p class="govuk-body">@messages("landingPage.howTo.p1")</p>
+    <p class="govuk-body">@messages("landingPage.howTo.p2")</p>
 
-    <ul class="list-bullet">
+    <ul class="govuk-list govuk-list--bullet">
         <li>@messages("landingPage.howTo.list1.bullet1")</li>
         <li>@messages("landingPage.howTo.list1.bullet2")</li>
         <li>@messages("landingPage.amendReturn.howTo.list1.bullet3")</li>
     </ul>
 
-    <p>@messages("landingPage.howTo.p3")</p>
+    <p class="govuk-body">@messages("landingPage.howTo.p3")</p>
 
-    <ul class="list-bullet">
+    <ul class="govuk-list govuk-list--bullet">
         <li>@messages("landingPage.howTo.list2.bullet1")</li>
         <li>@messages("landingPage.howTo.list2.bullet2")</li>
         <li>@messages("landingPage.howTo.list2.bullet3")</li>
         <li>@messages("landingPage.howTo.list2.bullet4")</li>
     </ul>
-    <p>@messages("landingPage.howTo.p4")</p>
-    <p>@messages("landingPage.howTo.p5")</p>
+    <p class="govuk-body">@messages("landingPage.howTo.p4")</p>
+    <p class="govuk-body">@messages("landingPage.howTo.p5")</p>
 
-    <h2 class="heading-medium" id="beforeYouStart">@messages("landingPage.beforeYouStart.h2")</h2>
+    <h2 class="govuk-heading-m" id="beforeYouStart">@messages("landingPage.beforeYouStart.h2")</h2>
 
-    <p>@messages("landingPage.beforeYouStart.p1")</p>
+    <p class="govuk-body">@messages("landingPage.beforeYouStart.p1")</p>
 
-    <p>@Html(messages("landingPage.beforeYouStart.p2", appConfig.contactHmrc))</p>
+    <p class="govuk-body">@Html(messages("landingPage.beforeYouStart.p2", appConfig.contactHmrc))</p>
 
-    <p>@messages("landingPage.beforeYouStart.p3")</p>
-    <ul class="list-bullet">
+    <p class="govuk-body">@messages("landingPage.beforeYouStart.p3")</p>
+    <ul class="govuk-list govuk-list--bullet">
         <li>@messages("landingPage.beforeYouStart.list1.bullet1")</li>
         <li>@messages("landingPage.beforeYouStart.list1.bullet2")</li>
         <li>@messages("landingPage.beforeYouStart.list1.bullet3")</li>
@@ -125,44 +131,44 @@
         <li>@messages("landingPage.beforeYouStart.list1.bullet9")</li>
     </ul>
 
-    <p>
-        <a href="@{
-            routes.StartController.start()
-        }" role="button" draggable="false" class="button button-start">@messages("landingPage.startButton")</a>
-    </p>
+    @govukButton(Button(
+        href = Some(routes.StartController.start().url),
+        isStartButton = true,
+        content = Text(messages("landingPage.startButton"))
+    ))
 
-    <h2 class="heading-medium" id="ifAgent">@messages("landingPage.ifAgent.h2")</h2>
+    <h2 class="govuk-heading-m" id="ifAgent">@messages("landingPage.ifAgent.h2")</h2>
 
-    <p>@Html(messages("landingPage.ifAgent.p1", routes.LandingPageController.agentsLandingPage()))</p>
+    <p class="govuk-body">@Html(messages("landingPage.ifAgent.p1", routes.LandingPageController.agentsLandingPage()))</p>
 
-    <h2 class="heading-medium" id="ifTrust">@messages("landingPage.ifTrust.h2")</h2>
+    <h2 class="govuk-heading-m" id="ifTrust">@messages("landingPage.ifTrust.h2")</h2>
 
-    <p>@Html(messages("landingPage.ifTrust.p1", appConfig.trusteeResponsibilitiesUrl))</p>
-    <h2 class="heading-medium" id="capacitorOrPersonalRepresentative">@messages("landingPage.capacitorOrPersonalRepresentative.h2")</h2>
+    <p class="govuk-body">@Html(messages("landingPage.ifTrust.p1", appConfig.trusteeResponsibilitiesUrl))</p>
+    <h2 class="govuk-heading-m" id="capacitorOrPersonalRepresentative">@messages("landingPage.capacitorOrPersonalRepresentative.h2")</h2>
 
-    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p1", appConfig.personalRepresentativeUrl))</p>
+    <p class="govuk-body">@Html(messages("landingPage.capacitorOrPersonalRepresentative.p1", appConfig.personalRepresentativeUrl))</p>
 
-    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p2", appConfig.contactHmrc))</p>
-    <ul class="list-bullet">
+    <p class="govuk-body">@Html(messages("landingPage.capacitorOrPersonalRepresentative.p2", appConfig.contactHmrc))</p>
+    <ul class="govuk-list govuk-list--bullet">
         <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet1")</li>
         <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet2")</li>
         <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet3")</li>
         <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet4")</li>
-        <ul class="list-bullet">
+        <ul class="govuk-list govuk-list--bullet">
             <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet1")</li>
             <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet2")</li>
             <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet3")</li>
         </ul>
         <li>@Html(messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet5", appConfig.powerOfAttorney))</li>
     </ul>
-    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p4"))</p>
+    <p class="govuk-body">@Html(messages("landingPage.capacitorOrPersonalRepresentative.p4"))</p>
 
-    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p5"))</p>
-    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p6"))</p>
+    <p class="govuk-body">@Html(messages("landingPage.capacitorOrPersonalRepresentative.p5"))</p>
+    <p class="govuk-body">@Html(messages("landingPage.capacitorOrPersonalRepresentative.p6"))</p>
 
-    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.example.title"))</p>
-    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p8"))</p>
-    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p9"))</p>
-    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p10"))</p>
+    <p class="govuk-body">@Html(messages("landingPage.capacitorOrPersonalRepresentative.example.title"))</p>
+    <p class="govuk-body">@Html(messages("landingPage.capacitorOrPersonalRepresentative.p8"))</p>
+    <p class="govuk-body">@Html(messages("landingPage.capacitorOrPersonalRepresentative.p9"))</p>
+    <p class="govuk-body">@Html(messages("landingPage.capacitorOrPersonalRepresentative.p10"))</p>
 
 }

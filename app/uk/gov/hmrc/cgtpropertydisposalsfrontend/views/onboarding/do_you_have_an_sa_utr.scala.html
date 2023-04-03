@@ -51,7 +51,6 @@
     fieldId = key,
     label = pageHeading(title, Some(messages("subscription.caption"))),
     errorKey = form.error(key).map(e => e.message),
-    hasErrors = form.error(key).nonEmpty,
     selected = form.data.get(key).map(f => f match {
       case "true" => true
       case _ => false

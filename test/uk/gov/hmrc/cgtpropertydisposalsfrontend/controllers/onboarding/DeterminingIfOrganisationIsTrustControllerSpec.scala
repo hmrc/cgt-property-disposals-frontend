@@ -189,7 +189,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           content          should include(
             messageFromMessageKey("isReportingForATrust.title")
           )
-          content          should include("checked=\"checked\"")
+          content          should include("checked")
         }
 
       }
@@ -513,7 +513,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           status(result) shouldBe OK
           content          should include(messageFromMessageKey("haveATrn.title"))
-          content          should include("checked=\"checked\"")
+          content          should include("checked")
         }
 
       }

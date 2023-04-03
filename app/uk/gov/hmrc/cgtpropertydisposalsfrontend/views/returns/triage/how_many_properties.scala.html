@@ -17,24 +17,22 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{NumberOfProperties, RepresentativeType}
-@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    formHelper: FormWithCSRF,
-    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk
+    formHelper: FormWithCSRF,
+    govukDetails: GovukDetails,
+    govukButton: GovukButton,
+    govukRadios: GovukRadios
 )
 
 @(
@@ -45,19 +43,12 @@
     representativeType: Option[RepresentativeType],
     isAmend: Boolean,
         isFurtherOrAmendReturn: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"numberOfProperties"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@title = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + messages(s"$key.title")
-    } else messages(s"$key.title")
-}
-
-
+@title = @{messages(s"$key.title")}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-
 @userKey = @{
     representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
@@ -80,41 +71,64 @@
     List(
         s"$key.One",
         s"$key.MoreThanOne"
-    ).map(messageKey =>Html(messages(messageKey)))
+    ).map(messageKey =>messages(messageKey))
 }
 
-  @submitLocation = @{
-    if(isFurtherOrAmendReturn)
-        controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesFurtherReturnSubmit()
-    else
-        controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesSubmit()
-  }
+@submitLocation = @{
+  if(isFurtherOrAmendReturn)
+      controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesFurtherReturnSubmit()
+  else
+      controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesSubmit()
+}
 
-@mainTemplate(pageTitle = title, withSignOutLink = false, isWelshTranslationAvailable = true, backLinkUrl = backLink.map(_.url)) {
+@layout(
+  pageTitle = title,
+  backLinkUrl = backLink.map(_.url),
+  hasErrors = hasErrors
+) {
 
     @if(hasErrors) {
         @errorSummary(form)
     }
 
-    @formHelper(submitLocation, 'novalidate -> "novalidate") {
-        @radioGroup(
-            fieldId = key,
-            options = options,
-            selected = form.value.map(optionIndex),
-            label = pageHeading(title, Some(messages("triage.caption"))),
-            helpText = Some(Html(messages(s"$key.helpText.p1.text"))),
-            errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors
-        )
+    <span class="govuk-caption-xl">@messages("triage.caption")</span>
 
-        @details(
-            messages(s"$key.details.summary"),
-            Html(messages(s"$key$userKey.details.p1", appConfig.tranferringOwnershipHelp))
-        )
+    @formHelper(submitLocation) {
 
-        @details(
-          messages(s"$key.nonResident$userKey.summary"),
-          Html(s"""
+      @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
+            content = Text(title),
+            classes = "govuk-fieldset__legend--xl",
+            isPageHeading = true
+          ))
+        )),
+        name = key,
+        items = options.zipWithIndex.map { case (option, index) =>
+          RadioItem(
+            content = Text(option),
+            value = Some(index.toString),
+            checked = form.value.map(optionIndex).contains(index)
+          )
+        }.toSeq,
+        hint = Some(Hint(
+          content = HtmlContent(messages(s"$key.helpText.p1.text"))
+        )),
+        errorMessage = form.error(key).map(e =>
+          ErrorMessage(
+            content = Text(messages(s"$key.${e.message}"))
+          )
+        )
+      ))
+
+      @govukDetails(Details(
+        summary = Text(messages(s"$key.details.summary")),
+        content = HtmlContent(messages(s"$key$userKey.details.p1", appConfig.tranferringOwnershipHelp))
+      ))
+
+      @govukDetails(Details(
+        summary = Text(messages(s"$key.nonResident$userKey.summary")),
+        content = HtmlContent(s"""
            | <h2 class="govuk-heading-m">
            |    ${messages(s"$key.helpText$userKey.p2.heading")}
            | </h2>
@@ -131,11 +145,13 @@
            |    <li>${messages(s"$key.helpText${userKey}.p3.li1")}</li>
            |    <li>${messages(s"$key.helpText${userKey}.p3.li2")}</li>
            | </ul>
-          """.stripMargin
-          )
-        )
+          """.stripMargin)
+      ))
 
-        @submitButton(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+      @govukButton(Button(
+        attributes = Map("id" -> "submitButton"),
+        content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+      ))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

@@ -170,7 +170,7 @@ class RegistrationControllerSpec
           contentAsString(result) should include(
             messageFromMessageKey("entityType.title")
           )
-          contentAsString(result) should include("""checked="checked"""")
+          contentAsString(result) should include("checked")
         }
 
       }

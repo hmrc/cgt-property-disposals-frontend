@@ -24,12 +24,10 @@
 
 @this(
  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
  yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
- backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link_govuk
 )
 
 @(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages)
@@ -83,19 +81,19 @@
 }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@layout(pageTitle = title) {
-  @backLinkComponent(backLink)
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
   @if(hasErrors) {
       @errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}"))
   }
 
+  <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
+
   @formWrapper(submit, 'novalidate -> "novalidate") {
    @yesNo(
     fieldId = key,
-    label = pageHeading(title, Some(messages(addressJourneyType.captionMessageKey()))),
+    label = title,
     errorKey = form.error(key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-    hasErrors = hasErrors,
     selected = form.value
    )
    @submitButton(messages("button.continue"))

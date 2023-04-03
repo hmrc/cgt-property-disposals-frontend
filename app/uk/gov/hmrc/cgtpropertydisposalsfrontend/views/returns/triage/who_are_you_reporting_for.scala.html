@@ -42,18 +42,10 @@ govukRadios : GovukRadios
 @key = @{"individualUserType"}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@inPageTitle = @{messages("who-are-you-reporting-for.title")}
-@title = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + inPageTitle
-    } else inPageTitle
-}
+@title = @{messages("who-are-you-reporting-for.title")}
 
-
-
-@layout(pageTitle = title, isWelshTranslationAvailable = true,backLinkUrl = backLink.map(_.url)) {
-@formHelper(controllers.returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresentingSubmit(), 'novalidate -> "novalidate") {
-
+@layout(pageTitle = title, hasErrors = hasErrors, backLinkUrl = backLink.map(_.url)) {
+  @formHelper(controllers.returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresentingSubmit()) {
 
     @if(hasErrors) {
         @errorSummary(form)
@@ -67,75 +59,64 @@ govukRadios : GovukRadios
                 isPageHeading = true
             ))
         )),
-        errorMessage = if(hasErrors){Some(ErrorMessage(content = Text(messages(s"individualUserType.error.required"))))}else None,
+        errorMessage = if(hasErrors){ Some(ErrorMessage(content = Text(messages(s"individualUserType.error.required"))))} else None,
         hint = None,
         idPrefix = Some(key),
         name = key,
         items = if(isAgent){
          Seq(
-
             RadioItem(
                 content =   Text(messages(s"$key.agent.Self")),
                 value = Some("0"),
                 hint = Some(Hint(content = Text(messages(s"$key.agent.Self.helpText")))),
-                checked = form("individualUserType").value.contains("0")
+                checked = form(key).value.contains("0")
             ),
-
             RadioItem(
                 content = HtmlContent(messages(s"$key.agent.PersonalRepresentative")),
                 value = Some("1"),
                 hint = Some(Hint(content = Text(messages(s"$key.agent.PersonalRepresentative.helpText")))),
-                checked = form("individualUserType").value.contains("1")
+                checked = form(key).value.contains("1")
             ),
-
             RadioItem(
-            content = HtmlContent(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin")),
-            value = Some("2"),
-            hint = Some(Hint(content = Text(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin.helpText")))),
-            checked = form("individualUserType").value.contains("2")
-            ),
-
-
-            )}else {
-                 Seq(
-                    RadioItem(
-                    content = Text(messages(s"$key.Self")),
-                    value = Some("0"),
-                    hint = None,
-                    checked = form("individualUserType").value.contains("0")
-                    ),
-
-                    RadioItem(
-                        content = Text(messages(s"$key.Capacitor")),
-                        value = Some("1"),
-                        hint =  Some(Hint(content = Text(messages(s"$key.Capacitor.helpText")))),
-                        checked = form("individualUserType").value.contains("1")
-                    ),
-
-                    RadioItem(
-                    content = HtmlContent(messages(s"$key.PersonalRepresentative")),
-                    value = Some("2"),
-                    hint =  Some(Hint(content = Text(messages(s"$key.PersonalRepresentative.helpText")))),
-                    checked = form("individualUserType").value.contains("2")
-                    ),
-
-                    RadioItem(
-                    content = HtmlContent(messages(s"$key.PersonalRepresentativeInPeriodOfAdmin")),
-                    value = Some("3"),
-                    hint =  Some(Hint(content = Text(messages(s"$key.PersonalRepresentativeInPeriodOfAdmin.helpText")))),
-                    checked = form("individualUserType").value.contains("3")
-                    )
-                )
-            }
+                content = HtmlContent(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin")),
+                value = Some("2"),
+                hint = Some(Hint(content = Text(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin.helpText")))),
+                checked = form(key).value.contains("2")
+            )
+         )} else {
+           Seq(
+              RadioItem(
+              content = Text(messages(s"$key.Self")),
+              value = Some("0"),
+              checked = form(key).value.contains("0")
+              ),
+              RadioItem(
+                  content = Text(messages(s"$key.Capacitor")),
+                  value = Some("1"),
+                  hint =  Some(Hint(content = Text(messages(s"$key.Capacitor.helpText")))),
+                  checked = form(key).value.contains("1")
+              ),
+              RadioItem(
+                content = HtmlContent(messages(s"$key.PersonalRepresentative")),
+                value = Some("2"),
+                hint =  Some(Hint(content = Text(messages(s"$key.PersonalRepresentative.helpText")))),
+                checked = form(key).value.contains("2")
+              ),
+              RadioItem(
+                content = HtmlContent(messages(s"$key.PersonalRepresentativeInPeriodOfAdmin")),
+                value = Some("3"),
+                hint =  Some(Hint(content = Text(messages(s"$key.PersonalRepresentativeInPeriodOfAdmin.helpText")))),
+                checked = form(key).value.contains("3")
+              )
+          )}
         ))
 
         @govukButton(
-        Button(
-            content = Text(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue")),
-            preventDoubleClick = true,
-            attributes = Map("id" -> "submitButton")
-            )
+          Button(
+              content = Text(messages(if(isAmend) "button.continue" else if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue")),
+              attributes = Map("id" -> "submitButton")
+          )
         )
     }
+  @returnToSummaryLink(displayReturnToSummaryLink)
 }
-    @returnToSummaryLink(displayReturnToSummaryLink)

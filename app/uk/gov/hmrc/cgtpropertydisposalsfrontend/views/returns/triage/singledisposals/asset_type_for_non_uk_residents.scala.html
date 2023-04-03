@@ -28,8 +28,7 @@
 
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
         formHelper: FormWithCSRF,
@@ -64,14 +63,7 @@
 
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@title = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title")
-    } else messages(s"$key$userKey.title")
-}
-
-
-
+@title = @{messages(s"$key$userKey.title")}
 @options = @{
     List(
       RadioOption(
@@ -97,17 +89,17 @@
     )
 }
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userKey"))
     }
-
+    <span class="govuk-caption-xl">messages("triage.caption")</span>
     @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), 'novalidate -> "novalidate") {
         @radioGroupConditional(
             fieldId = key,
             options = options,
-            label = pageHeading(title, Some(messages("triage.caption"))),
+            label = Html(s"""<h1 class="govuk-fieldset__heading">$title</h1>"""),
             error = form.error(key),
         )
 

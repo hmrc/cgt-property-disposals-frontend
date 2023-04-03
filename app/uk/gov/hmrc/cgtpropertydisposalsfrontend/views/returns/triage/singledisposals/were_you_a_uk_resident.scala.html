@@ -27,8 +27,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
@@ -63,30 +62,21 @@
 
 @userMsgKey = @{ userKey.stripSuffix(".") }
 @userErrorMsgKey = @{ userKey.stripPrefix(".") }
-
 @isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
-
-@label = @{pageHeading(title, Some(messages("triage.caption")))}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@title = @{messages(s"$key$userMsgKey.title")}
 
-@title = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + messages(s"$key$userMsgKey.title")
-    } else messages(s"$key$userMsgKey.title")
-}
-
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userMsgKey"))
     }
-
+    <span class="govuk-caption-xl">@messages("triage.caption")</span>
     @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
-            label = label,
+            label = title,
             errorKey = form.error(key).map(e => s"$userErrorMsgKey${e.message}"),
-            hasErrors = hasErrors,
             selected = form.value,
             helpText = if(isPeriodOfAdmin) None else Some(Html(messages(s"$key.helpText")))
         )

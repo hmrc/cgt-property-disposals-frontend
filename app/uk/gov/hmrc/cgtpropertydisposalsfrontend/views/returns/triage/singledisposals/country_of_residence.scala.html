@@ -30,7 +30,7 @@
 
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
     submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     formHelper: FormWithCSRF,
@@ -86,13 +86,7 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@titleWithErrorPrefix = @{
-    if(hasErrors){
-        messages("generic.errorPrefix") + " " + title
-    } else title
-}
-
-@mainTemplate(pageTitle = titleWithErrorPrefix, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form)

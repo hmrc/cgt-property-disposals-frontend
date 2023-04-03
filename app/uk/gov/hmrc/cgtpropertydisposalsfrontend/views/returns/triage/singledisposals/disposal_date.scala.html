@@ -30,7 +30,6 @@
 
 @this(
   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
   formHelper: FormWithCSRF,
@@ -64,22 +63,18 @@
 
 @hasErrors = @{form.hasErrors}
 
-@title = @{
- if(hasErrors){
-  messages("generic.errorPrefix") + " " + messages(s"$key$userKey.title")
- } else messages(s"$key$userKey.title")
-}
+@title = @{messages(s"$key$userKey.title")}
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true, backLinkUrl = Some(backLink.url)) {
+@mainTemplate(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
  @if(hasErrors) {
   @errorSummary(form)
  }
-
+ <span class="govuk-caption-xl">@messages("triage.caption")</span>
  @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.whenWasDisposalDateSubmit(), 'novalidate -> "novalidate") {
   @dateInput(
    fieldId = key,
-   label = pageHeading(title, Some(messages("triage.caption"))),
+   label = title,
    dayValue = form.data.get("disposalDate-day"),
    monthValue = form.data.get("disposalDate-month"),
    yearValue = form.data.get("disposalDate-year"),
