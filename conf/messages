@@ -130,6 +130,7 @@ generic.yes=Yes
 generic.no=No
 generic.success=Success
 generic.errorPrefix=Error:
+generic.error=Error
 generic.loss=loss
 generic.gain=gain
 generic.on=on

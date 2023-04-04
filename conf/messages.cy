@@ -145,6 +145,7 @@ generic.yes=Iawn
 generic.no=Na
 generic.success=Wedi llwyddo
 generic.errorPrefix=Gwall:
+generic.error=Gwall
 generic.loss=colled
 generic.gain=ennill
 generic.on=ar
