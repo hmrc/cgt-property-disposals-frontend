@@ -85,7 +85,7 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@layout(pageTitle = title, backLinkUrl = Some(backLink.url)) {
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
  @if(hasErrors) {
     @errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}"))
@@ -110,7 +110,7 @@
      }.toSeq,
      errorMessage = form.error(key).map(e =>
        ErrorMessage(
-         content = Text(messages(s"$key$journeyErrorKey${userKey.stripPrefix(".")}${e.message}"))
+         content = Text(messages(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}.${e.message}"))
        )
      )
    ))
