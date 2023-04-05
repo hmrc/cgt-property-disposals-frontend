@@ -17,24 +17,20 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualSautrNameMatchDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
- textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
- submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
- backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+ layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+ errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+ viewHelpers: ViewHelpers
 )
 
-@(form: Form[IndividualSautrNameMatchDetails], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[IndividualSautrNameMatchDetails], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{messages("enterSaUtr.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -42,44 +38,64 @@
 @firstNameKey = @{"firstName"}
 @lastNameKey = @{"lastName"}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
- @backLinkComponent(backLink)
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
  @if(hasErrors) {
   @errorSummary(form)
  }
 
- @pageHeading(title, Some(messages("subscription.caption")))
+ <span class="govuk-caption-xl">@messages("subscription.caption")</span>
+ <h1 class="govuk-heading-xl">@title</h1>
 
- @formWrapper(routes.InsufficientConfidenceLevelController.enterSautrAndNameSubmit(), 'novalidate -> "novalidate") {
-  @textInput(
-   fieldId = saUtrKey,
-   value = form.data.getOrElse(saUtrKey, ""),
-   errorKey = form.error(saUtrKey).map(e => e.message),
-   hasErrors = form.error(saUtrKey).nonEmpty,
-   label = Html(messages("saUtr.label")),
-   labelClass = Some("govuk-label--m"),
-   autoComplete= AutoCompleteType.On
-  )
-  @textInput(
-   fieldId = firstNameKey,
-   value = form.data.getOrElse(firstNameKey, ""),
-   errorKey = form.error(firstNameKey).map(e => e.message),
-   hasErrors = form.error(firstNameKey).nonEmpty,
-   label = Html(messages("enterName.firstName.label")),
-   labelClass = Some("govuk-label--m"),
-   autoComplete = AutoCompleteType.FirstName
-  )
-  @textInput(
-   fieldId = lastNameKey,
-   value = form.data.getOrElse(lastNameKey, ""),
-   errorKey = form.error(lastNameKey).map(e => e.message),
-   hasErrors = form.error(lastNameKey).nonEmpty,
-   label = Html(messages("enterName.lastName.label")),
-   labelClass = Some("govuk-label--m"),
-   autoComplete = AutoCompleteType.LastName
-  )
-  @submitButton(messages("button.continue"))
+@viewHelpers.form(routes.InsufficientConfidenceLevelController.enterSautrAndNameSubmit()) {
+  @viewHelpers.govukInput(Input(
+   id = saUtrKey,
+   name =saUtrKey,
+   label = Label(
+     classes = "govuk-label--m",
+     content = Text(messages("saUtr.label"))
+    ),
+   autocomplete = Some(AutoCompleteType.On.value),
+   classes = "govuk-!-width-one-half",
+   errorMessage = form.error(saUtrKey).map(e => ErrorMessage(
+     content = Text(messages(s"${e.key}.${e.message}")),
+     visuallyHiddenText = Some(messages("generic.error"))
+   )),
+   value = form(saUtrKey).value
+  ))
+  @viewHelpers.govukInput(Input(
+   id = firstNameKey,
+   name =firstNameKey,
+   label = Label(
+    classes = "govuk-label--m",
+    content = Text(messages("enterName.firstName.label"))
+   ),
+   autocomplete = Some(AutoCompleteType.FirstName.value),
+   classes = "govuk-!-width-one-half",
+   errorMessage = form.error(firstNameKey).map(e => ErrorMessage(
+    content = Text(messages(s"${e.key}.${e.message}")),
+    visuallyHiddenText = Some(messages("generic.error"))
+   )),
+   value = form(firstNameKey).value
+  ))
+  @viewHelpers.govukInput(Input(
+   id = lastNameKey,
+   name =lastNameKey,
+   label = Label(
+    classes = "govuk-label--m",
+    content = Text(messages("enterName.firstName.label"))
+   ),
+   autocomplete = Some(AutoCompleteType.LastName.value),
+   classes = "govuk-!-width-one-half",
+   errorMessage = form.error(lastNameKey).map(e => ErrorMessage(
+    content = Text(messages(s"${e.key}.${e.message}")),
+    visuallyHiddenText = Some(messages("generic.error"))
+   )),
+   value = form(lastNameKey).value
+  ))
+   @viewHelpers.govukButton(Button(
+     attributes = Map("id" -> "submitButton"),
+    content = Text(messages("button.continue"))
+   ))
  }
 }
