@@ -73,7 +73,8 @@
   ),
   errorMessage = errorKey.map(key =>
     ErrorMessage(
-      content = Text(errorMessage.getOrElse(messages(s"$fieldId.$key")))
+      content = Text(errorMessage.getOrElse(messages(s"$fieldId.$key"))),
+      visuallyHiddenText = Some(messages("generic.error"))
     )
   )
 ))
