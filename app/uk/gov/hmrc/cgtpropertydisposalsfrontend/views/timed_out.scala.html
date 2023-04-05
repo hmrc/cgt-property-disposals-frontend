@@ -16,8 +16,11 @@
 
 @import play.api.i18n.Messages
 @import play.api.mvc.Request
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout)
+@this(layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout, viewHelpers: ViewHelpers)
 
 @()(implicit messages:Messages, request: Request[_])
 
@@ -32,5 +35,8 @@
   <p class="govuk-body">
     @messages("timed-out.p2")
   </p>
-
+    @viewHelpers.govukButton(Button(
+    href = Some(routes.StartController.start().url),
+    content = Text(messages("timed-out.button"))
+    ))
 }
