@@ -77,7 +77,7 @@
       mainContentLayout = sidebar.map(s => twoThirdsOneThirdMainContent(s)),
 
     ),
-    backLink = backLinkUrl.map(url => BackLink(url)),
+    backLink = backLinkUrl.map(url => BackLink(url, content = Text(messages("generic.back")))),
     serviceName = Some(messages("service.title")),
     pageTitle = Some(gdsTitle),
     isWelshTranslationAvailable = isWelshTranslationAvailable,

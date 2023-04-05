@@ -20,30 +20,26 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
 @(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("enterSaUtr.tooManyAttempts.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title, backLinkUrl = Some(backLink.url)) {
 
-  @backLinkComponent(backLink)
+  <h1 class="govuk-heading-xl">@title</h1>
 
-  @pageHeading(title)
-
-  <p>
+  <p class="govuk-body">
     @messages("enterSaUtr.tooManyAttempts.p1")
   </p>
 
-  <p>
+  <p class="govuk-body">
     @messages("enterSaUtr.tooManyAttempts.p2")
   </p>
 
-  <p>
-    <a href="@{appConfig.lostUtrUrl}">@messages("enterSaUtr.lostUtrLink")</a>
+  <p class="govuk-body">
+    <a class="govuk-link" href="@{appConfig.lostUtrUrl}">@messages("enterSaUtr.lostUtrLink")</a>
   </p>
 }
