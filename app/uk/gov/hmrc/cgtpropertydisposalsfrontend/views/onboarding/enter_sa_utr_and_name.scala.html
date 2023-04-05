@@ -40,8 +40,19 @@
 
 @layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
- @if(hasErrors) {
-  @errorSummary(form)
+ @{
+   if(form.hasGlobalErrors) {
+    viewHelpers.govukErrorSummary(ErrorSummary(
+     errorList = form.globalErrors.map { error =>
+      ErrorLink(
+       href = Some(s"#$saUtrKey"),
+       content = Text(messages(s"${error.message}"))
+      )
+     }
+    ))
+   } else if (form.hasErrors) {
+    errorSummary(form)
+   }
  }
 
  <span class="govuk-caption-xl">@messages("subscription.caption")</span>
