@@ -17,13 +17,14 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
   layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
-@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("registerTrust.title")}
 
@@ -38,7 +39,7 @@
   </p>
 
   <ol class="govuk-list govuk-list--number">
-    <li>@Html(messages("registerTrust.bullet1"))</li>
+    <li>@Html(messages("registerTrust.bullet1", appConfig.trustRegistrationUrl))</li>
     <li>@messages("registerTrust.bullet2")</li>
   </ol>
 }
