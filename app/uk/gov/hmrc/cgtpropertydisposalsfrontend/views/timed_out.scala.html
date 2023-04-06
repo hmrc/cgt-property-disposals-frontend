@@ -16,32 +16,27 @@
 
 @import play.api.i18n.Messages
 @import play.api.mvc.Request
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
-)
+@this(layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout, viewHelpers: ViewHelpers)
 
-@()(implicit messages:Messages, appConfig: ViewConfig, request: Request[_])
+@()(implicit messages:Messages, request: Request[_])
 
 @title = @{messages("timed-out.title")}
 
-@mainTemplate(title = title, userType = None) {
-
-  @pageHeading(title)
-
-  <p>
+@layout(title, withSignOutLink = false) {
+<h1 class="heading-xlarge">@title</h1>
+  <p class="govuk-body">
     @messages("timed-out.p1")
   </p>
 
-  <p>
-    @Html(messages("timed-out.p2"))
+  <p class="govuk-body">
+    @messages("timed-out.p2")
   </p>
-
-  @buttonLink(messages("timed-out.button"), routes.StartController.start().url)
-
+    @viewHelpers.govukButton(Button(
+    href = Some(routes.StartController.start().url),
+    content = Text(messages("timed-out.button"))
+    ))
 }
