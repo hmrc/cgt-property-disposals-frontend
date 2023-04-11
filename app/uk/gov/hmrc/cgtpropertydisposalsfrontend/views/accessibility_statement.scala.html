@@ -21,19 +21,23 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
-@()(implicit messages: Messages, viewConfig: ViewConfig, request: Request[_])
+@()(implicit
+  request: Request[_],
+  messages: Messages,
+  viewConfig: ViewConfig
+)
 
 @key = @{ "accessibilityStatement" }
 @title = @{messages(s"$key.title")}
 @availableAtLocation = @{ s"tax.service.gov.uk${routes.LandingPageController.landingPage().url}" }
 
-@mainTemplate(title = title, userType = None, mainClass = Some("no-timeout")) {
+@layout(title) {
 
   <h1 class="govuk-heading-xl">@title</h1>
-  <p class="govuk-body govuk-!-margin-top-0 govuk-!-margin-bottom-3">@messages(s"$key.p1")</p>
+  <p class="govuk-body-l">@messages(s"$key.p1")</p>
   <p class="govuk-body">@Html(messages(s"$key.p2", viewConfig.govUkAccessibilityStatementUrl))</p>
   <p class="govuk-body">@messages(s"$key.p3", availableAtLocation)</p>
 
@@ -41,15 +45,16 @@
   <p class="govuk-body">@messages(s"$key.usingThisService.p1")</p>
   <p class="govuk-body">@messages(s"$key.usingThisService.p2") @messages(s"$key.usingThisService.p3")</p>
 
-  <ul class="govuk-list">
+  <ul class="govuk-list govuk-list--bullet">
     <li>@messages(s"$key.usingThisService.li1")</li>
     <li>@messages(s"$key.usingThisService.li2")</li>
     <li>@messages(s"$key.usingThisService.li3")</li>
     <li>@messages(s"$key.usingThisService.li4")</li>
     <li>@messages(s"$key.usingThisService.li5")</li>
   </ul>
+
   <p class="govuk-body">@messages(s"$key.usingThisService.p4")</p>
-  <p class="govuk-body"><a href="@viewConfig.abilityNetUrl">@messages(s"$key.usingThisService.making-device-easier.part1")</a> @messages(s"$key.usingThisService.making-device-easier.part2")</p>
+  <p class="govuk-body"><a class="govuk-link" href="@viewConfig.abilityNetUrl">@messages(s"$key.usingThisService.making-device-easier.part1")</a> @messages(s"$key.usingThisService.making-device-easier.part2")</p>
 
 
   <h2 class="govuk-heading-m">@messages(s"$key.howAccessible.title")</h2>
@@ -60,7 +65,7 @@
   <h2 class="govuk-heading-m">@messages(s"$key.contact.heading")</h2>
   <p class="govuk-body">
     @{messages(s"$key.contact.extra-support.part1")}
-    <a href="https://www.gov.uk/get-help-hmrc-extra-support">@{messages(s"$key.contact.extra-support.part2")}</a>
+    <a class="govuk-link" href="https://www.gov.uk/get-help-hmrc-extra-support">@{messages(s"$key.contact.extra-support.part2")}</a>
     @{messages(s"$key.contact.extra-support.part3")}
   </p>
 
@@ -78,5 +83,4 @@
   <h2 class="govuk-heading-m">@messages(s"$key.howWeTested.title")</h2>
   <p class="govuk-body">@Html(messages(s"$key.howWeTested.p1", viewConfig.digitalAccessibilityCentretUrl))</p>
   <p class="govuk-body">@messages(s"$key.howWeTested.p2")</p>
-
 }
