@@ -16,17 +16,16 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout)
 
-@()(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@()(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{messages("weOnlySupportGG.title")}
 
-@layout(title) {
+@layout(title, withSignOutLink = false) {
 
   <h1 class="govuk-heading-xl">@title</h1>
 
