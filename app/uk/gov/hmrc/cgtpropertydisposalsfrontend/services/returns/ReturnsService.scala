@@ -609,9 +609,9 @@ class ReturnsServiceImpl @Inject() (
   def listReturns(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, List[ReturnSummary]] = {
-    val fromDate = LocalDate.of(2020, 4, 6)
-    val toDate   = fromDate.plusYears(viewConfig.numberOfTaxYearsForReturns).minusDays(1L)
-
+    val today    = LocalDate.now()
+    val fromDate = today.minusYears(viewConfig.numberOfTaxYearsForReturns).plusDays(1L)
+    val toDate   = today
     connector.listReturns(cgtReference, fromDate, toDate).subflatMap { response =>
       if (response.status === OK)
         response

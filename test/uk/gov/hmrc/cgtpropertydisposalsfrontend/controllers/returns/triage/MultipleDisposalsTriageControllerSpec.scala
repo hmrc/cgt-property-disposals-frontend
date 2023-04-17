@@ -268,6 +268,7 @@ class MultipleDisposalsTriageControllerSpec
       case Some(t) if t.startDateInclusive.getYear === 2020 => Some(TaxYearExchanged(2020))
       case Some(t) if t.startDateInclusive.getYear === 2021 => Some(TaxYearExchanged(2021))
       case Some(t) if t.startDateInclusive.getYear === 2022 => Some(TaxYearExchanged(2022))
+      case Some(t) if t.startDateInclusive.getYear === 2023 => Some(TaxYearExchanged(2023))
       case _                                                => None
     }
 
@@ -276,6 +277,7 @@ class MultipleDisposalsTriageControllerSpec
       case t if t.startDateInclusive.getYear === 2020 => TaxYearExchanged(2020)
       case t if t.startDateInclusive.getYear === 2021 => TaxYearExchanged(2021)
       case t if t.startDateInclusive.getYear === 2022 => TaxYearExchanged(2022)
+      case t if t.startDateInclusive.getYear === 2023 => TaxYearExchanged(2023)
       case _                                          => TaxYearExchanged.taxYearExchangedBefore2020
     }
 
@@ -3661,12 +3663,14 @@ class MultipleDisposalsTriageControllerSpec
           startDateInclusive = taxYearStart.getYear match {
             case 2020 => LocalDate.of(2020, 4, 6)
             case 2021 => LocalDate.of(2021, 4, 6)
-            case _    => LocalDate.of(2022, 4, 6)
+            case 2022 => LocalDate.of(2022, 4, 6)
+            case _    => LocalDate.of(2023, 4, 6)
           },
           endDateExclusive = taxYearStart.getYear match {
             case 2020 => LocalDate.of(2021, 4, 6)
             case 2021 => LocalDate.of(2022, 4, 6)
-            case _    => LocalDate.of(2023, 4, 6)
+            case 2022 => LocalDate.of(2023, 4, 6)
+            case _    => LocalDate.of(2024, 4, 6)
           }
         )
 

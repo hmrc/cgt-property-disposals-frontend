@@ -407,7 +407,7 @@ subscribed.buttonText=Go to account
 
 registerTrust.title=You’ll need to register the trust
 registerTrust.p=To use this service, you’ll need to:
-registerTrust.bullet1=<a href="{0}" target="_blank">Register the trust (opens in new window)</a>.
+registerTrust.bullet1=<a class="govuk-link" href="{0}" target="_blank">Register the trust (opens in new window)</a>.
 registerTrust.bullet2=Sign in to this service using the Government Gateway user ID and password you used to register the trust.
 
 reportCorpTax.title=You’ve tried to sign in as an organisation
