@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
@@ -29,27 +29,27 @@
 
 @title = @{messages("weOnlySupportGG.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
 
-  @pageHeading(title)
+  <h1 class="govuk-heading-xl">@title</h1>
 
-  <p>
+  <p class="govuk-body">
     @messages("weOnlySupportGG.p1")
   </p>
 
-  <h2 class="heading-medium">
+  <h2 class="govuk-heading-m">
     @messages("weOnlySupportGG.createAccount")
   </h2>
 
-  <p>
+  <p class="govuk-body">
     @Html(messages("weOnlySupportGG.createAccount.p1", routes.StartController.signOutAndRegisterForGG().url))
   </p>
 
-  <h2 class="heading-medium">
+  <h2 class="govuk-heading-m">
     @messages("weOnlySupportGG.signIn")
   </h2>
 
-  <p>
+  <p class="govuk-body">
     @Html(messages("weOnlySupportGG.signIn.p1", routes.StartController.signOutAndSignIn().url))
   </p>
 

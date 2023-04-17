@@ -541,9 +541,9 @@ changeGGAccount.button=Try again
 weOnlySupportGG.title=Report and pay Capital Gains Tax on UK property
 weOnlySupportGG.p1=The Government Gateway user ID you signed in with cannot be used to access this service.
 weOnlySupportGG.createAccount=Create an account
-weOnlySupportGG.createAccount.p1=You’ll need to <a href="{0}">create a new Government Gateway user ID</a>. You can then use it to create a Capital Gains Tax on UK property account.
+weOnlySupportGG.createAccount.p1=You’ll need to <a class="govuk-link" href="{0}">create a new Government Gateway user ID</a>. You can then use it to create a Capital Gains Tax on UK property account.
 weOnlySupportGG.signIn=Sign in if you already have an account
-weOnlySupportGG.signIn.p1=<a href="{0}">Sign in</a> with the same Government Gateway user ID you used to create your Capital Gains Tax on UK property account.
+weOnlySupportGG.signIn.p1=<a class="govuk-link" href="{0}">Sign in</a> with the same Government Gateway user ID you used to create your Capital Gains Tax on UK property account.
 
 #===================================================
 # ONBOARDING - END
