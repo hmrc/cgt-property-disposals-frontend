@@ -496,9 +496,9 @@ changeGGAccount.button=Rhoi cynnig arall arni
 weOnlySupportGG.title=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
 weOnlySupportGG.p1=Ni allwch gael mynediad i’r gwasanaeth hwn drwy ddefnyddio’r Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth a defnyddiwyd gennych i fewngofnodi.
 weOnlySupportGG.createAccount=Creu cyfrif
-weOnlySupportGG.createAccount.p1=Bydd angen i chi <a href="{0}">greu Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth newydd</a>. Gallwch ei ddefnyddio i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+weOnlySupportGG.createAccount.p1=Bydd angen i chi <a class="govuk-link" href="{0}">greu Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth newydd</a>. Gallwch ei ddefnyddio i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
 weOnlySupportGG.signIn=Mewngofnodwch os oes gennych gyfrif eisoes
-weOnlySupportGG.signIn.p1=<a href="{0}">Mewngofnodwch</a> gyda’r un Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth newydd a ddefnyddiwyd gennych i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+weOnlySupportGG.signIn.p1=<a class="govuk-link" href="{0}">Mewngofnodwch</a> gyda’r un Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth newydd a ddefnyddiwyd gennych i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
 
 #===================================================
 # ONBOARDING - END
