@@ -1875,7 +1875,8 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
     "handling requests to list returns" must {
 
       val cgtReference       = sample[CgtReference]
-      val (fromDate, toDate) = LocalDate.now().minusYears(config.numberOfTaxYearsForReturns).plusDays(1L) -> LocalDate.now()
+      val (fromDate, toDate) =
+        LocalDate.now().minusYears(config.numberOfTaxYearsForReturns).plusDays(1L) -> LocalDate.now()
 
       "return an error " when {
 

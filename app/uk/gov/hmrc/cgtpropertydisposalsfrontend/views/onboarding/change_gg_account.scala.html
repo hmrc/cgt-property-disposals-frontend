@@ -19,9 +19,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSubscriptionReady
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  govukButton: GovukButton
 )
 
 @(
@@ -46,9 +48,8 @@
     @messages("changeGGAccount.p")
   </p>
 
-  <p class="govuk-body">
-    <a href="@{appConfig.signOutUrl}?continue=@{routes.StartController.start().url}" class="govuk-link" role="button">
-      @messages("changeGGAccount.button")
-    </a>
-  </p>
+  @govukButton(Button(
+    href = Some(s"${appConfig.signOutUrl}?continue=${routes.StartController.start().url}"),
+    content = Text(messages("changeGGAccount.button"))
+  ))
  }
