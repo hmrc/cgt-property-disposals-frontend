@@ -34,14 +34,14 @@
         viewConfig: ViewConfig
 )
 
-
 @(
         pageTitle: String,
         withSignOutLink: Boolean = true,
         isWelshTranslationAvailable: Boolean = true,
         backLinkUrl: Option[String] = None,
         hasErrors: Boolean = false,
-        sidebar: Option[Html] = None
+        sidebar: Option[Html] = None,
+        accountMenu: Option[HtmlFormat.Appendable] = None
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @signOutUrl = @{controllerRoutes.StartController.signOutAndRedirectToFeedback().url}
@@ -52,6 +52,8 @@
   }
   <link rel="stylesheet" media="all" href="@routes.Assets.at("stylesheets/cgtpd-ui-upgrade.css")" />
 }
+
+@beforeContent = @{accountMenu.fold(Html(""))(s => s)}
 
 @content = {
   <div class="govuk-!-margin-bottom-6">
@@ -75,7 +77,7 @@
     templateOverrides = TemplateOverrides(
       additionalHeadBlock = Some(additionalHeadBlock),
       mainContentLayout = sidebar.map(s => twoThirdsOneThirdMainContent(s)),
-
+      beforeContentBlock = Some(beforeContent)
     ),
     backLink = backLinkUrl.map(url => BackLink(url, content = Text(messages("generic.back")))),
     serviceName = Some(messages("service.title")),
