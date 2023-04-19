@@ -25,15 +25,17 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
 
 @this(
         hmrcStandardPage: HmrcStandardPage,
         twoThirdsOneThirdMainContent: TwoThirdsOneThirdMainContent,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-        viewConfig: ViewConfig
+        hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
+        viewConfig: ViewConfig,
+        viewHelpers: ViewHelpers
 )
-
 
 @(
         pageTitle: String,
@@ -41,7 +43,8 @@
         isWelshTranslationAvailable: Boolean = true,
         backLinkUrl: Option[String] = None,
         hasErrors: Boolean = false,
-        sidebar: Option[Html] = None
+        sidebar: Option[Html] = None,
+        accountMenu: Option[HtmlFormat.Appendable] = None
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @signOutUrl = @{controllerRoutes.StartController.signOutAndRedirectToFeedback().url}
@@ -51,6 +54,20 @@
     @hmrcTimeoutDialogHelper(signOutUrl, timeoutUrl = Some(viewConfig.ggTimedOutUrl))
   }
   <link rel="stylesheet" media="all" href="@routes.Assets.at("stylesheets/cgtpd-ui-upgrade.css")" />
+}
+
+@beforeContent = {
+  @accountMenu.fold(Html(""))(s => s)
+  <div class="govuk-!-display-none-print">
+    @if(isWelshTranslationAvailable) {
+      @hmrcLanguageSelectHelper()
+    }
+    @{
+      backLinkUrl map { url =>
+        viewHelpers.govukBackLink(BackLink(href = url, attributes = Map("id" -> "back"), content = Text(messages("generic.back"))))
+      }
+    }
+  </div>
 }
 
 @content = {
@@ -75,9 +92,8 @@
     templateOverrides = TemplateOverrides(
       additionalHeadBlock = Some(additionalHeadBlock),
       mainContentLayout = sidebar.map(s => twoThirdsOneThirdMainContent(s)),
-
+      beforeContentBlock = Some(beforeContent)
     ),
-    backLink = backLinkUrl.map(url => BackLink(url, content = Text(messages("generic.back")))),
     serviceName = Some(messages("service.title")),
     pageTitle = Some(gdsTitle),
     isWelshTranslationAvailable = isWelshTranslationAvailable,
