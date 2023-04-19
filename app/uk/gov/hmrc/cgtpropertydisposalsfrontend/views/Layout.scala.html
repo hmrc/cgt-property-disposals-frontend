@@ -25,13 +25,16 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
 
 @this(
         hmrcStandardPage: HmrcStandardPage,
         twoThirdsOneThirdMainContent: TwoThirdsOneThirdMainContent,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-        viewConfig: ViewConfig
+        hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
+        viewConfig: ViewConfig,
+        viewHelpers: ViewHelpers
 )
 
 @(
@@ -53,7 +56,19 @@
   <link rel="stylesheet" media="all" href="@routes.Assets.at("stylesheets/cgtpd-ui-upgrade.css")" />
 }
 
-@beforeContent = @{accountMenu.fold(Html(""))(s => s)}
+@beforeContent = {
+  @accountMenu.fold(Html(""))(s => s)
+  <div class="govuk-!-display-none-print">
+    @if(isWelshTranslationAvailable) {
+      @hmrcLanguageSelectHelper()
+    }
+    @{
+      backLinkUrl map { url =>
+        viewHelpers.govukBackLink(BackLink(href = url, attributes = Map("id" -> "back"), content = Text(messages("generic.back"))))
+      }
+    }
+  </div>
+}
 
 @content = {
   <div class="govuk-!-margin-bottom-6">
@@ -79,7 +94,6 @@
       mainContentLayout = sidebar.map(s => twoThirdsOneThirdMainContent(s)),
       beforeContentBlock = Some(beforeContent)
     ),
-    backLink = backLinkUrl.map(url => BackLink(url, content = Text(messages("generic.back")))),
     serviceName = Some(messages("service.title")),
     pageTitle = Some(gdsTitle),
     isWelshTranslationAvailable = isWelshTranslationAvailable,
