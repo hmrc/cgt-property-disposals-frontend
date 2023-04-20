@@ -15,32 +15,35 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.NeedMoreDetailsDetails
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+ layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+ govukButton: GovukButton
 )
 
-@(details: NeedMoreDetailsDetails)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(details: NeedMoreDetailsDetails)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{messages("weNeedMoreDetails.title")}
 @affinity = @{details.affinityGroup match {
   case NeedMoreDetailsDetails.AffinityGroup.Organisation => "organisation"
   case _ => "individual"
 }}
+@layout(title) {
+<span class="govuk-caption-xl">@messages("weNeedMoreDetails.caption")</span>
+<h1 class="govuk-heading-xl">@title</h1>
 
-@mainTemplate(title = title, userType = request.userType) {
- @pageHeading(title, Some(messages("weNeedMoreDetails.caption")))
- <p>
+ <p class="govuk-body">
   @messages("weNeedMoreDetails.p")
  </p>
- <ol class="list list-number">
+ <ol class="govuk-list govuk-list--number">
   <li>@messages(s"weNeedMoreDetails.${affinity}.p1")</li>
   <li>@messages(s"weNeedMoreDetails.${affinity}.p2")</li>
  </ol>
- @buttonLink(messages("button.continue"), details.continueUrl)
+ @govukButton(Button(
+ href = Some(details.continueUrl),
+ content = Text(messages("button.continue"))
+ ))
 }
