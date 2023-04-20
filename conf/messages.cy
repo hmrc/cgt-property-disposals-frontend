@@ -405,9 +405,9 @@ wrongAccountForTrusts.p1=Rydych yn ceisio defnyddio’r gwasanaeth hwn i roi gwy
 wrongAccountForTrusts.whatWentWrong=Yr hyn a aeth o’i le
 wrongAccountForTrusts.whatWentWrong.p1=Rydych wedi mewngofnodi i Borth y Llywodraeth fel ‘unigolyn’ ac nid fel ‘sefydliad’.
 wrongAccountForTrusts.whatNext=Yr hyn y bydd angen i chi ei wneud nesaf
-wrongAccountForTrusts.whatNext.p1=Bydd angen i chi mewngofnodi drwy ddefnyddio’r Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer <a href="{0}">Porth y Llywodraeth</a> a grëwyd ar gyfer yr ymddiriedolaeth. Rhain yw’r un manylion a defnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
+wrongAccountForTrusts.whatNext.p1=Bydd angen i chi mewngofnodi drwy ddefnyddio’r Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer <a class="govuk-link" href="{0}">Porth y Llywodraeth</a> a grëwyd ar gyfer yr ymddiriedolaeth. Rhain yw’r un manylion a defnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
 wrongAccountForTrusts.createGGAccount=Creu cyfrif Porth y Llywodraeth ymddiriedolaeth
-wrongAccountForTrusts.createGGAccount.p1=Gallwch <a href="{0}">greu cyfrif Porth y Llywodraeth</a> ar gyfer yr ymddiriedolaeth. Bydd angen iddo fod ar gyfer ‘sefydliad’ ac nid ‘unigolyn’. Bydd angen i’r ymddiriedolaeth <a href="{1}">gofrestru</a> cyn y gallwch ddefnyddio’r gwasanaeth hwn.
+wrongAccountForTrusts.createGGAccount.p1=Gallwch <a class="govuk-link" href="{0}">greu cyfrif Porth y Llywodraeth</a> ar gyfer yr ymddiriedolaeth. Bydd angen iddo fod ar gyfer ‘sefydliad’ ac nid ‘unigolyn’. Bydd angen i’r ymddiriedolaeth <a href="{1}">gofrestru</a> cyn y gallwch ddefnyddio’r gwasanaeth hwn.
 enterName.title=Nodwch eich enw llawn
 enterName.firstName.label=Enw cyntaf
 enterName.lastName.label=Enw olaf
