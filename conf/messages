@@ -425,9 +425,9 @@ wrongAccountForTrusts.p1=You’re trying to use this service to report Capital G
 wrongAccountForTrusts.whatWentWrong=What went wrong
 wrongAccountForTrusts.whatWentWrong.p1=You’ve signed into Government Gateway as an ‘individual’ person not an ‘organisation’.
 wrongAccountForTrusts.whatNext=What you’ll need to do next
-wrongAccountForTrusts.whatNext.p1=You’ll need to sign in using the <a href="{0}">Government Gateway</a> user ID and password created for the trust. These are the same details you used to register the trust.
+wrongAccountForTrusts.whatNext.p1=You’ll need to sign in using the <a class="govuk-link" href="{0}">Government Gateway</a> user ID and password created for the trust. These are the same details you used to register the trust.
 wrongAccountForTrusts.createGGAccount=Create a trust’s Government Gateway account
-wrongAccountForTrusts.createGGAccount.p1=You can a <a href="{0}">create a Government Gateway account</a> for the trust. It will need to be for an ‘organisation’ and not an ‘individual’. The trust will need to be <a href="{1}">registered</a> before you can use this service.
+wrongAccountForTrusts.createGGAccount.p1=You can a <a class="govuk-link" href="{0}">create a Government Gateway account</a> for the trust. It will need to be for an ‘organisation’ and not an ‘individual’. The trust will need to be <a class="govuk-link" href="{1}">registered</a> before you can use this service.
 
 enterName.title=Enter your full name
 enterName.firstName.label=First name
