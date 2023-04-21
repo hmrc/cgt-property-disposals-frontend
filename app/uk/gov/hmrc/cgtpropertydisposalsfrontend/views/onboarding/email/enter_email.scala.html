@@ -17,39 +17,31 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.SubmitEmailDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-   textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-   submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-   accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
-   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        viewHelpers: ViewHelpers,
+        accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk
 )
 
-@(form: Form[SubmitEmailDetails], emailJourneyType: EmailJourneyType, backLink: Option[Call], submit: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[SubmitEmailDetails], emailJourneyType: EmailJourneyType, backLink: Option[Call], submit: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @key = @{"email"}
-
 @title = @{ messages("email.title") }
-
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
 @isManagingSubscriptionJourney = @{
  emailJourneyType match {
   case _: EmailJourneyType.ManagingSubscription => true
   case _ => false
  }
 }
-
 @menu = @{
   if(isManagingSubscriptionJourney)
    Some(accountMenu(None))
@@ -57,32 +49,39 @@
    None
  }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, accountMenu = menu) {
+@layout(title, backLinkUrl = backLink.map(link => link.url), hasErrors = hasErrors, accountMenu = menu) {
 
- @backLink.map(link => backLinkComponent(link))
-
- @if(hasErrors) {
-   @errorSummary(form)
+  @if(hasErrors) {
+    @errorSummary(form)
   }
 
-  @caption(messages(emailJourneyType.captionMessageKey))
+  <span class="govuk-caption-xl">@messages(emailJourneyType.captionMessageKey)</span>
 
- @formWrapper(submit, 'novalidate -> "novalidate") {
-  @textInput(
-   fieldId = key,
-   label = Html(title),
-   helpText = Some(Html(messages("email.helpText"))),
-   labelAsHeading = true,
-   errorKey = form.error(key).map(e => e.message),
-   value = form.data.getOrElse(key, ""),
-   hasErrors = hasErrors,
-   extraContent = None,
-   inputType = Some("email"),
-   autoComplete = AutoCompleteType.Email
-  )
-  <input type="hidden" name="resendVerificationEmail" value="false" />
-
-  @submitButton(messages("button.continue"))
- }
+  @viewHelpers.form(submit) {
+    @viewHelpers.govukInput(Input(
+      id = key,
+      name = key,
+      inputType = "email",
+      label = Label(
+        content = Text(title),
+        classes = "govuk-label--xl",
+        isPageHeading = true
+      ),
+      hint = Some(Hint(
+        content = Text(messages("email.helpText"))
+      )),
+      errorMessage = form.error(key).map(e => ErrorMessage(
+        content = Text(messages(s"${e.key}.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )),
+      value = form(key).value,
+      autocomplete = Some(AutoCompleteType.Email.value),
+    ))
+    <input type="hidden" name="resendVerificationEmail" value="false" />
+    @viewHelpers.govukButton(Button(
+      attributes = Map("id" -> "submitButton"),
+      content = Text(messages("button.continue"))
+    ))
+  }
 
 }
