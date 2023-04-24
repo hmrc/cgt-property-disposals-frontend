@@ -20,40 +20,39 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
 @()(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("iv.insufficientEvidence.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
 
-   @pageHeading(title)
-  <p>@messages("iv.insufficientEvidence.p1")</p>
-  <p>
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-body">@messages("iv.insufficientEvidence.p1")</p>
+  <p class="govuk-body">
       @messages("iv.insufficientEvidence.telephone.title")
-      <br />
-      <span class="bold">@messages("iv.insufficientEvidence.telephone.number")</span>
+      <br>
+      <strong>@messages("iv.insufficientEvidence.telephone.number")</strong>
   </p>
-  <p>
+  <p class="govuk-body">
       @messages("iv.insufficientEvidence.textphone.title")
-      <br />
-      <span class="bold">@messages("iv.insufficientEvidence.textphone.number")</span>
+      <br>
+      <strong>@messages("iv.insufficientEvidence.textphone.number")</strong>
   </p>
-  <p>
+  <p class="govuk-body">
       @messages("iv.insufficientEvidence.outside-uk-telephone.title")
-      <br />
-      <span class="bold">@messages("iv.insufficientEvidence.outside-uk-telephone.number")</span>
+      <br>
+      <strong>@messages("iv.insufficientEvidence.outside-uk-telephone.number")</strong>
   </p>
 
   @Html(messages("iv.insufficientEvidence.openingTimes"))
 
-  <p>@messages("iv.insufficientEvidence.openingTimes.p3")</p>
+  <p class="govuk-body">@messages("iv.insufficientEvidence.openingTimes.p3")</p>
 
-  <p><a href="@viewConfig.callChargesUrl">@messages("iv.insufficientEvidence.helpWithCallCharges")</a></p>
-  <p>
-    @messages("iv.insufficientEvidence.getHelp") <a href="@viewConfig.additionalNeedsUrl">@messages("iv.insufficientEvidence.additionalNeedsLink")</a>.
+  <p class="govuk-body"><a class="govuk-link" href="@viewConfig.callChargesUrl">@messages("iv.insufficientEvidence.helpWithCallCharges")</a></p>
+  <p class="govuk-body">
+    @messages("iv.insufficientEvidence.getHelp") <a class="govuk-link" href="@viewConfig.additionalNeedsUrl">@messages("iv.insufficientEvidence.additionalNeedsLink")</a>.
   </p>
 }
