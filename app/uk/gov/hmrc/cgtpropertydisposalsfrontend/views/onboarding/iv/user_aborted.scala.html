@@ -15,30 +15,33 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
- submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
- )
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        formWrapper: FormWithCSRF,
+        viewHelpers: ViewHelpers
+)
 
-@()(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@()(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{messages("iv.userAborted.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
 
- @pageHeading(title)
- <p>@messages("iv.userAborted.p1")</p>
- <p>@messages("iv.userAborted.p2")</p>
- <p>@messages("iv.userAborted.p3")</p>
+ <h1 class="govuk-heading-xl">@title</h1>
+ <p class="govuk-body">@messages("iv.userAborted.p1")</p>
+ <p class="govuk-body">@messages("iv.userAborted.p2")</p>
+ <p class="govuk-body">@messages("iv.userAborted.p3")</p>
 
- @formWrapper(routes.IvController.retry(), 'novalidate -> "novalidate") {
-  @submitButton(messages("button.tryAgain"))
+ @formWrapper(routes.IvController.retry()) {
+  @viewHelpers.govukButton(Button(
+   attributes = Map("id" -> "submitButton"),
+   content = Text(messages("button.tryAgain"))
+  ))
  }
-
+  
 }
