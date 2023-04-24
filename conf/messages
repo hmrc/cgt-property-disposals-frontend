@@ -192,7 +192,7 @@ recruitment-banner.link=Help make this service better by <a target="_blank" rel=
 accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
 accessibilityStatement.title=Accessibility statement for Report and pay Capital Gains Tax on UK property service
 accessibilityStatement.p1=This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
-accessibilityStatement.p2=This service is part of the wider GOV.UK website. There is a separate <a class="govuk-link" href="{0}">accessibility statement for the main GOV.UK website</a>.
+accessibilityStatement.p2=This service is part of the wider GOV.UK website. There is a separate <a href="{0}">accessibility statement for the main GOV.UK website</a>.
 accessibilityStatement.p3=This page only contains information about the Report and pay Capital Gains Tax on UK property service, available at {0}.
 accessibilityStatement.usingThisService.title=Using this service
 accessibilityStatement.usingThisService.p1=You can use this service to report the disposal of UK residential property or land (made from 6 April 2020). You can also view your previous and current returns.
@@ -208,7 +208,7 @@ accessibilityStatement.usingThisService.making-device-easier.part1=AbilityNet ha
 accessibilityStatement.usingThisService.making-device-easier.part2=' on making your device easier to use if you have a disability.'
 accessibilityStatement.howAccessible.title=How accessible this service is
 accessibilityStatement.howAccessible.p1=HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
-accessibilityStatement.howAccessible.p2=This service was tested on 15 May 2020 by the Digital Accessibility Centre. It was found to be compliant with the <a class="govuk-link" href="{0}">Web Content Accessibility Guidelines version 2.1 AA standard</a>. Since then, it has been extended. We cannot be certain that it is fully compliant. The service will book a full accessibility audit by 31 December 2022.
+accessibilityStatement.howAccessible.p2=This service was tested on 15 May 2020 by the Digital Accessibility Centre. It was found to be compliant with the <a href="{0}">Web Content Accessibility Guidelines version 2.1 AA standard</a>. Since then, it has been extended. We cannot be certain that it is fully compliant. The service will book a full accessibility audit by 31 December 2022.
 
 ## Contact
 accessibilityStatement.contact.heading=What to do if you have difficulty using this service
@@ -218,15 +218,15 @@ accessibilityStatement.contact.extra-support.part3=' if you need help with filli
 
 
 accessibilityStatement.reportingProblems.title=Reporting accessibility problems with this service
-accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a class="govuk-link" href="{0}" target="_blank">accessibility problem (opens in a new tab)</a>.
+accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a href="{0}" target="_blank">accessibility problem (opens in a new tab)</a>.
 accessibilityStatement.notHappy.title=If you are not happy with our response
-accessibilityStatement.notHappy.p1=The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint, <a class="govuk-link" href="{0}">contact the Equality Advisory and Support Service (EASS)</a>, or the <a class="govuk-link" href="{1}">Equality Commission for Northern Ireland (ECNI)</a> if you live in Northern Ireland.
+accessibilityStatement.notHappy.p1=The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint, <a href="{0}">contact the Equality Advisory and Support Service (EASS)</a>, or the <a href="{1}">Equality Commission for Northern Ireland (ECNI)</a> if you live in Northern Ireland.
 accessibilityStatement.contactingUs.title=Contacting us by phone or getting a visit from us in person
 accessibilityStatement.contactingUs.p1=We provide a text relay service if you are deaf, hearing impaired or have a speech impediment.
 accessibilityStatement.contactingUs.p2=We can provide a British Sign Language (BSL) interpreter, or you can arrange a visit from an HMRC advisor to help you complete the service.
-accessibilityStatement.contactingUs.p3=Find out <a class="govuk-link" href="{0}">how to get extra support from HMRC</a>.
+accessibilityStatement.contactingUs.p3=Find out <a href="{0}">how to get extra support from HMRC</a>.
 accessibilityStatement.howWeTested.title=How we tested this service
-accessibilityStatement.howWeTested.p1=The service was tested on 15 May 2020 and checked for compliance with WCAG 2.1 AA. It was built using parts that were tested by the <a class="govuk-link" href="{0}">Digital Accessibility Centre</a>.
+accessibilityStatement.howWeTested.p1=The service was tested on 15 May 2020 and checked for compliance with WCAG 2.1 AA. It was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>.
 accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 9 June 2022.
 
 #===================================================
@@ -425,9 +425,9 @@ wrongAccountForTrusts.p1=You’re trying to use this service to report Capital G
 wrongAccountForTrusts.whatWentWrong=What went wrong
 wrongAccountForTrusts.whatWentWrong.p1=You’ve signed into Government Gateway as an ‘individual’ person not an ‘organisation’.
 wrongAccountForTrusts.whatNext=What you’ll need to do next
-wrongAccountForTrusts.whatNext.p1=You’ll need to sign in using the <a class="govuk-link" href="{0}">Government Gateway</a> user ID and password created for the trust. These are the same details you used to register the trust.
+wrongAccountForTrusts.whatNext.p1=You’ll need to sign in using the <a href="{0}">Government Gateway</a> user ID and password created for the trust. These are the same details you used to register the trust.
 wrongAccountForTrusts.createGGAccount=Create a trust’s Government Gateway account
-wrongAccountForTrusts.createGGAccount.p1=You can a <a class="govuk-link" href="{0}">create a Government Gateway account</a> for the trust. It will need to be for an ‘organisation’ and not an ‘individual’. The trust will need to be <a class="govuk-link" href="{1}">registered</a> before you can use this service.
+wrongAccountForTrusts.createGGAccount.p1=You can a <a href="{0}">create a Government Gateway account</a> for the trust. It will need to be for an ‘organisation’ and not an ‘individual’. The trust will need to be <a href="{1}">registered</a> before you can use this service.
 
 enterName.title=Enter your full name
 enterName.firstName.label=First name
@@ -482,7 +482,7 @@ iv.insufficientEvidence.textphone.title=Textphone:
 iv.insufficientEvidence.textphone.number=0300 200 3319
 iv.insufficientEvidence.outside-uk-telephone.title=Outside UK:
 iv.insufficientEvidence.outside-uk-telephone.number=+44 135 535 9022
-iv.insufficientEvidence.openingTimes=<p class="govuk-body">Opening times:</p><p class="govuk-body">Monday to Friday : 8am to 8pm<br />Saturday: 8am to 4pm</p>
+iv.insufficientEvidence.openingTimes=<p>Opening times:</p><p>Monday to Friday : 8am to 8pm<br />Saturday: 8am to 4pm</p>
 iv.insufficientEvidence.openingTimes.p3=Closed Sundays and bank holidays.
 iv.insufficientEvidence.helpWithCallCharges=Find out about call charges
 iv.insufficientEvidence.getHelp=Get help
@@ -592,7 +592,7 @@ agent.confirm-client.cgt-reference=Capital Gains Tax on UK property account numb
 agent.confirm-client.change-client=Change client
 
 agentNoEnrolment.title=Use your agent services account to access this service
-agentNoEnrolment.p1=You’ll need to sign in using your agent services account user ID and password. If you do not have one, you’ll need to <a href="{0}">create an agent services account</a>.
+agentNoEnrolment.p1=You’ll need to sign in using your agent services account user ID and password. If you do not have one, you’ll need to <a class="govuk-link" href="{0}">create an agent services account</a>.
 agentNoEnrolment.p2=Do not use sign in details for an HMRC online services for agents account.
 agentNoEnrolment.button.tryAgain=Try again
 
