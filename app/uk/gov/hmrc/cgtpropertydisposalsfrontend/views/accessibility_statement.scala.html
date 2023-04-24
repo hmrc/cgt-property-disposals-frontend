@@ -21,63 +21,66 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
-@()(implicit messages: Messages, viewConfig: ViewConfig, request: Request[_])
+@()(implicit
+  request: Request[_],
+  messages: Messages,
+  viewConfig: ViewConfig
+)
 
 @key = @{ "accessibilityStatement" }
 @title = @{messages(s"$key.title")}
 @availableAtLocation = @{ s"tax.service.gov.uk${routes.LandingPageController.landingPage().url}" }
 
-@mainTemplate(title = title, userType = None, mainClass = Some("no-timeout")) {
+@layout(title) {
 
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-body-l">@messages(s"$key.p1")</p>
+  <p class="govuk-body">@Html(messages(s"$key.p2", viewConfig.govUkAccessibilityStatementUrl))</p>
+  <p class="govuk-body">@messages(s"$key.p3", availableAtLocation)</p>
 
- <h1 class="heading-xlarge">@title</h1>
- <p class="lede">@messages(s"$key.p1")</p>
- <p>@Html(messages(s"$key.p2", viewConfig.govUkAccessibilityStatementUrl))</p>
- <p>@messages(s"$key.p3", availableAtLocation)</p>
+  <h2 class="govuk-heading-m">@messages(s"$key.usingThisService.title")</h2>
+  <p class="govuk-body">@messages(s"$key.usingThisService.p1")</p>
+  <p class="govuk-body">@messages(s"$key.usingThisService.p2") @messages(s"$key.usingThisService.p3")</p>
 
- <h2 class="heading-large">@messages(s"$key.usingThisService.title")</h2>
- <p>@messages(s"$key.usingThisService.p1")</p>
- <p>@messages(s"$key.usingThisService.p2") @messages(s"$key.usingThisService.p3")</p>
-
-  <ul class="list list-bullet">
-   <li>@messages(s"$key.usingThisService.li1")</li>
-   <li>@messages(s"$key.usingThisService.li2")</li>
-   <li>@messages(s"$key.usingThisService.li3")</li>
-   <li>@messages(s"$key.usingThisService.li4")</li>
-   <li>@messages(s"$key.usingThisService.li5")</li>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>@messages(s"$key.usingThisService.li1")</li>
+    <li>@messages(s"$key.usingThisService.li2")</li>
+    <li>@messages(s"$key.usingThisService.li3")</li>
+    <li>@messages(s"$key.usingThisService.li4")</li>
+    <li>@messages(s"$key.usingThisService.li5")</li>
   </ul>
- <p>@messages(s"$key.usingThisService.p4")</p>
- <p><a href="@viewConfig.abilityNetUrl">@messages(s"$key.usingThisService.making-device-easier.part1")</a> @messages(s"$key.usingThisService.making-device-easier.part2")</p>
+
+  <p class="govuk-body">@messages(s"$key.usingThisService.p4")</p>
+  <p class="govuk-body"><a class="govuk-link" href="@viewConfig.abilityNetUrl">@messages(s"$key.usingThisService.making-device-easier.part1")</a> @messages(s"$key.usingThisService.making-device-easier.part2")</p>
 
 
- <h2 class="heading-large">@messages(s"$key.howAccessible.title")</h2>
- <p>@messages(s"$key.howAccessible.p1")</p>
- <p>@Html(messages(s"$key.howAccessible.p2", viewConfig.webContentAccessibilityGuidelinesV21Url))</p>
+  <h2 class="govuk-heading-m">@messages(s"$key.howAccessible.title")</h2>
+  <p class="govuk-body">@messages(s"$key.howAccessible.p1")</p>
+  <p class="govuk-body">@Html(messages(s"$key.howAccessible.p2", viewConfig.webContentAccessibilityGuidelinesV21Url))</p>
 
 
- <h2 class="heading-large">@messages(s"$key.contact.heading")</h2>
- <p>
-        @{messages(s"$key.contact.extra-support.part1")}
-        <a href="https://www.gov.uk/get-help-hmrc-extra-support">@{messages(s"$key.contact.extra-support.part2")}</a>
-        @{messages(s"$key.contact.extra-support.part3")}
-</p>
+  <h2 class="govuk-heading-m">@messages(s"$key.contact.heading")</h2>
+  <p class="govuk-body">
+    @{messages(s"$key.contact.extra-support.part1")}
+    <a class="govuk-link" href="https://www.gov.uk/get-help-hmrc-extra-support">@{messages(s"$key.contact.extra-support.part2")}</a>
+    @{messages(s"$key.contact.extra-support.part3")}
+  </p>
 
- <h2 class="heading-large">@messages(s"$key.reportingProblems.title")</h2>
- <p>@Html(messages(s"$key.reportingProblems.p1", viewConfig.reportAccessibilityProblemUrl))</p>
+  <h2 class="govuk-heading-m">@messages(s"$key.reportingProblems.title")</h2>
+  <p class="govuk-body">@Html(messages(s"$key.reportingProblems.p1", viewConfig.reportAccessibilityProblemUrl))</p>
 
- <h2 class="heading-large">@messages(s"$key.notHappy.title")</h2>
- <p>@Html(messages(s"$key.notHappy.p1", viewConfig.equalityAndAdvisoryServiceUrl, viewConfig.equalityCommissionForNorthenIrelandUrl))</p>
+  <h2 class="govuk-heading-m">@messages(s"$key.notHappy.title")</h2>
+  <p class="govuk-body">@Html(messages(s"$key.notHappy.p1", viewConfig.equalityAndAdvisoryServiceUrl, viewConfig.equalityCommissionForNorthenIrelandUrl))</p>
 
- <h2 class="heading-large">@messages(s"$key.contactingUs.title")</h2>
- <p>@messages(s"$key.contactingUs.p1")</p>
- <p>@messages(s"$key.contactingUs.p2")</p>
- <p>@Html(messages(s"$key.contactingUs.p3", viewConfig.additionalNeedsUrl))</p>
+  <h2 class="govuk-heading-m">@messages(s"$key.contactingUs.title")</h2>
+  <p class="govuk-body">@messages(s"$key.contactingUs.p1")</p>
+  <p class="govuk-body">@messages(s"$key.contactingUs.p2")</p>
+  <p class="govuk-body">@Html(messages(s"$key.contactingUs.p3", viewConfig.additionalNeedsUrl))</p>
 
- <h2 class="heading-large">@messages(s"$key.howWeTested.title")</h2>
- <p>@Html(messages(s"$key.howWeTested.p1", viewConfig.digitalAccessibilityCentretUrl))</p>
- <p>@messages(s"$key.howWeTested.p2")</p>
-
+  <h2 class="govuk-heading-m">@messages(s"$key.howWeTested.title")</h2>
+  <p class="govuk-body">@Html(messages(s"$key.howWeTested.p1", viewConfig.digitalAccessibilityCentretUrl))</p>
+  <p class="govuk-body">@messages(s"$key.howWeTested.p2")</p>
 }
