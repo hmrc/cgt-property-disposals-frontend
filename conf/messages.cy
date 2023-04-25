@@ -542,7 +542,7 @@ agent.confirm-client.name=Enw
 agent.confirm-client.cgt-reference=Rhif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 agent.confirm-client.change-client=Newid cleient
 agentNoEnrolment.title=Defnyddiwch eich cyfrif gwasanaethau asiant i fynd at y gwasanaeth hwn
-agentNoEnrolment.p1=Bydd angen i chi fewngofnodi gan ddefnyddio Dynodydd Defnyddiwr (ID) a chyfrinair eich cyfrif gwasanaethau asiant. Os nad oes gennych un, bydd angen i chi <a href="{0}">greu cyfrif gwasanaethau asiant</a>.
+agentNoEnrolment.p1=Bydd angen i chi fewngofnodi gan ddefnyddio Dynodydd Defnyddiwr (ID) a chyfrinair eich cyfrif gwasanaethau asiant. Os nad oes gennych un, bydd angen i chi <a class="govuk-link" href="{0}">greu cyfrif gwasanaethau asiant</a>.
 agentNoEnrolment.p2=Peidiwch â defnyddio manylion mewngofnodi ar gyfer cyfrif gwasanaethau ar-lein CThEF ar gyfer asiantau.
 agentNoEnrolment.button.tryAgain=Rhowch gynnig arall arni
 
