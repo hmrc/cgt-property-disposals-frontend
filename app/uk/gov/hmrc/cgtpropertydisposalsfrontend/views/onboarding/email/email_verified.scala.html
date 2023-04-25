@@ -17,20 +17,19 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
   accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
-  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-  insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
+  govukInsetText : GovukInsetText,
+  govukButton: GovukButton
 )
 
-@(email: Email, continueCall: Call, emailJourneyType: EmailJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(email: Email, continueCall: Call, emailJourneyType: EmailJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{messages("confirmEmail.verified.title")}
 
@@ -46,29 +45,28 @@
  else None
 }
 
-@mainTemplate(title = title, userType = request.userType, accountMenu = menu) {
+@layout(title, accountMenu = menu) {
 
-  @caption(messages(emailJourneyType.captionMessageKey))
+<span class="govuk-caption-xl">@messages(emailJourneyType.captionMessageKey)</span>
+<h1 class="govuk-heading-xl">@title</h1>
 
-  @pageHeading(title)
-
-  <p class="lede">
+  <p class="govuk-body govuk-!-margin-top-0 govuk-!-margin-bottom-3">
   @Html(messages("confirmEmail.verified.intro", email.value))
   </p>
 
-  @insetPanel(
-    Html(messages(
+  @govukInsetText(InsetText(
+    content = HtmlContent(
       emailJourneyType match {
-          case _: EmailJourneyType.Returns.ChangingRepresenteeEmail => "confirmEmail.verified.representee.p1"
-          case _                                                    => "confirmEmail.verified.p1"
-      }))
-  )
+          case _: EmailJourneyType.Returns.ChangingRepresenteeEmail => messages("confirmEmail.verified.representee.p1")
+          case _                                                    => messages("confirmEmail.verified.p1")
+      })
+  ))
 
-  <p>
+  <p class="govuk-body">
   @messages("confirmEmail.verified.p2")
   </p>
-
-  <a class="button" role="button" href="@continueCall">
-  @messages("button.continue")
-  </a>
+    @govukButton(Button(
+    href = Some(continueCall.url),
+    content = Text(messages("button.continue"))
+    ))
 }
