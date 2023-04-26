@@ -15,23 +15,21 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
-@()(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@()(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{messages("iv.preconditionFailed.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
 
-  @pageHeading(title)
-  <p>@messages("iv.preconditionFailed.p1")</p>
-  <p>
-   <a href="https://www.gov.uk">@messages("iv.exitToGovUk")</a>
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-body">@messages("iv.preconditionFailed.p1")</p>
+  <p class="govuk-body">
+   <a class="govuk-link" href="https://www.gov.uk">@messages("iv.exitToGovUk")</a>
   </p>
 }
