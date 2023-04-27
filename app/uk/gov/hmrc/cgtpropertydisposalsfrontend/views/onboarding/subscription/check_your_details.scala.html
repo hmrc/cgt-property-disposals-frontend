@@ -15,60 +15,90 @@
  *@
 
 @import play.api.i18n.Messages
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSubscriptionReady
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{address, email, name, routes}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
- cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
- cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
- addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
- submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
- insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        viewHelpers: ViewHelpers,
+        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display_govuk
 )
 
-@(details: SubscriptionDetails)(implicit request: RequestWithSubscriptionReady[_], messages: Messages, appConfig: ViewConfig)
+@(details: SubscriptionDetails)(implicit request: RequestWithSubscriptionReady[_], messages: Messages)
 @affinity = @{details.name.fold(_ => "organisation", _ => "individual")}
 @title = @{messages(s"subscription.${affinity}.title")}
 
-@mainTemplate(title = title, userType = request.sessionData.userType) {
+@layout(title) {
+  <span class="govuk-caption-xl">@messages("subscription.caption")</span>
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-inset-text">@messages("subscription.lede")</p>
+  @viewHelpers.govukSummaryList(SummaryList(
+    rows = Seq(
+     SummaryListRow(
+      key = Key(
+       content = Text(messages("subscription.cyaLabel.contactName"))
+      ),
+      value = Value(
+       content = Text(details.contactName.value)
+      ),
+      actions = Some(Actions(
+       items = Seq(
+        ActionItem(
+         href = name.routes.SubscriptionChangeContactNameController.enterContactName().url,
+         content = Text(messages("cya.change")),
+         visuallyHiddenText = Some(messages("subscription.cyaChange.contactName"))
+        )
+       )
+      ))
+     ),
+     SummaryListRow(
+      key = Key(
+       content = Text(messages("subscription.cyaLabel.address"))
+      ),
+      value = Value(
+       content = HtmlContent(addressDisplay(details.address, Block))
+      ),
+      actions = Some(Actions(
+       items = Seq(
+        ActionItem(
+         href = address.routes.SubscriptionAddressController.isUk().url,
+         content = Text(messages("cya.change")),
+         visuallyHiddenText = Some(messages("subscription.cyaChange.address"))
+        )
+       )
+      ))
+     ),
+     SummaryListRow(
+      key = Key(
+       content = Text(messages("subscription.cyaLabel.email"))
+      ),
+      value = Value(
+       content = Text(details.emailAddress.value)
+      ),
+      actions = Some(Actions(
+       items = Seq(
+        ActionItem(
+         href = email.routes.SubscriptionChangeEmailController.enterEmail().url,
+         content = Text(messages("cya.change")),
+         visuallyHiddenText = Some(messages("subscription.cyaChange.email"))
+        )
+       )
+      ))
+    )
+  )))
 
- @pageHeading(title, Some(messages("subscription.caption")))
+  @viewHelpers.form(routes.SubscriptionController.checkYourDetailsSubmit()) {
+   @viewHelpers.govukButton(Button(
+    attributes = Map("id" -> "submitButton"),
+    content = Text(messages("button.createAccount"))
+   ))
+  }
 
- @insetPanel(Html(messages("subscription.lede")))
-
- @cyaSection() {
-  @cyaRow(
-   messages("subscription.cyaLabel.contactName"),
-   Html(details.contactName.value),
-   Some(cyaChange(messages("subscription.cyaChange.contactName"), name.routes.SubscriptionChangeContactNameController.enterContactName().url)),
-     "contactName"
-  )
-  @cyaRow(
-   messages("subscription.cyaLabel.address"),
-   addressDisplay(details.address, Block),
-   Some(cyaChange(messages("subscription.cyaChange.address"), address.routes.SubscriptionAddressController.isUk().url)),
-   "address"
-  )
-  @cyaRow(
-    messages("subscription.cyaLabel.email"),
-    Html(details.emailAddress.value),
-    Some(cyaChange(messages("subscription.cyaChange.email"), email.routes.SubscriptionChangeEmailController.enterEmail().url)),
-    "email"
-   )
- }
-
- @formWrapper(routes.SubscriptionController.checkYourDetailsSubmit(), 'novalidate -> "novalidate") {
-  @submitButton(messages("button.createAccount"))
- }
-  <p>
-   <a href="@{routes.SubscriptionController.changeGGAccountForSubscription().url}">@messages("subscription.changeGGAccount")</a>
-  </p>
+   <p class="govuk-body">
+    <a class="govuk-link" href="@{routes.SubscriptionController.changeGGAccountForSubscription().url}">@messages("subscription.changeGGAccount")</a>
+   </p>
 }
