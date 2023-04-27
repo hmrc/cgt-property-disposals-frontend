@@ -26,6 +26,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.userresearchbanner.UserResearchBanner
 
 @this(
         hmrcStandardPage: HmrcStandardPage,
@@ -93,6 +94,11 @@
       additionalHeadBlock = Some(additionalHeadBlock),
       mainContentLayout = sidebar.map(s => twoThirdsOneThirdMainContent(s)),
       beforeContentBlock = Some(beforeContent)
+    ),
+    banners = Banners(
+      userResearchBanner = if(viewConfig.userRecruitmentBannerEnabled) Some(UserResearchBanner(
+        url = viewConfig.userRecruitmentUrl
+      )) else None
     ),
     serviceName = Some(messages("service.title")),
     pageTitle = Some(gdsTitle),
