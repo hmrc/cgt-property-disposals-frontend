@@ -16,23 +16,32 @@
 
 @import play.api.i18n.Messages
 @import play.api.mvc.Request
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
-@this(govUkWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.govuk_wrapper)
+@this(
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
+)
 
-@(userType: Option[UserType], pageTitle: String, heading: String, message: String, extraMessage: Option[String] = None)(implicit messages: Messages, appConfig: ViewConfig, request: Request[_])
+@(
+  userType: Option[UserType],
+  pageTitle: String,
+  heading: String,
+  message: String,
+  extraMessage: Option[String] = None
+)(implicit
+  messages: Messages,
+  request: Request[_]
+)
 
-@mainContent = {
-  <div class="content__body">
-    <h1 class="heading-xlarge">
-      @heading
-    </h1>
-    <p>
-      @message
-    </p>
-    @extraMessage.map{m => <p>@m</p>}
-  </div>
+@layout(pageTitle) {
+  <h1
+    class="govuk-heading-xl"
+    data-user-type=@{s"${if(userType.isEmpty){ "anonymous " }}"}
+  >
+    @heading
+  </h1>
+  <p class="govuk-body">
+    @message
+  </p>
+  @extraMessage.map{m => <p class="govuk-body">@m</p>}
 }
-
-@govUkWrapper(appConfig = appConfig, title = pageTitle, contentHeader = None, mainContent = mainContent, userType = userType)
