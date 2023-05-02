@@ -412,7 +412,7 @@ registerTrust.bullet2=Sign in to this service using the Government Gateway user 
 
 reportCorpTax.title=You’ve tried to sign in as an organisation
 reportCorpTax.p1=Trusts are the only organisations that can use this service to report Capital Gains Tax on UK property.
-reportCorpTax.p2=You have told us you are not a trust so you’ll need to <a href="{0}">file a Company Tax Return</a> to report any taxable gains on UK property.
+reportCorpTax.p2=You have told us you are not a trust so you’ll need to <a class="govuk-link" href="{0}">file a Company Tax Return</a> to report any taxable gains on UK property.
 
 entityType.title=Do you want to report a capital gain for a trust or estate?
 entityType.individual=No

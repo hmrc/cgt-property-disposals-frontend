@@ -395,7 +395,7 @@ registerTrust.bullet1=<a href="{0}" target="_blank">Cofrestru’r ymddiriedolaet
 registerTrust.bullet2=Mewngofnodi i’r gwasanaeth hwn gan ddefnyddio’r Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer Porth y Llywodraeth a ddefnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
 reportCorpTax.title=Rydych wedi ceisio mewngofnodi fel sefydliad
 reportCorpTax.p1=Ymddiriedolaethau yw’r unig sefydliad sy’n gallu defnyddio’r gwasanaeth hwn i roi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y DU.
-reportCorpTax.p2=Rydych wedi rhoi gwybod i ni nad ydych yn ymddiriedolaeth felly fydd yn rhaid i chi <a href="{0}">gyflwyno Ffurflen Dreth y Cwmni</a> i roi gwybod am unrhyw enillion trethadwy ar eiddo yn y DU.
+reportCorpTax.p2=Rydych wedi rhoi gwybod i ni nad ydych yn ymddiriedolaeth felly fydd yn rhaid i chi <a class="govuk-link" href="{0}">gyflwyno Ffurflen Dreth y Cwmni</a> i roi gwybod am unrhyw enillion trethadwy ar eiddo yn y DU.
 entityType.title=A ydych am roi gwybod am ennill cyfalaf ar gyfer ymddiriedolaeth neu ystâd?
 entityType.individual=Na
 entityType.trust=Iawn
