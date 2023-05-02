@@ -41,6 +41,12 @@ object TimeUtils {
 
   def getTaxYearStartDate(year: Int): LocalDate = LocalDate.of(year, 4, 6)
 
+  def getTaxYearEndDateInclusive(date: LocalDate): LocalDate = if (date.isBefore(LocalDate.of(date.getYear, 4, 6))) {
+    LocalDate.of(date.getYear, 4, 5)
+  } else {
+    LocalDate.of(date.getYear + 1, 4, 5)
+  }
+
   def today(): LocalDate = LocalDate.now(clock)
 
   def now(): LocalDateTime = LocalDateTime.now(clock)
