@@ -16,25 +16,26 @@
 
 @import cats.syntax.order._
 @import play.api.i18n.Messages
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
 
-@this()
+@this(viewHelpers: ViewHelpers)
 
 @(totalLeftToPay: AmountInPence, hasRecentlyAmendedReturn : Boolean)(implicit messages: Messages)
 
 @numberClass = @{
-  if(totalLeftToPay.inPounds() > 999999999 || hasRecentlyAmendedReturn) "very-large-number"
-  else if (totalLeftToPay.inPounds() > 99999999) "large-number"
-  else "regular-number"
+  if(totalLeftToPay.inPounds() > 999999999 || hasRecentlyAmendedReturn) "govuk-heading-s"
+  else if (totalLeftToPay.inPounds() > 99999999) "govuk-heading-l"
+  else "govuk-heading-xl"
 }
 
 @pendingClass = @{
   if(hasRecentlyAmendedReturn) " pending" else ""
 }
 
-<h2 class="@numberClass@pendingClass">
+<h2 class="@{s"$numberClass$pendingClass govuk-!-margin-bottom-2"}">
 
     @if(hasRecentlyAmendedReturn){
         @{"£ " + messages("account.balance-updating")}
@@ -46,25 +47,21 @@
 
       @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay.inPounds())
 
-      <span class="sub-heading clearfix">
-        <span>
-          @messages("account.totalLeftToPay.penalties")
-        </span>
+      <span class="govuk-caption-m govuk-!-font-size-16">
+        @messages("account.totalLeftToPay.penalties")
       </span>
     }
 </h2>
 
 @if(totalLeftToPay > AmountInPence.zero) {
-  <a aria-describedby="payment-information"
-     class="button"
-     role="button"
-     href="@homepage.routes.HomePageController.payTotalAmountLeftToPay()">
-    @messages("account.make.payment.link")
-  </a>
+  @viewHelpers.govukButton(Button(
+    attributes = Map("aria-describedby" -> "payment-information"),
+    href = Some(homepage.routes.HomePageController.payTotalAmountLeftToPay.url),
+    content = Text(messages("account.make.payment.link"))
+  ))
 }
-<p>
-  <br/>
+<p class="govuk-body">
   <span id="payment-information">
-    @Html(messages("account.totalLeftToPay.payments"))
+    <strong>@messages("account.totalLeftToPay.payments")</strong>
   </span>
 </p>

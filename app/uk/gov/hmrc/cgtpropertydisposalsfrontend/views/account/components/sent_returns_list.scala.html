@@ -28,7 +28,7 @@ sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.c
 
 @sentReturnsHeader()
 
-<ul class="return-list">
+<ul class="govuk-list return-list">
   @for(sentReturnWithDueDate <- sentReturns) {
     @sentReturnItem(sentReturnWithDueDate)
   }

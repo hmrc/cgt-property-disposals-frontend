@@ -1,7 +1,28 @@
+.account-balance,
+.financial-summary,
+.submission-meta {
+    text-align: right;
+}
+@media (max-width: 900px) {
+    .account-balance,
+    .financial-summary,
+    .submission-meta {
+        text-align: left;
+    }
+    .financial-summary,
+    .submission-meta {
+        margin-top: 1rem;
+    }
+}
+
+.form-bundle {
+    border: 1px solid #bfc1c3;
+    padding: 20px;
+}
+
 .cgt-cya__key {
     width: 50%
 }
-
 
 .cgt-cya.govuk-summary-list {
     font-family: GDS Transport, arial, sans-serif;

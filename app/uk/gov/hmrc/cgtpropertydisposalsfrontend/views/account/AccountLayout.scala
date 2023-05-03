@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import play.api.i18n.Messages
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account
 
-@this()
-
-@()(implicit messages: Messages)
-
-<div class="govuk-grid-row returns-list-header">
-  <div class="govuk-grid-column-full">
-    <h2 class="govuk-heading-l">
-      @messages("returns.list.title")
-    </h2>
-  </div>
-</div>
+import play.twirl.api.Html
+final case class AccountLayout(accountHeader: Html, accountBalance: Html)
