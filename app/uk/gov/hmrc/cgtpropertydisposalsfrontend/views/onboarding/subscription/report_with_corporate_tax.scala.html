@@ -20,22 +20,18 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
-@this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
-)
+@this(layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout)
 
 @(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("reportCorpTax.title")}
-@mainTemplate(title = title, userType = request.userType) {
-  @backLinkComponent(backLink)
-  @pageHeading(title)
-  <p>
+@layout(title, backLinkUrl = Some(backLink.url)) {
+
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-body">
    @messages("reportCorpTax.p1")
   </p>
-  <p>
+  <p class="govuk-body">
    @Html(messages("reportCorpTax.p2", appConfig.fileCorporationTaxUrl))
   </p>
 }
