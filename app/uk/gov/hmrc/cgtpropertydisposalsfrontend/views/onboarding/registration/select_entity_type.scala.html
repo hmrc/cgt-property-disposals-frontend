@@ -18,21 +18,20 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.EntityType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_govuk,
+    govukButton: GovukButton,
+    viewHelpers: ViewHelpers
 )
-@(form: Form[EntityType], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[EntityType], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @toMessage(entityType: EntityType) = @{
   entityType match {
@@ -45,22 +44,23 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @options = @{List(EntityType.Trust, EntityType.Individual).map(toMessage)}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@layout(title, hasErrors = hasErrors, backLinkUrl = Some(backLink.url)) {
 
-  @backLinkComponent(backLink)
   @if(hasErrors) {
     @errorSummary(form)
   }
-
-  @formWrapper(routes.RegistrationController.selectEntityTypeSubmit(), 'novalidate -> "novalidate") {
+<span class="govuk-caption-xl">@messages("subscription.caption")</span>
+  @viewHelpers.form(routes.RegistrationController.selectEntityTypeSubmit()) {
     @radioGroup(
       fieldId = key,
-      label = pageHeading(title, Some(messages("subscription.caption"))),
       options = options,
-      errorKey = form.error(key).map(e => e.message),
-      hasErrors = hasErrors,
-      selected = form.value.map(entity => options.indexOf(toMessage(entity)))
+      selected = form.value.map(entity => options.indexOf(toMessage(entity))),
+      label = title,
+      errorKey = form.error(key).map(e => e.message)
     )
-    @submitButton(messages("button.continue"))
+    @govukButton(Button(
+    attributes = Map("id" -> "submitButton"),
+    content = Text(messages("button.continue"))
+    ))
   }
 }
