@@ -383,11 +383,11 @@ address-select.returns.personalRep.invalid=Dewiswch y cyfeiriad cyswllt neu nodw
 subscribed.title=Cyfrif wedi’i greu
 subscribed.individual.p1=Rydych wedi creu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 subscribed.organisation.p1=Rydych wedi creu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU ar gyfer eich ymddiriedolaeth neu ystâd.
-subscribed.organisation.p2=Rhif cyfrif yr ymddiriedolaeth neu ystâd yw <strong class="bold">{0}</strong>.
-subscribed.individual.p2=Rhif eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU yw <strong class="bold">{0}</strong>.
+subscribed.organisation.p2=Rhif cyfrif yr ymddiriedolaeth neu ystâd yw <strong id="cgt-ref">{0}</strong>.
+subscribed.individual.p2=Rhif eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU yw <strong id="cgt-ref">{0}</strong>.
 subscribed.organisation.p3=Bydd rhaid i chi roi’r rhif hwn i CThEF os oes angen i chi drafod cyfrif yr ymddiriedolaeth neu ystâd.
 subscribed.individual.p3=Bydd rhaid i chi roi’r rhif hwn i CThEF os oes angen i chi drafod eich cyfrif.
-subscribed.p4=Rydym wedi anfon e-bost cadarnhau i <strong class="bold">{0}</strong>.
+subscribed.p4=Rydym wedi anfon e-bost cadarnhau i <strong id="contact-email">{0}</strong>.
 subscribed.buttonText=Ewch i’r cyfrif
 registerTrust.title=Bydd angen i chi gofrestru’r ymddiriedolaeth
 registerTrust.p=I ddefnyddio’r gwasanaeth hwn, bydd angen i chi:
