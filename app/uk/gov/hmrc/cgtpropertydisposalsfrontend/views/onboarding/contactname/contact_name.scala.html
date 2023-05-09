@@ -17,58 +17,81 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
+
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+  viewHelpers: ViewHelpers
 )
 
 
 @(
-    form: Form[ContactName],
-    backLink: Call,
-    submit: Call,
-    showAccountMenu: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+  form: Form[ContactName],
+  backLink: Call,
+  submit: Call,
+  showAccountMenu: Boolean
+)(
+  implicit
+  request: RequestWithSessionData[_],
+  messages: Messages
+)
 
 @key = @{"contactName"}
 @title = @{messages(s"${key}.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@menu = {@if(showAccountMenu) { @accountMenu(None) }}
+@menu = @{
+  if(showAccountMenu)
+   Some(accountMenu(None))
+  else
+   None
+ }
 
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, accountMenu = Some(menu)) {
-
-  @backLinkComponent(backLink)
-
+@layout(
+  title,
+  hasErrors = hasErrors,
+  accountMenu = menu,
+  backLinkUrl = Some(backLink.url)
+) {
   @if(hasErrors) {
     @errorSummary(form)
   }
 
-  @formWrapper(submit, 'novalidate -> "novalidate") {
-      @textInput(
-        fieldId = key,
-        label = Html(s"""<span class="heading-secondary">${messages(if (showAccountMenu) "account.caption" else "subscription.caption")}</span>$title"""),
-        labelAsHeading = true,
-        errorKey = form.error(key).map(e => e.message),
-        value = form.data.getOrElse(key, ""),
-        hasErrors = form.error(key).nonEmpty,
-        inputClass = Some("form-control-3-4"),
-        helpText = Some(Html(messages("contactName.extraContent"))),
-        autoComplete = AutoCompleteType.ContactName
-      )
+  <span class="govuk-caption-xl">
+    @messages(s"${if (showAccountMenu) "account.caption" else "subscription.caption"}")
+  </span>
 
-    @submitButton(messages("button.continue"))
+
+  @viewHelpers.form(submit) {
+    @viewHelpers.govukInput(Input(
+      id = key,
+      name = key,
+      label = Label(
+        content = Text(title),
+        classes = "govuk-label--xl",
+        isPageHeading = true
+      ),
+      errorMessage = form.error(key).map(e => ErrorMessage(
+        content = Text(messages(s"${e.key}.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )),
+      value = form(key).value,
+      hint = Some(Hint(
+        content = Text(messages("contactName.extraContent"))
+      )),
+      autocomplete = Some(AutoCompleteType.ContactName.value)
+    ))
+
+    @viewHelpers.govukButton(Button(
+      attributes = Map("id" -> "submitButton"),
+      content = Text(messages("button.continue"))
+    ))
   }
-
 }
