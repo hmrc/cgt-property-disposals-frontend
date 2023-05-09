@@ -27,6 +27,7 @@
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.userresearchbanner.UserResearchBanner
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountLayout
 
 @this(
         hmrcStandardPage: HmrcStandardPage,
@@ -35,7 +36,8 @@
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         viewConfig: ViewConfig,
-        viewHelpers: ViewHelpers
+        viewHelpers: ViewHelpers,
+        accountHomeLayout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.account_home_layout
 )
 
 @(
@@ -45,7 +47,8 @@
         backLinkUrl: Option[String] = None,
         hasErrors: Boolean = false,
         sidebar: Option[Html] = None,
-        accountMenu: Option[HtmlFormat.Appendable] = None
+        accountMenu: Option[HtmlFormat.Appendable] = None,
+        accountLayout: Option[AccountLayout] = None
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @signOutUrl = @{controllerRoutes.StartController.signOutAndRedirectToFeedback().url}
@@ -84,6 +87,16 @@
   s"""${if(hasErrors){ s"""${messages("generic.errorPrefix")} """ } else ""}$pageTitle - ${messages("service.title")} - GOV.UK"""
 }
 
+@layoutOption = @{
+  if(accountLayout.nonEmpty) {
+    accountLayout.map(c => accountHomeLayout.apply(c.accountHeader, c.accountBalance)(_))
+  } else if(sidebar.nonEmpty) {
+    sidebar.map(s => twoThirdsOneThirdMainContent(s)(_))
+  } else {
+    None
+  }
+}
+
 @hmrcStandardPage(
   HmrcStandardPageParams(
     serviceURLs = ServiceURLs(
@@ -92,7 +105,7 @@
     ),
     templateOverrides = TemplateOverrides(
       additionalHeadBlock = Some(additionalHeadBlock),
-      mainContentLayout = sidebar.map(s => twoThirdsOneThirdMainContent(s)),
+      mainContentLayout = layoutOption,
       beforeContentBlock = Some(beforeContent)
     ),
     banners = Banners(

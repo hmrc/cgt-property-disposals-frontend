@@ -32,41 +32,41 @@
 @totalOutstanding = @{ sentReturn.totalOutstanding() }
 @numberOfOutstandingCharges = @{ sentReturn.charges.count(_.totalOutstanding() > AmountInPence.zero) }
 
-<li class="single-return form-bundle">
-  <div class="grid-row">
-    <div class="column-two-thirds submission-summary">
-      <h3>
-        <span class="caption">@messages("returns.list.disposalDetails")</span>
+<li class="single-return form-bundle govuk-!-margin-bottom-3">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds submission-summary">
+      <h3 class="govuk-heading-m">
+        <span class="govuk-caption-m govuk-!-font-size-16">@messages("returns.list.disposalDetails")</span>
         @sentReturn.propertyAddress.getAddressLines.headOption.getOrElse("")
-        <span class="sub-heading">@sentReturn.propertyAddress.getAddressLines.drop(1).mkString(", ")</span>
+        <span class="govuk-caption-m govuk-!-font-size-16">@sentReturn.propertyAddress.getAddressLines.drop(1).mkString(", ")</span>
       </h3>
-      <h4 id="taxOwed-@sentReturn.submissionId" class="cgt-liability">
-        <span class="caption">@messages("returns.list.taxOwed")</span>
+      <h4 id="taxOwed-@sentReturn.submissionId" class="govuk-heading-l">
+        <span class="govuk-caption-m govuk-!-font-size-16">@messages("returns.list.taxOwed")</span>
         @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.mainReturnChargeAmount.withFloorZero.inPounds())
       </h4>
     </div>
-    <div class="column-one-third financial-summary">
+    <div class="govuk-grid-column-one-third financial-summary">
       @if(sentReturn.mainReturnChargeAmount.withFloorZero.isZero) {
         <h5>
-          <span class="caption">
+          <span class="govuk-caption-m govuk-!-font-size-16">
             @messages("returns.list.noTaxDue")
           </span>
         </h5>
       } else {
-        <h5 id="leftToPay-@sentReturn.submissionId">
+        <h5 class="govuk-heading-m" id="leftToPay-@sentReturn.submissionId">
           @if(sentReturn.isRecentlyAmended){
-            <span class="caption">@messages("returns.list.updating-payment-details")</span>
+            <span class="govuk-caption-m govuk-!-font-size-16">@messages("returns.list.updating-payment-details")</span>
           }else{
-            <span class="caption">@messages("returns.list.leftToPay")</span>
-            <strong class="bold">
+            <span class="govuk-caption-m govuk-!-font-size-16">@messages("returns.list.leftToPay")</span>
+            <strong>
               @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding().inPounds())
             </strong>
           }
         </h5>
         @if(!totalOutstanding.isZero) {
-          <h5>
-            <span class="caption">@messages(if(numberOfOutstandingCharges > 1) "returns.list.nextPaymentDue" else "returns.list.paymentDue")</span>
-            <strong id="paymentDue-@sentReturn.submissionId" class="bold">
+          <h5 class="govuk-heading-m" >
+            <span class="govuk-caption-m govuk-!-font-size-16">@messages(if(numberOfOutstandingCharges > 1) "returns.list.nextPaymentDue" else "returns.list.paymentDue")</span>
+            <strong id="paymentDue-@sentReturn.submissionId">
               @paymentDueDate.map(TimeUtils.govShortDisplayFormat(_))
             </strong>
           </h5>
@@ -75,9 +75,10 @@
 
     </div>
   </div>
-  <div class="grid-row">
-    <div class="column-two-thirds">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
       <a
+        class="govuk-link"
         id="viewSentReturn-@sentReturn.submissionId"
         href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}"
       >
@@ -89,12 +90,12 @@
       </a>
     </div>
 
-    <div class="column-one-third">
+    <div class="govuk-grid-column-one-third">
       <div class="submission-meta">
-        <span class="caption">
+        <span class="govuk-caption-m govuk-!-font-size-16">
           @messages("returns.list.ref") @sentReturn.submissionId
         </span>
-        <span id="sentDate-@sentReturn.submissionId" class="caption">
+        <span id="sentDate-@sentReturn.submissionId" class="govuk-caption-m govuk-!-font-size-16">
         @messages("returns.list.sentDate", TimeUtils.govShortDisplayFormat(sentReturn.submissionDate))
         </span>
       </div>

@@ -246,7 +246,7 @@ class HomePageControllerSpec
 
       // the callToActionButton selector is designed to select the only
       // button on the page for us to check which message it has
-      val callToActionButton    = "#content a.button"
+      val callToActionButton    = ".govuk-button"
       val resumeDraftMessage    = "drafts.list.resume"
       val makePaymentMessage    = "account.make.payment.link"
       val startNewReturnMessage = "account.home.button.start-a-new-return"
@@ -415,7 +415,7 @@ class HomePageControllerSpec
       "display the resume draft link as a button when there is a draft with an expected due date before any sent return due dates" in {
         val propertyAddress   = sample[UkAddress]
         val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
-          .copy(completionDate = CompletionDate(ukResidentMainReturnChargeDueDate.minusDays(31)))
+          .copy(completionDate = CompletionDate(ukResidentMainReturnChargeDueDate.minusDays(61)))
         val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
           triageAnswers = triageAnswers,
           lastUpdatedDate = LocalDate.now(),
@@ -611,7 +611,11 @@ class HomePageControllerSpec
           case _                                      => sys.error("Error")
         }
 
-        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(60)
+        val expectedDraftReturnSendAndPayBy: LocalDate = if (completionDate.isAfter(LocalDate.of(2021, 10, 20))) {
+          completionDate.plusDays(60L)
+        } else {
+          completionDate.plusDays(30L)
+        }
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -1286,7 +1290,7 @@ class HomePageControllerSpec
               { doc =>
                 if (subscribed.sentReturns.isEmpty && subscribed.draftReturns.isEmpty)
                   doc
-                    .select("#content a.button")
+                    .select(".govuk-button")
                     .text should include(
                     messageFromMessageKey(
                       "account.home.button.start-a-new-return"
@@ -1294,7 +1298,7 @@ class HomePageControllerSpec
                   )
                 else if (subscribed.totalLeftToPay().isZero && subscribed.draftReturns.isEmpty)
                   doc
-                    .select("#content a.button")
+                    .select(".govuk-button")
                     .text should include(
                     messageFromMessageKey(
                       "account.home.button.start-a-new-return"
@@ -1303,7 +1307,7 @@ class HomePageControllerSpec
                 else
                   doc
                     .select(
-                      "#content > article > div:nth-child(1) > div > p > a"
+                      ".account-header a"
                     )
                     .text should include(
                     messageFromMessageKey(
@@ -1311,7 +1315,7 @@ class HomePageControllerSpec
                     )
                   )
 
-                doc.select("#content #account-details").text should include(
+                doc.select("#account-details").text should include(
                   messageFromMessageKey(
                     "account.home.subtitle",
                     subscribed.subscribedDetails.cgtReference.value
@@ -1321,7 +1325,7 @@ class HomePageControllerSpec
                   if (subscribed.totalLeftToPay() > AmountInPence.zero)
                     doc
                       .select(
-                        "#content > article > div.grid-row.account-home-heading > div.column-one-third.account-due > a"
+                        ".account-balance > a"
                       )
                       .attr(
                         "href"
@@ -1363,7 +1367,7 @@ class HomePageControllerSpec
           ),
           doc =>
             doc
-              .select("#content > article #account-details")
+              .select("#account-details")
               .text() should include(
               messageFromMessageKey("account.home.accountName", subscribed.subscribedDetails.makeAccountName())
             ),

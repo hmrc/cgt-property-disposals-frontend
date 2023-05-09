@@ -19,14 +19,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 
 @this(
-   draftListItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_item,
-   draftReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_header
+   draftListItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_item
 )
 
 @(draftReturns: List[DraftReturn], showButtonOnDraftReturn: Boolean)(implicit messages:Messages, appConfig: ViewConfig)
 
-@draftReturnsHeader()
+<h2 class="govuk-heading-l">
+ @messages("drafts.list.title")
+</h2>
 
-<ul class="return-list drafts-list">
+<ul class="govuk-list drafts-list">
   @draftReturns.map(draftListItem(_, showButtonOnDraftReturn))
 </ul>
