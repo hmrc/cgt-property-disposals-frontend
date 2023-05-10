@@ -398,11 +398,11 @@ address-select.returns.personalRep.invalid=Select the contact address or enter i
 subscribed.title=Account created
 subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account
 subscribed.organisation.p1=You’ve created a Capital Gains Tax on UK property account for your trust or estate.
-subscribed.organisation.p2=The trust or estate’s account number is <strong class="bold">{0}</strong>.
-subscribed.individual.p2=Your Capital Gains Tax on UK property account number is <strong class="bold">{0}</strong>.
+subscribed.organisation.p2=The trust or estate’s account number is <strong id="cgt-ref">{0}</strong>.
+subscribed.individual.p2=Your Capital Gains Tax on UK property account number is <strong id="cgt-ref">{0}</strong>.
 subscribed.organisation.p3=You will need to provide this number to HMRC if you need to discuss the trust or estate’s account.
 subscribed.individual.p3=You will need to provide this number to HMRC if you need to discuss your account.
-subscribed.p4=We have sent a confirmation email to <strong class="bold">{0}</strong>.
+subscribed.p4=We have sent a confirmation email to <strong id="contact-email">{0}</strong>.
 subscribed.buttonText=Go to account
 
 registerTrust.title=You’ll need to register the trust
