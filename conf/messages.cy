@@ -481,9 +481,9 @@ enterTrn.tooManyAttempts.title=Bydd angen i chi aros a rhoi cynnig arall arni
 enterTrn.tooManyAttempts.p1=Rydych wedi ceisio nodi eich Rhif Cofrestru Ymddiriedolaeth ac enw’r ymddiriedolaeth gormod o weithiau.
 enterTrn.tooManyAttempts.p2=Bydd angen i chi aros am 2 awr a rhoi cynnig arall arni.
 enterTrn.whatATrnIs=Beth yw Rhif Cofrestru Ymddiriedolaeth?
-enterTrn.whatATrnIs.p1=Mae CThEF yn anfon y rhif hwn i’r person sy’n <a href="{0}" target="_blank">cofrestru’r ymddiriedolaeth (yn agor tab newydd)</a>.
+enterTrn.whatATrnIs.p1=Mae CThEF yn anfon y rhif hwn i’r person sy’n <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">cofrestru’r ymddiriedolaeth (yn agor tab newydd)</a>.
 enterTrn.ifYouCannotFind=Os na allwch ddod o hyd iddo
-enterTrn.ifYouCannotFind.p1=Os gwnaethoch gofrestru’r ymddiriedolaeth a ni allwch ddod o hyd i’w Rhif Cofrestru Ymddiriedolaeth, gallwch <a href="{0}" target="_blank">gysylltu â CThEF (yn agor tab newydd)</a>.
+enterTrn.ifYouCannotFind.p1=Os gwnaethoch gofrestru’r ymddiriedolaeth a ni allwch ddod o hyd i’w Rhif Cofrestru Ymddiriedolaeth, gallwch <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">gysylltu â CThEF (yn agor tab newydd)</a>.
 enterTrustName.label=Enw’r ymddiriedolaeth
 trustName.error.required=Nodwch enw’ch ymddiriedolaeth
 trustName.error.tooLong=Mae’n rhaid i enw’ch ymddiriedolaeth fod yn llai na 105 o gymeriadau

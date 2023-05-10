@@ -521,9 +521,9 @@ enterTrn.tooManyAttempts.title=You’ll need to wait and try again
 enterTrn.tooManyAttempts.p1=You’ve tried to enter your Trust Registration Number and trust name too many times.
 enterTrn.tooManyAttempts.p2=You’ll need to wait 2 hours and try again.
 enterTrn.whatATrnIs=What a Trust Registration Number is
-enterTrn.whatATrnIs.p1=HMRC sends this number to the person who <a href="{0}" target="_blank">registers the trust (opens in a new tab)</a>.
+enterTrn.whatATrnIs.p1=HMRC sends this number to the person who <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">registers the trust (opens in a new tab)</a>.
 enterTrn.ifYouCannotFind=If you cannot find it
-enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Trust Registration Number number, you can <a href="{0}" target="_blank">contact HMRC (opens in a new tab)</a>.
+enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Trust Registration Number number, you can <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">contact HMRC (opens in a new tab)</a>.
 
 enterTrustName.label=Name of trust
 trustName.error.required=Enter the name of your trust
