@@ -24,13 +24,12 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-    addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
-    accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
+layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section_govuk,
+cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row_govuk,
+cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change_govuk,
+addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display_govuk,
+accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu_govuk
 )
 
 
@@ -48,10 +47,10 @@
 
 @changeAccountName = @{details.name.fold(_ => Html(""), _ => Html(messages(s"account.manageYourDetails.individual.p2", appConfig.tellHmrcChangeDetails)))}
 
-@mainTemplate(title = title, userType = request.userType, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
-
- @pageHeading(title, Some(messages("account.caption")))
-  @cyaSection(None, Some("cya-questions-long no-border")) {
+@layout(title, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
+<span class="govuk-caption-xl">@messages("account.caption")</span>
+<h1 class="govuk-heading-xl">@title</h1>
+  @cyaSection(None, Some("cya-questions-long govuk-summary-list--no-border")) {
     @cyaRow(
       messages("account.manageYourDetails.subtitle"),
       Html(details.cgtReference.value),
@@ -64,12 +63,12 @@
     )
   }
 
-  <h2 class="heading-medium">
+<h2 class="govuk-heading-m">
     @messages("account.manageYourDetails.contactHeading")
-  </h2>
+</h2>
 
-  <div class="panel panel-border-wide">
-    <p>
+<div class="govuk-inset-text">
+    <p class="govuk-body">
       @messages(s"account.manageYourDetails.p")
       @if(details.registeredWithId){
         @changeAccountName
