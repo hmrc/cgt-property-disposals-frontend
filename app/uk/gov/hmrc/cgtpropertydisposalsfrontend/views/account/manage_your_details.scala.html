@@ -50,7 +50,7 @@ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.acco
 @layout(title, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
 <span class="govuk-caption-xl">@messages("account.caption")</span>
 <h1 class="govuk-heading-xl">@title</h1>
-  @cyaSection(None, Some("cya-questions-long no-border")) {
+  @cyaSection(None, Some("cya-questions-long govuk-summary-list--no-border")) {
     @cyaRow(
       messages("account.manageYourDetails.subtitle"),
       Html(details.cgtReference.value),
