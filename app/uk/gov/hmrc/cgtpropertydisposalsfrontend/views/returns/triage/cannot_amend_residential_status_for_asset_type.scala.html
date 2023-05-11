@@ -19,12 +19,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        govukWarningText: GovukWarningText
 )
 
 @(backLink: Call,
@@ -43,23 +42,24 @@
 
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title, backLinkUrl = Some(backLink.url)) {
 
-    @backLinkComponent(backLink)
+  <h1 class="govuk-heading-xl">@title</h1>
 
-    @pageHeading(title)
+    @govukWarningText(WarningText(
+      content = Text(messages(s"$key$userKey.warning")),
+      iconFallbackText = messages("generic.warning")
+    ))
 
-    @warning(messages(s"$key$userKey.warning"))
+    <p class="govuk-body">@messages(s"$key.p1")</p>
 
-    <p>@messages(s"$key.p1")</p>
-
-    <ul class="list-bullet">
+    <ul class="govuk-list govuk-list--bullet">
         <li>@messages(s"$key$userKey.li1")</li>
         <li>@messages(s"$key$userKey.li2")</li>
         <li>@messages(s"$key$userKey.li3")</li>
         <li>@messages(s"$key$userKey.li4")</li>
     </ul>
 
-  <a href="@{appConfig.contactHmrc}">@messages(s"$key.link")</a>
+  <a class="govuk-link" href="@{appConfig.contactHmrc}">@messages(s"$key.link")</a>
 
 }
