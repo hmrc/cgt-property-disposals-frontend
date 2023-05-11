@@ -582,7 +582,7 @@ account.manageYourDetails.subtitle=Rhif y cyfrif
 account.manageYourDetails.accountName=Enw’r cyfrif
 account.manageYourDetails.contactHeading=Manylion y person cyswllt
 account.manageYourDetails.p=Byddwn dim ond yn defnyddio’r manylion cyswllt hyn os oes angen i ni gysylltu â chi ynghylch y gwasanaeth hwn.
-account.manageYourDetails.individual.p2=Os oes angen i ‘Enw’r cyfrif’ newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEF (yn agor tab newydd)</a>.
+account.manageYourDetails.individual.p2=Os oes angen i ‘Enw’r cyfrif’ newid, bydd angen i chi <a class="govuk-link" href="{0}" target="_blank">roi gwybod i CThEF (yn agor tab newydd)</a>.
 account.manageYourDetails.organisation.p2=Os bydd enw neu gyfeiriad y prif ymddiriedolwr yn newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEF (yn agor tab newydd)</a>.
 account.manageYourDetails.yourName=Eich enw
 account.manageYourDetails.ContactName.changed=Mae’r enw cyswllt wedi newid
