@@ -47,7 +47,7 @@
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
   @if(hasErrors) {
-   @errorSummary(form)
+    @errorSummary(form, dateField = Some(key))
   }
   <span class="govuk-caption-xl">@messages("triage.caption")</span>
   @formHelper(submit) {
@@ -60,6 +60,23 @@
     errorMessage = errorKey.map(e => ErrorMessage(
      content = Text(messages(s"${e.key}.${e.message}"))
     )),
+   items = Seq(
+     InputItem(
+      name = "day",
+      value = form.data.get(s"$key-day"),
+      classes = s"govuk-input--width-2${if(hasErrors) " govuk-input--error" else ""}"
+     ),
+     InputItem(
+      name = "month",
+      value = form.data.get(s"$key-month"),
+      classes = s"govuk-input--width-2${if(hasErrors) " govuk-input--error" else ""}"
+     ),
+     InputItem(
+      name = "year",
+      value = form.data.get(s"$key-year"),
+      classes = s"govuk-input--width-4${if(hasErrors) " govuk-input--error" else ""}"
+     )
+   ),
     fieldset = Some(Fieldset(
      legend = Some(Legend(
       content = Text(title),
