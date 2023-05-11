@@ -2273,7 +2273,9 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("cannotAmendResidentialStatusForAssetType.title"),
               { doc =>
                 doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
-                doc.select("#warning").text()                      shouldBe messageFromMessageKey(expectedWarningKey)
+                doc.select(".govuk-warning-text__text").text()     shouldBe s"""${messageFromMessageKey(
+                  "generic.warning"
+                )} ${messageFromMessageKey(expectedWarningKey)}"""
               }
             )
 
@@ -2410,17 +2412,17 @@ class CommonTriageQuestionsControllerSpec
             performAction(),
             messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href")       shouldBe routes.MultipleDisposalsTriageController
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.MultipleDisposalsTriageController
                 .completionDate()
                 .url
-              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+              doc.select("p:first-of-type").html()               shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.p1",
                 TimeUtils.govDisplayFormat(date.value)
               )
-              doc.select("#content > article > p:nth-child(4)").html() shouldBe messageFromMessageKey(
+              doc.select("p:last-of-type").html()                shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.p2"
               )
-              doc.select(s"#viewSentReturn-$id").attr("href")          shouldBe homePageRoutes.HomePageController
+              doc.select(s"#viewSentReturn-$id").attr("href")    shouldBe homePageRoutes.HomePageController
                 .viewSentReturn(id)
                 .url
             }
@@ -2451,17 +2453,17 @@ class CommonTriageQuestionsControllerSpec
             performAction(),
             messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href")       shouldBe routes.SingleDisposalsTriageController
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.SingleDisposalsTriageController
                 .whenWasCompletionDate()
                 .url
-              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+              doc.select("p:first-of-type").html()               shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.p1",
                 TimeUtils.govDisplayFormat(date.value)
               )
-              doc.select("#content > article > p:nth-child(4)").html() shouldBe messageFromMessageKey(
+              doc.select("p:last-of-type").html()                shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.p2"
               )
-              doc.select(s"#viewSentReturn-$id").attr("href")          shouldBe homePageRoutes.HomePageController
+              doc.select(s"#viewSentReturn-$id").attr("href")    shouldBe homePageRoutes.HomePageController
                 .viewSentReturn(id)
                 .url
             }
@@ -2493,17 +2495,17 @@ class CommonTriageQuestionsControllerSpec
             performAction(),
             messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href")       shouldBe routes.SingleDisposalsTriageController
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.SingleDisposalsTriageController
                 .whenWasCompletionDate()
                 .url
-              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+              doc.select("p:first-of-type").html()               shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.p1",
                 TimeUtils.govDisplayFormat(date.value)
               )
-              doc.select("#content > article > p:nth-child(4)").html() shouldBe messageFromMessageKey(
+              doc.select("p:last-of-type").html()                shouldBe messageFromMessageKey(
                 "previousReturnExistsWithSameCompletionDate.p2"
               )
-              doc.select(s"#viewSentReturn-$id").attr("href")          shouldBe homePageRoutes.HomePageController
+              doc.select(s"#viewSentReturn-$id").attr("href")    shouldBe homePageRoutes.HomePageController
                 .viewSentReturn(id)
                 .url
             }
