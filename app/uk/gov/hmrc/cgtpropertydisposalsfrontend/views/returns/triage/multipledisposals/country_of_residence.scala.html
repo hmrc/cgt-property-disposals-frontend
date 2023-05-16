@@ -25,17 +25,16 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, RepresenteeAnswers}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code,
-submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
+        submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        formWrapper: FormWithCSRF,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
@@ -48,7 +47,6 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{"countryCode"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
@@ -79,9 +77,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
       messages(s"multipleDisposalsCountryOfResidence$userKey.title")
 }
 
-@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
-
-    @backLinkComponent(backLink)
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form)
@@ -89,20 +85,16 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
     @caption(messages("triage.caption"))
 
-    @formWrapper(triage.routes.MultipleDisposalsTriageController.countryOfResidenceSubmit(), 'novalidate -> "novalidate") {
-
+    @formWrapper(triage.routes.MultipleDisposalsTriageController.countryOfResidenceSubmit()) {
         @countryCode(
             Country.countryCodes,
-            selected = form.data.get(key),
+            form,
             label = title,
-            hasErrors = form.error(key).nonEmpty,
-            errorKey = form.error(key).map(e => e.message),
-            autoComplete = AutoCompleteType.Country,
             helpText = Some(Html(messages(s"multipleDisposalsCountryOfResidence$userKey.helpText"))).filterNot(_ => isPeriodOfAdmin),
             labelAsHeading = true
         )
 
-        <p>@Html(messages(s"triage.enterCountry$userKey.link", appConfig.workOurYouResidenceStatusUrl))</p>
+        <p class="govuk-body">@Html(messages(s"triage.enterCountry$userKey.link", appConfig.workOurYouResidenceStatusUrl))</p>
         @submitButton(messages(if(isAmend) "button.continue" else if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
     }
 

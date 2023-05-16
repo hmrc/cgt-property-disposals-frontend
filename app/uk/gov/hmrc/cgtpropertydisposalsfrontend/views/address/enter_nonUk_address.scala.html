@@ -153,11 +153,8 @@
 
       @countryCode(
         Country.countryCodes,
-        selected = form.data.get(countryCodeKey),
-        label = messages(s"${countryCodeKey}.label"),
-        hasErrors = form.error(countryCodeKey).nonEmpty,
-        errorKey = form.error(countryCodeKey).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-        autoComplete = AutoCompleteType.Country
+        form,
+        label = messages(s"${countryCodeKey}.label")
       )
 
     @submitButton(messages(if(isAmend) "button.continue" else if (addressJourneyType.showReturnToSummaryLink()) "button.saveAndContinue" else "button.continue"))

@@ -20,8 +20,6 @@
 @import play.twirl.api._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcReportTechnicalIssueHelper, HmrcTimeoutDialogHelper}
-@import views.html.helper.CSPNonce
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
@@ -35,6 +33,8 @@
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
+        autocompleteCss: HmrcAccessibleAutocompleteCss,
+        autocompleteJavascript: HmrcAccessibleAutocompleteJavascript,
         viewConfig: ViewConfig,
         viewHelpers: ViewHelpers,
         accountHomeLayout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.account_home_layout
@@ -56,6 +56,7 @@
 @additionalHeadBlock = {
   @if(withSignOutLink) {
     @hmrcTimeoutDialogHelper(signOutUrl, timeoutUrl = Some(viewConfig.ggTimedOutUrl))
+    @autocompleteCss()
   }
   <link rel="stylesheet" media="all" href="@routes.Assets.at("stylesheets/cgtpd-ui-upgrade.css")" />
 }
@@ -106,7 +107,8 @@
     templateOverrides = TemplateOverrides(
       additionalHeadBlock = Some(additionalHeadBlock),
       mainContentLayout = layoutOption,
-      beforeContentBlock = Some(beforeContent)
+      beforeContentBlock = Some(beforeContent),
+      additionalScriptsBlock = Some(autocompleteJavascript())
     ),
     banners = Banners(
       userResearchBanner = if(viewConfig.userRecruitmentBannerEnabled) Some(UserResearchBanner(
@@ -115,6 +117,5 @@
     ),
     serviceName = Some(messages("service.title")),
     pageTitle = Some(gdsTitle),
-    isWelshTranslationAvailable = isWelshTranslationAvailable,
-    cspNonce = CSPNonce.get
+    isWelshTranslationAvailable = isWelshTranslationAvailable
   ))(content)

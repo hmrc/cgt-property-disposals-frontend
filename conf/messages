@@ -953,12 +953,12 @@ triage.enterCountry.trust.helpText=It’s usually the day the trust and the new 
 triage.enterCountry.capacitor.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.personalRep.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 
-triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new tab)</a>
-triage.enterCountry.agent.link=<a class="govuk-link" href="{0}" target="_blank">Work out your client’s residence status (opens in a new tab)</a>.
-triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Work out the trust’s residence status (opens in a new tab)</a>.
-triage.enterCountry.capacitor.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
-triage.enterCountry.personalRep.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
-triage.enterCountry.personalRepInPeriodOfAdmin.link=<a class="govuk-link" href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
+triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Work out your residence status for a tax year (opens in a new tab)</a>
+triage.enterCountry.agent.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Work out your client’s residence status (opens in a new tab)</a>.
+triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Work out the trust’s residence status (opens in a new tab)</a>.
+triage.enterCountry.capacitor.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
+triage.enterCountry.personalRep.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
+triage.enterCountry.personalRepInPeriodOfAdmin.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Work out the person’s residence status for a tax year (opens in a new tab)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell or dispose of?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?

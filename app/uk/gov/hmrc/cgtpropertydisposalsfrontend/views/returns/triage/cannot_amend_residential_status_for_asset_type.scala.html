@@ -48,7 +48,7 @@
 
     @govukWarningText(WarningText(
       content = Text(messages(s"$key$userKey.warning")),
-      iconFallbackText = messages("generic.warning")
+      iconFallbackText = Some(messages("generic.warning"))
     ))
 
     <p class="govuk-body">@messages(s"$key.p1")</p>

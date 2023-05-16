@@ -81,6 +81,6 @@
 
 @warningField.map(warningText => govukWarningText(WarningText(
   attributes = Map("id" -> warningId),
-  iconFallbackText = messages("generic.warning"),
+  iconFallbackText = Some(messages("generic.warning")),
   content = Text(warningText)
 )))

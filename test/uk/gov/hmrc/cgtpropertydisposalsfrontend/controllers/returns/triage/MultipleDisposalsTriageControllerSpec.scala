@@ -881,7 +881,7 @@ class MultipleDisposalsTriageControllerSpec
             expectReturnToSummaryLink,
             List(
               SelectorAndValue(
-                "#wrapper > div:eq(1) > article > form > p",
+                "form > p",
                 messageFromMessageKey(
                   s"multipleDisposalsWereYouAUKResident${displayType.getSubKey(separatePeriodOfAdminKey = true)}.link",
                   viewConfig.workOurYouResidenceStatusUrl
@@ -2351,7 +2351,7 @@ class MultipleDisposalsTriageControllerSpec
             expectReturnToSummaryLink,
             List(
               SelectorAndValue(
-                "#countryCode-form-hint",
+                "#countryCode-hint",
                 if (isPeriodOfAdmin) ""
                 else
                   messageFromMessageKey(
@@ -2359,7 +2359,7 @@ class MultipleDisposalsTriageControllerSpec
                   )
               ),
               SelectorAndValue(
-                "#wrapper > div:eq(1) > article > form > p",
+                "form > p:first-of-type",
                 messageFromMessageKey(
                   s"triage.enterCountry$userKey.link",
                   viewConfig.workOurYouResidenceStatusUrl
