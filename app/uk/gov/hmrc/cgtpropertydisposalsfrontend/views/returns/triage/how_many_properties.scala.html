@@ -81,6 +81,25 @@
       controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesSubmit()
 }
 
+@detailsContent = {
+  <h2 class="govuk-heading-m">
+    @messages(s"$key.helpText$userKey.p2.heading")
+  </h2>
+  <p class="govuk-body">
+    @messages(s"$key.helpText.p2.text")
+  </p>
+  <h2 class="govuk-heading-m">
+    @messages(s"$key.helpText${userKey}.p3.heading")
+  </h2>
+  <p class="govuk-body">
+    @messages(s"$key.helpText${userKey}.p3.text")
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>@messages(s"$key.helpText${userKey}.p3.li1")</li>
+    <li>@messages(s"$key.helpText${userKey}.p3.li2")</li>
+  </ul>
+}
+
 @layout(
   pageTitle = title,
   backLinkUrl = backLink.map(_.url),
@@ -128,24 +147,7 @@
 
       @govukDetails(Details(
         summary = Text(messages(s"$key.nonResident$userKey.summary")),
-        content = HtmlContent(s"""
-           | <h2 class="govuk-heading-m">
-           |    ${messages(s"$key.helpText$userKey.p2.heading")}
-           | </h2>
-           | <p class="govuk-body">
-           |    ${messages(s"$key.helpText.p2.text")}
-           | </p>
-           | <h2 class="govuk-heading-m">
-           |    ${messages(s"$key.helpText${userKey}.p3.heading")}
-           | </h2>
-           | <p class="govuk-body">
-           |    ${messages(s"$key.helpText${userKey}.p3.text")}
-           | </p>
-           | <ul class="govuk-list">
-           |    <li>${messages(s"$key.helpText${userKey}.p3.li1")}</li>
-           |    <li>${messages(s"$key.helpText${userKey}.p3.li2")}</li>
-           | </ul>
-          """.stripMargin)
+        content = HtmlContent(detailsContent)
       ))
 
       @govukButton(Button(

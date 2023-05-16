@@ -17,14 +17,12 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, RepresentativeType}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
-@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 
 @this(
@@ -32,7 +30,7 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
         formHelper: FormWithCSRF,
-        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional_govuk,
+        govukRadios: GovukRadios,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
@@ -64,44 +62,59 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @title = @{messages(s"$key$userKey.title")}
-@options = @{
-    List(
-      RadioOption(
-        label = messages(s"$key.Residential"),
-        content = None,
-        optionHelpText = Some(Html(messages(s"$key.Residential.helpText")))
-      ),
-      RadioOption(
-        label = messages(s"$key.NonResidential"),
-        content = None,
-        optionHelpText = None
-      ),
-      RadioOption(
-        label = messages(s"$key.MixedUse"),
-        content = None,
-        optionHelpText = Some(Html(messages(s"$key$userKey.MixedUse.helpText")))
-      ),
-      RadioOption(
-        label = messages(s"$key$userKey.IndirectDisposal"),
-        content = None,
-        optionHelpText = Some(Html(messages(s"$key$userKey.IndirectDisposal.helpText")))
-      )
-    )
-}
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userKey"))
     }
-    <span class="govuk-caption-xl">messages("triage.caption")</span>
-    @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), 'novalidate -> "novalidate") {
-        @radioGroupConditional(
-            fieldId = key,
-            options = options,
-            label = Html(s"""<h1 class="govuk-fieldset__heading">$title</h1>"""),
-            error = form.error(key),
-        )
+    <span class="govuk-caption-xl">@messages("triage.caption")</span>
+    @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.assetTypeForNonUkResidentsSubmit()) {
+      @govukRadios(Radios(
+        name = key,
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
+            content = Text(title),
+            classes = "govuk-fieldset__legend--xl",
+            isPageHeading = true
+          ))
+        )),
+        items = Seq(
+          RadioItem(
+            content = Text(messages(s"$key.Residential")),
+            value = Some("0"),
+            hint = Some(Hint(
+              content = HtmlContent(messages(s"$key.Residential.helpText"))
+            )),
+            checked = form.value.contains(AssetType.Residential)
+          ),
+          RadioItem(
+            content = Text(messages(s"$key.NonResidential")),
+            value = Some("1"),
+            checked = form.value.contains(AssetType.NonResidential)
+          ),
+          RadioItem(
+            content = Text(messages(s"$key.MixedUse")),
+            value = Some("2"),
+            hint = Some(Hint(
+              content = HtmlContent(messages(s"$key$userKey.MixedUse.helpText"))
+            )),
+            checked = form.value.contains(AssetType.MixedUse)
+          ),
+          RadioItem(
+            content = Text(messages(s"$key$userKey.IndirectDisposal")),
+            value = Some("3"),
+            hint = Some(Hint(
+              content = HtmlContent(messages(s"$key$userKey.IndirectDisposal.helpText"))
+            )),
+            checked = form.value.contains(AssetType.IndirectDisposal)
+          )
+        ),
+        errorMessage = form.error(key).map(e => ErrorMessage(
+          content = Text(messages(s"$key.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        ))
+      ))
 
         @submitButton(messages(if (isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }

@@ -44,17 +44,20 @@
     InputItem(
       name = "day",
       value = dayValue,
-      classes = s"govuk-input--width-2${if(hasErrors) " govuk-input--error" else ""}"
+      classes = s"govuk-input--width-2${if(hasErrors) " govuk-input--error" else ""}",
+      label = Some(messages("generic.day"))
     ),
     InputItem(
       name = "month",
       value = monthValue,
-      classes = s"govuk-input--width-2${if(hasErrors) " govuk-input--error" else ""}"
+      classes = s"govuk-input--width-2${if(hasErrors) " govuk-input--error" else ""}",
+      label = Some(messages("generic.month"))
     ),
     InputItem(
       name = "year",
       value = yearValue,
-      classes = s"govuk-input--width-4${if(hasErrors) " govuk-input--error" else ""}"
+      classes = s"govuk-input--width-4${if(hasErrors) " govuk-input--error" else ""}",
+      label = Some(messages("generic.year"))
     )
   ),
   fieldset = Some(Fieldset(

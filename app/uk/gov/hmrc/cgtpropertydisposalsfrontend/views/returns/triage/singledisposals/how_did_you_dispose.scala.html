@@ -17,7 +17,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
@@ -26,12 +25,12 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_govuk,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-    formHelper: FormWithCSRF,
-    govukButton: GovukButton
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        formHelper: FormWithCSRF,
+        govukButton: GovukButton,
+        govukRadios: GovukRadios
 )
 
 @(
@@ -74,21 +73,6 @@
 
 @title = @{messages(s"$key$userKey.title")}
 
-@optionIndex(value: DisposalMethod) = @{
-    value match {
-        case DisposalMethod.Sold => 0
-        case DisposalMethod.Gifted => 1
-        case DisposalMethod.Other => 2
-    }}
-
-@options = @{
-    List(
-        s"$key.Sold",
-        s"$key.Gifted",
-        s"$key.Other"
-    ).map(messageKey =>Html(messages(messageKey)))
-}
-
 @layout(
   pageTitle = title,
   backLinkUrl = Some(backLink.url),
@@ -102,17 +86,42 @@
     <span class="govuk-caption-xl">@messages("triage.caption")</span>
 
     @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.howDidYouDisposeOfPropertySubmit()) {
-        @radioGroup(
-            fieldId = key,
-            options = options,
-            selected = form.value.map(optionIndex),
-            label = title,
-            errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}")
-        )
-        @govukButton(Button(
-          attributes = Map("id" -> "submitBUtton"),
-          content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+      @govukRadios(Radios(
+        name = key,
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
+            content = Text(title),
+            classes = "govuk-fieldset__legend--xl",
+            isPageHeading = true
+          ))
+        )),
+        items = Seq(
+          RadioItem(
+            content = Text(messages(s"$key.Sold")),
+            value = Some("0"),
+            checked = form.value.contains(DisposalMethod.Sold)
+          ),
+          RadioItem(
+            content = Text(messages(s"$key.Gifted")),
+            value = Some("1"),
+            checked = form.value.contains(DisposalMethod.Gifted)
+          ),
+          RadioItem(
+            content = Text(messages(s"$key.Other")),
+            value = Some("2"),
+            checked = form.value.contains(DisposalMethod.Other)
+          )
+        ),
+        errorMessage = form.error(key).map(e => ErrorMessage(
+          content = Text(messages(s"$key.$userErrorPrefix${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
         ))
+      ))
+
+      @govukButton(Button(
+        attributes = Map("id" -> "submitButton"),
+        content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+      ))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

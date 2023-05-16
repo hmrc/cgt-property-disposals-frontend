@@ -22,12 +22,12 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     formHelper: FormWithCSRF,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary_govuk,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
 )
 
 @(
@@ -40,14 +40,14 @@
 
 @title = @{messages("triage.check-your-answers.title")}
 
-@mainTemplate(pageTitle = title, withSignOutLink = true, isWelshTranslationAvailable = true) {
+@layout(pageTitle = title) {
 
  @caption(messages("triage.caption"))
  <h1 class="govuk-heading-xl">@title</h1>
 
  @summary(answers, isATrust, representativeType, representeeAnswers)
 
- @formHelper(routes.SingleDisposalsTriageController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+ @formHelper(routes.SingleDisposalsTriageController.checkYourAnswersSubmit()) {
   @submitButton(messages("button.confirmAndContinue"))
  }
 
