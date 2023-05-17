@@ -88,16 +88,11 @@
       name = key,
       inputmode = Some("numeric"),
       value = Some(form.data.getOrElse(key, "")),
-      label = Label(
-        isPageHeading = false,
-        classes = "govuk-label--l",
-        content = Text(title)
-      ),
       errorMessage = form.error(key).map(e => ErrorMessage(
         content = Text(messages(s"$key.${e.message}")),
         visuallyHiddenText = Some(messages("generic.error"))
       )),
-      classes = "govuk-input--width-5"
+      classes = "govuk-input--width-3"
     ))
 
     @govukDetails(Details(
