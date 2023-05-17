@@ -15,20 +15,19 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-   pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary,
-   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+   govukButton: GovukButton
 )
 
 @(
@@ -36,23 +35,23 @@
    hasCreatedDraftReturn: Boolean,
    isATrust: Boolean,
    representeeAnswers: Option[RepresenteeAnswers]
-)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request:RequestWithSessionData[_], messages:Messages)
 
 @title = @{messages("multipleDisposals.triage.cya.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title) {
 
  @caption(messages("triage.caption"))
-
- @pageHeading(title)
-
-  <p><a href="@routes.MultipleDisposalsTriageController.guidance()" id="guidanceLink">@messages("multipleDisposals.triage.cya.guidanceLink")</a></p>
+  <h1 class="heading-xlarge">@title</h1>
+  <p class="govuk-body"><a class="govuk-link" href="@routes.MultipleDisposalsTriageController.guidance()" id="guidanceLink">@messages("multipleDisposals.triage.cya.guidanceLink")</a></p>
 
  @summary(answers, isATrust, representeeAnswers)
 
  @formWrapper(routes.MultipleDisposalsTriageController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
-  @submitButton(messages("button.confirmAndContinue"))
- }
+ @govukButton(Button(
+    attributes = Map("id" -> "submitButton"),
+    content = Text(messages("button.confirmAndContinue"))))
+}
 
   @returnToSummaryLink(hasCreatedDraftReturn)
 }
