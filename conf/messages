@@ -634,7 +634,7 @@ account.manageYourDetails.subtitle=Account number
 account.manageYourDetails.accountName=Account name
 account.manageYourDetails.contactHeading=Contact person’s details
 account.manageYourDetails.p=We only use these details if we need to get in contact about this service.
-account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new tab)</a>.
+account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">tell HMRC (opens in a new tab)</a>.
 account.manageYourDetails.organisation.p2=If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new tab)</a>.
 account.manageYourDetails.yourName=Your name
 account.manageYourDetails.ContactName.changed=Contact name changed
