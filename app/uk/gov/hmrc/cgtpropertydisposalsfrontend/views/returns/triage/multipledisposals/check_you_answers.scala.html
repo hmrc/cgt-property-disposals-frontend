@@ -25,7 +25,7 @@
    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-   summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary,
+   summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary_govuk,
    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
    govukButton: GovukButton
 )
@@ -42,7 +42,7 @@
 @mainTemplate(title) {
 
  @caption(messages("triage.caption"))
-  <h1 class="heading-xlarge">@title</h1>
+  <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body"><a class="govuk-link" href="@routes.MultipleDisposalsTriageController.guidance()" id="guidanceLink">@messages("multipleDisposals.triage.cya.guidanceLink")</a></p>
 
  @summary(answers, isATrust, representeeAnswers)
