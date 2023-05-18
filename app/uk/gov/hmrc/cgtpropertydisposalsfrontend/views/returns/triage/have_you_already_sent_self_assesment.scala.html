@@ -74,7 +74,7 @@
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
-        @errorSummary(form, Some(s"$key$userKey"))
+        @errorSummary(form, customErrorKey = Some(s"$key$userKey"))
     }
 
     <span class="govuk-caption-xl">@messages("triage.caption")</span>

@@ -1,7 +1,7 @@
 multiple-draft.exit.title=Mae gennych Ffurflen Dreth ddrafft sy’n bodoli eisoes
 multiple-draft.exit.p1=Llenwch eich Ffurflen Dreth ddrafft cyn dechrau un newydd.
 who-are-you-reporting-for-exit-page.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
-who-are-you-reporting-for-exit-page.helpText=Rhaid i chi <a href="{0}">gysylltu â CThEF</a>. Rhowch wybod i CThEF fod angen i chi newid pwy ydych yn llenwi’r Ffurflen Dreth hon ar ei gyfer.
+who-are-you-reporting-for-exit-page.helpText=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEF</a>. Rhowch wybod i CThEF fod angen i chi newid pwy ydych yn llenwi’r Ffurflen Dreth hon ar ei gyfer.
 previousReturnExistsWithSameCompletionDate.amend.title=Ni allwch newid y Ffurflen Dreth hon ar-lein
 previousReturnExistsWithSameCompletionDate.amend.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEF</a>.
 previousReturnExistsWithSameCompletionDate.amend.trust.p1=Rhaid i chi <a class="govuk-link" href="{0}">gysylltu â CThEF</a>.

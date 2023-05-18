@@ -699,7 +699,7 @@ individualUserType.error.invalid=Select who are you reporting the tax for
 individualUserType.cyaChange=who you are reporting the tax for
 
 who-are-you-reporting-for-exit-page.title=You cannot change this return online
-who-are-you-reporting-for-exit-page.helpText=You must <a href="{0}">contact HMRC</a>. Tell HMRC you need to change who you’re completing this return for.
+who-are-you-reporting-for-exit-page.helpText=You must <a class="govuk-link" href="{0}">contact HMRC</a>. Tell HMRC you need to change who you’re completing this return for.
 
 numberOfProperties.title=How many properties or disposals are you including in this return?
 

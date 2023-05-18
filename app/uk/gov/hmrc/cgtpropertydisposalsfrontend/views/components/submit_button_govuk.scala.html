@@ -15,11 +15,15 @@
  *@
 
 @import play.twirl.api.Html
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this()
+@this(govukButton: GovukButton)
 
 @(label: String, otherHtml: Option[Html] = None)
-<div class="govuk-form-group">
-  <button class="govuk-button" type="submit" id="submitButton" data-module="govuk-button">@label</button>
-  @otherHtml
-</div>
+
+@govukButton(Button(
+  attributes = Map("id" -> "submitButton", "type" -> "submit"),
+  content = Text(label)
+))
+
+@otherHtml
