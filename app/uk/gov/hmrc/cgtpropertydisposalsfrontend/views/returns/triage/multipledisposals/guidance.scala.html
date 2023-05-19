@@ -23,16 +23,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk,
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+govukButton: GovukButton
 )
 
 @(
@@ -57,27 +56,26 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
 
 @title = @{messages(s"multiple-disposals.guidance$userKey.title")}
-@mainTemplate(title = title, userType = request.userType) {
- @backLinkComponent(backLink)
+@layout(title, backLinkUrl = Some(backLink.url)) {
 
     @caption(messages("triage.caption"))
 
-    @pageHeading(title)
-    <p>
+<h1 class="govuk-heading-xl">@title</h1>
+    <p class="govuk-body">
     @messages("multiple-disposals.guidance.p1")
     </p>
 
-    <ul class="list-bullet">
+    <ul class="govuk-list govuk-list--bullet">
         <li>@messages("multiple-disposals.guidance.li1")</li>
         <li>@messages("multiple-disposals.guidance.li2")</li>
         <li>@messages("multiple-disposals.guidance.li3")</li>
     </ul>
 
-    <p>
+    <p class="govuk-body">
     @messages("multiple-disposals.guidance.p2")
     </p>
 
-    <p>
+    <p class="govuk-body">
     @messages("multiple-disposals.guidance.p3")
     </p>
 
@@ -85,16 +83,18 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
       messages("multiple-disposals.guidance.details.summary"),
         Html(
           s"""
-           | <p>${messages("multiple-disposals.guidance.details.p1")}</p>
-           | <p>${messages("multiple-disposals.guidance.details.p2")}</p>
-           | <p>${messages(s"multiple-disposals.guidance.details.link", appConfig.tranferringOwnershipHelp)}</p>
+           | <p class="govuk-body">${messages("multiple-disposals.guidance.details.p1")}</p>
+           | <p class="govuk-body">${messages("multiple-disposals.guidance.details.p2")}</p>
+           | <p class="govuk-body">${messages(s"multiple-disposals.guidance.details.link", appConfig.tranferringOwnershipHelp)}</p>
            |""".stripMargin
         )
 
       )
 
     @formWrapper(triage.routes.MultipleDisposalsTriageController.guidanceSubmit()) {
-        @submitButton(messages("button.continue"))
+        @govukButton(Button(
+        content = Text(messages("button.continue"))
+        ))
     }
 
     @returnToSummaryLink(hasCreatedDraftReturn)
