@@ -20,15 +20,20 @@
 
 @this(govukErrorSummary : GovukErrorSummary)
 
-@(form: Form[_], customErrorKey: Option[String] = None, userKeyOnly: String = "")(implicit messages: Messages)
+@(
+        form: Form[_],
+        customErrorKey: Option[String] = None,
+        userKeyOnly: String = "",
+        dateField: Option[String] = None
+)(implicit messages: Messages)
 
 @govukErrorSummary(ErrorSummary(
   title = Text(messages("error.summary.heading")),
   attributes = Map("data-spec" -> "errorSummaryDisplay"),
   errorList = form.errors.map { error =>
       ErrorLink(
-      href = Some(s"#${error.key}"),
-      content = Text(messages(s"${customErrorKey.getOrElse(error.key)}$userKeyOnly.${error.message}", error.args: _*))
+        href = Some(s"#${if(dateField.isDefined && dateField.getOrElse("").matches(error.key)) { s"${error.key}-day" } else { error.key }}"),
+        content = Text(messages(s"${customErrorKey.getOrElse(error.key)}$userKeyOnly.${error.message}", error.args: _*))
       )
   }
 ))

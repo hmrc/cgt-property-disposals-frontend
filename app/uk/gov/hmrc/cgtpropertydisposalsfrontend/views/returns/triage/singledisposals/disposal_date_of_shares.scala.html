@@ -22,7 +22,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareDisposalDate
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
-
 @this(
    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
@@ -42,7 +41,7 @@
 @mainTemplate(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
 @if(hasErrors) {
-@errorSummary(form)
+ @errorSummary(form, dateField = Some(key))
 }
 <span class="govuk-caption-xl">@messages("triage.caption")</span>
 @formHelper(submit, 'novalidate -> "novalidate") {
