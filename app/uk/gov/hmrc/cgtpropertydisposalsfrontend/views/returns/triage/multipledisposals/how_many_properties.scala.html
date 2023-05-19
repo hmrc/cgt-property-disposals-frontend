@@ -86,6 +86,10 @@
     @govukInput(Input(
       id = key,
       name = key,
+      label = Label(
+        content = Text(title),
+        classes = "govuk-visually-hidden"
+      ),
       inputmode = Some("numeric"),
       value = Some(form.data.getOrElse(key, "")),
       errorMessage = form.error(key).map(e => ErrorMessage(

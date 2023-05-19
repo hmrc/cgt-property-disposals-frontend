@@ -66,45 +66,42 @@
 
 @title = @{messages(s"$key$userKey.title")}
 
-@toIndex(assetType: AssetType) = @{
-  assetType match {
-    case AssetType.Residential => 0
-    case AssetType.NonResidential => 1
-    case AssetType.MixedUse => 2
-    case AssetType.IndirectDisposal => 3
-  }
-}
-
-@selected = @{form.value.map(_.map(toIndex)).getOrElse(List.empty)}
-
 @checkBoxes = @{List(
   CheckboxItem(
-    id = Some(messages(s"$key-0")),
     content = Text(messages(s"$key.Residential")),
     hint = Some(Hint(content = Text(messages(s"$key.Residential.helpText")))),
     value = "0",
-    checked = selected.contains(0)
+    checked = form.value match {
+      case Some(a: List[AssetType]) => a.contains(AssetType.Residential)
+      case _  => false
+    }
   ),
   CheckboxItem(
-    id = Some(messages(s"$key-1")),
     content = Text(messages(s"$key.NonResidential")),
     hint = Some(Hint(content = Text(messages(s"$key.NonResidential.helpText")))),
     value = "1",
-    checked = selected.contains(1)
+    checked = form.value match {
+      case Some(a: List[AssetType]) => a.contains(AssetType.NonResidential)
+      case _  => false
+    }
   ),
   CheckboxItem(
-    id = Some(messages(s"$key-2")),
     content = Text(messages(s"$key.MixedUse")),
     hint = Some(Hint(content = Text(messages(s"$key.MixedUse$userKey.helpText")))),
     value = "2",
-    checked = selected.contains(2)
+    checked = form.value match {
+      case Some(a: List[AssetType]) => a.contains(AssetType.MixedUse)
+      case _  => false
+    }
   ),
   CheckboxItem(
-    id = Some(messages(s"$key-3")),
     content = Text(messages(s"$key$userKey.IndirectDisposal")),
     hint = Some(Hint(content = Text(messages(s"$key.IndirectDisposal.helpText")))),
     value = "3",
-    checked = selected.contains(3)
+    checked = form.value match {
+      case Some(a: List[AssetType]) => a.contains(AssetType.IndirectDisposal)
+      case _  => false
+    }
   )
 )}
 
@@ -138,6 +135,7 @@
         content = Text(messages(s"$key$userKey.${e.message}")),
         visuallyHiddenText = Some(messages("generic.error"))
       )),
+      idPrefix = Some(key),
       name = s"$key[]",
       items = checkBoxes
     ))
