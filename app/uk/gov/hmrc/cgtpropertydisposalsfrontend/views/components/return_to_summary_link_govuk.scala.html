@@ -22,9 +22,9 @@
 @(displayReturnToSummaryLink: Boolean)(implicit messages: Messages)
 
 @if(displayReturnToSummaryLink) {
-    <p class="govuk-body">
-        <a class="govuk-link" href="@controllers.returns.routes.TaskListController.taskList().url" id="returnToSummaryLink">
-        @messages("returns.return-to-summary-link")
-        </a>
-    </p>
+  <p class="govuk-body">
+    <a class="govuk-link" href="@controllers.returns.routes.TaskListController.taskList().url" id="returnToSummaryLink">
+      @messages("returns.return-to-summary-link")
+    </a>
+  </p>
 }

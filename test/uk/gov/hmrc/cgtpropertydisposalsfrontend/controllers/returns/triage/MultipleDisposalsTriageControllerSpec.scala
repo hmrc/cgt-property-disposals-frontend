@@ -881,7 +881,7 @@ class MultipleDisposalsTriageControllerSpec
             expectReturnToSummaryLink,
             List(
               SelectorAndValue(
-                "#wrapper > div:eq(1) > article > form > p",
+                "form > p",
                 messageFromMessageKey(
                   s"multipleDisposalsWereYouAUKResident${displayType.getSubKey(separatePeriodOfAdminKey = true)}.link",
                   viewConfig.workOurYouResidenceStatusUrl
@@ -2856,7 +2856,7 @@ class MultipleDisposalsTriageControllerSpec
             expectReturnToSummaryLink,
             List(
               SelectorAndValue(
-                "#content > article > form > div > #multipleDisposalsAssetTypeForNonUkResidents > div:eq(4) > span",
+                "#multipleDisposalsAssetTypeForNonUkResidents-3-item-hint",
                 messageFromMessageKey(
                   s"multipleDisposalsAssetTypeForNonUkResidents.MixedUse${displayType.getSubKey(separatePeriodOfAdminKey = true)}.helpText"
                 )

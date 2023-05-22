@@ -37,5 +37,6 @@ class ViewHelpers @Inject() (
   val govukDetails: GovukDetails,
   val govukInsetText: GovukInsetText,
   val govukSelect: GovukSelect,
-  val govukBreadcrumbs: GovukBreadcrumbs
+  val govukBreadcrumbs: GovukBreadcrumbs,
+  val govukCheckboxes: GovukCheckboxes
 )

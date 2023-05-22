@@ -1189,7 +1189,7 @@ multipleDisposalsNumberOfProperties.p2=If you are reporting the sale of shares e
 multipleDisposalsNumberOfProperties.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
 multipleDisposalsNumberOfProperties.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
 multipleDisposalsNumberOfProperties.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
-multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new tab)</a>.
+multipleDisposalsNumberOfProperties.details.link=<a class="govuk-link" href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new tab)</a>.
 
 multipleDisposalsNumberOfProperties.error.invalid=Amount of disposals must be a number
 multipleDisposalsNumberOfProperties.error.required=Enter the number of disposals you are including in this return

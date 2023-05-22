@@ -18,65 +18,79 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
-    yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  formWrapper: FormWithCSRF,
+  yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
+  govukDetails : GovukDetails,
+  govukButton: GovukButton,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
-@(form: Form[Boolean], backLink: Call, hasCreatedDraftReturn: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+  form: Form[Boolean],
+  backLink: Call,
+  hasCreatedDraftReturn: Boolean,
+  isAmend: Boolean
+)(
+  implicit request: RequestWithSessionData[_],
+  messages:Messages
+)
 
 @key = @{"multipleDisposalsWereAllPropertiesResidential"}
+
 @title = @{messages(s"$key.title")}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@detailsContent = {
+  <p class="govuk-body">@{messages("multipleDisposalsWereAllPropertiesResidential.details.p1")}</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>@{messages("multipleDisposalsWereAllPropertiesResidential.details.li1")}</li>
+    <li>@{messages("multipleDisposalsWereAllPropertiesResidential.details.li2")}</li>
+    <li>@{messages("multipleDisposalsWereAllPropertiesResidential.details.li3")}</li>
+  </ul>
+}
 
-    @backLinkComponent(backLink)
+@layout(
+  title,
+  hasErrors = hasErrors,
+  backLinkUrl = Some(backLink.url)
+) {
+  @if(hasErrors) {
+    @errorSummary(form)
+  }
 
-    @if(hasErrors) {
-        @errorSummary(form)
-    }
+  <span class="govuk-caption-xl">
+    @messages("triage.caption")
+  </span>
 
-    @caption(messages("triage.caption"))
+  @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.wereAllPropertiesResidentialSubmit(), 'novalidate -> "novalidate") {
+    @yesNo(
+      fieldId = key,
+      label = title,
+      errorKey = form.error(key).map(e => e.message),
+      selected = form.value,
+      helpText = Some(Html(messages(s"$key.helpText"))),
+      errorMessage = form.error(key).map(e => messages(s"${e.key}.${e.message}", e.args:_*) )
+    )
 
-    @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.wereAllPropertiesResidentialSubmit(), 'novalidate -> "novalidate") {
-        @yesNo(
-            fieldId = key,
-            label = pageHeading(title),
-            errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors,
-            selected = form.value,
-            helpText = Some(Html(messages(s"$key.helpText")))
-        )
-        @details(
-            messages("multipleDisposalsWereAllPropertiesResidential.link"),
-            Html(
-                s"""
-                | <p>${messages("multipleDisposalsWereAllPropertiesResidential.details.p1")}</p>
-                | <ul class="list-bullet">
-                | <li>${messages("multipleDisposalsWereAllPropertiesResidential.details.li1")}</li>
-                | <li>${messages("multipleDisposalsWereAllPropertiesResidential.details.li2")}</li>
-                | <li>${messages("multipleDisposalsWereAllPropertiesResidential.details.li3")}</li>
-                | </ul>
-                |""".stripMargin
-            )
-        )
+    @govukDetails(Details(
+      summary = Text(messages("multipleDisposalsWereAllPropertiesResidential.link")),
+      content = HtmlContent(detailsContent)
+    ))
 
-        @submitButton(messages(if(isAmend) "button.continue" else if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
-    }
+    @govukButton(Button(
+      attributes = Map("id" -> "submitButton"),
+      content = Text(messages(if(isAmend) "button.continue" else if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
+    ))
+  }
 
-    @returnToSummaryLink(hasCreatedDraftReturn)
+  @returnToSummaryLink(hasCreatedDraftReturn)
 
 }
