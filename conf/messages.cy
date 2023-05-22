@@ -1022,7 +1022,7 @@ multiple-disposals.guidance.p3=Mae’n rhaid i chi anfon Ffurflenni Treth ar wah
 multiple-disposals.guidance.details.summary=Beth sy’n digwydd ar ddyddiadau ‘cyfnewid’ a ‘chwblhau’?
 multiple-disposals.guidance.details.p1=Fel arfer, y dyddiad ‘cwblhau’ yw’r diwrnod y bydd y perchennog newydd yn cael allwedd i’r eiddo.
 multiple-disposals.guidance.details.p2=Fel arfer, mae ‘cyfnewid’ contract yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
-multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Darllenwch am ‘gyfnewid a ‘chwblhau’ (yn agor tab newydd)</a>.
+multiple-disposals.guidance.details.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Darllenwch am ‘gyfnewid a ‘chwblhau’ (yn agor tab newydd)</a>.
 multipleDisposalsNumberOfProperties.title=Faint o warediadau ydych yn eu cynnwys yn y Ffurflen Dreth hon?
 multipleDisposalsNumberOfProperties.p1=Mae’n rhaid i’r holl warediadau eiddo fod â’r un dyddiad ‘cwblhau’. Mae’n rhaid i’r holl ddyddiadau ‘cyfnewid’ contract fod yn yr un flwyddyn dreth.
 multipleDisposalsNumberOfProperties.p2=Os ydych yn rhoi gwybod am werthiant cyfranddaliadau, nodwch nifer y cwmnïau yr oedd y cyfranddaliadau’n cael eu cadw ynddynt. Mae’n rhaid i’r holl gyfranddaliadau fod wedi’u gwerthu ar yr un dyddiad.
