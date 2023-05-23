@@ -4609,7 +4609,7 @@ singleMixedUseDisposalsAcquisitionPrice.trust.title=What was the acquisition val
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=What was the market value of the property on {0}?
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What was the market value of the property on {0}?
 
-singleMixedUseDisposalsAcquisitionPrice.helpText=This is the amount you paid when they bought the property or its market value if you inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+singleMixedUseDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 singleMixedUseDisposalsAcquisitionPrice.personalRep.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 singleMixedUseDisposalsAcquisitionPrice.capacitor.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 singleMixedUseDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
