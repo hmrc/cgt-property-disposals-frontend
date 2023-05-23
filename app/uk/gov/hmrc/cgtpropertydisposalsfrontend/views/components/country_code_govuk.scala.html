@@ -14,57 +14,28 @@
  * limitations under the License.
  *@
 
-@import cats.instances.string._
-@import cats.syntax.eq._
-@import controllers.routes
+@import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.CountryCode
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.WelshSorting.WelshStringOps
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Implicits.RichSelect
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.accessibleautocomplete.AccessibleAutocomplete
 
-@this(
-  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline_govuk
-)
+@this(govukSelect: GovukSelect)
 
 @(
-  countryCodes: List[CountryCode],
-  selected: Option[String],
+  countryCodes: List[Country.CountryCode],
+  form: Form[_],
   label: String,
-  errorKey: Option[String],
-  hasErrors: Boolean,
-  autoComplete: AutoCompleteType,
   helpText: Option[Html] = None,
-  extraContent: Option[Html] = None,
   labelAsHeading: Boolean = false
 )(implicit messages: Messages)
 
-@fieldId = @{"countryCode"}
-@classes = @{if(hasErrors) "govuk-form-group govuk-form-group--error govuk-!-width-two-thirds" else "govuk-form-group govuk-!-width-two-thirds" }
-@inputClasses = @{if(hasErrors) "govuk-select govuk-select--error autocomplete"  else "govuk-select autocomplete"}
-@errorId = @{s"${{fieldId}}-inline-error"}
-@errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
-@hintTextKey = @{s"${{fieldId}}-govuk-hint"}
-@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
-@extraContentId = @{s"${{fieldId}}-extra-content"}
-@extraContentIdWithContent = @{extraContent.map(extraContentId -> _)}
-
-<link
-    rel="stylesheet"
-    type="text/css"
-    href='@routes.Assets.at("stylesheets/accessible-autocomplete.min.css")'
-/>
-
-@fieldLabel = {
-  @if(labelAsHeading) {
-    <h1 class="govuk-label-wrapper">
-      <label for="@{fieldId}" class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-3">@{label}</label>
-    </h1>
-  } else {
-    <label for="@{fieldId}" class="govuk-label govuk-label--m">@{label}</label>
-  }
-}
-@isWelsh = @{ messages("lang") =!= "en" }
+@key = @{ "countryCode" }
+@isWelsh = @{ messages("lang").matches("cy") }
+@labelClass = @{if(labelAsHeading) { "govuk-label--xl" } else { "govuk-label--m" }}
 @sortedCountryCodeOptions = @{
   val countries = countryCodes.map(countryCode => countryCode -> messages(s"country.$countryCode"))
       countries.sortWith{ case ((_, countryName1), (_, countryName2)) =>
@@ -72,56 +43,36 @@
           else countryName1.compare(countryName2) < 0
       }
 }
+@countryCodeSelectItems = @{
+  List(SelectItem(value = Some(""), text = messages("countryCode.placeholder"))) :::
+    sortedCountryCodeOptions.map { countryCodeWithCountryName =>
+        SelectItem(
+          value = Some(countryCodeWithCountryName._1),
+          text = countryCodeWithCountryName._2,
+          selected = form.data.get(key).contains(countryCodeWithCountryName._1)
+        )
+    }
+}
 
-@describedByKeys = @{List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
-
-<div class="@classes country-code-wrapper">
- @fieldLabel
- @extraContent.map { text =>
-   <div id="@extraContentId">
-     @text
-   </div>
- }
- @hintIdWithHintText.map { case (id, text) =>
-  <span id="@id" class="govuk-hint">
-    @text
-  </span>
- }
- @errorIdWithMessageKey.map { case (id, key) =>
-  @errorInline(id, messages(s"$fieldId.$key"))
- }
-    <div class="autocomplete__wrapper">
-     <select
-       id="@fieldId"
-       name="@fieldId"
-       class="@inputClasses"
-       autocomplete="@{autoComplete.value}"
-       @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-        <option value="">@messages("countryCode.placeholder")</option>
-         @sortedCountryCodeOptions.map { countryCodeWithCountryName =>
-             <option value="@{countryCodeWithCountryName._1}" @{if(selected.contains(countryCodeWithCountryName._1))"selected"}>@{countryCodeWithCountryName._2}</option>
-         }
-     </select>
-    </div>
-
-    <script src='@routes.Assets.at("javascript/accessible-autocomplete.min.js")'></script>
-    <script>
-            function convertSelectElementsToAutocomplete() {
-                var selectEl = document.querySelector(".autocomplete");
-                if (selectEl && selectEl.style.display !== "none") {
-                    console.log("enhancing select element");
-                    accessibleAutocomplete.enhanceSelectElement({
-                        id: selectEl.id, // Important that id is the same
-                        minLength: 2,
-                        defaultValue: "",
-                        selectElement: selectEl,
-                        showAllValues: true,
-                    });
-                }
-            }
-
-            convertSelectElementsToAutocomplete();
-            convertSelectElementsToAutocomplete(); // idempotent
-    </script>
-
-</div>
+  @govukSelect(Select(
+      id = key,
+      name = key,
+      items = countryCodeSelectItems,
+      label = Label(
+        content = Text(label),
+        isPageHeading = labelAsHeading,
+        classes = labelClass
+      ),
+      hint = helpText.map(h => Hint(
+        content = HtmlContent(h)
+      )),
+      errorMessage = form.error("countryCode").map(e => ErrorMessage(
+        content = Text(messages(s"countryCode.${e.message}"))
+      )),
+      classes = "govuk-!-width-two-thirds"
+  ).asAccessibleAutocomplete(Some(AccessibleAutocomplete(
+        showAllValues = true,
+        autoSelect = false,
+        defaultValue = Some("")
+    )
+  )))

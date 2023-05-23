@@ -246,7 +246,7 @@ class HomePageControllerSpec
 
       // the callToActionButton selector is designed to select the only
       // button on the page for us to check which message it has
-      val callToActionButton    = ".govuk-button"
+      val callToActionButton    = "#main-content .govuk-button"
       val resumeDraftMessage    = "drafts.list.resume"
       val makePaymentMessage    = "account.make.payment.link"
       val startNewReturnMessage = "account.home.button.start-a-new-return"

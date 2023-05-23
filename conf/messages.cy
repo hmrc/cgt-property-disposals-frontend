@@ -829,12 +829,12 @@ triage.enterCountry.agent.helpText=Fel arfer, dyma’r diwrnod y gwnaeth eich cl
 triage.enterCountry.trust.helpText=Fel arfer, dyma’r diwrnod y gwnaeth yr ymddiriedolaeth a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
 triage.enterCountry.capacitor.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
 triage.enterCountry.personalRep.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
-triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor tab newydd)</a>.
-triage.enterCountry.agent.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor tab newydd)</a>.
-triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor tab newydd)</a>.
-triage.enterCountry.capacitor.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor tab newydd)</a>.
-triage.enterCountry.personalRep.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor tab newydd)</a>.
-triage.enterCountry.personalRepInPeriodOfAdmin.link=<a class="govuk-link" href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor tab newydd)</a>.
+triage.enterCountry.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor tab newydd)</a>.
+triage.enterCountry.agent.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Gweithiwch allan statws preswylio’ch cleient (yn agor tab newydd)</a>.
+triage.enterCountry.trust.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor tab newydd)</a>.
+triage.enterCountry.capacitor.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor tab newydd)</a>.
+triage.enterCountry.personalRep.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor tab newydd)</a>.
+triage.enterCountry.personalRepInPeriodOfAdmin.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor tab newydd)</a>.
 assetTypeForNonUkResidents.title=Pa fath o eiddo neu ased y gwnaethoch ei werthu neu ei waredu?
 assetTypeForNonUkResidents.agent.title=Pa fath o eiddo, tir neu ased y gwnaeth eich cleient ei werthu neu ei waredu?
 assetTypeForNonUkResidents.trust.title=Pa fath o eiddo, tir neu ased y gwnaeth yr ymddiriedolaeth ei werthu neu ei waredu?
