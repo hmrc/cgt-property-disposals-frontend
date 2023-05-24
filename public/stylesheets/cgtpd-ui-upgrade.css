@@ -385,3 +385,37 @@ html[lang="cy"] .govuk-date-input > .govuk-date-input__item:first-of-type {
         margin-bottom: 0;
     }
 }
+
+.calc-rows > li {
+    position: relative;
+}
+
+.calc-rows h2 {
+    max-width: 390px;
+}
+
+.calc-total {
+    font-family: GDS Transport, arial, sans-serif;
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-weight: bold;
+}
+
+.sum-part > .govuk-summary-list__key {
+    font-weight: normal;
+}
+.sum-total > .govuk-summary-list__value {
+    font-weight: bold;
+}
+
+.sum-part > .govuk-summary-list__key,
+.sum-total > .govuk-summary-list__key {
+    width: 66%;
+}
+
+.sum-total > .govuk-summary-list__value,
+.sum-part > .govuk-summary-list__value {
+    text-align: right;
+    width: 33%;
+}

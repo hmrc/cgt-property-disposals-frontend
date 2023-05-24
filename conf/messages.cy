@@ -4647,18 +4647,18 @@ furtherReturnGuidance.stage-a.step-a1.p1=Gwnewch hyn ar gyfer pob gwarediad sy�
 furtherReturnGuidance.stage-a.step-a1.li1=Dechreuwch gyda’r enillion yn sgil gwaredu’r eiddo.
 furtherReturnGuidance.stage-a.step-a1.li2=Tynnwch y costau gwerthu neu waredu.
 furtherReturnGuidance.stage-a.step-a1.li3=Tynnwch y costau gwella.
-furtherReturnGuidance.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’ch <strong class="bold">ennill neu’ch colled ar gyfer y gwarediad hwn</strong>.
-furtherReturnGuidance.agent.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’r <strong class="bold">ennill neu’r golled ar gyfer y gwarediad hwn</strong>.
+furtherReturnGuidance.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’ch <strong>ennill neu’ch colled ar gyfer y gwarediad hwn</strong>.
+furtherReturnGuidance.agent.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’r <strong>ennill neu’r golled ar gyfer y gwarediad hwn</strong>.
 furtherReturnGuidance.capacitor.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’r <strong class="bold">ennill neu’r golled ar gyfer y gwarediad hwn</strong>.
-furtherReturnGuidance.trust.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’r <strong class="bold">ennill neu’r golled ar gyfer y gwarediad hwn</strong>.
-furtherReturnGuidance.personalRep.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’r <strong class="bold">ennill neu’r golled ar gyfer y gwarediad hwn</strong>.
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’r <strong class="bold">ennill neu’r golled ar gyfer y gwarediad hwn</strong>.
-furtherReturnGuidance.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong class="bold">ennill hwn neu’r golled hon</strong> i roi’ch <strong class="bold">ennill neu’ch colled ar ôl rhyddhad</strong>.
-furtherReturnGuidance.agent.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong class="bold">ennill hwn neu’r golled hon</strong> i roi’r <strong class="bold">ennill neu’r golled ar ôl rhyddhad</strong>.
-furtherReturnGuidance.capacitor.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong class="bold">ennill hwn neu’r golled hon</strong> i roi’r <strong class="bold">ennill neu’r golled ar ôl rhyddhad</strong>.
-furtherReturnGuidance.trust.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong class="bold">ennill hwn neu’r golled hon</strong> i roi’r <strong class="bold">ennill neu’r golled ar ôl rhyddhad</strong>.
-furtherReturnGuidance.personalRep.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong class="bold">ennill hwn neu’r golled hon</strong> i roi’r <strong class="bold">ennill neu’r golled ar ôl rhyddhad</strong>.
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong class="bold">ennill hwn neu’r golled hon</strong> i roi <strong class="bold">ennill neu golled yr ystâd ar ôl rhyddhad</strong>.
+furtherReturnGuidance.trust.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’r <strong>ennill neu’r golled ar gyfer y gwarediad hwn</strong>.
+furtherReturnGuidance.personalRep.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’r <strong>ennill neu’r golled ar gyfer y gwarediad hwn</strong>.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1.li4=Tynnwch y costau caffael i roi’r <strong>ennill neu’r golled ar gyfer y gwarediad hwn</strong>.
+furtherReturnGuidance.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong>ennill hwn neu’r golled hon</strong> i roi’ch <strong class="bold">ennill neu’ch colled ar ôl rhyddhad</strong>.
+furtherReturnGuidance.agent.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong>ennill hwn neu’r golled hon</strong> i roi’r <strong class="bold">ennill neu’r golled ar ôl rhyddhad</strong>.
+furtherReturnGuidance.capacitor.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong>ennill hwn neu’r golled hon</strong> i roi’r <strong class="bold">ennill neu’r golled ar ôl rhyddhad</strong>.
+furtherReturnGuidance.trust.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong>ennill hwn neu’r golled hon</strong> i roi’r <strong class="bold">ennill neu’r golled ar ôl rhyddhad</strong>.
+furtherReturnGuidance.personalRep.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong>ennill hwn neu’r golled hon</strong> i roi’r <strong class="bold">ennill neu’r golled ar ôl rhyddhad</strong>.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1.li5=Tynnwch unrhyw ryddhad (ond nid y Swm Blynyddol sydd wedi ei Eithrio rhag Treth) o’r <strong>ennill hwn neu’r golled hon</strong> i roi <strong class="bold">ennill neu golled yr ystâd ar ôl rhyddhad</strong>.
 furtherReturnGuidance.stage-a.step-a2=Cam A2 – Cyfrifwch eich ennill net ar warediadau sy’n gysylltiedig ag eiddo yn y DU
 furtherReturnGuidance.agent.stage-a.step-a2=Cam A2 – Cyfrifwch yr ennill net ar warediadau sy’n gysylltiedig ag eiddo yn y DU
 furtherReturnGuidance.capacitor.stage-a.step-a2=Cam A2 – Cyfrifwch yr ennill net ar warediadau sy’n gysylltiedig ag eiddo yn y DU
@@ -4671,15 +4671,15 @@ furtherReturnGuidance.capacitor.stage-a.step-a2.p1=Gwnewch hyn i gyfrifo ennill 
 furtherReturnGuidance.trust.stage-a.step-a2.p1=Gwnewch hyn i gyfrifo’r ennill net ar warediadau sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth hyd yn hyn.
 furtherReturnGuidance.personalRep.stage-a.step-a2.p1=Gwnewch hyn i gyfrifo ennill net y person ar warediadau sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth hyd yn hyn.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.p1=Gwnewch hyn i gyfrifo’r ennill net ar warediadau sy’n gysylltiedig ag eiddo yn y DU ar gyfer y flwyddyn dreth hyd yn hyn.
-furtherReturnGuidance.stage-a.step-a2.li1=Ychwanegwch at ei gilydd yr holl <strong class="bold">enillion ar ôl rhyddhad</strong> o warediadau sy’n gysylltiedig ag eiddo yn y DU.
+furtherReturnGuidance.stage-a.step-a2.li1=Ychwanegwch at ei gilydd yr holl <strong>enillion ar ôl rhyddhad</strong> o warediadau sy’n gysylltiedig ag eiddo yn y DU.
 furtherReturnGuidance.stage-a.step-a2.li2=Tynnwch unrhyw golledion Treth Enillion Cyfalaf yn ystod y flwyddyn y gellir eu didynnu.
 furtherReturnGuidance.stage-a.step-a2.li3=Tynnwch unrhyw golledion Treth Enillion Cyfalaf caniataol yn ystod blynyddoedd treth blaenorol.
-furtherReturnGuidance.stage-a.step-a2.li4=Tynnwch eich <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> yr ydych am ei ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">eich ennill net</strong>.
-furtherReturnGuidance.agent.stage-a.step-a2.li4=Tynnwch <a href="{0}" target="_blank">Swm Blynyddol eich cleient sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
-furtherReturnGuidance.capacitor.stage-a.step-a2.li4=Tynnwch <a href="{0}" target="_blank">Swm Blynyddol y person sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
-furtherReturnGuidance.trust.stage-a.step-a2.li4=Tynnwch y <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
-furtherReturnGuidance.personalRep.stage-a.step-a2.li4=Tynnwch <a href="{0}" target="_blank">Swm Blynyddol y person sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.li4=Tynnwch y <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar yr enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
+furtherReturnGuidance.stage-a.step-a2.li4=Tynnwch eich <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> yr ydych am ei ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">eich ennill net</strong>.
+furtherReturnGuidance.agent.stage-a.step-a2.li4=Tynnwch <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Swm Blynyddol eich cleient sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
+furtherReturnGuidance.capacitor.stage-a.step-a2.li4=Tynnwch <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Swm Blynyddol y person sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
+furtherReturnGuidance.trust.stage-a.step-a2.li4=Tynnwch y <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
+furtherReturnGuidance.personalRep.stage-a.step-a2.li4=Tynnwch <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Swm Blynyddol y person sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.li4=Tynnwch y <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> ac sydd i’w ddefnyddio ar yr enillion o eiddo preswyl i gael <strong class="bold">yr ennill net</strong>.
 furtherReturnGuidance.stage-a.step-a2.li5=Mae’r canlyniad hwn yn seiliedig ar y Dreth Enillion Cyfalaf y dylech fod yn ei thalu nawr.
 furtherReturnGuidance.agent.stage-a.step-a2.li5=Mae’r canlyniad hwn yn seiliedig ar y Dreth Enillion Cyfalaf y dylid ei thalu nawr.
 furtherReturnGuidance.capacitor.stage-a.step-a2.li5=Mae’r canlyniad hwn yn seiliedig ar y Dreth Enillion Cyfalaf y dylid ei thalu nawr.
@@ -4741,7 +4741,7 @@ furtherReturnGuidance.stage-a.step2.example1.table1.total.value=Ennill o £67,40
 furtherReturnGuidance.stage-a.step1.example2.p1=Gwerthodd Kavita 2 eiddo preswyl yn y DU. Roedd gan y ddau ddyddiad cyfnewid contractau yn y flwyddyn dreth hon. Mae hi’n dymuno defnyddio’r golled o ail warediad i ostwng yr ennill net ar y cyntaf.
 furtherReturnGuidance.stage-a.step1.example2.headingText=Cam A1 – Mae Kavita yn cyfrifo’r ennill neu’r golled ar ôl rhyddhad ar gyfer pob gwarediad y mae wedi’i wneud hyd yn hyn yn ystod y flwyddyn dreth hon.
 furtherReturnGuidance.stage-a.step1.example2.p2=Mae hi’n cynnwys y gwarediadau y mae’n eu cynnwys yn y Ffurflen Dreth hon.
-furtherReturnGuidance.stage-a.step1.example2.p3=<strong class="bold">Eiddo 1 – gwaredu eiddo preswyl yn y DU ym mis Mai {0}</strong>
+furtherReturnGuidance.stage-a.step1.example2.p3=Eiddo 1 – gwaredu eiddo preswyl yn y DU ym mis Mai {0}
 furtherReturnGuidance.stage-a.step1.example2.table1.row1.key=Mae hi’n dechrau gyda’r enillion yn sgil gwaredu’r eiddo
 furtherReturnGuidance.stage-a.step1.example2.table1.row1.value=£325,500
 furtherReturnGuidance.stage-a.step1.example2.table1.row2.key=Mae hi’n tynnu costau gwerthu neu waredu
@@ -4756,7 +4756,7 @@ furtherReturnGuidance.stage-a.step1.example2.table1.row6.key=Mae hi’n tynnu rh
 furtherReturnGuidance.stage-a.step1.example2.table1.row6.value=£1,200
 furtherReturnGuidance.stage-a.step1.example2.table1.total.key=Ennill ar ôl rhyddhad ar gyfer eiddo 1
 furtherReturnGuidance.stage-a.step1.example2.table1.total.value=£157,900
-furtherReturnGuidance.stage-a.step1.example2.p4=<strong class="bold">Eiddo 2 – gwaredu eiddo preswyl yn y DU ym mis Mehefin {0}</strong>
+furtherReturnGuidance.stage-a.step1.example2.p4=Eiddo 2 – gwaredu eiddo preswyl yn y DU ym mis Mehefin {0}
 furtherReturnGuidance.stage-a.step1.example2.table2.row1.key=Mae hi’n dechrau gyda’r enillion yn sgil gwaredu’r eiddo
 furtherReturnGuidance.stage-a.step1.example2.table2.row1.value=£150,000
 furtherReturnGuidance.stage-a.step1.example2.table2.row2.key=Mae hi’n tynnu costau gwerthu neu waredu
@@ -4790,7 +4790,7 @@ furtherReturnGuidance.stage-a.step2.example2.table1.total.value=Ennill o £89,70
 furtherReturnGuidance.trust.stage-a.example3.p1=Mae Bianca yn ymddiriedolwr i Ymddiriedolaeth ‘Square’, ymddiriedolaeth y mae ei man preswylio yn y DU. Gwerthodd 2 eiddo preswyl yn y DU yr oedd Ymddiriedolaeth ‘Square’ yn berchen arnynt ym mis Mai a mis Mehefin {0}.
 furtherReturnGuidance.trust.stage-a.step1.example3.headingText=Cam A1 – Mae Bianca yn cyfrifo’r ennill neu’r golled ar ôl rhyddhad ar gyfer pob un o’r gwarediadau a wnaed hyd yn hyn ym mlwyddyn dreth {0} i {1}.
 furtherReturnGuidance.trust.stage-a.step1.example3.p1=Mae hi’n cynnwys y gwarediadau y mae’n eu cynnwys yn y Ffurflen Dreth hon.
-furtherReturnGuidance.trust.stage-a.step1.example3.property1=<strong class="bold">Eiddo 1 – gwaredu eiddo preswyl yn y DU ym mis Mai {0}</strong>
+furtherReturnGuidance.trust.stage-a.step1.example3.property1=Eiddo 1 – gwaredu eiddo preswyl yn y DU ym mis Mai {0}
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.row1.key=Mae hi’n dechrau gyda’r enillion yn sgil gwaredu’r eiddo
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.row1.value=£325,500
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.row2.key=Mae hi’n tynnu costau gwerthu neu waredu
@@ -4805,7 +4805,7 @@ furtherReturnGuidance.trust.stage-a.step1.example3.table1.row6.key=Mae hi’n ty
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.row6.value=£9,480
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.total.key=Ennill ar ôl rhyddhad ar gyfer eiddo 1
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.total.value=Ennill o £46,070
-furtherReturnGuidance.trust.stage-a.step1.example3.property2=<strong class="bold">Eiddo 2 – gwaredu eiddo preswyl yn y DU ym mis Mehefin {0}</strong>
+furtherReturnGuidance.trust.stage-a.step1.example3.property2=Eiddo 2 – gwaredu eiddo preswyl yn y DU ym mis Mehefin {0}
 furtherReturnGuidance.trust.stage-a.step1.example3.table2.row1.key=Mae hi’n dechrau gyda’r enillion yn sgil gwaredu’r eiddo
 furtherReturnGuidance.trust.stage-a.step1.example3.table2.row1.value=£549,950
 furtherReturnGuidance.trust.stage-a.step1.example3.table2.row2.key=Mae hi’n tynnu costau gwerthu neu waredu
