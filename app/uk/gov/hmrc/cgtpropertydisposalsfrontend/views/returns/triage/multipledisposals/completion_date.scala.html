@@ -52,7 +52,7 @@
 @mainTemplate(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
  @if(hasErrors) {
-  @errorSummary(form)
+  @errorSummary(form, dateField = Some(key))
  }
 
   @caption(messages("triage.caption"))
