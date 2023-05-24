@@ -1263,7 +1263,7 @@ multipleDisposalsTaxYear.taxyear.2020=All between 6 April 2020 and 5 April 2021
 multipleDisposalsTaxYear.taxyear.before2020=All before 6 April 2020
 multipleDisposalsTaxYear.taxyear.different=The properties were exchanged in different tax years
 
-multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new tab)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
+multipleDisposalsTaxYear.details.p1=Contract <a class="govuk-link" href="{0}" target="_blank">exchange (opens in a new tab)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
 multipleDisposalsTaxYear.error.before.invalid=The exchange dates must be either in the same tax year as the date of death or a previous tax year
 multipleDisposalsTaxYear.error.after.invalid=The exchange dates must be either in the same tax year as the date of death or a later tax year
