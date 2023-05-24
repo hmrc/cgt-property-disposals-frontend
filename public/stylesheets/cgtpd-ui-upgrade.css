@@ -1,3 +1,6 @@
+html[lang="cy"] .govuk-date-input > .govuk-date-input__item:first-of-type {
+    margin-right: 9px;
+}
 .govuk-form-group--error .autocomplete__input {
     border-color: #d4351c;
 }
@@ -242,6 +245,7 @@
     color: #005ea5;
     padding: 12px 18px 8px 22px;
     border-bottom: 4px solid #005ea5;
+    font-family: GDS Transport, arial, sans-serif;
 }
 
 .account-menu .as-link-home:hover, .account-menu .as-link-active:hover {

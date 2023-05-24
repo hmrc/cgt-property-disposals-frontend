@@ -44,7 +44,7 @@
  @errorSummary(form, dateField = Some(key))
 }
 <span class="govuk-caption-xl">@messages("triage.caption")</span>
-@formHelper(submit, 'novalidate -> "novalidate") {
+@formHelper(submit) {
  @dateInput(
   fieldId = key,
   label = title,

@@ -67,7 +67,7 @@
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
  @if(hasErrors) {
-  @errorSummary(form)
+  @errorSummary(form, dateField = Some(key))
  }
 <span class="govuk-caption-xl">@messages("triage.caption")</span>
  @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.whenWasCompletionDateSubmit()) {
