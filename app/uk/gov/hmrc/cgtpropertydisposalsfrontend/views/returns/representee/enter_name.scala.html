@@ -28,11 +28,12 @@
 @this(
         layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        formWrapper: FormWithCSRF,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
         govukInput : GovukInput,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        govukFieldset: GovukFieldset
 )
 
 @(
@@ -54,57 +55,58 @@
 @lastNameKey = @{"representeeLastName"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @title = @{messages(s"$key$representativeTypeInterpolator.title")}
+@htmlContent = {
+  <div class="govuk-hint" id=@{s"$key-hint"}>
+    @messages(s"$key$representativeTypeInterpolator.p1")
+  </div>
+  @govukInput(Input(
+    id = firstNameKey,
+    name = firstNameKey.toString,
+    label = Label(
+      isPageHeading = false,
+      classes = "govuk-label--m",
+      content = Text(messages(s"$key.firstName.label"))
+    ),
+    autocomplete= Some("given-name"),
+    classes = "govuk-input--width-20",
+    hint = None,
+    value = form.data.get(firstNameKey),
+    errorMessage = form.error(firstNameKey).map(e => ErrorMessage(content =Text(messages(s"$firstNameKey.${e.message}")))),
+  ))
+  @govukInput(Input(
+    id = lastNameKey,
+    name = lastNameKey.toString,
+    label = Label(
+      isPageHeading = false,
+      classes = "govuk-label--m",
+      content = Text(messages(s"$key.lastName.label")),
+    ),
+    autocomplete= Some("family-name"),
+    classes = "govuk-input--width-20",
+    hint = None,
+    value = form.data.get(lastNameKey),
+    errorMessage = form.error(lastNameKey).map(e => ErrorMessage(content =Text(messages(s"$lastNameKey.${e.message}")))),
+  ))
+}
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form)
     }
+
     @caption(messages("representee.caption"))
-
-    <h1 class="govuk-heading-xl">
-        @title
-    </h1>
-
-    @formWrapper(routes.RepresenteeController.enterNameSubmit(), 'novalidate -> "novalidate") {
-
-        <div class="govuk-hint">
-            @messages(s"$key$representativeTypeInterpolator.p1")
-        </div>
-        @govukInput(Input(
-            id = firstNameKey,
-            name = firstNameKey.toString,
-            label = Label(
-                isPageHeading = true,
-                classes = "govuk-label--m",
-                content = Text(messages(s"$key.firstName.label"))
-            ),
-            autocomplete= Some("given-name"),
-            classes = "govuk-input--width-20",
-            hint = None,
-            value = form.data.get(firstNameKey),
-            errorMessage = form.error(firstNameKey).map(e => ErrorMessage(content =Text(messages(s"$firstNameKey"+"."+ e.message)))),
-        ))
-
-        @govukInput(Input(
-            id = lastNameKey,
-            name = lastNameKey.toString,
-            label = Label(
-            isPageHeading = true,
-            classes = "govuk-label--m",
-            content = Text(messages(s"$key.lastName.label")),
-        ),
-            autocomplete= Some("family-name"),
-            classes = "govuk-input--width-20",
-            hint = None,
-            value = form.data.get(lastNameKey),
-            errorMessage = form.error(lastNameKey).map(e => ErrorMessage(content =Text(messages(s"$lastNameKey"+"."+ e.message)))),
-        ))
-
-
-        @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
+    @formWrapper(routes.RepresenteeController.enterNameSubmit()) {
+      @govukFieldset(Fieldset(
+        legend = Some(Legend(
+          content = Text(title),
+          classes = "govuk-fieldset__legend--xl",
+          isPageHeading = true
+        )),
+        describedBy = Some(s"$key-hint"),
+        html = htmlContent
+      ))
+      @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
     }
-
     @returnToSummaryLink(displayReturnToSummaryLink)
-
 }

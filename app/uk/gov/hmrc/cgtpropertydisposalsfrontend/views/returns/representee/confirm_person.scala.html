@@ -28,13 +28,13 @@
 
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    formWrapper: FormWithCSRF,
     govukButton: GovukButton,
     govukRadios : GovukRadios,
-    govukTable : GovukTable
+    govukSummaryList: GovukSummaryList
 )
 
 @(
@@ -46,80 +46,79 @@
     isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
-@title = @{ messages("representeeConfirmPerson.title") }
-@key = @{ "confirmed"}
-
+@title = @{messages("representeeConfirmPerson.title")}
+@key = @{"confirmed"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @formTitle = @{messages("representeeConfirmPerson.formTitle")}
-
 @isDisplayedWithLabelAndId = @{
-    id match { case RepresenteeCgtReference(CgtReference(value)) => (true, messages("representeeConfirmPerson.summaryLine2.cgtReferenceId"), value) case _ => (false, "", "")
+    id match {
+      case RepresenteeCgtReference(CgtReference(value)) =>
+        (true, messages("representeeConfirmPerson.summaryLine2.cgtReferenceId"), value)
+      case _ => (false, "", "")
     }
 }
+@cgtRefRow = @{if(isDisplayedWithLabelAndId._1) {
+    List(SummaryListRow(
+      key = Key(
+        content = Text(isDisplayedWithLabelAndId._2)
+      ),
+      value = Value(
+        content = Text(isDisplayedWithLabelAndId._3)
+      ),
+      actions = None
+    ))
+  } else List.empty}
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
+  @if(hasErrors) {  @errorSummary(form) }
+  @caption(messages("representee.caption"))
+  <h1 class="govuk-heading-xl">@title</h1>
 
-    @if(hasErrors) {
-        @errorSummary(form)
-    }
-    @caption(messages("representee.caption"))
+  @govukSummaryList(SummaryList(
+    rows = List(
+      SummaryListRow(
+        key = Key(
+          content = Text(messages("representeeConfirmPerson.summaryLine1"))
+        ),
+        value = Value(
+          content = Text(s"${name.firstName} ${name.lastName}")
+        ),
+        actions = None
+      )
+    ) ++ cgtRefRow
+  ))
 
-    <h1 class="govuk-heading-xl">@title</h1>
-
-    @govukTable(
-        Table(
-            rows = Seq(
-            Seq(
-                TableRow(
-                    content = Text(messages("representeeConfirmPerson.summaryLine1"))
-                ),
-                TableRow(
-                    content =  Text(messages((name.firstName + " " +name.lastName).toString )),
-                    format = Some("text")
-                ),
-                TableRow(
-                    content =  if(isDisplayedWithLabelAndId._1){Text(messages(isDisplayedWithLabelAndId._2 + " " +  isDisplayedWithLabelAndId._3))} else Empty,
-                    format = Some("text")
-                ),
-                )
-            ),
-            head = None,
-            caption = None,
-            captionClasses = "govuk-table__caption--m",
-            firstCellIsHeader = true
-        )
-    )
-
-@formWrapper(routes.RepresenteeController.confirmPersonSubmit(), 'novalidate -> "novalidate") {
-
-        @govukRadios(Radios(
-            fieldset = Some(Fieldset(
-                legend = Some(Legend(
-                    content = HtmlContent(formTitle),
-                    classes = "govuk-fieldset__legend--m"
-                    ))
-                )),
-            errorMessage = if(hasErrors){Some(ErrorMessage(content = Text(messages("confirmed.error.required"))))} else  None,
-            hint = None,
-            idPrefix = Some(key),
-            name = key,
-            items = Seq(
-                RadioItem(
-                    content = Text(messages("generic.yes")),
-                    value = Some("true"),
-                    hint = None,
-            ),
-            RadioItem(
-                content = Text(messages("generic.no")),
-                value = Some("false"),
-                hint = None,
-                )
-            )
+  @formWrapper(routes.RepresenteeController.confirmPersonSubmit()) {
+    @govukRadios(Radios(
+      fieldset = Some(Fieldset(
+        legend = Some(Legend(
+          content = Text(formTitle),
+          classes = "govuk-fieldset__legend--m"
         ))
+      )),
+      errorMessage = form.error(key).map { e => ErrorMessage(
+        content = Text(messages(s"$key.${e.message}"))
+      )},
+      idPrefix = Some(key),
+      name = key,
+      items = Seq(
+        RadioItem(
+          content = Text(messages("generic.yes")),
+          value = Some("true")
+        ),
+        RadioItem(
+          content = Text(messages("generic.no")),
+          value = Some("false")
+        )
+      )
+    ))
 
-      @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
-    }
+    @govukButton(Button(
+      content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+    ))
 
-    @returnToSummaryLink(displayReturnToSummaryLink)
+  }
+
+  @returnToSummaryLink(displayReturnToSummaryLink)
 
 }

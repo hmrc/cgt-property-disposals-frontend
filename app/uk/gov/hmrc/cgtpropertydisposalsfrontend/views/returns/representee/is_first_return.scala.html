@@ -17,6 +17,7 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
+@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
@@ -28,10 +29,10 @@
 @this(
         layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        govukRadios : GovukRadios,
+        formWrapper: FormWithCSRF,
         govukButton: GovukButton
 )
 
@@ -51,47 +52,20 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
-
     @if(hasErrors) {
-        @errorSummary(form, userKeyOnly = s".$userKey")
+      @errorSummary(form, userKeyOnly = s".$userKey")
     }
-
-    @formWrapper(routes.RepresenteeController.isFirstReturnSubmit(), 'novalidate -> "novalidate") {
-
     @caption(messages("representee.caption"))
-
-        @govukRadios(
-            Radios(
-                fieldset = Some(Fieldset(
-                legend = Some(Legend(
-                content = Text(title),
-                classes = "govuk-fieldset__legend--xl",
-                isPageHeading = true
-                ))
-                )),
-                errorMessage = if(hasErrors){Some(ErrorMessage(content = Text(messages("representeeIsFirstReturn.capacitor.error.required"))))} else  None,
-                hint = Some(Hint(content = Text(messages((s"$key.helpText"))))),
-                idPrefix = Some(key),
-                name = key,
-                items = Seq(
-                    RadioItem(
-                        content = Text(messages("generic.yes")),
-                        value = Some("true"),
-                        hint = None,
-                        checked = form("representeeIsFirstReturn").value.contains("true")
-                    ),
-                    RadioItem(
-                        content = Text(messages("generic.no")),
-                        value = Some("false"),
-                        hint = None,
-                        checked = form("representeeIsFirstReturn").value.contains("false")
-                        )
-                    )
-                )
-            )
-        @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
+    @formWrapper(routes.RepresenteeController.isFirstReturnSubmit()) {
+      @yesNo(
+        fieldId = key,
+        label = title,
+        errorKey = form.error(key).map(e => s"$userKey.${e.message}"),
+        selected = form.value,
+        helpText = Some(Html(messages(s"$key.helpText")))
+      )
+      @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)
-
 }

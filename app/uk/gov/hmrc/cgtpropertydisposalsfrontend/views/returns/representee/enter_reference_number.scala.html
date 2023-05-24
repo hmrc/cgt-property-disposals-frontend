@@ -46,51 +46,60 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @cgtReferenceKeyHtml = {
-    @govukInput(Input(
-        id = cgtReferenceKey,
-        name = cgtReferenceKey,
-        inputType = cgtReferenceKey,
-        label = Label(
-        content = HtmlContent(messages(s"$cgtReferenceKey.helpText")),
-        ),
-        errorMessage = form.error(cgtReferenceKey).map(e =>
-          ErrorMessage(
-            content = Text(messages(s"$cgtReferenceKey.${e.message}"))
-          )
-        ),
-        classes = "govuk-!-width-one-third",
-        spellcheck = Some(false),
-        value = form(cgtReferenceKey).value,
-    ))
+  @govukInput(Input(
+    id = cgtReferenceKey,
+    name = cgtReferenceKey,
+    label = Label(
+      content = HtmlContent(messages(s"$cgtReferenceKey.label")),
+      classes = "govuk-visually-hidden"
+    ),
+    hint = Some(Hint(
+      content = Text(messages(s"$cgtReferenceKey.helpText"))
+    )),
+    errorMessage = form.error(cgtReferenceKey).map(e =>
+      ErrorMessage(
+        content = Text(messages(s"$cgtReferenceKey.${e.message}"))
+      )
+    ),
+    classes = "govuk-!-width-one-third",
+    spellcheck = Some(false),
+    value = form(cgtReferenceKey).value
+  ))
 }
 
 @ninoKeyHtml = {
-    @govukInput(Input(
-        id = ninoKey,
-        name = ninoKey,
-        inputType = ninoKey,
-        label = Label(
-        content = HtmlContent(messages(s"$ninoKey.helpText")),
-        ),
-        errorMessage = form.error(ninoKey).map(e =>
-          ErrorMessage(
-            content = Text(messages(s"$ninoKey.${e.message}"))
-          )
-        ),
-        classes = "govuk-!-width-one-third",
-        spellcheck = Some(false),
-        value = form(ninoKey).value
-    ))
+  @govukInput(Input(
+    id = ninoKey,
+    name = ninoKey,
+    label = Label(
+      content = HtmlContent(messages(s"$ninoKey.label")),
+      classes = "govuk-visually-hidden",
+    ),
+    hint = Some(Hint(
+      content = Text(messages(s"$ninoKey.helpText"))
+    )),
+    errorMessage = form.error(ninoKey).map(e =>
+      ErrorMessage(
+        content = Text(messages(s"$ninoKey.${e.message}"))
+      )
+    ),
+    classes = "govuk-!-width-one-third",
+    spellcheck = Some(false),
+    value = form(ninoKey).value
+  ))
 }
 
 @sautrKeyHtml = {
-    @govukInput(Input(
+  @govukInput(Input(
     id = sautrKey,
     name = sautrKey,
-    inputType = sautrKey,
     label = Label(
-    content = HtmlContent(messages(s"$sautrKey.helpText")),
+      content = Text(messages(s"$sautrKey.label")),
+      classes = "govuk-visually-hidden",
     ),
+    hint = Some(Hint(
+      content = Text(messages(s"$sautrKey.helpText"))
+    )),
     errorMessage = form.error(sautrKey).map(e =>
       ErrorMessage(
         content = Text(messages(s"$sautrKey.${e.message}"))
@@ -99,64 +108,65 @@
     classes = "govuk-!-width-one-third",
     spellcheck = Some(false),
     value = form(sautrKey).value
-    ))
+  ))
 }
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
-        @errorSummary(form)
+      @errorSummary(form)
     }
 
     @caption(messages("representee.caption"))
     @formWrapper(routes.RepresenteeController.enterIdSubmit(), 'novalidate -> "novalidate") {
 
-    @govukRadios(Radios(
-            fieldset = Some(Fieldset(
-            legend = Some(Legend(
+      @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
             content = Text(title),
             classes = "govuk-fieldset__legend--xl",
             isPageHeading = true
-            ))
-            )),
-            errorMessage = form.error(key).map(e =>
-              ErrorMessage(
-                content = Text(messages(s"$key.${e.message}"))
-              )
-            ),
-            hint = Some(Hint(
-              content = Text(messages(s"$key.helpText"))
-            )),
-            idPrefix = Some(key),
-            name = key,
-            items = Seq(
-                RadioItem(
-                content = Text(messages(s"$cgtReferenceKey.label")),
-                value = Some("0"),
-                conditionalHtml = Some(cgtReferenceKeyHtml),
-                checked = form(key).value.contains("0")
-                ),
-                RadioItem(
-                content = Text(messages(s"$ninoKey.label")),
-                value = Some("1"),
-                conditionalHtml = Some(ninoKeyHtml),
-                checked = form(key).value.contains("1")
-                ),
-                RadioItem(
-                content = Text(messages(s"$sautrKey.label")),
-                value = Some("2"),
-                conditionalHtml = Some(sautrKeyHtml),
-                checked = form(key).value.contains("2")
-                ),
-                RadioItem(
-                content = Text(messages(s"$key.noReferenceId.label")),
-                value = Some("3"),
-                checked = form(key).value.contains("3"),
-                conditionalHtml = None),
-
-            )))
-        @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
+          ))
+        )),
+        errorMessage = form.error(key).map(e =>
+          ErrorMessage(
+            content = Text(messages(s"$key.${e.message}"))
+          )
+        ),
+        hint = Some(Hint(
+          content = Text(messages(s"$key.helpText"))
+        )),
+        idPrefix = Some(key),
+        name = key,
+        items = Seq(
+          RadioItem(
+            content = Text(messages(s"$cgtReferenceKey.label")),
+            value = Some("0"),
+            conditionalHtml = Some(cgtReferenceKeyHtml),
+            checked = form(key).value.contains("0")
+          ),
+          RadioItem(
+            content = Text(messages(s"$ninoKey.label")),
+            value = Some("1"),
+            conditionalHtml = Some(ninoKeyHtml),
+            checked = form(key).value.contains("1")
+          ),
+          RadioItem(
+            content = Text(messages(s"$sautrKey.label")),
+            value = Some("2"),
+            conditionalHtml = Some(sautrKeyHtml),
+            checked = form(key).value.contains("2")
+          ),
+          RadioItem(
+            content = Text(messages(s"$key.noReferenceId.label")),
+            value = Some("3"),
+            checked = form(key).value.contains("3")
+          )
+        )
+      ))
+      @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)
+
 }
