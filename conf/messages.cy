@@ -1097,7 +1097,7 @@ multipleDisposalsTaxYear.taxyear.2020= Y cyfan rhwng 6 Ebrill 2020 a 5 Ebrill 20
 multipleDisposalsTaxYear.taxyear.before2020=Y cyfan cyn 6 Ebrill 2020
 multipleDisposalsTaxYear.taxyear.different=Cyfnewidiwyd yr eiddo mewn gwahanol flynyddoedd treth
 
-multipleDisposalsTaxYear.details.p1=Fel arfer, mae cyfnewid <a href="{0}" target="_blank">contractau (yn agor tab newydd)</a> yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
+multipleDisposalsTaxYear.details.p1=Fel arfer, mae cyfnewid <a class="govuk-link" rel="noopener noreferrer" href="{0}" target="_blank">contractau (yn agor tab newydd)</a> yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
 multipleDisposalsTaxYear.error.required=Dewiswch bryd y cyfnewidiwyd y contractau ar yr holl eiddo
 multipleDisposalsTaxYear.error.before.invalid=Mae’n rhaid i’r dyddiadau cyfnewid fod naill ai yn ystod yr un flwyddyn dreth â dyddiad y farwolaeth neu mewn blwyddyn dreth flaenorol
 multipleDisposalsTaxYear.error.after.invalid=Mae’n rhaid i’r dyddiadau cyfnewid fod naill ai yn ystod yr un flwyddyn dreth â dyddiad y farwolaeth neu mewn blwyddyn dreth ddiweddarach
@@ -1150,7 +1150,7 @@ multipleDisposalsAssetTypeForNonUkResidents.cyaChange=y mathau o eiddo neu asedi
 multipleDisposalsCompletionDate.title=Beth oedd y dyddiad ‘cwblhau’ ar gyfer yr holl eiddo?
 multipleDisposalsCompletionDate.helpText=Er enghraifft 25, 4, 2020.
 multipleDisposalsCompletionDate.details.summary=Beth sy’n digwydd ar y dyddiad ‘cwblhau’?
-multipleDisposalsCompletionDate.details.p1=Fel arfer, <a class="govuk-link" href="{0}" target="_blank">y dyddiad ‘cwblhau’ (yn agor tab newydd)</a> yw’r diwrnod y mae’r perchennog newydd yn cael yr allweddi i’r eiddo.
+multipleDisposalsCompletionDate.details.p1=Fel arfer, <a class="govuk-link" rel="noopener noreferrer" href="{0}" target="_blank">y dyddiad ‘cwblhau’ (yn agor tab newydd)</a> yw’r diwrnod y mae’r perchennog newydd yn cael yr allweddi i’r eiddo.
 multipleDisposalsCompletionDate.error.required=Nodwch ddyddiad cwblhau
 multipleDisposalsCompletionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
 multipleDisposalsCompletionDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cwblhau fod heddiw neu yn y gorffennol
