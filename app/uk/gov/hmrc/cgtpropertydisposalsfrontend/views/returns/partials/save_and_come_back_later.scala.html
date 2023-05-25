@@ -15,14 +15,12 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
-@this(govukWarningText : GovukWarningText)
+@this()
 
-@(warningText: String)(implicit messages: Messages)
+@()(implicit messages: Messages)
 
-
-@govukWarningText(WarningText(
- iconFallbackText = Some("Warning"),
- content = Text(messages(warningText))
-))
+<p class="govuk-body">
+  <a class="govuk-link" id="saveAndComeBackLater" href="@{returns.routes.DraftReturnSavedController.draftReturnSaved()}">@messages("task-list.save-and-come-back.link")</a>
+</p>
