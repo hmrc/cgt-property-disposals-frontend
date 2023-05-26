@@ -15,7 +15,6 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
@@ -24,20 +23,21 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.partials._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
-    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-    accountName: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.partials.account_name,
-    cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
+        accountName: account_name,
+        incompleteTriageWarning: incomplete_triage,
+        saveAndComeBackLater: save_and_come_back_later,
+        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links_govuk
 )
 
 @(
-    draftReturn: DraftSingleMixedUseDisposalReturn,
-    fillingOutReturn: FillingOutReturn
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+        draftReturn: DraftSingleMixedUseDisposalReturn,
+        fillingOutReturn: FillingOutReturn
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{messages("service.title")}
 
@@ -76,7 +76,6 @@
         None
 }
 
-
 @exemptionsAndLossesState = @{
     propertyDetailsState match {
         case Complete =>
@@ -111,11 +110,10 @@
     }
 }
 
-
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
 
     @accountName(fillingOutReturn)
-    @pageHeading(title)
+    <h1 class="govuk-heading-xl">@title</h1>
 
     <ol class="app-task-list">
         <li>
@@ -134,93 +132,87 @@
                     </li>
                 }
 
-                @if(!representeeState.forall(_.isComplete)) {
+            @if(!representeeState.forall(_.isComplete)) {
                 </ul>
-        @warning(messages("task-list.incompleteTriage"))
-        } else {
-        <li id="canTheyUseOurService" class="app-task-list__item">
-        @taskLink(messages("task-list.triage.link"), returns.triage.routes.SingleDisposalsTriageController.checkYourAnswers().url, triageState)
-        </li>
-        </ul>
+                @incompleteTriageWarning()
+            } else {
+                    <li id="canTheyUseOurService" class="app-task-list__item">
+                        @taskLink(messages("task-list.triage.link"), returns.triage.routes.SingleDisposalsTriageController.checkYourAnswers().url, triageState)
+                    </li>
+                </ul>
 
+                @if(!triageState.isComplete) {
+                    @incompleteTriageWarning()
+                } else {
+                    <li>
+                        <h2 class="app-task-list__section">
+                            <span class="app-task-list__section-number">
+                                2.
+                            </span>
+                            @messages("task-list.provide-details.heading")
+                        </h2>
+                        <ul class="app-task-list__items">
+                            <li id="propertyDetails" class="app-task-list__item">
+                            @taskLink(
+                                messages("task-list.enter-property-details-single-mixed-use.link"),
+                                returns.address.routes.MixedUsePropertyDetailsController.checkYourAnswers().url,
+                                propertyDetailsState
+                            )
+                            </li>
 
-    @if(!triageState.isComplete) {
-        @warning(messages("task-list.incompleteTriage"))
-    } else {
-        <li>
-            <h2 class="app-task-list__section">
-                <span class="app-task-list__section-number">
-                    2.
-                </span>
-                @messages("task-list.provide-details.heading")
-            </h2>
-            <ul class="app-task-list__items">
-                <li id="propertyDetails" class="app-task-list__item">
-                @taskLink(
-                    messages("task-list.enter-property-details-single-mixed-use.link"),
-                    returns.address.routes.MixedUsePropertyDetailsController.checkYourAnswers().url,
-                    propertyDetailsState
-                )
-                </li>
+                            @gainOrLossAfterReliefsState.map{ state =>
+                                <li id="gainOrLossAfterReliefs" class="app-task-list__item">
+                                    @taskLink(
+                                        messages("task-list.gain-or-loss-after-reliefs.link"),
+                                        returns.gainorlossafterreliefs.routes.GainOrLossAfterReliefsController.checkYourAnswers().url,
+                                        state
+                                    )
+                                </li>
+                            }
+                        </ul>
+                    </li>
 
-                @gainOrLossAfterReliefsState.map{ state =>
-                    <li id="gainOrLossAfterReliefs" class="app-task-list__item">
-                        @taskLink(
-                            messages("task-list.gain-or-loss-after-reliefs.link"),
-                            returns.gainorlossafterreliefs.routes.GainOrLossAfterReliefsController.checkYourAnswers().url,
-                            state
-                        )
+                    <li>
+                        <h2 class="app-task-list__section">
+                            <span class="app-task-list__section-number">
+                                3.
+                            </span>
+                            @messages("task-list.report-and-pay-the-tax.heading")
+                        </h2>
+                        <ul class="app-task-list__items">
+
+                            <li id="exemptionsAndLosses" class="app-task-list__item">
+                            @taskLink(messages("task-list.exemptions-and-losses.link"),
+                                returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
+                            </li>
+
+                            <li id="enterCgtLiability" class="app-task-list__item">
+                            @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityController.checkYourAnswers().url, ytdLiabilityState)
+                            </li>
+
+                            <li id="uploadSupportingDocs" class="app-task-list__item">
+                            @taskLink(messages("task-list.upload-supporting-docs.link"), returns.supportingevidence.routes.SupportingEvidenceController.checkYourAnswers().url, uploadSupportingDocsState)
+                            </li>
+
+                            <li id="checkAndSendReturn" class="app-task-list__item">
+                            @taskLink(messages("task-list.check-and-send-return.link"), returns.routes.CheckAllAnswersAndSubmitController.checkAllAnswers().url, checkAndSendReturnState)
+                            </li>
+
+                        </ul>
                     </li>
                 }
-            </ul>
-        </li>
-
-
-        <li>
-            <h2 class="app-task-list__section">
-                <span class="app-task-list__section-number">
-                    3.
-                </span>
-                @messages("task-list.report-and-pay-the-tax.heading")
-            </h2>
-            <ul class="app-task-list__items">
-
-                <li id="exemptionsAndLosses" class="app-task-list__item">
-                @taskLink(messages("task-list.exemptions-and-losses.link"),
-                    returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
-                </li>
-
-                <li id="enterCgtLiability" class="app-task-list__item">
-                @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityController.checkYourAnswers().url, ytdLiabilityState)
-                </li>
-
-                <li id="uploadSupportingDocs" class="app-task-list__item">
-                @taskLink(messages("task-list.upload-supporting-docs.link"), returns.supportingevidence.routes.SupportingEvidenceController.checkYourAnswers().url, uploadSupportingDocsState)
-                </li>
-
-                <li id="checkAndSendReturn" class="app-task-list__item">
-                @taskLink(messages("task-list.check-and-send-return.link"), returns.routes.CheckAllAnswersAndSubmitController.checkAllAnswers().url, checkAndSendReturnState)
-                </li>
-            </ul>
-        </li>
-    }
-    }
+            }
 
     </ol>
 
-    @{{if(fillingOutReturn.isAmendReturn)
-        cancelOrContinue(
+    @if(fillingOutReturn.isAmendReturn) {
+        @cancelOrContinue(
             messages("button.cancel"),
             returns.amend.routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.taskList).url,
             None,
             None
         )
-    }}
-
-
-    @if(!fillingOutReturn.isAmendReturn) {
-        <p><a id="saveAndComeBackLater" href="@{
-            returns.routes.DraftReturnSavedController.draftReturnSaved()
-        }">@messages("task-list.save-and-come-back.link")</a></p>
+    } else {
+        @saveAndComeBackLater()
     }
 }

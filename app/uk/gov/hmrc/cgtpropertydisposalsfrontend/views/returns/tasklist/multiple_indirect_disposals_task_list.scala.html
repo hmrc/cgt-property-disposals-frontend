@@ -15,7 +15,6 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
@@ -24,20 +23,21 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.partials._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
-    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-    accountName: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.partials.account_name,
-    cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
+        accountName: account_name,
+        incompleteTriageWarning: incomplete_triage,
+        saveAndComeBackLater: save_and_come_back_later,
+        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links_govuk
 )
 
 @(
     draftReturn: DraftMultipleIndirectDisposalsReturn,
     fillingOutReturn: FillingOutReturn
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{messages("service.title")}
 
@@ -111,10 +111,10 @@
 }
 
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
 
     @accountName(fillingOutReturn)
-    @pageHeading(title)
+    <h1 class="govuk-heading-xl">@title</h1>
 
     <ol class="app-task-list">
         <li>
@@ -135,16 +135,16 @@
 
                 @if(!representeeState.forall(_.isComplete)) {
                 </ul>
-        @warning(messages("task-list.incompleteTriage"))
+                @incompleteTriageWarning()
         } else {
-        <li id="canTheyUseOurService" class="app-task-list__item">
-        @taskLink(messages("task-list.triage.link"), returns.triage.routes.MultipleDisposalsTriageController.checkYourAnswers().url, triageState)
-        </li>
-        </ul>
+                <li id="canTheyUseOurService" class="app-task-list__item">
+                    @taskLink(messages("task-list.triage.link"), returns.triage.routes.MultipleDisposalsTriageController.checkYourAnswers().url, triageState)
+                </li>
+            </ul>
 
 
     @if(!triageState.isComplete) {
-        @warning(messages("task-list.incompleteTriage"))
+        @incompleteTriageWarning()
     } else {
         <li>
             <h2 class="app-task-list__section">
@@ -206,20 +206,15 @@
 
     </ol>
 
-    @{{if(fillingOutReturn.isAmendReturn)
-        cancelOrContinue(
+    @if(fillingOutReturn.isAmendReturn) {
+        @cancelOrContinue(
             messages("button.cancel"),
             returns.amend.routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.taskList).url,
             None,
             None
         )
-    }}
-
-
-    @if(!fillingOutReturn.isAmendReturn) {
-        <p><a id="saveAndComeBackLater" href="@{
-            returns.routes.DraftReturnSavedController.draftReturnSaved()
-        }">@messages("task-list.save-and-come-back.link")</a></p>
+    } else {
+        @saveAndComeBackLater()
     }
 
 }

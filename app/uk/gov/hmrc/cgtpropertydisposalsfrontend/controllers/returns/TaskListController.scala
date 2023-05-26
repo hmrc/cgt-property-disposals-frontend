@@ -22,7 +22,7 @@ import com.google.inject.{Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -56,7 +56,7 @@ class TaskListController @Inject() (
   singleIndirectDisposalTaskListPage: taskListPages.single_indirect_disposal_task_list,
   singleMixedUseDisposalTaskListPage: taskListPages.single_mixed_use_disposal_task_list,
   multipleIndirectDisposalTaskListPage: taskListPages.multiple_indirect_disposals_task_list
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+)(implicit ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates

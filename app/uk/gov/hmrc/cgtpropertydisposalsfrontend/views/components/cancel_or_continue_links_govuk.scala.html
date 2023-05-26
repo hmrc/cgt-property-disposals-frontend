@@ -14,15 +14,25 @@
  * limitations under the License.
  *@
 
-@import play.api.i18n.Messages
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(govukWarningText : GovukWarningText)
+@this(govukButton: GovukButton)
 
-@(warningText: String)(implicit messages: Messages)
+@(cancelLabel: String, cancelUrl: String, continueLabel: Option[String], continueUrl: Option[String])
 
+<div class="govuk-form-group">
+  @continueLabel.map(l =>
+    govukButton(Button(
+      attributes = Map("id" -> "cancelOrContinue-continue"),
+      href = continueUrl,
+      content = Text(l)
+    ))
+  )
 
-@govukWarningText(WarningText(
- iconFallbackText = Some("Warning"),
- content = Text(messages(warningText))
-))
+ @govukButton(Button(
+   attributes = Map("id" -> "cancelOrContinue-cancel"),
+   href = Some(cancelUrl),
+   content = Text(cancelLabel),
+  classes = "govuk-button--secondary"
+ ))
+</div>

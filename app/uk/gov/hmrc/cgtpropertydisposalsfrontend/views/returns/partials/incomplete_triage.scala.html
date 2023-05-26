@@ -17,12 +17,11 @@
 @import play.api.i18n.Messages
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(govukWarningText : GovukWarningText)
+@this(govukWarningText: GovukWarningText)
 
-@(warningText: String)(implicit messages: Messages)
-
+@()(implicit messages: Messages)
 
 @govukWarningText(WarningText(
- iconFallbackText = Some("Warning"),
- content = Text(messages(warningText))
+  iconFallbackText = Some(messages("generic.warning")),
+  content = Text(messages("task-list.incompleteTriage"))
 ))
