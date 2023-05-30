@@ -25,7 +25,7 @@
 
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    formWrapper: FormWithCSRF,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
     govukButton: GovukButton
@@ -50,7 +50,7 @@
 
     @summary(answers, representativeType)
 
-    @formWrapper(routes.RepresenteeController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.RepresenteeController.checkYourAnswersSubmit()) {
         @govukButton(Button(content = Text(messages("button.confirmAndContinue"))))
     }
 
