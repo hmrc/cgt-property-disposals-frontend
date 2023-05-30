@@ -17,72 +17,83 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  formWrapper: FormWithCSRF,
+  govukInput: GovukInput,
+  govukButton: GovukButton,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
-        form: Form[ContactName],
-        backLink: Call,
-        displayReturnToSummaryLink: Boolean,
-        isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+  form: Form[ContactName],
+  backLink: Call,
+  displayReturnToSummaryLink: Boolean,
+  isAmend: Boolean
+)(
+  implicit request: RequestWithSessionData[_],
+  messages: Messages
+)
 
 @key = @{
-    "representeeContactName"
+  "representeeContactName"
 }
 
 @contactNameKey = @{
-    "contactName"
+  "contactName"
 }
 @hasErrors = @{
-    form.hasErrors || form.hasGlobalErrors
+  form.hasErrors || form.hasGlobalErrors
 }
 @title = @{
-    messages(s"$key.change.title")
+  messages(s"$key.change.title")
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@layout(
+  title,
+  hasErrors = hasErrors,
+  backLinkUrl = Some(backLink.url)
+) {
+  @if(hasErrors) {
+    @errorSummary(form)
+  }
 
-    @backLinkComponent(backLink)
+  <span class="govuk-caption-xl">
+    @messages("representee.caption")
+  </span>
 
-    @if(hasErrors) {
-        @errorSummary(form)
-    }
+  @formWrapper(routes.RepresenteeController.changeContactNameSubmit(), 'novalidate -> "novalidate") {
+    @govukInput(Input(
+      id = contactNameKey,
+      name = contactNameKey,
+      label = Label(
+        content = Text(title),
+        classes = "govuk-label--xl",
+        isPageHeading = true
+      ),
+      errorMessage = form.error(contactNameKey).map(e => ErrorMessage(
+        content = Text(messages(s"${e.key}.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )),
+      value = Some(form.data.getOrElse(contactNameKey, "")),
+      hint = Some(Hint(
+        content = Text(messages(s"$key.change.help"))
+      )),
+      autocomplete = Some(AutoCompleteType.ContactName.value)
+    ))
 
-    @caption(messages("representee.caption"))
+    @govukButton(Button(
+      attributes = Map("id" -> "submitButton"),
+      content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+    ))
+  }
 
-    @pageHeading(title)
-
-    @formWrapper(routes.RepresenteeController.changeContactNameSubmit(), 'novalidate -> "novalidate") {
-        @textInput(
-            fieldId = contactNameKey,
-            value = form.data.getOrElse(contactNameKey, ""),
-            errorKey = form.error(contactNameKey).map(e => e.message),
-            hasErrors = form.error(contactNameKey).nonEmpty,
-            label = Html(""),
-            labelClass = Some("govuk-label--m"),
-            helpText = Some(Html(messages(s"$key.change.help"))),
-            autoComplete = AutoCompleteType.ContactName
-
-        )
-
-        @submitButton(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
-    }
-    @returnToSummaryLink(displayReturnToSummaryLink)
+  @returnToSummaryLink(displayReturnToSummaryLink)
 }
