@@ -15,35 +15,45 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  formWrapper: FormWithCSRF,
+  govukButton: GovukButton
 )
 
-@()(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@()(
+  implicit request: RequestWithSessionData[_],
+  messages:Messages
+)
 
 @key = @{ "representeeNameMatchError" }
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
+  <span class="govuk-caption-xl">
+    @messages("representee.caption")
+  </span>
 
-    @caption(messages("representee.caption"))
+  <h1 class="govuk-heading-xl">
+    @title
+  </h1>
 
-    @pageHeading(title)
+  <p class="govuk-body">
+    @messages(s"$key.p1")
+  </p>
 
-    <p>@messages(s"$key.p1")</p>
+  <p class="govuk-body">
+    @messages(s"$key.p2")
+  </p>
 
-    <p>@messages(s"$key.p2")</p>
-
-    @formWrapper(routes.RepresenteeController.nameMatchErrorSubmit(), 'novalidate -> "novalidate") {
-        @submitButton(messages("button.tryAgain"))
-    }
-
+  @formWrapper(routes.RepresenteeController.nameMatchErrorSubmit(), 'novalidate -> "novalidate") {
+    @govukButton(Button(
+      attributes = Map("id" -> "submitButton"),
+      content = Text(messages("button.tryAgain"))
+    ))
+  }
 }

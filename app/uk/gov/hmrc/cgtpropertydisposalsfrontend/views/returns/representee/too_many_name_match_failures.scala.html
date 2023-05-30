@@ -15,30 +15,38 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
 )
 
-@()(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@()(
+  implicit request: RequestWithSessionData[_],
+  messages:Messages
+)
 
 @key = @{ "representeeTooManyNameMatchFailures" }
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
+  <span class="govuk-caption-xl">
+    @messages("representee.caption")
+  </span>
 
-    @caption(messages("representee.caption"))
+  <h1 class="govuk-heading-xl">
+    @title
+  </h1>
 
-    @pageHeading(title)
+  <p class="govuk-body">
+    @messages(s"$key.p1")
+  </p>
 
-    <p>@messages(s"$key.p1")</p>
+  <p class="govuk-body">
+    @messages(s"$key.p2")
+  </p>
 
-    <p>@messages(s"$key.p2")</p>
-
-    <p>@messages(s"$key.p3")</p>
-
+  <p class="govuk-body">
+    @messages(s"$key.p3")
+  </p>
 }
