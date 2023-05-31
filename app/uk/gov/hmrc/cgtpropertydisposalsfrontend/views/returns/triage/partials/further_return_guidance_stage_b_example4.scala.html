@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 
 @this(
-        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum_govuk
 )
 
 @(taxYear: Option[TaxYear])(implicit messages: Messages)
@@ -30,7 +30,7 @@
 @taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
 @taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
 
-<h4 class="heading-medium">
+<h4 class="govuk-heading-m">
 @messages(
     s"$key.personalRepInPeriodOfAdmin.stage-b.example4.headingText",
     taxYearStartYear,
