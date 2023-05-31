@@ -15,13 +15,12 @@
  *@
 
 @import play.api.i18n.Messages
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 
 @this(
-        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum_govuk
 )
 
 @(taxYear: Option[TaxYear])(implicit messages: Messages)
@@ -31,8 +30,8 @@
 @taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
 @annualExemptAmountGeneral = @{ taxYear.map(_.annualExemptAmountGeneral.inPounds).getOrElse(BigDecimal("0")) }
 
-<p>@messages(s"$key.stage-a.step1.example4.p1", taxYearStartYear)</p>
-<h4 class="heading-medium">
+<p class="govuk-body">@messages(s"$key.stage-a.step1.example4.p1", taxYearStartYear)</p>
+<h4 class="govuk-heading-m">
 @messages(
     s"$key.stage-a.step1.example4.headingText",
     taxYearStartYear,
@@ -40,8 +39,8 @@
 )
 </h4>
 
-<p>@messages(s"$key.stage-a.step1.example4.p2")</p>
-<h5 class="heading-small">@Html(messages(s"$key.stage-a.step1.example4.p3", taxYearStartYear))</h5>
+<p class="govuk-body">@messages(s"$key.stage-a.step1.example4.p2")</p>
+<h5 class="govuk-heading-s">@messages(s"$key.stage-a.step1.example4.p3", taxYearStartYear)</h5>
 @calcSum(
     List(
         SumPartDisplay(
@@ -83,13 +82,11 @@
     )
 )
 
-<h5 class="heading-small">
-@Html(
-    messages(
+<h5 class="govuk-heading-s">
+    @messages(
         s"$key.stage-a.step1.example4.p4",
         taxYearStartYear
     )
-)
 </h5>
 @calcSum(
     List(
@@ -132,8 +129,8 @@
     )
 )
 
-<h4 class="heading-medium">@messages(s"$key.stage-a.step2.example4.headingText")</h4>
-<p>@messages(s"$key.stage-a.step2.example4.p1")</p>
+<h4 class="govuk-heading-m">@messages(s"$key.stage-a.step2.example4.headingText")</h4>
+<p class="govuk-body">@messages(s"$key.stage-a.step2.example4.p1")</p>
 
 @calcSum(
     List(

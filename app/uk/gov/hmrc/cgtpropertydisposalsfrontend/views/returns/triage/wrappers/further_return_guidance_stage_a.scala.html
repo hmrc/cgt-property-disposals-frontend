@@ -15,64 +15,53 @@
  *@
 
 @import play.api.i18n.Messages
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk,
         stageAExample1: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example1,
         stageAExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example2,
         stageAExample3: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example3,
         stageAExample4: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example4,
-        stepHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.step_header
+        govukAccordion : GovukAccordion
 )
 
 @(userKey: String, taxYear: Option[TaxYear])(implicit messages: Messages, appConfig: ViewConfig)
 
 @key = @{ "furtherReturnGuidance" }
 
-<div
-    id="step-by-step-navigation"
-    class="app-step-nav app-step-nav--large app-step-nav--active"
-    data-show-text="@messages("furtherReturnGuidance.show")"
-    data-hide-text="@messages("furtherReturnGuidance.hide")"
-    data-show-all-text="@messages("furtherReturnGuidance.showall")"
-    data-hide-all-text="@messages("furtherReturnGuidance.hideall")"
->
-    <ol class="app-step-nav__steps">
-        <li class="app-step-nav__step js-step" id="step-a1">
-            @stepHeader(1, messages(s"$key$userKey.stage-a.step-a1"))
-            <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-a1">
-                <p>@messages(s"$key.stage-a.step-a1.p1")</p>
-                <ol class="list list-number">
-                    <li>@messages(s"$key.stage-a.step-a1.li1")</li>
-                    <li>@messages(s"$key.stage-a.step-a1.li2")</li>
-                    <li>@messages(s"$key.stage-a.step-a1.li3")</li>
-                    <li>@Html(messages(s"$key$userKey.stage-a.step-a1.li4"))</li>
-                    <li>@Html(messages(s"$key$userKey.stage-a.step-a1.li5"))</li>
-                </ol>
-            </div>
-        </li>
-        <li class="app-step-nav__step js-step" id="step-a2">
-            @stepHeader(2, messages(s"$key$userKey.stage-a.step-a2"))
-            <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-a2">
-                <p>@messages(s"$key$userKey.stage-a.step-a2.p1")</p>
-                <ol class="list list-number">
-                    <li>@Html(messages(s"$key.stage-a.step-a2.li1"))</li>
-                    <li>@messages(s"$key.stage-a.step-a2.li2")</li>
-                    <li>@messages(s"$key.stage-a.step-a2.li3")</li>
-                    <li>@Html(messages(s"$key$userKey.stage-a.step-a2.li4", appConfig.taxFreeAllowanceUrl))</li>
-                    <li>@messages(s"$key$userKey.stage-a.step-a2.li5")</li>
-                </ol>
-            </div>
-        </li>
-    </ol>
-</div>
+@govukAccordion(Accordion(
+    id = "step-by-step-navigation",
+    items = Seq(
+    Section(
+        headingContent = Text(messages(s"$key$userKey.stage-a.step-a1")),
+        content = HtmlContent("<p class=\"govuk-body\">"+s"${messages(s"$key.stage-a.step-a1.p1")}"+"</p>" +
+        "<ol class=\"govuk-list govuk-list--number\">" +
+            "<li>" + s"${messages(s"$key.stage-a.step-a1.li1")}" + "</li>" +
+        "<li>" + s"${messages(s"$key.stage-a.step-a1.li2")}" + "</li>" +
+        "<li>" + s"${messages(s"$key.stage-a.step-a1.li3")}" + "</li>" +
+        "<li>" + s"${messages(s"$key$userKey.stage-a.step-a1.li4")}" + "</li>" +
+        "<li>" + s"${messages(s"$key$userKey.stage-a.step-a1.li5")}" + "</li>" +
+        "</ol>")
+    ),
+    Section(
+        headingContent = Text(messages(s"$key$userKey.stage-a.step-a2")),
+        content = HtmlContent("<p class=\"govuk-body\">"+s"${messages(s"$key$userKey.stage-a.step-a2.p1")}"+"</p>" +
+        "<ol class=\"govuk-list govuk-list--number\">" +
+        "<li>" + s"${messages("furtherReturnGuidance.stage-a.step-a2.li1")}" + "</li>" +
+        "<li>" + s"${messages(s"$key.stage-a.step-a2.li2")}" + "</li>" +
+        "<li>" + s"${messages(s"$key.stage-a.step-a2.li3")}" + "</li>" +
+        "<li>" + s"${messages(s"$key$userKey.stage-a.step-a2.li4", appConfig.taxFreeAllowanceUrl)}" + "</li>" +
+        "<li>" + s"${messages(s"$key$userKey.stage-a.step-a2.li5")}" + "</li>" +
+        "</ol>"))
+    )
+))
 
-<h2 class="heading-medium">
+<h2 class="govuk-heading-m">
     @messages(s"$key.examplesText")
-    <span class="visuallyhidden">@messages(s"$key.examplesText.netGainAssistive")</span>
+    <span class="govuk-visually-hidden">@messages(s"$key.examplesText.netGainAssistive")</span>
 </h2>
 @if(userKey.contains(".personalRepInPeriodOfAdmin")) {
     @details(
