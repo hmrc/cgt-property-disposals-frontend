@@ -18,23 +18,48 @@
 @import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk,
         stageBExample1: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example1,
         stageBExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example2,
         stageBExample3: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example3,
         stageBExample4: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example4,
-        stepHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.step_header
+        govukAccordion: GovukAccordion
 )
 
 @(userKey: String, taxYear: Option[TaxYear])(implicit messages: Messages, appConfig: ViewConfig)
 
 @key = @{ "furtherReturnGuidance" }
+@stepB1 = {
+    <p class="govuk-body">@Html(messages(s"$key$userKey.stage-b.step-b1.p1", appConfig.cgtRatesUrl))</p>
+    <ol class="govuk-list govuk-list--number">
+        <li>@Html(messages(s"$key$userKey.stage-b.step-b1.li1"))</li>
+        <li>@Html(messages(s"$key$userKey.stage-b.step-b1.li2"))</li>
+    </ol>
+}
+@stepB2 = {
+    <p class="govuk-body">@Html(messages(s"$key$userKey.stage-b.step-b2.p1", appConfig.cgtRatesUrl))</p>
+    <ol class="govuk-list govuk-list--number">
+        <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li1"))</li>
+        <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li2"))</li>
+        <li>@Html(messages(s"$key.stage-b.step-b2.li3"))</li>
+    </ol>
+}
+@stepB3 = {
+    <p class="govuk-body">@messages(s"$key$userKey.stage-b.step-b3.p1")</p>
+    <ol class="govuk-list govuk-list--number">
+        <li>@Html(messages(s"$key$userKey.stage-b.step-b3.li1", appConfig.cgtRatesUrl))</li>
+        <li>@Html(messages(s"$key.stage-b.step-b3.li2", appConfig.cgtRatesUrl))</li>
+        <li>@Html(messages(s"$key$userKey.stage-b.step-b3.li3"))</li>
+    </ol>
+}
+
 
 @if(userKey.contains(".personalRepInPeriodOfAdmin")) {
-    <p>@Html(messages(s"$key$userKey.stage-b.p1", appConfig.cgtRatesUrl))</p>
-    <h2 class="heading-medium">
+    <p class="govuk-body">@Html(messages(s"$key$userKey.stage-b.p1", appConfig.cgtRatesUrl))</p>
+    <h2 class="govuk-heading-m">
         @messages(s"$key.examplesText")
         <span class="visuallyhidden">@messages(s"$key.examplesText.ytdAssistive")</span>
     </h2>
@@ -45,10 +70,10 @@
         Some(messages(s"$key.assistive.prefix"))
     )
 } else if(userKey.contains(".trust")){
-    <p>@Html(messages(s"$key$userKey.stage-b.step-b1.p1", appConfig.trustsAndCgtWorkoutUrl))</p>
-    <h2 class="heading-medium">
+    <p class="govuk-body">@Html(messages(s"$key$userKey.stage-b.step-b1.p1", appConfig.trustsAndCgtWorkoutUrl))</p>
+    <h2 class="govuk-heading-m">
         @messages(s"$key.examplesText")
-        <span class="visuallyhidden">@messages(s"$key.examplesText.ytdAssistive")</span>
+        <span class="govuk-visually-hidden">@messages(s"$key.examplesText.ytdAssistive")</span>
     </h2>
     @details(
         messages(s"$key$userKey.stage-b.example3.link"),
@@ -57,51 +82,28 @@
         Some(messages(s"$key.assistive.prefix"))
     )
 } else{
-    <div
-        id="step-by-step-navigation"
-        class="app-step-nav app-step-nav--large app-step-nav--active"
-        data-show-text="@messages("furtherReturnGuidance.show")"
-        data-hide-text="@messages("furtherReturnGuidance.hide")"
-        data-show-all-text="@messages("furtherReturnGuidance.showall")"
-        data-hide-all-text="@messages("furtherReturnGuidance.hideall")"
-    >
-        <ol class="app-step-nav__steps">
-            <li class="app-step-nav__step js-step" id="step-b1">
-                @stepHeader(1, messages(s"$key$userKey.stage-b.step-b1"))
-                <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-b1">
-                    <p>@Html(messages(s"$key$userKey.stage-b.step-b1.p1", appConfig.cgtRatesUrl))</p>
-                    <ol class="list list-number">
-                        <li>@Html(messages(s"$key$userKey.stage-b.step-b1.li1"))</li>
-                        <li>@Html(messages(s"$key$userKey.stage-b.step-b1.li2"))</li>
-                    </ol>
-                </div>
-            </li>
-            <li class="app-step-nav__step js-step" id="step-b2">
-                @stepHeader(2, messages(s"$key.stage-b.step-b2"))
-                <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-b2">
-                    <p>@Html(messages(s"$key$userKey.stage-b.step-b2.p1", appConfig.cgtRatesUrl))</p>
-                    <ol class="list list-number">
-                        <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li1"))</li>
-                        <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li2"))</li>
-                        <li>@Html(messages(s"$key.stage-b.step-b2.li3"))</li>
-                    </ol>
-                </div>
-            </li>
-            <li class="app-step-nav__step js-step" id="step-b3">
-                @stepHeader(3, messages(s"$key$userKey.stage-b.step-b3"))
-                <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-b3">
-                    <p>@messages(s"$key$userKey.stage-b.step-b3.p1")</p>
-                    <ol class="list list-number">
-                        <li>@Html(messages(s"$key$userKey.stage-b.step-b3.li1", appConfig.cgtRatesUrl))</li>
-                        <li>@Html(messages(s"$key.stage-b.step-b3.li2", appConfig.cgtRatesUrl))</li>
-                        <li>@Html(messages(s"$key$userKey.stage-b.step-b3.li3"))</li>
-                    </ol>
-                </div>
-            </li>
-        </ol>
-    </div>
+@govukAccordion(Accordion(
+    id = "step-by-step-navigation",
+    showAllSections = Some(messages(s"$key.showall")),
+    hideAllSections = Some(messages(s"$key.hideall")),
+    showSection = Some(messages(s"$key.show")),
+    hideSection = Some(messages(s"$key.hide")),
+    items = Seq(
+        Section(
+            headingContent = Text(messages(s"$key$userKey.stage-b.step-b1")),
+            content = HtmlContent(stepB1)
+        ),
+        Section(
+            headingContent = Text(messages(s"$key.stage-b.step-b2")),
+            content = HtmlContent(stepB2)
+        ),
+        Section(
+            headingContent = Text(messages(s"$key$userKey.stage-b.step-b3")),
+            content = HtmlContent(stepB3)
+        )
+    )))
 
-    <h2 class="heading-medium">
+    <h2 class="govuk-heading-m">
         @messages(s"$key.examplesText")
         <span class="visuallyhidden"> @messages(s"$key.examplesText.ytdAssistive")</span>
     </h2>

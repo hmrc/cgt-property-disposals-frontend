@@ -34,6 +34,10 @@
 
 @govukAccordion(Accordion(
     id = "step-by-step-navigation",
+    showAllSections = Some(messages(s"$key.showall")),
+    hideAllSections = Some(messages(s"$key.hideall")),
+    showSection = Some(messages(s"$key.show")),
+    hideSection = Some(messages(s"$key.hide")),
     items = Seq(
     Section(
         headingContent = Text(messages(s"$key$userKey.stage-a.step-a1")),
