@@ -18,24 +18,23 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    formWrapper: FormWithCSRF,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk,
+    govukInput: GovukInput
 )
 
 @(
@@ -44,7 +43,7 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @key = @{ "multipleDisposalsDisposalPrice" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -65,9 +64,7 @@
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-    @backLinkComponent(backLink)
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$key$userKey"))
@@ -75,29 +72,36 @@
 
     @caption(messages("returns.property-details.multipleDisposals.caption"))
 
-    @formWrapper(address.routes.PropertyDetailsController.disposalPriceSubmit(), 'novalidate -> "novalidate") {
-      @unitInput(
-        fieldId = key,
-        value = form.data.getOrElse(key, ""),
-        formError = form.error(key),
-        hasErrors = form.error(key).nonEmpty,
-        label = Html(title),
-        labelAsHeading = true,
-        helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-        autoComplete = AutoCompleteType.On,
-        inputClass = Some("small"),
-        aspect = "left",
-        unit = "£",
-        assistiveText = messages("unit-input.assistive.pounds"),
-        customErrorKey = Some(s"$key$userKey")
-    )
+    @formWrapper(address.routes.PropertyDetailsController.disposalPriceSubmit()) {
+      @govukInput(Input(
+        id = key,
+        name = key,
+        value = form.data.get(key),
+        label = Label(
+          content = Text(title),
+          isPageHeading = true,
+          classes = "govuk-label--xl"
+        ),
+        classes = "govuk-input--width-10",
+        hint = Some(Hint(
+          content = HtmlContent(messages(s"$key$userKey.helpText"))
+        )),
+        prefix = Some(PrefixOrSuffix(
+          content = Text("£")
+        )),
+        errorMessage = form.error(key).map(e => ErrorMessage(
+          content = Text(messages(s"$key$userKey.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        )),
+        autocomplete = Some(AutoCompleteType.On.value)
+      ))
 
-@details(
+       @details(
         messages(s"$key.link"),
         Html(
-        s"""
-        | <p>${messages(s"$key.details.p1")}</p>
-        |""".stripMargin
+          s"""
+          | <p class="govuk-body">${messages(s"$key.details.p1")}</p>
+          |""".stripMargin
         )
       )
 
