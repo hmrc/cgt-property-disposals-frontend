@@ -3956,7 +3956,7 @@ multipleDisposalsDisposalDate.capacitor.helpText=Mae hyn fel arfer pan fydd pryn
 multipleDisposalsDisposalDate.personalRep.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contractau i''w gilydd ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contractau i''w gilydd ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
 multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.agent.helpText=Fel arfer, dyna pan mae prynwr a gwerthwr yn cyfnewid contractau ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
-multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cyfnewid (yn agor tab newydd)</a>.
+multipleDisposalsDisposalDate.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Dysgwch beth sy’n digwydd ar y dyddiad cyfnewid (yn agor tab newydd)</a>.
 multipleDisposalsDisposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
 multipleDisposalsDisposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
 multipleDisposalsDisposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod yr un fath neu cyn y dyddiad cwblhau

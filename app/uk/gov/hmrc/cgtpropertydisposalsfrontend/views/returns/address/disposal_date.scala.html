@@ -21,17 +21,16 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import java.time.LocalDate
 
 @this(
-  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-  dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input,
-  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  formWrapper: FormWithCSRF,
+  dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input_govuk,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
 )
 
@@ -48,33 +47,33 @@
 @title = @{messages(s"$key$userKey.title")}
 @errorKey = @{List("multipleDisposalsDisposalDate-day", "multipleDisposalsDisposalDate-month", "multipleDisposalsDisposalDate-year", "multipleDisposalsDisposalDate").map(form.error).find(_.isDefined).flatten}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@layout(title, backLinkUrl = None, hasErrors = hasErrors) {
 
  @if(hasErrors) {
-   @errorSummary(form)
+   @errorSummary(form, dateField = Some(key))
  }
 
  @caption(messages("returns.property-details.multipleDisposals.caption"))
 
- @formWrapper(address.routes.PropertyDetailsController.disposalDateSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(address.routes.PropertyDetailsController.disposalDateSubmit()) {
   @dateInput(
    fieldId = key,
-   label = pageHeading(title),
+   label = title,
    dayValue = form.data.get(s"$key-day"),
    monthValue = form.data.get(s"$key-month"),
    yearValue = form.data.get(s"$key-year"),
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
    errorKey = errorKey.map(e => {
-                if(e.message == "error.tooFarInPast") {
-                    messages(s"${e.key}.${e.message}", s"${e.args(0)}", s"${e.args(1)}")
-                } else {
-                    s"${e.key}.${e.message}"
-                }
+       if(e.message == "error.tooFarInPast") {
+           messages(s"${e.key}.${e.message}", e.args:_*)
+       } else {
+           s"${e.key}.${e.message}"
+       }
     }),
    hasErrors = hasErrors
   )
 
-  <p>@Html(messages(s"$key.link", viewConfig.tranferringOwnershipHelp))</p>
+  <p class="govuk-body">@Html(messages(s"$key.link", viewConfig.tranferringOwnershipHelp))</p>
   @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
  }
 

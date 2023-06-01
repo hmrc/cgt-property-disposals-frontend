@@ -4504,7 +4504,7 @@ multipleDisposalsDisposalDate.personalRep.helpText=It’s usually when a buyer a
 multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.agent.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 
-multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new tab)</a>.
+multipleDisposalsDisposalDate.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Find out what happens on the exchange date (opens in a new tab)</a>.
 
 multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
 multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
