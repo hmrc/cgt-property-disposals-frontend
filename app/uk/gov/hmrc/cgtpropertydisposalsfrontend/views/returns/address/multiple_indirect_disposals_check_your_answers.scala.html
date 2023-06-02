@@ -15,39 +15,41 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_indirect_disposals_summary
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    formWrapper: FormWithCSRF,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_indirect_disposals_summary_govuk
 )
 
-@(answers: CompleteExampleCompanyDetailsAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteExampleCompanyDetailsAnswers)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 
 @title = @{messages("returns.company-address.cya.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
+  <span class="govuk-caption-xl">
+    @messages("returns.company-details.multipleIndirectDisposals.caption")
+  </span>
+  <h1 class="govuk-heading-xl">
+    @title
+  </h1>
+  <p class="govuk-body">
+    <a class="govuk-link" href="@routes.CompanyDetailsController.multipleIndirectDisposalsGuidance()" id="guidanceLink">@messages("returns.property-details.multiple-disposals.cya.guidanceLink")</a>
+  </p>
 
-    @pageHeading(title, Some(messages("returns.company-details.multipleIndirectDisposals.caption")))
+  @summary(answers)
 
-    <p>
-        <a href="@routes.CompanyDetailsController.multipleIndirectDisposalsGuidance()" id="guidanceLink">@messages("returns.property-details.multiple-disposals.cya.guidanceLink")</a>
-    </p>
+  @formWrapper(routes.CompanyDetailsController.checkYourAnswersSubmit()) {
+      @submitButton(messages("button.confirmAndContinue"))
+  }
 
-    @summary(answers)
-
-    @formWrapper(routes.CompanyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
-        @submitButton(messages("button.confirmAndContinue"))
-    }
-
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

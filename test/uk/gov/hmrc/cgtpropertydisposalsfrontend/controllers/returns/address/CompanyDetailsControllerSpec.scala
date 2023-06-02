@@ -2083,7 +2083,7 @@ class CompanyDetailsControllerSpec
                 .multipleIndirectDisposalPriceSubmit()
                 .url
               doc
-                .select(s"#$key-form-hint")
+                .select(s"#$key-hint")
                 .text()                                          shouldBe messageFromMessageKey(s"$key.helpText")
             }
           )
@@ -2588,7 +2588,7 @@ class CompanyDetailsControllerSpec
                 .multipleIndirectAcquisitionPriceSubmit()
                 .url
               doc
-                .select(s"#$key-form-hint")
+                .select(s"#$key-hint")
                 .text()                                          shouldBe messageFromMessageKey(s"$key.helpText")
             }
           )
