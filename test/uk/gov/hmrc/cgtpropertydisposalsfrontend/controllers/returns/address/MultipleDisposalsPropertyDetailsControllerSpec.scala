@@ -275,12 +275,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 .multipleDisposalsGuidanceSubmit()
                 .url
               doc
-                .select("#content > article > p:nth-child(4)")
+                .select("#main-content > div > div > div > p:nth-child(3)")
                 .text()                                          shouldBe messageFromMessageKey(
                 s"property-details.multiple-disposals.guidance${messageKey(userType, individualUserType)}.p1"
               )
               doc
-                .select("#content > article > p:nth-child(7)")
+                .select("#main-content > div > div > div > p:nth-child(6)")
                 .text()                                          shouldBe messageFromMessageKey(
                 s"property-details.multiple-disposals.guidance${messageKey(userType, individualUserType)}.p3"
               )
