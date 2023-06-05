@@ -102,7 +102,7 @@
           content = Text("£")
         )),
         errorMessage = form.error(key).map(e => ErrorMessage(
-          content = Text(messages(s"$key$userKey.${e.message}")),
+          content = Text(messages(s"$key${if(isPeriodOfAdmin) userKey else ""}.${e.message}")),
           visuallyHiddenText = Some(messages("generic.error"))
         )),
         autocomplete = Some(AutoCompleteType.On.value)
