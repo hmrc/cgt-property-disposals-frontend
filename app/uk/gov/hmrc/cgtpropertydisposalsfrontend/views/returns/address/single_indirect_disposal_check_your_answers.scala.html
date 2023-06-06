@@ -15,31 +15,31 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 
 @this(
-  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-  summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
-  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+  summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary_govuk
 
 )
 
-@(companyAddress: Address)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(companyAddress: Address)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @title = @{messages("companyDetails.cya.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
+    <span class="govuk-caption-xl">
+      @messages("companyDetails.caption")
+    </span>
 
-  @caption(messages("companyDetails.caption"))
-
-  @pageHeading(title)
+    <h1 class="govuk-heading-xl">
+        @title
+    </h1>
 
   @summary(companyAddress)
 
