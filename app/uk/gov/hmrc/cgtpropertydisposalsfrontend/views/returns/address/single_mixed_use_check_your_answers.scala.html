@@ -15,32 +15,35 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.CompleteMixedUsePropertyDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DateOfDeath, RepresentativeType}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        formWrapper: FormWithCSRF,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary_govuk
 )
 
-@(answers: CompleteMixedUsePropertyDetailsAnswers, representativeType: Option[RepresentativeType], dateOfDeath: Option[DateOfDeath])(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+        answers: CompleteMixedUsePropertyDetailsAnswers,
+        representativeType: Option[RepresentativeType],
+        dateOfDeath: Option[DateOfDeath])(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @title = @{messages("singleMixedUse.cya.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
-
-@caption(messages("singleMixedUse.caption"))
+@layout(title) {
+ @caption(messages("singleMixedUse.caption"))
+ <h1 class="govuk-heading-xl">@title</h1>
 
 @summary(answers, representativeType, dateOfDeath)
 
-@formWrapper(routes.MixedUsePropertyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+@formWrapper(routes.MixedUsePropertyDetailsController.checkYourAnswersSubmit()) {
  @submitButton(messages("button.confirmAndContinue"))
 }
 

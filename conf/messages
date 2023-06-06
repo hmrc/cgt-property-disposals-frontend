@@ -4560,7 +4560,7 @@ enterUPRN-line1.error.invalid=UPRN must only include numbers
 # SINGLE MIXED USE PROPERTY DETAILS PAGES - START
 #===================================================
 
-singleMixedUse.cya.title=Check you answers
+singleMixedUse.cya.title=Check your answers
 singleMixedUse.cyaLabel.address=Property address
 
 singleMixedUse.caption=Property details
