@@ -4299,8 +4299,11 @@ class AcquisitionDetailsControllerSpec
                   )
                 ),
                 doc =>
-                  doc.select("#warning").text() shouldBe (userType match {
-                    case UserType.Organisation => messageFromMessageKey("shouldUseRebase.nrTrust.warning")
+                  doc.select("#single-warning").text() shouldBe (userType match {
+                    case UserType.Organisation =>
+                      "! " + messageFromMessageKey("generic.warning") + " " + messageFromMessageKey(
+                        "shouldUseRebase.nrTrust.warning"
+                      )
                     case _                     => ""
                   })
               )

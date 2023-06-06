@@ -59,7 +59,10 @@
                 isPageHeading = true
             ))
         )),
-        errorMessage = if(hasErrors){ Some(ErrorMessage(content = Text(messages(s"individualUserType.error.required"))))} else None,
+        errorMessage = if(hasErrors){ Some(ErrorMessage(
+          content = Text(messages(s"individualUserType.error.required")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        ))} else None,
         hint = None,
         idPrefix = Some(key),
         name = key,

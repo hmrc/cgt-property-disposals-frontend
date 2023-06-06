@@ -17,26 +17,23 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, AssetType, RepresentativeType}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        formWrapper: FormWithCSRF,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        govukRadios: GovukRadios,
+        govukInput: GovukInput
 )
 
 @(
@@ -46,7 +43,7 @@
     representativeType: Option[RepresentativeType],
     assetType: AssetType,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @key = @{"acquisitionMethod"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -89,52 +86,23 @@
 @relevantErrorKey = @{if (form.error(otherMethodKey).nonEmpty) otherMethodKey else key }
 @title = @{messages(s"$key$userKey$assetTypeKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
-@options = @{List(
-    RadioOption(
-        label = messages(s"returns.$key$assetTypeKey.Bought"),
-        content = None,
-        optionHelpText = None
+@otherOption = {
+  @govukInput(Input(
+    id = otherMethodKey,
+    name = otherMethodKey,
+    label = Label(
+      content = Text(messages(s"returns.$otherMethodKey$userKey$assetTypeKey.label"))
     ),
-    RadioOption(
-        label = messages(s"returns.$key$assetTypeKey.Inherited"),
-        content = None,
-        optionHelpText = None
-    ),
-    RadioOption(
-        label = messages(s"returns.$key$assetTypeKey.Gifted"),
-        content = None,
-        optionHelpText = None
-    ),
-    RadioOption(
-        label = messages(s"returns.$key.Other"),
-        content = Some(textInput(
-            fieldId = otherMethodKey,
-            label = Html(messages(s"returns.$otherMethodKey$userKey$assetTypeKey.label")),
-            helpText = None,
-            labelAsHeading = false,
-            errorKey = form.error(otherMethodKey).map(e => s"$userErrorPrefix$assetTypeKeyForErrors${e.message}"),
-            value = form.data.getOrElse(otherMethodKey, ""),
-            hasErrors = form.error(otherMethodKey).isDefined,
-            extraContent = None,
-            inputType = Some("text"),
-            autoComplete = AutoCompleteType.On
-        )),
-        optionHelpText = None
-    )
-)}
-@selectedIndex = @{
-    form.data.get(key).map({
-        case "0" => 0
-        case "1" => 1
-        case "2" => 2
-        case _ => 3
-    })
+    value = form.data.get(otherMethodKey),
+    errorMessage = form.error(otherMethodKey).map(e => ErrorMessage(
+      content = Text(messages(s"$otherMethodKey.$userErrorPrefix$assetTypeKeyForErrors${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    autocomplete = Some(AutoCompleteType.On.value)
+  ))
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-    @backLinkComponent(backLink)
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, Some(s"$relevantErrorKey$userKey$assetTypeKey"))
@@ -142,19 +110,46 @@
 
     @caption(messages("acquisitionDetails.caption"))
 
-    @formWrapper(controllers.returns.acquisitiondetails.routes.AcquisitionDetailsController.acquisitionMethodSubmit(), 'novalidate -> "novalidate") {
-        @radioGroupConditional(
-            fieldId = key,
-            label = pageHeading(title),
-            selected = selectedIndex,
-            error = form.error(key),
-            options = options,
-            customErrorKey = Some(s"$key$userKey$assetTypeKey")
+    @formWrapper(controllers.returns.acquisitiondetails.routes.AcquisitionDetailsController.acquisitionMethodSubmit()) {
+      @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
+            content = Text(title),
+            classes = "govuk-fieldset__legend--xl",
+            isPageHeading = true
+          ))
+        )),
+        errorMessage = form.error(key).map(e => ErrorMessage(
+          content = Text(messages(s"$key$userKey$assetTypeKey.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        )),
+        idPrefix = Some(key),
+        name = key,
+        items = Seq(
+          RadioItem(
+            value = Some("0"),
+            content = Text(messages(s"returns.$key$assetTypeKey.Bought")),
+            checked = form.value.contains(AcquisitionMethod.Bought)
+          ),
+          RadioItem(
+            value = Some("1"),
+            content = Text(messages(s"returns.$key$assetTypeKey.Inherited")),
+            checked = form.value.contains(AcquisitionMethod.Inherited)
+          ),
+          RadioItem(
+            value = Some("2"),
+            content = Text(messages(s"returns.$key$assetTypeKey.Gifted")),
+            checked = form.value.contains(AcquisitionMethod.Gifted)
+          ),
+          RadioItem(
+            value = Some("3"),
+            content = Text(messages(s"returns.$key.Other")),
+            checked = form.data.get(key).contains("3"),
+            conditionalHtml = Some(otherOption)
+          )
         )
-
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+      ))
+      @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
-
     @returnToSummaryLink(displayReturnToSummaryLink = true)
-
 }
