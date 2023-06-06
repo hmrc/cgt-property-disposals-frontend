@@ -18,22 +18,20 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, RepresentativeType}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    formWrapper: FormWithCSRF,
+    dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input_govuk,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
@@ -43,11 +41,10 @@
     representativeType: Option[RepresentativeType],
     assetType: AssetType,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @key = @{"acquisitionDate"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-
 @userKey = @{
     representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
@@ -59,29 +56,24 @@
           else ""
   }
 }
-
 @assetTypeKey = @{assetType match {
   case AssetType.IndirectDisposal => ".indirect"
   case _ => ""
 }}
-
-
 @hasErrors = @{form.hasErrors}
 @title = @{messages(s"$key$userKey$assetTypeKey.title")}
 @errorKey = @{List(s"acquisitionDate-day", s"acquisitionDate-month", s"acquisitionDate-year", "acquisitionDate").map(form.error).find(_.isDefined).flatten}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-    @backLinkComponent(backLink)
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
-        @errorSummary(form, errorKey.map(e => s"${e.key}$userKey$assetTypeKey"))
+        @errorSummary(form, customErrorKey = errorKey.map(e => s"${e.key}$userKey$assetTypeKey"), dateField = Some(key))
     }
-
-    @formWrapper(routes.AcquisitionDetailsController.acquisitionDateSubmit(), 'novalidate -> "novalidate") {
+    <span class="govuk-caption-xl">@messages("acquisitionDetails.caption")</span>
+    @formWrapper(routes.AcquisitionDetailsController.acquisitionDateSubmit()) {
         @dateInput(
             fieldId = key,
-            label = pageHeading(title, Some(messages("acquisitionDetails.caption"))),
+            label = title,
             dayValue = form.data.get("acquisitionDate-day"),
             monthValue = form.data.get("acquisitionDate-month"),
             yearValue = form.data.get("acquisitionDate-year"),
