@@ -27,17 +27,16 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 
 @this(
-  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading_govuk,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-  radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-  unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
+  radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional_govuk,
+  unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input_govuk,
   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-  details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+  details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk
 )
 
 @(
@@ -140,9 +139,7 @@
  })
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-    @backLinkComponent(backLink)
+@layout(title, hasErrors = hasErrors, backLinkUrl = Some(backLink.url)) {
 
     @if(hasErrors) {
      @errorSummary(form, Some(customErrorKey))
