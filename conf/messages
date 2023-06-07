@@ -3060,13 +3060,7 @@ inYearLosses.personalRep.error.invalid=Select yes if the person want to include 
 inYearLosses.personalRepInPeriodOfAdmin.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in the tax year
 inYearLosses.personalRepInPeriodOfAdmin.agent.error.invalid=Select yes if your client wants to include any Capital Gains Tax losses the estate made in the tax year
 
-inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
-inYearLosses.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
-inYearLosses.trust.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
-inYearLosses.capacitor.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
-inYearLosses.personalRep.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
-inYearLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
-inYearLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new tab)</a>.
+inYearLosses.link=Find out how losses can reduce gains
 
 inYearLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 inYearLossesValue.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
@@ -3190,13 +3184,7 @@ previousYearsLosses.personalRep.error.required=Select yes if you want to include
 previousYearsLosses.personalRepInPeriodOfAdmin.error.required=Select yes if you are including any other Capital Gains Tax losses the estate made in previous tax years
 previousYearsLosses.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client is including any other Capital Gains Tax losses the estate made in previous tax years
 
-previousYearsLosses.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
-previousYearsLosses.agent.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
-previousYearsLosses.trust.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
-previousYearsLosses.capacitor.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
-previousYearsLosses.personalRep.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
-previousYearsLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
-previousYearsLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new tab)</a>.
+previousYearsLosses.link=Find out how to report losses
 
 previousYearsLossesValue.label=Amount of losses from previous tax years
 previousYearsLossesValue.agent.label=Amount of losses from previous tax years

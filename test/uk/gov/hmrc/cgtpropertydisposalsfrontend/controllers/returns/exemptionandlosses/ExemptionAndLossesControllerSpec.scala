@@ -2580,7 +2580,7 @@ class ExemptionAndLossesControllerSpec
 
         val errorSummary   = doc.select(s"""a[href="#$key"]""").text()
         val inlineErrorMsg =
-          doc.select(s"""span[id="$key-inline-error"]""").text()
+          doc.select(s"#$key-error, #$key-inline-error").text()
 
         val errorSummaryMsg =
           if (errorSummary.nonEmpty) "Error: " + errorSummary else errorSummary

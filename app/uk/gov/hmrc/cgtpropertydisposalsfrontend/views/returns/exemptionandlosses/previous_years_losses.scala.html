@@ -24,19 +24,21 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcNewTabLinkHelper
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.newtablinkhelper.NewTabLinkHelper
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        formWrapper: FormWithCSRF,
+        govukInput: GovukInput,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        hmrcNewTabLinkHelper: HmrcNewTabLinkHelper
 )
 
 @(
@@ -70,41 +72,27 @@
 
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
-@options = @{List(
-    RadioOption(
-        label = messages(s"generic.yes"),
-        content = Some(unitInput(
-            fieldId = valueKey,
-            value = form.data.getOrElse(valueKey, ""),
-            label = Html(messages(s"$valueKey$userKey.label")),
-            formError = form.error(valueKey),
-            hasErrors = form.error(valueKey).nonEmpty,
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds")
-        )),
-        optionHelpText = None
+@yesContent = {
+  @govukInput(Input(
+    id = valueKey,
+    name = valueKey,
+    value = form.data.get(valueKey),
+    label = Label(
+      content = Text(messages(s"$valueKey$userKey.label"))
     ),
-    RadioOption(
-        label = messages(s"generic.no"),
-        content = None,
-        optionHelpText = None
-    )
-
-)}
-@selectedIndex = @{
-    form.data.get(key).map({
-        case "0" => 0
-        case _ => 1
-    })
+    classes = "govuk-input--width-10",
+    prefix = Some(PrefixOrSuffix(
+      content = Text("£")
+    )),
+    errorMessage = form.error(valueKey).map(e => ErrorMessage(
+      content = Text(messages(s"$valueKey$userKey.${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    autocomplete = Some(AutoCompleteType.On.value)
+  ))
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-    @backLinkComponent(backLink)
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, None, userKey)
@@ -112,20 +100,30 @@
 
     @caption(messages("exemptionAndLosses.caption"))
 
-    @formWrapper(routes.ExemptionAndLossesController.previousYearsLossesSubmit(), 'novalidate -> "novalidate") {
-        @radioGroupConditional(
-            fieldId = key,
-            label = pageHeading(title),
-            selected = selectedIndex,
-            error = form.error(key),
-            options = options,
-            helpText = Some(Html(messages(s"$residentSpecificKey.helpText"))),
-            customErrorKey = Some(s"$key$userKey")
-        )
+    @formWrapper(routes.ExemptionAndLossesController.previousYearsLossesSubmit()) {
+      @yesNo(
+        fieldId = key,
+        label = title,
+        helpText = Some(Html(
+          messages(s"$residentSpecificKey.helpText")
+        )),
+        yesContent = Some(yesContent),
+        errorKey = form.error(key).map(e => s"$userKey.${e.message}"),
+        selected = form.data.get(key) map {
+          case "0" => true
+          case _ => false
+        },
+        useIndexStrings = true
+      )
 
-        <p>@Html(messages(s"$key$userKey.link", if(wasAUkResident) appConfig.cgtLossesUrl else appConfig.cgtLossesUrlNonUk))</p>
+      <p class="govuk-body">
+      @hmrcNewTabLinkHelper(NewTabLinkHelper(
+        text = messages(s"$key.link"),
+        href = Some(if(wasAUkResident) appConfig.cgtLossesUrl else appConfig.cgtLossesUrlNonUk)
+      ))
+      </p>
 
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+      @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

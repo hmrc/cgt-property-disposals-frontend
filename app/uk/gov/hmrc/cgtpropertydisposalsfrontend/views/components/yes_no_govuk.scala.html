@@ -33,7 +33,8 @@
   noContent: Option[Html] = None,
   describedBy: Option[String] = None,
   errorMessage: Option[String] = None,
-  warningField: Option[String] = None
+  warningField: Option[String] = None,
+  useIndexStrings: Boolean = false
 )(implicit messages: Messages)
 
 @warningId = @{"single-warning"}
@@ -42,6 +43,8 @@
     Some(s"""${describedBy.map(d => s"$d ")}${warningField.map(_ => warningId)}""".trim)
   else None
 }
+@yesValue = @{if(useIndexStrings) "0" else "true"}
+@noValue = @{if(useIndexStrings) "1" else "false"}
 
 @govukRadios(Radios(
   fieldset = Some(Fieldset(
@@ -60,20 +63,20 @@
   items = Seq(
     RadioItem(
       content = Text(messages("generic.yes")),
-      value = Some("true"),
+      value = Some(yesValue),
       checked = selected.contains(true),
       conditionalHtml = yesContent
     ),
     RadioItem(
       content = Text(messages("generic.no")),
-      value = Some("false"),
+      value = Some(noValue),
       checked = selected.contains(false),
       conditionalHtml = noContent
     )
   ),
   errorMessage = errorKey.map(key =>
     ErrorMessage(
-      content = Text(errorMessage.getOrElse(messages(s"$fieldId.$key"))),
+      content = Text(errorMessage.getOrElse(messages(s"$fieldId.${key.stripPrefix(".")}"))),
       visuallyHiddenText = Some(messages("generic.error"))
     )
   )

@@ -2661,13 +2661,7 @@ inYearLosses.agent.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw
 inYearLosses.trust.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ymddiriedolaeth yn y flwyddyn dreth
 inYearLosses.agent.error.invalid=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth eich cleient yn y flwyddyn dreth
 inYearLosses.trust.error.invalid=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ymddiriedolaeth yn y flwyddyn dreth
-inYearLosses.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
-inYearLosses.agent.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
-inYearLosses.trust.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
-inYearLosses.capacitor.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
-inYearLosses.personalRep.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
-inYearLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
-inYearLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Dysgwch sut mae colledion yn gallu gostwng enillion (yn agor tab newydd)</a>.
+inYearLosses.link=Dysgwch sut mae colledion yn gallu gostwng enillion
 inYearLossesValue.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
 inYearLossesValue.agent.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
 inYearLossesValue.trust.error.invalid=Mae’n rhaid i swm y colledion Treth Enillion Cyfalaf fod yn rhif, megis 108 neu 2,940.54
@@ -2775,13 +2769,7 @@ previousYearsLosses.capacitor.error.required=Dewiswch ‘Iawn’ os yw’r perso
 previousYearsLosses.personalRep.error.required=Dewiswch ‘Iawn’ os ydych am gynnwys unrhyw golledion Treth Enillion Cyfalaf a wnaeth y person mewn blynyddoedd treth blaenorol
 previousYearsLosses.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os ydych yn cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ystâd mewn blynyddoedd treth blaenorol
 previousYearsLosses.personalRepInPeriodOfAdmin.agent.error.required=Dewiswch ‘Iawn’ os yw’ch cleient yn cynnwys unrhyw golledion Treth Enillion Cyfalaf eraill a wnaeth yr ystâd mewn blynyddoedd treth blaenorol
-previousYearsLosses.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
-previousYearsLosses.agent.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
-previousYearsLosses.trust.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
-previousYearsLosses.capacitor.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
-previousYearsLosses.personalRep.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
-previousYearsLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
-previousYearsLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Dysgwch sut i roi gwybod am golledion (yn agor tab newydd)</a>.
+previousYearsLosses.link=Dysgwch sut i roi gwybod am golledion
 previousYearsLossesValue.label=Swm y colledion o flynyddoedd treth blaenorol
 previousYearsLossesValue.agent.label=Swm y colledion o flynyddoedd treth blaenorol
 previousYearsLossesValue.trust.label=Swm y colledion o flynyddoedd treth blaenorol
