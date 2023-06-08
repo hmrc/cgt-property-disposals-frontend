@@ -3143,13 +3143,13 @@ inYearLosses.furtherReturn.personalRep.helpText1=You’ll need to enter the tota
 inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText1=You’ll need to enter the total amount of allowable losses in the year that affect the estate’s Capital Gains Tax liability on UK property-related disposals. You would have worked out this amount when you worked out the estate’s overall Capital Gains Tax liability on its UK property-related disposals so far this tax year.
 inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText1=You’ll need to enter the total amount of allowable losses in the year that affect the estate’s Capital Gains Tax liability on UK property-related disposals. You would have worked out this amount when you worked out the estate’s overall Capital Gains Tax liability on its UK property-related disposals so far this tax year.
 
-inYearLosses.furtherReturn.helpText2=If you made an allowable loss on the disposal you have reported in this return you should not include this in the total.
-inYearLosses.furtherReturn.agent.helpText2=If your client made an allowable loss on the disposal you have reported in this return you should not include this in the total.
-inYearLosses.furtherReturn.trust.helpText2=If the trust made an allowable loss on the disposal you have reported in this return you should not include this in the total.
-inYearLosses.furtherReturn.capacitor.helpText2=If the person made an allowable loss on the disposal you have reported in this return you should not include this in the total.
-inYearLosses.furtherReturn.personalRep.helpText2=If the person made an allowable loss on the disposal you have reported in this return you should not include this in the total.
-inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText2=If the estate made an allowable loss on the disposal you have reported in this return you should not include this in the total.
-inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText2=If the estate made an allowable loss on the disposal you have reported in this return you should not include this in the total.
+inYearLosses.furtherReturn.helpText2=If you made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.agent.helpText2=If your client made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.trust.helpText2=If the trust made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.capacitor.helpText2=If the person made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.personalRep.helpText2=If the person made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText2=If the estate made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText2=If the estate made a loss on the disposal you have reported in this return you should also include that amount in this total.
 
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.agent.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
