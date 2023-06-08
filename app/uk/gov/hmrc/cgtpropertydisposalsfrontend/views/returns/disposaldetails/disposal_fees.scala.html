@@ -17,7 +17,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
@@ -28,12 +27,12 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, _}
 
 @this(
-    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    formHelper: FormWithCSRF,
-    govukButton: GovukButton,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input_govuk,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        formHelper: FormWithCSRF,
+        govukButton: GovukButton,
+        govukInput: GovukInput,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
@@ -78,23 +77,30 @@
 
     <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
     @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFeesSubmit(), 'novalidate -> "novalidate") {
-        @unitInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            formError = form.error(key),
-            hasErrors = form.error(key).nonEmpty,
-            label = Html(title),
-            labelAsHeading = true,
-            helpText = Some(Html(helpTextMessage)),
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = Some(s"$key$userKey$indirectKey")
-        )
+      @govukInput(Input(
+        id = key,
+        name = key,
+        value = form.data.get(key),
+        label = Label(
+          content = Text(title),
+          isPageHeading = true,
+          classes = "govuk-label--xl"
+        ),
+        classes = "govuk-input--width-10",
+        prefix = Some(PrefixOrSuffix(
+          content = Text("£")
+        )),
+        hint = Some(Hint(
+          content = Text(helpTextMessage)
+        )),
+        errorMessage = form.error(key).map(e => ErrorMessage(
+          content = Text(messages(s"$key$userKey$indirectKey.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        )),
+        autocomplete = Some(AutoCompleteType.On.value)
+      ))
 
-        @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
+      @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

@@ -27,7 +27,7 @@
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.input.PrefixOrSuffix
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
     formHelper: FormWithCSRF,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
@@ -70,7 +70,10 @@
         label = Label(
             content =  HtmlContent(messages(s"$percentageShareKey$userKey.label")),
         ),
-        errorMessage = if(hasErrors){Some(ErrorMessage(Some(form.error(percentageShareKey) match { case Some(message) => (message.message) case None => ""})))} else None,
+        errorMessage = form.error(percentageShareKey).map(e => ErrorMessage(
+          content = Text(messages(s"$percentageShareKey$userKey.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        )),
         classes = "govuk-!-width-one-third",
         spellcheck = Some(false),
         value = form(percentageShareKey).value,
@@ -100,14 +103,14 @@
     )
 )}
 
-@mainTemplate(pageTitle = title, isWelshTranslationAvailable = true, withSignOutLink = true, backLinkUrl = Some(backLink.url)) {
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
 @if(hasErrors) {
     @errorSummary(form, None, s"$userKey")
 }
 
 <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
-@formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwnSubmit(), 'novalidate -> "novalidate") {
+@formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwnSubmit()) {
     @govukRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
@@ -116,7 +119,10 @@
                 isPageHeading = true
             ))
         )),
-        errorMessage = form.error(key) match { case Some(errorKey) => Some(ErrorMessage(Some(errorKey.toString))) case _ => None},
+        errorMessage = form.error(key).map(e => ErrorMessage(
+          content = Text(messages(s"$key.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        )),
         hint = None,
         idPrefix = None,
         name = s"$key",
