@@ -1,0 +1,95 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import cats.syntax.order._
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+
+@this(
+cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section_govuk,
+cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row_govuk,
+cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change_govuk,
+)
+
+@(
+    answers: AmountInPence,
+    isATrust: Boolean,
+    representativeType: Option[RepresentativeType],
+    isMultipleDisposal: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages)
+
+@isAgent = @{request.userType.contains(UserType.Agent)}
+
+@userKey = @{
+    representativeType match {
+        case Some(PersonalRepresentative) => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent => ".personalRepInPeriodOfAdmin.agent"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
+        case Some(Capacitor) => ".capacitor"
+        case None =>
+            if (isAgent) ".agent"
+            else if (isATrust) ".trust"
+            else ""
+    }
+}
+
+@outerLabelUserKey = @{
+    if(representativeType.isEmpty && !isAgent && !isATrust) ""
+    else ".notSelf"
+}
+
+@multipleDisposalKey = @{ if(isMultipleDisposal) ".multipleDisposals" else "" }
+
+@gainOrLossAfterReliefsLabelWithAmount = @{
+  Some(answers).map { answer =>
+    if(answer > AmountInPence.zero)
+      s"gainOrLossAfterReliefs.gain$outerLabelUserKey.outerLabel" -> Some("gainOrLossAfterReliefs.gain.innerLabel" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answer.inPounds()))
+    else if(answer < AmountInPence.zero)
+      s"gainOrLossAfterReliefs.loss$outerLabelUserKey.outerLabel" -> Some("gainOrLossAfterReliefs.loss.innerLabel" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answer.inPounds().abs))
+    else
+      s"gainOrLossAfterReliefs.noLossOrGain$outerLabelUserKey.outerLabel" -> None
+  }
+
+}
+
+@cyaSection() {
+
+  @gainOrLossAfterReliefsLabelWithAmount.map{ labelsAndAmount =>
+
+    @cyaRow(
+      messages(s"gainOrLossAfterReliefs$userKey$multipleDisposalKey.h2"),
+      Html(messages(labelsAndAmount._1)),
+      Some(cyaChange(messages("gainOrLossAfterReliefs.cyaChange"), routes.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefs().url)),
+      "gainOrLossAfterReliefs"
+    )
+
+    @labelsAndAmount._2.map( labelAndAmount =>
+      cyaRow(
+        messages(labelAndAmount._1),
+        Html(labelAndAmount._2),
+        Some(cyaChange(messages(labelAndAmount._1), routes.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefs().url)),
+        "gainOrLossAfterReliefsValue"
+      )
+    )
+
+  }
+}
