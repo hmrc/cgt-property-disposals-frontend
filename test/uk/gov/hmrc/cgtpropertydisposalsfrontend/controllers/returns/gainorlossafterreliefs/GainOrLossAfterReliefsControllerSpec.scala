@@ -367,32 +367,34 @@ class GainOrLossAfterReliefsControllerSpec
               performAction(),
               messageFromMessageKey(expectedTitleKey),
               { doc =>
-                doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+                doc.select(".govuk-back-link").attr("href") shouldBe expectedBackLink.url
 
-                doc.select("#content > article > span").text() shouldBe messageFromMessageKey(
+                doc.select(".govuk-caption-xl").text() shouldBe messageFromMessageKey(
                   "gainOrLossAfterReliefs.caption"
                 )
 
-                doc.select("#gainOrLossAfterReliefs > div:nth-child(2) > label").text() shouldBe messageFromMessageKey(
+                doc.select("label[for='gainOrLossAfterReliefs']").text() shouldBe messageFromMessageKey(
                   s"gainOrLossAfterReliefs.gain$expectedOuterLabelUserKey.outerLabel"
                 )
 
-                doc.select("#gainOrLossAfterReliefs > div:nth-child(4) > label").text() shouldBe messageFromMessageKey(
+                doc.select("label[for='gainOrLossAfterReliefs-2']").text() shouldBe messageFromMessageKey(
                   s"gainOrLossAfterReliefs.loss$expectedOuterLabelUserKey.outerLabel"
                 )
 
-                doc.select("#gainOrLossAfterReliefs > div:nth-child(6) > label").text() shouldBe messageFromMessageKey(
+                doc.select("label[for='gainOrLossAfterReliefs-3']").text() shouldBe messageFromMessageKey(
                   s"gainOrLossAfterReliefs.noLossOrGain$expectedOuterLabelUserKey.outerLabel"
                 )
 
-                doc.select("#subheading").text() shouldBe messageFromMessageKey(expectedH2Key)
+                doc.select("legend").text() shouldBe messageFromMessageKey(expectedH2Key)
 
-                doc.select("#content > article > div > ol > li:nth-child(1)").text() shouldBe messageFromMessageKey(
+                doc
+                  .select("#main-content ol.govuk-list--number > li:nth-child(1)")
+                  .text() shouldBe messageFromMessageKey(
                   expectedLi1Key
                 )
 
                 doc
-                  .select("#content > article > form, #main-content form")
+                  .select("#main-content form")
                   .attr("action") shouldBe routes.GainOrLossAfterReliefsController
                   .enterGainOrLossAfterReliefsSubmit()
                   .url
@@ -598,75 +600,107 @@ class GainOrLossAfterReliefsControllerSpec
               { doc =>
                 doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
 
-                doc.select("#content > article > span").text() shouldBe messageFromMessageKey(
+                doc.select(".govuk-caption-xl").text() shouldBe messageFromMessageKey(
                   "gainOrLossAfterReliefs.caption"
                 )
 
-                doc.select("#gainOrLossAfterReliefs > div:nth-child(3) > label").text() shouldBe messageFromMessageKey(
+                doc.select("label[for='gainOrLossAfterReliefs']").text() shouldBe messageFromMessageKey(
                   s"gainOrLossAfterReliefs.gain$expectedOuterLabelUserKey.outerLabel"
                 )
 
-                doc.select("#gainOrLossAfterReliefs > div:nth-child(5) > label").text() shouldBe messageFromMessageKey(
+                doc.select("label[for='gainOrLossAfterReliefs-2']").text() shouldBe messageFromMessageKey(
                   s"gainOrLossAfterReliefs.loss$expectedOuterLabelUserKey.outerLabel"
                 )
 
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(1) > :nth-child(1) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(1) > div.sum-part:nth-child(1) .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.disposalPrice")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(1) > :nth-child(2) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(1) > div.sum-part:nth-child(2) .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.disposalFees")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(1) > :nth-child(3) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(1) > div.sum-total > .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.total.disposalAmount")
 
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(2) > :nth-child(1) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(2) > div.sum-part:nth-child(1) > .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.acquisitionPrice")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(2) > :nth-child(2) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(2) > div.sum-part:nth-child(2) .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.improvementCosts")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(2) > :nth-child(3) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(2) > div.sum-part:nth-child(3) > .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.acquisitionFees")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(2) > :nth-child(4) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(2) > div.sum-total > .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.total.acquisitionAmount")
 
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(3) > :nth-child(1) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(3) > div.sum-part:nth-child(1) .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.total.disposalAmount")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(3) > :nth-child(2) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(3) > div.sum-part:nth-child(2) .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.total.acquisitionAmount")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(3) > :nth-child(3) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(3) > div.sum-total > .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.total.initialGainOrLoss")
 
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(4) > :nth-child(1) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(4) > div.sum-part:nth-child(1) .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.privateResidenceRelief")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(4) > :nth-child(2) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(4) > div.sum-part:nth-child(2) .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.lettingRelief")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(4) > :nth-child(3) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(4) > div.sum-total > .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.total.reliefs")
 
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(5) > :nth-child(1) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(5) > div.sum-part:nth-child(1) .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.total.initialGainOrLoss")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(5) > :nth-child(2) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(5) > div.sum-part:nth-child(2) .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.total.reliefs")
                 doc
-                  .select("#content > article > div > details > div > dl:nth-child(5) > :nth-child(3) > .cya-question")
+                  .select(
+                    ".govuk-details__text > .govuk-summary-list:nth-child(5) > div.sum-total > .govuk-summary-list__key"
+                  )
                   .text() shouldBe messageFromMessageKey("calculator.total.gainOrLossAfterReliefs")
 
-                doc.select("#subheading").text() shouldBe messageFromMessageKey(expectedH2Key)
+                doc.select("legend").text() shouldBe messageFromMessageKey(expectedH2Key)
 
                 doc
-                  .select("#content > article > form, #main-content form")
+                  .select("#main-content form")
                   .attr("action") shouldBe routes.GainOrLossAfterReliefsController
                   .enterGainOrLossAfterReliefsSubmit()
                   .url
@@ -793,7 +827,7 @@ class GainOrLossAfterReliefsControllerSpec
                   doc.text() shouldNot include(messageFromMessageKey("calculator.lettingRelief"))
 
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#main-content form")
                     .attr("action") shouldBe routes.GainOrLossAfterReliefsController
                     .enterGainOrLossAfterReliefsSubmit()
                     .url
@@ -1133,7 +1167,7 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.cya.title"
             ),
             { doc =>
-              doc.select("#content > article > h1").text() shouldBe messageFromMessageKey(
+              doc.select("h1").text() shouldBe messageFromMessageKey(
                 "gainOrLossAfterReliefs.cya.title"
               )
 
@@ -1149,7 +1183,7 @@ class GainOrLossAfterReliefsControllerSpec
                 .getOrElse("")
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#main-content form")
                 .attr("action") shouldBe routes.GainOrLossAfterReliefsController
                 .checkYourAnswersSubmit()
                 .url

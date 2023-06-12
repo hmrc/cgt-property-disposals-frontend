@@ -15,20 +15,18 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        formHelper: FormWithCSRF,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary_govuk
 )
 
 @(
@@ -36,20 +34,19 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_
         isATrust: Boolean,
         representativeType: Option[RepresentativeType],
         isMultipleDisposal: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{
     messages("gainOrLossAfterReliefs.cya.title")
 }
 
-@mainTemplate(title = title, userType = request.userType) {
-    @caption(messages("gainOrLossAfterReliefs.caption"))
-
-    @pageHeading(title, None)
+@layout(title) {
+    <span class="govuk-caption-xl">@messages("gainOrLossAfterReliefs.caption")</span>
+    <h1 class="govuk-heading-xl">@title</h1>
 
     @summary(answers, isATrust, representativeType, isMultipleDisposal)
 
-    @formWrapper(routes.GainOrLossAfterReliefsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(routes.GainOrLossAfterReliefsController.checkYourAnswersSubmit()) {
         @submitButton(messages("button.confirmAndContinue"))
     }
 

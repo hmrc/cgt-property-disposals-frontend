@@ -14,33 +14,29 @@
  * limitations under the License.
  *@
 
-@import cats.instances.string._
-@import cats.syntax.eq._
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedGlarBreakdown, RepresentativeType}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-gainOrLossAfterReliefsCalculator: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_or_loss_after_reliefs_calculator,
-details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        formWrapper: FormWithCSRF,
+        govukInput: GovukInput,
+        govukRadios: GovukRadios,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        gainOrLossAfterReliefsCalculator: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_or_loss_after_reliefs_calculator,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk
 )
 
 @(
@@ -51,14 +47,13 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     isMultipleDisposal: Boolean,
     isAmend: Boolean,
     glarCalulatorInput: Option[CalculatedGlarBreakdown]
-)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @key = @{ "gainOrLossAfterReliefs" }
 @gainKey = @{ "gainAfterReliefs" }
 @lossKey = @{ "lossAfterReliefs" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @isAgent = @{request.userType.contains(UserType.Agent)}
-
 
 @userKey = @{
     representativeType match {
@@ -81,61 +76,52 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 }
 
 @customErrorKey = @{
-    form.errors.headOption.map(e =>
-        if(e.key === key) s"$key$userKey"
-        else e.key
+  // only add a user key if the error is on the key itself
+  // other errors on inner fields do not use a user key
+    form.error(key).map(e =>
+        s"${e.key}$userKey"
     )
  }
 
-@options = @{
-    List(
-    RadioOption(
-        label = messages(s"gainOrLossAfterReliefs.gain$outerLabelUserKey.outerLabel"),
-        content = Some(unitInput(
-            fieldId = gainKey,
-            value = form.data.getOrElse(gainKey, ""),
-            label = Html(messages("gainOrLossAfterReliefs.gain.innerLabel")),
-            formError = form.error(gainKey),
-            hasErrors = form.error(gainKey).nonEmpty,
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds")
-        )),
-        optionHelpText = None
+@gainContent = {
+  @govukInput(Input(
+    id = gainKey,
+    name = gainKey,
+    value = form.data.get(gainKey),
+    label = Label(
+      content = Text(messages("gainOrLossAfterReliefs.gain.innerLabel"))
     ),
-    RadioOption(
-        label = messages(s"gainOrLossAfterReliefs.loss$outerLabelUserKey.outerLabel"),
-        content = Some(unitInput(
-            fieldId = lossKey,
-            value = form.data.getOrElse(lossKey, ""),
-            label = Html(messages("gainOrLossAfterReliefs.loss.innerLabel")),
-            formError = form.error(lossKey),
-            hasErrors = form.error(lossKey).nonEmpty,
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds")
-        )),
-        optionHelpText = None
-    ),
-    RadioOption(
-        label = messages(s"gainOrLossAfterReliefs.noLossOrGain$outerLabelUserKey.outerLabel"),
-        content = None,
-        optionHelpText = None
-    )
-)}
-
-@selectedIndex = @{
-    form.data.get(key).map({
-        case "0" => 0
-        case "1" => 1
-        case _ => 2
-    })
+    classes = "govuk-input--width-10",
+    prefix = Some(PrefixOrSuffix(
+      content = Text("£")
+    )),
+    errorMessage = form.error(gainKey).map(e => ErrorMessage(
+      content = Text(messages(s"$gainKey.${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    autocomplete = Some(AutoCompleteType.On.value)
+  ))
 }
 
+@lossContent = {
+  @govukInput(Input(
+    id = lossKey,
+    name = lossKey,
+    value = form.data.get(lossKey),
+    label = Label(
+      content = Text(messages("gainOrLossAfterReliefs.loss.innerLabel"))
+    ),
+    classes = "govuk-input--width-10",
+    prefix = Some(PrefixOrSuffix(
+      content = Text("£")
+    )),
+    errorMessage = form.error(lossKey).map(e => ErrorMessage(
+      content = Text(messages(s"$lossKey.${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    autocomplete = Some(AutoCompleteType.On.value)
+  ))
+}
 
 @title = @{
     messages(s"$key$userKey$multipleDisposalKey.title")
@@ -155,17 +141,15 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
           Some(Html(
               s"""
-                 |<p>$prompt</p>
-                 |<p>${messages("gainOrLossAfterReliefs.calculated.promptEnding")}</p>
+                 |<p class="govuk-body">$prompt</p>
+                 |<p class="govuk-body">${messages("gainOrLossAfterReliefs.calculated.promptEnding")}</p>
                  |""".stripMargin))
 
         case None => None
     }
 }
 
-    @mainTemplate(title = title, userType = request.userType) {
-
-    @backLinkComponent(backLink)
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, customErrorKey)
@@ -173,12 +157,11 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
     @caption(messages("gainOrLossAfterReliefs.caption"))
 
-    @pageHeading(title)
+    <h1 class="govuk-heading-xl">@title</h1>
 
-    <div>
     @glarCalulatorInput match {
           case Some(calculatedValues) =>  {
-            <p>@messages(s"$key.calculatorHeading")</p>
+            <p class="govuk-body">@messages(s"$key.calculatorHeading")</p>
               @details(
                   messages("calculator.showWorkings"),
                   gainOrLossAfterReliefsCalculator(calculatedValues),
@@ -186,8 +169,8 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
               )
           }
           case _ => {
-              <p>@messages(s"$key.p1")</p>
-              <ol class="list list-number">
+              <p class="govuk-body">@messages(s"$key.p1")</p>
+              <ol class="govuk-list govuk-list--number">
                   <li>@messages(s"$key$multipleDisposalKey.li1")</li>
                   <li>@messages(s"$key.li2")</li>
                   <li>@messages(s"$key.li3")</li>
@@ -196,19 +179,44 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
               </ol>
           }
     }
-    </div>
 
-    @formWrapper(routes.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefsSubmit(), 'novalidate -> "novalidate") {
-      @radioGroupConditional(
-        fieldId = key,
-        selected = selectedIndex,
-        error = form.error(key),
-        label = Html(s"""<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>"""),
-        options = options,
-        customErrorKey = customErrorKey,
-        helpText = None,
-        extraContent = extraContent
-      )
+    @formWrapper(routes.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefsSubmit()) {
+      @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
+            content = Text(messages(s"$key$userKey$multipleDisposalKey.h2")),
+            classes = "govuk-fieldset__legend--m"
+          ))
+        )),
+        name = key,
+        idPrefix = Some(key),
+        hint = extraContent.map(c => Hint(content = HtmlContent(c))),
+        items = Seq(
+          RadioItem(
+            content = Text(messages(s"gainOrLossAfterReliefs.gain$outerLabelUserKey.outerLabel")),
+            value = Some("0"),
+            checked = form.data.get(key).contains("0"),
+            conditionalHtml = Some(gainContent)
+          ),
+          RadioItem(
+            content = Text(messages(s"gainOrLossAfterReliefs.loss$outerLabelUserKey.outerLabel")),
+            value = Some("1"),
+            checked = form.data.get(key).contains("1"),
+            conditionalHtml = Some(lossContent)
+          ),
+          RadioItem(
+            content = Text(messages(s"gainOrLossAfterReliefs.noLossOrGain$outerLabelUserKey.outerLabel")),
+            value = Some("2"),
+            checked = form.data.get(key).contains("2")
+          )
+        ),
+        errorMessage = form.error(key).map(e =>
+          ErrorMessage(
+            content = Text(messages(s"${customErrorKey.getOrElse(key)}.${e.message}")),
+            visuallyHiddenText = Some(messages("generic.error"))
+          )
+        )
+      ))
 
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
