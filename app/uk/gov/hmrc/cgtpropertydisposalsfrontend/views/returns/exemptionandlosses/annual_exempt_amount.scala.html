@@ -26,17 +26,17 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, RepresentativeType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    formWrapper: FormWithCSRF,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
+    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk
 )
 
 @(
@@ -101,11 +101,7 @@
     annualExemptAmountForVulnerableString,
     annualExemptAmountString
 ) )) }
-
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-    @backLinkComponent(backLink)
-
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
     @if(hasErrors) {
         @errorSummary(form, None, userKey)
     }
@@ -134,9 +130,9 @@
           @details(messages(s"$key.details.2.header"),  Html(messages(s"$key.details.2.body", appConfig.trustsForVulnerable)))
         } else if(isPeriodOfAdmin){
             @details(messages(s"$key.details.3.header"),  Html(messages(s"$key.details.3.body", appConfig.personalAllowanceUrl)))
-            <p>@Html(messages(s"$key$userKey.link", appConfig.taxFreeAllowanceUrl))</p>
+            <p class="govuk-body">@Html(messages(s"$key$userKey.link", appConfig.taxFreeAllowanceUrl))</p>
         }else {
-            <p>@Html(messages(s"$key.link", appConfig.annualExemptAmountUrl))</p>
+            <p class="govuk-body">@Html(messages(s"$key.link", appConfig.annualExemptAmountUrl))</p>
         }
 
         @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))

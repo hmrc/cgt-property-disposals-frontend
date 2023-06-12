@@ -1696,7 +1696,7 @@ class ExemptionAndLossesControllerSpec
               messageFromMessageKey(s"$key.title"),
               { doc =>
                 doc
-                  .select(s"#$key-form-hint")
+                  .select(s"#$key-govuk-hint")
                   .html()      shouldBe messageFromMessageKey(
                   s"$key.helpText",
                   taxYear.startDateInclusive.getYear.toString,
@@ -1735,7 +1735,7 @@ class ExemptionAndLossesControllerSpec
               messageFromMessageKey(s"$key.agent.title"),
               { doc =>
                 doc
-                  .select(s"#$key-form-hint")
+                  .select(s"#$key-govuk-hint")
                   .text()      shouldBe messageFromMessageKey(
                   s"$key.agent.helpText",
                   taxYear.startDateInclusive.getYear.toString,
@@ -1775,7 +1775,7 @@ class ExemptionAndLossesControllerSpec
               ),
               { doc =>
                 doc
-                  .select("#annualExemptAmount-form-hint")
+                  .select("#annualExemptAmount-govuk-hint")
                   .html() shouldBe messageFromMessageKey(
                   "annualExemptAmount.trust.helpText",
                   taxYear.startDateInclusive.getYear.toString,
@@ -1827,7 +1827,7 @@ class ExemptionAndLossesControllerSpec
               messageFromMessageKey(s"$key.title"),
               doc =>
                 doc
-                  .select(s"#$key-form-hint")
+                  .select(s"#$key-govuk-hint")
                   .html() shouldBe messageFromMessageKey(
                   s"$key.furtherReturn.helpText",
                   taxYear.startDateInclusive.getYear.toString,
@@ -1860,7 +1860,7 @@ class ExemptionAndLossesControllerSpec
               messageFromMessageKey(s"$key.agent.title"),
               doc =>
                 doc
-                  .select(s"#$key-form-hint")
+                  .select(s"#$key-govuk-hint")
                   .html() shouldBe messageFromMessageKey(
                   s"$key.furtherReturn.agent.helpText",
                   taxYear.startDateInclusive.getYear.toString,
@@ -1893,7 +1893,7 @@ class ExemptionAndLossesControllerSpec
               messageFromMessageKey(s"$key.trust.title"),
               doc =>
                 doc
-                  .select(s"#$key-form-hint")
+                  .select(s"#$key-govuk-hint")
                   .html() shouldBe messageFromMessageKey(
                   s"$key.furtherReturn.trust.helpText",
                   taxYear.startDateInclusive.getYear.toString,
