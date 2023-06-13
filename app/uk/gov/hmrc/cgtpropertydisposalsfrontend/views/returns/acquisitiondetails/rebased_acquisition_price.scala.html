@@ -25,102 +25,124 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, RepresentativeType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-
 @import java.time.LocalDate
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+  formWrapper: FormWithCSRF,
+  govukInput: GovukInput,
+  govukDetails : GovukDetails,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
-    form: Form[BigDecimal],
-    backLink: Call,
-    rebaseCutOffDate: LocalDate,
-    isATrust: Boolean,
-    representativeType: Option[RepresentativeType],
-    assetType: AssetType,
-    isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+  form: Form[BigDecimal],
+  backLink: Call,
+  rebaseCutOffDate: LocalDate,
+  isATrust: Boolean,
+  representativeType: Option[RepresentativeType],
+  assetType: AssetType,
+  isAmend: Boolean
+)(
+  implicit request: RequestWithSessionData[_],
+  messages:Messages,
+  appConfig: ViewConfig
+)
 
 @key = @{ "rebaseAcquisitionPrice" }
+
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @userKey = @{
-    representativeType match {
-      case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
-      case Some(Capacitor) => ".capacitor"
-      case None =>
-          if (isAgent) ".agent"
-          else if (isATrust) ".trust"
-          else ""
+  representativeType match {
+    case Some(PersonalRepresentative) => ".personalRep"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+    case Some(Capacitor) => ".capacitor"
+    case None =>
+      if (isAgent) ".agent"
+      else if (isATrust) ".trust"
+      else ""
   }
 }
 
 @assetTypeKey = @{assetType match {
-    case AssetType.IndirectDisposal => ".indirect"
-    case _ => ""
+  case AssetType.IndirectDisposal => ".indirect"
+  case _ => ""
 }}
 
 @rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate)}
+
 @title = @{messages(s"$key$assetTypeKey.title", rebaseCutOffDateDisplayString)}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@detailsContentNoAsset = {
+  <p class="govuk-body">@{messages(s"$key$userKey.dropdown.p1", rebaseCutOffDateDisplayString)}</p>
+  <p class="govuk-body">@{messages(s"$key$userKey.dropdown.p2")}</p>
+  <p class="govuk-body">@{messages(s"$key.dropdown.p3")}</p>
+  <p class="govuk-body">@{Html(messages(s"$key.dropdown.p4", appConfig.marketValue))}</p>
+  <p class="govuk-body">@{messages(s"$key$userKey.dropdown.p5")}</p>
+}
 
-    @backLinkComponent(backLink)
+@detailsContent = {
+  <p class="govuk-body">@{messages(s"$key$userKey$assetTypeKey.dropdown.p1", rebaseCutOffDateDisplayString)}</p>
+  <p class="govuk-body">@{messages(s"$key$assetTypeKey.dropdown.p2", appConfig.nonResidentsRebasingUrl)}</p>
+}
 
-    @if(hasErrors) {
-        @errorSummary(form, Some(s"$key$assetTypeKey"))
-    }
+@layout(
+  title,
+  backLinkUrl = Some(backLink.url),
+  hasErrors = hasErrors
+) {
+  @if(hasErrors) {
+    @errorSummary(form, Some(s"$key$assetTypeKey"))
+  }
 
-@caption(messages("acquisitionDetails.caption"))
+  @caption(messages("acquisitionDetails.caption"))
 
-    @formWrapper(routes.AcquisitionDetailsController.rebasedAcquisitionPriceSubmit(), 'novalidate -> "novalidate") {
-        @unitInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            formError = form.error(key),
-            hasErrors = form.error(key).nonEmpty,
-            label = Html(title),
-            labelAsHeading = true,
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            helpText = if(assetTypeKey.isEmpty) Some(Html(messages(s"$key$userKey$assetTypeKey.helpText"))) else None,
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = Some(s"$key$assetTypeKey")
-        )
-
+  @formWrapper(routes.AcquisitionDetailsController.rebasedAcquisitionPriceSubmit(), 'novalidate -> "novalidate") {
+    @govukInput(Input(
+      id = key,
+      name = key,
+      value = form.data.get(key),
+      label = Label(
+        content = Text(title),
+        isPageHeading = true,
+        classes = "govuk-label--xl"
+      ),
+      classes = "govuk-input--width-10",
+      hint = Some(Hint(
+        content = Text(if(assetTypeKey.isEmpty) (messages(s"$key$userKey.helpText")) else "")
+      )),
+      prefix = Some(PrefixOrSuffix(
+        content = Text("£")
+      )),
+      errorMessage = form.error(key).map(e => ErrorMessage(
+        content = Text(messages(s"$key$assetTypeKey.${e.message}", rebaseCutOffDateDisplayString)),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )),
+      autocomplete = Some(AutoCompleteType.On.value)
+    ))
 
     @if(assetTypeKey.isEmpty) {
-        @details(messages(s"$key.dropdown.header"),
-            Html(s"""|
-            |<p> ${messages(s"$key$userKey.dropdown.p1", rebaseCutOffDateDisplayString)} </p>
-            |<p> ${messages(s"$key$userKey.dropdown.p2")} </p>
-            |<p> ${messages(s"$key.dropdown.p3")} </p>
-            |<p> ${Html(messages(s"$key.dropdown.p4", appConfig.marketValue))} </p>
-            |<p> ${messages(s"$key$userKey.dropdown.p5")} </p>
-            |""".stripMargin ))
-        } else {
-            @details(messages(s"$key.dropdown.header"),
-            Html(s"""|
-            |<p> ${messages(s"$key$userKey$assetTypeKey.dropdown.p1", rebaseCutOffDateDisplayString)} </p>
-            |<p> ${messages(s"$key$assetTypeKey.dropdown.p2", appConfig.nonResidentsRebasingUrl)} </p>
-            |""".stripMargin ))
-        }
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+      @govukDetails(Details(
+        summary = Text(messages(s"$key.dropdown.header")),
+        content = HtmlContent(detailsContentNoAsset)
+      ))
+    } else {
+      @govukDetails(Details(
+        summary = Text(messages(s"$key.dropdown.header")),
+        content = HtmlContent(detailsContent)
+      ))
     }
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+    @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+  }
+
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

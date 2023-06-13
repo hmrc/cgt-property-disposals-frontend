@@ -17,84 +17,94 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DateOfDeath, RepresentativeType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+  formWrapper: FormWithCSRF,
+  govukInput: GovukInput,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
 )
 
 @(
-    form: Form[BigDecimal],
-    backLink: Call,
-    dateOfDeath: DateOfDeath,
-    assetType: AssetType,
-    representativeType: Option[RepresentativeType],
-    isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+  form: Form[BigDecimal],
+  backLink: Call,
+  dateOfDeath: DateOfDeath,
+  assetType: AssetType,
+  representativeType: Option[RepresentativeType],
+  isAmend: Boolean
+)(
+  implicit request: RequestWithSessionData[_],
+  messages:Messages
+)
 
 @key = @{ "periodOfAdminMarketValue" }
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @userKey = @{
-    representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
-        case _ => if (isAgent) ".agent" else ""
-    }
+  representativeType match {
+    case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+    case _ => if (isAgent) ".agent" else ""
+  }
 }
 
 @assetTypeKey = @{assetType match {
-    case AssetType.IndirectDisposal => ".indirect"
-    case _ => ""
+  case AssetType.IndirectDisposal => ".indirect"
+  case _ => ""
 }}
 
 @title = @{messages(s"$key$assetTypeKey.title", TimeUtils.govDisplayFormat(dateOfDeath.value)) }
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@layout(
+  title,
+  backLinkUrl = Some(backLink.url),
+  hasErrors = hasErrors
+) {
+  @if(hasErrors) {
+    @errorSummary(form, Some(s"$key$assetTypeKey"))
+  }
 
-    @backLinkComponent(backLink)
+  @caption(messages("acquisitionDetails.caption"))
 
-    @if(hasErrors) {
-        @errorSummary(form, Some(s"$key$assetTypeKey"))
-    }
+  @formWrapper(routes.AcquisitionDetailsController.periodOfAdminMarketValueSubmit(), 'novalidate -> "novalidate") {
+    @govukInput(Input(
+      id = key,
+      name = key,
+      value = form.data.get(key),
+      label = Label(
+        content = Text(title),
+        isPageHeading = true,
+        classes = "govuk-label--xl"
+      ),
+      classes = "govuk-input--width-10",
+      hint = Some(Hint(
+        content = HtmlContent(messages(s"$key$userKey$assetTypeKey.helpText"))
+      )),
+      prefix = Some(PrefixOrSuffix(
+        content = Text("£")
+      )),
+      errorMessage = form.error(key).map(e => ErrorMessage(
+        content = Text(messages(s"$key$assetTypeKey.${e.message}", TimeUtils.govDisplayFormat(dateOfDeath.value))),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )),
+      autocomplete = Some(AutoCompleteType.On.value)
+    ))
 
-@caption(messages("acquisitionDetails.caption"))
+    @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+  }
 
-    @formWrapper(routes.AcquisitionDetailsController.periodOfAdminMarketValueSubmit(), 'novalidate -> "novalidate") {
-        @unitInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            formError = form.error(key),
-            hasErrors = form.error(key).nonEmpty,
-            label = Html(title),
-            labelAsHeading = true,
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            helpText = Some(Html(messages(s"$key$userKey$assetTypeKey.helpText"))),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = Some(s"$key$assetTypeKey")
-        )
-
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
-    }
-
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

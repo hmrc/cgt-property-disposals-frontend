@@ -18,93 +18,104 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, RepresentativeType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+  formWrapper: FormWithCSRF,
+  govukInput: GovukInput,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
 )
 
 @(
-    form: Form[BigDecimal],
-    backLink: Call,
-    acquisitionMethod: AcquisitionMethod,
-    acquisitionDate: AcquisitionDate,
-    isATrust: Boolean,
-    representativeType: Option[RepresentativeType],
-    assetType: AssetType,
-    isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+  form: Form[BigDecimal],
+  backLink: Call,
+  acquisitionMethod: AcquisitionMethod,
+  acquisitionDate: AcquisitionDate,
+  isATrust: Boolean,
+  representativeType: Option[RepresentativeType],
+  assetType: AssetType,
+  isAmend: Boolean
+)(
+  implicit request: RequestWithSessionData[_],
+  messages: Messages
+)
 
 @key = @{ "acquisitionPrice" }
+
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @userKey = @{
-    representativeType match {
-      case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
-      case Some(Capacitor) => ".capacitor"
-      case None =>
-          if (isAgent) ".agent"
-          else if (isATrust) ".trust"
-          else ""
-  }
+  representativeType match {
+    case Some(PersonalRepresentative) => ".personalRep"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+    case Some(Capacitor) => ".capacitor"
+    case None =>
+      if (isAgent) ".agent"
+      else if (isATrust) ".trust"
+      else ""
+}
 }
 
 @assetTypeKey = @{assetType match {
-    case AssetType.IndirectDisposal => ".indirect"
-    case _ => ""
+  case AssetType.IndirectDisposal => ".indirect"
+  case _ => ""
 }}
 
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
 @titleWithHelpTextAndContext = @{acquisitionMethod match {
   case AcquisitionMethod.Bought => (messages(s"${key}Bought$userKey$assetTypeKey.title"), Html(messages(s"${key}Bought$userKey.helpText")), s"acquisitionPriceBought$userKey$assetTypeKey")
   case _ => (messages(s"${key}NotBought$userKey$assetTypeKey.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages(s"${key}NotBought$userKey.helpText")), s"acquisitionPriceNotBought$userKey$assetTypeKey")
 }}
 
-@mainTemplate(title = titleWithHelpTextAndContext._1, userType = request.userType, hasErrors = hasErrors) {
+@layout(
+  titleWithHelpTextAndContext._1,
+  backLinkUrl = Some(backLink.url),
+  hasErrors = hasErrors
+) {
+  @if(hasErrors) {
+    @errorSummary(form, Some(titleWithHelpTextAndContext._3))
+  }
 
-    @backLinkComponent(backLink)
+  @caption(messages("acquisitionDetails.caption"))
 
-    @if(hasErrors) {
-        @errorSummary(form, Some(titleWithHelpTextAndContext._3))
-    }
+  @formWrapper(routes.AcquisitionDetailsController.acquisitionPriceSubmit(), 'novalidate -> "novalidate") {
+    @govukInput(Input(
+      id = key,
+      name = key,
+      value = form.data.get(key),
+      label = Label(
+        content = Text(titleWithHelpTextAndContext._1),
+        isPageHeading = true,
+        classes = "govuk-label--xl"
+      ),
+      classes = "govuk-input--width-10",
+      hint = Some(Hint(
+        content = assetTypeKey.isEmpty match {case true => HtmlContent(titleWithHelpTextAndContext._2) case false => Text("")}
+      )),
+      prefix = Some(PrefixOrSuffix(
+        content = Text("£")
+      )),
+      errorMessage = form.error(key).map(e => ErrorMessage(
+        content = Text(messages(s"${key}Bought$userKey$assetTypeKey.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )),
+      autocomplete = Some(AutoCompleteType.On.value)
+    ))
 
-    @caption(messages("acquisitionDetails.caption"))
+    @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+  }
 
-    @formWrapper(routes.AcquisitionDetailsController.acquisitionPriceSubmit(), 'novalidate -> "novalidate") {
-        @unitInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            formError = form.error(key),
-            hasErrors = form.error(key).nonEmpty,
-            label = Html(titleWithHelpTextAndContext._1),
-            labelAsHeading = true,
-            helpText = if(assetTypeKey.isEmpty) Some(titleWithHelpTextAndContext._2) else None,
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = Some(titleWithHelpTextAndContext._3)
-        )
-
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
-    }
-
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
-
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 }

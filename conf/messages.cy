@@ -2211,7 +2211,7 @@ acquisitionFees.indirect.details.p2=Mae hyn yn golygu, wrth i chi gyfrifo’ch T
 acquisitionFees.indirect.agent.p2=I gyfrifo Treth Enillion Cyfalaf eich cleient, mae’n rhaid i chi ddefnyddio gwerth marchnadol y cyfranddaliadau ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 acquisitionFees.indirect.trust.details.p2=I gyfrifo Treth Enillion Cyfalaf yr ymddiriedolaeth, mae’n rhaid i chi ddefnyddio gwerth marchnadol y cyfranddaliadau ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 acquisitionFees.details.p3=Yr enw ar y broses hon yw ail-sylfaenu.
-acquisitionFees.non-resident.details.p3=Yr enw ar y broses hon yw <a href="{0}" target="_blank">ail-sylfaenu (yn agor tab newydd)</a>.
+acquisitionFees.non-resident.details.p3=Yr enw ar y broses hon yw <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">ail-sylfaenu (yn agor tab newydd)</a>.
 acquisitionFees.cyaChange=os oedd unrhyw gostau caffael ychwanegol
 acquisitionFees.rebased.cyaChange=os oedd unrhyw gostau ail-sylfaenu ychwanegol
 acquisitionFees.error.required=Dewiswch ‘Iawn’ os oes costau ychwanegol
@@ -2274,9 +2274,9 @@ rebaseAcquisitionPrice.agent.dropdown.p2=I gyfrifo enillion neu golledion eich c
 rebaseAcquisitionPrice.trust.dropdown.p2=I gyfrifo enillion neu golledion yr ymddiriedolaeth, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 rebaseAcquisitionPrice.capacitor.dropdown.p2=I gyfrifo enillion neu golledion y person, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
 rebaseAcquisitionPrice.personalRep.dropdown.p2=I gyfrifo enillion neu golledion y person, mae’n rhaid i chi ddefnyddio gwerth marchnadol yr eiddo ar y dyddiad hwnnw. Mae hyn yn hytrach na defnyddio’r swm prynu neu’r swm caffael gwirioneddol.
-rebaseAcquisitionPrice.indirect.dropdown.p2=<a href="{0}" target="_blank">Dysgwch am ail-sylfaenu (yn agor ffenestr neu dab newydd)</a>
+rebaseAcquisitionPrice.indirect.dropdown.p2=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Dysgwch am ail-sylfaenu (yn agor ffenestr neu dab newydd)</a>
 rebaseAcquisitionPrice.dropdown.p3=Yr enw ar y broses hon yw ail-sylfaenu.
-rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Dysgwch sut i ofyn i CThEF wirio gwerth marchnadol eiddo (yn agor tab newydd)</a>.
+rebaseAcquisitionPrice.dropdown.p4=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Dysgwch sut i ofyn i CThEF wirio gwerth marchnadol eiddo (yn agor tab newydd)</a>.
 rebaseAcquisitionPrice.dropdown.p5=Mae’n cymryd o leiaf 3 mis i CThEF wirio gwerth marchnadol eiddo. Mae hyn yn golygu y dylech nodi amcangyfrif nawr ac, os bydd angen i chi newid y swm, gwnewch hynny’n nes ymlaen gan ddefnyddio’r gwasanaeth hwn. Neu os ydych eisoes wedi llenwi Ffurflen Dreth Hunanasesiad, gallwch roi’r gwerth marchnadol cywir yn eich Ffurflen Dreth Hunanasesiad nesaf.
 rebaseAcquisitionPrice.agent.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEF wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’ch cleient allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
 rebaseAcquisitionPrice.trust.dropdown.p5=Gall gymryd 3 mis neu fwy i CThEF wirio gwerth marchnadol eiddo. Mae hyn yn golygu y gellir nodi amcangyfrif er mwyn i’r ymddiriedolaeth allu rhoi gwybod am y dreth. Gellir cadarnhau’r amcangyfrif yn nes ymlaen drwy’r gwasanaeth hwn, neu drwy Ffurflen Dreth Hunanasesiad.
