@@ -131,20 +131,20 @@ class InitialGainOrLossControllerSpec
               "initialGainOrLoss.title"
             ),
             { doc =>
-              doc.select(".govuk-caption-xl").html()  should include(
+              doc.select(".govuk-caption-xl").text()       should be(
                 "Initial gain or loss"
               )
-              doc.select("#initialGainOrLoss").html() should include(
+              doc.select(".govuk-fieldset__legend").text() should be(
                 messageFromMessageKey("initialGainOrLoss.title")
               )
               doc
-                .select("#back, .govuk-back-link")
-                .attr("href")                       shouldBe returns.routes.TaskListController
+                .select(".govuk-back-link")
+                .attr("href")                            shouldBe returns.routes.TaskListController
                 .taskList()
                 .url
               doc
-                .select("#content > article > form, #main-content form")
-                .attr("action")                     shouldBe routes.InitialGainOrLossController
+                .select("#main-content form")
+                .attr("action")                          shouldBe routes.InitialGainOrLossController
                 .submitInitialGainOrLoss()
                 .url
             },
@@ -219,41 +219,41 @@ class InitialGainOrLossControllerSpec
             s"initialGainOrLoss$key.title"
           ),
           { doc =>
-            doc.select(".govuk-caption-xl").html()            should include(
+            doc.select(".govuk-caption-xl").text()           should be(
               "Initial gain or loss"
             )
-            doc.select("#initialGainOrLoss").html()           should include(
+            doc.select(".govuk-fieldset__legend--xl").text() should be(
               messageFromMessageKey(s"initialGainOrLoss$key.title")
             )
             doc
-              .select("#initialGainOrLoss-0-content > div > label")
-              .text()                                         should be("Initial gain amount")
+              .select("label[for='gain']")
+              .text()                                        should be("Initial gain amount")
             doc
-              .select("#initialGainOrLoss-1-content > div > label")
-              .text()                                         should be("Initial loss amount")
+              .select("label[for='loss']")
+              .text()                                        should be("Initial loss amount")
             doc
-              .select("#back, .govuk-back-link")
-              .attr("href")                                 shouldBe routes.InitialGainOrLossController
+              .select(".govuk-back-link")
+              .attr("href")                                shouldBe routes.InitialGainOrLossController
               .checkYourAnswers()
               .url
             doc
               .select(
-                "#content > article > form > details > div> ol > li:nth-child(2)"
+                "#main-content details ol > li:nth-child(2)"
               )
-              .text()                                         should include(
+              .text()                                        should include(
               messageFromMessageKey(s"initialGainOrLoss$key.details.li2")
             )
             doc
-              .select("#content > article > form > details > div> p")
-              .text()                                         should startWith(
+              .select("#main-content details p:first-of-type")
+              .text()                                        should startWith(
               messageFromMessageKey(s"initialGainOrLoss$key.details.olTitle")
             )
-            doc.select("#initialGainOrLoss-form-hint").text() should be(
+            doc.select("#initialGainOrLoss-hint").text()     should be(
               messageFromMessageKey(s"initialGainOrLoss$key.helpText")
             )
             doc
-              .select("#content > article > form, #main-content form")
-              .attr("action")                               shouldBe routes.InitialGainOrLossController
+              .select("#main-content form")
+              .attr("action")                              shouldBe routes.InitialGainOrLossController
               .submitInitialGainOrLoss()
               .url
           }

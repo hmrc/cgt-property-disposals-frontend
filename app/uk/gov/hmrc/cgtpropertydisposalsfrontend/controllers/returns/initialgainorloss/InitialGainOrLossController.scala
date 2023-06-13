@@ -23,7 +23,7 @@ import com.google.inject.Inject
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.mvc._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
@@ -52,7 +52,7 @@ class InitialGainOrLossController @Inject() (
   cc: MessagesControllerComponents,
   initialGainOrLossesPage: views.html.returns.initialgainorloss.initial_gain_or_loss,
   checkYourAnswersPage: views.html.returns.initialgainorloss.check_your_answers
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+)(implicit ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
