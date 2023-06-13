@@ -2856,9 +2856,9 @@ annualExemptAmount.details.2.header=Pwy yw buddiolwyr sy’n agored i niwed?
 annualExemptAmount.details.2.body=<a href="{0}" target="_blank">Gallai buddiolwr sy’n agored i niwed (yn agor tab newydd)</a> fod yn rhywun o dan 18 oed y mae ei rieni wedi marw. Gallai hefyd fod yn berson ag anabledd sy’n gymwys ar gyfer budd-daliadau penodol.
 annualExemptAmount.details.3.header=Beth yw’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth?
 annualExemptAmount.details.3.body=Mae’r <a href="{0}" target="_blank">Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a> yn lwfans rhydd o dreth blynyddol. Mae ar gael i rai pobl sydd angen talu Treth Enillion Cyfalaf. Dim ond ar eu henillion ar gyfer y flwyddyn dreth sydd dros y Swm Blynyddol sydd wedi ei Eithrio rhag Treth y mae’n rhaid i’r rhan fwyaf o bobl dalu Treth Enillion Cyfalaf. Mae’n rhaid i unrhyw golledion neu ryddhad fod wedi’u tynnu oddi ar yr enillion eisoes.
-annualExemptAmount.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth (yn agor tab newydd)</a>.
-annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yn ystod y cyfnod gweinyddu (yn agor tab newydd)</a>.
-annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yn ystod y cyfnod gweinyddu (yn agor tab newydd)</a>.
+annualExemptAmount.link=Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth
+annualExemptAmount.personalRepInPeriodOfAdmin.link=Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yn ystod y cyfnod gweinyddu
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=Dysgwch am y Swm Blynyddol sydd wedi ei Eithrio rhag Treth yn ystod y cyfnod gweinyddu
 annualExemptAmount.error.tooLarge=Mae’n rhaid i’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth fod yn {0} neu lai
 annualExemptAmount.agent.error.tooLarge=Mae’n rhaid i’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth fod yn {0} neu lai
 annualExemptAmount.trust.error.tooLarge=Mae’n rhaid i’r Swm Blynyddol sydd wedi ei Eithrio rhag Treth fod yn {0} neu lai
