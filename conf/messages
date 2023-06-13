@@ -3273,7 +3273,7 @@ annualExemptAmount.personalRepInPeriodOfAdmin.agent.title=How much of the estate
 
 annualExemptAmount.helpText=In the tax year {0} to {1}, you only have to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.agent.helpText=In the tax year {0} to {1}, your client only has to pay Capital Gains Tax on gains above {3}.
-annualExemptAmount.trust.helpText=In the tax year {0} to {1}, most trustees only have to pay Capital Gains Tax on gains above {2}. This is called the Annual Exempt Amount. <br> <br>The Annual Exempt Amount for trusts for vulnerable beneficiaries is {3}.
+annualExemptAmount.trust.helpText=In the tax year {0} to {1}, most trustees only have to pay Capital Gains Tax on gains above {2}. This is called the Annual Exempt Amount.<br><br>The Annual Exempt Amount for trusts for vulnerable beneficiaries is {3}.
 annualExemptAmount.capacitor.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.personalRep.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.personalRepInPeriodOfAdmin.helpText=During the period of administration, all of the Annual Exempt Amount can be included in the estate’s return. This is the case even if the time between 6 April and the day the person died was very short.
@@ -3290,9 +3290,9 @@ annualExemptAmount.details.2.body=<a href="{0}" target="_blank">A vulnerable ben
 annualExemptAmount.details.3.header=What is the Annual Exempt Amount?
 annualExemptAmount.details.3.body=The <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new tab)</a> is an annual tax-free allowance. It is available to certain people who need to pay Capital Gains Tax. Most people only have to pay Capital Gains Tax on their gains for the tax year above the Annual Exempt Amount. Any losses or reliefs must have been subtracted from the gain already.
 
-annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new tab)</a>.
-annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new tab)</a>.
-annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new tab)</a>.
+annualExemptAmount.link=Find out about the Annual Exempt Amount
+annualExemptAmount.personalRepInPeriodOfAdmin.link=Find out about the Annual Exempt Amount during the period of administration
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=Find out about the Annual Exempt Amount during the period of administration
 
 annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.agent.error.tooLarge=Annual Exempt Amount must be {0} or less

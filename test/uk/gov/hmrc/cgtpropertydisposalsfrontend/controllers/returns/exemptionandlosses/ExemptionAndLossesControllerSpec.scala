@@ -1696,20 +1696,17 @@ class ExemptionAndLossesControllerSpec
               messageFromMessageKey(s"$key.title"),
               { doc =>
                 doc
-                  .select(s"#$key-form-hint")
-                  .html()      shouldBe messageFromMessageKey(
+                  .select(s"#$key-hint")
+                  .text() shouldBe messageFromMessageKey(
                   s"$key.helpText",
                   taxYear.startDateInclusive.getYear.toString,
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                )
+                ).replaceAllLiterally("<br><br>", " ")
                 doc
-                  .select("#content > article > form > p > a")
-                  .outerHtml() shouldBe messageFromMessageKey(
-                  s"$key.link",
-                  viewConfig.annualExemptAmountUrl
-                ).stripSuffix(".")
+                  .select("#main-content a[rel='noopener noreferrer']")
+                  .text() shouldBe messageFromMessageKey(s"$key.link") + " (opens in new tab)"
               }
             )
           }
@@ -1735,20 +1732,17 @@ class ExemptionAndLossesControllerSpec
               messageFromMessageKey(s"$key.agent.title"),
               { doc =>
                 doc
-                  .select(s"#$key-form-hint")
-                  .text()      shouldBe messageFromMessageKey(
+                  .select(s"#$key-hint")
+                  .text() shouldBe messageFromMessageKey(
                   s"$key.agent.helpText",
                   taxYear.startDateInclusive.getYear.toString,
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                )
+                ).replaceAllLiterally("<br><br>", " ")
                 doc
-                  .select("#content > article > form > p > a")
-                  .outerHtml() shouldBe messageFromMessageKey(
-                  s"$key.link",
-                  viewConfig.annualExemptAmountUrl
-                ).stripSuffix(".")
+                  .select("#main-content a[rel='noopener noreferrer']")
+                  .text() shouldBe messageFromMessageKey(s"$key.link") + " (opens in new tab)"
               }
             )
           }
@@ -1775,25 +1769,25 @@ class ExemptionAndLossesControllerSpec
               ),
               { doc =>
                 doc
-                  .select("#annualExemptAmount-form-hint")
-                  .html() shouldBe messageFromMessageKey(
+                  .select("#annualExemptAmount-hint")
+                  .text() shouldBe messageFromMessageKey(
                   "annualExemptAmount.trust.helpText",
                   taxYear.startDateInclusive.getYear.toString,
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                )
+                ).replaceAllLiterally("<br><br>", " ")
 
                 doc
                   .select(
-                    "#content > article > form > details:nth-child(2) > summary > span"
+                    "form > details:nth-child(2) > summary > span"
                   )
                   .text() shouldBe messageFromMessageKey(
                   "annualExemptAmount.details.1.header"
                 )
                 doc
                   .select(
-                    "#content > article > form > details:nth-child(3) > summary > span"
+                    "form > details:nth-child(3) > summary > span"
                   )
                   .text() shouldBe messageFromMessageKey(
                   "annualExemptAmount.details.2.header"
@@ -1827,14 +1821,14 @@ class ExemptionAndLossesControllerSpec
               messageFromMessageKey(s"$key.title"),
               doc =>
                 doc
-                  .select(s"#$key-form-hint")
-                  .html() shouldBe messageFromMessageKey(
+                  .select(s"#$key-hint")
+                  .text() shouldBe messageFromMessageKey(
                   s"$key.furtherReturn.helpText",
                   taxYear.startDateInclusive.getYear.toString,
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                )
+                ).replaceAllLiterally("<br><br>", " ")
             )
           }
 
@@ -1860,14 +1854,14 @@ class ExemptionAndLossesControllerSpec
               messageFromMessageKey(s"$key.agent.title"),
               doc =>
                 doc
-                  .select(s"#$key-form-hint")
-                  .html() shouldBe messageFromMessageKey(
+                  .select(s"#$key-hint")
+                  .text() shouldBe messageFromMessageKey(
                   s"$key.furtherReturn.agent.helpText",
                   taxYear.startDateInclusive.getYear.toString,
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                )
+                ).replaceAllLiterally("<br><br>", " ")
             )
           }
 
@@ -1893,14 +1887,14 @@ class ExemptionAndLossesControllerSpec
               messageFromMessageKey(s"$key.trust.title"),
               doc =>
                 doc
-                  .select(s"#$key-form-hint")
-                  .html() shouldBe messageFromMessageKey(
+                  .select(s"#$key-hint")
+                  .text() shouldBe messageFromMessageKey(
                   s"$key.furtherReturn.trust.helpText",
                   taxYear.startDateInclusive.getYear.toString,
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                )
+                ).replaceAllLiterally("<br><br>", " ")
             )
           }
 
@@ -2580,7 +2574,7 @@ class ExemptionAndLossesControllerSpec
 
         val errorSummary   = doc.select(s"""a[href="#$key"]""").text()
         val inlineErrorMsg =
-          doc.select(s"#$key-error, #$key-inline-error").text()
+          doc.select(s"#$key-error").text()
 
         val errorSummaryMsg =
           if (errorSummary.nonEmpty) "Error: " + errorSummary else errorSummary
