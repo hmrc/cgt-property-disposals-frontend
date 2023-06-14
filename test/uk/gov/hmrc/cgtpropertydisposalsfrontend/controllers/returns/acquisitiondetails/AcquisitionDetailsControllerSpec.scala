@@ -1550,7 +1550,7 @@ class AcquisitionDetailsControllerSpec
                 else s"periodOfAdminMarketValue${assetTypeMessageKey(assetType)}.helpText"
 
               doc
-                .select("#periodOfAdminMarketValue-form-hint")
+                .select("#periodOfAdminMarketValue-hint")
                 .text()                          shouldBe messageFromMessageKey(expectedHelpTextKey)
               doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
 
@@ -2452,7 +2452,7 @@ class AcquisitionDetailsControllerSpec
                 .url
               if (displayHelpText)
                 doc
-                  .select("#rebaseAcquisitionPrice-form-hint")
+                  .select("#rebaseAcquisitionPrice-hint")
                   .text()                        shouldBe messageFromMessageKey(
                   s"rebaseAcquisitionPrice$userKey.helpText"
                 )
@@ -2519,7 +2519,7 @@ class AcquisitionDetailsControllerSpec
                 .rebasedAcquisitionPriceSubmit()
                 .url
               doc
-                .select("#rebaseAcquisitionPrice-form-hint")
+                .select("#rebaseAcquisitionPrice-hint")
                 .text()                          shouldBe messageFromMessageKey(
                 s"rebaseAcquisitionPrice$userKey.helpText"
               )
@@ -3687,7 +3687,7 @@ class AcquisitionDetailsControllerSpec
                     .acquisitionFeesSubmit()
                     .url
                   doc
-                    .select("#acquisitionFees-form-hint")
+                    .select("#acquisitionFees-hint")
                     .text()                          shouldBe messageFromMessageKey(s"$key$userKey.helpText")
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
                 }
@@ -3949,7 +3949,7 @@ class AcquisitionDetailsControllerSpec
                     .acquisitionFeesSubmit()
                     .url
                   doc
-                    .select("#acquisitionFees-form-hint")
+                    .select("#acquisitionFees-hint")
                     .text()                          shouldBe messageFromMessageKey("acquisitionFees.personalRepInPeriodOfAdmin.helpText")
                   doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
                 }

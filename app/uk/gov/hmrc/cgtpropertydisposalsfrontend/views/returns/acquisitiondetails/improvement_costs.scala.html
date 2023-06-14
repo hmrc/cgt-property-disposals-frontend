@@ -17,128 +17,151 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import java.time.LocalDate
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+  formWrapper: FormWithCSRF,
+  govukInput: GovukInput,
+  govukRadios: GovukRadios,
+  govukDetails : GovukDetails,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
 )
 
 @(
-    form: Form[BigDecimal],
-    backLink: Call,
-    isATrust: Boolean,
-    shouldUseRebase: Option[Boolean],
-    rebaseCutOffDate: LocalDate,
-    representativeType: Option[RepresentativeType],
-    isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+  form: Form[BigDecimal],
+  backLink: Call,
+  isATrust: Boolean,
+  shouldUseRebase: Option[Boolean],
+  rebaseCutOffDate: LocalDate,
+  representativeType: Option[RepresentativeType],
+  isAmend: Boolean
+)(
+  implicit request: RequestWithSessionData[_],
+  messages:Messages
+)
 
 @key = @{ "improvementCosts" }
+
 @valueKey = @{ "improvementCostsValue" }
+
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @userKey = @{
-    representativeType match {
-      case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
-      case Some(Capacitor) => ".capacitor"
-      case None =>
-          if (isAgent) ".agent"
-          else if (isATrust) ".trust"
-          else ""
+  representativeType match {
+    case Some(PersonalRepresentative) => ".personalRep"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+    case Some(Capacitor) => ".capacitor"
+    case None =>
+      if (isAgent) ".agent"
+      else if (isATrust) ".trust"
+      else ""
   }
 }
+
 @helpTextUserKey = @{
   representativeType match {
-      case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent =>  ".personalRepInPeriodOfAdmin.agent"
-      case _ => userKey
+    case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent =>  ".personalRepInPeriodOfAdmin.agent"
+    case _ => userKey
   }
 }
 
 @title = @{messages(s"$key$userKey.title")}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
 @rebasingKey = @{if(shouldUseRebase.contains(true)) ".rebased" else ""}
 
-@options = @{List(
-    RadioOption(
-        label = messages(s"generic.yes"),
-        content = Some(unitInput(
-          fieldId = valueKey,
-          value = form.data.getOrElse(valueKey, ""),
-          label = Html(messages(s"$valueKey.label")),
-          formError = form.error(valueKey),
-          hasErrors = form.error(valueKey).nonEmpty,
-          autoComplete = AutoCompleteType.On,
-          inputClass = Some("small"),
-          aspect = "left",
-          unit = "£",
-          assistiveText = messages("unit-input.assistive.pounds")
-        )),
-        optionHelpText = None
+@yesContent = {
+  @govukInput(Input(
+    id = valueKey,
+    name = valueKey,
+    value = form.data.get(valueKey),
+    label = Label(
+      content = Text(messages(s"$valueKey.label"))
     ),
-    RadioOption(
-        label = messages(s"generic.no"),
-        content = None,
-        optionHelpText = None
-    )
-
-)}
-@selectedIndex = @{
-    form.data.get(key).map({
-        case "0" => 0
-        case _ => 1
-    })
+    classes = "govuk-input--width-10",
+    prefix = Some(PrefixOrSuffix(
+      content = Text("£")
+    )),
+    errorMessage = form.error(valueKey).map(e => ErrorMessage(
+      content = Text(messages(s"$valueKey.${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    autocomplete = Some(AutoCompleteType.On.value)
+  ))
 }
+
 @customErrorKey = @{
   if(form.errors.headOption.map(_.key).contains(key)) Some(s"$key$userKey")
   else None
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@layout(
+  title,
+  backLinkUrl = Some(backLink.url),
+  hasErrors = hasErrors
+) {
+  @if(hasErrors) {
+    @errorSummary(form, customErrorKey = customErrorKey)
+  }
 
-    @backLinkComponent(backLink)
+  @caption(messages("acquisitionDetails.caption"))
 
-    @if(hasErrors) {
-        @errorSummary(form, customErrorKey = customErrorKey)
-    }
-
-    @caption(messages("acquisitionDetails.caption"))
-
-    @formWrapper(routes.AcquisitionDetailsController.improvementCostsSubmit(), 'novalidate -> "novalidate") {
-        @radioGroupConditional(
-            fieldId = key,
-            label = pageHeading(title),
-            selected = selectedIndex,
-            error = form.error(key),
-            options = options,
-            helpText = Some(Html(messages(s"$key$helpTextUserKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate)))),
-            customErrorKey = customErrorKey
+  @formWrapper(routes.AcquisitionDetailsController.improvementCostsSubmit(), 'novalidate -> "novalidate") {
+    @govukRadios(Radios(
+      fieldset = Some(Fieldset(
+        legend = Some(Legend(
+          content = Text(title),
+          isPageHeading = true,
+          classes = "govuk-fieldset__legend--xl"
+        ))
+      )),
+      hint = Some(Hint(
+        content = HtmlContent(messages(s"$key$helpTextUserKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate))),
+      )),
+      name = key,
+      idPrefix = Some(key),
+      items = Seq(
+        RadioItem(
+          content = Text(messages("generic.yes")),
+          value = Some("0"),
+          checked = form.data.get(key).contains("0"),
+          conditionalHtml = Some(yesContent)
+        ),
+        RadioItem(
+          content = Text(messages("generic.no")),
+          value = Some("1"),
+          checked = form.data.get(key).contains("1")
         )
-        @details(messages(s"$key.details.summary"), Html(messages(s"$key.details.p1")))
+      ),
+      errorMessage = form.error(key).map(e =>
+        ErrorMessage(
+          content = Text(messages(s"${customErrorKey.getOrElse(key)}.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        )
+      )
+    ))
 
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
-    }
+    @govukDetails(Details(
+      summary = Text(messages(s"$key.details.summary")),
+      content = HtmlContent(messages(s"$key.details.p1"))
+    ))
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+    @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+  }
+
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }
