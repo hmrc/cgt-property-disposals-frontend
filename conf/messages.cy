@@ -3538,9 +3538,10 @@ supporting-evidence.check-your-answers.cya-change=Newid
 supporting-evidence.check-your-answers.assistive=y ffeil dan yr enw {0}
 supporting-evidence.check-your-answers.cya-delete=Dileu
 supporting-evidence.check-your-answers.add-another-file=Ychwanegu ffeil arall
-supporting-evidence.upload.title=Uwchlwytho dogfen gyda thystiolaeth ategol
+supporting-evidence.upload.title=Uwchlwythwch eich Dogfennau Ategol
 supporting-evidence.upload.caption=Tystiolaeth ategol
 supporting-evidence.upload.error.required=Uwchlwytho ffeil gyda’ch tystiolaeth ategol
+supporting-evidence.upload.label=Uwchlwytho ffeil gyda’ch tystiolaeth ategol
 supporting-evidence.upload.help-text=Gall y ffeil fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, a JPG.
 supporting-evidence.upload.amendReturn.help-text=Gall y ffeil fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, a JPG.
 
