@@ -1639,7 +1639,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("submitReturnError.title"),
-              doc =>
+              { doc =>
                 doc
                   .select("#content > article > form, #main-content form")
                   .attr(
@@ -1647,6 +1647,32 @@ class CheckAllAnswersAndSubmitControllerSpec
                   ) shouldBe routes.CheckAllAnswersAndSubmitController
                   .submissionErrorSubmit()
                   .url
+
+                doc.select(".govuk-body").text shouldBe
+                  s"""${messageFromMessageKey("submitReturnError.p1")} ${messageFromMessageKey(
+                    "submitReturnError.p2"
+                  )} ${messageFromMessageKey("submitReturnError.p3")} ${messageFromMessageKey(
+                    "submitReturnError.p4"
+                  )}"""
+
+                doc
+                  .select("#main-content ol.govuk-list--number > li:nth-child(1)")
+                  .text() shouldBe messageFromMessageKey(
+                  "submitReturnError.li1"
+                )
+
+                doc
+                  .select("#main-content ol.govuk-list--number > li:nth-child(2)")
+                  .text() shouldBe messageFromMessageKey(
+                  "submitReturnError.li2"
+                )
+
+                doc
+                  .select("#main-content ol.govuk-list--number > li:nth-child(3)")
+                  .text() shouldBe messageFromMessageKey(
+                  "submitReturnError.li3"
+                )
+              }
             )
           }
 
