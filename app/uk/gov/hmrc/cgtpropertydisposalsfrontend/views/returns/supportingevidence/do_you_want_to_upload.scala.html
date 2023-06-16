@@ -48,6 +48,8 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
+@helpText = @{"helpText"}
+
 @layout(
   title,
   backLinkUrl = Some(backLink.url),
@@ -61,11 +63,11 @@
 
   <h1 class="govuk-heading-xl">@title</h1>
 
-  <p class="govuk-body-l">@messages(s"$key.help-text")</p>
+  <p class="govuk-hint" id=@helpText>@messages(s"$key.help-text")</p>
 
   @if(dueRepayment){
     @govukWarningText(WarningText(
-      iconFallbackText = Some("Warning"),
+      iconFallbackText = Some(messages("generic.warning")),
       content = Text(messages(s"$key.hint"))
     ))
   }
@@ -76,8 +78,9 @@
         legend = Some(Legend(
           content = Text(title),
           isPageHeading = false,
-          classes = "govuk-visually-hidden"
-        ))
+          classes = "govuk-visually-hidden",
+        )),
+        describedBy = Some(helpText)
       )),
       name = key,
       idPrefix = Some(key),
