@@ -1503,12 +1503,12 @@ class SupportingEvidenceControllerSpec
             ),
             { doc =>
               doc
-                .select("#content > article > p:nth-child(3)")
+                .select("#main-content > div > div > div > p:nth-child(3)")
                 .text() shouldBe messageFromMessageKey(
                 "supporting-evidence.scan-progress.p1"
               )
               doc
-                .select("#content > article > p:nth-child(4)")
+                .select("#main-content > div > div > div > p:nth-child(4)")
                 .text() shouldBe messageFromMessageKey(
                 "supporting-evidence.scan-progress.p2"
               )
