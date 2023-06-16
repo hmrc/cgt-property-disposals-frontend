@@ -16,21 +16,17 @@
 
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUpload
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    fileInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.file_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel,
-    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        govukFileUpload : GovukFileUpload,
+        govukWarningText: GovukWarningText
 )
 
 @(
@@ -40,7 +36,7 @@
     isAmend: Boolean,
     isMultipleDisposal: Boolean,
     isRepaymentDue: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
     @key = @{ "mandatoryEvidence" }
     @fieldId = @{ "file" }
@@ -50,10 +46,10 @@
     @amendKey = @{if(isAmend) ".amend" else ""}
     @guidance = {
       @if(isMultipleDisposal) {
-        <p id="upload-guidance">
+        <p class="govuk-body" id="upload-guidance">
           @messages(s"$key.multiple.guidance.p1")
         </p>
-        <ul class="list-bullet">
+        <ul class="govuk-list govuk-list--bullet">
           <li>@messages(s"$key.multiple.guidance.bullet1")</li>
           <li>@messages(s"$key.multiple.guidance.bullet2")</li>
           <li>@messages(s"$key.multiple.guidance.bullet3")</li>
@@ -63,10 +59,10 @@
           <li>@messages(s"$key.guidance.bullet7")</li>
         </ul>
       } else {
-        <p id="upload-guidance">
+        <p class="govuk-body" id="upload-guidance">
           @messages(s"$key.guidance.p1")
         </p>
-        <ul class="list-bullet">
+        <ul class="govuk-list govuk-list--bullet">
           <li>@messages(s"$key.guidance.bullet5")</li>
           <li>@messages(s"$key.guidance.bullet6")</li>
           <li>@messages(s"$key.guidance.bullet7")</li>
@@ -74,43 +70,48 @@
       }
     }
 
-    @mainTemplate(title = title, userType = request.userType) {
+@layout(title, backLinkUrl = Some(backLink.url)) {
 
-      @backLinkComponent(backLink)
+  @caption(messages(s"ytdLiability${if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}.caption"))
 
-      @caption(messages(s"ytdLiability${if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}.caption"))
+  <h1 class="govuk-heading-xl">@title</h1>
 
-      @pageHeading(title)
+  @if(isRepaymentDue){
+    @govukWarningText(WarningText(
+      content = Text(messages(s"$key.alert")),
+      iconFallbackText = Some(messages("generic.warning"))
+    ))
+  }
 
-      @if(isRepaymentDue){
-        @warning(messages(s"$key.alert"))
-      }
+  @guidance
 
-      @guidance
+  <p class="govuk-inset-text">
+    @messages(s"$key$amendKey.notice")
+  </p>
 
-      @insetPanel(Html(messages(s"$key$amendKey.notice")))
+  <form action="@href" method="post" enctype="multipart/form-data" novalidate="novalidate">
 
-      <form action="@href" method="post" enctype="multipart/form-data" novalidate="novalidate">
-
-        @for((k,v) <- meta){
-          <input type="hidden" id="@k" name="@k" value="@v">
-        }
-
-        @fileInput(
-          fieldId = fieldId,
-          label = Html(messages(s"$key.label")),
-          helpText = Some(Html(messages(s"$key.helpText"))),
-          hasErrors = false,
-          errorKey = None,
-          labelAsHeading = false,
-          labelClass = Some("heading-medium bold"),
-          isMandatoryUpload = true
-        )
-
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
-
-      </form>
-
-      @returnToSummaryLink(displayReturnToSummaryLink = true)
-
+    @for((k,v) <- meta){
+      <input type="hidden" id="@k" name="@k" value="@v">
     }
+
+    @govukFileUpload(FileUpload(
+      name = fieldId,
+      id = fieldId,
+      label = Label(
+        content = Text(messages(s"$key.label")),
+        classes = "govuk-label--m"
+      ),
+      hint = Some(Hint(
+        content = Text(messages(s"$key.helpText"))
+      )),
+      attributes = Map("data-is-mandatory-upload" -> "true")
+    ))
+
+    @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+
+  </form>
+
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
+
+}

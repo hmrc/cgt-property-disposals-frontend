@@ -15,45 +15,45 @@
  *@
 
 @import play.api.i18n.Messages
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MandatoryEvidence
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        govukButton: GovukButton,
+        govukSummaryList: GovukSummaryList,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
 )
 
-@(expired : MandatoryEvidence, isFurtherOrAmendReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(expired : MandatoryEvidence, isFurtherOrAmendReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @key = @{ "mandatoryEvidenceExpired" }
 @title = @{ messages(s"$key.title") }
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
 
-    @caption(messages(s"ytdLiability${if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}.caption"))
+  @caption(messages(s"ytdLiability${if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}.caption"))
+  <h1 class="govuk-heading-xl">@title</h1>
 
-    @pageHeading(title)
+  @govukSummaryList(SummaryList(
+    rows = Seq(SummaryListRow(
+      key = Key(
+        content = Text(expired.fileName)
+      ),
+      value = Value(
+        content = Text(messages(s"$key.label"))
+      )
+    ))
+  ))
 
-    @cyaSection(None, Some("cya-questions-short")) {
+  <p class="govuk-body">@messages(s"$key.p1")</p>
+  <p class="govuk-body">@messages(s"$key.p2")</p>
 
-        @cyaRow(
-            expired.fileName,
-            Html(""),
-            Some(Html(
-                messages(s"$key.label")
-            )),
-            key
-        )
+  @govukButton(Button(
+    href = Some(routes.YearToDateLiabilityController.uploadMandatoryEvidence().url),
+    content = Text(messages("mandatoryEvidenceExpired.button.text"))
+  ))
 
-    }
-
-    <p>@messages(s"$key.p1")</p>
-    <p>@messages(s"$key.p2")</p>
-    <a href="@{routes.YearToDateLiabilityController.uploadMandatoryEvidence().url}" class="button" role="button">@messages("mandatoryEvidenceExpired.button.text")</a>
 }

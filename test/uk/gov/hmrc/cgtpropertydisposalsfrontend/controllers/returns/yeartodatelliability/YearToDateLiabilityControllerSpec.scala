@@ -4418,16 +4418,18 @@ class YearToDateLiabilityControllerSpec
             performAction(),
             messageFromMessageKey(s"$key.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href")          shouldBe backLink.url
-              doc.select("#content > article > p#upload-guidance").text() shouldBe messageFromMessageKey(
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
+              doc.select("#upload-guidance").text()              shouldBe messageFromMessageKey(
                 s"$key.guidance.p1"
               )
 
               if (repaymentDue)
-                doc.select("div > strong.bold-small").text() shouldBe messageFromMessageKey(s"$key.alert")
+                doc.select(".govuk-warning-text__text").text() shouldBe messageFromMessageKey(
+                  "generic.warning"
+                ) + " " + messageFromMessageKey(s"$key.alert")
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#main-content form")
                 .attr(
                   "action"
                 ) shouldBe upscanUpload.upscanUploadMeta.uploadRequest.href
@@ -6633,12 +6635,12 @@ class YearToDateLiabilityControllerSpec
             ),
             { doc =>
               doc
-                .select("#content > article > p:nth-child(3)")
+                .select("#main-content > div > div > div > p:nth-child(3)")
                 .text() shouldBe messageFromMessageKey(
                 "mandatoryEvidence.scan-progress.p1"
               )
               doc
-                .select("#content > article > p:nth-child(4)")
+                .select("#main-content > div > div > div > p:nth-child(4)")
                 .text() shouldBe messageFromMessageKey(
                 "mandatoryEvidence.scan-progress.p2"
               )
@@ -7084,24 +7086,24 @@ class YearToDateLiabilityControllerSpec
             messageFromMessageKey("mandatoryEvidenceExpired.title"),
             doc => {
               doc
-                .select("#content > article > p")
+                .select("#main-content p.govuk-body")
                 .get(0)
                 .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.p1")
               doc
-                .select("#content > article > p")
+                .select("#main-content p.govuk-body")
                 .get(1)
                 .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.p2")
               doc
-                .select("#content > article > a")
+                .select("#main-content .govuk-button")
                 .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.button.text")
               doc
-                .select("#content > article > a")
+                .select("#main-content .govuk-button")
                 .attr("href") shouldBe routes.YearToDateLiabilityController.uploadMandatoryEvidence().url
               doc
-                .select("#content > article > dl > div > dt")
+                .select("#main-content .govuk-summary-list__key")
                 .text()       shouldBe expiredEvidence.fileName
               doc
-                .select("#content > article > dl > div > dd:eq(2)")
+                .select("#main-content .govuk-summary-list__value")
                 .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.label")
             }
           )
