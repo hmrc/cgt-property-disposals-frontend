@@ -29,25 +29,24 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedTaxDue, RepresentativeType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    calcRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_row,
-    initialGainOrLossWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.initial_gain_or_loss_workings,
-    gainOrLossAfterReliefsWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_or_loss_after_reliefs_workings,
-    taxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.taxable_gain_workings,
-    taxOwedWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.tax_owed_workings,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
-    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
-    radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        formWrapper: FormWithCSRF,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        calcRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_row,
+        initialGainOrLossWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.initial_gain_or_loss_workings,
+        gainOrLossAfterReliefsWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_or_loss_after_reliefs_workings,
+        taxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.taxable_gain_workings,
+        taxOwedWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.tax_owed_workings,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk,
+        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+        govukRadios: GovukRadios,
+        govukInput: GovukInput
 )
 
 @(form: Form[BigDecimal],
@@ -70,66 +69,48 @@
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @taxYear = @{ triageAnswers.disposalDate.taxYear }
-
 @isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 @calculatedTaxDue = @{MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds())}
-
-@options = @{List(
-  RadioOption(
-    label = calculatedTaxDue,
-    content = None,
-    optionHelpText = None
-  ),
-  RadioOption(
-    label = messages(s"$agreeKey.other.label"),
-    content = Some(unitInput(
-      fieldId = key,
-      value = form.data.getOrElse(key, ""),
-      formError = form.error(key),
-      hasErrors = form.error(key).nonEmpty,
-      label = Html(messages(s"$key.label")),
-      labelClass = None,
-      labelAsHeading = false,
-      extraContent = None,
-      autoComplete = AutoCompleteType.On,
-      inputClass = Some("small"),
-      aspect = "left",
-      unit = "£",
-      assistiveText = messages("unit-input.assistive.pounds")
+@disagreeContent = {
+  @govukInput(Input(
+    id = key,
+    name = key,
+    value = form.data.get(key),
+    label = Label(
+      content = Text(messages(s"$key.label"))
+    ),
+    classes = "govuk-input--width-10",
+    prefix = Some(PrefixOrSuffix(
+      content = Text("£")
     )),
-    optionHelpText = None
-  )
-
-)}
-
-@selectedIndex = @{
-  form.data.get(agreeKey).map({
-    case "0" => 0
-    case _ => 1
-  })
+    errorMessage = form.error(key).map(e => ErrorMessage(
+      content = Text(messages(s"$key.${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    autocomplete = Some(AutoCompleteType.On.value)
+  ))
 }
 
-@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
-
-   @backLinkComponent(backLink)
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form)
     }
+  
+    <span class="govuk-caption-xl">@messages("ytdLiability.caption")</span>
+    <h1 class="govuk-heading-xl">@title</h1>
 
-    @pageHeading(messages(s"$key.title"), Some(messages("ytdLiability.caption")))
+    <p class="govuk-body">@messages(s"$key.p1")</p>
 
-    <p>@messages(s"$key.p1")</p>
-
-    <p>@messages(s"$key.p2")</p>
+    <p class="govuk-body">@messages(s"$key.p2")</p>
 
     @printLink(messages(s"$key.printLink"))
 
-    <h2 class="heading-large">
+    <h2 class="govuk-heading-l">
       @messages("calculator.heading")
     </h2>
 
-    <ul class="calc-rows with-bottom-margin">
+    <ul class="govuk-list calc-rows with-bottom-margin">
       <li>
         @calcRow(calculatedTax.initialGainOrLoss.amount, messages(s"$key.initialGainOrLoss"), showGainType = true)
         @details(
@@ -166,21 +147,40 @@
       </li>
     </ul>
 
-    <p>@{Html(messages(s"$key.helpText.p1", calculatedTaxDue))}</p>
+    <p class="govuk-body">@{Html(messages(s"$key.helpText.p1", calculatedTaxDue))}</p>
     @if(isATrust) {
-      <p>@messages(s"$key.helpText.p3")</p>
+      <p class="govuk-body">@messages(s"$key.helpText.p3")</p>
     }
 
-    @formWrapper(routes.YearToDateLiabilityController.taxDueSubmit(), 'novalidate -> "novalidate") {
-
-      @radioGroupConditional(
-        fieldId = agreeKey,
-        label = Html(s"""<h2 class="heading-medium">${messages(s"$key.h2")}</h2>"""),
-        selected = selectedIndex,
-        error = form.error(agreeKey),
-        options = options,
-        helpText = None
-      )
+    @formWrapper(routes.YearToDateLiabilityController.taxDueSubmit()) {
+      @govukRadios(Radios(
+        name = agreeKey,
+        idPrefix = Some(agreeKey),
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
+            content = Text(messages(s"$key.h2")),
+            classes = "govuk-fieldset__legend--m"
+          ))
+        )),
+        items = Seq(
+          RadioItem(
+            content = Text(calculatedTaxDue),
+            value = Some("0"),
+            checked = form.data.get(agreeKey).contains("0")
+          ),
+          RadioItem(
+            content = Text(messages(s"$agreeKey.other.label")),
+            value = Some("1"),
+            checked = form.data.get(agreeKey).contains("1"),
+            conditionalHtml = Some(disagreeContent)
+          )),
+        errorMessage = form.error(agreeKey).map(e =>
+          ErrorMessage(
+            content = Text(messages(s"$agreeKey.${e.message}")),
+            visuallyHiddenText = Some(messages("generic.error"))
+          )
+        )
+      ))
 
       @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }

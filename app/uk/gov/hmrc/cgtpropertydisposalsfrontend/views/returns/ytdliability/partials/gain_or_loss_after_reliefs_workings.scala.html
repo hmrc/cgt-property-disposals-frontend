@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 
 @this(
-    calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+    calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum_govuk
 )
 
 @(
@@ -40,7 +40,7 @@
 
 @if(calculatedTax.initialGainOrLoss.amount.isNegative) {
 
-  <p>
+  <p class="govuk-body">
     <em>
       @messages("calculator.reliefsLossIntro")
     </em>
