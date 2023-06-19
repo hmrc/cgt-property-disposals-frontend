@@ -20,7 +20,6 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
@@ -29,21 +28,20 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, TaxableGainOrLossCalculation}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        formWrapper: FormWithCSRF,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
+        govukRadios: GovukRadios,
+        govukInput: GovukInput,
         furtherReturnTaxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.further_return_taxable_gain_workings,
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk
 )
 
 @(
@@ -54,7 +52,7 @@
         taxYear: TaxYear,
         isAmend: Boolean,
         taxableGainOrLossCalculation: Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 @key = @{ "taxableGainOrLoss" }
 @gainKey = @{ "taxableGain" }
 @lossKey = @{ "netLoss" }
@@ -82,80 +80,26 @@
         else s"${e.key}.furtherReturn"
     )
 }
-
-@options = @{List(
-    RadioOption(
-        label = messages(s"$key$userKey.furtherReturn.gain.label"),
-        content = Some(unitInput(
-            fieldId = gainKey,
-            value = form.data.getOrElse(gainKey, ""),
-            label = Html(messages(s"$gainKey.furtherReturn.label")),
-            formError = form.error(gainKey),
-            hasErrors = form.error(gainKey).nonEmpty,
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = customErrorKey
-        )),
-        optionHelpText = None
-    ),
-    RadioOption(
-        label = messages(s"$key$userKey.furtherReturn.loss.label"),
-        content = Some(unitInput(
-            fieldId = lossKey,
-            value = form.data.getOrElse(lossKey, ""),
-            label = Html(messages(s"$lossKey.furtherReturn.label")),
-            formError = form.error(lossKey),
-            hasErrors = form.error(lossKey).nonEmpty,
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = customErrorKey
-        )),
-        optionHelpText = None
-    ),
-    RadioOption(
-        label = messages(s"$key.noLossOrGain.furtherReturn.label"),
-        content = None,
-        optionHelpText = None
-    )
-
-)}
-@selectedIndex = @{
-    form.data.get(key).map({
-        case "0" => 0
-        case "1" => 1
-        case _ => 2
-    })
-}
-
-
 @taxYearStart = @{ taxYear.startDateInclusive.getYear.toString }
 @taxYearEnd = @{ taxYear.endDateExclusive.getYear.toString }
+@calc(c: (TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)) = {
+    <p class="govuk-body">@messages(s"$key.calculated.furtherReturn.p1", taxYearStart, taxYearEnd)</p>
+    @details(messages("calculator.showWorkings"), furtherReturnTaxableGainWorkings(c._1, c._2), Some(messages(s"$key.assistive.taxableGain")))
+}
+@guidance = {
+    <p class="govuk-body">@messages(s"$key$userKey.furtherReturn.p1", taxYearStart, taxYearEnd)</p>
+    <p class="govuk-body">@messages(s"$key.furtherReturn.p2")</p>
+    <ol class="govuk-list govuk-list--bullet">
+        <li>@messages(s"$key.furtherReturn.li1")</li>
+        <li>@messages(s"$key.furtherReturn.li2")</li>
+        <li>@messages(s"$key$userKey.furtherReturn.li4")</li>
+        <li>@messages(s"$key.furtherReturn.li3")</li>
+    </ol>
+}
 @calcOrGuidance = @{
     taxableGainOrLossCalculation match {
-      case Some(c) =>
-          Html(
-           s"""
-           |<p>${messages(s"$key.calculated.furtherReturn.p1", taxYearStart, taxYearEnd)}</p>
-           |${details(messages("calculator.showWorkings"), furtherReturnTaxableGainWorkings(c._1, c._2), Some(messages(s"$key.assistive.taxableGain")))}
-            """.stripMargin)
-      case _ =>
-          Html(
-            s"""
-           |<p>${messages(s"$key$userKey.furtherReturn.p1", taxYearStart, taxYearEnd)}</p>
-           |<p>${messages(s"$key.furtherReturn.p2")}</p>
-           |<ol class="list list-number">
-           |<li>${messages(s"$key.furtherReturn.li1")}</li>
-           |<li>${messages(s"$key.furtherReturn.li2")}</li>
-           |<li>${messages(s"$key$userKey.furtherReturn.li4")}</li>
-           |<li>${messages(s"$key.furtherReturn.li3")}</li>
-           |</ol>
-            """.stripMargin)
+      case Some(c) => calc(c)
+      case _ => guidance
     }
 }
 @extraContent = @{
@@ -170,14 +114,51 @@
                 else
                     messages(s"$key.calculated.noGainOrLoss.prompt")
 
-            Some(Html(s"""<p>$prompt</p><p>${messages(s"$key$userKey.calculatedHelpText.p2")}</p>""".stripMargin))
+            Some(Html(s"""<p class="govuk-body">$prompt</p><p class="govuk-body">${messages(s"$key$userKey.calculatedHelpText.p2")}</p>""".stripMargin))
         case _ => None
     }
 }
+@gainContent = {
+    @govukInput(Input(
+        id = gainKey,
+        name = gainKey,
+        value = form.data.get(gainKey),
+        label = Label(
+            content = Text(messages(s"$gainKey.furtherReturn.label"))
+        ),
+        classes = "govuk-input--width-10",
+        prefix = Some(PrefixOrSuffix(
+            content = Text("£")
+        )),
+        errorMessage = form.error(gainKey).map(e => ErrorMessage(
+            content = Text(messages(s"$gainKey.${e.message}")),
+            visuallyHiddenText = Some(messages("generic.error"))
+        )),
+        autocomplete = Some(AutoCompleteType.On.value)
+    ))
+}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@lossContent = {
+    @govukInput(Input(
+        id = lossKey,
+        name = lossKey,
+        value = form.data.get(lossKey),
+        label = Label(
+            content = Text(messages(s"$lossKey.furtherReturn.label"))
+        ),
+        classes = "govuk-input--width-10",
+        prefix = Some(PrefixOrSuffix(
+            content = Text("£")
+        )),
+        errorMessage = form.error(lossKey).map(e => ErrorMessage(
+            content = Text(messages(s"$lossKey.${e.message}")),
+            visuallyHiddenText = Some(messages("generic.error"))
+        )),
+        autocomplete = Some(AutoCompleteType.On.value)
+    ))
+}
 
-    @backLinkComponent(backLink)
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form, customErrorKey = customErrorKey)
@@ -185,25 +166,53 @@
 
     @caption(messages("ytdLiability.furtherReturn.caption"))
 
-    @pageHeading(title)
+    <h1 class="govuk-heading-xl">@title</h1>
 
     @calcOrGuidance
 
-    @formWrapper(routes.YearToDateLiabilityController.taxableGainOrLossSubmit(), 'novalidate -> "novalidate") {
-        @radioGroupConditional(
-            fieldId = key,
-            label = Html(s"""<h2 class="heading-medium">${messages(s"$key$userKey.furtherReturn.h2", taxYearStart, taxYearEnd)}</h2>"""),
-            selected = selectedIndex,
-            error = form.error(key),
-            options = options,
-            helpText = None,
-            customErrorKey = customErrorKey,
-            extraContent = extraContent
-        )
+    @extraContent.getOrElse(Html(""))
+
+    @formWrapper(routes.YearToDateLiabilityController.taxableGainOrLossSubmit()) {
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(messages(s"$key$userKey.furtherReturn.h2", taxYearStart, taxYearEnd)),
+                    classes = "govuk-fieldset__legend--m"
+                ))
+            )),
+            name = key,
+            idPrefix = Some(key),
+            hint = Some(Hint(content = HtmlContent(messages(s"$key$userKey.helpText")))),
+            items = Seq(
+                RadioItem(
+                    content = Text(messages(s"$key$userKey.furtherReturn.gain.label")),
+                    value = Some("0"),
+                    checked = form.data.get(key).contains("0"),
+                    conditionalHtml = Some(gainContent)
+                ),
+                RadioItem(
+                    content = Text(messages(s"$key$userKey.furtherReturn.loss.label")),
+                    value = Some("1"),
+                    checked = form.data.get(key).contains("1"),
+                    conditionalHtml = Some(lossContent)
+                ),
+                RadioItem(
+                    content = Text(messages(s"$key.noLossOrGain.furtherReturn.label")),
+                    value = Some("2"),
+                    checked = form.data.get(key).contains("2")
+                )
+            ),
+            errorMessage = form.error(key).map(e =>
+                ErrorMessage(
+                    content = Text(messages(s"${customErrorKey.getOrElse(key)}.${e.message}")),
+                    visuallyHiddenText = Some(messages("generic.error"))
+                )
+            )
+        ))
 
         @if(taxableGainOrLossCalculation.isEmpty) {
-            <p>
-                <a href="@{triage.routes.FurtherReturnGuidanceController.taxableGainGuidance()}" id="link">
+            <p class="govuk-body">
+                <a class="govuk-link" href="@{triage.routes.FurtherReturnGuidanceController.taxableGainGuidance()}" id="link">
                 @messages(s"$key$userKey.furtherReturn.link")
                 </a>
             </p>

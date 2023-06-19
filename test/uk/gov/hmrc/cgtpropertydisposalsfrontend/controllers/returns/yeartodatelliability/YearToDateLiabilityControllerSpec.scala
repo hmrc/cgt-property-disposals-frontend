@@ -4740,7 +4740,7 @@ class YearToDateLiabilityControllerSpec
             "taxableGainOrLoss.multiple.title",
             { doc =>
               doc
-                .select("#taxableGainOrLoss-1")
+                .select("#taxableGainOrLoss-2")
                 .attr("checked")                   shouldBe ""
               doc.select("#netLoss").attr("value") shouldBe "1"
             }
@@ -4760,7 +4760,7 @@ class YearToDateLiabilityControllerSpec
             "taxableGainOrLoss.title",
             doc =>
               doc
-                .select("#taxableGainOrLoss-2")
+                .select("#taxableGainOrLoss-3")
                 .hasAttr("checked")
           )
 
@@ -4782,7 +4782,7 @@ class YearToDateLiabilityControllerSpec
             "taxableGainOrLoss.personalRepInPeriodOfAdmin.title",
             doc =>
               doc
-                .select("#taxableGainOrLoss-2")
+                .select("#taxableGainOrLoss-3")
                 .hasAttr("checked")
           )
         }
@@ -4802,7 +4802,7 @@ class YearToDateLiabilityControllerSpec
             "taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title",
             doc =>
               doc
-                .select("#taxableGainOrLoss-2")
+                .select("#taxableGainOrLoss-3")
                 .hasAttr("checked")
           )
         }
@@ -4824,13 +4824,13 @@ class YearToDateLiabilityControllerSpec
               expectedBackLink,
               expectedTitleKey,
               { doc =>
-                doc.select("#taxableGainOrLoss > legend > h2").text()              shouldBe expectedSubtitle
-                doc.select("#taxableGainOrLoss > div:nth-child(2) > label").text() shouldBe expectedNetGainLabel
-                doc.select("#taxableGainOrLoss > div:nth-child(4) > label").text() shouldBe expectedNetLossLabel
-                doc.select("#link").text()                                         shouldBe expectedLinkText
+                doc.select(".govuk-fieldset__legend--m").text()       shouldBe expectedSubtitle
+                doc.select("label[for='taxableGainOrLoss']").text()   shouldBe expectedNetGainLabel
+                doc.select("label[for='taxableGainOrLoss-2']").text() shouldBe expectedNetLossLabel
+                doc.select("#link").text()                            shouldBe expectedLinkText
                 doc
                   .select("#link")
-                  .attr("href")                                                    shouldBe controllers.returns.triage.routes.FurtherReturnGuidanceController
+                  .attr("href")                                       shouldBe controllers.returns.triage.routes.FurtherReturnGuidanceController
                   .taxableGainGuidance()
                   .url
               },
@@ -6660,7 +6660,7 @@ class YearToDateLiabilityControllerSpec
             ),
             doc =>
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#main-content form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
                 .uploadMandatoryEvidence()
                 .url
@@ -8402,7 +8402,7 @@ class YearToDateLiabilityControllerSpec
               doc.select("#repayment-form-hint").text shouldBe messageFromMessageKey(expectedHelpTextKey)
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
                 .repaymentSubmit()
                 .url
