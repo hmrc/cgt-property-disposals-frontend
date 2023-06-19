@@ -15,41 +15,51 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{accounts, returns}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{returns}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+govukButton: GovukButton,
+govukWarningText: GovukWarningText
 )
 
-@(draftReturn: DraftReturn, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftReturn, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
 
-@title = @{messages("draftReturnSaved.title")}
-@isAnAgent = @{ request.userType.contains(UserType.Agent)}
-@warningMessageKey = @{ s"draftReturnSaved${if(isAnAgent) ".agent" else if (isATrust) ".trust" else ""}.warning" }
-@mainTemplate(title = title, userType = request.userType) {
+@key = @{"draftReturnSaved"}
 
-  @backLinkComponent(returns.routes.TaskListController.taskList())
+@title = @{messages(s"$key.title")}
 
-  @pageHeading(title)
+@isAgent = @{ request.userType.contains(UserType.Agent)}
+@userKey = @{
+    if (isAgent) ".agent"
+    else if(isATrust) ".trust"
+    else ""
+}
 
-  @warning(messages(warningMessageKey, TimeUtils.govDisplayFormat(draftReturn.lastUpdatedDate.plusDays(29))))
 
-  <p>
+@layout(title, backLinkUrl = Some(returns.routes.TaskListController.taskList().url)) {
+
+<h1 class="govuk-heading-xl">@title</h1>
+
+@govukWarningText(WarningText(
+    content = Text(messages(s"$key$userKey.warning", TimeUtils.govDisplayFormat(draftReturn.lastUpdatedDate.plusDays(29)))),
+    iconFallbackText = Some(messages("generic.warning"))
+))
+  <p class="govuk-body">
     @messages("draftReturnSaved.p1")
   </p>
 
-  <p>
+  <p class="govuk-body">
     @messages("draftReturnSaved.p2")
   </p>
-
-  <a class="button" role="button" href="@{accounts.homepage.routes.HomePageController.homepage().url}">
-    @messages("button.accountHome")
-  </a>
+    @govukButton(Button(
+    attributes = Map("id" -> "button"),
+    href = Some(controllers.accounts.homepage.routes.HomePageController.homepage().url),
+    content = Text(messages("button.accountHome"))
+    ))
 }
