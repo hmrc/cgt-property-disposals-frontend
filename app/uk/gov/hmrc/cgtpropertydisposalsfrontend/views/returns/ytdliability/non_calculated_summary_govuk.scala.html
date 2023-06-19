@@ -1,0 +1,187 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import cats.syntax.order._
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
+
+@this(
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section_govuk,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row_govuk,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change_govuk
+)
+
+@(
+    answers: CompleteNonCalculatedYTDAnswers,
+    showFiles: Boolean,
+    isMultiple: Boolean,
+    isATrust: Boolean,
+    representativeType: Option[RepresentativeType],
+    isFurtherOrAmendReturn: Option[Boolean],
+    isAmend: Boolean,
+    taxYear: TaxYear,
+    hideEstimatesQuestion: Boolean,
+        wasUkResident: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages)
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{
+  representativeType match {
+      case Some(PersonalRepresentative) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(Capacitor) => ".capacitor"
+      case None =>
+          if (isAgent) ".agent"
+          else if (isATrust) ".trust"
+          else ""
+  }
+}
+@userKeyWithSeparatePeriodOfAdmin = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent  => ".personalRepInPeriodOfAdmin.agent"
+        case _ => userKey
+    }
+}
+
+@multipleKey = @{if(isMultiple) ".multiple" else ""}
+@furtherReturnKey = @{
+  if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn"
+  else ""
+}
+@nrKey = @{ if(wasUkResident) "" else ".non-resident" }
+
+@checkTaxDueKey = @{
+  if(isAmend) ".amendReturn.checkTaxDue"
+  else if (isFurtherOrAmendReturn.contains(true)) ".furtherReturn.checkTaxDue"
+  else ""
+}
+
+@taxableGainOrLossLabelWithAmount = @{
+    if(answers.taxableGainOrLoss > AmountInPence.zero)
+        s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin$furtherReturnKey.gain.label" -> Some(s"taxableGain$furtherReturnKey.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds()))
+    else if(answers.taxableGainOrLoss < AmountInPence.zero)
+        s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin$furtherReturnKey.loss.label" -> Some(s"netLoss$furtherReturnKey.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds() * -1))
+    else
+        s"taxableGainOrLoss.noLossOrGain$furtherReturnKey.label" -> None
+}
+
+@taxYearStart = @{ taxYear.startDateInclusive.getYear.toString }
+@taxYearEnd = @{ taxYear.endDateExclusive.getYear.toString }
+
+@cyaSection() {
+
+    @cyaRow(
+        if(isFurtherOrAmendReturn.contains(true))
+            messages(s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin.furtherReturn.h2", taxYearStart, taxYearEnd)
+        else
+            messages(s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin$multipleKey.title"),
+        Html(messages(taxableGainOrLossLabelWithAmount._1)),
+        Some(cyaChange(messages(s"taxableGainOrLoss$furtherReturnKey.cyaChange"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
+        "taxableGainOrLossAnswer"
+    )
+
+    @taxableGainOrLossLabelWithAmount._2.map{ case (label, amount) =>
+        @cyaRow(
+            messages(label),
+            Html(amount),
+            Some(cyaChange(messages(label), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
+            "taxableGainOrLossAmount"
+        )
+    }
+
+   @if(!isATrust) {
+
+     @answers.estimatedIncome.map { estimatedIncome =>
+       @cyaRow(
+         messages(s"estimatedIncome$userKey$nrKey.title"),
+         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(estimatedIncome.inPounds())),
+         Some(cyaChange(messages(s"estimatedIncome$nrKey.cyaChange"), routes.YearToDateLiabilityController.estimatedIncome().url)),
+         "estimatedIncome-value"
+       )
+     }
+
+     @answers.personalAllowance.map { personalAllowance =>
+       @cyaRow(
+         messages(s"personalAllowance$userKey.title", taxYearStart, taxYearEnd),
+         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
+         Some(cyaChange(messages("personalAllowance.cyaChange"), routes.YearToDateLiabilityController.personalAllowance().url)),
+         "personalAllowance-value"
+       )
+     }
+
+   }
+
+
+   @if(!hideEstimatesQuestion) {
+       @cyaRow(
+           messages("hasEstimatedDetails.title"),
+           Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
+           Some(cyaChange(messages("hasEstimatedDetails.cyaChange"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
+           "hasEstimatedDetails-value"
+       )
+   }
+
+    @if(isFurtherOrAmendReturn.contains(true)) {
+        @answers.yearToDateLiability.map { y =>
+            @cyaRow(
+                messages(s"yearToDateLiability$userKeyWithSeparatePeriodOfAdmin.title", taxYearStart, taxYearEnd),
+                Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(y.inPounds())),
+                Some(cyaChange(messages("yearToDateLiability.cyaChange"), routes.YearToDateLiabilityController.yearToDateLiability().url)),
+                "yearToDateLiability"
+            )
+        }
+    }
+
+    @cyaRow(
+        messages(s"nonCalculatedTaxDue$checkTaxDueKey.title"),
+        Html( MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
+        Some(cyaChange(messages(s"nonCalculatedTaxDue$furtherReturnKey.cyaChange"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
+        "nonCalculatedTaxDue-value"
+    )
+
+    @if(isFurtherOrAmendReturn.contains(true)) {
+        @answers.checkForRepayment.map { checkForRepayment =>
+            @cyaRow(
+                messages(s"repayment$userKeyWithSeparatePeriodOfAdmin.title"),
+                Html(messages(if(checkForRepayment) "generic.yes" else "generic.no")),
+                Some(cyaChange(messages("repayment.cyaChange"), routes.YearToDateLiabilityController.repayment().url)),
+                "repayment"
+            )
+
+        }
+    }
+
+  @if(showFiles) {
+    @answers.mandatoryEvidence.map{ m =>
+        @cyaRow(
+            messages("mandatoryEvidence.title"),
+            Html(m.fileName),
+            Some(cyaChange(messages("mandatoryEvidence.cyaChange"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
+            "mandatoryEvidence-value"
+        )
+    }
+
+  }
+
+}
