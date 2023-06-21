@@ -5772,21 +5772,25 @@ class YearToDateLiabilityControllerSpec
               { doc =>
                 val formattedTaxDue = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDue.inPounds())
 
-                doc.select("#content > article > dl > div:nth-child(1) > dd").text() shouldBe MoneyUtils
+                doc.select("#main-content dl.govuk-summary-list > div:nth-child(1) > dd").text() shouldBe MoneyUtils
                   .formatAmountOfMoneyWithPoundSign(yearToDateLiability.inPounds())
 
-                doc.select("#content > article > dl > div:nth-child(2) > dd").text() shouldBe s"- ${MoneyUtils
+                doc
+                  .select("#main-content dl.govuk-summary-list > div:nth-child(2) > dd")
+                  .text() shouldBe s"- ${MoneyUtils
                   .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
 
-                doc.select("#content > article > dl > div.sum-total > dd").text() shouldBe s"= $formattedTaxDue"
+                doc
+                  .select("#main-content dl.govuk-summary-list > div.sum-total > dd")
+                  .text() shouldBe s"= $formattedTaxDue"
 
-                doc.select("#content > article > p:nth-child(6)").text() shouldBe messageFromMessageKey(
+                doc.select("#main-content > div > div > div > p:nth-child(5)").text() shouldBe messageFromMessageKey(
                   expectedP1Key,
                   formattedTaxDue
                 )
 
                 doc
-                  .select("#content > article > form, #main-content form")
+                  .select("#main-content form")
                   .attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
                   .url
@@ -5887,9 +5891,9 @@ class YearToDateLiabilityControllerSpec
               performAction(),
               messageFromMessageKey(s"nonCalculatedTaxDue.furtherReturn.enterTaxDue.title"),
               { doc =>
-                doc.select("#nonCalculatedTaxDue-form-hint") contains expectedP1Key
+                doc.select("#nonCalculatedTaxDue-hint") contains expectedP1Key
                 doc
-                  .select("#content > article > form, #main-content form")
+                  .select("#main-content form")
                   .attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
                   .url
@@ -6013,16 +6017,16 @@ class YearToDateLiabilityControllerSpec
               { doc =>
                 val formattedTaxDue = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDue.inPounds())
 
-                doc.select("#content > article > dl > div:nth-child(1) > dd").text() shouldBe MoneyUtils
+                doc.select("#main-content dl.govuk-summary-list > div:nth-child(1) > dd").text() shouldBe MoneyUtils
                   .formatAmountOfMoneyWithPoundSign(yearToDateLiability.inPounds())
 
-                doc.select("#content > article > dl > div:nth-child(2) > dd").text() shouldBe s"${MoneyUtils
+                doc.select("#main-content dl.govuk-summary-list > div:nth-child(2) > dd").text() shouldBe s"${MoneyUtils
                   .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
 
-                doc.select("#content > article > dl > div.sum-total > dd").text() shouldBe formattedTaxDue
+                doc.select("#main-content dl.govuk-summary-list > div.sum-total > dd").text() shouldBe formattedTaxDue
 
                 doc
-                  .select("#content > article > form, #main-content form")
+                  .select("#main-content form")
                   .attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
                   .url

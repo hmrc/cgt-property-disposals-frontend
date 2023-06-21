@@ -3764,11 +3764,11 @@ taxDue.taxableGain=Taxable gain
 taxDue.assistive.taxableGain=for taxable gain
 taxDue.amountOfTaxDue=Capital Gains Tax due for this return
 taxDue.assistive.amountOfTaxDue=for Capital Gains Tax due for this return
-taxDue.helpText.p1=Based on the details you entered <strong class="bold">{0}</strong> is due in Capital Gains Tax on UK property for this return. If you disagree with this figure, you’ll need to enter another amount and upload a file later showing your workings.
-taxDue.agent.helpText.p1=If your client agrees with these workings enter <strong class="bold">{0}</strong>.
-taxDue.trust.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
-taxDue.capacitor.helpText.p1=If the person agrees with these workings enter <strong class="bold">{0}</strong>.
-taxDue.personalRep.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
+taxDue.helpText.p1=Based on the details you entered <strong>{0}</strong> is due in Capital Gains Tax on UK property for this return. If you disagree with this figure, you’ll need to enter another amount and upload a file later showing your workings.
+taxDue.agent.helpText.p1=If your client agrees with these workings enter <strong>{0}</strong>.
+taxDue.trust.helpText.p1=If you agree with these workings enter <strong>{0}</strong>.
+taxDue.capacitor.helpText.p1=If the person agrees with these workings enter <strong>{0}</strong>.
+taxDue.personalRep.helpText.p1=If you agree with these workings enter <strong>{0}</strong>.
 taxDue.helpText.p2=If you want to enter a different amount you will be asked to upload a file later showing your workings.
 taxDue.helpText.p3=If the trust is for vulnerable beneficiaries, you’ll need to work out and enter the amount of tax due.
 taxDue.trustDetails.label=Help for trusts for vulnerable beneficiaries
@@ -3845,9 +3845,9 @@ calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
 nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
-nonCalculatedTaxDue.ukResident.link=Find out how to work out tax when property is sold (opens in a new tab)
-nonCalculatedTaxDue.trust.link=Find out how to work out Capital Gains Tax for a trust (opens in a new tab)
-nonCalculatedTaxDue.nonResident.link=Find out how to work out tax when property is sold or for indirect disposals (opens in a new tab)
+nonCalculatedTaxDue.ukResident.link=Find out how to work out tax when property is sold
+nonCalculatedTaxDue.trust.link=Find out how to work out Capital Gains Tax for a trust
+nonCalculatedTaxDue.nonResident.link=Find out how to work out tax when property is sold or for indirect disposals
 
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
 nonCalculatedTaxDue.error.required=Enter the amount of Capital Gains Tax due for this return

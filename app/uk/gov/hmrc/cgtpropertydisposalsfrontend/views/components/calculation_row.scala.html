@@ -21,11 +21,11 @@
 
 @(total: AmountInPence, label: String, showGainType: Boolean)(implicit messages: Messages)
 
-<h2 class="heading-medium">
+<h2 class="govuk-heading-m">
  @label
 </h2>
 <span class="calc-total">
-  @{MoneyUtils.formatAmountOfMoneyWithPoundSign(total.abs().inPounds())}
+ @{MoneyUtils.formatAmountOfMoneyWithPoundSign(total.abs().inPounds())}
  @if(showGainType) {
   @{if (total.isNegative) s"(${messages("generic.loss")})" else if (!total.isZero) s"(${messages("generic.gain")})"}
  }
