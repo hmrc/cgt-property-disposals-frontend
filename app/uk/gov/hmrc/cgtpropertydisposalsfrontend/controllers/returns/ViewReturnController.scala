@@ -21,7 +21,7 @@ import cats.instances.string._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
@@ -48,7 +48,7 @@ class ViewReturnController @Inject() (
   cc: MessagesControllerComponents,
   viewReturnPage: views.html.returns.view_return,
   rebasingEligibilityUtil: RebasingEligibilityUtil
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+)(implicit ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates

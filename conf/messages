@@ -4289,7 +4289,7 @@ viewReturn.amend.chargeType.TwelveMonthLatePaymentPenalty=Penalty - payment 12 m
 viewReturn.chargeType.PenaltyInterest=Interest on penalties paid late
 viewReturn.amend.chargeType.PenaltyInterest=Interest on penalties paid late
 viewReturn.charge.status.paid=Paid
-viewReturn.charge.status.payNow=<a href="{0}">Pay now</a>
+viewReturn.charge.status.payNow=<a class="govuk-link" href="{0}">Pay now</a>
 viewReturn.charge.paymentMethod.BACS=Bacs payment received
 viewReturn.charge.paymentMethod.CHAPS=CHAPS payment received
 viewReturn.charge.paymentMethod.Cheque=cheque received

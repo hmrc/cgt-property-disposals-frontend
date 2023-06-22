@@ -24,21 +24,21 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, DisposalDate, RepresentativeType}
 
 @this(
-        singleDisposalTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary,
-        multipleDisposalsTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary,
-        addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary,
-        examplePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary,
-        exampleCompanyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_indirect_disposals_summary,
-        calculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary,
-        nonCalculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary,
-        acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
-        disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
-        reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
-        glarSummary : uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary,
-        lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
-        singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
-        singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
-        initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary
+        singleDisposalTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary_govuk,
+        multipleDisposalsTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary_govuk,
+        addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary_govuk,
+        examplePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary_govuk,
+        exampleCompanyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_indirect_disposals_summary_govuk,
+        calculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary_govuk,
+        nonCalculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary_govuk,
+        acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary_govuk,
+        disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary_govuk,
+        reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary_govuk,
+        glarSummary : uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary_govuk,
+        lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary_govuk,
+        singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary_govuk,
+        singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary_govuk,
+        initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary_govuk
 )
 
 @(
@@ -59,13 +59,13 @@
 
 @completeReturn match {
     case s: CompleteSingleDisposalReturn => {
-        <h2>@messages("task-list.triage.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.triage.link")</h2>
         @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust, representativeType, s.representeeAnswers)
 
-        <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-property-address.link")</h2>
         @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())
 
-        <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.disposals-details.link")</h2>
         @disposalDetailsSummary(
             s.disposalDetails,
             s.triageAnswers.disposalMethod,
@@ -74,7 +74,7 @@
             isIndirectDisposal
         )
 
-        <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.acquisition-details.link")</h2>
         @acquisitionDetailsSummary(s.acquisitionDetails,
             rebasingEligibilityUtil.getRebasingCutOffDate(s),
             rebasingEligibilityUtil.isUk(s),
@@ -84,25 +84,25 @@
             s.triageAnswers.assetType
         )
 
-        <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.relief-details.link")</h2>
         @reliefDetailsSummary(s.reliefDetails, subscribedDetails.isATrust, representativeType)
 
       @s.initialGainOrLoss.map{ initialGainOrLoss =>
-          <h2 class="heading-medium">@messages("task-list.enter-initial-gain-or-loss.link")</h2>
+          <h2 class="govuk-heading-m">@messages("task-list.enter-initial-gain-or-loss.link")</h2>
       @initialGainOrLossSummary(initialGainOrLoss, subscribedDetails.isATrust, representativeType)
       }
 
         @s.gainOrLossAfterReliefs.map{ glar =>
             @if(isFurtherOrAmendReturn.contains(true)){
-                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                <h2 class="govuk-heading-m">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
                 @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
             }
         }
 
-        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherOrAmendReturn, showAnnualExemptAmount)
 
-        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-cgt-liability.link")</h2>
         @s.yearToDateLiabilityAnswers.fold(
             nonCalculatedYearToDateLiabilitySummary(
                 _,
@@ -128,29 +128,29 @@
         )
 
         @if(s.hasAttachments) {
-            <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
-            <p>@messages(s"$key.hasAttachments.p1")</p>
+            <h2 class="govuk-heading-m">@messages(s"$key.hasAttachments")</h2>
+            <p class="govuk-body">@messages(s"$key.hasAttachments.p1")</p>
         }
     }
 
     case m: CompleteMultipleDisposalsReturn => {
-        <h2>@messages("task-list.triage.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.triage.link")</h2>
         @multipleDisposalsTriageSummary(m.triageAnswers, subscribedDetails.isATrust, m.representeeAnswers)
 
-        <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-property-address.link")</h2>
         @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), subscribedDetails.isATrust, representativeType, m.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
 
-        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust, representativeType,  isFurtherOrAmendReturn, showAnnualExemptAmount)
 
         @m.gainOrLossAfterReliefs.map{ glar =>
             @if(isFurtherOrAmendReturn.contains(true)){
-                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                <h2 class="govuk-heading-m">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
                 @glarSummary(glar, subscribedDetails.isATrust, representativeType, true)
             }
         }
 
-        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(
             m.yearToDateLiabilityAnswers,
             showFiles = false,
@@ -165,19 +165,19 @@
         )
 
         @if(m.hasAttachments) {
-            <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
-            <p>@messages(s"$key.hasAttachments.p1")</p>
+            <h2 class="govuk-heading-m">@messages(s"$key.hasAttachments")</h2>
+            <p class="govuk-body">@messages(s"$key.hasAttachments.p1")</p>
         }
     }
 
     case s: CompleteSingleIndirectDisposalReturn => {
-        <h2>@messages("task-list.triage.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.triage.link")</h2>
         @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust, representativeType, s.representeeAnswers)
 
-        <h2 class="heading-medium">@messages("task-list.enter-company-details.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-company-details.link")</h2>
         @singleIndirectDisposalAddressSummary(s.companyAddress)
 
-        <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.disposals-details.link")</h2>
         @disposalDetailsSummary(
             s.disposalDetails,
             s.triageAnswers.disposalMethod,
@@ -186,7 +186,7 @@
             isIndirectDisposal
         )
 
-        <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.acquisition-details.link")</h2>
         @acquisitionDetailsSummary(s.acquisitionDetails,
             rebasingEligibilityUtil.getRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
             isUk = false,
@@ -196,17 +196,17 @@
             s.triageAnswers.assetType
         )
 
-        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType,  isFurtherOrAmendReturn, showAnnualExemptAmount)
 
         @s.gainOrLossAfterReliefs.map{ glar =>
             @if(isFurtherOrAmendReturn.contains(true)){
-                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                <h2 class="govuk-heading-m">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
                 @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
             }
         }
 
-        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(
             s.yearToDateLiabilityAnswers,
             showFiles = false,
@@ -221,20 +221,20 @@
         )
 
         @if(s.hasAttachments) {
-            <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
-            <p>@messages(s"$key.hasAttachments.p1")</p>
+            <h2 class="govuk-heading-m">@messages(s"$key.hasAttachments")</h2>
+            <p class="govuk-body">@messages(s"$key.hasAttachments.p1")</p>
         }
 
     }
 
     case multipleIndirect: CompleteMultipleIndirectDisposalReturn => {
-        <h2>@messages("task-list.triage.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.triage.link")</h2>
         @multipleDisposalsTriageSummary(multipleIndirect.triageAnswers, subscribedDetails.isATrust, multipleIndirect.representeeAnswers)
 
-        <h2 class="heading-medium">@messages("task-list.example-company-details.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.example-company-details.link")</h2>
         @exampleCompanyDetailsSummary(multipleIndirect.exampleCompanyDetailsAnswers)
 
-        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(
             multipleIndirect.exemptionsAndLossesDetails,
             DisposalDate(multipleIndirect.triageAnswers.completionDate.value, multipleIndirect.triageAnswers.taxYear),
@@ -245,12 +245,12 @@
 
         @multipleIndirect.gainOrLossAfterReliefs.map{ glar =>
             @if(isFurtherOrAmendReturn.contains(true)){
-                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                <h2 class="govuk-heading-m">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
                 @glarSummary(glar, subscribedDetails.isATrust, representativeType, true)
             }
         }
 
-        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(
             multipleIndirect.yearToDateLiabilityAnswers,
             showFiles = false,
@@ -265,8 +265,8 @@
         )
 
         @if(multipleIndirect.hasAttachments) {
-            <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
-            <p>@messages(s"$key.hasAttachments.p1")</p>
+            <h2 class="govuk-heading-m">@messages(s"$key.hasAttachments")</h2>
+            <p class="govuk-body">@messages(s"$key.hasAttachments.p1")</p>
         }
     }
 
@@ -274,20 +274,20 @@
         <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
         @singleDisposalTriageSummary(singleMixedUse.triageAnswers, subscribedDetails.isATrust, representativeType, singleMixedUse.representeeAnswers)
 
-        <h2 class="heading-medium">@messages("task-list.enter-property-details-single-mixed-use.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-property-details-single-mixed-use.link")</h2>
         @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers, representativeType, singleMixedUse.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
 
-        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType,  isFurtherOrAmendReturn, showAnnualExemptAmount)
 
         @singleMixedUse.gainOrLossAfterReliefs.map{ glar =>
             @if(isFurtherOrAmendReturn.contains(true)){
-                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                <h2 class="govuk-heading-m">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
                 @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
             }
         }
 
-        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(
             singleMixedUse.yearToDateLiabilityAnswers,
             showFiles = false,
@@ -302,8 +302,8 @@
         )
 
         @if(singleMixedUse.hasAttachments) {
-            <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
-            <p>@messages(s"$key.hasAttachments.p1")</p>
+            <h2 class="govuk-heading-m">@messages(s"$key.hasAttachments")</h2>
+            <p class="govuk-body">@messages(s"$key.hasAttachments.p1")</p>
         }
     }
 

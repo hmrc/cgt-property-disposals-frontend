@@ -18,10 +18,11 @@
 @import play.api.i18n.Messages
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{Charge, ChargeType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-  chargeItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.charge_item,
-  warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+        chargeItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.charge_item,
+        govukWarningText: GovukWarningText
 )
 
 @(
@@ -41,27 +42,34 @@
 }
 @hasDelta = @{positiveCharges.exists(p => p.chargeType === ChargeType.DeltaCharge)}
 
-  <h2 class="heading-large">@heading</h2>
+  <h2 class="govuk-heading-l">
+    @heading
+  </h2>
 
-  @warning(messages(s"$key$userKey.warning"))
+  @govukWarningText(WarningText(
+    attributes = Map("id" -> "warning"),
+    iconFallbackText = Some(messages("generic.warning")),
+    content = Text(messages(s"$key$userKey.warning"))
+  ))
 
-  <p>
-  @messages(s"$key$userKey.warning.subtext")
+  <p class="govuk-body">
+    @messages(s"$key$userKey.warning.subtext")
   </p>
 
-  <table class="borders payments-table view-return-charges">
-    <thead>
-      <tr style="vertical-align: bottom;">
-        <th scope="col">@messages(s"$key.charges.description")</th>
-        <th scope="col">@messages(s"$key.charges.payBy")</th>
-        <th scope="col">@messages(s"$key.charges.amount")</th>
-        <th scope="col">@messages(s"$key.charges.due")</th>
-        <th scope="col">@messages(s"$key.charges.status")</th>
+  <table class="govuk-table borders payments-table view-return-charges govuk-!-font-size-14">
+    <caption class="govuk-visually-hidden">@heading</caption>
+    <thead class="govuk-table__head">
+      <tr  class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">@messages(s"$key.charges.description")</th>
+        <th scope="col" class="govuk-table__header govuk-table__header--numeric">@messages(s"$key.charges.payBy")</th>
+        <th scope="col" class="govuk-table__header govuk-table__header--numeric">@messages(s"$key.charges.amount")</th>
+        <th scope="col" class="govuk-table__header govuk-table__header--numeric">@messages(s"$key.charges.due")</th>
+        <th scope="col" class="govuk-table__header govuk-table__header--numeric">@messages(s"$key.charges.status")</th>
       </tr>
     </thead>
     <tbody id="returnPaymentDetails-@submissionId">
-    @{
-      positiveCharges.map(c => chargeItem(c, returnType.isAmendReturn, hasDelta))
-    }
+      @positiveCharges.map(c =>
+        chargeItem(c, returnType.isAmendReturn, hasDelta)
+      )
     </tbody>
   </table>

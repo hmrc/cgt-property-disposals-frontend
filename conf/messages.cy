@@ -3771,7 +3771,7 @@ viewReturn.amend.chargeType.TwelveMonthLatePaymentPenalty=Cosb – taliad sydd 1
 viewReturn.chargeType.PenaltyInterest=Llog ar gosbau wedi’i dalu’n hwyr
 viewReturn.amend.chargeType.PenaltyInterest=Llog ar gosbau wedi’i dalu’n hwyr
 viewReturn.charge.status.paid=Talwyd
-viewReturn.charge.status.payNow=<a href="{0}">Talwch nawr</a>
+viewReturn.charge.status.payNow=<a class="govuk-link" href="{0}">Talwch nawr</a>
 viewReturn.charge.paymentMethod.BACS=taliad Bacs wedi dod i law
 viewReturn.charge.paymentMethod.CHAPS=taliad CHAPS wedi dod i law
 viewReturn.charge.paymentMethod.Cheque=siec wedi dod i law
