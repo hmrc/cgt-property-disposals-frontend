@@ -386,7 +386,7 @@ class ViewReturnControllerSpec
 
           document
             .select(
-              "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1"
+              ".govuk-box-highlight--status > h1"
             )
             .text() shouldBe messageFromMessageKey(
             "viewReturn.title"
@@ -398,7 +398,9 @@ class ViewReturnControllerSpec
           val time    = extractDueDate(viewingReturn)
           val userKey = deriveUserKey(isAgent, isATrust)
 
-          document.select("#warning").text() shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
+          document.select("#warning").text() shouldBe "! " + messageFromMessageKey(
+            "generic.warning"
+          ) + " " + messageFromMessageKey(s"viewReturn$userKey.warning", time)
 
           document
             .select("#heading-reference")
@@ -508,7 +510,7 @@ class ViewReturnControllerSpec
 
           document
             .select(
-              "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1"
+              ".govuk-box-highlight--status > h1"
             )
             .text() shouldBe messageFromMessageKey(
             "viewReturn.title"
@@ -516,7 +518,7 @@ class ViewReturnControllerSpec
 
           document
             .select(
-              "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > p"
+              ".govuk-panel__body > p"
             )
             .text() should include(
             messageFromMessageKey(
@@ -530,7 +532,9 @@ class ViewReturnControllerSpec
           val time    = extractDueDate(viewingReturn)
           val userKey = deriveUserKey(isAgent, isATrust)
 
-          document.select("#warning").text() shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
+          document.select("#warning").text() shouldBe "! " + messageFromMessageKey(
+            "generic.warning"
+          ) + " " + messageFromMessageKey(s"viewReturn$userKey.warning", time)
 
           document
             .select("#heading-reference")
@@ -622,7 +626,9 @@ class ViewReturnControllerSpec
             .text() shouldBe subscribedDetails.name
             .fold(_.value, e => e.makeSingleName())
 
-          document.select("#warning").text()                shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
+          document.select("#warning").text()                shouldBe "! " + messageFromMessageKey(
+            "generic.warning"
+          ) + " " + messageFromMessageKey(s"viewReturn$userKey.warning", time)
           document
             .select("#date-sent-table-question")
             .text()                                         shouldBe messageFromMessageKey("viewReturn.sentToHmrc")
@@ -648,7 +654,7 @@ class ViewReturnControllerSpec
 
           document
             .select(
-              "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1"
+              ".govuk-box-highlight--status > h1"
             )
             .text() shouldBe messageFromMessageKey(
             "viewReturn.title"
@@ -759,7 +765,7 @@ class ViewReturnControllerSpec
 
           document
             .select(
-              "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1"
+              ".govuk-box-highlight--status > h1"
             )
             .text() shouldBe messageFromMessageKey(
             "viewReturn.title"

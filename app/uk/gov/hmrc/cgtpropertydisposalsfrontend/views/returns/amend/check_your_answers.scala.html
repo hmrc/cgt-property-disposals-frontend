@@ -16,7 +16,6 @@
 
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.{AmendReturnController, routes}
@@ -25,13 +24,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, RepresentativeType}
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    completeReturnSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.complete_return_summary,
-    cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        completeReturnSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.complete_return_summary,
+        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links_govuk
 )
 
 @(
@@ -42,7 +39,7 @@
     isIndirectDisposal: Boolean,
     isFurtherOrAmendReturn: Option[Boolean],
     backLink: Call
-)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @key = @{ "amendCya" }
 
@@ -66,16 +63,14 @@
     else s"$accountName"
 }
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title, backLinkUrl = Some(backLink.url)) {
 
-    @backLinkComponent(backLink)
+  @caption(accountFullName)
+  <h1 class="govuk-heading-xl">@title</h1>
 
-    @caption(accountFullName)
-    @pageHeading(title)
-
-    <div class="panel panel-border-wide">
-        <p>@messages(s"$key.insetText")</p>
-    </div>
+  <div class="govuk-inset-text">
+      <p class="govuk-body">@messages(s"$key.insetText")</p>
+  </div>
 
     @completeReturnSummary(
         completeReturn,
@@ -87,7 +82,7 @@
         isAmend = true
     )
 
-    <p>@messages(s"$key.p1")</p>
+    <p class="govuk-body">@messages(s"$key.p1")</p>
 
     @printLink(messages(s"$key.printLink"))
 

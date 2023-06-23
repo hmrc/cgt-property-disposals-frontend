@@ -30,7 +30,7 @@
 
     @makePaymentDetailsHtml(paymentItemSubKey : String, paymentItemValue: String, amount:BigDecimal, clearingDate: LocalDate) = {
         <li>
-            <strong class="bold">
+            <strong>
                 @{MoneyUtils.formatAmountOfMoneyWithPoundSign(amount)}
             </strong>
             @{messages(s"viewReturn.charge.$paymentItemSubKey.$paymentItemValue")}
@@ -49,28 +49,28 @@
         }
     }
 
-  <tr class="no-border charge">
-    <td>
-      <strong class="bold">
+  <tr class="govuk-table__row charge">
+    <td class="govuk-table__cell">
+      <strong>
         @messages(s"viewReturn$amendKey.chargeType.${charge.chargeType.toString}")
       </strong>
       <br>
-      <span class="caption">
+      <span class="govuk-caption-s">
         @{charge.chargeReference}
       </span>
     </td>
-    <td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">
       @{TimeUtils.govShortDisplayFormat(charge.dueDate)}
     </td>
-    <td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">
       @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.amount.withFloorZero.inPounds())}
     </td>
-    <td>
-      <strong class="bold">
+    <td class="govuk-table__cell govuk-table__cell--numeric">
+      <strong>
         @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.totalOutstanding().withFloorZero.inPounds())}
       </strong>
     </td>
-    <td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">
       @if(charge.totalOutstanding().withFloorZero.isZero) {
         @messages("viewReturn.charge.status.paid")
       } else {
@@ -80,10 +80,10 @@
   </tr>
 
   @if(charge.payments.nonEmpty) {
-  <tr>
-    <td class="allocations" colspan="5">
-      <div class="panel panel-border-wide payments-list-container">
-        <ul class="payments-list">
+  <tr class="govuk-table__row">
+    <td class="govuk-table__cell govuk-table__cell--numeric allocations" colspan="5">
+      <div class="govuk-inset-text payments-list-container">
+        <ul class="govuk-list payments-list">
           @{charge.payments.map { payment =>
             displayPaymentDetails(payment)
             }}

@@ -16,7 +16,6 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
@@ -26,19 +25,20 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, RepresentativeType, ReturnSummary, ReturnType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
-  addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
-  returnHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_banner,
-  returnCharges: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_charges,
-  cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-  cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-  printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
-  completeReturnSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.complete_return_summary,
-  insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel,
-  warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu_govuk,
+        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display_govuk,
+        returnCharges: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_charges,
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section_govuk,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row_govuk,
+        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+        completeReturnSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.complete_return_summary,
+        govukPanel: GovukPanel,
+        govukWarningText: GovukWarningText
 )
 
 @(
@@ -49,7 +49,7 @@
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
     returnType: ReturnType
-)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @title = @{messages("viewReturn.title")}
 @amountOwed = @{returnSummary.mainReturnChargeAmount}
@@ -66,13 +66,37 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     else messages(s"$key.propertyAddress")
 }
 
-@changeReturnLink(id: String) = @{
-    Html(s"""<p><a href="${routes.ViewReturnController.startAmendingReturn().url}" id="$id">${messages(s"$key.changeReturn")}</a></p>""")
+@changeReturnLink(id: String) = {
+    <p class="govuk-body">
+      <a class="govuk-link" href="@{routes.ViewReturnController.startAmendingReturn().url}" id="@id">@messages(s"$key.changeReturn")</a>
+    </p>
 }
 
-@mainTemplate(title = title, userType = request.userType, accountMenu=Some(accountMenu(None))) {
+@panelContent = {
+  <p class="govuk-body">
+    <span class="tax-owed-label">
+      @messages(s"$key${if(returnType.isAmendReturn) ".amend" else ""}.heading.taxOwed")
+    </span>
+    <span class="govuk-heading-xl" id="heading-tax-owed">
+      @{MoneyUtils.formatAmountOfMoneyWithPoundSign(returnSummary.mainReturnChargeAmount.withFloorZero.inPounds())}
+    </span>
+  </p>
+  <p class="govuk-body">
+    @messages(if(returnSummary.mainReturnChargeAmount.withFloorZero.isPositive) s"$key.heading.payment.reference" else s"$key.heading.reference")
+    <span class="govuk-heading-l" id="heading-reference">
+      @returnSummary.mainReturnChargeReference.getOrElse(returnSummary.submissionId)
+    </span>
+  </p>
+}
 
-  @returnHeading(title, returnSummary, returnType)
+@layout(title, accountMenu=Some(accountMenu(None))) {
+
+  @govukPanel(Panel(
+    title = Text(title),
+    headingLevel = 1,
+    classes = "govuk-box-highlight--status",
+    content = HtmlContent(panelContent)
+  ))
   
   @printLink(messages(s"$key.printLink"))
 
@@ -112,8 +136,13 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     }
 
     @if(returnSummary.isRecentlyAmended) {
-      @warning(messages(s"$key$userKey.warning"))
-      @insetPanel(Html(messages(s"$key$userKey.clearingNotice")))
+      @govukWarningText(WarningText(
+        iconFallbackText = Some(messages("generic.warning")),
+        content = Text(messages(s"$key$userKey.warning"))
+      ))
+      <p class="govuk-inset-text">
+        @messages(s"$key$userKey.clearingNotice")
+      </p>
     } else {
       @if(positiveCharges.nonEmpty) {
         @returnCharges(
@@ -127,7 +156,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
       }
     }
 
-    <h2 class="heading-large">
+    <h2 class="govuk-heading-l">
         @messages(s"$key.summaryHeading")
     </h2>
 

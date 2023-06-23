@@ -422,3 +422,27 @@ body:not(.js-enabled) .js-visible {
     text-align: right;
     width: 33%;
 }
+
+.govuk-panel.govuk-box-highlight--status {
+    background-color: #1d70b8;
+}
+
+.govuk-panel.govuk-box-highlight--status > p {
+    margin: 20px 0 0 0;
+}
+
+.govuk-panel.govuk-box-highlight--status * {
+    color: white;
+}
+
+.govuk-panel.govuk-box-highlight--status > p > span {
+    margin: 0;
+}
+
+.govuk-panel.govuk-box-highlight--status > p > span.heading-large.tax-owed-label {
+    font-weight: normal;
+}
+
+.return-summary .govuk-summary-list__actions {
+    display: none !important;
+}
