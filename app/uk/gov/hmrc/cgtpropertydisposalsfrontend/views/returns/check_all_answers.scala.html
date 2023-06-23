@@ -16,7 +16,6 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
@@ -30,35 +29,34 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, DisposalDate}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    singleDisposalTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary,
-    multipleDisposalsTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary,
-    addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary,
-    examplePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary,
-    exampleCompanyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_indirect_disposals_summary,
-    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-    calculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary,
-    nonCalculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary,
-    acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
-    disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
-    reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
-    lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
-    initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary,
-    supportingEvidenceSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.supportingevidence.summary,
-    representeeSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
-    singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
-    singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
-    gainOrLossAfterReliefsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary,
-    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
-    accountName: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.partials.account_name,
-    insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        formWrapper: FormWithCSRF,
+        singleDisposalTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary_govuk,
+        multipleDisposalsTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary_govuk,
+        addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary_govuk,
+        examplePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary_govuk,
+        exampleCompanyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_indirect_disposals_summary_govuk,
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section_govuk,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row_govuk,
+        calculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary_govuk,
+        nonCalculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary_govuk,
+        acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary_govuk,
+        disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary_govuk,
+        reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary_govuk,
+        lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary_govuk,
+        initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary_govuk,
+        supportingEvidenceSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.supportingevidence.summary_govuk,
+        representeeSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
+        singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary_govuk,
+        singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary_govuk,
+        gainOrLossAfterReliefsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary_govuk,
+        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+        accountName: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.partials.account_name,
+        govukButton: GovukButton
 )
 
 @(
@@ -68,7 +66,7 @@
     showSubmissionDetails: Boolean,
     hideEstimatesQuestion: Boolean,
     furtherOrAmendReturnCalculationEligibility: Option[FurtherReturnCalculationEligibility]
-)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @subscribedDetails = @{ fillingOutReturn.subscribedDetails }
 @representativeType = @{ completeReturn.representativeType() }
@@ -85,7 +83,7 @@
         case (Some(answers), Some(repType)) =>
           Html(
             s"""
-                 |<h2 class="heading-medium">${messages("task-list.representee.link")}</h2>
+                 |<h2 class="govuk-heading-m">${messages("task-list.representee.link")}</h2>
                  |${representeeSummary(answers, repType)}
                  |""".stripMargin
           )
@@ -97,19 +95,19 @@
 @representeeId = @{completeReturn.fold(_.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id))}
 @submissionDetailsKey=@{"checkAllAnswers.submissionDetails"}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title, backLinkUrl = Some(routes.TaskListController.taskList.url)) {
 
- @backLinkComponent(routes.TaskListController.taskList())
-
- @accountName(fillingOutReturn)
- @pageHeading(title)
+  @accountName(fillingOutReturn)
+  <h1 class="govuk-heading-xl">@title</h1>
 
   @if(fillingOutReturn.isAmendReturn && !showSubmissionDetails){
-    @insetPanel(Html(messages("checkAllAnswers.amend.warning")))
+    <p class="govuk-inset-text">
+      @messages("checkAllAnswers.amend.warning")
+    </p>
   }
 
   @if(showSubmissionDetails) {
-      <h2 class="heading-medium">@messages(s"$submissionDetailsKey.title") </h2>
+      <h2 class="govuk-heading-m">@messages(s"$submissionDetailsKey.title") </h2>
       @cyaSection() {
           @if(!isAnAgent) {
               @cyaRow(
@@ -145,20 +143,20 @@
       }
   }
 
-    @completeReturn match {
+  @completeReturn match {
     case s: CompleteSingleDisposalReturn => {
      @representeeSection(s.representeeAnswers)
 
-     <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
+     <h2 class="govuk-heading-m">@messages("task-list.triage.link")</h2>
      @singleDisposalTriageSummary(s.triageAnswers, isATrust, representativeType, s.representeeAnswers)
 
-     <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
+     <h2 class="govuk-heading-m">@messages("task-list.enter-property-address.link")</h2>
      @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())
 
-     <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
+     <h2 class="govuk-heading-m">@messages("task-list.disposals-details.link")</h2>
      @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod, isATrust, representativeType, isIndirectDisposal)
 
-<h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
+     <h2 class="govuk-heading-m">@messages("task-list.acquisition-details.link")</h2>
      @acquisitionDetailsSummary(s.acquisitionDetails,
         rebasingEligibilityUtil.getRebasingCutOffDate(s),
         rebasingEligibilityUtil.isUk(s),
@@ -168,29 +166,29 @@
         s.triageAnswers.assetType
       )
 
-     <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
+     <h2 class="govuk-heading-m">@messages("task-list.relief-details.link")</h2>
      @reliefDetailsSummary(s.reliefDetails, isATrust, representativeType)
 
      @s.initialGainOrLoss.map{ initialGainOrLoss =>
-      <h2 class="heading-medium">@messages("task-list.enter-initial-gain-or-loss.link")</h2>
+      <h2 class="govuk-heading-m">@messages("task-list.enter-initial-gain-or-loss.link")</h2>
      @initialGainOrLossSummary(initialGainOrLoss, isATrust, representativeType)
      }
 
      @s.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>
-            <h2 class="heading-medium">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
         @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = false)
      }
 
-     <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+     <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>
      @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, isATrust, representativeType, Some(isFurtherOrAmendReturn), showAnnualExemptAmount)
 
-     <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+     <h2 class="govuk-heading-m">@messages("task-list.enter-cgt-liability.link")</h2>
      @s.yearToDateLiabilityAnswers.fold(
       nonCalculatedYearToDateLiabilitySummary(_, showFiles = true, isMultiple = false, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, s.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion, s.triageAnswers.countryOfResidence.isUk()),
       calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate.taxYear, showFiles = true, isATrust, representativeType, s.triageAnswers.countryOfResidence.isUk(), hideEstimatesQuestion)
      )
 
-     <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
+     <h2 class="govuk-heading-m">@messages("task-list.upload-supporting-docs.link")</h2>
      @supportingEvidenceSummary(s.supportingDocumentAnswers)
 
     }
@@ -198,40 +196,40 @@
     case m: CompleteMultipleDisposalsReturn => {
         @representeeSection(m.representeeAnswers)
 
-       <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
+       <h2 class="govuk-heading-m">@messages("task-list.triage.link")</h2>
        @multipleDisposalsTriageSummary(m.triageAnswers, isATrust, m.representeeAnswers)
 
-       <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
+       <h2 class="govuk-heading-m">@messages("task-list.enter-property-address.link")</h2>
        @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), isATrust, representativeType, m.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
 
-       <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+       <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>
        @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, isATrust, representativeType,  Some(isFurtherOrAmendReturn), showAnnualExemptAmount)
 
         @m.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>
-            <h2 class="heading-medium">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
+            <h2 class="govuk-heading-m">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
         @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = true)
         }
 
-       <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+       <h2 class="govuk-heading-m">@messages("task-list.enter-cgt-liability.link")</h2>
        @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, m.triageAnswers.taxYear, hideEstimatesQuestion, m.triageAnswers.countryOfResidence.isUk())
 
-       <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
+       <h2 class="govuk-heading-m">@messages("task-list.upload-supporting-docs.link")</h2>
         @supportingEvidenceSummary(m.supportingDocumentAnswers)
       }
 
     case s: CompleteSingleIndirectDisposalReturn => {
         @representeeSection(s.representeeAnswers)
 
-        <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.triage.link")</h2>
         @singleDisposalTriageSummary(s.triageAnswers, isATrust, representativeType, s.representeeAnswers)
 
-        <h2 class="heading-medium">@messages("task-list.enter-company-details.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-company-details.link")</h2>
         @singleIndirectDisposalAddressSummary(s.companyAddress)
 
-        <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.disposals-details.link")</h2>
         @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod, isATrust, representativeType, isIndirectDisposal)
 
-        <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.acquisition-details.link")</h2>
         @acquisitionDetailsSummary(s.acquisitionDetails,
             rebasingEligibilityUtil.getRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
             isUk = false,
@@ -242,17 +240,17 @@
         )
 
         @s.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>
-            <h2 class="heading-medium">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
+            <h2 class="govuk-heading-m">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
         @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = false)
         }
 
-        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, isATrust, representativeType,  Some(isFurtherOrAmendReturn), showAnnualExemptAmount)
 
-        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = true, isMultiple = false, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, s.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion, s.triageAnswers.countryOfResidence.isUk())
 
-        <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.upload-supporting-docs.link")</h2>
         @supportingEvidenceSummary(s.supportingDocumentAnswers)
 
     }
@@ -260,18 +258,18 @@
     case multipleIndirect: CompleteMultipleIndirectDisposalReturn => {
       @representeeSection(multipleIndirect.representeeAnswers)
 
-        <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.triage.link")</h2>
         @multipleDisposalsTriageSummary(multipleIndirect.triageAnswers, isATrust, multipleIndirect.representeeAnswers)
 
-        <h2 class="heading-medium">Example company details</h2>
+        <h2 class="govuk-heading-m">Example company details</h2>
         @exampleCompanyDetailsSummary(multipleIndirect.exampleCompanyDetailsAnswers)
 
         @multipleIndirect.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>
-            <h2 class="heading-medium">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
-        @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = true)
+          <h2 class="govuk-heading-m">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
+          @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = true)
         }
 
-        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(
             multipleIndirect.exemptionsAndLossesDetails,
             DisposalDate(multipleIndirect.triageAnswers.completionDate.value, multipleIndirect.triageAnswers.taxYear),
@@ -281,61 +279,55 @@
             showAnnualExemptAmount
         )
 
-        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(multipleIndirect.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, multipleIndirect.triageAnswers.taxYear, hideEstimatesQuestion, multipleIndirect.triageAnswers.countryOfResidence.isUk())
 
-        <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.upload-supporting-docs.link")</h2>
         @supportingEvidenceSummary(multipleIndirect.supportingDocumentAnswers)
     }
 
     case singleMixedUse: CompleteSingleMixedUseDisposalReturn=> {
         @representeeSection(singleMixedUse.representeeAnswers)
 
-        <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.triage.link")</h2>
         @singleDisposalTriageSummary(singleMixedUse.triageAnswers, isATrust, representativeType, singleMixedUse.representeeAnswers)
 
-        <h2 class="heading-medium">@messages("task-list.enter-property-details-single-mixed-use.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-property-details-single-mixed-use.link")</h2>
         @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers, representativeType, singleMixedUse.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
 
         @singleMixedUse.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>
-            <h2 class="heading-medium">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
+            <h2 class="govuk-heading-m">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
         @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = false)
         }
 
-        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, isATrust, representativeType, Some(isFurtherOrAmendReturn), showAnnualExemptAmount)
 
-        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(singleMixedUse.yearToDateLiabilityAnswers, showFiles = true, isMultiple = false, isATrust, representativeType, Some(isFurtherOrAmendReturn), fillingOutReturn.isAmendReturn, singleMixedUse.triageAnswers.disposalDate.taxYear, hideEstimatesQuestion, singleMixedUse.triageAnswers.countryOfResidence.isUk())
 
-        <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
+        <h2 class="govuk-heading-m">@messages("task-list.upload-supporting-docs.link")</h2>
         @supportingEvidenceSummary(singleMixedUse.supportingDocumentAnswers)
     }
 
   }
 
-    @formWrapper(routes.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit(), 'novalidate -> "novalidate") {
-        <h2 class="heading-medium">@messages("checkAllAnswers.declaration")</h2>
-        <p>@messages("checkAllAnswers.declaration.p1")</p>
-        <p>@messages("checkAllAnswers.declaration.p2")</p>
-            @submitButton(messages("button.acceptAndSend"),
-                if(!fillingOutReturn.isAmendReturn) None
-                else
-                    Some(
-                        Html(
-                            s"""<a
-                               | class="button--secondary"
-                               |   role="button"
-                               |   id="cancelButton"
-                               |   href="${controllers.returns.amend.routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.checkAnswersAcceptSend).url}"
-                               |>
-                               |${messages("button.cancel")}
-                               |</a>
-                               |""".stripMargin
-                        )
-                    )
-            )
- }
+    @formWrapper(routes.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit()) {
+        <h2 class="govuk-heading-m">@messages("checkAllAnswers.declaration")</h2>
+        <p class="govuk-body">@messages("checkAllAnswers.declaration.p1")</p>
+        <p class="govuk-body">@messages("checkAllAnswers.declaration.p2")</p>
+        <div class="govuk-form-group">
+          @submitButton(messages("button.acceptAndSend"))
+          @if(fillingOutReturn.isAmendReturn) {
+            @govukButton(Button(
+              attributes = Map("id" -> "cancelButton"),
+              href = Some(controllers.returns.amend.routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.checkAnswersAcceptSend).url),
+              content = Text(messages("button.cancel")),
+              classes = "govuk-button--secondary"
+            ))
+          }
+        </div>
+  }
 
  @printLink(messages("viewReturn.printLink"))
 

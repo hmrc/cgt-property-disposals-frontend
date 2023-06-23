@@ -26,7 +26,6 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, MessagesRequest, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedRequest, RequestWithSessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
@@ -1392,7 +1391,6 @@ class CheckAllAnswersAndSubmitControllerSpec
               new MessagesRequest(FakeRequest(), messagesApi)
             )
           )
-        implicit val config: ViewConfig                                = viewConfig
         implicit val messages: MessagesImpl                            = MessagesImpl(Lang.apply("en"), messagesApi)
 
         val cyaPageHtml =
@@ -1428,9 +1426,9 @@ class CheckAllAnswersAndSubmitControllerSpec
               new MessagesRequest(FakeRequest(), messagesApi)
             )
           )
-        implicit val config: ViewConfig                                = viewConfig
-        implicit val messages: Messages                                = MessagesImpl(Lang.apply("en"), messagesApi)
-        val mockedCompleteReturn                                       = CompleteSingleDisposalReturn
+
+        implicit val messages: Messages = MessagesImpl(Lang.apply("en"), messagesApi)
+        val mockedCompleteReturn        = CompleteSingleDisposalReturn
           .fromDraftReturn(
             completeDraftReturnRepresenteWithNoReference
               .copy(representeeAnswers =
