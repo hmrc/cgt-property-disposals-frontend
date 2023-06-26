@@ -3641,17 +3641,17 @@ confirmationOfSubmission.dateDue=Dyddiad cau ar gyfer talu treth
 confirmationOfSubmission.amount=Swm
 confirmationOfSubmission.chargeLabel=Taliad treth
 confirmationOfSubmission.deltaChargeLabel=Rhwymedigaeth treth ddiweddaredig
-confirmationOfSubmission.emailSent=Rydym wedi anfon e-bost cadarnhau i <strong class="bold">{0}</strong>.
+confirmationOfSubmission.emailSent=Rydym wedi anfon e-bost cadarnhau i <strong>{0}</strong>.
 confirmationOfSubmission.sentToHmrc=Ffurflen Dreth wedi’i hanfon i CThEF
 confirmationOfSubmission.taxDue=Dyddiad cau ar gyfer talu treth
-confirmationOfSubmission.printPage=<a href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
-confirmationOfSubmission.agent.printPage=<a href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
-confirmationOfSubmission.trust.printPage=<a href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
-confirmationOfSubmission.capacitor.printPage=Dylech <a href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer y person. Gall y person fwrw golwg dros y Ffurflen Dreth o’i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.capacitor.noId.printPage=Dylech <a href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer y person. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.personalRep.printPage=Dylech <a href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=Dylech <a href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=Dylech <a href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yng nghyfrif Treth Enillion Cyfalaf ar eiddo yn y DU eich cleient.
+confirmationOfSubmission.printPage=<a class="govuk-link" href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
+confirmationOfSubmission.agent.printPage=<a class="govuk-link" href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
+confirmationOfSubmission.trust.printPage=<a class="govuk-link" href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
+confirmationOfSubmission.capacitor.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer y person. Gall y person fwrw golwg dros y Ffurflen Dreth o’i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.capacitor.noId.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer y person. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.personalRep.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yng nghyfrif Treth Enillion Cyfalaf ar eiddo yn y DU eich cleient.
 
 confirmationOfSubmission.whatNext=Yr hyn y mae angen i chi ei wneud nesaf
 confirmationOfSubmission.agent.whatNext=Yr hyn sy’n digwydd nesaf
@@ -3666,7 +3666,7 @@ confirmationOfSubmission.trust.warning=Efallai y codir llog ar yr ymddiriedolaet
 confirmationOfSubmission.capacitor.warning=Efallai y codir llog ar y person am daliadau hwyr.
 confirmationOfSubmission.Admin.warning=Peidiwch â thalu tan i ni gysylltu â chi.
 confirmationOfSubmission.howToPay.heading=Sut i dalu
-confirmationOfSubmission.agent.howToPay.heading.p1=Dysgwch sut y gall eich cleient <a href="{0}"><strong class="bold">dalu ei fil treth</strong></a>.
+confirmationOfSubmission.agent.howToPay.heading.p1=Dysgwch sut y gall eich cleient <a class="govuk-link" href="{0}"><strong>dalu ei fil treth</strong></a>.
 
 confirmationOfSubmission.penalty.warning=Efallai y cewch gosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
 confirmationOfSubmission.agent.penalty.warning=Efallai y bydd eich cleient yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na roddwyd gwybod am y dreth cyn pen 30 diwrnod i ddyddiad cwblhau’r eiddo.
@@ -3678,11 +3678,11 @@ confirmationOfSubmission.agent.60days.penalty.warning=Efallai y bydd eich cleien
 confirmationOfSubmission.trust.60days.penalty.warning=Efallai y bydd yr ymddiriedolaeth yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na wnaethoch roi gwybod am y dreth cyn pen 60 diwrnod i ddyddiad cwblhau’r eiddo.
 confirmationOfSubmission.capacitor.60days.penalty.warning=Efallai y bydd y person yn cael cosb am gyflwyno’n hwyr. Mae hyn oherwydd na roddwyd gwybod am y dreth cyn pen 60 diwrnod i ddyddiad cwblhau’r eiddo.
 
-confirmationOfSubmission.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.agent.howToPay.p1=Bydd angen iddo ddarparu ei gyfeirnod talu <strong class="bold">{0}</strong>.
-confirmationOfSubmission.trust.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.capacitor.howToPay.p1=Gall y person dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen ei gyfeirnod talu arno: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.personalRep.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong>{0}</strong>.
+confirmationOfSubmission.agent.howToPay.p1=Bydd angen iddo ddarparu ei gyfeirnod talu <strong>{0}</strong>.
+confirmationOfSubmission.trust.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong>{0}</strong>.
+confirmationOfSubmission.capacitor.howToPay.p1=Gall y person dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen ei gyfeirnod talu arno: <strong>{0}</strong>.
+confirmationOfSubmission.personalRep.howToPay.p1=Gallwch dalu ar-lein neu drwy drosglwyddiad banc. Bydd angen eich cyfeirnod talu arnoch: <strong>{0}</strong>.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=Arhoswch i ni gysylltu â chi gyda manylion ynghylch pryd a sut i dalu’r dreth.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=Arhoswch i ni gysylltu â chi gyda manylion ynghylch pryd a sut i dalu’r dreth.
 
@@ -3697,8 +3697,8 @@ confirmationOfSubmission.trust.paymentNotice=Mae’n cymryd 3 i 5 diwrnod i dali
 confirmationOfSubmission.gotoViewReturn=Ewch i ‘bwrw golwg dros eich Ffurflen Dreth’ yn eich cyfrif i fwrw golwg dros unrhyw daliadau neu gostau sy’n ddyledus.
 confirmationOfSubmission.trust.gotoViewReturn=Ewch i ‘bwrw golwg dros eich Ffurflen Dreth’ yng nghyfrif yr ymddiriedolaeth i fwrw golwg dros unrhyw daliadau neu gostau sy’n ddyledus.
 confirmationOfSubmission.agent.gotoViewReturn=Ewch i ‘bwrw golwg dros eich Ffurflen Dreth’ yng nghyfrif eich cleient i fwrw golwg dros unrhyw daliadau neu gostau sy’n ddyledus.
-confirmationOfSubmission.agent.inset.heading=<strong class="bold">Hunanasesiad</strong>
-confirmationOfSubmission.trust.inset.heading=<strong class="bold">Os oes angen i’r ymddiriedolaeth anfon Ffurflen Dreth Hunanasesiad</strong>
+confirmationOfSubmission.agent.inset.heading=<strong>Hunanasesiad</strong>
+confirmationOfSubmission.trust.inset.heading=<strong>Os oes angen i’r ymddiriedolaeth anfon Ffurflen Dreth Hunanasesiad</strong>
 confirmationOfSubmission.agent.inset.p1=Os oes angen i’ch cleient anfon Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.
 confirmationOfSubmission.trust.inset.p1=Os oes angen i’r ymddiriedolaeth anfon Ffurflen Dreth Hunanasesiad
 confirmationOfSubmission.ifSa=Os oes angen i chi gyflwyno Ffurflen Dreth Hunanasesiad
@@ -3710,7 +3710,7 @@ confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=Os oes angen i’
 confirmationOfSubmission.trust.ifSa=Os oes angen i’r ymddiriedolaeth anfon Ffurflen Dreth Hunanasesiad
 confirmationOfSubmission.capacitor.ifSa=Hunanasesiad
 confirmationOfSubmission.personalRep.ifSa=Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer y person
-confirmationOfSubmission.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn eich <a href="{0}" target="_blank">Ffurflen Dreth Hunanasesiad nesaf (yn agor tab newydd)</a>.
+confirmationOfSubmission.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn eich <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Ffurflen Dreth Hunanasesiad nesaf (yn agor tab newydd)</a>.
 confirmationOfSubmission.agent.ifSa.p1=Os oes angen i’ch cleient anfon Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.
 confirmationOfSubmission.trust.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn Ffurflen Dreth Hunanasesiad nesaf yr ymddiriedolaeth.
 confirmationOfSubmission.capacitor.ifSa.p1=Os oes angen i’r person gyflwyno Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.
@@ -3720,8 +3720,8 @@ confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa.p1=Bydd angen i�
 confirmationOfSubmission.clearingNotice=Pan fyddwch yn diweddaru Ffurflen Dreth, bydd yn cymryd 24 awr i’ch balans sy’n weddill gael ei ddiweddaru yn eich cyfrif. Gallwch wneud taliad unrhyw bryd.
 confirmationOfSubmission.agent.clearingNotice=Pan fyddwch yn diweddaru Ffurflen Dreth, bydd yn cymryd 24 awr i’ch balans sy’n weddill gael ei ddiweddaru yng nghyfrif eich cleient. Gall eich cleient wneud taliad unrhyw bryd.
 confirmationOfSubmission.trust.clearingNotice=Pan fyddwch yn diweddaru Ffurflen Dreth, bydd yn cymryd 24 awr i’ch balans sy’n weddill gael ei ddiweddaru yng nghyfrif yr ymddiriedolaeth. Gallwch wneud taliad unrhyw bryd.
-confirmationOfSubmission.returnToAccountHome=Ewch i <a href="{0}">hafan eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU</a>.
-confirmationOfSubmission.trust.returnToAccountHome=Ewch i <a href="{0}">hafan cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU yr ymddiriedolaeth</a>.
+confirmationOfSubmission.returnToAccountHome=Ewch i <a class="govuk-link" href="{0}">hafan eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU</a>.
+confirmationOfSubmission.trust.returnToAccountHome=Ewch i <a class="govuk-link" href="{0}">hafan cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU yr ymddiriedolaeth</a>.
 
 
 

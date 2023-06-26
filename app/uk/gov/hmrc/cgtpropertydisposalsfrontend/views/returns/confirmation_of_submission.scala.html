@@ -28,28 +28,29 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.NoReferenceId
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @import java.time.LocalDate
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey,
-    addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
-    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-    buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
-    link: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.link
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        formWrapper: FormWithCSRF,
+        exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey,
+        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display_govuk,
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section_govuk,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row_govuk,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details_govuk,
+        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning_govuk,
+        govukPanel : GovukPanel,
+        govukButton: GovukButton,
+        govukTable: GovukTable
 )
 
 @(justSubmittedReturn: JustSubmittedReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key=@{"confirmationOfSubmission"}
 @title = @{ messages(s"$key.title") }
-
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @isATrust = @{ justSubmittedReturn.subscribedDetails.isATrust }
 @isAmend = @{ justSubmittedReturn.amendReturnData.isDefined }
@@ -60,341 +61,294 @@
     case CompleteSingleIndirectDisposalReturn(triageAnswers, _, _, _, _, _, _, _,_, _) =>triageAnswers.completionDate
     case CompleteMultipleIndirectDisposalReturn(triageAnswers, _, _, _, _, _, _, _) =>triageAnswers.completionDate
     case CompleteSingleMixedUseDisposalReturn(triageAnswers, _, _, _, _, _, _, _) =>triageAnswers.completionDate
-    }
-}
-
-@representativeType = @{ justSubmittedReturn.completeReturn.representativeType() }
-
-@representeeAnswers = @{
-    justSubmittedReturn.completeReturn.fold(
-        _.representeeAnswers,
-        _.representeeAnswers,
-        _.representeeAnswers,
-        _.representeeAnswers,
-        _.representeeAnswers
-    )
-}
-
-@userKey = @{
-    representativeType match {
-      case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) if(!isAgent) => ".personalRepInPeriodOfAdmin"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) if(isAgent) => ".personalRepInPeriodOfAdmin.agent"
-      case Some(Capacitor) => ".capacitor"
-      case None =>
-          if (isAgent) ".agent"
-          else if (isATrust) ".trust"
-          else ""
   }
 }
-
+@representativeType = @{ justSubmittedReturn.completeReturn.representativeType() }
+@representeeAnswers = @{
+  justSubmittedReturn.completeReturn.fold(
+    _.representeeAnswers,
+    _.representeeAnswers,
+    _.representeeAnswers,
+    _.representeeAnswers,
+    _.representeeAnswers
+  )
+}
+@userKey = @{
+  representativeType match {
+    case Some(PersonalRepresentative) => ".personalRep"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) if(!isAgent) => ".personalRepInPeriodOfAdmin"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) if(isAgent) => ".personalRepInPeriodOfAdmin.agent"
+    case Some(Capacitor) => ".capacitor"
+    case None =>
+      if (isAgent) ".agent"
+      else if (isATrust) ".trust"
+      else ""
+  }
+}
 @isPeriodOfAdmin = @{representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)}
-
-@name = @{
-    justSubmittedReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName())
-}
-
+@name = @{justSubmittedReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName())}
 @representeeName = @{
-    representeeAnswers.map(_.name.makeSingleName())
+  representeeAnswers.map(_.name.makeSingleName())
 }
-
 @nameLabel = @{
-    representativeType match {
-      case Some(_) => ".person"
-      case None => if(isATrust) ".trust" else userKey
-    }
+  representativeType match {
+    case Some(_) => ".person"
+    case None => if(isATrust) ".trust" else userKey
+  }
 }
-
 @amountOwed = @{justSubmittedReturn.submissionResponse.charge.map(_.amount.inPounds()).getOrElse(BigDecimal(0))}
-
 @chargeReference = @{justSubmittedReturn.submissionResponse.charge.map { charge => charge.chargeReference }}
-
 @payNowButton = {
   @formWrapper(routes.CheckAllAnswersAndSubmitController.payReturn()) {
-      @submitButton(messages("button.payNow"))
+    @submitButton(messages("button.payNow"))
   }
 }
-
 @propertyAddressLabel = @{
-    if(justSubmittedReturn.completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
-    else messages(s"$key.propertyAddress")
+  if(justSubmittedReturn.completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
+  else messages(s"$key.propertyAddress")
 }
-
 @printLinkMessageKey = @{(representativeType, representeeAnswers.map(_.id)) match {
   case (Some(Capacitor), Some(NoReferenceId)) => s"$key$userKey.noId.printPage"
   case _ => s"$key$userKey.printPage"
-  }}
-
+}}
 @amendedReturnWithSameCompletionDate = @{ justSubmittedReturn.amendReturnData.exists(_.originalReturn.completeReturn.completionDate === justSubmittedReturn.completeReturn.completionDate) }
 @showDueDate = @{!amountOwed.equals(BigDecimal(0)) && !isPeriodOfAdmin}
 @taxOwedLabel = @{if(isAmend) "revisedLiability" else "taxOwed"}
-
 @is60DaysWarning = @{
-    val dueDateChecker = LocalDate.of(viewConfig.draftReturnNewDueDateStartYear,
-                                        viewConfig.draftReturnNewDueDateStartMonth,
-                                        viewConfig.draftReturnNewDueDateStartDay-1)
-    if(completionDate.value.isAfter(dueDateChecker)){
-        true
-    } else {
-        false
-    }
+  completionDate.value.isAfter(LocalDate.of(
+    viewConfig.draftReturnNewDueDateStartYear,
+    viewConfig.draftReturnNewDueDateStartMonth,
+    viewConfig.draftReturnNewDueDateStartDay-1
+  ))
 }
-
 @isLateReturn = @{
-    if(is60DaysWarning){
-        completionDate.value.plusDays(60L).isBefore(TimeUtils.today)
-    } else {
-        completionDate.value.plusDays(30L).isBefore(TimeUtils.today)
-    }
+  if(is60DaysWarning)
+    completionDate.value.plusDays(60L).isBefore(TimeUtils.today)
+  else
+    completionDate.value.plusDays(30L).isBefore(TimeUtils.today)
+}
+@panelContent = {
+  @if(!isPeriodOfAdmin) {
+    <span class="tax-owed-label">
+      @messages(s"$key.$taxOwedLabel")
+      <br>
+    </span>
+    <span id="tax-owed-amount" class="govuk-!-font-size-48 govuk-!-font-weight-bold">
+      @{formatAmountOfMoneyWithPoundSign(amountOwed)}
+    </span>
+    <br>
+  }
+  <span class="govuk-body" id="ref-id">
+    @{if(amountOwed.equals(BigDecimal(0)) || isPeriodOfAdmin) messages(s"$key.returnReference") else messages(s"$key.paymentReference")}
+    <br>
+    <span class="govuk-!-font-size-36 govuk-!-font-weight-bold">
+      @{if(amountOwed.equals(BigDecimal(0)) || isPeriodOfAdmin) justSubmittedReturn.submissionResponse.formBundleId else chargeReference}
+    </span>
+  </span>
+}
+@chargeItem(chargeName: String, ref: String) = {
+  @chargeName<br>
+  <span class="govuk-!-font-size-14 govuk-!-font-weight-regular">@ref</span>
+}
+@linkParagraph(href: String, linkText: String, paragraphClasses: String) = {
+  <p class=@{s"govuk-body ${paragraphClasses}"}>
+    <a class="govuk-link" href="@href">@linkText</a>
+  </p>
+}
+@htmlParagraph(htmlString: String, domId: Option[String] = None) = {
+  <p class="govuk-body"@domId.map(a => s" id=$a")>
+    @Html(htmlString)
+  </p>
 }
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
 
-    <div class="govuk-box-highlight">
+  @govukPanel(Panel(
+    title = Text(title),
+    content = HtmlContent(panelContent)
+  ))
 
-      <h1 class="heading-xlarge">@title</h1>
+  @htmlParagraph(messages(s"$key.emailSent", justSubmittedReturn.subscribedDetails.emailAddress.value))
 
-      @if(!isPeriodOfAdmin) {
-        <p>
-          <span class="tax-owed-label">
-            @messages(s"$key.$taxOwedLabel")
-          </span>
-          <span class="heading-xlarge">
-          @{formatAmountOfMoneyWithPoundSign(amountOwed)}
-          </span>
-        </p>
-      }
+  <p class="govuk-body" id="printPage" class="js-visible">
+    @Html(messages(printLinkMessageKey, "JavaScript: window.print();"))
+  </p>
 
-      <p id="ref-id">
-        @{if(amountOwed.equals(BigDecimal(0)) || isPeriodOfAdmin) messages(s"$key.returnReference") else messages(s"$key.paymentReference")}
-        <span class="heading-large">
-          @{if(amountOwed.equals(BigDecimal(0)) || isPeriodOfAdmin) justSubmittedReturn.submissionResponse.formBundleId else chargeReference}
-        </span>
-      </p>
-
-    </div>
-
-    <p>
-     @Html(messages(s"$key.emailSent", justSubmittedReturn.subscribedDetails.emailAddress.value))
-    </p>
-
-    <p id="printPage" class="js-visible">
-      @Html(messages(printLinkMessageKey, "JavaScript: window.print();"))
-    </p>
-
-    @cyaSection() {
-        @cyaRow(
-          messages(s"$key$nameLabel.nameLabel"),
-          Html(representeeName.getOrElse(name)),
-          None,
-          "account-name-table"
-        )
-        @cyaRow(
-            messages(s"$key.sentToHmrc"),
-            Html(TimeUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.processingDate.toLocalDate)),
-            None,
-            "sent-date-table"
-        )
-        @if(!amountOwed.equals(BigDecimal(0))) {
-            @cyaRow(
-                messages(s"$key.returnReference"),
-                Html(justSubmittedReturn.submissionResponse.formBundleId),
-                None,
-                "return-reference-table"
-            )
-        }
-        @cyaRow(
-            propertyAddressLabel,
-            justSubmittedReturn.completeReturn match {
-                case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
-                case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
-                case c: CompleteSingleIndirectDisposalReturn => addressDisplay(c.companyAddress, Line)
-                case c: CompleteMultipleIndirectDisposalReturn => addressDisplay(c.exampleCompanyDetailsAnswers.address, Line)
-                case c: CompleteSingleMixedUseDisposalReturn => addressDisplay(c.propertyDetailsAnswers.address, Line)
-            },
-            None,
-            "property-address-table"
-        )
-        @{if(showDueDate && deltaCharge.isEmpty) {
-            justSubmittedReturn.submissionResponse.charge.map { charge =>
-                cyaRow(
-                    messages(s"$key.taxDue"),
-                    Html(TimeUtils.govDisplayFormat(charge.dueDate)),
-                    None,
-                    "tax-due-date-table"
-                )
-            }}
-        }
+  @cyaSection() {
+    @cyaRow(
+      messages(s"$key$nameLabel.nameLabel"),
+      Html(representeeName.getOrElse(name)),
+      None,
+      "account-name-table"
+    )
+    @cyaRow(
+      messages(s"$key.sentToHmrc"),
+      Html(TimeUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.processingDate.toLocalDate)),
+      None,
+      "sent-date-table"
+    )
+    @if(!amountOwed.equals(BigDecimal(0))) {
+      @cyaRow(
+        messages(s"$key.returnReference"),
+        Html(justSubmittedReturn.submissionResponse.formBundleId),
+        None,
+        "return-reference-table"
+      )
     }
+    @cyaRow(
+      propertyAddressLabel,
+      justSubmittedReturn.completeReturn match {
+        case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
+        case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
+        case c: CompleteSingleIndirectDisposalReturn => addressDisplay(c.companyAddress, Line)
+        case c: CompleteMultipleIndirectDisposalReturn => addressDisplay(c.exampleCompanyDetailsAnswers.address, Line)
+        case c: CompleteSingleMixedUseDisposalReturn => addressDisplay(c.propertyDetailsAnswers.address, Line)
+      },
+      None,
+      "property-address-table"
+    )
+    @{if(showDueDate && deltaCharge.isEmpty) {
+      justSubmittedReturn.submissionResponse.charge.map { charge =>
+        cyaRow(
+          messages(s"$key.taxDue"),
+          Html(TimeUtils.govDisplayFormat(charge.dueDate)),
+          None,
+          "tax-due-date-table"
+        )
+      }}
+    }
+  }
 
   @if(showDueDate) {
     @deltaCharge.map { charges =>
-      <table class="borders delta-table">
-        <thead>
-          <tr style="vertical-align:bottom;">
-            <th scope="col" width="50%"></th>
-            <th scope="col">@messages("confirmationOfSubmission.dateDue")</th>
-            <th scope="col">@messages("confirmationOfSubmission.amount")</th>
-          </tr>
-        </thead>
-        <tbody id="delta-due-dates">
-          <tr>
-            <td width="50%">
-              <strong class="bold">
-                @messages(s"$key.chargeLabel")
-              </strong>
-              <br>
-              <span class="caption">
-                @charges.originalCharge.chargeReference
-              </span>
-            </td>
-            <td id="original-charge-due-date">
-              @Html(TimeUtils.govDisplayFormat(charges.originalCharge.dueDate))
-            </td>
-            <td>
-              @{formatAmountOfMoneyWithPoundSign(charges.originalCharge.amount.inPounds())}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <strong class="bold">
-              @messages(s"$key.deltaChargeLabel")
-              </strong>
-              <br>
-              <span class="caption">
-              @charges.deltaCharge.chargeReference
-              </span>
-            </td>
-            <td id="delta-charge-due-date">
-            @Html(TimeUtils.govDisplayFormat(charges.deltaCharge.dueDate))
-            </td>
-            <td>
-            @{formatAmountOfMoneyWithPoundSign(charges.deltaCharge.amount.inPounds())}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      @govukTable(Table(
+        head = Some(Seq(
+          HeadCell(
+            content = Empty,
+            classes = "govuk-!-width-one-half"
+          ),
+          HeadCell(
+            content = Text(messages("confirmationOfSubmission.dateDue"))
+          ),
+          HeadCell(
+            content = Text(messages("confirmationOfSubmission.amount"))
+          )
+        )),
+        caption = None,
+        firstCellIsHeader = true,
+        rows = Seq(
+          Seq(
+            TableRow(
+              content = HtmlContent(chargeItem(messages(s"$key.chargeLabel"), charges.originalCharge.chargeReference))
+            ),
+            TableRow(
+              attributes = Map("id" -> "original-charge-due-date"),
+              content = Text(TimeUtils.govDisplayFormat(charges.originalCharge.dueDate))
+            ),
+            TableRow(
+              content = Text(formatAmountOfMoneyWithPoundSign(charges.originalCharge.amount.inPounds())),
+              format = Some("numeric")
+            )
+          ),
+          Seq(
+            TableRow(
+              content = HtmlContent(chargeItem(messages(s"$key.deltaChargeLabel"), charges.deltaCharge.chargeReference))
+            ),
+            TableRow(
+              attributes = Map("id" -> "delta-charge-due-date"),
+              content = Text(TimeUtils.govDisplayFormat(charges.deltaCharge.dueDate))
+            ),
+            TableRow(
+              content = Text(formatAmountOfMoneyWithPoundSign(charges.deltaCharge.amount.inPounds())),
+              format = Some("numeric")
+            )
+          )
+        )))
     }
   }
 
   @if(justSubmittedReturn.submissionResponse.charge.isEmpty && isPeriodOfAdmin) {
-    <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
-    <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
+    <h2 class="govuk-heading-m">@messages(s"$key$userKey.whatNext")</h2>
+    @htmlParagraph(messages(s"$key$userKey.howToPay.p1"), Some("howToPay"))
   } else {
-
     @justSubmittedReturn.submissionResponse.charge.map { charge =>
       @representativeType match {
-          case Some(PersonalRepresentative) => {
-            <h2 class="heading-medium">@messages(s"$key.howToPay.heading")</h2>
+        case Some(PersonalRepresentative) => {
+          <h2 class="govuk-heading-m">@messages(s"$key.howToPay.heading")</h2>
+          @htmlParagraph(messages(s"$key.personalRep.howToPay.p1", charge.chargeReference), Some("howToPay"))
+          @payNowButton
+        }
 
-            <p id="howToPay">@Html(messages(s"$key.personalRep.howToPay.p1", charge.chargeReference))</p>
-
-            @payNowButton
+        case Some(Capacitor) => {
+          <h2 class="govuk-heading-m">@messages(s"$key.capacitor.whatNext")</h2>
+          @warning(messages(s"$key.capacitor.warning"))
+          @if(isLateReturn && !amendedReturnWithSameCompletionDate) {
+            @htmlParagraph(messages(s"$key$userKey${if(is60DaysWarning) ".60days" else ""}.penalty.warning"), Some("lfpWarning"))
           }
+          <h3 class="govuk-heading-m">@messages(s"$key.howToPay.heading")</h3>
+          @htmlParagraph(messages(s"$key.capacitor.howToPay.p1", charge.chargeReference), Some("howToPay"))
+          @payNowButton
+        }
 
-          case Some(Capacitor) => {
-              <h2 class="heading-medium">@messages(s"$key.capacitor.whatNext")</h2>
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => {
+          <h2 class="govuk-heading-m">@messages(s"$key$userKey.whatNext")</h2>
+          @htmlParagraph(messages(s"$key$userKey.howToPay.p1"), Some("howToPay"))
+          @warning(messages(s"$key.Admin.warning"))
+          @htmlParagraph(messages(s"$key$userKey.howToPay.p2"), Some("howToPay2"))
+          @details(
+            summary = messages(s"$key$userKey.sA"),
+            content = htmlParagraph(messages(s"$key$userKey.howToPay.p3"))
+          )
+        }
 
-                @warning(messages(s"$key.capacitor.warning"))
-
-                @if(isLateReturn && !amendedReturnWithSameCompletionDate) {
-                    @if(is60DaysWarning){
-                        <p id="lfpWarning">@messages(s"$key$userKey.60days.penalty.warning")</p>
-                    } else {
-                        <p id="lfpWarning">@messages(s"$key$userKey.penalty.warning")</p>
-                    }
-                }
-
-              <h3 class="heading-medium">@messages(s"$key.howToPay.heading")</h3>
-
-              <p id="howToPay">@Html(messages(s"$key.capacitor.howToPay.p1", charge.chargeReference))</p>
-
-              @payNowButton
+        case None => {
+          <h2 class="govuk-heading-m">@messages(s"$key$userKey.whatNext")</h2>
+          @warning(messages(s"$key$userKey.warning"))
+          @if(isLateReturn && !amendedReturnWithSameCompletionDate) {
+            @htmlParagraph(messages(s"$key$userKey.${if(is60DaysWarning) "60days." else ""}penalty.warning"), Some("lfpWarning"))
           }
-
-          case Some(PersonalRepresentativeInPeriodOfAdmin) => {
-            <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
-
-            <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
-
-            @warning(messages(s"$key.Admin.warning"))
-
-            <p id="howToPay2">@messages(s"$key$userKey.howToPay.p2")</p>
-
-            @details(
-                summary = messages(s"$key$userKey.sA"),
-                content = Html(
-                    s"""
-                    | <p>${messages(s"$key$userKey.howToPay.p3")}</p>
-                    |""".stripMargin
-                )
-            )
+          @if(isAgent) {
+            @htmlParagraph(messages(s"$key.agent.howToPay.heading.p1", viewConfig.payTheirTaxBill), Some("howToPay-heading"))
+          } else {
+             <h3 class="govuk-heading-m">@messages(s"$key.howToPay.heading")</h3>
           }
-
-          case None => {
-              <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
-
-              @warning(messages(s"$key$userKey.warning"))
-
-              @if(isLateReturn && !amendedReturnWithSameCompletionDate){
-                @if(is60DaysWarning){
-                    <p id="lfpWarning">@messages(s"$key$userKey.60days.penalty.warning")</p>
-                } else {
-                    <p id="lfpWarning">@messages(s"$key$userKey.penalty.warning")</p>
-                }
-              }
-
-              @{
-                if (isAgent)
-                  Html(s"""<p id="howToPay-heading">${messages(s"$key.agent.howToPay.heading.p1", viewConfig.payTheirTaxBill)}</p>""")
-                else
-                  Html(s"""<h3 class="heading-medium">${messages(s"$key.howToPay.heading")}</h3>""")
-              }
-
-              <p id="howToPay">@Html(messages(s"$key$userKey.howToPay.p1", charge.chargeReference))</p>
-              @if(isAmend) {
-                <p>@messages(s"$key$userKey.gotoViewReturn")</p>
-                <div class="panel panel-border-wide">
-                  <p>@messages(s"$key$userKey.clearingNotice")</p>
-                </div>
-              } else {
-                @if(isATrust && isAgent) {
-                  <span class="form-hint">@messages(s"$key.trust.paymentNotice")</span>
-                } else {
-                  <span class="form-hint">@messages(s"$key$userKey.paymentNotice")</span>
-                }
-              }
-
-              @{if (!isAgent) payNowButton }
+          @htmlParagraph(messages(s"$key$userKey.howToPay.p1", charge.chargeReference), Some("howToPay"))
+          @if(isAmend) {
+            @htmlParagraph(messages(s"$key$userKey.gotoViewReturn"))
+            <div class="govuk-inset-text">
+              @htmlParagraph(messages(s"$key$userKey.clearingNotice"))
+            </div>
+          } else {
+            <p class="govuk-hint">@messages(s"$key${if(isATrust && isAgent) ".trust" else ""}.paymentNotice")</p>
           }
+          @{if (!isAgent) payNowButton }
+        }
       }
     }
   }
 
-    @if(!isPeriodOfAdmin){
-        <div class="panel panel-border-wide">
-            <h2 class="heading-medium" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
-            <p>@Html(messages(s"$key$userKey.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
-        </div>
-    }
+  @if(!isPeriodOfAdmin){
+    <div class="govuk-inset-text">
+      <h2 class="govuk-heading-m" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
+      @htmlParagraph(messages(s"$key$userKey.ifSa.p1", viewConfig.selfAssessmentUrl))
+    </div>
+  }
 
-    @{
-      if(isAgent)
-        link(accountRoutes.HomePageController.homepage().url,messages("button.clients.accountHome"),"account-home-link")
-      else if(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
-            link(accountRoutes.HomePageController.homepage().url,messages("button.accountHome"),"account-home-link")
-      else
-        justSubmittedReturn.submissionResponse.charge.fold(
-            buttonLink(messages("button.accountHome"), accountRoutes.HomePageController.homepage().url)
-        )( _ =>
-           if(isATrust)
-             Html(s"""<p>${messages(s"$key.trust.returnToAccountHome", accountRoutes.HomePageController.homepage().url)}</p>""")
-           else
-             Html(s"""<p>${messages(s"$key.returnToAccountHome", accountRoutes.HomePageController.homepage().url)}</p>""")
+  @{if(isAgent)
+      linkParagraph(accountRoutes.HomePageController.homepage().url,messages("button.clients.accountHome"),"account-home-link")
+    else if(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
+      linkParagraph(accountRoutes.HomePageController.homepage().url,messages("button.accountHome"),"account-home-link")
+    else
+      justSubmittedReturn.submissionResponse.charge.fold(
+        govukButton(Button(
+          href = Some(accountRoutes.HomePageController.homepage().url),
+          content = Text(messages("button.accountHome"))
+        ))
+      )( _ =>
+        htmlParagraph(messages(s"""$key.${if(isATrust) "trust." else ""}returnToAccountHome""", accountRoutes.HomePageController.homepage().url))
+      )
+  }
 
-        )
-    }
-
- @exitSurveyLink(if(isAmend) viewConfig.amendsExitSurveyUrl else viewConfig.returnsExitSurveyUrl)
+  @exitSurveyLink(if(isAmend) viewConfig.amendsExitSurveyUrl else viewConfig.returnsExitSurveyUrl)
 
 }

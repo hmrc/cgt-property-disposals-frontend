@@ -4152,18 +4152,18 @@ confirmationOfSubmission.amount=Amount
 confirmationOfSubmission.chargeLabel=Tax payment
 confirmationOfSubmission.deltaChargeLabel=Updated tax liability
 
-confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>.
+confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong>{0}</strong>.
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
 confirmationOfSubmission.taxDue=Tax due date
 
-confirmationOfSubmission.printPage=<a href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.agent.printPage=<a href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.trust.printPage=<a href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.capacitor.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
-confirmationOfSubmission.capacitor.noId.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRep.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your client’s Capital Gain Tax on UK property account.
+confirmationOfSubmission.printPage=<a class="govuk-link" href="{0}">Print or save this page as a PDF</a>
+confirmationOfSubmission.agent.printPage=<a class="govuk-link" href="{0}">Print or save this page as a PDF</a>
+confirmationOfSubmission.trust.printPage=<a class="govuk-link" href="{0}">Print or save this page as a PDF</a>
+confirmationOfSubmission.capacitor.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
+confirmationOfSubmission.capacitor.noId.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRep.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your client’s Capital Gain Tax on UK property account.
 
 
 confirmationOfSubmission.whatNext=What you need to do next
@@ -4190,14 +4190,14 @@ confirmationOfSubmission.trust.60days.penalty.warning=The trust may receive a la
 confirmationOfSubmission.capacitor.60days.penalty.warning=The person may receive a late filing penalty. This is because the tax was not reported within 60 days of the property’s completion date.
 
 confirmationOfSubmission.howToPay.heading=How to pay
-confirmationOfSubmission.agent.howToPay.heading.p1=Find out how your client can <a href="{0}"><strong class="bold">pay their tax bill</strong></a>.
+confirmationOfSubmission.agent.howToPay.heading.p1=Find out how your client can <a class="govuk-link" href="{0}"><strong>pay their tax bill</strong></a>.
 
-confirmationOfSubmission.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.agent.howToPay.p1=They will need to provide their payment reference number <strong class="bold">{0}</strong>.
-confirmationOfSubmission.trust.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong>{0}</strong>.
+confirmationOfSubmission.agent.howToPay.p1=They will need to provide their payment reference number <strong>{0}</strong>.
+confirmationOfSubmission.trust.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong>{0}</strong>.
+confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong>{0}</strong>.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=Wait for us to contact you with details of when and how to pay the tax.
-confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong>{0}</strong>.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=Wait for us to contact you with details of when and how to pay the tax.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p2=This return will not appear on your account home page. You can now sign out.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p3=If you need to do a Self Assessment tax return for the estate, you will need to provide details from this return.
@@ -4227,7 +4227,7 @@ confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
 
-confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new tab)</a>.
+confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Self Assessment tax return (opens in a new tab)</a>.
 confirmationOfSubmission.agent.ifSa.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.trust.ifSa.p1=You’ll need to provide details from this return in the trust’s next Self Assessment tax return.
 confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment tax return, they will need to provide details from this return in their next Self Assessment tax return.
@@ -4239,8 +4239,8 @@ confirmationOfSubmission.clearingNotice=It takes 24 hours for your outstanding b
 confirmationOfSubmission.agent.clearingNotice=It takes 24 hours for your outstanding balance to be updated in your client’s account when you update a return. They can make a payment at any time.
 confirmationOfSubmission.trust.clearingNotice=It takes 24 hours for your outstanding balance to be updated in the trust’s account when you update a return. You can make a payment at any time.
 
-confirmationOfSubmission.returnToAccountHome=Go to your <a href="{0}">Capital Gains Tax on UK property account home</a>.
-confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a href="{0}">Capital Gains Tax on UK property account home</a>.
+confirmationOfSubmission.returnToAccountHome=Go to your <a class="govuk-link" href="{0}">Capital Gains Tax on UK property account home</a>.
+confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a class="govuk-link" href="{0}">Capital Gains Tax on UK property account home</a>.
 
 confirmationOfSubmission.nameLabel=Account name
 confirmationOfSubmission.trust.nameLabel=Trust name
