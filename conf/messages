@@ -3622,7 +3622,7 @@ personalAllowance.non-resident.helpText=We’ll use this amount to work out the 
 personalAllowance.agent.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax your client should pay.<br/><br/>You’ll need to check the double tax agreement for the country your client is resident in and the UK. This will tell you if they are entitled to a Personal Allowance.
 personalAllowance.capacitor.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax the person should pay.<br/><br/>The person will need to check the double tax agreement for the country the person is resident in and the UK. This will tell the person if they are entitled to a Personal Allowance.
 personalAllowance.personalRep.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax that should be paid.<br/><br/>You will need to check the double tax agreement for the country the person was resident in and the UK. This will tell you if the person was entitled to a Personal Allowance.
-personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new tab)</a>.
+personalAllowance.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Find out about Personal Allowances (opens in a new tab)</a>.
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.agent.error.required=Enter your client’s Personal Allowance for the tax year
 personalAllowance.capacitor.error.required=Enter the person’s Personal Allowance for the tax year
