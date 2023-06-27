@@ -8397,7 +8397,7 @@ class YearToDateLiabilityControllerSpec
             { doc =>
               doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
 
-              doc.select("#repayment-form-hint").text shouldBe messageFromMessageKey(expectedHelpTextKey)
+              doc.select("#repayment-hint").text shouldBe messageFromMessageKey(expectedHelpTextKey)
 
               doc
                 .select("#content > article > form, #main-content form")

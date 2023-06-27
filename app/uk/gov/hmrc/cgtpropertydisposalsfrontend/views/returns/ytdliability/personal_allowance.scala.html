@@ -26,16 +26,16 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+  formWrapper: FormWithCSRF,
+  govukInput: GovukInput,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
@@ -48,57 +48,73 @@
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "personalAllowance" }
+
 @isAgent = @{ request.userType.contains(UserType.Agent) }
+
 @userKey = @{
-    representativeType match {
-        case Some(PersonalRepresentative) => ".personalRep"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
-        case Some(Capacitor) => ".capacitor"
-        case None =>
-            if (isAgent) ".agent"
-            else ""
-    }
+  representativeType match {
+    case Some(PersonalRepresentative) => ".personalRep"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+    case Some(Capacitor) => ".capacitor"
+    case None =>
+      if (isAgent) ".agent"
+      else ""
+  }
 }
+
 @nrKey = @{if(wasUkResident) "" else ".non-resident"}
+
 @taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
+
 @taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
+
 @personalAllowance = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.personalAllowance.inPounds())}
+
 @higherIncomePersonalAllowanceThreshold = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.higherIncomePersonalAllowanceThreshold.inPounds())}
 
 @title = @{messages(s"$key$userKey.title", taxYearStartYear, taxYearEndYear)}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@layout(
+  title,
+  backLinkUrl = Some(backLink.url),
+  hasErrors = hasErrors
+) {
+  @if(hasErrors) {
+    @errorSummary(form, Some(s"$key$userKey"))
+  }
 
-    @backLinkComponent(backLink)
+  @caption(messages("ytdLiability.caption"))
 
-    @if(hasErrors) {
-        @errorSummary(form, Some(s"$key$userKey"))
-    }
+  @formWrapper(routes.YearToDateLiabilityController.personalAllowanceSubmit(), 'novalidate -> "novalidate") {
+    @govukInput(Input(
+      id = key,
+      name = key,
+      value = form.data.get(key),
+      label = Label(
+        content = Text(title),
+        isPageHeading = true,
+        classes = "govuk-label--xl"
+      ),
+      hint = Some(Hint(
+        content = HtmlContent(messages(s"$key$userKey$nrKey.helpText", taxYearStartYear, taxYearEndYear, personalAllowance, higherIncomePersonalAllowanceThreshold))
+      )),
+      classes = "govuk-input--width-10",
+      prefix = Some(PrefixOrSuffix(
+        content = Text("£")
+      )),
+      errorMessage = form.error(key).map(e => ErrorMessage(
+        content = Text(messages(s"$key$userKey.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )),
+      autocomplete = Some(AutoCompleteType.On.value)
+    ))
 
-    @caption(messages("ytdLiability.caption"))
+    <p class="govuk-body">@Html(messages(s"$key.link", viewConfig.personalAllowanceUrl))</p>
 
-    @formWrapper(routes.YearToDateLiabilityController.personalAllowanceSubmit(), 'novalidate -> "novalidate") {
-        @unitInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            formError = form.error(key),
-            hasErrors = form.error(key).nonEmpty,
-            label = Html(title),
-            labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key$userKey$nrKey.helpText", taxYearStartYear, taxYearEndYear, personalAllowance, higherIncomePersonalAllowanceThreshold))),
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = Some(s"$key$userKey")
-        )
+    @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+  }
 
-        <p>@Html(messages(s"$key.link", viewConfig.personalAllowanceUrl))</p>
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
-    }
-
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
-
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 }

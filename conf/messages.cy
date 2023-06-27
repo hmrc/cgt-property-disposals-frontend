@@ -3159,7 +3159,7 @@ personalAllowance.non-resident.helpText=Byddwn yn defnyddio’r swm hwn i gyfrif
 personalAllowance.agent.non-resident.helpText=Byddwn yn defnyddio’r swm hwn i gyfrifo cyfradd y Dreth Enillion Cyfalaf y dylai’ch cleient ei thalu. <br/><br/>Bydd angen i chi wirio’r cytundeb trethiant dwbl ar gyfer y wlad mae’ch cleient yn preswylio ynddi a’r DU. Bydd hyn yn rhoi gwybod i chi a oes ganddo hawl i Lwfans Personol.
 personalAllowance.capacitor.non-resident.helpText=Byddwn yn defnyddio’r swm hwn i gyfrifo cyfradd y Dreth Enillion Cyfalaf y dylai’r person ei thalu. <br/><br/>Bydd angen i’r person wirio’r cytundeb trethiant dwbl ar gyfer y wlad y mae’r person yn preswylio ynddi a’r DU. Bydd hyn yn rhoi gwybod i’r person a oes ganddo hawl i Lwfans Personol.
 personalAllowance.personalRep.non-resident.helpText=Byddwn yn defnyddio’r swm hwn i gyfrifo cyfradd y Dreth Enillion Cyfalaf y dylid ei thalu. <br/><br/>Bydd angen i chi wirio’r cytundeb trethiant dwbl ar gyfer y wlad yr oedd y person yn preswylio ynddi a’r DU. Bydd hyn yn rhoi gwybod i chi a oedd gan y person hawl i Lwfans Personol.
-personalAllowance.link=<a href="{0}" target="_blank">Dysgwch am Lwfansau Personol (yn agor tab newydd)</a>.
+personalAllowance.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Dysgwch am Lwfansau Personol (yn agor tab newydd)</a>.
 personalAllowance.error.required=Nodwch faint o’ch Lwfans Personol rydych am ei ddefnyddio
 personalAllowance.agent.error.required=Nodwch Lwfans Personol eich cleient ar gyfer y flwyddyn dreth
 personalAllowance.capacitor.error.required=Nodwch Lwfans Personol y person ar gyfer y flwyddyn dreth
