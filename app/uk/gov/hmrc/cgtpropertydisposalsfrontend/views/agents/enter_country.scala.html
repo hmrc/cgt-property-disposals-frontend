@@ -17,48 +17,38 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code,
-        submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
+        submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        formWrapper: FormWithCSRF,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk
 )
 
-@(form: Form[Country])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[Country])(implicit request: RequestWithSessionData[_], messages: Messages)
 
-@key = @{"countryCode"}
 @title = @{messages("agent.enter-client-country.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
-
- @backLinkComponent(routes.AgentAccessController.enterClientsCgtRef())
+@layout(title, backLinkUrl = Some(routes.AgentAccessController.enterClientsCgtRef.url), hasErrors = hasErrors) {
 
  @if(hasErrors) {
   @errorSummary(form)
  }
 
- @formWrapper(routes.AgentAccessController.enterClientsCountrySubmit(), 'novalidate -> "novalidate") {
-
-  @countryCode(
-    Country.countryCodes,
-    selected = form.data.get(key),
-    label = title,
-    hasErrors = form.error(key).nonEmpty,
-    errorKey = form.error(key).map(e => e.message),
-    autoComplete = AutoCompleteType.Country,
-    extraContent = Some(Html(s"""<p class="lede">${messages("agent.enter-client-country.extraContent")}</p>""")),
-    labelAsHeading = true
-  )
-
+ @formWrapper(routes.AgentAccessController.enterClientsCountrySubmit()) {
+   @countryCode(
+     Country.countryCodes,
+     form,
+     label = title,
+     helpText = Some(Html(s"""<p class="govuk-body-l">${messages("agent.enter-client-country.extraContent")}</p>""")),
+     labelAsHeading = true
+   )
   @submitButton(messages("button.continue"))
  }
 
