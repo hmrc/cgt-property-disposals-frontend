@@ -1,6 +1,9 @@
 html[lang="cy"] .govuk-date-input > .govuk-date-input__item:first-of-type {
     margin-right: 9px;
 }
+body:not(.js-enabled) .js-visible {
+    display: none;
+}
 .govuk-form-group--error .autocomplete__input {
     border-color: #d4351c;
 }
@@ -418,4 +421,28 @@ html[lang="cy"] .govuk-date-input > .govuk-date-input__item:first-of-type {
 .sum-part > .govuk-summary-list__value {
     text-align: right;
     width: 33%;
+}
+
+.govuk-panel.govuk-box-highlight--status {
+    background-color: #1d70b8;
+}
+
+.govuk-panel.govuk-box-highlight--status > p {
+    margin: 20px 0 0 0;
+}
+
+.govuk-panel.govuk-box-highlight--status * {
+    color: white;
+}
+
+.govuk-panel.govuk-box-highlight--status > p > span {
+    margin: 0;
+}
+
+.govuk-panel.govuk-box-highlight--status > p > span.heading-large.tax-owed-label {
+    font-weight: normal;
+}
+
+.return-summary .govuk-summary-list__actions {
+    display: none !important;
 }

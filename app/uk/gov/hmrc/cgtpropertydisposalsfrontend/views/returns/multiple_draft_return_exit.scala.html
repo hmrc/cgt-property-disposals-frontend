@@ -16,30 +16,28 @@
 
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
- backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+ layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+ govukButton: GovukButton
 )
 
-@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
 
  @key=@{"multiple-draft.exit"}
  @title = @{messages(s"$key.title")}
 
- @mainTemplate(title = title, userType = request.userType) {
+ @layout(title, backLinkUrl = Some(backLink.url)) {
 
-  @backLinkComponent(backLink)
+<h1 class="govuk-heading-xl">@title</h1>
 
-  @pageHeading(title)
+  <p class="govuk-body">@messages(s"$key.p1")</p>
 
-  <p>@messages(s"$key.p1")</p>
-
-  @buttonLink(messages("button.continue"), routes.HomePageController.homepage().url)
-
+  @govukButton(Button(
+  href = Some(routes.HomePageController.homepage().url),
+  content = Text(messages("button.continue"))
+  ))
  }

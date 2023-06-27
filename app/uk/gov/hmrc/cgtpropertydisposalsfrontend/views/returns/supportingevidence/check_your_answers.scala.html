@@ -15,41 +15,44 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.supportingevidence.summary
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.supportingevidence.summary_govuk,
+  formWrapper: FormWithCSRF,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
 )
 
-@(answers: CompleteSupportingEvidenceAnswers, maxUploads: Int)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(
+  answers: CompleteSupportingEvidenceAnswers,
+  maxUploads: Int
+)(
+  implicit request: RequestWithSessionData[_],
+  messages: Messages
+)
 
-    @key = @{"supporting-evidence.check-your-answers"}
+@key = @{"supporting-evidence.check-your-answers"}
 
-    @title = @{messages(s"$key.title")}
+@title = @{messages(s"$key.title")}
 
-    @mainTemplate(title = title, userType = request.userType) {
+@layout(title) {
+  <span class="govuk-caption-xl">@messages(s"$key.caption")</span>
 
-        @pageHeading(title, Some(messages(s"$key.caption")))
+  <h1 class="govuk-heading-xl">@title</h1>
 
-        @summary(answers)
+  @summary(answers)
 
-        @if(answers.evidences.size < maxUploads && answers.doYouWantToUploadSupportingEvidence){
+  @if(answers.evidences.size < maxUploads && answers.doYouWantToUploadSupportingEvidence){
+    <p class="govuk-body" id="add-another-file">
+      <a class="govuk-link" href="@routes.SupportingEvidenceController.uploadSupportingEvidence().url">@messages(s"$key.add-another-file")</a>
+    </p>
+  }
 
-         <p id="add-another-file">
-            <a href="@routes.SupportingEvidenceController.uploadSupportingEvidence().url">@messages(s"$key.add-another-file")</a>
-         </p>
-        }
-
-        @formWrapper(routes.SupportingEvidenceController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
-
-            @submitButton(messages("button.confirmAndContinue"))
-
-        }
-    }
+  @formWrapper(routes.SupportingEvidenceController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+      @submitButton(messages("button.confirmAndContinue"))
+  }
+}

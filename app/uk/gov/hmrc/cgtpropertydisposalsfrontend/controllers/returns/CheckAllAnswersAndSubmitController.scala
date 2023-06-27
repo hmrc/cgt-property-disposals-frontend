@@ -123,7 +123,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                       showSubmissionDetails = true,
                       fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer),
                       furtherOrAmendReturnCalculationEligibility
-                    )(request, explicitEnglishMessage, viewConfig)
+                    )(request, explicitEnglishMessage)
                       .toString()
                       .getBytes
                   )

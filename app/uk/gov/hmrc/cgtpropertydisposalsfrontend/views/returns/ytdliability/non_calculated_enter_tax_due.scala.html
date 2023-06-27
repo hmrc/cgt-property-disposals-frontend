@@ -17,21 +17,23 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcNewTabLinkHelper
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.newtablinkhelper.NewTabLinkHelper
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        formWrapper: FormWithCSRF,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        govukInput: GovukInput,
+        hmrcNewTabLinkHelper: HmrcNewTabLinkHelper
 )
 
 @(form: Form[BigDecimal], backLink: Call, isAmend: Boolean, isATrust: Boolean, wasUkResident: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -45,9 +47,7 @@
   else ".nonResident" -> viewConfig.calculateCgtNr
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-    @backLinkComponent(backLink)
+@layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
     @if(hasErrors) {
         @errorSummary(form)
@@ -55,29 +55,38 @@
 
     @caption(messages("ytdLiability.caption"))
 
-    @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit(), 'novalidate -> "novalidate") {
-        @unitInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            formError = form.error(key),
-            hasErrors = form.error(key).nonEmpty,
-            label = Html(title),
-            labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key.helpText"))),
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds")
-        )
+    @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit()) {
+      @govukInput(Input(
+        id = key,
+        name = key,
+        value = form.data.get(key),
+        label = Label(
+          content = Text(title),
+          isPageHeading = true,
+          classes = "govuk-label--xl"
+        ),
+        classes = "govuk-input--width-10",
+        prefix = Some(PrefixOrSuffix(
+          content = Text("£")
+        )),
+        errorMessage = form.error(key).map(e => ErrorMessage(
+          content = Text(messages(s"$key.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        )),
+        autocomplete = Some(AutoCompleteType.On.value),
+        hint = Some(Hint(
+          content = HtmlContent(messages(s"$key.helpText"))
+        ))
+      ))
 
-        <p>
-          <a href="@link._2" target="_blank" id="calculate-cgt-guidance-link">
-            @messages(s"$key${link._1}.link")
-          </a>
-        </p>
+      <p class="govuk-body">
+        @hmrcNewTabLinkHelper(NewTabLinkHelper(
+          text = messages(s"$key${link._1}.link"),
+          href = Some(link._2)
+        ))
+      </p>
 
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+      @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

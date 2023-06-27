@@ -26,7 +26,6 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, MessagesRequest, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedRequest, RequestWithSessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
@@ -1392,7 +1391,6 @@ class CheckAllAnswersAndSubmitControllerSpec
               new MessagesRequest(FakeRequest(), messagesApi)
             )
           )
-        implicit val config: ViewConfig                                = viewConfig
         implicit val messages: MessagesImpl                            = MessagesImpl(Lang.apply("en"), messagesApi)
 
         val cyaPageHtml =
@@ -1428,9 +1426,9 @@ class CheckAllAnswersAndSubmitControllerSpec
               new MessagesRequest(FakeRequest(), messagesApi)
             )
           )
-        implicit val config: ViewConfig                                = viewConfig
-        implicit val messages: Messages                                = MessagesImpl(Lang.apply("en"), messagesApi)
-        val mockedCompleteReturn                                       = CompleteSingleDisposalReturn
+
+        implicit val messages: Messages = MessagesImpl(Lang.apply("en"), messagesApi)
+        val mockedCompleteReturn        = CompleteSingleDisposalReturn
           .fromDraftReturn(
             completeDraftReturnRepresenteWithNoReference
               .copy(representeeAnswers =
@@ -1639,7 +1637,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("submitReturnError.title"),
-              doc =>
+              { doc =>
                 doc
                   .select("#content > article > form, #main-content form")
                   .attr(
@@ -1647,6 +1645,32 @@ class CheckAllAnswersAndSubmitControllerSpec
                   ) shouldBe routes.CheckAllAnswersAndSubmitController
                   .submissionErrorSubmit()
                   .url
+
+                doc.select(".govuk-body").text shouldBe
+                  s"""${messageFromMessageKey("submitReturnError.p1")} ${messageFromMessageKey(
+                    "submitReturnError.p2"
+                  )} ${messageFromMessageKey("submitReturnError.p3")} ${messageFromMessageKey(
+                    "submitReturnError.p4"
+                  )}"""
+
+                doc
+                  .select("#main-content ol.govuk-list--number > li:nth-child(1)")
+                  .text() shouldBe messageFromMessageKey(
+                  "submitReturnError.li1"
+                )
+
+                doc
+                  .select("#main-content ol.govuk-list--number > li:nth-child(2)")
+                  .text() shouldBe messageFromMessageKey(
+                  "submitReturnError.li2"
+                )
+
+                doc
+                  .select("#main-content ol.govuk-list--number > li:nth-child(3)")
+                  .text() shouldBe messageFromMessageKey(
+                  "submitReturnError.li3"
+                )
+              }
             )
           }
 

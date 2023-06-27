@@ -4418,16 +4418,18 @@ class YearToDateLiabilityControllerSpec
             performAction(),
             messageFromMessageKey(s"$key.title"),
             { doc =>
-              doc.select("#back, .govuk-back-link").attr("href")          shouldBe backLink.url
-              doc.select("#content > article > p#upload-guidance").text() shouldBe messageFromMessageKey(
+              doc.select("#back, .govuk-back-link").attr("href") shouldBe backLink.url
+              doc.select("#upload-guidance").text()              shouldBe messageFromMessageKey(
                 s"$key.guidance.p1"
               )
 
               if (repaymentDue)
-                doc.select("div > strong.bold-small").text() shouldBe messageFromMessageKey(s"$key.alert")
+                doc.select(".govuk-warning-text__text").text() shouldBe messageFromMessageKey(
+                  "generic.warning"
+                ) + " " + messageFromMessageKey(s"$key.alert")
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#main-content form")
                 .attr(
                   "action"
                 ) shouldBe upscanUpload.upscanUploadMeta.uploadRequest.href
@@ -4738,7 +4740,7 @@ class YearToDateLiabilityControllerSpec
             "taxableGainOrLoss.multiple.title",
             { doc =>
               doc
-                .select("#taxableGainOrLoss-1")
+                .select("#taxableGainOrLoss-2")
                 .attr("checked")                   shouldBe ""
               doc.select("#netLoss").attr("value") shouldBe "1"
             }
@@ -4758,7 +4760,7 @@ class YearToDateLiabilityControllerSpec
             "taxableGainOrLoss.title",
             doc =>
               doc
-                .select("#taxableGainOrLoss-2")
+                .select("#taxableGainOrLoss-3")
                 .hasAttr("checked")
           )
 
@@ -4780,7 +4782,7 @@ class YearToDateLiabilityControllerSpec
             "taxableGainOrLoss.personalRepInPeriodOfAdmin.title",
             doc =>
               doc
-                .select("#taxableGainOrLoss-2")
+                .select("#taxableGainOrLoss-3")
                 .hasAttr("checked")
           )
         }
@@ -4800,7 +4802,7 @@ class YearToDateLiabilityControllerSpec
             "taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title",
             doc =>
               doc
-                .select("#taxableGainOrLoss-2")
+                .select("#taxableGainOrLoss-3")
                 .hasAttr("checked")
           )
         }
@@ -4822,13 +4824,13 @@ class YearToDateLiabilityControllerSpec
               expectedBackLink,
               expectedTitleKey,
               { doc =>
-                doc.select("#taxableGainOrLoss > legend > h2").text()              shouldBe expectedSubtitle
-                doc.select("#taxableGainOrLoss > div:nth-child(2) > label").text() shouldBe expectedNetGainLabel
-                doc.select("#taxableGainOrLoss > div:nth-child(4) > label").text() shouldBe expectedNetLossLabel
-                doc.select("#link").text()                                         shouldBe expectedLinkText
+                doc.select(".govuk-fieldset__legend--m").text()       shouldBe expectedSubtitle
+                doc.select("label[for='taxableGainOrLoss']").text()   shouldBe expectedNetGainLabel
+                doc.select("label[for='taxableGainOrLoss-2']").text() shouldBe expectedNetLossLabel
+                doc.select("#link").text()                            shouldBe expectedLinkText
                 doc
                   .select("#link")
-                  .attr("href")                                                    shouldBe controllers.returns.triage.routes.FurtherReturnGuidanceController
+                  .attr("href")                                       shouldBe controllers.returns.triage.routes.FurtherReturnGuidanceController
                   .taxableGainGuidance()
                   .url
               },
@@ -5770,21 +5772,25 @@ class YearToDateLiabilityControllerSpec
               { doc =>
                 val formattedTaxDue = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDue.inPounds())
 
-                doc.select("#content > article > dl > div:nth-child(1) > dd").text() shouldBe MoneyUtils
+                doc.select("#main-content dl.govuk-summary-list > div:nth-child(1) > dd").text() shouldBe MoneyUtils
                   .formatAmountOfMoneyWithPoundSign(yearToDateLiability.inPounds())
 
-                doc.select("#content > article > dl > div:nth-child(2) > dd").text() shouldBe s"- ${MoneyUtils
+                doc
+                  .select("#main-content dl.govuk-summary-list > div:nth-child(2) > dd")
+                  .text() shouldBe s"- ${MoneyUtils
                   .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
 
-                doc.select("#content > article > dl > div.sum-total > dd").text() shouldBe s"= $formattedTaxDue"
+                doc
+                  .select("#main-content dl.govuk-summary-list > div.sum-total > dd")
+                  .text() shouldBe s"= $formattedTaxDue"
 
-                doc.select("#content > article > p:nth-child(6)").text() shouldBe messageFromMessageKey(
+                doc.select("#main-content > div > div > div > p:nth-child(5)").text() shouldBe messageFromMessageKey(
                   expectedP1Key,
                   formattedTaxDue
                 )
 
                 doc
-                  .select("#content > article > form, #main-content form")
+                  .select("#main-content form")
                   .attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
                   .url
@@ -5885,9 +5891,9 @@ class YearToDateLiabilityControllerSpec
               performAction(),
               messageFromMessageKey(s"nonCalculatedTaxDue.furtherReturn.enterTaxDue.title"),
               { doc =>
-                doc.select("#nonCalculatedTaxDue-form-hint") contains expectedP1Key
+                doc.select("#nonCalculatedTaxDue-hint") contains expectedP1Key
                 doc
-                  .select("#content > article > form, #main-content form")
+                  .select("#main-content form")
                   .attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
                   .url
@@ -6011,16 +6017,16 @@ class YearToDateLiabilityControllerSpec
               { doc =>
                 val formattedTaxDue = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDue.inPounds())
 
-                doc.select("#content > article > dl > div:nth-child(1) > dd").text() shouldBe MoneyUtils
+                doc.select("#main-content dl.govuk-summary-list > div:nth-child(1) > dd").text() shouldBe MoneyUtils
                   .formatAmountOfMoneyWithPoundSign(yearToDateLiability.inPounds())
 
-                doc.select("#content > article > dl > div:nth-child(2) > dd").text() shouldBe s"${MoneyUtils
+                doc.select("#main-content dl.govuk-summary-list > div:nth-child(2) > dd").text() shouldBe s"${MoneyUtils
                   .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
 
-                doc.select("#content > article > dl > div.sum-total > dd").text() shouldBe formattedTaxDue
+                doc.select("#main-content dl.govuk-summary-list > div.sum-total > dd").text() shouldBe formattedTaxDue
 
                 doc
-                  .select("#content > article > form, #main-content form")
+                  .select("#main-content form")
                   .attr("action") shouldBe routes.YearToDateLiabilityController
                   .nonCalculatedEnterTaxDueSubmit()
                   .url
@@ -6633,12 +6639,12 @@ class YearToDateLiabilityControllerSpec
             ),
             { doc =>
               doc
-                .select("#content > article > p:nth-child(3)")
+                .select("#main-content > div > div > div > p:nth-child(3)")
                 .text() shouldBe messageFromMessageKey(
                 "mandatoryEvidence.scan-progress.p1"
               )
               doc
-                .select("#content > article > p:nth-child(4)")
+                .select("#main-content > div > div > div > p:nth-child(4)")
                 .text() shouldBe messageFromMessageKey(
                 "mandatoryEvidence.scan-progress.p2"
               )
@@ -6658,7 +6664,7 @@ class YearToDateLiabilityControllerSpec
             ),
             doc =>
               doc
-                .select("#content > article > form, #main-content form")
+                .select("#main-content form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
                 .uploadMandatoryEvidence()
                 .url
@@ -7084,24 +7090,24 @@ class YearToDateLiabilityControllerSpec
             messageFromMessageKey("mandatoryEvidenceExpired.title"),
             doc => {
               doc
-                .select("#content > article > p")
+                .select("#main-content p.govuk-body")
                 .get(0)
                 .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.p1")
               doc
-                .select("#content > article > p")
+                .select("#main-content p.govuk-body")
                 .get(1)
                 .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.p2")
               doc
-                .select("#content > article > a")
+                .select("#main-content .govuk-button")
                 .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.button.text")
               doc
-                .select("#content > article > a")
+                .select("#main-content .govuk-button")
                 .attr("href") shouldBe routes.YearToDateLiabilityController.uploadMandatoryEvidence().url
               doc
-                .select("#content > article > dl > div > dt")
+                .select("#main-content .govuk-summary-list__key")
                 .text()       shouldBe expiredEvidence.fileName
               doc
-                .select("#content > article > dl > div > dd:eq(2)")
+                .select("#main-content .govuk-summary-list__value")
                 .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.label")
             }
           )
@@ -8400,7 +8406,7 @@ class YearToDateLiabilityControllerSpec
               doc.select("#repayment-hint").text shouldBe messageFromMessageKey(expectedHelpTextKey)
 
               doc
-                .select("#content > article > form, #main-content form")
+                .select("form")
                 .attr("action") shouldBe routes.YearToDateLiabilityController
                 .repaymentSubmit()
                 .url

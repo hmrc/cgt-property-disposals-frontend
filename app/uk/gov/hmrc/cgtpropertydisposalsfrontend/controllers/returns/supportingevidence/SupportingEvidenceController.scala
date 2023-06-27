@@ -27,7 +27,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
 import play.api.mvc._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -71,7 +71,7 @@ class SupportingEvidenceController @Inject() (
   scanProgressPage: pages.scan_progress,
   uploadFailedPage: pages.upload_failed,
   scanFailedPage: pages.scan_failed
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+)(implicit ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging

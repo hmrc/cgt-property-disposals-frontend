@@ -15,18 +15,9 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 
 @this()
 
-@(total: AmountInPence, label: String, showGainType: Boolean)(implicit messages: Messages)
+@(hintText: String, url: String, label: Option[String] = None)(implicit messages: Messages)
 
-<h2 class="govuk-heading-m">
- @label
-</h2>
-<span class="calc-total">
- @{MoneyUtils.formatAmountOfMoneyWithPoundSign(total.abs().inPounds())}
- @if(showGainType) {
-  @{if (total.isNegative) s"(${messages("generic.loss")})" else if (!total.isZero) s"(${messages("generic.gain")})"}
- }
-</span>
+<a class="govuk-link" href="@url">@{label.getOrElse(messages("cya.delete"))}<span class="govuk-visually-hidden""> @hintText</span></a>

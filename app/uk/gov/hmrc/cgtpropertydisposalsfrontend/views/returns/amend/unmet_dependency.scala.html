@@ -18,32 +18,27 @@
 @import cats.syntax.eq._
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.{AmendReturnController, routes}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
-)
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        formWrapper: FormWithCSRF,
+        govukButton: GovukButton
+        )
 
-@(backLink: Call, key: String)(implicit messages:Messages, appConfig: ViewConfig, request: RequestWithSessionData[_])
+@(backLink: Call, key: String)(implicit messages:Messages, request: RequestWithSessionData[_])
 
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@layout(title, backLinkUrl = Some(backLink.url)) {
 
-    @backLinkComponent(backLink)
+<h1 class="govuk-heading-xl">@title</h1>
 
-    @pageHeading(title)
+    <p class="govuk-body">@messages(s"$key.p1")</p>
 
-    <p>@messages(s"$key.p1")</p>
-
-    <ul class="list-bullet">
+    <ul class="govuk-list govuk-list--bullet">
         <li>@messages(s"$key.li1")</li>
         <li>@messages(s"$key.li2")</li>
         <li>@messages(s"$key.li3")</li>
@@ -53,21 +48,15 @@
     </ul>
 
     @formWrapper(routes.AmendReturnController.unmetDependencySubmit(), 'novalidate -> "novalidate") {
-        @submitButton(
-            messages("button.continue"),
-          Some(Html(
-             s"""<a
-                | class="button--secondary"
-                |   role="button"
-                |   id="cancelButton"
-                |   href="${routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.unmetDependency).url}"
-                |>
-                |${messages("button.cancel")}
-                |</a>
-                |""".stripMargin
-          ))
-        )
-
+        @govukButton(Button(
+        content = Text(messages("button.continue"))
+        ))
+        @govukButton(Button(
+        attributes = Map("id" -> "cancelButton"),
+        href = Some(routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.unmetDependency).url),
+        content = Text(messages("button.cancel")),
+        classes = "govuk-button--secondary"
+        ))
     }
 
 }

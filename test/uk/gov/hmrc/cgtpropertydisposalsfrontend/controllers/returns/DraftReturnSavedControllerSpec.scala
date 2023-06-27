@@ -114,19 +114,17 @@ class DraftReturnSavedControllerSpec
                 .taskList()
                 .url
               doc
-                .select(".button")
+                .select(".govuk-button")
                 .attr(
                   "href"
                 )             shouldBe accounts.homepage.routes.HomePageController
                 .homepage()
                 .url
               doc
-                .select("#content > article > div > strong")
-                .text()       shouldBe messageFromMessageKey(
-                expectedWarningMessageKey,
-                formattedDate
-              )
-
+                .select(".govuk-warning-text__text")
+                .text()       shouldBe s"""${messageFromMessageKey(
+                "generic.warning"
+              )} ${messageFromMessageKey(expectedWarningMessageKey, formattedDate)}"""
             }
           )
         }

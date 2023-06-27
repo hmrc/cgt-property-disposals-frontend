@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 
 @this(
-        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum_govuk
 )
 
 @(
@@ -86,12 +86,12 @@
       total = true
     )
   )
-  <p>
+  <p class="govuk-body">
     <em>
     @messages("calculator.cannotApplyAEA")
     </em>
   </p>
-  <p>
+  <p class="govuk-body">
     <em>
     @messages("calculator.cannotUsePrevYearsLosses")
     </em>
@@ -140,7 +140,7 @@
   )
 
   @if(calculatedTax.yearPosition.isZero) {
-    <p>
+    <p class="govuk-body">
       <em>
       @messages("calculator.cannotUsePrevYearsLosses")
       </em>

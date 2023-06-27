@@ -2819,7 +2819,7 @@ previousYearsLosses.furtherReturn.main.agent.title=Rhowch wybod i ni am unrhyw g
 previousYearsLosses.furtherReturn.main.trust.title=Rhowch wybod i ni am unrhyw golledion Treth Enillion Cyfalaf caniataol a wnaeth yr ymddiriedolaeth mewn blynyddoedd treth blaenorol
 previousYearsLosses.furtherReturn.main.capacitor.title=Rhowch wybod i ni am unrhyw golledion Treth Enillion Cyfalaf caniataol a wnaeth y person mewn blynyddoedd treth blaenorol
 previousYearsLosses.furtherReturn.main.personalRep.title=Rhowch wybod i ni am unrhyw golledion Treth Enillion Cyfalaf caniataol a wnaeth y person mewn blynyddoedd treth blaenorol
-previousYearsLosses.furtherReturn.main.personalRepInPeriodOfAdmin.title=Rhowch wybod i ni am unrhyw golledion Treth Enillion Cyfalaf caniataol a wnaeth eich cleient mewn blynyddoedd treth blaenorol
+previousYearsLosses.furtherReturn.main.personalRepInPeriodOfAdmin.title=Rhowch wybod i ni am unrhyw golledion Treth Enillion Cyfalaf caniataol a wnaeth yr ystâd mewn blynyddoedd treth blaenorol
 previousYearsLosses.furtherReturn.main.personalRepInPeriodOfAdmin.agent.title=Rhowch wybod i ni am unrhyw golledion Treth Enillion Cyfalaf caniataol a wnaeth eich cleient mewn blynyddoedd treth blaenorol
 previousYearsLosses.furtherReturn.title=A ydych yn cynnwys unrhyw golledion Treth Enillion Cyfalaf caniataol eraill a wnaed mewn blynyddoedd treth blaenorol?
 previousYearsLosses.furtherReturn.agent.title=A ydych yn cynnwys unrhyw golledion Treth Enillion Cyfalaf caniataol eraill a wnaed mewn blynyddoedd treth blaenorol?
@@ -3291,11 +3291,11 @@ taxDue.taxableGain=Ennill trethadwy
 taxDue.assistive.taxableGain=ar gyfer ennill trethadwy
 taxDue.amountOfTaxDue=Treth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 taxDue.assistive.amountOfTaxDue=ar gyfer Treth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
-taxDue.helpText.p1=Yn seiliedig ar y manylion a nodwyd gennych, mae <strong class="bold">{0}</strong> o Dreth Enillion Cyfalaf yn ddyledus ar eiddo yn y DU ar gyfer y Ffurflen Dreth hon. Os ydych yn anghytuno â’r ffigur hwn, bydd angen i chi nodi swm arall ac uwchlwytho ffeil yn ddiweddarach sy’n dangos eich gwaith cyfrifo.
-taxDue.agent.helpText.p1=Os yw’ch cleient yn cytuno â’r gwaith cyfrifo hwn, nodwch <strong class="bold">{0}</strong>.
-taxDue.trust.helpText.p1=Os ydych yn cytuno â’r gwaith cyfrifo hwn, nodwch <strong class="bold">{0}</strong>.
-taxDue.capacitor.helpText.p1=Os yw’r person yn cytuno â’r gwaith cyfrifo hwn, nodwch <strong class="bold">{0}</strong>.
-taxDue.personalRep.helpText.p1=Os ydych yn cytuno â’r gwaith cyfrifo hwn, nodwch <strong class="bold">{0}</strong>.
+taxDue.helpText.p1=Yn seiliedig ar y manylion a nodwyd gennych, mae <strong>{0}</strong> o Dreth Enillion Cyfalaf yn ddyledus ar eiddo yn y DU ar gyfer y Ffurflen Dreth hon. Os ydych yn anghytuno â’r ffigur hwn, bydd angen i chi nodi swm arall ac uwchlwytho ffeil yn ddiweddarach sy’n dangos eich gwaith cyfrifo.
+taxDue.agent.helpText.p1=Os yw’ch cleient yn cytuno â’r gwaith cyfrifo hwn, nodwch <strong>{0}</strong>.
+taxDue.trust.helpText.p1=Os ydych yn cytuno â’r gwaith cyfrifo hwn, nodwch <strong>{0}</strong>.
+taxDue.capacitor.helpText.p1=Os yw’r person yn cytuno â’r gwaith cyfrifo hwn, nodwch <strong>{0}</strong>.
+taxDue.personalRep.helpText.p1=Os ydych yn cytuno â’r gwaith cyfrifo hwn, nodwch <strong>{0}</strong>.
 taxDue.helpText.p2=Os hoffech nodi swm gwahanol, gofynnir i chi uwchlwytho ffeil yn ddiweddarach sy’n dangos eich gwaith cyfrifo.
 taxDue.helpText.p3=Os yw’r ymddiriedolaeth ar gyfer buddiolwyr sy’n agored i niwed, bydd angen i chi gyfrifo a nodi swm y dreth sy’n ddyledus.
 taxDue.trustDetails.label=Cymorth i ymddiriedolaethau ar gyfer buddiolwyr sy’n agored i niwed
@@ -3362,9 +3362,9 @@ calculator.total.amountDueAtHigherRate=Swm y dreth sy’n ddyledus ar y gyfradd 
 calculator.total.taxOwed=Treth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 calculator.noTaxToPay=Does dim treth yn ddyledus ar gyfer y Ffurflen Dreth hon
 nonCalculatedTaxDue.title=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
-nonCalculatedTaxDue.ukResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu (yn agor tab newydd)
-nonCalculatedTaxDue.trust.link=Rhagor o wybodaeth am sut i gyfrifo Treth Enillion Cyfalaf ar gyfer ymddiriedolaeth (yn agor tab newydd)
-nonCalculatedTaxDue.nonResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu neu ar gyfer gwarediadau anuniongyrchol (yn agor tab newydd)
+nonCalculatedTaxDue.ukResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu
+nonCalculatedTaxDue.trust.link=Rhagor o wybodaeth am sut i gyfrifo Treth Enillion Cyfalaf ar gyfer ymddiriedolaeth
+nonCalculatedTaxDue.nonResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu neu ar gyfer gwarediadau anuniongyrchol
 nonCalculatedTaxDue.helpText=Bydd angen i chi gyfrifo’r swm a’i nodi.
 nonCalculatedTaxDue.error.required=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 nonCalculatedTaxDue.error.tooSmall=Mae’n rhaid i swm y Dreth Enillion Cyfalaf sy’n ddyledus fod yn 0 neu fwy
@@ -3771,7 +3771,7 @@ viewReturn.amend.chargeType.TwelveMonthLatePaymentPenalty=Cosb – taliad sydd 1
 viewReturn.chargeType.PenaltyInterest=Llog ar gosbau wedi’i dalu’n hwyr
 viewReturn.amend.chargeType.PenaltyInterest=Llog ar gosbau wedi’i dalu’n hwyr
 viewReturn.charge.status.paid=Talwyd
-viewReturn.charge.status.payNow=<a href="{0}">Talwch nawr</a>
+viewReturn.charge.status.payNow=<a class="govuk-link" href="{0}">Talwch nawr</a>
 viewReturn.charge.paymentMethod.BACS=taliad Bacs wedi dod i law
 viewReturn.charge.paymentMethod.CHAPS=taliad CHAPS wedi dod i law
 viewReturn.charge.paymentMethod.Cheque=siec wedi dod i law

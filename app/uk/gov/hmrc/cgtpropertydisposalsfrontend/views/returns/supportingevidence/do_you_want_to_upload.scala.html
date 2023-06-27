@@ -17,56 +17,96 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  govukWarningText : GovukWarningText,
+  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+  formWrapper: FormWithCSRF,
+  govukRadios: GovukRadios,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
-@(form: Form[Boolean], backLink: Call, isAmend: Boolean, dueRepayment: Boolean = false )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(
+  form: Form[Boolean],
+  backLink: Call,
+  isAmend: Boolean,
+  dueRepayment: Boolean = false
+)(
+  implicit request: RequestWithSessionData[_],
+  messages: Messages
+)
 
-    @key = @{"supporting-evidence.do-you-want-to-upload"}
-    @title = @{messages(s"$key.title")}
-    @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@key = @{"supporting-evidence.do-you-want-to-upload"}
 
-    @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@title = @{messages(s"$key.title")}
 
-        @backLinkComponent(backLink)
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-        @if(hasErrors) {
-            @errorSummary(form)
-        }
+@helpText = @{"helpText"}
 
-        @caption(messages(s"$key.caption"))
+@layout(
+  title,
+  backLinkUrl = Some(backLink.url),
+  hasErrors = hasErrors
+) {
+  @if(hasErrors) {
+    @errorSummary(form)
+  }
 
-        @formWrapper(routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidenceSubmit(), 'novalidate -> "novalidate") {
+  @caption(messages(s"$key.caption"))
 
-            @yesNo(
-                fieldId = key,
-                label = pageHeading(title),
-                errorKey = form.error(key).map(e => e.message),
-                hasErrors = hasErrors,
-                selected = form.value,
-                helpText = Some(Html(messages(s"$key.help-text"))),
-                yesContent = None,
-                warningField = if(dueRepayment){Some(messages(s"$key.hint"))}else{None}
-            )
+  <h1 class="govuk-heading-xl">@title</h1>
 
-            @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+  <p class="govuk-hint" id=@helpText>@messages(s"$key.help-text")</p>
 
-        }
+  @if(dueRepayment){
+    @govukWarningText(WarningText(
+      iconFallbackText = Some(messages("generic.warning")),
+      content = Text(messages(s"$key.hint"))
+    ))
+  }
 
-        @returnToSummaryLink(displayReturnToSummaryLink = true)
+  @formWrapper(routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidenceSubmit(), 'novalidate -> "novalidate") {
+    @govukRadios(Radios(
+      fieldset = Some(Fieldset(
+        legend = Some(Legend(
+          content = Text(title),
+          isPageHeading = false,
+          classes = "govuk-visually-hidden",
+        )),
+        describedBy = Some(helpText)
+      )),
+      name = key,
+      idPrefix = Some(key),
+      items = Seq(
+        RadioItem(
+          content = Text(messages("generic.yes")),
+          value = Some("true"),
+          checked = form.data.get(key).contains("true"),
+        ),
+        RadioItem(
+          content = Text(messages("generic.no")),
+          value = Some("false"),
+          checked = form.data.get(key).contains("false"),
+        )
+      ),
+      errorMessage = form.error(key).map(e =>
+        ErrorMessage(
+          content = Text(messages(s"${key}.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        )
+      )
+    ))
 
+    @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue")
+  )
+  }
+
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 }
