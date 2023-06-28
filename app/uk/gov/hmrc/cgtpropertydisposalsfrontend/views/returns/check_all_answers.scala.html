@@ -332,7 +332,7 @@
  @printLink(messages("viewReturn.printLink"))
 
   @if(!fillingOutReturn.isAmendReturn) {
-      <a id="saveAndComeBackLater" href="@{
+      <a class="govuk-link" id="saveAndComeBackLater" href="@{
           routes.DraftReturnSavedController.draftReturnSaved().url
       }">@messages("task-list.save-and-come-back.link")</a>
   }
