@@ -7,6 +7,9 @@ body:not(.js-enabled) .js-visible {
 .govuk-form-group--error .autocomplete__input {
     border-color: #d4351c;
 }
+.govuk-panel--confirmation * {
+    color: #ffffff !important;
+}
 @media (min-width: 40.0625em) {
     .autocomplete__wrapper {
         width: 66%;

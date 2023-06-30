@@ -15,8 +15,9 @@
  *@
 
 @import play.twirl.api.Html
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this()
+@this(govukDetails: GovukDetails)
 
 @(
     summary: String,
@@ -25,15 +26,13 @@
     assistivePrefix: Option[String] = None
 )
 
-<details class="govuk-details govuk-!-margin-bottom-4" data-module="govuk-details">
-  <summary class="govuk-details__summary">
-    <span class="govuk-details__summary-text">
-      @assistivePrefix.map(a => Html(s"""<span class="govuk-visually-hidden">${a} </span>"""))
-      @summary
-      @assistiveText.map(a => Html(s""" <span class="govuk-visually-hidden">${a}</span>"""))
-    </span>
-  </summary>
-  <div class="govuk-details__text">
-    @content
-  </div>
-</details>
+@summaryHtml = {
+  @assistivePrefix.map(a => Html(s"""<span class="govuk-visually-hidden">${a}</span> """))
+  @summary
+  @assistiveText.map(a => Html(s""" <span class="govuk-visually-hidden">${a}</span>"""))
+}
+
+@govukDetails(Details(
+  summary = HtmlContent(summaryHtml),
+  content = HtmlContent(content)
+))
