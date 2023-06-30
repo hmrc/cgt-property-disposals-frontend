@@ -212,10 +212,6 @@ class ReliefDetailsControllerSpec
     if (individualUserType === PersonalRepresentativeInPeriodOfAdmin) true
     else false
 
-  def periodOfAdminMsgKey(individualUserType: IndividualUserType): String =
-    if (individualUserType === PersonalRepresentativeInPeriodOfAdmin) ".main"
-    else ""
-
   "ReliefDetailsController" when {
 
     "handling requests to display the private residence relief page" must {
@@ -250,12 +246,12 @@ class ReliefDetailsControllerSpec
                 )
               }
 
-              val userKey   = userMessageKey(individualUserType, userType)
-              val poaMsgKey = periodOfAdminMsgKey(individualUserType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey$poaMsgKey.title")
+                messageFromMessageKey(s"$key.h1"),
+                doc => doc.select("legend").text() shouldBe messageFromMessageKey(s"$key$userKey.title")
               )
           }
         }
@@ -277,13 +273,15 @@ class ReliefDetailsControllerSpec
                   )
                 }
 
-                val userKey   = userMessageKey(individualUserType, userType)
-                val poaMsgKey = periodOfAdminMsgKey(individualUserType)
+                val userKey = userMessageKey(individualUserType, userType)
 
                 checkPageIsDisplayed(
                   performAction(),
-                  messageFromMessageKey(s"$key$userKey$poaMsgKey.title"),
-                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
+                  messageFromMessageKey(s"$key.h1"),
+                  doc => {
+                    doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
+                    doc.select("legend").text()             shouldBe messageFromMessageKey(s"$key$userKey.title")
+                  }
                 )
             }
           }
@@ -304,13 +302,15 @@ class ReliefDetailsControllerSpec
                   )
                 }
 
-                val userKey   = userMessageKey(individualUserType, userType)
-                val poaMsgKey = periodOfAdminMsgKey(individualUserType)
+                val userKey = userMessageKey(individualUserType, userType)
 
                 checkPageIsDisplayed(
                   performAction(),
-                  messageFromMessageKey(s"$key$userKey$poaMsgKey.title"),
-                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
+                  messageFromMessageKey(s"$key.h1"),
+                  doc => {
+                    doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
+                    doc.select("legend").text()             shouldBe messageFromMessageKey(s"$key$userKey.title")
+                  }
                 )
             }
           }
@@ -369,17 +369,15 @@ class ReliefDetailsControllerSpec
             )
           }
 
-          val poaMsgKey = periodOfAdminMsgKey(individualUserType)
-
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey(s"$key$userKey$poaMsgKey.title"),
-            doc =>
+            messageFromMessageKey(s"$key.h1"),
+            doc => {
               doc
                 .select("[data-spec='errorSummaryDisplay'] a")
-                .text() shouldBe messageFromMessageKey(
-                expectedErrorMessageKey
-              ),
+                .text()                   shouldBe messageFromMessageKey(expectedErrorMessageKey)
+              doc.select("legend").text() shouldBe messageFromMessageKey(s"$key$userKey.title")
+            },
             BAD_REQUEST
           )
         }
@@ -697,7 +695,8 @@ class ReliefDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title")
+                messageFromMessageKey(s"$key.h1"),
+                doc => doc.select("legend").text() shouldBe messageFromMessageKey(s"$key$userKey.title")
               )
           }
         }
@@ -724,10 +723,11 @@ class ReliefDetailsControllerSpec
 
                 checkPageIsDisplayed(
                   performAction(),
-                  messageFromMessageKey(s"$key$userKey.title"),
+                  messageFromMessageKey(s"$key.h1"),
                   doc => {
                     doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
-                    doc.select("div > strong#warning").text shouldBe messages(s"$key.warningMsg")
+                    doc.select(".govuk-inset-text").text    shouldBe messages(s"$key.warningMsg")
+                    doc.select("legend").text()             shouldBe messageFromMessageKey(s"$key$userKey.title")
                   }
                 )
             }
@@ -755,8 +755,11 @@ class ReliefDetailsControllerSpec
 
                 checkPageIsDisplayed(
                   performAction(),
-                  messageFromMessageKey(s"$key$userKey.title"),
-                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
+                  messageFromMessageKey(s"$key.h1"),
+                  doc => {
+                    doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
+                    doc.select("legend").text()             shouldBe messageFromMessageKey(s"$key$userKey.title")
+                  }
                 )
             }
           }
@@ -846,10 +849,14 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey(s"$key$userKey.title"),
-            doc =>
-              doc.select("[data-spec='errorSummaryDisplay'] a").text() shouldBe
-                Messages(expectedErrorMessageKey, args: _*),
+            messageFromMessageKey(s"$key.h1"),
+            doc => {
+              doc.select("legend").text()                              shouldBe messageFromMessageKey(s"$key$userKey.title")
+              doc.select("[data-spec='errorSummaryDisplay'] a").text() shouldBe Messages(
+                expectedErrorMessageKey,
+                args: _*
+              )
+            },
             BAD_REQUEST
           )
         }
@@ -908,13 +915,15 @@ class ReliefDetailsControllerSpec
                 performAction(
                   Seq(key -> "0", valueKey -> "10")
                 ),
-                messageFromMessageKey(s"$key$userKey.title"),
-                doc =>
+                messageFromMessageKey(s"$key.h1"),
+                doc => {
                   doc
                     .select("[data-spec='errorSummaryDisplay'] a")
-                    .text() shouldBe messageFromMessageKey(
+                    .text()                   shouldBe messageFromMessageKey(
                     s"$valueKey.error.amountOverPrivateResidenceRelief"
-                  ),
+                  )
+                  doc.select("legend").text() shouldBe messageFromMessageKey(s"$key$userKey.title")
+                },
                 BAD_REQUEST
               )
           }
@@ -1252,7 +1261,8 @@ class ReliefDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title")
+                messageFromMessageKey(s"$key.h1"),
+                doc => doc.select("legend").text() shouldBe messageFromMessageKey(s"$key$userKey.title")
               )
           }
         }
@@ -1280,8 +1290,11 @@ class ReliefDetailsControllerSpec
 
                 checkPageIsDisplayed(
                   performAction(),
-                  messageFromMessageKey(s"$key$userKey.title"),
-                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "13.34"
+                  messageFromMessageKey(s"$key.h1"),
+                  doc => {
+                    doc.select(s"#$valueKey").attr("value") shouldBe "13.34"
+                    doc.select("legend").text()             shouldBe messageFromMessageKey(s"$key$userKey.title")
+                  }
                 )
             }
           }
@@ -1309,8 +1322,11 @@ class ReliefDetailsControllerSpec
 
                 checkPageIsDisplayed(
                   performAction(),
-                  messageFromMessageKey(s"$key$userKey.title"),
-                  doc => doc.select(s"#$valueKey").attr("value") shouldBe "13.34"
+                  messageFromMessageKey(s"$key.h1"),
+                  doc => {
+                    doc.select(s"#$valueKey").attr("value") shouldBe "13.34"
+                    doc.select("legend").text()             shouldBe messageFromMessageKey(s"$key$userKey.title")
+                  }
                 )
             }
           }
@@ -1361,13 +1377,15 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey(s"$key$userKey.title"),
-            doc =>
+            messageFromMessageKey(s"$key.h1"),
+            doc => {
               doc
                 .select("[data-spec='errorSummaryDisplay'] a")
-                .text() shouldBe messageFromMessageKey(
+                .text()                   shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              ),
+              )
+              doc.select("legend").text() shouldBe messageFromMessageKey(s"$key$userKey.title")
+            },
             BAD_REQUEST
           )
         }
@@ -1417,8 +1435,8 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey(s"$key$userKey.title"),
-            doc =>
+            messageFromMessageKey(s"$key.h1"),
+            doc => {
               expectedErrorMessageKey.toList match {
                 case Nil             =>
                 case errorKey :: Nil =>
@@ -1439,7 +1457,9 @@ class ReliefDetailsControllerSpec
                   expectedErrorMessageKey
                     .map(messageFromMessageKey(_))
                     .foreach(message => errors should contain(message))
-              },
+              }
+              doc.select("legend").text() shouldBe messageFromMessageKey(s"$key$userKey.title")
+            },
             BAD_REQUEST
           )
         }
@@ -2079,7 +2099,7 @@ class ReliefDetailsControllerSpec
                 messageFromMessageKey("reliefDetails.cya.title"),
                 doc =>
                   doc
-                    .select("#content > article > form, #main-content form")
+                    .select("#main-content form")
                     .attr("action") shouldBe routes.ReliefDetailsController
                     .checkYourAnswersSubmit()
                     .url

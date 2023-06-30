@@ -17,27 +17,24 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        formWrapper: FormWithCSRF,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+        govukRadios: GovukRadios,
+        govukInput: GovukInput
 )
 
 @(
@@ -79,93 +76,90 @@
     }
 }
 
-@title = @{messages(s"$key$userKey.title", "")}
+@title = @{messages(s"$key.h1")}
+@legend = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@yesContent = {
+  @govukInput(Input(
+    id = nameKey,
+    name = nameKey,
+    value = form.data.get(nameKey),
+    label = Label(
+      content = Text(messages(s"$nameKey$userKey.label"))
+    ),
+    errorMessage = form.error(nameKey).map(e => ErrorMessage(
+      content = Text(messages(s"$nameKey.$userErrorKey${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    autocomplete = Some(AutoCompleteType.On.value)
+  ))
+  @govukInput(Input(
+    id = valueKey,
+    name = valueKey,
+    value = form.data.get(valueKey),
+    label = Label(
+      content = Text(messages(s"$valueKey$userKey.label"))
+    ),
+    classes = "govuk-input--width-10",
+    prefix = Some(PrefixOrSuffix(
+      content = Text("£")
+    )),
+    errorMessage = form.error(valueKey).map(e => ErrorMessage(
+      content = Text(messages(s"$valueKey$userKey.${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    autocomplete = Some(AutoCompleteType.On.value)
+  ))
+}
 
-@options = @{
-    List(
-        RadioOption(
-            label = messages(s"generic.yes"),
-            content = Some(
-                Html(
-                    s"""
-                    |${
-                        textInput(
-                            fieldId = nameKey,
-                            label = Html(messages(s"$nameKey$userKey.label")),
-                            helpText = None,
-                            labelAsHeading = false,
-                            errorKey = form.error(nameKey).map(e => s"$userErrorKey${e.message}"),
-                            value = form.data.getOrElse(nameKey, ""),
-                            hasErrors = form.error(nameKey).nonEmpty,
-                            extraContent = None,
-                            inputType = Some("text"),
-                            autoComplete = AutoCompleteType.On
-                        )
-                    }
-                    |${
-                        unitInput(
-                            fieldId = valueKey,
-                            value = form.data.getOrElse(valueKey, ""),
-                            label = Html(messages(s"$valueKey$userKey.label")),
-                            formError = form.error(valueKey),
-                            hasErrors = form.error(valueKey).nonEmpty,
-                            autoComplete = AutoCompleteType.On,
-                            inputClass = Some("small"),
-                            aspect = "left",
-                            unit = "£",
-                            assistiveText = messages("unit-input.assistive.pounds"),
-                            customErrorKey = Some(s"$valueKey$userKey")
-                        )
-                    }
-                    |""".stripMargin
-                )
-            ),
-            optionHelpText = None
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
+
+  @if(hasErrors) {
+    @errorSummary(form, None, userKey)
+  }
+
+  @caption(messages("reliefDetails.caption"))
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-body">@messages(s"$key$userKey.helpText")</p>
+  <p class="govuk-body">@messages(s"$key$userKey.helpText2")</p>
+  <p class="govuk-body">
+    <a class="govuk-link" href="@{appConfig.reliefsInfo}" target="_blank" rel="noopener noreferrer">
+      @messages(s"$key$userKey.furtherInfoLink")
+    </a>
+  </p>
+  @formWrapper(routes.ReliefDetailsController.otherReliefsSubmit()) {
+    @govukRadios(Radios(
+      fieldset = Some(Fieldset(
+        legend = Some(Legend(
+          content = Text(legend),
+          classes = "govuk-fieldset__legend--m"
+        ))
+      )),
+      name = key,
+      idPrefix = Some(key),
+      items = Seq(
+        RadioItem(
+          content = Text(messages("generic.yes")),
+          value = Some("0"),
+          checked = form.data.get(key).contains("0"),
+          conditionalHtml = Some(yesContent)
         ),
-        RadioOption(
-            label = messages(s"generic.no"),
-            content = None,
-            optionHelpText = None
+        RadioItem(
+          content = Text(messages("generic.no")),
+          value = Some("1"),
+          checked = form.data.get(key).contains("1")
         )
-    )
-}
-
-@selectedIndex = @{
-    form.data.get(key).map({
-        case "0" => 0
-        case _ => 1
-    })
-}
-
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
-
-    @backLinkComponent(backLink)
-
-    @if(hasErrors) {
-        @errorSummary(form, None, userKey)
-    }
-
-    @caption(messages("reliefDetails.caption"))
-
-    @formWrapper(routes.ReliefDetailsController.otherReliefsSubmit(), 'novalidate -> "novalidate") {
-        @radioGroupConditional(
-            fieldId = key,
-            label = pageHeading(title),
-            selected = selectedIndex,
-            error = form.error(key),
-            options = options,
-            helpText = Some(Html(s"""${messages(s"$key$userKey.helpText")}<br/><br/>${messages(s"$key$userKey.helpText2")}""")),
-            customErrorKey = Some(s"$key$userKey")
+      ),
+      errorMessage = form.error(key).map(e =>
+        ErrorMessage(
+          content = Text(messages(s"$key$userKey.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
         )
-        <p>
-            <a href="@{appConfig.reliefsInfo}" target="_blank">
-                @messages(s"$key$userKey.furtherInfoLink")
-            </a>
-        </p>
-        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
-    }
+      )
+    ))
+    @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+  }
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

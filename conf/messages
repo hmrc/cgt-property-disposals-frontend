@@ -2751,6 +2751,7 @@ loss.label=Initial loss amount
 #===================================================
 
 reliefDetails.caption=Reliefs
+privateResidentsRelief.h1=Private Residence Relief
 
 privateResidentsRelief.title=Are you entitled to claim Private Residence Relief?
 privateResidentsRelief.agent.title=Is your client entitled to claim Private Residence Relief?
@@ -2777,13 +2778,13 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Private Residence 
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=the property had been the only home of a beneficiary, both before and after the deceased’s death
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=that beneficiary was also entitled to at least 75% of the proceeds of the disposal of the property (assuming that none of the proceeds are needed to meet any liabilities of the deceased person’s estate)
 
-privateResidentsRelief.warningMsg=Private Residence Relief changed on 6 April 2020. Please make sure you understand the new rules.
+privateResidentsRelief.warningMsg=Private Residence Relief changed on 6 April 2020. Make sure you understand the rules.
 
 privateResidentsRelief.details.link=Help with Private Residence Relief
 privateResidentsRelief.details.body.p1=If the property was your main home and you lived there for the entire time you owned it, you can claim full relief.
 privateResidentsRelief.details.body.p2=If you did not live in the property for the entire time you owned it, you can claim relief for the:
 privateResidentsRelief.details.body.li1=years you lived there
-privateResidentsRelief.details.body.li2=last <strong class="bold">9 months</strong> you owned it - even if you were not living there at the time
+privateResidentsRelief.details.body.li2=last <strong>9 months</strong> you owned it - even if you were not living there at the time
 privateResidentsRelief.details.body.p3=Some exceptions apply.
 privateResidentsRelief.details.body.link=Find out about Private Residence Relief (opens in a new tab)
 
@@ -2848,6 +2849,7 @@ privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooManyDecimals=Amo
 privateResidentsRelief.cyaChange=if Private Residence Relief is being claimed
 privateResidentsReliefValue.cyaChange=the amount of Private Residence Relief
 
+lettingsRelief.h1=Letting Relief
 lettingsRelief.title=Are you entitled to claim Letting Relief?
 lettingsRelief.agent.title=Is your client entitled to claim Letting Relief?
 lettingsRelief.trust.title=Is the trust entitled to claim Letting Relief?
@@ -2860,10 +2862,10 @@ lettingsRelief.trust.helpText=The trust might be able to claim this relief if th
 lettingsRelief.capacitor.helpText=The person might be able to claim this relief if the property was their main home and they also let it out for a time.
 lettingsRelief.personalRep.helpText=The person might have been able to claim this relief if the property was their main home and they also let it out for a time.
 
-lettingsRelief.warningMsg=Letting Relief changed on 6 April 2020. Please make sure you understand the new rules.
+lettingsRelief.warningMsg=Letting Relief changed on 6 April 2020. Make sure you understand the rules.
 
 lettingsRelief.details.link=Help with Letting Relief
-lettingsRelief.details.body.p1=If you lived in your home <strong class="bold">at the same time</strong> as your tenants, you may qualify for the lowest of:
+lettingsRelief.details.body.p1=If you lived in your home <strong>at the same time</strong> as your tenants, you may qualify for the lowest of:
 lettingsRelief.details.body.li1=the same amount you got in Private Residence Relief
 lettingsRelief.details.body.li2=£40,000
 lettingsRelief.details.body.li3=the same amount as the chargeable gain you made while letting out part of your home
@@ -2890,6 +2892,7 @@ lettingsReliefValue.error.amountOverPrivateResidenceRelief=Amount of Letting Rel
 lettingsRelief.cyaChange=if Letting Relief is being claimed
 lettingsReliefValue.cyaChange=the amount of Letting Relief
 
+otherReliefs.h1=Other Capital Gains Tax reliefs
 otherReliefs.title=Do you want to claim any other Capital Gains Tax reliefs?
 otherReliefs.agent.title=Does your client want to claim any other Capital Gains Tax reliefs?
 otherReliefs.trust.title=Does the trust want to claim any other Capital Gains Tax reliefs?
@@ -3016,7 +3019,6 @@ otherReliefsName.cyaChange=the names of other reliefs being claimed
 otherReliefsAmount.cyaChange=the amount of other reliefs being claimed
 
 reliefDetails.cya.title=Check your answers
-reliefDetails.cya.warningMsg=Private Residence Relief and Letting Relief changed on 6 April 2020. Please make sure you understand the new rules.
 
 #===================================================
 #  RELIEFS PAGES - END

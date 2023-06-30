@@ -2392,6 +2392,7 @@ loss.label=Swm y golled gychwynnol
 #===================================================
 
 reliefDetails.caption=Rhyddhad
+privateResidentsRelief.h1=Ryddhad Preswylfa Breifat
 privateResidentsRelief.title=A oes gennych hawl i Ryddhad Preswylfa Breifat?
 privateResidentsRelief.agent.title=A oes gan eich cleient hawl i Ryddhad Preswylfa Breifat?
 privateResidentsRelief.trust.title=A oes gan yr ymddiriedolaeth hawl i Ryddhad Preswylfa Breifat?
@@ -2414,13 +2415,13 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Gellir ond hawlio 
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=mai’r eiddo oedd unig gartref buddiolwr, cyn ac ar ôl marwolaeth yr ymadawedig
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=oedd gan y buddiolwr hwnnw hawl hefyd i o leiaf 75% o dderbyniadau gwaredu’r eiddo (gan dybio nad oedd angen unrhyw un o’r derbyniadau er mwyn bodloni unrhyw rwymedigaethau ystâd yr ymadawedig)
 
-privateResidentsRelief.warningMsg=Newidiodd Rhyddhad Preswylfa Breifat ar 6 Ebrill 2020. Gwnewch yn siŵr eich bod yn deall y rheolau newydd.
+privateResidentsRelief.warningMsg=Newidiodd Rhyddhad Preswylfa Breifat ar 6 Ebrill 2020. Gwnewch yn siŵr eich bod yn deall y rheolau.
 
 privateResidentsRelief.details.link=Help gyda Rhyddhad Preswylfa Breifat
 privateResidentsRelief.details.body.p1=Os mai’ch prif gartref oedd yr eiddo ac os oeddech yn byw yno drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio’r rhyddhad llawn.
 privateResidentsRelief.details.body.p2=Os nad oeddech yn byw yn yr eiddo drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio rhyddhad ar gyfer:
 privateResidentsRelief.details.body.li1=y blynyddoedd yr oeddech yn byw yno
-privateResidentsRelief.details.body.li2=y <strong class="bold">naw mis</strong> olaf yr oeddech yn berchen arno – hyd yn oed os nad oeddech yn byw yno ar y pryd
+privateResidentsRelief.details.body.li2=y <strong>naw mis</strong> olaf yr oeddech yn berchen arno – hyd yn oed os nad oeddech yn byw yno ar y pryd
 privateResidentsRelief.details.body.p3=Mae rhai eithriadau’n gymwys.
 privateResidentsRelief.details.body.link=Dysgwch am Ryddhad Preswylfa Breifat (yn agor tab newydd)
 
@@ -2476,6 +2477,7 @@ privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooManyDecima
 privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooManyDecimals=Mae’n rhaid i swm y Rhyddhad Preswylfan Preifat fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, fel 108 neu 2,940.54
 privateResidentsRelief.cyaChange=os yw Rhyddhad Preswylfan Preifat yn cael ei hawlio
 privateResidentsReliefValue.cyaChange=swm y Rhyddhad Preswylfan Preifat
+lettingsRelief.h1=Ryddhad Gosod
 lettingsRelief.title=A oes gennych hawl i Ryddhad Gosod?
 lettingsRelief.agent.title=A oes gan eich cleient hawl i Ryddhad Gosod?
 lettingsRelief.trust.title=A oes gan yr ymddiriedolaeth hawl i Ryddhad Gosod?
@@ -2487,10 +2489,10 @@ lettingsRelief.trust.helpText=Mae’n bosibl y gall yr ymddiriedolaeth hawlio’
 lettingsRelief.capacitor.helpText=Mae’n bosibl y gall yr ymddiriedolaeth hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i bod hefyd wedi’i roi ar osod am gyfnod.
 lettingsRelief.personalRep.helpText=Mae’n bosibl y gall y person hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i fod hefyd wedi’i roi ar osod am gyfnod.
 
-lettingsRelief.warningMsg=Newidiodd Rhyddhad Gosod ar 6 Ebrill 2020.  Gwnewch yn siŵr eich bod yn deall y rheolau newydd.
+lettingsRelief.warningMsg=Newidiodd Rhyddhad Gosod ar 6 Ebrill 2020. Gwnewch yn siŵr eich bod yn deall y rheolau.
 
 lettingsRelief.details.link=Help gyda Rhyddhad Gosod
-lettingsRelief.details.body.p1=Os oeddech yn byw yn eich cartref <strong class="bold">ar yr un pryd</strong> â’ch tenantiaid, efallai y byddwch yn gymwys i gael yr isaf o’r canlynol:
+lettingsRelief.details.body.p1=Os oeddech yn byw yn eich cartref <strong>ar yr un pryd</strong> â’ch tenantiaid, efallai y byddwch yn gymwys i gael yr isaf o’r canlynol:
 lettingsRelief.details.body.li1=yr un swm a gawsoch mewn Rhyddhad Preswylfa Breifat
 lettingsRelief.details.body.li2=£40,000
 lettingsRelief.details.body.li3=yr un swm â’r enillion trethadwy a wnaethoch wrth roi rhan o’ch cartref ar osod
@@ -2512,6 +2514,7 @@ lettingsReliefValue.error.amountOverLimit=Mae’n rhaid i swm y Rhyddhad Gosod f
 lettingsReliefValue.error.amountOverPrivateResidenceRelief=Ni all swm y Rhyddhad Gosod fod yn uwch na swm y Rhyddhad Preswylfan Preifat
 lettingsRelief.cyaChange=os yw Rhyddhad Gosod yn cael ei hawlio
 lettingsReliefValue.cyaChange=swm y Rhyddhad Gosod
+otherReliefs.h1=Unrhyw ryddhad arall sy’n ymwneud â Threth Enillion Cyfalaf
 otherReliefs.title=A ydych am hawlio unrhyw ryddhad arall sy’n ymwneud â Threth Enillion Cyfalaf?
 otherReliefs.agent.title=A yw’ch cleient am hawlio unrhyw ryddhad arall sy’n ymwneud â Threth Enillion Cyfalaf?
 otherReliefs.trust.title=A yw’r ymddiriedolaeth am hawlio unrhyw ryddhad araill sy’n ymwneud â Threth Enillion Cyfalaf?
@@ -2622,7 +2625,6 @@ otherReliefs.cyaChange=os yw rhyddhad arall yn cael ei hawlio
 otherReliefsName.cyaChange=enwau’r rhyddhad arall sy’n cael ei hawlio
 otherReliefsAmount.cyaChange=swm y rhyddhad arall sy’n cael ei hawlio
 reliefDetails.cya.title=Gwiriwch eich atebion
-reliefDetails.cya.warningMsg=Newidiodd Rhyddhad Preswylfa Breifat a Rhyddhad Gosod ar 6 Ebrill 2020. Gwnewch yn siŵr eich bod yn deall y rheolau newydd.
 #===================================================
 #  RELIEFS PAGES - END
 #===================================================
