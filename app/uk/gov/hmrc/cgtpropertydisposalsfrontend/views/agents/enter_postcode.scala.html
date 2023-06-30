@@ -27,7 +27,8 @@
         submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
         formWrapper: FormWithCSRF,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-        govukInput: GovukInput
+        govukInput: GovukInput,
+        govukErrorSummary: GovukErrorSummary,
 )
 
 @(form: Form[Postcode])(implicit request: RequestWithSessionData[_], messages: Messages)
@@ -38,32 +39,45 @@
 
 @layout(title, hasErrors = hasErrors, backLinkUrl = Some(routes.AgentAccessController.enterClientsCgtRef().url)) {
 
- @if(hasErrors) {
-  @errorSummary(form)
- }
+  @{
+    if(form.hasGlobalErrors) {
+      govukErrorSummary(ErrorSummary(
+        title = Text(messages("error.summary.heading")),
+        attributes = Map("data-spec" -> "errorSummaryDisplay"),
+        errorList = form.globalErrors.map { error =>
+          ErrorLink(
+            href = Some(s"#$key"),
+            content = Text(messages(s"${error.message}"))
+          )
+        }
+      ))
+    } else if (form.hasErrors) {
+      errorSummary(form)
+    }
+  }
 
  @formWrapper(routes.AgentAccessController.enterClientsPostcodeSubmit(), 'novalidate -> "novalidate") {
-    @govukInput(Input(
-            id = key,
-            name = key,
-            value = form.data.get(key),
-            label = Label(
-            content = Text(messages("agent.enter-client-postcode.title")),
-            isPageHeading = true,
-            classes = "govuk-label--xl govuk-input--width-10"
-            ),
-            classes = "govuk-!-width-one-quarter",
-            hint = Some(Hint(
-            content = HtmlContent("<p class=\"govuk-body-l\">"+s"${messages("agent.enter-client-postcode.extraContent")}</p>" +
-            s"${messages("agent.enter-client-postcode.helpText")}"
-            )
-            )),
-            errorMessage = form.error(key).map(e => ErrorMessage(
-            content = Text(messages(s"$key.${e.message}")),
-            visuallyHiddenText = Some(messages("generic.error"))
-            )),
-            autocomplete = Some(AutoCompleteType.Postcode.toString)
-      ))
+  @govukInput(Input(
+    id = key,
+    name = key,
+    value = form.data.get(key),
+    label = Label(
+    content = Text(messages("agent.enter-client-postcode.title")),
+      isPageHeading = true,
+      classes = "govuk-label--xl govuk-input--width-10"
+    ),
+    classes = "govuk-!-width-one-quarter",
+    hint = Some(Hint(
+      content = HtmlContent("<p class=\"govuk-body-l\">"+s"${messages("agent.enter-client-postcode.extraContent")}</p>" +
+      s"${messages("agent.enter-client-postcode.helpText")}"
+    )
+    )),
+    errorMessage = form.error(key).map(e => ErrorMessage(
+      content = Text(messages(s"$key.${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    autocomplete = Some(AutoCompleteType.Postcode.value)
+  ))
 
   @submitButton(messages("button.continue"))
  }
