@@ -29,7 +29,6 @@ import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
@@ -57,7 +56,7 @@ class JourneyStatusController @Inject() (
   sessionStore: SessionStore,
   cc: MessagesControllerComponents,
   setReturnStatePage: views.html.testonly.set_return_state
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+)(implicit ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
