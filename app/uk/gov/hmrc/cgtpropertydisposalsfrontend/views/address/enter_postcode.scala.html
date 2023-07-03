@@ -17,7 +17,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupRequest
@@ -28,13 +27,13 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input_govuk,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    formWrapper: FormWithCSRF,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        formWrapper: FormWithCSRF,
+        govukInput: GovukInput,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
 )
 
 @(
@@ -81,34 +80,50 @@
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
- @if(hasErrors) {
-  @errorSummary(form)
+ @if(form.hasErrors) {
+   @errorSummary(form)
  }
 
  @caption(messages(addressJourneyType.captionMessageKey()))
   <h1 class="govuk-heading-xl">@title</h1>
 
  @formWrapper(submit) {
-   @textInput(
-    fieldId = postcodeFilterKey,
-    label = Html(messages("address.postcodeFilter.label")),
-    helpText = Some(Html(messages("address.postcodeFilter.helpText"))),
-    errorKey = form.error(postcodeFilterKey).map(e => e.message),
-    value = form.data.getOrElse(postcodeFilterKey, ""),
-    hasErrors = form.error(postcodeFilterKey).nonEmpty,
-    inputClass = Some("govuk-input govuk-!-width-two-thirds"),
-    autoComplete = AutoCompleteType.On
-   )
-   @textInput(
-    fieldId = key,
-    label = Html(messages("address.postcode.label")),
-    helpText = Some(Html(messages("address.postcode.helpText"))),
-    errorKey = form.error(key).map(e => e.message),
-    value = form.data.getOrElse(key, ""),
-    hasErrors = form.error(key).nonEmpty,
-    inputClass = Some("govuk-input govuk-!-width-one-third"),
-    autoComplete = AutoCompleteType.Postcode
-   )
+   @govukInput(Input(
+     id = postcodeFilterKey,
+     name = postcodeFilterKey,
+     value = form.data.get(postcodeFilterKey),
+     label = Label(
+       content = Text(messages("address.postcodeFilter.label")),
+       classes = "govuk-label--m"
+     ),
+     classes = "govuk-!-width-two-thirds",
+     hint = Some(Hint(
+       content = Text(messages("address.postcodeFilter.helpText"))
+     )),
+     errorMessage = form.error(postcodeFilterKey).map(e => ErrorMessage(
+       content = Text(messages(s"$key.${e.message}")),
+       visuallyHiddenText = Some(messages("generic.error"))
+     )),
+     autocomplete = Some(AutoCompleteType.On.value)
+   ))
+   @govukInput(Input(
+     id = key,
+     name = key,
+     value = form.data.get(key),
+     label = Label(
+       content = Text(messages("address.postcode.label")),
+       classes = "govuk-label--m"
+     ),
+     classes = "govuk-!-width-one-quarter",
+     hint = Some(Hint(
+       content = Text(messages("address.postcode.helpText"))
+     )),
+     errorMessage = form.error(key).map(e => ErrorMessage(
+       content = Text(messages(s"$key.${e.message}")),
+       visuallyHiddenText = Some(messages("generic.error"))
+     )),
+     autocomplete = Some(AutoCompleteType.Postcode.value)
+   ))
 
     <p class="govuk-body">
         <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>

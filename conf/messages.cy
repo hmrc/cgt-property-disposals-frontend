@@ -513,7 +513,7 @@ agent.enter-client-cgt-ref.title=Cael at gyfrif eich cleient
 agent.enter-client-cgt-ref.p1=Cyn y gallwch reoli cyfrif Treth Enillion Cyfalaf cleient ar eiddo yn y DU:
 agent.enter-client-cgt-ref.li1=bydd angen iddynt greu cyfrif a rhoi rhif y cyfrif i chi
 agent.enter-client-cgt-ref.li2=bydd angen iddynt roi cod post yn y DU neu’r wlad breswyl i chi yn eu manylion cyswllt yn eu cyfrif
-agent.enter-client-cgt-ref.li3=bydd angen i chi fynd i’ch cyfrif gwasanaethau asiant a <a href="{0}">gofyn i gleient eich awdurdodi</a>
+agent.enter-client-cgt-ref.li3=bydd angen i chi fynd i’ch cyfrif gwasanaethau asiant a <a class="govuk-link" href="{0}">gofyn i gleient eich awdurdodi</a>
 agent.enter-client-cgt-ref.label=Pa rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sydd gan eich cleient?
 agent.enter-client-cgt-ref.helpText=Mae hwn yn 15 o gymeriadau. Er enghraifft, XYCGTP123456789.
 agent.enter-client-cgt-ref.link=Sut i ‘Gofyn i gleient eich awdurdodi’ ar-lein
@@ -536,7 +536,7 @@ countryCode.error.noMatch=Mae’n rhaid i’r wlad gyd-fynd â’r wlad a ddefny
 agent.too-many-attempts.title=Bydd angen i chi aros a rhoi cynnig arall arni
 agent.too-many-attempts.p1=Rydych wedi nodi manylion anghywir ar gyfer eich cleient ormod o weithiau.
 agent.too-many-attempts.p2=Bydd angen i chi aros am 2 awr a rhoi cynnig arall arni.
-agent.too-many-attempts.p3=Gallwch <a href="{0}">newid i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sy''n perthyn i gleient gwahanol</a>.
+agent.too-many-attempts.p3=Gallwch <a class="govuk-link" href="{0}">newid i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sy''n perthyn i gleient gwahanol</a>.
 agent.confirm-client.title=Gwirio a chadarnhau manylion eich cleient
 agent.confirm-client.name=Enw
 agent.confirm-client.cgt-reference=Rhif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU

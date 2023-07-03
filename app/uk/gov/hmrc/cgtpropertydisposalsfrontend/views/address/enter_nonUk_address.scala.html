@@ -34,7 +34,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.NonUkAddress
@@ -45,13 +44,14 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input_govuk,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    formWrapper: FormWithCSRF,
-    countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        formWrapper: FormWithCSRF,
+        countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code_govuk,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+        govukInput: GovukInput,
+        govukFieldset: GovukFieldset
 )
 
 @(
@@ -104,7 +104,67 @@
   }
 }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
+@addressFields = {
+  @govukInput(Input(
+    id = line1Key,
+    name = line1Key,
+    label = Label(
+      content = Text(messages(s"$key.${journeyErrorKey.stripPrefix(".")}line1.label")),
+      classes = "govuk-label--m"
+    ),
+    autocomplete = Some(AutoCompleteType.AddressLine1.value),
+    errorMessage = form.error(line1Key).map(e => ErrorMessage(
+      content = Text(messages(s"$line1Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    ))
+  ))
+  @govukInput(Input(
+    id = line2Key,
+    name = line2Key,
+    label = Label(
+      content = Text(messages(s"$key.${journeyErrorKey.stripPrefix(".")}line2.label")),
+      classes = "govuk-label--m"
+    ),
+    autocomplete = Some(AutoCompleteType.AddressLine1.value),
+    errorMessage = form.error(line2Key).map(e => ErrorMessage(
+      content = Text(messages(s"$line2Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    ))
+  ))
+  @govukInput(Input(
+    id = line3Key,
+    name = line3Key,
+    label = Label(
+      content = Text(messages(s"$key.line3.label")),
+      classes = "govuk-label--m"
+    ),
+    autocomplete = Some(AutoCompleteType.AddressLevel2.value),
+    errorMessage = form.error(line3Key).map(e => ErrorMessage(
+      content = Text(messages(s"$line3Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    classes = "govuk-!-width-two-thirds"
+  ))
+  @govukInput(Input(
+    id = line4Key,
+    name = line4Key,
+    label = Label(
+      content = Text(messages(s"$key.line4.label")),
+      classes = "govuk-label--m"
+    ),
+    autocomplete = Some(AutoCompleteType.AddressLevel1.value),
+    errorMessage = form.error(line4Key).map(e => ErrorMessage(
+      content = Text(messages(s"$line4Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
+      visuallyHiddenText = Some(messages("generic.error"))
+    )),
+    classes = "govuk-!-width-two-thirds"
+  ))
+  @countryCode(
+    Country.countryCodes,
+    form,
+    label = messages(s"${countryCodeKey}.label")
+  )
+}
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
   @if(hasErrors) {
@@ -112,50 +172,15 @@
   }
 
   <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
-  <h1 class="govuk-heading-xl">@title</h1>
   @formWrapper(submit) {
-      @textInput(
-        fieldId = line1Key,
-        label = Html(messages(s"$key${journeyErrorKey.stripSuffix(".")}.line1.label")),
-        errorKey = form.error(line1Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-        value = form.data.getOrElse(line1Key, ""),
-        hasErrors = form.error(line1Key).nonEmpty,
-        inputClass = Some("govuk-input govuk-!-width-two-thirds"),
-        autoComplete = AutoCompleteType.AddressLine1
-      )
-      @textInput(
-        fieldId = line2Key,
-        label = Html(messages(s"$key${journeyErrorKey.stripSuffix(".")}.line2.label")),
-        errorKey = form.error(line2Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-        value = form.data.getOrElse(line2Key, ""),
-        hasErrors = form.error(line2Key).nonEmpty,
-        inputClass = Some("govuk-input govuk-!-width-two-thirds"),
-        autoComplete = AutoCompleteType.AddressLine2
-      )
-      @textInput(
-        fieldId = line3Key,
-        label = Html(messages(s"${key}.line3.label")),
-        errorKey = form.error(line3Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-        value = form.data.getOrElse(line3Key, ""),
-        hasErrors = form.error(line3Key).nonEmpty,
-        inputClass = Some("govuk-input govuk-!-width-two-thirds"),
-        autoComplete = AutoCompleteType.AddressLevel2
-      )
-      @textInput(
-        fieldId = line4Key,
-        label = Html(messages(s"${key}.line4.label")),
-        errorKey = form.error(line4Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
-        value = form.data.getOrElse(line4Key, ""),
-        hasErrors = form.error(line4Key).nonEmpty,
-        inputClass = Some("govuk-input govuk-!-width-two-thirds"),
-        autoComplete = AutoCompleteType.AddressLevel1
-      )
-
-      @countryCode(
-        Country.countryCodes,
-        form,
-        label = messages(s"${countryCodeKey}.label")
-      )
+    @govukFieldset(Fieldset(
+      legend = Some(Legend(
+        content = Text(title),
+        classes = "govuk-fieldset__legend--xl",
+        isPageHeading = true
+      )),
+      html = addressFields
+    ))
 
     @submitButton(messages(if(isAmend) "button.continue" else if (addressJourneyType.showReturnToSummaryLink()) "button.saveAndContinue" else "button.continue"))
   }

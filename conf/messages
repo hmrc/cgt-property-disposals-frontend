@@ -557,7 +557,7 @@ agent.enter-client-cgt-ref.title=Access your client’s account
 agent.enter-client-cgt-ref.p1=Before you can manage your client’s Capital Gains Tax on UK property account:
 agent.enter-client-cgt-ref.li1=they will need to create an account and give you their account number
 agent.enter-client-cgt-ref.li2=they will need to give you the UK postcode or country of residence in their contact details in their account
-agent.enter-client-cgt-ref.li3=you will need to go to your agent services account and <a href="{0}">ask a client to authorise you</a>
+agent.enter-client-cgt-ref.li3=you will need to go to your agent services account and <a class="govuk-link" href="{0}">ask a client to authorise you</a>
 agent.enter-client-cgt-ref.label=What is your client’s Capital Gains Tax on UK property account number?
 agent.enter-client-cgt-ref.helpText=This is 15 characters. For example, XYCGTP123456789.
 agent.enter-client-cgt-ref.link=How to ‘Ask a client to authorise you’ online
@@ -584,7 +584,7 @@ countryCode.error.noMatch=The country must match the country used in your client
 agent.too-many-attempts.title=You’ll need to wait and try again
 agent.too-many-attempts.p1=You’ve entered incorrect details for your client too many times.
 agent.too-many-attempts.p2=You’ll need to wait 2 hours and try again.
-agent.too-many-attempts.p3=You can <a href="{0}">change to a different client’s Capital Gains Tax on UK property account</a>.
+agent.too-many-attempts.p3=You can <a class="govuk-link" href="{0}">change to a different client’s Capital Gains Tax on UK property account</a>.
 
 agent.confirm-client.title=Check and confirm your client’s details
 agent.confirm-client.name=Name
