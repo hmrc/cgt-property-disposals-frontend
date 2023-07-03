@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 
 @this(
-    calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
+    calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum_govuk
 )
 
 @(
@@ -51,7 +51,7 @@
 
 @if(yearToDateLiabilityCalculation.yearToDateLiability.isZero |
         yearToDateLiabilityCalculation.yearToDateLiability.isNegative) {
-  <p>
+  <p class="govuk-body">
     <em>
       @messages("calculator.noTaxToPay")
     </em>
@@ -59,19 +59,19 @@
 } else {
 
   @if(isATrust) {
-    <p>
+    <p class="govuk-body">
       <em>
         @messages("calculator.trustRateInfo.p1", higherRateDisplay)
       </em>
     </p>
-    <p>
+    <p class="govuk-body">
       <em>
       @messages(s"calculator$userKeyWithoutTrust.trustRateInfo.p2")
       </em>
     </p>
   } else {
     @if(isPeriodOfAdmin){
-      <p>
+      <p class="govuk-body">
         <em>
         @messages("calculator.periodOfAdminRateInfo.p1", higherRateDisplay)
         </em>
@@ -101,7 +101,7 @@
 
       @if(taxYear.incomeTaxHigherRateThreshold.--(taxableIncome).isNegative) {
 
-        <p>
+        <p class="govuk-body">
           <em>
           @messages(s"calculator.incomeAboveThreshold", MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.incomeTaxHigherRateThreshold.inPounds()))
           </em>

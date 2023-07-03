@@ -7290,10 +7290,12 @@ class YearToDateLiabilityControllerSpec
 
               expectedCalculationChecks match {
                 case None =>
-                  doc.select("#link").text()                                  shouldBe messageFromMessageKey(expectedLinkKey)
+                  doc.select("a.govuk-link").get(3).text()                    shouldBe messageFromMessageKey(expectedLinkKey)
                   doc.select("#yearToDateLiability-extra-content > p").html() shouldBe expectedP1Message
 
-                  doc.select("#yearToDateLiability-extra-content > ol > li:nth-child(3)").text() shouldBe expectedLi3Key
+                  doc
+                    .select("#yearToDateLiability-extra-content > ol > li:nth-child(3)")
+                    .text() shouldBe expectedLi3Key
                     .map(messageFromMessageKey(_))
                     .getOrElse("")
 
@@ -7328,7 +7330,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.label",
+            "yearToDateLiability.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link"
@@ -7352,7 +7354,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.agent.label",
+            "yearToDateLiability.agent.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.agent.li3"),
             "yearToDateLiability.agent.link"
@@ -7376,7 +7378,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.trust.label",
+            "yearToDateLiability.trust.title",
             messageFromMessageKey("yearToDateLiability.trust.p1", viewConfig.trustsAndCgtUrl),
             None,
             "yearToDateLiability.trust.link"
@@ -7405,7 +7407,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.hasEstimatedDetails(),
-            "yearToDateLiability.capacitor.label",
+            "yearToDateLiability.capacitor.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.capacitor.li3"),
             "yearToDateLiability.capacitor.link"
@@ -7434,7 +7436,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "yearToDateLiability.personalRep.label",
+            "yearToDateLiability.personalRep.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.personalRep.li3"),
             "yearToDateLiability.personalRep.link"
@@ -7463,7 +7465,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "yearToDateLiability.personalRepInPeriodOfAdmin.label",
+            "yearToDateLiability.personalRepInPeriodOfAdmin.title",
             messageFromMessageKey("yearToDateLiability.personalRepInPeriodOfAdmin.p1", viewConfig.trustsAndCgtUrl),
             None,
             "yearToDateLiability.personalRepInPeriodOfAdmin.link"
@@ -7492,7 +7494,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "yearToDateLiability.personalRepInPeriodOfAdmin.agent.label",
+            "yearToDateLiability.personalRepInPeriodOfAdmin.agent.title",
             messageFromMessageKey(
               "yearToDateLiability.personalRepInPeriodOfAdmin.agent.p1",
               viewConfig.trustsAndCgtUrl
@@ -7535,7 +7537,7 @@ class YearToDateLiabilityControllerSpec
             taxYear,
             sample[Ineligible],
             routes.YearToDateLiabilityController.taxableGainOrLoss(),
-            "yearToDateLiability.label",
+            "yearToDateLiability.title",
             messageFromMessageKey("yearToDateLiability.p1", viewConfig.cgtRatesUrl),
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link"
@@ -7618,7 +7620,9 @@ class YearToDateLiabilityControllerSpec
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link",
             expectedCalculationChecks = Some { doc =>
-              doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
+              doc
+                .select("#yearToDateLiability-hint > p:nth-child(1)")
+                .html() shouldBe messageFromMessageKey(
                 "yearToDateLiability.calculatedHelpText.p1",
                 MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
               )
@@ -7703,7 +7707,9 @@ class YearToDateLiabilityControllerSpec
             Some("yearToDateLiability.li3"),
             "yearToDateLiability.link",
             expectedCalculationChecks = Some { doc =>
-              doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
+              doc
+                .select("#yearToDateLiability-hint > p:nth-child(1)")
+                .html() shouldBe messageFromMessageKey(
                 "yearToDateLiability.calculatedHelpText.p1",
                 MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
               )
@@ -7797,7 +7803,9 @@ class YearToDateLiabilityControllerSpec
               None,
               "yearToDateLiability.trust.link",
               expectedCalculationChecks = Some { doc =>
-                doc.select("#yearToDateLiability-extra-content > p:nth-child(1)").html() shouldBe messageFromMessageKey(
+                doc
+                  .select("#yearToDateLiability-hint > p:nth-child(1)")
+                  .html() shouldBe messageFromMessageKey(
                   "yearToDateLiability.trust.calculatedHelpText.p1",
                   MoneyUtils.formatAmountOfMoneyWithPoundSign(calculationResult.yearToDateLiability.inPounds())
                 )
@@ -8151,7 +8159,7 @@ class YearToDateLiabilityControllerSpec
         "nothing is submitted" in {
           testCases.foreach { case (userKey, session) =>
             withClue(s"For user key '$userKey': ") {
-              test(session._1, session._2)()(s"yearToDateLiability$userKey.label", taxYearStart, taxYearEnd)(
+              test(session._1, session._2)()(s"yearToDateLiability$userKey.title", taxYearStart, taxYearEnd)(
                 s"yearToDateLiability$userKey.error.required",
                 taxYearStart,
                 taxYearEnd
@@ -8168,7 +8176,7 @@ class YearToDateLiabilityControllerSpec
               .foreach { scenario =>
                 withClue(s"For user key '$userKey' and $scenario: ") {
                   test(session._1, session._2)(scenario.formData: _*)(
-                    s"yearToDateLiability$userKey.label",
+                    s"yearToDateLiability$userKey.title",
                     taxYearStart,
                     taxYearEnd
                   )(
