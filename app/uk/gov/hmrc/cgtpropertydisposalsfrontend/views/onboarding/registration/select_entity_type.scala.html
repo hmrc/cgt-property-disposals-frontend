@@ -17,7 +17,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.EntityType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
@@ -25,42 +24,62 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
 
 @this(
-    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_govuk,
-    govukButton: GovukButton,
-    viewHelpers: ViewHelpers
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+        govukButton: GovukButton,
+        viewHelpers: ViewHelpers,
+        govukRadios: GovukRadios
 )
 @(form: Form[EntityType], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @toMessage(entityType: EntityType) = @{
   entityType match {
-    case EntityType.Individual => Html(messages("entityType.individual"))
-    case EntityType.Trust      => Html(messages("entityType.trust"))
+    case EntityType.Individual => messages("entityType.individual")
+    case EntityType.Trust      => messages("entityType.trust")
   }
 }
 @key = @{"entityType"}
-@title = @{messages("entityType.title")}
+@title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@options = @{List(EntityType.Trust, EntityType.Individual).map(toMessage)}
 
 @layout(title, hasErrors = hasErrors, backLinkUrl = Some(backLink.url)) {
 
   @if(hasErrors) {
     @errorSummary(form)
   }
-<span class="govuk-caption-xl">@messages("subscription.caption")</span>
+  <span class="govuk-caption-xl">@messages("subscription.caption")</span>
   @viewHelpers.form(routes.RegistrationController.selectEntityTypeSubmit()) {
-    @radioGroup(
-      fieldId = key,
-      options = options,
-      selected = form.value.map(entity => options.indexOf(toMessage(entity))),
-      label = title,
-      errorKey = form.error(key).map(e => e.message)
-    )
+    @govukRadios(Radios(
+      fieldset = Some(Fieldset(
+        legend = Some(Legend(
+          content = Text(title),
+          classes = "govuk-fieldset__legend--xl",
+          isPageHeading = true
+        ))
+      )),
+      errorMessage = form.error(key).map(e => ErrorMessage(
+        content = Text(messages(s"$key.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )),
+      idPrefix = Some(key),
+      name = key,
+      items = Seq(
+        RadioItem(
+          content = Text(toMessage(EntityType.Trust)),
+          value = Some("0"),
+          checked = form.value.contains(EntityType.Trust)
+        ),
+        RadioItem(
+          content = Text(toMessage(EntityType.Individual)),
+          value = Some("1"),
+          checked = form.value.contains(EntityType.Individual)
+        )
+      )
+    ))
+
     @govukButton(Button(
-    attributes = Map("id" -> "submitButton"),
-    content = Text(messages("button.continue"))
+      attributes = Map("id" -> "submitButton"),
+      content = Text(messages("button.continue"))
     ))
   }
 }
