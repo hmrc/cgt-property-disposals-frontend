@@ -21,12 +21,13 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
- formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+ formWrapper: FormWithCSRF,
  yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
 )
 
