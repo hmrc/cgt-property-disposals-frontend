@@ -185,7 +185,7 @@ unit-input.assistive.percent=peidiwch â nodi’r arwydd canran
 error.summary.heading=Mae problem wedi codi
 signed-out.title=Rydych wedi allgofnodi
 signed-out.p1=Rydych wedi allgofnodi o’ch cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-signed-out.p2=Gallwch <a href="{0}">fewngofnodi</a> i’ch cyfrif.
+signed-out.p2=Gallwch <a class="govuk-link" href="{0}">fewngofnodi</a> i’ch cyfrif.
 signed-out.button=Ewch i GOV.UK
 timed-out.title=Er eich diogelwch, gwnaethom eich allgofnodi
 timed-out.p1=Roedd hyn oherwydd eich bod wedi bod yn segur am rhy hir.

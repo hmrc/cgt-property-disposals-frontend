@@ -177,7 +177,7 @@ error.summary.heading=There’s a problem
 
 signed-out.title=You’ve signed out
 signed-out.p1=You’ve signed out of your Capital Gains Tax on UK property account.
-signed-out.p2=You can <a href="{0}">sign in</a> to your account.
+signed-out.p2=You can <a class="govuk-link" href="{0}">sign in</a> to your account.
 signed-out.button=Go to GOV.UK
 
 timed-out.title=For your security, we signed you out
