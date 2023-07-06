@@ -25,13 +25,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{OtherReliefsOption, RepresentativeType}
-@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section_govuk,
         cyaRow:     uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row_govuk,
-        cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change_govuk,
-        govukWarningText: GovukWarningText
+        cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change_govuk
 )
 
 @(
@@ -60,12 +58,6 @@
     case Some(PersonalRepresentativeInPeriodOfAdmin) => true
     case _ => false
   }
-}
-@if(answers.privateResidentsRelief.value =!= 0L || answers.lettingsRelief.value =!= 0L){
-  @govukWarningText(WarningText(
-    iconFallbackText = Some(messages("generic.warning")),
-    content = Text(messages("reliefDetails.cya.warningMsg"))
-  ))
 }
 
 @cyaSection() {
