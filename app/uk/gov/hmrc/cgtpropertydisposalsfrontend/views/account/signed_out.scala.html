@@ -19,29 +19,32 @@
 @import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  govukButton: GovukButton
 )
 
 @()(implicit messages: Messages, appConfig: ViewConfig, request: Request[_])
 
 @title = @{messages("signed-out.title")}
 
-@mainTemplate(title = title, userType = None) {
+@layout(
+  title
+) {
+  <h1 class="govuk-heading-xl">@title</h1>
 
-  @pageHeading(title)
-
-  <p>
+  <p class="govuk-body">
     @messages("signed-out.p1")
   </p>
 
-  <p>
+  <p class="govuk-body">
     @Html(messages("signed-out.p2", routes.StartController.start().url))
   </p>
 
-  @buttonLink(messages("signed-out.button"), appConfig.govUkUrl)
-
+  @govukButton(Button(
+    href = Some(appConfig.govUkUrl),
+    content = Text(messages("signed-out.button"))
+  ))
 }
