@@ -58,7 +58,7 @@
     @hmrcTimeoutDialogHelper(signOutUrl, timeoutUrl = Some(viewConfig.ggTimedOutUrl))
     @autocompleteCss()
   }
-  <link rel="stylesheet" media="all" href="@routes.Assets.at("stylesheets/cgtpd-ui-upgrade.css")" />
+  <link rel="stylesheet" media="all" href="@{routes.Assets.at("stylesheets/cgtpd.css")}" />
 }
 
 @beforeContent = {
