@@ -31,8 +31,6 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   private val signOutUri: String            = getString("sign-out.uri")
   private val contactFormServiceIdentifier  = "CGTPD"
 
-  val assetsPrefix: String                            =
-    getString("assets.url") + getString("assets.version")
   val reportAProblemPartialUrl: String                =
     s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   val reportAProblemNonJSUrl: String                  =

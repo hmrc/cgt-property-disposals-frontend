@@ -59,7 +59,7 @@ class MixedUsePropertyDetailsController @Inject() (
   cc: MessagesControllerComponents,
   val enterPostcodePage: views.html.address.enter_postcode,
   val selectAddressPage: views.html.address.select_address,
-  val addressDisplay: views.html.components.address_display,
+  val addressDisplay: views.html.components.address_display_govuk,
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
   val isUkPage: views.html.address.isUk,
