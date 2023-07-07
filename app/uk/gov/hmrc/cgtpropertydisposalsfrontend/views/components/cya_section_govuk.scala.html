@@ -18,9 +18,9 @@
 
 @this()
 
-@(heading: Option[String] = None, classes: Option[String] = Some("cya-questions-long"))(rows: => Html)
+@(heading: Option[String] = None, classes: Option[String] = None)(rows: => Html)
 
-@heading.map(h => Html(s"""<h2 class="govuk-heading-m">${h}</h2>"""))
-<dl class="cgt-cya govuk-summary-list @{classes.map(c => s" $c")}">
+@heading.map(h => {{<h2 class="govuk-heading-m">${h}</h2>}})
+<dl class=@{s"""govuk-summary-list ${classes.getOrElse("")}"""}>
   @rows
 </dl>

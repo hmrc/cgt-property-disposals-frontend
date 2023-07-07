@@ -26,7 +26,7 @@
     @{part.label}
   </dt>
   <dd class="govuk-summary-list__value">
-    @{part.operator.map { o => Html(s"""<strong class="bold">$o</strong>""") } }
+    @{part.operator.map { o => Html(s"""<strong>$o</strong>""") } }
     @{part.amount}
   </dd>
 </div>
