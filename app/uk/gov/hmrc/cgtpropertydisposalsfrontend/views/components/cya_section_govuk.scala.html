@@ -21,6 +21,6 @@
 @(heading: Option[String] = None, classes: Option[String] = None)(rows: => Html)
 
 @heading.map(h => {{<h2 class="govuk-heading-m">${h}</h2>}})
-<dl class=@{s"""govuk-summary-list ${classes.getOrElse("")}"""}>
+<dl class="govuk-summary-list@{classes.fold("")(c => s" $c")}">
   @rows
 </dl>
