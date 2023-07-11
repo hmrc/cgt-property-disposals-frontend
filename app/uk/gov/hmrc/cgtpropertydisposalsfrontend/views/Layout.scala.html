@@ -58,12 +58,13 @@
     @hmrcTimeoutDialogHelper(signOutUrl, timeoutUrl = Some(viewConfig.ggTimedOutUrl))
     @autocompleteCss()
   }
-  <link rel="stylesheet" media="all" href="@{routes.Assets.at("stylesheets/cgtpd.css")}" />
+  <link rel="stylesheet" media="screen" href="@{routes.Assets.at("stylesheets/cgtpd.css")}" />
+  <link rel="stylesheet" media="print" href="@{routes.Assets.at("stylesheets/print.css")}" />
 }
 
 @beforeContent = {
-  @accountMenu.fold(Html(""))(s => s)
   <div class="govuk-!-display-none-print">
+    @accountMenu.fold(Html(""))(s => s)
     @if(isWelshTranslationAvailable) {
       @hmrcLanguageSelectHelper()
     }

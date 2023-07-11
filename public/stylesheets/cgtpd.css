@@ -145,18 +145,6 @@ body:not(.js-enabled) .js-visible {
     line-height: 1.11111;
 }
 
-@media print {
-    .app-task-list__section {
-        font-family: sans-serif;
-        font-size: 18pt;
-        line-height: 1.15;
-    }
-
-    a:link:after, a:visited:after {
-        content: "";
-    }
-}
-
 .app-task-list__section-number {
     display: table-cell;
     min-width: 1.1em;
@@ -172,14 +160,6 @@ body:not(.js-enabled) .js-visible {
     margin-bottom: 40px;
     list-style: none;
     padding-left: 30px;
-}
-
-@media print {
-    .app-task-list__items {
-        font-family: sans-serif;
-        font-size: 14pt;
-        line-height: 1.15;
-    }
 }
 
 .app-task-list__item {
