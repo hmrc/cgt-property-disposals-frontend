@@ -26,6 +26,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.userresearchbanner.UserResearchBanner
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountLayout
+@import views.html.helper.CSPNonce
 
 @this(
         hmrcStandardPage: HmrcStandardPage,
@@ -58,8 +59,8 @@
     @hmrcTimeoutDialogHelper(signOutUrl, timeoutUrl = Some(viewConfig.ggTimedOutUrl))
     @autocompleteCss()
   }
-  <link rel="stylesheet" media="screen" href="@{routes.Assets.at("stylesheets/cgtpd.css")}" />
-  <link rel="stylesheet" media="print" href="@{routes.Assets.at("stylesheets/print.css")}" />
+  <link rel="stylesheet" media="screen" href="@{routes.Assets.at("stylesheets/cgtpd.css")}" @{CSPNonce.attr}/>
+  <link rel="stylesheet" media="print" href="@{routes.Assets.at("stylesheets/print.css")}" @{CSPNonce.attr}/>
 }
 
 @beforeContent = {
