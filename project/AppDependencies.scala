@@ -4,10 +4,11 @@ import sbt._
 object AppDependencies {
 
   val playVersion = "play-28"
+  val bootstrapVersion = "7.19.0"
 
   val compile = Seq(
     "uk.gov.hmrc"                %% "play-frontend-hmrc"               % s"7.7.0-$playVersion",
-    "uk.gov.hmrc"                %% s"bootstrap-frontend-$playVersion" % "5.25.0",
+    "uk.gov.hmrc"                %% s"bootstrap-frontend-$playVersion" % bootstrapVersion,
     "uk.gov.hmrc.mongo"          %% s"hmrc-mongo-$playVersion"         % "0.70.0",
     "uk.gov.hmrc"                %% "domain"                           % s"6.1.0-$playVersion",
     "org.typelevel"              %% "cats-core"                        % "2.6.0",
@@ -28,7 +29,8 @@ object AppDependencies {
     "com.vladsch.flexmark"        % "flexmark-all"              % "0.35.10"     % "test",
     "uk.gov.hmrc.mongo"          %% "hmrc-mongo-test-play-28"   % "0.70.0"      % "test",
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.14" % "1.2.1"       % "test",
-    "org.scalatestplus.play"     %% "scalatestplus-play"        % "5.1.0"       % "test, it"
+    "org.scalatestplus.play"     %% "scalatestplus-play"        % "5.1.0"       % "test, it",
+    "uk.gov.hmrc"                %% s"bootstrap-test-$playVersion" % bootstrapVersion % "test"
   )
 
 }
