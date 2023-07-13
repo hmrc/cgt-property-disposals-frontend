@@ -2063,7 +2063,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                       s"confirmationOfSubmission.capacitor.noId.printPage"
                     else
                       s"confirmationOfSubmission$userKey.printPage",
-                    "JavaScript: window.print();"
+                    "#print-dialogue"
                   )
 
                   doc.select("#howToPay").html() shouldBe messageFromMessageKey(
@@ -2331,7 +2331,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                       s"confirmationOfSubmission.capacitor.noId.printPage"
                     else
                       s"confirmationOfSubmission$userKey.printPage",
-                    "JavaScript: window.print();"
+                    "#print-dialogue"
                   )
 
                   doc.select("#howToPay").html() shouldBe messageFromMessageKey(

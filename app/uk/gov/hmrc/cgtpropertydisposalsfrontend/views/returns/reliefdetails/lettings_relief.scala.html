@@ -81,7 +81,7 @@
       content = Text("£")
     )),
     errorMessage = form.error(valueKey).map(e => ErrorMessage(
-      content = Text(messages(s"$valueKey.${e.message}")),
+      content = Text(messages(s"$valueKey.${e.message}", e.args: _*)),
       visuallyHiddenText = Some(messages("generic.error"))
     )),
     autocomplete = Some(AutoCompleteType.On.value)
@@ -139,7 +139,7 @@
       ),
       errorMessage = form.error(key).map(e =>
         ErrorMessage(
-          content = Text(messages(s"$key$userKey.${e.message}")),
+          content = Text(messages(s"$key$userKey.${e.message}", e.args: _*)),
           visuallyHiddenText = Some(messages("generic.error"))
         )
       )
