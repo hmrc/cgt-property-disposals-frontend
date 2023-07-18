@@ -22,18 +22,22 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, AssetType, RepresentativeType}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.Aliases.{ErrorMessage, Label, Radios, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukRadios}
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.fieldset.{Fieldset, Legend}
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
+@import uk.gov.hmrc.hmrcfrontend.views.Aliases.CharacterCount
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcCharacterCount
 
 @this(
-        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-        formWrapper: FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
-        govukRadios: GovukRadios,
-        govukInput: GovukInput
+    layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+    formWrapper: FormWithCSRF,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
+    govukRadios: GovukRadios,
+    hmrcCharacterCount: HmrcCharacterCount
 )
 
 @(
@@ -87,19 +91,22 @@
 @title = @{messages(s"$key$userKey$assetTypeKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @otherOption = {
-  @govukInput(Input(
-    id = otherMethodKey,
-    name = otherMethodKey,
-    label = Label(
-      content = Text(messages(s"returns.$otherMethodKey$userKey$assetTypeKey.label"))
-    ),
-    value = form.data.get(otherMethodKey),
-    errorMessage = form.error(otherMethodKey).map(e => ErrorMessage(
-      content = Text(messages(s"$otherMethodKey.$userErrorPrefix$assetTypeKeyForErrors${e.message}")),
-      visuallyHiddenText = Some(messages("generic.error"))
-    )),
-    autocomplete = Some(AutoCompleteType.On.value)
-  ))
+@hmrcCharacterCount(
+    CharacterCount(
+        id = otherMethodKey,
+        name = otherMethodKey,
+        maxLength = Some(35),
+        label = Label(
+            content = Text(messages(s"returns.$otherMethodKey$userKey$assetTypeKey.label"))
+        ),
+        value = form.data.get(otherMethodKey),
+        errorMessage = form.error(otherMethodKey).map(e => ErrorMessage(
+                content = Text(messages(s"$otherMethodKey.$userErrorPrefix$assetTypeKeyForErrors${e.message}")),
+                visuallyHiddenText = Some(messages("generic.error"))
+                )
+            )
+        )
+    )
 }
 
 @layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {

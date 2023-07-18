@@ -6,7 +6,7 @@ object AppDependencies {
   val playVersion = "play-28"
   val bootstrapVersion = "7.19.0"
 
-  val compile = Seq(
+  val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"                %% "play-frontend-hmrc"               % s"7.7.0-$playVersion",
     "uk.gov.hmrc"                %% s"bootstrap-frontend-$playVersion" % bootstrapVersion,
     "uk.gov.hmrc.mongo"          %% s"hmrc-mongo-$playVersion"         % "0.70.0",
@@ -20,7 +20,7 @@ object AppDependencies {
     "com.github.ghik"             % "silencer-lib"                     % "1.7.1" % Provided cross CrossVersion.full
   )
 
-  val test = Seq(
+  val test: Seq[ModuleID] = Seq(
     "org.scalatest"              %% "scalatest"                 % "3.2.9"       % "test",
     "org.jsoup"                   % "jsoup"                     % "1.12.1"      % "test",
     "com.typesafe.play"          %% "play-test"                 % current       % "test",
