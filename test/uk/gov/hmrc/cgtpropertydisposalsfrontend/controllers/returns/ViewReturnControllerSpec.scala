@@ -802,6 +802,51 @@ class ViewReturnControllerSpec
 
       }
 
+      "Don't show amend links if submission has expired" in {
+
+        forAll(acceptedUserTypeGen, completeMultipleIndirectDisposalReturnGen) { (userType, c) =>
+          val subscribedDetails = sample[SubscribedDetails].copy(
+            name = setNameForUserType(userType)
+          )
+
+          val completeMultipleIndirectDisposalsReturn: CompleteMultipleIndirectDisposalReturn = c.copy(
+            triageAnswers = c.triageAnswers.copy(
+              individualUserType = None
+            ),
+            exampleCompanyDetailsAnswers = sample[CompleteExampleCompanyDetailsAnswers].copy(
+              address = sample[UkAddress]
+            ),
+            representeeAnswers = None
+          )
+
+          val sampleViewingReturn = sample[ViewingReturn]
+            .copy(
+              completeReturn = completeMultipleIndirectDisposalsReturn,
+              agentReferenceNumber = setAgentReferenceNumber(userType),
+              subscribedDetails = subscribedDetails,
+              returnType = ReturnType.FirstReturn
+            )
+
+          val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn.copy(expired = true))
+
+          val sessionData = SessionData.empty.copy(
+            journeyStatus = Some(viewingReturn),
+            userType = Some(userType)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          val result   = performAction()
+          val document = Jsoup.parse(contentAsString(result))
+
+          document.select("#amend-link-1").isEmpty shouldBe true
+        }
+
+      }
+
     }
 
     "handling requests to pay a charge" must {
