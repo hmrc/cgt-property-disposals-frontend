@@ -84,7 +84,7 @@ class ViewReturnController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withViewingReturn() { viewingReturn =>
         if (viewingReturn.returnSummary.expired) {
-          Redirect(routes.ViewReturnController.displayReturn().url)
+          Redirect(homeRoutes.HomePageController.homepage().url)
         } else {
           val newJourneyStatus = StartingToAmendReturn(
             viewingReturn.subscribedDetails,
@@ -100,7 +100,9 @@ class ViewReturnController @Inject() (
             None
           )
 
-          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourneyStatus), journeyType = Some(Amend)))
+          updateSession(sessionStore, request)(
+            _.copy(journeyStatus = Some(newJourneyStatus), journeyType = Some(Amend))
+          )
             .map {
               case Left(e)  =>
                 logger.warn("Could not start amending a return", e)
