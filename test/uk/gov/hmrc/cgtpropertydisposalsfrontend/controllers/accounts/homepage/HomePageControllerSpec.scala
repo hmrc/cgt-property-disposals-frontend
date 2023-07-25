@@ -348,6 +348,48 @@ class HomePageControllerSpec
         )
       }
 
+      "Display 'view return' when the return has expired" in {
+        val propertyAddress   = sample[UkAddress]
+        val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(ukResidentMainReturnChargeDueDate.minusDays(61)))
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers,
+          lastUpdatedDate = LocalDate.now(),
+          propertyAddress = Some(propertyAddress)
+        )
+        val sampleSentReturn  = sample[ReturnSummary].copy(
+          charges = chargesWithChargeRaiseAndNoPayment,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false,
+          expired = true
+        )
+        val subscribed        =
+          sample[Subscribed].copy(
+            draftReturns = List(sampleDraftReturn),
+            sentReturns = List(sampleSentReturn)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(s"#viewSentReturn-${sampleSentReturn.submissionId}")
+              .text shouldBe messageFromMessageKey("returns.list.viewExpired")
+        )
+      }
+
       "display the resume draft link as a button when there is a draft with no completion date and no outstanding amounts to pay in sent returns" in {
         val triageAnswers                       = sample[IncompleteSingleDisposalTriageAnswers]
           .copy(completionDate = None)
