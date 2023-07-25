@@ -207,7 +207,8 @@ class ViewReturnControllerSpec
         lastUpdatedDate = None,
         mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
         submissionDate = ukResidentReturnSentDate,
-        isRecentlyAmended = false
+        isRecentlyAmended = false,
+        expired = false
       )
 
       val sentAmendedReturn = sample[ReturnSummary].copy(
@@ -215,7 +216,8 @@ class ViewReturnControllerSpec
         lastUpdatedDate = Some(LocalDate.now().plusMonths(2)),
         mainReturnChargeAmount = mainChargeAmountWithDelta,
         submissionDate = ukResidentReturnSentDate,
-        isRecentlyAmended = false
+        isRecentlyAmended = false,
+        expired = false
       )
 
       def validatePaymentsSection(

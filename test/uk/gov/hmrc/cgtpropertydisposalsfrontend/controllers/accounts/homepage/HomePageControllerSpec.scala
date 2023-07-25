@@ -316,7 +316,8 @@ class HomePageControllerSpec
           charges = charges,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed             =
           sample[Subscribed].copy(
@@ -381,7 +382,8 @@ class HomePageControllerSpec
           charges = charges,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed             =
           sample[Subscribed].copy(
@@ -425,7 +427,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed        =
           sample[Subscribed].copy(
@@ -467,7 +470,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed        =
           sample[Subscribed].copy(
@@ -503,7 +507,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed       =
           sample[Subscribed].copy(
@@ -930,7 +935,8 @@ class HomePageControllerSpec
           charges = chargesWithoutChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -982,7 +988,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -1035,7 +1042,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndPartialPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = true
+          isRecentlyAmended = true,
+          expired = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -1085,7 +1093,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndPartialPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -1140,7 +1149,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndFullPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -1221,7 +1231,8 @@ class HomePageControllerSpec
           charges = charges,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
 
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
