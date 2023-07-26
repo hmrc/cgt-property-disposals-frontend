@@ -127,33 +127,33 @@ class IvController @Inject() (
     }
 
   def getFailedMatching: Action[AnyContent] =
-    authenticatedActionWithSessionData { implicit r ⇒
+    authenticatedActionWithSessionData { implicit r =>
       Ok(failedMatchingPage())
     }
 
   def getFailedIV: Action[AnyContent] =
-    authenticatedActionWithSessionData(implicit r ⇒ Ok(failedIvPage()))
+    authenticatedActionWithSessionData(implicit r => Ok(failedIvPage()))
 
   def getInsufficientEvidence: Action[AnyContent] =
-    authenticatedActionWithSessionData { implicit r ⇒
+    authenticatedActionWithSessionData { implicit r =>
       Ok(insufficientEvidencePage())
     }
 
   def getLockedOut: Action[AnyContent] =
-    authenticatedActionWithSessionData(implicit r ⇒ Ok(lockedOutPage()))
+    authenticatedActionWithSessionData(implicit r => Ok(lockedOutPage()))
 
   def getUserAborted: Action[AnyContent] =
-    authenticatedActionWithSessionData(implicit r ⇒ Ok(userAbortedPage()))
+    authenticatedActionWithSessionData(implicit r => Ok(userAbortedPage()))
 
   def getTimedOut: Action[AnyContent] =
-    authenticatedActionWithSessionData(implicit r ⇒ Ok(timeoutPage()))
+    authenticatedActionWithSessionData(implicit r => Ok(timeoutPage()))
 
   def getTechnicalIssue: Action[AnyContent]     =
-    authenticatedActionWithSessionData { implicit r ⇒
+    authenticatedActionWithSessionData { implicit r =>
       Ok(technicalIssuesPage())
     }
   def getPreconditionFailed: Action[AnyContent] =
-    authenticatedActionWithSessionData { implicit r ⇒
+    authenticatedActionWithSessionData { implicit r =>
       Ok(preconditionFailedPage())
     }
 
