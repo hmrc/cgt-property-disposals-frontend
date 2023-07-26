@@ -77,7 +77,7 @@
         )
     }
 
-    @formWrapper(routes.RepresenteeController.checkContactDetailsSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.RepresenteeController.checkContactDetailsSubmit(), Symbol("novalidate") -> "novalidate") {
         @govukButton(Button(content = Text(messages("button.continue"))))
     }
 

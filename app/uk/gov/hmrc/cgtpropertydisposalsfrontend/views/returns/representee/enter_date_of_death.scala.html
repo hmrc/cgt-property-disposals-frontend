@@ -63,7 +63,7 @@
     @messages("representee.caption")
   </span>
 
-  @formWrapper(routes.RepresenteeController.enterDateOfDeathSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.RepresenteeController.enterDateOfDeathSubmit(), Symbol("novalidate") -> "novalidate") {
     @dateInput(
       fieldId = key,
       label = title,

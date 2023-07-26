@@ -100,7 +100,7 @@
 
     <span class="govuk-caption-xl">@messages("triage.caption")</span>
 
-    @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialPropertySubmit(), 'novalidate -> "novalidate") {
+    @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialPropertySubmit(), Symbol("novalidate") -> "novalidate") {
         @yesNo(
             fieldId = key,
             label = title,

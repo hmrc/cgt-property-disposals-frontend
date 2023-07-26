@@ -56,7 +56,7 @@
     }
   }
 
- @formWrapper(routes.AgentAccessController.enterClientsPostcodeSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(routes.AgentAccessController.enterClientsPostcodeSubmit(), Symbol("novalidate") -> "novalidate") {
   @govukInput(Input(
     id = key,
     name = key,

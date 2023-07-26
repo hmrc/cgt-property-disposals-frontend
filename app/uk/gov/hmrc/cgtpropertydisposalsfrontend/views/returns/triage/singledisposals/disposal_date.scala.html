@@ -71,7 +71,7 @@
   @errorSummary(form, dateField = Some(key))
  }
  <span class="govuk-caption-xl">@messages("triage.caption")</span>
- @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.whenWasDisposalDateSubmit(), 'novalidate -> "novalidate") {
+ @formHelper(controllers.returns.triage.routes.SingleDisposalsTriageController.whenWasDisposalDateSubmit(), Symbol("novalidate") -> "novalidate") {
   @dateInput(
    fieldId = key,
    label = title,

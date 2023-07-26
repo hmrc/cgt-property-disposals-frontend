@@ -48,7 +48,7 @@
 
     @summary(answers, disposalDate, isATrust, representativeType, isFurtherOrAmendReturn, showAnnualExemptAmount)
 
-    @formWrapper(routes.ExemptionAndLossesController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.ExemptionAndLossesController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))
     }
 

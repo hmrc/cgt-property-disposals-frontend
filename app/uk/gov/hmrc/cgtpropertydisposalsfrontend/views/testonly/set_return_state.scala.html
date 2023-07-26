@@ -61,7 +61,7 @@
     @errorSummary(form)
   }
 
-  @formWrapper(routes.JourneyStatusController.setReturnStateSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.JourneyStatusController.setReturnStateSubmit(), Symbol("novalidate") -> "novalidate") {
     @askForText("individual-user-type")
     @askForText("number-of-properties")
     @askForText("disposal-method")

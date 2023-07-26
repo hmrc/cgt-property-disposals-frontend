@@ -43,7 +43,7 @@ layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
 
   @summary(companyAddress)
 
-  @formWrapper(routes.CompanyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.CompanyDetailsController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
     @submitButton(messages("button.confirmAndContinue"))
   }
 

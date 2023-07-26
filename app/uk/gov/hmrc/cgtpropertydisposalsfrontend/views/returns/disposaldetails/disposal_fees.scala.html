@@ -76,7 +76,7 @@
     }
 
     <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
-    @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFeesSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFeesSubmit(), Symbol("novalidate") -> "novalidate") {
       @govukInput(Input(
         id = key,
         name = key,

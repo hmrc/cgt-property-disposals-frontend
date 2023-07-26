@@ -56,7 +56,7 @@
   <li>@Html(messages("agent.enter-client-cgt-ref.li3", appConfig.agentAskClientToAuthoriseUrl))</li>
  </ul>
 
-  @formWrapper(routes.AgentAccessController.enterClientsCgtRefSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.AgentAccessController.enterClientsCgtRefSubmit(), Symbol("novalidate") -> "novalidate") {
     @govukInput(Input(
         id = key,
         name = key,

@@ -52,7 +52,7 @@
     </p>
   }
 
-  @formWrapper(routes.SupportingEvidenceController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.SupportingEvidenceController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
       @submitButton(messages("button.confirmAndContinue"))
   }
 }

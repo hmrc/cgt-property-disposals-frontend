@@ -90,7 +90,7 @@
 
     @caption(messages("triage.caption"))
 
-    @formHelper(controllers.returns.triage.routes.MultipleDisposalsTriageController.whenWereContractsExchangedSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(controllers.returns.triage.routes.MultipleDisposalsTriageController.whenWereContractsExchangedSubmit(), Symbol("novalidate") -> "novalidate") {
 
 
         @govukRadios(Radios(

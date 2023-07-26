@@ -118,7 +118,7 @@
     }
 
     @caption(messages("representee.caption"))
-    @formWrapper(routes.RepresenteeController.enterIdSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.RepresenteeController.enterIdSubmit(), Symbol("novalidate") -> "novalidate") {
 
       @govukRadios(Radios(
         fieldset = Some(Fieldset(

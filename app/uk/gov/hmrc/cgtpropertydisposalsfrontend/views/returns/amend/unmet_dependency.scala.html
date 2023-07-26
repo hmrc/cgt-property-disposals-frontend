@@ -47,7 +47,7 @@
         }
     </ul>
 
-    @formWrapper(routes.AmendReturnController.unmetDependencySubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.AmendReturnController.unmetDependencySubmit(), Symbol("novalidate") -> "novalidate") {
         @govukButton(Button(
         content = Text(messages("button.continue"))
         ))

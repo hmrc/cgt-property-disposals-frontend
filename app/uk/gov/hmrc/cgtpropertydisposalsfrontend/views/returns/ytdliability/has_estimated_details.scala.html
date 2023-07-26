@@ -65,7 +65,7 @@
 
   @caption(messages(s"ytdLiability${if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}.caption"))
 
-  @formWrapper(routes.YearToDateLiabilityController.hasEstimatedDetailsSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.YearToDateLiabilityController.hasEstimatedDetailsSubmit(), Symbol("novalidate") -> "novalidate") {
     @govukRadios(Radios(
       fieldset = Some(Fieldset(
         legend = Some(Legend(

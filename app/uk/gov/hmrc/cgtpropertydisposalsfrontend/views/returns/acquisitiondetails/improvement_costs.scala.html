@@ -119,7 +119,7 @@
 
   @caption(messages("acquisitionDetails.caption"))
 
-  @formWrapper(routes.AcquisitionDetailsController.improvementCostsSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.AcquisitionDetailsController.improvementCostsSubmit(), Symbol("novalidate") -> "novalidate") {
     @govukRadios(Radios(
       fieldset = Some(Fieldset(
         legend = Some(Legend(

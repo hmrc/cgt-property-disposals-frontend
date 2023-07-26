@@ -50,7 +50,7 @@
     @messages(s"$key.p2")
   </p>
 
-  @formWrapper(routes.RepresenteeController.nameMatchErrorSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.RepresenteeController.nameMatchErrorSubmit(), Symbol("novalidate") -> "novalidate") {
     @govukButton(Button(
       attributes = Map("id" -> "submitButton"),
       content = Text(messages("button.tryAgain"))

@@ -106,7 +106,7 @@
 
 <span class="govuk-caption-xl">@messages("ytdLiability.furtherReturn.caption")</span>
 <h1 class="govuk-heading-xl">@title</h1>
-  @formWrapper(routes.YearToDateLiabilityController.yearToDateLiabilitySubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.YearToDateLiabilityController.yearToDateLiabilitySubmit(), Symbol("novalidate") -> "novalidate") {
 
     @if(yearToDateLiabilityCalculation.isDefined) {
     <div id="yearToDateLiability-extra-content">

@@ -41,7 +41,7 @@
   @errorSummary(form)
  }
  <span class="govuk-caption-xl">@messages("subscription.caption")</span>
- @formWrapper(routes.InsufficientConfidenceLevelController.doYouHaveNINOSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(routes.InsufficientConfidenceLevelController.doYouHaveNINOSubmit(), Symbol("novalidate") -> "novalidate") {
    @yesNo(
      fieldId = key,
      label = title,
