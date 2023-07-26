@@ -920,7 +920,7 @@ class RepresenteeController @Inject() (
 
       case NameMatchServiceError.NameMatchFailed(u) =>
         logger.info(
-          s"Name match failed: ${u.unsuccessfulAttempts} attempts made out of a maximum ${u.maximumAttempts}"
+          s"Name match failed: ${u.unsuccessfulAttempts.toString} attempts made out of a maximum ${u.maximumAttempts.toString}"
         )
         Redirect(routes.RepresenteeController.nameMatchError())
 

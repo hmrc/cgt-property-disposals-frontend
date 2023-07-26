@@ -350,7 +350,7 @@ class SupportingEvidenceController @Inject() (
             result.fold(
               e => {
                 logger.warn(
-                  s"could not update the status of upscan upload to uploaded : $e"
+                  s"could not update the status of upscan upload to uploaded : ${e.toString}"
                 )
                 errorHandler.errorResult()
               },
