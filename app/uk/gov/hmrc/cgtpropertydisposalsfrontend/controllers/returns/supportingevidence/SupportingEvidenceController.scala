@@ -171,111 +171,113 @@ class SupportingEvidenceController @Inject() (
   def doYouWantToUploadSupportingEvidenceSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, answers) =>
-        doYouWantToUploadForm.bindFromRequest.fold(
-          errors =>
-            BadRequest(
-              doYouWantToUploadPage(
-                errors,
-                controllers.returns.routes.TaskListController.taskList(),
-                fillingOutReturn.isAmendReturn,
-                isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers)
-              )
-            ),
-          newDoYouWantToUploadSupportingEvidenceAnswer =>
-            if (newDoYouWantToUploadSupportingEvidenceAnswer) {
-              val updatedAnswers: SupportingEvidenceAnswers = answers match {
-                case IncompleteSupportingEvidenceAnswers(
-                      _,
+        doYouWantToUploadForm
+          .bindFromRequest()
+          .fold(
+            errors =>
+              BadRequest(
+                doYouWantToUploadPage(
+                  errors,
+                  controllers.returns.routes.TaskListController.taskList(),
+                  fillingOutReturn.isAmendReturn,
+                  isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers)
+                )
+              ),
+            newDoYouWantToUploadSupportingEvidenceAnswer =>
+              if (newDoYouWantToUploadSupportingEvidenceAnswer) {
+                val updatedAnswers: SupportingEvidenceAnswers = answers match {
+                  case IncompleteSupportingEvidenceAnswers(
+                        _,
+                        evidences,
+                        expiredEvidences
+                      ) =>
+                    IncompleteSupportingEvidenceAnswers(
+                      Some(true),
                       evidences,
                       expiredEvidences
-                    ) =>
-                  IncompleteSupportingEvidenceAnswers(
-                    Some(true),
-                    evidences,
-                    expiredEvidences
-                  )
-                case CompleteSupportingEvidenceAnswers(_, evidences) =>
-                  IncompleteSupportingEvidenceAnswers(
-                    Some(true),
-                    evidences,
-                    List.empty
-                  )
-              }
+                    )
+                  case CompleteSupportingEvidenceAnswers(_, evidences) =>
+                    IncompleteSupportingEvidenceAnswers(
+                      Some(true),
+                      evidences,
+                      List.empty
+                    )
+                }
 
-              val newDraftReturn = fillingOutReturn.draftReturn.fold(
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-              )
+                val newDraftReturn = fillingOutReturn.draftReturn.fold(
+                  _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                  _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                  _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                  _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                  _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                )
 
-              val newJourney =
-                fillingOutReturn.copy(draftReturn = newDraftReturn)
+                val newJourney =
+                  fillingOutReturn.copy(draftReturn = newDraftReturn)
 
-              val result = for {
-                _ <- returnsService.storeDraftReturn(newJourney)
-                _ <- EitherT(
-                       updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourney)))
-                     )
-              } yield ()
-
-              result.fold(
-                { e =>
-                  logger.warn("Could not update session", e)
-                  errorHandler.errorResult()
-                },
-                _ =>
-                  Redirect(
-                    routes.SupportingEvidenceController.checkYourAnswers()
-                  )
-              )
-
-            } else {
-              val updatedAnswers: SupportingEvidenceAnswers = answers.fold(
-                _ =>
-                  IncompleteSupportingEvidenceAnswers(
-                    Some(false),
-                    List.empty,
-                    List.empty
-                  ),
-                _ =>
-                  CompleteSupportingEvidenceAnswers(
-                    doYouWantToUploadSupportingEvidence = false,
-                    List.empty
-                  )
-              )
-              val newDraftReturn                            = fillingOutReturn.draftReturn.fold(
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-              )
-
-              val newJourney = fillingOutReturn.copy(draftReturn = newDraftReturn)
-
-              val result = for {
-                _ <- returnsService.storeDraftReturn(newJourney)
-                _ <- EitherT(
-                       updateSession(sessionStore, request)(
-                         _.copy(journeyStatus = Some(newJourney))
+                val result = for {
+                  _ <- returnsService.storeDraftReturn(newJourney)
+                  _ <- EitherT(
+                         updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourney)))
                        )
-                     )
-              } yield ()
+                } yield ()
 
-              result.fold(
-                { e =>
-                  logger.warn("Could not update session", e)
-                  errorHandler.errorResult()
-                },
-                _ =>
-                  Redirect(
-                    routes.SupportingEvidenceController.checkYourAnswers()
-                  )
-              )
-            }
-        )
+                result.fold(
+                  { e =>
+                    logger.warn("Could not update session", e)
+                    errorHandler.errorResult()
+                  },
+                  _ =>
+                    Redirect(
+                      routes.SupportingEvidenceController.checkYourAnswers()
+                    )
+                )
+
+              } else {
+                val updatedAnswers: SupportingEvidenceAnswers = answers.fold(
+                  _ =>
+                    IncompleteSupportingEvidenceAnswers(
+                      Some(false),
+                      List.empty,
+                      List.empty
+                    ),
+                  _ =>
+                    CompleteSupportingEvidenceAnswers(
+                      doYouWantToUploadSupportingEvidence = false,
+                      List.empty
+                    )
+                )
+                val newDraftReturn                            = fillingOutReturn.draftReturn.fold(
+                  _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                  _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                  _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                  _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                  _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                )
+
+                val newJourney = fillingOutReturn.copy(draftReturn = newDraftReturn)
+
+                val result = for {
+                  _ <- returnsService.storeDraftReturn(newJourney)
+                  _ <- EitherT(
+                         updateSession(sessionStore, request)(
+                           _.copy(journeyStatus = Some(newJourney))
+                         )
+                       )
+                } yield ()
+
+                result.fold(
+                  { e =>
+                    logger.warn("Could not update session", e)
+                    errorHandler.errorResult()
+                  },
+                  _ =>
+                    Redirect(
+                      routes.SupportingEvidenceController.checkYourAnswers()
+                    )
+                )
+              }
+          )
       }
     }
 

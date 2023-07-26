@@ -3050,7 +3050,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
     validateDisposalDetailsCheckYourAnswersPage(
       completeReturn.disposalDetails,
       doc,
-      completeReturn.isIndirectDisposal()
+      completeReturn.isIndirectDisposal
     )
 
     validateReliefDetailsCheckYourAnswersPage(
@@ -3177,7 +3177,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
     validateDisposalDetailsCheckYourAnswersPage(
       completeReturn.disposalDetails,
       doc,
-      completeReturn.isIndirectDisposal()
+      completeReturn.isIndirectDisposal
     )
 
     completeReturn.triageAnswers.individualUserType.foreach { individualUserType =>

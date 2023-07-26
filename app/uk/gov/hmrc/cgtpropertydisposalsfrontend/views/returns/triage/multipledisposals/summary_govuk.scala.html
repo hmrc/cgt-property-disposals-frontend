@@ -131,7 +131,7 @@
         )
     }
 
-  @if(!answers.isIndirectDisposal()) {
+  @if(!answers.isIndirectDisposal) {
       @cyaRow(
           messages("multipleDisposalsTaxYear.title"),
           Html(s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"),

@@ -35,7 +35,7 @@
 @title = @{messages("agent.enter-client-country.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@layout(title, backLinkUrl = Some(routes.AgentAccessController.enterClientsCgtRef.url), hasErrors = hasErrors) {
+@layout(title, backLinkUrl = Some(routes.AgentAccessController.enterClientsCgtRef().url), hasErrors = hasErrors) {
 
  @if(hasErrors) {
   @errorSummary(form)

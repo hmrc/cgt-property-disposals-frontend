@@ -108,10 +108,12 @@ class FurtherReturnGuidanceController @Inject() (
           _.fold(_.disposalDate.map(_.taxYear), c => Some(c.disposalDate.taxYear))
         )
       ),
-      _.draftReturn.triageAnswers.fold(
-        _.fold(_.taxYear, c => Some(c.taxYear)),
-        _.fold(_.disposalDate.map(_.taxYear), c => Some(c.disposalDate.taxYear))
-      )
+      _.draftReturn
+        .triageAnswers()
+        .fold(
+          _.fold(_.taxYear, c => Some(c.taxYear)),
+          _.fold(_.disposalDate.map(_.taxYear), c => Some(c.disposalDate.taxYear))
+        )
     )
 
   private def withJourneyState(request: RequestWithSessionData[_])(

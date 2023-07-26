@@ -5274,7 +5274,7 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
     doc
       .select("#taxYear-answer")
       .text()                                   shouldBe (
-      if (answers.isIndirectDisposal()) ""
+      if (answers.isIndirectDisposal) ""
       else s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"
     )
     doc.select("#completionDate-answer").text() shouldBe TimeUtils

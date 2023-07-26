@@ -215,7 +215,7 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def wereYouUKResidentBackLinkUrl(triageAnswers: SingleDisposalTriageAnswers): Call =
-    if (triageAnswers.isPeriodOfAdmin())
+    if (triageAnswers.isPeriodOfAdmin)
       routes.CommonTriageQuestionsController.howManyProperties()
     else
       routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -558,7 +558,10 @@ class SingleDisposalsTriageController @Inject() (
                       },
                       taxYear => {
                         val amendReturnOriginalTaxYear =
-                          state.map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
+                          state
+                            .map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear()))
+                            .toOption
+                            .flatten
 
                         taxYear match {
                           case None if isAmendReturn(state) =>
@@ -1182,7 +1185,10 @@ class SingleDisposalsTriageController @Inject() (
                       },
                       taxYear => {
                         val amendReturnOriginalTaxYear =
-                          state.map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
+                          state
+                            .map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear()))
+                            .toOption
+                            .flatten
 
                         taxYear match {
                           case None if isAmendReturn(state) =>
@@ -1824,7 +1830,7 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def populateDisposalMethodInPeriodOfAdmin(s: SingleDisposalTriageAnswers): SingleDisposalTriageAnswers =
-    if (s.isPeriodOfAdmin())
+    if (s.isPeriodOfAdmin)
       s.fold(
         _.copy(disposalMethod = Some(DisposalMethod.Sold)),
         _.copy(disposalMethod = DisposalMethod.Sold)

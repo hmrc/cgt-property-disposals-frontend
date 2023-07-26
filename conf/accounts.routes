@@ -34,7 +34,7 @@ GET         /account-home/manage-account/with-id/change-name                    
 POST        /account-home/manage-account/with-id/change-name                                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeContactNameController.enterContactNameSubmit()
 GET         /account-home/manage-account/without-id/change-name                                                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedWithoutIdChangeContactNameController.enterIndividualName()
 POST        /account-home/manage-account/without-id/change-name                                                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedWithoutIdChangeContactNameController.enterIndividualNameSubmit()
-GET         /account-home/manage-account                                                                                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.manageYourDetails
+GET         /account-home/manage-account                                                                                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.manageYourDetails()
 GET         /account-home/manage-account/contact-name-changed                                                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.contactNameUpdated()
 
 

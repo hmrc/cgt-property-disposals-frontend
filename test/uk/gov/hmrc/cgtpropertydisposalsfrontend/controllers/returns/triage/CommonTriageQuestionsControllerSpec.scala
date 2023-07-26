@@ -177,7 +177,7 @@ class CommonTriageQuestionsControllerSpec
       gainOrLossAfterReliefs = None,
       exemptionAndLossesAnswers = None,
       reliefDetailsAnswers =
-        if (singleDisposalTriageAnswers.isPeriodOfAdmin())
+        if (singleDisposalTriageAnswers.isPeriodOfAdmin)
           Some(IncompleteReliefDetailsAnswers.empty)
         else None,
       representeeAnswers = representeeAnswers

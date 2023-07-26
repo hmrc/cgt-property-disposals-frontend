@@ -70,7 +70,7 @@
 
 @subscribedDetails = @{ fillingOutReturn.subscribedDetails }
 @representativeType = @{ completeReturn.representativeType() }
-@isIndirectDisposal = @{ completeReturn.isIndirectDisposal() }
+@isIndirectDisposal = @{ completeReturn.isIndirectDisposal }
 @isFurtherOrAmendReturn = @{ furtherOrAmendReturnCalculationEligibility.isDefined }
 @showAnnualExemptAmount = @{ furtherOrAmendReturnCalculationEligibility.forall(_.isEligible) }
 
@@ -95,7 +95,7 @@
 @representeeId = @{completeReturn.fold(_.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id))}
 @submissionDetailsKey=@{"checkAllAnswers.submissionDetails"}
 
-@layout(title, backLinkUrl = Some(routes.TaskListController.taskList.url)) {
+@layout(title, backLinkUrl = Some(routes.TaskListController.taskList().url)) {
 
   @accountName(fillingOutReturn)
   <h1 class="govuk-heading-xl">@title</h1>

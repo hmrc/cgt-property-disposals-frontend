@@ -207,7 +207,7 @@
       <p class="govuk-body"><a class="govuk-link" href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
     }
 
-    @submitButton(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+    @submitButton(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink()) "button.saveAndContinue" else "button.continue"))
   }
 
   @returnToSummaryLink(addressJourneyType.showReturnToSummaryLink())

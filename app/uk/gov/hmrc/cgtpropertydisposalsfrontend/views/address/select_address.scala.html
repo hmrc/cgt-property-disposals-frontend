@@ -121,7 +121,7 @@
 
    @govukButton(Button(
      attributes = Map("id" -> "submitButton"),
-     content = Text(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+     content = Text(messages(if(isAmend) "button.continue" else if(addressJourneyType.showReturnToSummaryLink()) "button.saveAndContinue" else "button.continue"))
    ))
  }
 

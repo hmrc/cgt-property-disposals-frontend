@@ -339,16 +339,18 @@ class YearToDateLiabilityController @Inject() (
   private def withResidentialStatus(
     draftReturn: DraftReturn
   )(f: Boolean => Future[Result]): Future[Result] =
-    draftReturn.triageAnswers.fold(
-      _.fold(
-        _.wasAUKResident,
-        c => Some(c.countryOfResidence.isUk())
-      ),
-      _.fold(
-        _.wasAUKResident,
-        c => Some(c.countryOfResidence.isUk())
-      )
-    ) match {
+    draftReturn
+      .triageAnswers()
+      .fold(
+        _.fold(
+          _.wasAUKResident,
+          c => Some(c.countryOfResidence.isUk())
+        ),
+        _.fold(
+          _.wasAUKResident,
+          c => Some(c.countryOfResidence.isUk())
+        )
+      ) match {
       case Some(u) => f(u)
       case _       => Redirect(controllers.returns.routes.TaskListController.taskList())
     }
@@ -1378,7 +1380,7 @@ class YearToDateLiabilityController @Inject() (
                   backLink,
                   fillingOutReturn.isFurtherOrAmendReturn,
                   fillingOutReturn.isAmendReturn,
-                  fillingOutReturn.draftReturn.triageAnswers.isLeft,
+                  fillingOutReturn.draftReturn.triageAnswers().isLeft,
                   isReplaymentDue(answers)
                 )
               )
@@ -1720,7 +1722,7 @@ class YearToDateLiabilityController @Inject() (
                             _,
                             taxYear,
                             fillingOutReturn.subscribedDetails.isATrust,
-                            fillingOutReturn.draftReturn.representativeType,
+                            fillingOutReturn.draftReturn.representativeType(),
                             fillingOutReturn.isAmendReturn
                           )
                         else
@@ -1789,7 +1791,7 @@ class YearToDateLiabilityController @Inject() (
                             _,
                             taxYear,
                             fillingOutReturn.subscribedDetails.isATrust,
-                            fillingOutReturn.draftReturn.representativeType,
+                            fillingOutReturn.draftReturn.representativeType(),
                             fillingOutReturn.isAmendReturn
                           )
                         else
@@ -2652,7 +2654,7 @@ class YearToDateLiabilityController @Inject() (
                     case _: DraftSingleMixedUseDisposalReturn    => false
                   },
                   fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType,
+                  draftReturn.representativeType(),
                   fillingOutReturn.isFurtherOrAmendReturn,
                   fillingOutReturn.isAmendReturn,
                   taxYear,
@@ -2674,7 +2676,7 @@ class YearToDateLiabilityController @Inject() (
                 case _: DraftSingleMixedUseDisposalReturn    => false
               },
               fillingOutReturn.subscribedDetails.isATrust,
-              draftReturn.representativeType,
+              draftReturn.representativeType(),
               fillingOutReturn.isFurtherOrAmendReturn,
               fillingOutReturn.isAmendReturn,
               taxYear,

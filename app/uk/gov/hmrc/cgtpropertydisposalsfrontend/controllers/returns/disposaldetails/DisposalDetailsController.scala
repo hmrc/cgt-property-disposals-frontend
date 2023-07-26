@@ -547,7 +547,7 @@ class DisposalDetailsController @Inject() (
               result.fold(
                 { e =>
                   logger.warn("Could not update session", e)
-                  errorHandler.errorResult
+                  errorHandler.errorResult()
                 },
                 _ =>
                   Ok(
