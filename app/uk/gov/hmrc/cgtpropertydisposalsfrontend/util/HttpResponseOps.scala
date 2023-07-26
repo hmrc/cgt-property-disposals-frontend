@@ -48,7 +48,7 @@ object HttpResponseOps {
                 Right(_)
               )
             )
-        case Failure(error) =>
+        case Failure(error)          =>
           // response.json failed in this case - there was no JSON in the response
           Left(s"Could not read http response as JSON: ${error.getMessage}")
       }

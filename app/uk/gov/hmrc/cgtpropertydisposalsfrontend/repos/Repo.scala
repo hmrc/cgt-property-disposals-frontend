@@ -40,18 +40,18 @@ trait Repo {
         .findById(id)
         .map { maybeCache =>
           val response: OptionT[Either[Error, *], A] = for {
-            cache <- OptionT.fromOption[Either[Error, *]](maybeCache)
-            data <- OptionT.fromOption[Either[Error, *]](Some(cache.data))
+            cache  <- OptionT.fromOption[Either[Error, *]](maybeCache)
+            data   <- OptionT.fromOption[Either[Error, *]](Some(cache.data))
             result <- OptionT.liftF[Either[Error, *], A](
-                       (data \ sessionKey)
-                         .validate[A]
-                         .asEither
-                         .leftMap(e =>
-                           Error(
-                             s"Could not parse session data from mongo: ${e.mkString("; ")}"
-                           )
-                         )
-                     )
+                        (data \ sessionKey)
+                          .validate[A]
+                          .asEither
+                          .leftMap(e =>
+                            Error(
+                              s"Could not parse session data from mongo: ${e.mkString("; ")}"
+                            )
+                          )
+                      )
           } yield result
 
           response.value

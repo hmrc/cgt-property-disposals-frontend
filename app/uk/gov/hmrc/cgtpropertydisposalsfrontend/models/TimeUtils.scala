@@ -104,10 +104,10 @@ object TimeUtils {
       ): Either[Seq[FormError], LocalDate] = {
         val result = for {
           dateFieldStrings <- dateFieldStringValues(data)
-          day <- toValidInt(dayKey, dateFieldStrings._1, Some(31))
-          month <- toValidInt(monthKey, dateFieldStrings._2, Some(12))
-          year <- toValidInt(yearKey, dateFieldStrings._3, None)
-          date <-
+          day              <- toValidInt(dayKey, dateFieldStrings._1, Some(31))
+          month            <- toValidInt(monthKey, dateFieldStrings._2, Some(12))
+          year             <- toValidInt(yearKey, dateFieldStrings._3, None)
+          date             <-
             Either
               .fromTry(Try(LocalDate.of(year, month, day)))
               .leftMap(_ => FormError(dateKey, "error.invalid"))
