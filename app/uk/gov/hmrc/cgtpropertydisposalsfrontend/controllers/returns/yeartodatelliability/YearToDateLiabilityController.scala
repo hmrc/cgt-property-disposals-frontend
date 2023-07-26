@@ -2097,32 +2097,29 @@ class YearToDateLiabilityController @Inject() (
     for {
       eligibility     <-
         furtherReturnCalculationEligibilityUtil.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
-      requiredAnswers <- eligibility match {
+      requiredAnswers <- EitherT.fromEither[Future](eligibility match {
                            case _: Ineligible =>
-                             EitherT.pure[Future, Error](None)
+                             Right(None)
                            case _: Eligible   =>
-                             EitherT.fromEither(
-                               (
-                                 ytdAnswers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
-                                 ytdAnswers.fold(_.estimatedIncome, _.estimatedIncome),
-                                 ytdAnswers.fold(_.personalAllowance, _.personalAllowance)
-                               ) match {
-                                 case (Some(taxableGainOrLoss), Some(income), allowance)
-                                     if !isATrust(fillingOutReturn) =>
-                                   requiredAnswers(taxableGainOrLoss, income, allowance.getOrElse(AmountInPence.zero))
+                             (
+                               ytdAnswers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
+                               ytdAnswers.fold(_.estimatedIncome, _.estimatedIncome),
+                               ytdAnswers.fold(_.personalAllowance, _.personalAllowance)
+                             ) match {
+                               case (Some(taxableGainOrLoss), Some(income), allowance) if !isATrust(fillingOutReturn) =>
+                                 requiredAnswers(taxableGainOrLoss, income, allowance.getOrElse(AmountInPence.zero))
 
-                                 case (Some(taxableGainOrLoss), _, _) if isATrust(fillingOutReturn) =>
-                                   requiredAnswers(taxableGainOrLoss, AmountInPence.zero, AmountInPence.zero)
+                               case (Some(taxableGainOrLoss), _, _) if isATrust(fillingOutReturn) =>
+                                 requiredAnswers(taxableGainOrLoss, AmountInPence.zero, AmountInPence.zero)
 
-                                 case _ =>
-                                   Left(
-                                     Error(
-                                       "Could not find taxable gain or loss, estimated income and personal allowance"
-                                     )
+                               case _ =>
+                                 Left(
+                                   Error(
+                                     "Could not find taxable gain or loss, estimated income and personal allowance"
                                    )
-                               }
-                             )
-                         }
+                                 )
+                             }
+                         })
       calculation     <- requiredAnswers match {
                            case None                                                                   =>
                              EitherT.pure[Future, Error](None)

@@ -522,7 +522,7 @@ class SingleDisposalsTriageController @Inject() (
 
                     val result = existingDisposalDate match {
                       case Some(existingDate) if existingDate.value === date =>
-                        EitherT.pure(Some(existingDate.taxYear))
+                        EitherT.pure[Future, Error](Some(existingDate.taxYear))
 
                       case _ =>
                         for {
@@ -540,7 +540,7 @@ class SingleDisposalsTriageController @Inject() (
                                              }
                                            )
                           _             <- newState.fold(
-                                             _ => EitherT.pure(()),
+                                             _ => EitherT.pure[Future, Error](()),
                                              returnsService.storeDraftReturn(_)
                                            )
                           _             <- EitherT(
@@ -1167,7 +1167,7 @@ class SingleDisposalsTriageController @Inject() (
                                                                }
                                                              )
                           _                               <- newState.fold(
-                                                               _ => EitherT.pure(()),
+                                                               _ => EitherT.pure[Future, Error](()),
                                                                returnsService.storeDraftReturn(_)
                                                              )
                           _                               <- EitherT(
@@ -1208,7 +1208,7 @@ class SingleDisposalsTriageController @Inject() (
                             )
                           case None                         =>
                             Redirect(
-                              routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly
+                              routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
                             )
                         }
                       }
@@ -1715,13 +1715,13 @@ class SingleDisposalsTriageController @Inject() (
 
               val result = for {
                 _ <- updatedState.fold(
-                       _ => EitherT.pure(()),
+                       _ => EitherT.pure[Future, Error](()),
                        newFillingOutReturn =>
                          if (
                            state.exists(
                              _._2.draftReturn === newFillingOutReturn.draftReturn
                            )
-                         ) EitherT.pure(())
+                         ) EitherT.pure[Future, Error](())
                          else
                            returnsService.storeDraftReturn(newFillingOutReturn)
                      )
