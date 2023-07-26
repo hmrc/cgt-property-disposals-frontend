@@ -32,7 +32,8 @@ final case class ReturnSummary(
   mainReturnChargeReference: Option[String],
   propertyAddress: Address,
   charges: List[Charge],
-  isRecentlyAmended: Boolean
+  isRecentlyAmended: Boolean,
+  expired: Boolean
 )
 
 object ReturnSummary {

@@ -82,10 +82,12 @@
         id="viewSentReturn-@sentReturn.submissionId"
         href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}"
       >
-      @if(!totalOutstanding.isZero) {
-        @messages("returns.list.viewAndPay")
-      } else {
+      @if(sentReturn.expired) {
+        @messages("returns.list.viewExpired")
+      } else if(totalOutstanding.isZero) {
         @messages("returns.list.view")
+      } else {
+        @messages("returns.list.viewAndPay")
       }
       </a>
     </div>

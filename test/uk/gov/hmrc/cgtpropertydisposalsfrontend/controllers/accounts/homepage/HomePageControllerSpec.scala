@@ -77,11 +77,11 @@ class HomePageControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val mockReturnsService = mock[ReturnsService]
+  private val mockReturnsService = mock[ReturnsService]
 
-  val mockPaymentsService = mock[PaymentsService]
+  private val mockPaymentsService = mock[PaymentsService]
 
-  override val overrideBindings =
+  override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -89,7 +89,7 @@ class HomePageControllerSpec
       bind[PaymentsService].toInstance(mockPaymentsService)
     )
 
-  def mockGetDraftReturns(
+  private def mockGetDraftReturns(
     cgtReference: CgtReference,
     sentReturns: List[ReturnSummary]
   )(
@@ -102,7 +102,7 @@ class HomePageControllerSpec
       .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockUpdateCorrectTaxYearToSentReturns(
+  private def mockUpdateCorrectTaxYearToSentReturns(
     cgtReference: CgtReference,
     sentReturns: List[ReturnSummary]
   )(
@@ -115,7 +115,7 @@ class HomePageControllerSpec
       .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockGetReturnsList(cgtReference: CgtReference)(
+  private def mockGetReturnsList(cgtReference: CgtReference)(
     response: Either[Error, List[ReturnSummary]]
   ) =
     (mockReturnsService
@@ -123,7 +123,7 @@ class HomePageControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(
+  private def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(
     response: Either[Error, DisplayReturn]
   ) =
     (mockReturnsService
@@ -131,7 +131,7 @@ class HomePageControllerSpec
       .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockStartPaymentJourney(
+  private def mockStartPaymentJourney(
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
@@ -152,13 +152,13 @@ class HomePageControllerSpec
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  lazy val controller = instanceOf[HomePageController]
+  private lazy val controller = instanceOf[HomePageController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
   implicit val messages: Messages = MessagesImpl(lang, messagesApi)
 
-  def sessionDataWithSubscribed(subscribed: Subscribed) =
+  private def sessionDataWithSubscribed(subscribed: Subscribed) =
     SessionData.empty.copy(journeyStatus = Some(subscribed))
 
   "The HomePage Controller" when {
@@ -316,7 +316,8 @@ class HomePageControllerSpec
           charges = charges,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed             =
           sample[Subscribed].copy(
@@ -344,6 +345,48 @@ class HomePageControllerSpec
               messageFromMessageKey(
                 resumeDraftMessage
               )
+        )
+      }
+
+      "Display 'view return' when the return has expired" in {
+        val propertyAddress   = sample[UkAddress]
+        val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(ukResidentMainReturnChargeDueDate.minusDays(61)))
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers,
+          lastUpdatedDate = LocalDate.now(),
+          propertyAddress = Some(propertyAddress)
+        )
+        val sampleSentReturn  = sample[ReturnSummary].copy(
+          charges = chargesWithChargeRaiseAndNoPayment,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate = ukResidentReturnSentDate,
+          isRecentlyAmended = false,
+          expired = true
+        )
+        val subscribed        =
+          sample[Subscribed].copy(
+            draftReturns = List(sampleDraftReturn),
+            sentReturns = List(sampleSentReturn)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(s"#viewSentReturn-${sampleSentReturn.submissionId}")
+              .text shouldBe messageFromMessageKey("returns.list.viewExpired")
         )
       }
 
@@ -381,7 +424,8 @@ class HomePageControllerSpec
           charges = charges,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed             =
           sample[Subscribed].copy(
@@ -425,7 +469,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed        =
           sample[Subscribed].copy(
@@ -467,7 +512,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed        =
           sample[Subscribed].copy(
@@ -503,7 +549,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed       =
           sample[Subscribed].copy(
@@ -930,7 +977,8 @@ class HomePageControllerSpec
           charges = chargesWithoutChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -982,7 +1030,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndNoPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -1035,7 +1084,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndPartialPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = true
+          isRecentlyAmended = true,
+          expired = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -1085,7 +1135,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndPartialPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -1140,7 +1191,8 @@ class HomePageControllerSpec
           charges = chargesWithChargeRaiseAndFullPayment,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -1221,7 +1273,8 @@ class HomePageControllerSpec
           charges = charges,
           mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
           submissionDate = ukResidentReturnSentDate,
-          isRecentlyAmended = false
+          isRecentlyAmended = false,
+          expired = false
         )
 
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))

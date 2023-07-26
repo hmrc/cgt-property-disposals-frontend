@@ -206,39 +206,24 @@ class ReturnsServiceImpl @Inject() (
     cgtReference: CgtReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, (Boolean, ReturnSummary)] =
     for {
-      result <- displayReturn(cgtReference, returnSummary.submissionId).map { r =>
-                  val expectedTaxYear: String =
-                    r.completeReturn
-                      .fold(
-                        _.triageAnswers.taxYear.startDateInclusive.getYear,
-                        _.triageAnswers.disposalDate.taxYear.startDateInclusive.getYear,
-                        _.triageAnswers.disposalDate.taxYear.startDateInclusive.getYear,
-                        _.triageAnswers.taxYear.startDateInclusive.getYear,
-                        _.triageAnswers.disposalDate.taxYear.startDateInclusive.getYear
-                      )
-                      .toString
-
-                  val actualTaxYear = returnSummary.taxYear
-
-                  if (expectedTaxYear === actualTaxYear)
-                    (false, returnSummary)
-                  else {
-                    val updatedReturnSummary = ReturnSummary(
-                      returnSummary.submissionId,
-                      returnSummary.submissionDate,
-                      returnSummary.completionDate,
-                      returnSummary.lastUpdatedDate,
-                      expectedTaxYear,
-                      returnSummary.mainReturnChargeAmount,
-                      returnSummary.mainReturnChargeReference,
-                      returnSummary.propertyAddress,
-                      returnSummary.charges,
-                      returnSummary.isRecentlyAmended
-                    )
-                    (true, updatedReturnSummary)
-                  }
-                }
-    } yield result
+      return_ <- displayReturn(cgtReference, returnSummary.submissionId)
+    } yield {
+      val expectedTaxYear =
+        return_.completeReturn
+          .fold(
+            _.triageAnswers.taxYear,
+            _.triageAnswers.disposalDate.taxYear,
+            _.triageAnswers.disposalDate.taxYear,
+            _.triageAnswers.taxYear,
+            _.triageAnswers.disposalDate.taxYear
+          )
+          .startDateInclusive
+          .getYear
+          .toString
+      val actualTaxYear   = returnSummary.taxYear
+      if (expectedTaxYear === actualTaxYear) (false, returnSummary)
+      else (true, returnSummary.copy(taxYear = expectedTaxYear))
+    }
 
   def unsetUnwantedSectionsToDraftReturn(draftReturn: DraftReturn): DraftReturn =
     draftReturn.fold(
