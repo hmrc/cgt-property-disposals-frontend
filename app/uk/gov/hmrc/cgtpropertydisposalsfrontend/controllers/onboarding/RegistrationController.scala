@@ -150,7 +150,7 @@ class RegistrationController @Inject() (
                 case EntityType.Trust      =>
                   metrics.individualWantingToRegisterTrustCounter.inc()
                   RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId) ->
-                    routes.RegistrationController.wrongGGAccountForTrusts
+                    routes.RegistrationController.wrongGGAccountForTrusts()
               }
 
               (status, newRegistrationStatus) match {

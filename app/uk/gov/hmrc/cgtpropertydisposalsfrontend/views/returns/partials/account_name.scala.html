@@ -26,11 +26,11 @@
 
 @isAnAgent = @{ request.userType.contains(UserType.Agent)}
 
-@crOrPRAccountName = @{ fillingOutReturn.draftReturn.representeeAnswers.fold("")(_.makeAccountName) }
-@accountName = @{ fillingOutReturn.subscribedDetails.makeAccountName }
+@crOrPRAccountName = @{ fillingOutReturn.draftReturn.representeeAnswers.fold("")(_.makeAccountName()) }
+@accountName = @{ fillingOutReturn.subscribedDetails.makeAccountName() }
 
 @accountFullName = @{
-  fillingOutReturn.draftReturn.representativeType match {
+  fillingOutReturn.draftReturn.representativeType() match {
     case Some(PersonalRepresentative) =>
         s"${messages("account.personalRep.prefix")} ${crOrPRAccountName}"
     case Some(PersonalRepresentativeInPeriodOfAdmin) =>

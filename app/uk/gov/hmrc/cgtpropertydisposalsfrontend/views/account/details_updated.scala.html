@@ -37,7 +37,7 @@
   </p>
 
     @govukButton(Button(
-    href = Some(routes.AccountController.manageYourDetails.url),
+    href = Some(routes.AccountController.manageYourDetails().url),
     content = Text(messages("button.manageAccount"))
     ))
 }

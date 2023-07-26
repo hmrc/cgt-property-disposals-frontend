@@ -381,7 +381,7 @@ object CompleteReturn {
         _ => false
       )
 
-    def representativeType(): Option[RepresentativeType] =
+    def representativeType: Option[RepresentativeType] =
       c.fold(
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType(),

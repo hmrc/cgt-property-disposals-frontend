@@ -34,7 +34,7 @@ object TaskListStatus {
   implicit val eq: Eq[TaskListStatus] = Eq.fromUniversalEquals[TaskListStatus]
 
   implicit class TaskListStatusOps(private val a: TaskListStatus) extends AnyVal {
-    def isComplete(): Boolean = a === Complete
+    def isComplete: Boolean = a === Complete
   }
 
 }

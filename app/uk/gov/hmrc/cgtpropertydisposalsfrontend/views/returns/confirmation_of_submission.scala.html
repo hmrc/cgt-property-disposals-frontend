@@ -63,7 +63,7 @@
     case CompleteSingleMixedUseDisposalReturn(triageAnswers, _, _, _, _, _, _, _) =>triageAnswers.completionDate
   }
 }
-@representativeType = @{ justSubmittedReturn.completeReturn.representativeType() }
+@representativeType = @{ justSubmittedReturn.completeReturn.representativeType }
 @representeeAnswers = @{
   justSubmittedReturn.completeReturn.fold(
     _.representeeAnswers,
@@ -123,9 +123,9 @@
 }
 @isLateReturn = @{
   if(is60DaysWarning)
-    completionDate.value.plusDays(60L).isBefore(TimeUtils.today)
+    completionDate.value.plusDays(60L).isBefore(TimeUtils.today())
   else
-    completionDate.value.plusDays(30L).isBefore(TimeUtils.today)
+    completionDate.value.plusDays(30L).isBefore(TimeUtils.today())
 }
 @panelContent = {
   @if(!isPeriodOfAdmin) {

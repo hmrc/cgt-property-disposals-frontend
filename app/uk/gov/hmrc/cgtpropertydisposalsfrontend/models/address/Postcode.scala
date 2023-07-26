@@ -39,7 +39,7 @@ object Postcode {
 
     def validatePostcode(p: Postcode): ValidationResult = {
       val postcodeWithoutSpaces =
-        p.value.toUpperCase.replaceAllLiterally(" ", "")
+        p.value.toUpperCase().replaceAllLiterally(" ", "")
       if (p.value.length > 8) Invalid("error.tooLong")
       else if (!postcodeWithoutSpaces.forall(_.isLetterOrDigit))
         Invalid("error.invalidCharacters")

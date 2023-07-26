@@ -492,7 +492,7 @@ class AcquisitionDetailsController @Inject() (
             withAssetType(state) { assetType =>
               commonDisplayBehaviour(answers)(
                 form = _.fold(
-                  _.acquisitionPrice.fold(acquisitionPriceForm)(p => acquisitionPriceForm.fill(p.inPounds)),
+                  _.acquisitionPrice.fold(acquisitionPriceForm)(p => acquisitionPriceForm.fill(p.inPounds())),
                   c => acquisitionPriceForm.fill(c.acquisitionPrice.inPounds())
                 )
               )(

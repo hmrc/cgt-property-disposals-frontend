@@ -265,7 +265,7 @@ class CompanyDetailsController @Inject() (
               .fold(_.disposalPrice, c => Some(c.disposalPrice))
 
             val form = disposalPrice.fold(multipleIndirectDisposalPriceForm)(c =>
-              multipleIndirectDisposalPriceForm.fill(c.inPounds)
+              multipleIndirectDisposalPriceForm.fill(c.inPounds())
             )
 
             Ok(multipleIndirectDisposalPricePage(form, backLink, r.journey.isAmendReturn))
@@ -365,7 +365,7 @@ class CompanyDetailsController @Inject() (
               .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
 
             val form = acquisitionPrice.fold(multipleIndirectAcquisitionPriceForm)(c =>
-              multipleIndirectAcquisitionPriceForm.fill(c.inPounds)
+              multipleIndirectAcquisitionPriceForm.fill(c.inPounds())
             )
 
             Ok(multipleIndirectAcquisitionPricePage(form, backLink, r.journey.isAmendReturn))

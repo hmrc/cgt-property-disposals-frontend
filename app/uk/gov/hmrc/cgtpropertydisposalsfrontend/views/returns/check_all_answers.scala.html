@@ -69,7 +69,7 @@
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @subscribedDetails = @{ fillingOutReturn.subscribedDetails }
-@representativeType = @{ completeReturn.representativeType() }
+@representativeType = @{ completeReturn.representativeType }
 @isIndirectDisposal = @{ completeReturn.isIndirectDisposal }
 @isFurtherOrAmendReturn = @{ furtherOrAmendReturnCalculationEligibility.isDefined }
 @showAnnualExemptAmount = @{ furtherOrAmendReturnCalculationEligibility.forall(_.isEligible) }

@@ -357,7 +357,7 @@ class HomePageController @Inject() (
     uplift: (J, List[DraftReturn], List[ReturnSummary]) => Subscribed
   )(
     f: Subscribed => Future[Result]
-  )()(implicit
+  )(implicit
     hc: HeaderCarrier,
     request: RequestWithSessionData[_]
   ): Future[Result] = {

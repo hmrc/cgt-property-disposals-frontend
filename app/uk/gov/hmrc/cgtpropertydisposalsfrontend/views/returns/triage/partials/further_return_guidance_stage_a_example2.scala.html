@@ -27,7 +27,7 @@
 
 @key = @{ "furtherReturnGuidance" }
 @taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
-@annualExemptAmountGeneral = @{ taxYear.map(_.annualExemptAmountGeneral.inPounds).getOrElse(BigDecimal("0")) }
+@annualExemptAmountGeneral = @{ taxYear.map(_.annualExemptAmountGeneral.inPounds()).getOrElse(BigDecimal("0")) }
 
 <p class="govuk-body">@messages(s"$key.stage-a.step1.example2.p1")</p>
 <h4 class="govuk-heading-m">@messages(s"$key.stage-a.step1.example2.headingText")</h4>
