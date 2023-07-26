@@ -845,6 +845,7 @@ class ViewReturnControllerSpec
           val document = Jsoup.parse(contentAsString(result))
 
           document.select("#amend-link-1").isEmpty shouldBe true
+          document.select("#amend-link-2").isEmpty shouldBe true
         }
 
       }

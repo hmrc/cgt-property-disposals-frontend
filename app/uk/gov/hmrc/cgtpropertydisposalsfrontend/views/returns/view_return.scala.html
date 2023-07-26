@@ -180,6 +180,8 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         returnSummaryClass = Some("return-summary")
     )
 
-  @changeReturnLink("amend-link-2")
+    @if(!returnSummary.expired) {
+        @changeReturnLink("amend-link-2")
+    }
 
 }
