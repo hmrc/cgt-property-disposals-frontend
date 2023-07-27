@@ -67,7 +67,7 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
       "do a get http call and return the result" in {
 
         val lookupAddressByPostcode = LookupAddressByPostcode(
-          postcode.value.replaceAllLiterally(" ", "").toUpperCase,
+          postcode.value.replace(" ", "").toUpperCase,
           None
         )
 
@@ -93,7 +93,7 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
       "include the filter in the query parameters if one is passed in" in {
         val filter: String          = "8"
         val lookupAddressByPostcode = LookupAddressByPostcode(
-          postcode.value.replaceAllLiterally(" ", "").toUpperCase,
+          postcode.value.replace(" ", "").toUpperCase,
           Some(filter)
         )
         val httpResponse            = HttpResponse(200, emptyJsonBody)
@@ -113,7 +113,7 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
         val postcode = Postcode("AB12CD")
 
         val lookupAddressByPostcode = LookupAddressByPostcode(
-          postcode.value.replaceAllLiterally(" ", "").toUpperCase,
+          postcode.value.replace(" ", "").toUpperCase,
           None
         )
         mockPost(
@@ -129,7 +129,7 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
 
       "return an error" when {
         val lookupAddressByPostcode = LookupAddressByPostcode(
-          postcode.value.replaceAllLiterally(" ", "").toUpperCase,
+          postcode.value.replace(" ", "").toUpperCase,
           None
         )
 

@@ -47,7 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.{Locale, UUID}
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[ReturnsServiceImpl])
@@ -570,7 +570,7 @@ class ReturnsServiceImpl @Inject() (
   private def toUpperCaseWithoutSpaces(
     countryOrPostcode: Either[CountryCode, Postcode]
   ): Either[CountryCode, Postcode] = {
-    def format(s: String): CountryCode = s.replaceAllLiterally(" ", "").toUpperCase()
+    def format(s: String): CountryCode = s.replace(" ", "").toUpperCase(Locale.UK)
     countryOrPostcode.bimap(format, p => Postcode(format(p.value)))
   }
 

@@ -31,6 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
+import java.util.Locale
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -110,7 +111,7 @@ object EmailVerificationConnectorImpl {
   def getEmailTemplate(language: AcceptLanguage, baseTemplateName: String): String =
     language match {
       case AcceptLanguage.EN => baseTemplateName
-      case AcceptLanguage.CY => baseTemplateName + "_" + AcceptLanguage.CY.toString.toLowerCase
+      case AcceptLanguage.CY => baseTemplateName + "_" + AcceptLanguage.CY.toString.toLowerCase(Locale.UK)
     }
 
 }

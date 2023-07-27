@@ -53,6 +53,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.util.Locale
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -276,7 +277,7 @@ class AgentAccessController @Inject() (
     }
 
   private def toUpperWithNoSpaces(s: String): String =
-    s.toUpperCase.replaceAllLiterally(" ", "")
+    s.toUpperCase(Locale.UK).replace(" ", "")
 
   private def handleSubmittedCgtReferenceNumber(
     cgtReference: CgtReference,

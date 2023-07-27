@@ -42,7 +42,7 @@
     name = id,
     value = form.data.get(id),
     label = Label(
-      content = Text(id.replaceAllLiterally("-", " ")),
+      content = Text(id.replace("-", " ")),
     ),
     classes = "govuk-input--width-10",
     errorMessage = form.error(id).map(e => ErrorMessage(

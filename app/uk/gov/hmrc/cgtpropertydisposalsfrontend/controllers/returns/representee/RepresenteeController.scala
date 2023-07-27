@@ -54,6 +54,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import java.time.LocalDate
+import java.util.Locale
 import scala.concurrent.{ExecutionContext, Future}
 
 class RepresenteeController @Inject() (
@@ -979,7 +980,7 @@ object RepresenteeController {
       InnerOption { data =>
         FormUtils
           .readValue(ninoId, data, identity)
-          .map(_.toUpperCase.replaceAllLiterally(" ", ""))
+          .map(_.toUpperCase(Locale.UK).replace(" ", ""))
           .flatMap(nino =>
             if (nino.length > 9)
               Left(FormError(ninoId, "error.tooLong"))
@@ -999,7 +1000,7 @@ object RepresenteeController {
       InnerOption { data =>
         FormUtils
           .readValue(sautrId, data, identity)
-          .map(_.replaceAllLiterally(" ", ""))
+          .map(_.replace(" ", ""))
           .flatMap(sautr =>
             if (sautr.exists(!_.isDigit))
               Left(FormError(sautrId, "error.invalid"))

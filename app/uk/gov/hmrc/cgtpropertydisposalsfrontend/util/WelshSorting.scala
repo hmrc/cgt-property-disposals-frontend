@@ -21,6 +21,8 @@ import cats.instances.string._
 import cats.syntax.eq._
 import org.apache.commons.lang3.StringUtils
 
+import java.util.Locale
+
 object WelshSorting {
   private val WELSH_ALPHABET = Map(
     " "  -> 0,
@@ -75,7 +77,7 @@ object WelshSorting {
       }
 
     private def clean(code: String): String =
-      StringUtils.stripAccents(code.toLowerCase().stripPrefix(YR).filter(s => s.isLetter || s.isWhitespace))
+      StringUtils.stripAccents(code.toLowerCase(Locale.UK).stripPrefix(YR).filter(s => s.isLetter || s.isWhitespace))
 
     @scala.annotation.tailrec
     private def toCharacterValues(str: String, acc: List[Int]): List[Int] =
