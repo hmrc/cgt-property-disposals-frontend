@@ -129,7 +129,7 @@
             value = Some(index.toString),
             checked = form.value.map(optionIndex).contains(index)
           )
-        }.toSeq,
+        },
         hint = Some(Hint(
           content = HtmlContent(messages(s"$key.helpText.p1.text"))
         )),

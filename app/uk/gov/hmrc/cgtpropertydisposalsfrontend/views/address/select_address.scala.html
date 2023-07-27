@@ -107,7 +107,7 @@
          value = Some(index.toString),
          checked = form.value.map(addresses.indexOf(_)).contains(index)
        )
-     }.toSeq,
+     },
      errorMessage = form.error(key).map(e =>
        ErrorMessage(
          content = Text(messages(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}.${e.message}"))
