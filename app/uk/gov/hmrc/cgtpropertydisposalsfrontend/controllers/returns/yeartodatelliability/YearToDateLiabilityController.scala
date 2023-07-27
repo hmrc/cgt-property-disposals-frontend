@@ -1473,7 +1473,7 @@ class YearToDateLiabilityController @Inject() (
   ): EitherT[Future, Error, Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]]               =
     for {
       requiredAnswers <-
-        EitherT.fromEither(
+        EitherT.fromEither[Future](
           (
             fillingOutReturn.draftReturn.gainOrLossAfterReliefs,
             fillingOutReturn.draftReturn.exemptionAndLossesAnswers
@@ -2918,7 +2918,7 @@ class YearToDateLiabilityController @Inject() (
         furtherReturnCalculationEligibilityUtil
           .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
           .map(Some(_))
-      else EitherT.pure(None)
+      else EitherT.pure[Future, Error](None)
 
     result.foldF(
       { e =>

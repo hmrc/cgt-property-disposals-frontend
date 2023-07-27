@@ -175,7 +175,7 @@ class PropertyDetailsController @Inject() (
               IncompleteExamplePropertyDetailsAnswers.empty
             )
             if (answers.fold(_.address, c => Some(c.address)).contains(a))
-              EitherT.pure(journey.journey)
+              EitherT.pure[Future, Error](journey.journey)
             else {
               val updatedDraftReturn = m.copy(
                 examplePropertyDetailsAnswers = Some(answers.unset(_.disposalDate).copy(address = Some(a))),
@@ -190,7 +190,7 @@ class PropertyDetailsController @Inject() (
 
           case Right(d: DraftSingleDisposalReturn) =>
             if (d.propertyAddress.contains(a))
-              EitherT.pure(journey.journey)
+              EitherT.pure[Future, Error](journey.journey)
             else {
               val updatedDraftReturn = d.copy(
                 propertyAddress = Some(a),

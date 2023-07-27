@@ -438,7 +438,7 @@ class RepresenteeController @Inject() (
                                  .bindFromRequest()
                                  .fold(
                                    formWithErrors =>
-                                     EitherT.leftT(
+                                     EitherT.leftT[Future, RepresenteeReferenceId](
                                        ValidationError(formWithErrors)
                                      ),
                                    id =>

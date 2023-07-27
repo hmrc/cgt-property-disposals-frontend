@@ -163,7 +163,7 @@ class ReliefDetailsController @Inject() (
               currentFillingOutReturn.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
             val result = for {
-              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
+              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure[Future, Error](())
                    else
                      returnsService.storeDraftReturn(newJourney)
               _ <- EitherT(

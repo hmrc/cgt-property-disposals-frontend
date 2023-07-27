@@ -269,7 +269,7 @@ class AcquisitionDetailsController @Inject() (
 
             val result = for {
               _ <- if (newDraftReturn.merge === currentState.merge)
-                     EitherT.pure(())
+                     EitherT.pure[Future, Error](())
                    else
                      returnsService.storeDraftReturn(newJourney)
               _ <- EitherT(

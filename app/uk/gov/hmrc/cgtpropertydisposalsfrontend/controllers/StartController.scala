@@ -342,7 +342,7 @@ class StartController @Inject() (
                                                            )
                                                          )
                                                        )
-                                                   )(EitherT.pure(_))
+                                                   )(EitherT.pure[Future, Error](_))
       sentReturns                               <- returnsService.listReturns(cgtReference)
       draftReturns                              <- returnsService.getDraftReturns(cgtReference, sentReturns)
       unsetDraftReturnFlagAndUpdatedSentReturns <- returnsService.updateCorrectTaxYearToSentReturns(
@@ -656,7 +656,7 @@ class StartController @Inject() (
                                     )
                                   )
       maybeSubscriptionDetails <-
-        EitherT.pure(
+        EitherT.pure[Future, Error](
           bprResponse.cgtReference
             .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
               SubscriptionDetails(bpr, individual.email, None, None)

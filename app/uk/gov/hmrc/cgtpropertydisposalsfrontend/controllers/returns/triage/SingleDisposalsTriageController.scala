@@ -1147,7 +1147,7 @@ class SingleDisposalsTriageController @Inject() (
                     val existingDisposalDate = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate))
                     val result               = existingDisposalDate match {
                       case Some(existingDate) if existingDate.value === date.value =>
-                        EitherT.pure(Some(existingDate.taxYear))
+                        EitherT.pure[Future, Error](Some(existingDate.taxYear))
                       case _                                                       =>
                         for {
                           taxYear                         <- taxYearService.taxYear(date.value)
