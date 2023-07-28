@@ -16,33 +16,32 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 
 sealed trait UpscanCallBack extends Product with Serializable
 
+final case class UpscanSuccess(
+  reference: String,
+  fileStatus: String,
+  downloadUrl: String,
+  uploadDetails: Map[String, String]
+) extends UpscanCallBack
+
+object UpscanSuccess {
+  implicit val format: OFormat[UpscanSuccess] = Json.format[UpscanSuccess]
+}
+
+final case class UpscanFailure(
+  reference: String,
+  fileStatus: String,
+  failureDetails: Map[String, String]
+) extends UpscanCallBack
+
+object UpscanFailure {
+  implicit val format: OFormat[UpscanFailure] = Json.format[UpscanFailure]
+}
+
 object UpscanCallBack {
-
-  final case class UpscanSuccess(
-    reference: String,
-    fileStatus: String,
-    downloadUrl: String,
-    uploadDetails: Map[String, String]
-  ) extends UpscanCallBack
-
-  object UpscanSuccess {
-    implicit val format: OFormat[UpscanSuccess] = Json.format[UpscanSuccess]
-  }
-
-  final case class UpscanFailure(
-    reference: String,
-    fileStatus: String,
-    failureDetails: Map[String, String]
-  ) extends UpscanCallBack
-
-  object UpscanFailure {
-    implicit val format: OFormat[UpscanFailure] = Json.format[UpscanFailure]
-  }
 
   implicit class UpscanSuccessOps(private val u: UpscanSuccess) extends AnyVal {
 
@@ -53,6 +52,6 @@ object UpscanCallBack {
       )
   }
 
-  implicit val format: OFormat[UpscanCallBack] = derived.oformat()
+  implicit val format: OFormat[UpscanCallBack] = Json.format[UpscanCallBack]
 
 }
