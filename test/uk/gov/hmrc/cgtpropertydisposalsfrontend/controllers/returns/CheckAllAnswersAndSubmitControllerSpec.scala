@@ -842,7 +842,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                     wasAUkResident = false,
                     IndirectDisposal,
                     completeReturn.acquisitionDetails.acquisitionDate,
-                    completeReturn.representativeType()
+                    completeReturn.representativeType
                   ),
                   isATrust,
                   IndirectDisposal,
