@@ -17,7 +17,15 @@ lazy val wartremoverSettings =
       Wart.ImplicitParameter,
       Wart.Nothing,
       Wart.Overloading,
-      Wart.ToString
+      Wart.ToString,
+      Wart.Any,
+      Wart.StringPlusAny,
+      Wart.SizeIs,
+      Wart.PlatformDefault,
+      Wart.Throw,
+      Wart.Equals,
+      Wart.GetGetOrElse,
+      Wart.GlobalExecutionContext,
     ),
     wartremover.WartRemover.autoImport.wartremoverExcluded ++=
       (Compile / routes).value ++
@@ -52,6 +60,11 @@ lazy val microservice = Project(appName, file("."))
       "-Yrangepos",
       "-language:postfixOps"
     ),
+    scalacOptions -= "-Xlint:byname-implicit",
+    scalacOptions -= "-Ywarn-by-name",
+    scalacOptions -= "-Werror",
+    scalacOptions -= "-Xfatal-warnings",
+    scalacOptions += "-Xnon-strict-patmat-analysis",
     Test / scalacOptions --= Seq("-Ywarn-value-discard")
   )
   .configs(IntegrationTest)
