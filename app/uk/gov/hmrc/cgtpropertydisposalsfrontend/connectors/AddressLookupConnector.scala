@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.net.URLEncoder
+import java.util.Locale
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[AddressLookupConnectorImpl])
@@ -61,7 +62,7 @@ class AddressLookupConnectorImpl @Inject() (
   ): EitherT[Future, Error, HttpResponse] = {
 
     val lookupAddressByPostcode = LookupAddressByPostcode(
-      postcode.value.replaceAllLiterally(" ", "").toUpperCase,
+      postcode.value.replace(" ", "").toUpperCase(Locale.UK),
       filter.map(f => URLEncoder.encode(f, "UTF-8"))
     )
 

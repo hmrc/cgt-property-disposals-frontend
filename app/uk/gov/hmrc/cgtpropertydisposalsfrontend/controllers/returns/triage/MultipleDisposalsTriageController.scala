@@ -548,7 +548,7 @@ class MultipleDisposalsTriageController @Inject() (
   def whenWereContractsExchanged(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
-        if (answers.isIndirectDisposal())
+        if (answers.isIndirectDisposal)
           Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
         else {
           val taxYears =
@@ -601,7 +601,7 @@ class MultipleDisposalsTriageController @Inject() (
   def whenWereContractsExchangedSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
-        if (answers.isIndirectDisposal())
+        if (answers.isIndirectDisposal)
           Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
         else {
           val taxYears =
@@ -914,7 +914,7 @@ class MultipleDisposalsTriageController @Inject() (
           dateOfDeathValue,
           isDateOfDeathValid,
           taxYearStartYear,
-          answers.isPeriodOfAdmin()
+          answers.isPeriodOfAdmin
         )
           .bindFromRequest()
           .fold(
@@ -1127,7 +1127,10 @@ class MultipleDisposalsTriageController @Inject() (
                       },
                       taxYear => {
                         val amendReturnOriginalTaxYear =
-                          state.map(_._1.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
+                          state
+                            .map(_._1.amendReturnData.map(_.originalReturn.completeReturn.taxYear()))
+                            .toOption
+                            .flatten
                         taxYear match {
                           case None if isAmendReturn(state) =>
                             Redirect(
@@ -1335,7 +1338,7 @@ class MultipleDisposalsTriageController @Inject() (
               )
               if assetTypes.contains(List(IndirectDisposal)) &&
                 !isAValidCGTTaxTear(TimeUtils.getTaxYearExchangedOfADate(completionDate.value)) =>
-            Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly)
+            Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly())
 
           case IncompleteMultipleDisposalsTriageAnswers(
                 _,
@@ -1390,7 +1393,7 @@ class MultipleDisposalsTriageController @Inject() (
               if (isAmendReturn(state))
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
               else if (assetTypes.contains(List(IndirectDisposal)))
-                routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly
+                routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
               else if (taxYearExchanged === TaxYearExchanged.differentTaxYears & taxYearExchanged.year === -1)
                 routes.MultipleDisposalsTriageController.exchangedInDifferentTaxYears()
               else

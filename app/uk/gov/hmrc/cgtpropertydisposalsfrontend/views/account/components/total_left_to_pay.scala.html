@@ -56,7 +56,7 @@
 @if(totalLeftToPay > AmountInPence.zero) {
   @viewHelpers.govukButton(Button(
     attributes = Map("aria-describedby" -> "payment-information"),
-    href = Some(homepage.routes.HomePageController.payTotalAmountLeftToPay.url),
+    href = Some(homepage.routes.HomePageController.payTotalAmountLeftToPay().url),
     content = Text(messages("account.make.payment.link"))
   ))
 }

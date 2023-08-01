@@ -22,6 +22,7 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 
+import java.util.Locale
 import java.util.function.Predicate
 
 final case class Postcode(value: String) extends AnyVal
@@ -39,7 +40,7 @@ object Postcode {
 
     def validatePostcode(p: Postcode): ValidationResult = {
       val postcodeWithoutSpaces =
-        p.value.toUpperCase.replaceAllLiterally(" ", "")
+        p.value.toUpperCase(Locale.UK).replace(" ", "")
       if (p.value.length > 8) Invalid("error.tooLong")
       else if (!postcodeWithoutSpaces.forall(_.isLetterOrDigit))
         Invalid("error.invalidCharacters")

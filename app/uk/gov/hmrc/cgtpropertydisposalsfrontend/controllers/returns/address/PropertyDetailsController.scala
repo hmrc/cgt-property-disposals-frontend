@@ -175,7 +175,7 @@ class PropertyDetailsController @Inject() (
               IncompleteExamplePropertyDetailsAnswers.empty
             )
             if (answers.fold(_.address, c => Some(c.address)).contains(a))
-              EitherT.pure(journey.journey)
+              EitherT.pure[Future, Error](journey.journey)
             else {
               val updatedDraftReturn = m.copy(
                 examplePropertyDetailsAnswers = Some(answers.unset(_.disposalDate).copy(address = Some(a))),
@@ -190,7 +190,7 @@ class PropertyDetailsController @Inject() (
 
           case Right(d: DraftSingleDisposalReturn) =>
             if (d.propertyAddress.contains(a))
-              EitherT.pure(journey.journey)
+              EitherT.pure[Future, Error](journey.journey)
             else {
               val updatedDraftReturn = d.copy(
                 propertyAddress = Some(a),
@@ -598,7 +598,7 @@ class PropertyDetailsController @Inject() (
             val disposalPrice = answers
               .fold(_.disposalPrice, c => Some(c.disposalPrice))
 
-            val form = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
+            val form = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds()))
 
             Ok(
               multipleDisposalsDisposalPricePage(
@@ -700,7 +700,7 @@ class PropertyDetailsController @Inject() (
             val acquisitionPrice = answers
               .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
 
-            val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds))
+            val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds()))
 
             Ok(
               multipleDisposalsAcquisitionPricePage(

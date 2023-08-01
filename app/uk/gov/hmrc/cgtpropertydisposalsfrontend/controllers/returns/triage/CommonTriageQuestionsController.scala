@@ -426,10 +426,10 @@ class CommonTriageQuestionsController @Inject() (
         val backLink =
           triageAnswersFomState(state) match {
             case Left(multiple) =>
-              if (multiple.isIndirectDisposal()) routes.MultipleDisposalsTriageController.disposalDateOfShares()
+              if (multiple.isIndirectDisposal) routes.MultipleDisposalsTriageController.disposalDateOfShares()
               else routes.MultipleDisposalsTriageController.completionDate()
             case Right(single)  =>
-              if (single.isIndirectDisposal()) routes.SingleDisposalsTriageController.disposalDateOfShares()
+              if (single.isIndirectDisposal) routes.SingleDisposalsTriageController.disposalDateOfShares()
               else routes.SingleDisposalsTriageController.whenWasCompletionDate()
           }
 
@@ -902,7 +902,7 @@ class CommonTriageQuestionsController @Inject() (
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Call = {
     val triageAnswers      = triageAnswersFomState(state)
-    val isIndirectDisposal = triageAnswers.fold(_.isIndirectDisposal(), _.isIndirectDisposal())
+    val isIndirectDisposal = triageAnswers.fold(_.isIndirectDisposal, _.isIndirectDisposal)
 
     triageAnswers.fold(
       _.fold(
@@ -1107,7 +1107,7 @@ class CommonTriageQuestionsController @Inject() (
                 disposalDetailsAnswers = None,
                 acquisitionDetailsAnswers = None,
                 reliefDetailsAnswers = single.reliefDetailsAnswers
-                  .map(_.unsetPrrAndLettingRelief(answers.fold(_.isPeriodOfAdmin(), _.isPeriodOfAdmin()))),
+                  .map(_.unsetPrrAndLettingRelief(answers.fold(_.isPeriodOfAdmin, _.isPeriodOfAdmin))),
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss = None,
                 supportingEvidenceAnswers = None,

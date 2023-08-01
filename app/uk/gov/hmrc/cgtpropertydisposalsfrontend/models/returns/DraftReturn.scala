@@ -234,7 +234,7 @@ object DraftReturn {
         case s: DraftSingleMixedUseDisposalReturn    => whenSingleMixedUse(s)
       }
 
-    def isMultipleIndirectDisposal(): Boolean =
+    def isMultipleIndirectDisposal: Boolean =
       fold(_ => false, _ => false, _ => false, _ => true, _ => false)
 
     def triageAnswers(): Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers] =

@@ -36,7 +36,7 @@ POST        /before-start/date-exchanged-contracts                     uk.gov.hm
 
 GET         /exit/disposal-date-before-6-April-2020                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.disposalDateTooEarly()
 GET         /exit/uk-resident-can-only-report-residential              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential()
-GET         /exit/share-date-too-early                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.disposalsOfSharesTooEarly
+GET         /exit/share-date-too-early                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
 
 GET         /before-start/date-of-completion                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasCompletionDate()
 POST        /before-start/date-of-completion                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasCompletionDateSubmit()

@@ -90,7 +90,7 @@
 
   <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
 
-  @formWrapper(submit, 'novalidate -> "novalidate") {
+  @formWrapper(submit, Symbol("novalidate") -> "novalidate") {
    @yesNo(
     fieldId = key,
     label = title,

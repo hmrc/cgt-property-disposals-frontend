@@ -842,7 +842,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                     wasAUkResident = false,
                     IndirectDisposal,
                     completeReturn.acquisitionDetails.acquisitionDate,
-                    completeReturn.representativeType()
+                    completeReturn.representativeType
                   ),
                   isATrust,
                   IndirectDisposal,
@@ -3050,7 +3050,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
     validateDisposalDetailsCheckYourAnswersPage(
       completeReturn.disposalDetails,
       doc,
-      completeReturn.isIndirectDisposal()
+      completeReturn.isIndirectDisposal
     )
 
     validateReliefDetailsCheckYourAnswersPage(
@@ -3177,7 +3177,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
     validateDisposalDetailsCheckYourAnswersPage(
       completeReturn.disposalDetails,
       doc,
-      completeReturn.isIndirectDisposal()
+      completeReturn.isIndirectDisposal
     )
 
     completeReturn.triageAnswers.individualUserType.foreach { individualUserType =>

@@ -42,7 +42,7 @@ layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
         @errorSummary(form)
     }
 <span class="govuk-caption-xl">@messages("subscription.caption")</span>
-    @formWrapper(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrnSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrnSubmit(), Symbol("novalidate") -> "novalidate") {
         @yesNo(
             fieldId = key,
             label = title,

@@ -372,16 +372,16 @@ object CompleteReturn {
         case s: CompleteSingleMixedUseDisposalReturn   => whenSingleMixedUse(s)
       }
 
-    def isIndirectDisposal(): Boolean =
+    def isIndirectDisposal: Boolean =
       c.fold[Boolean](
-        m => m.triageAnswers.isIndirectDisposal(),
+        m => m.triageAnswers.isIndirectDisposal,
         _ => false,
         _ => true,
         _ => true,
         _ => false
       )
 
-    def representativeType(): Option[RepresentativeType] =
+    def representativeType: Option[RepresentativeType] =
       c.fold(
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType(),

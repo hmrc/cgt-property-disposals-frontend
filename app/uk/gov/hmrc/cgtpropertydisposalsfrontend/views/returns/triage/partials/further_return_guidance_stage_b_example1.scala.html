@@ -31,8 +31,8 @@
 <h4 class="govuk-heading-m">@messages(s"$key.stage-b.step1.example1.headingText")</h4>
 <p class="govuk-body">@messages(s"$key.stage-b.step1.example1.p2", "£45,000")</p>
 
-@personalAllowance = @{ taxYear.map(_.personalAllowance.inPounds).getOrElse(BigDecimal("12500")) }
-@incomeTaxHigherRateThreshold = @{ taxYear.map(_.incomeTaxHigherRateThreshold.inPounds).getOrElse(BigDecimal("37500")) }
+@personalAllowance = @{ taxYear.map(_.personalAllowance.inPounds()).getOrElse(BigDecimal("12500")) }
+@incomeTaxHigherRateThreshold = @{ taxYear.map(_.incomeTaxHigherRateThreshold.inPounds()).getOrElse(BigDecimal("37500")) }
 @netGainChargedAtBasicRate = @{ incomeTaxHigherRateThreshold - (BigDecimal("45000") - personalAllowance) }
 @cgtRateLowerBandResidential = @{ taxYear.map(_.cgtRateLowerBandResidential).getOrElse(BigDecimal("18")) }
 @cgtRateHigherBandResidential = @{ taxYear.map(_.cgtRateHigherBandResidential).getOrElse(BigDecimal("28")) }

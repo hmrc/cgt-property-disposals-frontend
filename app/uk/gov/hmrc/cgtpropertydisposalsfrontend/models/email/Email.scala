@@ -39,7 +39,7 @@ object Email {
 
   val mapping: Mapping[Email] =
     nonEmptyText
-      .transform[Email](s => Email(s.replaceAllLiterally(" ", "")), _.value)
+      .transform[Email](s => Email(s.replace(" ", "")), _.value)
       .verifying("invalid", e => emailRegex.test(e.value))
 
 }

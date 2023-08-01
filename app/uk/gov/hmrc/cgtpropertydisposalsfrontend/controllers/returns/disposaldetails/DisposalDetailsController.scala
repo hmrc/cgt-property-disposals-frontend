@@ -41,6 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, NumberUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -196,10 +197,10 @@ class DisposalDetailsController @Inject() (
 
             val result = for {
               _ <- if (newDraftReturn.merge === draftReturn.merge)
-                     EitherT.pure(())
+                     EitherT.pure[Future, Error](())
                    else
                      returnsService.storeDraftReturn(newJourney)
-              _ <- EitherT(
+              _ <- EitherT[Future, Error, Unit](
                      updateSession(sessionStore, request)(
                        _.copy(journeyStatus = Some(newJourney))
                      )
@@ -547,7 +548,7 @@ class DisposalDetailsController @Inject() (
               result.fold(
                 { e =>
                   logger.warn("Could not update session", e)
-                  errorHandler.errorResult
+                  errorHandler.errorResult()
                 },
                 _ =>
                   Ok(

@@ -27,6 +27,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.NameMatchError.{ServiceError, ValidationError}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
+
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.DeterminingIfOrganisationIsTrust
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment, SubscriptionStatus}
@@ -313,7 +315,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                       ),
                       "access-with-wrong-gg-account"
                     )
-                    Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+                    Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
 
                   case _ =>
                     Redirect(controllers.routes.StartController.start())

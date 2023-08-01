@@ -72,7 +72,7 @@
     ))
   }
 
-  @formWrapper(routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidenceSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidenceSubmit(), Symbol("novalidate") -> "novalidate") {
     @govukRadios(Radios(
       fieldset = Some(Fieldset(
         legend = Some(Legend(

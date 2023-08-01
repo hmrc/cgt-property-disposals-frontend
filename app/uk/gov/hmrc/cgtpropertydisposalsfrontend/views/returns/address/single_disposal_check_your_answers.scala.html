@@ -43,7 +43,7 @@
 
     @summary(propertyAddress, shouldAskIfPostcodeExists)
 
-    @formWrapper(returns.address.routes.PropertyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(returns.address.routes.PropertyDetailsController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))
     }
 

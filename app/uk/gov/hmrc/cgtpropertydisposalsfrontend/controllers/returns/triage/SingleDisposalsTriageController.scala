@@ -215,7 +215,7 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def wereYouUKResidentBackLinkUrl(triageAnswers: SingleDisposalTriageAnswers): Call =
-    if (triageAnswers.isPeriodOfAdmin())
+    if (triageAnswers.isPeriodOfAdmin)
       routes.CommonTriageQuestionsController.howManyProperties()
     else
       routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -522,7 +522,7 @@ class SingleDisposalsTriageController @Inject() (
 
                     val result = existingDisposalDate match {
                       case Some(existingDate) if existingDate.value === date =>
-                        EitherT.pure(Some(existingDate.taxYear))
+                        EitherT.pure[Future, Error](Some(existingDate.taxYear))
 
                       case _ =>
                         for {
@@ -540,7 +540,7 @@ class SingleDisposalsTriageController @Inject() (
                                              }
                                            )
                           _             <- newState.fold(
-                                             _ => EitherT.pure(()),
+                                             _ => EitherT.pure[Future, Error](()),
                                              returnsService.storeDraftReturn(_)
                                            )
                           _             <- EitherT(
@@ -558,7 +558,10 @@ class SingleDisposalsTriageController @Inject() (
                       },
                       taxYear => {
                         val amendReturnOriginalTaxYear =
-                          state.map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
+                          state
+                            .map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear()))
+                            .toOption
+                            .flatten
 
                         taxYear match {
                           case None if isAmendReturn(state) =>
@@ -1144,7 +1147,7 @@ class SingleDisposalsTriageController @Inject() (
                     val existingDisposalDate = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate))
                     val result               = existingDisposalDate match {
                       case Some(existingDate) if existingDate.value === date.value =>
-                        EitherT.pure(Some(existingDate.taxYear))
+                        EitherT.pure[Future, Error](Some(existingDate.taxYear))
                       case _                                                       =>
                         for {
                           taxYear                         <- taxYearService.taxYear(date.value)
@@ -1164,7 +1167,7 @@ class SingleDisposalsTriageController @Inject() (
                                                                }
                                                              )
                           _                               <- newState.fold(
-                                                               _ => EitherT.pure(()),
+                                                               _ => EitherT.pure[Future, Error](()),
                                                                returnsService.storeDraftReturn(_)
                                                              )
                           _                               <- EitherT(
@@ -1182,7 +1185,10 @@ class SingleDisposalsTriageController @Inject() (
                       },
                       taxYear => {
                         val amendReturnOriginalTaxYear =
-                          state.map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear)).toOption.flatten
+                          state
+                            .map(_._2.amendReturnData.map(_.originalReturn.completeReturn.taxYear()))
+                            .toOption
+                            .flatten
 
                         taxYear match {
                           case None if isAmendReturn(state) =>
@@ -1202,7 +1208,7 @@ class SingleDisposalsTriageController @Inject() (
                             )
                           case None                         =>
                             Redirect(
-                              routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly
+                              routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
                             )
                         }
                       }
@@ -1709,13 +1715,13 @@ class SingleDisposalsTriageController @Inject() (
 
               val result = for {
                 _ <- updatedState.fold(
-                       _ => EitherT.pure(()),
+                       _ => EitherT.pure[Future, Error](()),
                        newFillingOutReturn =>
                          if (
                            state.exists(
                              _._2.draftReturn === newFillingOutReturn.draftReturn
                            )
-                         ) EitherT.pure(())
+                         ) EitherT.pure[Future, Error](())
                          else
                            returnsService.storeDraftReturn(newFillingOutReturn)
                      )
@@ -1824,7 +1830,7 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def populateDisposalMethodInPeriodOfAdmin(s: SingleDisposalTriageAnswers): SingleDisposalTriageAnswers =
-    if (s.isPeriodOfAdmin())
+    if (s.isPeriodOfAdmin)
       s.fold(
         _.copy(disposalMethod = Some(DisposalMethod.Sold)),
         _.copy(disposalMethod = DisposalMethod.Sold)

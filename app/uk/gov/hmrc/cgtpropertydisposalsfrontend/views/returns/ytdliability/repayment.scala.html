@@ -83,7 +83,7 @@
 
   @caption(messages(s"ytdLiability.furtherReturn.caption"))
 
-  @formWrapper(routes.YearToDateLiabilityController.repaymentSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.YearToDateLiabilityController.repaymentSubmit(), Symbol("novalidate") -> "novalidate") {
     @govukRadios(Radios(
       fieldset = Some(Fieldset(
         legend = Some(Legend(

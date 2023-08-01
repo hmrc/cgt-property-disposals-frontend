@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompletionDate
-@import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, _}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 
 @this(
@@ -57,7 +57,7 @@
 
   @caption(messages("triage.caption"))
 
- @formHelper(controllers.returns.triage.routes.MultipleDisposalsTriageController.completionDateSubmit(), 'novalidate -> "novalidate") {
+ @formHelper(controllers.returns.triage.routes.MultipleDisposalsTriageController.completionDateSubmit(), Symbol("novalidate") -> "novalidate") {
   @dateInput(
    fieldId = key,
    label = title,

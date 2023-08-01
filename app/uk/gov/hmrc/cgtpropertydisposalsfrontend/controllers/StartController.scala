@@ -25,6 +25,10 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.BuildSubscriptionDataError
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{routes => addressRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.{routes => agentsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus._
@@ -179,34 +183,26 @@ class StartController @Inject() (
         Redirect(routes.StartController.agentNoEnrolment())
 
       case AlreadySubscribedWithDifferentGGAccount(_, _) =>
-        Redirect(
-          onboarding.routes.SubscriptionController
-            .alreadySubscribedWithDifferentGGAccount()
-        )
+        Redirect(onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
 
       case _: SubscriptionStatus.SubscriptionReady =>
-        Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
+        Redirect(onboardingRoutes.SubscriptionController.checkYourDetails())
 
       case _: SubscriptionStatus.TryingToGetIndividualsFootprint =>
         // this is not the first time a person with individual insufficient confidence level has come to start
-        Redirect(
-          onboarding.routes.InsufficientConfidenceLevelController
-            .doYouHaveNINO()
-        )
+        Redirect(onboardingRoutes.InsufficientConfidenceLevelController.doYouHaveNINO())
 
       case _: RegistrationStatus.RegistrationReady =>
-        Redirect(onboarding.routes.RegistrationController.checkYourAnswers())
+        Redirect(onboardingRoutes.RegistrationController.checkYourAnswers())
 
       case _: RegistrationStatus.IndividualSupplyingInformation =>
-        Redirect(onboarding.routes.RegistrationController.selectEntityType())
+        Redirect(onboardingRoutes.RegistrationController.selectEntityType())
 
       case _: RegistrationStatus.IndividualMissingEmail =>
-        Redirect(
-          onboarding.email.routes.RegistrationEnterEmailController.enterEmail()
-        )
+        Redirect(emailRoutes.RegistrationEnterEmailController.enterEmail())
 
       case RegistrationStatus.IndividualWantsToRegisterTrust(_) =>
-        Redirect(onboarding.routes.RegistrationController.selectEntityType())
+        Redirect(onboardingRoutes.RegistrationController.selectEntityType())
 
       case SubscriptionStatus
             .DeterminingIfOrganisationIsTrust(ggCredId, ggEmail, _, _) =>
@@ -219,7 +215,7 @@ class StartController @Inject() (
         handleSubscriptionMissingData(s)
 
       case _: AgentStatus.AgentSupplyingClientDetails =>
-        Redirect(agents.routes.AgentAccessController.enterClientsCgtRef())
+        Redirect(agentsRoutes.AgentAccessController.enterClientsCgtRef())
 
       case _: StartingNewDraftReturn | _: FillingOutReturn | _: ViewingReturn | _: SubmitReturnFailed =>
         Redirect(accounts.homepage.routes.HomePageController.homepage())
@@ -255,8 +251,7 @@ class StartController @Inject() (
               a,
               ggCredId,
               None
-            ) -> agents.routes.AgentAccessController
-              .enterClientsCgtRef()
+            ) -> agentsRoutes.AgentAccessController.enterClientsCgtRef()
           )
 
         updateSession(sessionStore, request)(
@@ -347,7 +342,7 @@ class StartController @Inject() (
                                                            )
                                                          )
                                                        )
-                                                   )(EitherT.pure(_))
+                                                   )(EitherT.pure[Future, Error](_))
       sentReturns                               <- returnsService.listReturns(cgtReference)
       draftReturns                              <- returnsService.getDraftReturns(cgtReference, sentReturns)
       unsetDraftReturnFlagAndUpdatedSentReturns <- returnsService.updateCorrectTaxYearToSentReturns(
@@ -409,7 +404,7 @@ class StartController @Inject() (
         journeyStatus = Some(newSessionData),
         needMoreDetailsDetails = Some(
           NeedMoreDetailsDetails(
-            onboarding.routes.DeterminingIfOrganisationIsTrustController
+            onboardingRoutes.DeterminingIfOrganisationIsTrustController
               .doYouWantToReportForATrust()
               .url,
             NeedMoreDetailsDetails.AffinityGroup.Organisation
@@ -453,7 +448,7 @@ class StartController @Inject() (
                 journeyStatus = Some(subscriptionStatus),
                 needMoreDetailsDetails = Some(
                   NeedMoreDetailsDetails(
-                    onboarding.routes.InsufficientConfidenceLevelController
+                    onboardingRoutes.InsufficientConfidenceLevelController
                       .doYouHaveNINO()
                       .url,
                     NeedMoreDetailsDetails.AffinityGroup.Individual
@@ -593,10 +588,7 @@ class StartController @Inject() (
             WrongGGAccountEvent(Some(cgtReference.value), trust.ggCredId.value),
             "access-with-wrong-gg-account"
           )
-          Redirect(
-            onboarding.routes.SubscriptionController
-              .alreadySubscribedWithDifferentGGAccount()
-          )
+          Redirect(onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
 
         case Left(BuildSubscriptionDataError.NewEnrolmentCreatedForMissingEnrolment(subscribedDetails)) =>
           logger.info(
@@ -605,7 +597,7 @@ class StartController @Inject() (
           Redirect(routes.StartController.start())
 
         case Right(_) =>
-          Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
+          Redirect(onboardingRoutes.SubscriptionController.checkYourDetails())
       }
     )
   }
@@ -625,16 +617,10 @@ class StartController @Inject() (
         )
         missingData.head match {
           case MissingData.Address =>
-            Redirect(
-              onboarding.address.routes.SubscriptionEnterAddressController
-                .isUk()
-            )
+            Redirect(addressRoutes.SubscriptionEnterAddressController.isUk())
 
           case MissingData.Email =>
-            Redirect(
-              onboarding.email.routes.SubscriptionEnterEmailController
-                .enterEmail()
-            )
+            Redirect(emailRoutes.SubscriptionEnterEmailController.enterEmail())
         }
       },
       subscriptionDetails =>
@@ -646,7 +632,7 @@ class StartController @Inject() (
                 .SubscriptionReady(subscriptionDetails, s.ggCredId)
             )
           )
-        ).map(_ => Redirect(onboarding.routes.SubscriptionController.checkYourDetails()))
+        ).map(_ => Redirect(onboardingRoutes.SubscriptionController.checkYourDetails()))
     )
 
   private def buildIndividualSubscriptionData(individual: Individual)(implicit
@@ -670,7 +656,7 @@ class StartController @Inject() (
                                     )
                                   )
       maybeSubscriptionDetails <-
-        EitherT.pure(
+        EitherT.pure[Future, Error](
           bprResponse.cgtReference
             .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
               SubscriptionDetails(bpr, individual.email, None, None)
@@ -715,10 +701,7 @@ class StartController @Inject() (
             ),
             "access-with-wrong-gg-account"
           )
-          Redirect(
-            onboarding.routes.SubscriptionController
-              .alreadySubscribedWithDifferentGGAccount()
-          )
+          Redirect(onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
 
         case Left(BuildSubscriptionDataError.NewEnrolmentCreatedForMissingEnrolment(subscribedDetails)) =>
           logger.info(
@@ -727,7 +710,7 @@ class StartController @Inject() (
           Redirect(routes.StartController.start())
 
         case Right(_) =>
-          Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
+          Redirect(onboardingRoutes.SubscriptionController.checkYourDetails())
       }
     )
   }

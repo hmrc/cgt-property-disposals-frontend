@@ -203,7 +203,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
         singleMixedUse => fromNonCalculatedYtdAnswers(singleMixedUse.yearToDateLiabilityAnswers)
       )
     val previousSentReturnsWithDates                         = previousSentReturns.map(r => r -> r.lastUpdatedDate.getOrElse(r.submissionDate))
-    val latestReturnWithData                                 = previousSentReturnsWithDates.sortBy(_._2)(localDateOrder.toOrdering).lastOption
+    val latestReturnWithData                                 = previousSentReturnsWithDates.maxByOption(_._2)(localDateOrder.toOrdering)
 
     latestReturnWithData match {
       case None                             => EitherT.pure(None)

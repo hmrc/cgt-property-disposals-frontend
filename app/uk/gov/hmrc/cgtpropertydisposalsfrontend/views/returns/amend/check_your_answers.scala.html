@@ -53,7 +53,7 @@
     messages(messageKey)
 }
 
-@accountName = @{ subscribedDetails.makeAccountName }
+@accountName = @{ subscribedDetails.makeAccountName() }
 
 @accountFullName = @{
     if (isAgent)

@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.govukfrontend.views.Aliases.{Button, Text}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, _}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
         layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
@@ -76,7 +76,7 @@
     }
 
     <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
-    @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFeesSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFeesSubmit(), Symbol("novalidate") -> "novalidate") {
       @govukInput(Input(
         id = key,
         name = key,

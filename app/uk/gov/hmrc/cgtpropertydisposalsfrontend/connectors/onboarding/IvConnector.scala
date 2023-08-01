@@ -54,7 +54,7 @@ class IvConnectorImpl @Inject() (
       http
         .GET[HttpResponse](url(journeyId))
         .map(Right(_))
-        .recover { case e ⇒
+        .recover { case e =>
           Left(Error(e))
         }
     )

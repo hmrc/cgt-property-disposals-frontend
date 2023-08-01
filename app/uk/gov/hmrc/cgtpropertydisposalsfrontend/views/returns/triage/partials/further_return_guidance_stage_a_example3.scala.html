@@ -27,7 +27,7 @@
 @key = @{ "furtherReturnGuidance" }
 @taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
 @taxYearEndYear = @{ taxYear.map(_.endDateExclusive.getYear).getOrElse(2021).toString }
-@annualExemptAmountNonVulnerableTrust = @{ taxYear.map(_.annualExemptAmountNonVulnerableTrust.inPounds).getOrElse(BigDecimal("0")) }
+@annualExemptAmountNonVulnerableTrust = @{ taxYear.map(_.annualExemptAmountNonVulnerableTrust.inPounds()).getOrElse(BigDecimal("0")) }
 
 <p class="govuk-body">@messages(s"$key$userKey.stage-a.example3.p1", taxYearStartYear)</p>
 <h4 class="govuk-heading-m">

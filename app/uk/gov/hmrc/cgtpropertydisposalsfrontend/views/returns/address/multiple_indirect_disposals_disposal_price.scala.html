@@ -51,7 +51,7 @@
 
     @caption(messages("returns.company-details.multipleIndirectDisposals.caption"))
 
-    @formWrapper(address.routes.CompanyDetailsController.multipleIndirectDisposalPriceSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(address.routes.CompanyDetailsController.multipleIndirectDisposalPriceSubmit(), Symbol("novalidate") -> "novalidate") {
       @govukInput(Input(
         id = key,
         name = key,

@@ -96,7 +96,7 @@
     @messages("triage.caption")
   </span>
 
-  @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.wereYouAUKResidentSubmit(), Symbol("novalidate") -> "novalidate") {
     @yesNo(
       fieldId = key,
       label = title,

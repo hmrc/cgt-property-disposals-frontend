@@ -47,7 +47,7 @@
 
  @summary(answers, isATrust, representeeAnswers)
 
- @formWrapper(routes.MultipleDisposalsTriageController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(routes.MultipleDisposalsTriageController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
  @govukButton(Button(
     attributes = Map("id" -> "submitButton"),
     content = Text(messages("button.confirmAndContinue"))))

@@ -40,7 +40,7 @@ object MoneyUtils {
     currencyFormatter.format(d).stripSuffix(".00")
 
   def formatAmountOfMoneyWithoutPoundSign(d: BigDecimal): String =
-    formatAmountOfMoneyWithPoundSign(d).replaceAllLiterally("£", "")
+    formatAmountOfMoneyWithPoundSign(d).replace("£", "")
 
   def validateAmountOfMoney(
     key: String,

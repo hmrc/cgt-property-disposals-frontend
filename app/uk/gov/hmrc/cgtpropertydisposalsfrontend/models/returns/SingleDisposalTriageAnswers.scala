@@ -127,9 +127,9 @@ object SingleDisposalTriageAnswers {
         case _                           => None
       }
 
-    def isPeriodOfAdmin(): Boolean = representativeType().contains(PersonalRepresentativeInPeriodOfAdmin)
+    def isPeriodOfAdmin: Boolean = representativeType().contains(PersonalRepresentativeInPeriodOfAdmin)
 
-    def isIndirectDisposal(): Boolean =
+    def isIndirectDisposal: Boolean =
       s.fold(
         _.assetType,
         c => Some(c.assetType)

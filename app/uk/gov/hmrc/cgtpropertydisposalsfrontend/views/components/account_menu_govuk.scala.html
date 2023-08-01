@@ -26,7 +26,7 @@
   <a href="@{accounts.homepage.routes.HomePageController.homepage().url}" class="govuk-link as-link@if(activeLink.exists(_.is[AccountMenuItem.Home])){-home }">
     @messages("account.menu.home")
   </a>
-  <a href="@{accounts.routes.AccountController.manageYourDetails.url}" class="govuk-link as-link@if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){-active }">
+  <a href="@{accounts.routes.AccountController.manageYourDetails().url}" class="govuk-link as-link@if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){-active }">
     @messages("account.menu.manageYourDetails")
   </a>
   <a href="@routes.StartController.signOutAndRedirectToFeedback().url" class="govuk-link as-link">

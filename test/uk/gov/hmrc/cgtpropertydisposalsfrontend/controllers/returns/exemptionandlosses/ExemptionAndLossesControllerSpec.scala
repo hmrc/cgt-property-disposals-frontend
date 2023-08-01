@@ -1703,7 +1703,7 @@ class ExemptionAndLossesControllerSpec
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                ).replaceAllLiterally("<br><br>", " ")
+                ).replace("<br><br>", " ")
                 doc
                   .select("#main-content a[rel='noopener noreferrer']")
                   .text() shouldBe messageFromMessageKey(s"$key.link") + " (opens in new tab)"
@@ -1739,7 +1739,7 @@ class ExemptionAndLossesControllerSpec
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                ).replaceAllLiterally("<br><br>", " ")
+                ).replace("<br><br>", " ")
                 doc
                   .select("#main-content a[rel='noopener noreferrer']")
                   .text() shouldBe messageFromMessageKey(s"$key.link") + " (opens in new tab)"
@@ -1776,7 +1776,7 @@ class ExemptionAndLossesControllerSpec
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                ).replaceAllLiterally("<br><br>", " ")
+                ).replace("<br><br>", " ")
 
                 doc
                   .select(
@@ -1828,7 +1828,7 @@ class ExemptionAndLossesControllerSpec
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                ).replaceAllLiterally("<br><br>", " ")
+                ).replace("<br><br>", " ")
             )
           }
 
@@ -1861,7 +1861,7 @@ class ExemptionAndLossesControllerSpec
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                ).replaceAllLiterally("<br><br>", " ")
+                ).replace("<br><br>", " ")
             )
           }
 
@@ -1894,7 +1894,7 @@ class ExemptionAndLossesControllerSpec
                   taxYear.endDateExclusive.getYear.toString,
                   annualExemptAmountForVulnerableString,
                   annualExemptAmountString
-                ).replaceAllLiterally("<br><br>", " ")
+                ).replace("<br><br>", " ")
             )
           }
 

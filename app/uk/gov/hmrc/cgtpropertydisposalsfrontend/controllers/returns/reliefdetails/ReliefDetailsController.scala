@@ -87,7 +87,7 @@ class ReliefDetailsController @Inject() (
 
       case Some(
             (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
-          ) if d.triageAnswers.isPeriodOfAdmin() =>
+          ) if d.triageAnswers.isPeriodOfAdmin =>
         d.reliefDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)
         )(relief =>
@@ -163,7 +163,7 @@ class ReliefDetailsController @Inject() (
               currentFillingOutReturn.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
             val result = for {
-              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
+              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure[Future, Error](())
                    else
                      returnsService.storeDraftReturn(newJourney)
               _ <- EitherT(
@@ -361,7 +361,7 @@ class ReliefDetailsController @Inject() (
     )
 
   private def otherReliefsBackLink(answers: SingleDisposalTriageAnswers): Call =
-    if (answers.isPeriodOfAdmin())
+    if (answers.isPeriodOfAdmin)
       routes.ReliefDetailsController.privateResidentsRelief()
     else routes.ReliefDetailsController.lettingsRelief()
 
@@ -374,7 +374,7 @@ class ReliefDetailsController @Inject() (
               _.fold(
                 otherReliefs =>
                   otherReliefsForm.fill(
-                    Left(otherReliefs.name -> otherReliefs.amount.inPounds)
+                    Left(otherReliefs.name -> otherReliefs.amount.inPounds())
                   ),
                 () => otherReliefsForm.fill(Right(()))
               )
@@ -384,7 +384,7 @@ class ReliefDetailsController @Inject() (
                 _.fold(
                   otherReliefs =>
                     otherReliefsForm.fill(
-                      Left(otherReliefs.name -> otherReliefs.amount.inPounds)
+                      Left(otherReliefs.name -> otherReliefs.amount.inPounds())
                     ),
                   () => otherReliefsForm.fill(Right(()))
                 )

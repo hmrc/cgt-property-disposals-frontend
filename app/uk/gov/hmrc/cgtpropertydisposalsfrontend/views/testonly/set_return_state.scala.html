@@ -42,7 +42,7 @@
     name = id,
     value = form.data.get(id),
     label = Label(
-      content = Text(id.replaceAllLiterally("-", " ")),
+      content = Text(id.replace("-", " ")),
     ),
     classes = "govuk-input--width-10",
     errorMessage = form.error(id).map(e => ErrorMessage(
@@ -61,7 +61,7 @@
     @errorSummary(form)
   }
 
-  @formWrapper(routes.JourneyStatusController.setReturnStateSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.JourneyStatusController.setReturnStateSubmit(), Symbol("novalidate") -> "novalidate") {
     @askForText("individual-user-type")
     @askForText("number-of-properties")
     @askForText("disposal-method")

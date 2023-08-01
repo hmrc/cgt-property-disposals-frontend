@@ -339,16 +339,18 @@ class YearToDateLiabilityController @Inject() (
   private def withResidentialStatus(
     draftReturn: DraftReturn
   )(f: Boolean => Future[Result]): Future[Result] =
-    draftReturn.triageAnswers.fold(
-      _.fold(
-        _.wasAUKResident,
-        c => Some(c.countryOfResidence.isUk())
-      ),
-      _.fold(
-        _.wasAUKResident,
-        c => Some(c.countryOfResidence.isUk())
-      )
-    ) match {
+    draftReturn
+      .triageAnswers()
+      .fold(
+        _.fold(
+          _.wasAUKResident,
+          c => Some(c.countryOfResidence.isUk())
+        ),
+        _.fold(
+          _.wasAUKResident,
+          c => Some(c.countryOfResidence.isUk())
+        )
+      ) match {
       case Some(u) => f(u)
       case _       => Redirect(controllers.returns.routes.TaskListController.taskList())
     }
@@ -1378,7 +1380,7 @@ class YearToDateLiabilityController @Inject() (
                   backLink,
                   fillingOutReturn.isFurtherOrAmendReturn,
                   fillingOutReturn.isAmendReturn,
-                  fillingOutReturn.draftReturn.triageAnswers.isLeft,
+                  fillingOutReturn.draftReturn.triageAnswers().isLeft,
                   isReplaymentDue(answers)
                 )
               )
@@ -1471,7 +1473,7 @@ class YearToDateLiabilityController @Inject() (
   ): EitherT[Future, Error, Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]]               =
     for {
       requiredAnswers <-
-        EitherT.fromEither(
+        EitherT.fromEither[Future](
           (
             fillingOutReturn.draftReturn.gainOrLossAfterReliefs,
             fillingOutReturn.draftReturn.exemptionAndLossesAnswers
@@ -1720,7 +1722,7 @@ class YearToDateLiabilityController @Inject() (
                             _,
                             taxYear,
                             fillingOutReturn.subscribedDetails.isATrust,
-                            fillingOutReturn.draftReturn.representativeType,
+                            fillingOutReturn.draftReturn.representativeType(),
                             fillingOutReturn.isAmendReturn
                           )
                         else
@@ -1789,7 +1791,7 @@ class YearToDateLiabilityController @Inject() (
                             _,
                             taxYear,
                             fillingOutReturn.subscribedDetails.isATrust,
-                            fillingOutReturn.draftReturn.representativeType,
+                            fillingOutReturn.draftReturn.representativeType(),
                             fillingOutReturn.isAmendReturn
                           )
                         else
@@ -2095,32 +2097,29 @@ class YearToDateLiabilityController @Inject() (
     for {
       eligibility     <-
         furtherReturnCalculationEligibilityUtil.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
-      requiredAnswers <- eligibility match {
+      requiredAnswers <- EitherT.fromEither[Future](eligibility match {
                            case _: Ineligible =>
-                             EitherT.pure[Future, Error](None)
+                             Right(None)
                            case _: Eligible   =>
-                             EitherT.fromEither(
-                               (
-                                 ytdAnswers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
-                                 ytdAnswers.fold(_.estimatedIncome, _.estimatedIncome),
-                                 ytdAnswers.fold(_.personalAllowance, _.personalAllowance)
-                               ) match {
-                                 case (Some(taxableGainOrLoss), Some(income), allowance)
-                                     if !isATrust(fillingOutReturn) =>
-                                   requiredAnswers(taxableGainOrLoss, income, allowance.getOrElse(AmountInPence.zero))
+                             (
+                               ytdAnswers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
+                               ytdAnswers.fold(_.estimatedIncome, _.estimatedIncome),
+                               ytdAnswers.fold(_.personalAllowance, _.personalAllowance)
+                             ) match {
+                               case (Some(taxableGainOrLoss), Some(income), allowance) if !isATrust(fillingOutReturn) =>
+                                 requiredAnswers(taxableGainOrLoss, income, allowance.getOrElse(AmountInPence.zero))
 
-                                 case (Some(taxableGainOrLoss), _, _) if isATrust(fillingOutReturn) =>
-                                   requiredAnswers(taxableGainOrLoss, AmountInPence.zero, AmountInPence.zero)
+                               case (Some(taxableGainOrLoss), _, _) if isATrust(fillingOutReturn) =>
+                                 requiredAnswers(taxableGainOrLoss, AmountInPence.zero, AmountInPence.zero)
 
-                                 case _ =>
-                                   Left(
-                                     Error(
-                                       "Could not find taxable gain or loss, estimated income and personal allowance"
-                                     )
+                               case _ =>
+                                 Left(
+                                   Error(
+                                     "Could not find taxable gain or loss, estimated income and personal allowance"
                                    )
-                               }
-                             )
-                         }
+                                 )
+                             }
+                         })
       calculation     <- requiredAnswers match {
                            case None                                                                   =>
                              EitherT.pure[Future, Error](None)
@@ -2652,7 +2651,7 @@ class YearToDateLiabilityController @Inject() (
                     case _: DraftSingleMixedUseDisposalReturn    => false
                   },
                   fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType,
+                  draftReturn.representativeType(),
                   fillingOutReturn.isFurtherOrAmendReturn,
                   fillingOutReturn.isAmendReturn,
                   taxYear,
@@ -2674,7 +2673,7 @@ class YearToDateLiabilityController @Inject() (
                 case _: DraftSingleMixedUseDisposalReturn    => false
               },
               fillingOutReturn.subscribedDetails.isATrust,
-              draftReturn.representativeType,
+              draftReturn.representativeType(),
               fillingOutReturn.isFurtherOrAmendReturn,
               fillingOutReturn.isAmendReturn,
               taxYear,
@@ -2919,7 +2918,7 @@ class YearToDateLiabilityController @Inject() (
         furtherReturnCalculationEligibilityUtil
           .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
           .map(Some(_))
-      else EitherT.pure(None)
+      else EitherT.pure[Future, Error](None)
 
     result.foldF(
       { e =>

@@ -70,7 +70,7 @@
     @messages("triage.caption")
   </span>
 
-  @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.wereAllPropertiesResidentialSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.wereAllPropertiesResidentialSubmit(), Symbol("novalidate") -> "novalidate") {
     @yesNo(
       fieldId = key,
       label = title,

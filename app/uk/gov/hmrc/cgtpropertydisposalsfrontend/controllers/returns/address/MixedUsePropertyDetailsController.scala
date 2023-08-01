@@ -201,7 +201,7 @@ class MixedUsePropertyDetailsController @Inject() (
           _ => routes.MixedUsePropertyDetailsController.checkYourAnswers()
         )
         val disposalPrice = answers.fold(_.disposalPrice, c => Some(c.disposalPrice))
-        val form          = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
+        val form          = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds()))
         Ok(
           disposalValuePage(
             form,
@@ -300,7 +300,7 @@ class MixedUsePropertyDetailsController @Inject() (
         val acquisitionPrice = answers
           .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
 
-        val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds))
+        val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds()))
 
         Ok(
           acquisitionValuePage(

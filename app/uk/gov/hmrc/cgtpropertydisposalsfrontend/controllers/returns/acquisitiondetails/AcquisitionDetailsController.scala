@@ -269,7 +269,7 @@ class AcquisitionDetailsController @Inject() (
 
             val result = for {
               _ <- if (newDraftReturn.merge === currentState.merge)
-                     EitherT.pure(())
+                     EitherT.pure[Future, Error](())
                    else
                      returnsService.storeDraftReturn(newJourney)
               _ <- EitherT(
@@ -492,7 +492,7 @@ class AcquisitionDetailsController @Inject() (
             withAssetType(state) { assetType =>
               commonDisplayBehaviour(answers)(
                 form = _.fold(
-                  _.acquisitionPrice.fold(acquisitionPriceForm)(p => acquisitionPriceForm.fill(p.inPounds)),
+                  _.acquisitionPrice.fold(acquisitionPriceForm)(p => acquisitionPriceForm.fill(p.inPounds())),
                   c => acquisitionPriceForm.fill(c.acquisitionPrice.inPounds())
                 )
               )(

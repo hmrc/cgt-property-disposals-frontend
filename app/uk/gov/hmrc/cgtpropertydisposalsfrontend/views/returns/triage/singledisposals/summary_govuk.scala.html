@@ -136,7 +136,7 @@
         @cyaRow(
             messages("sharesDisposalDate.title"),
             Html(TimeUtils.govDisplayFormat(answers.disposalDate.value)),
-            Some(cyaChange(messages("sharesDisposalDate.cyaChange"), routes.SingleDisposalsTriageController.disposalDateOfShares.url)),
+            Some(cyaChange(messages("sharesDisposalDate.cyaChange"), routes.SingleDisposalsTriageController.disposalDateOfShares().url)),
             "disposalDateOfShares"
         )
         @if(answers.alreadySentSelfAssessment.contains(false)){

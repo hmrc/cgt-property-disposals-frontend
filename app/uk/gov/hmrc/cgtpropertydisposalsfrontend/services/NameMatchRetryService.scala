@@ -43,6 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.NameMatchRetryStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.Locale
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[NameMatchRetryServiceImpl])
@@ -430,7 +431,7 @@ class NameMatchRetryServiceImpl @Inject() (
       comparedName: IndividualName
     ): Boolean = {
       def format(word: String): String =
-        s"${word.toLowerCase().filterNot(_.isWhitespace).trim}"
+        s"${word.toLowerCase(Locale.UK).filterNot(_.isWhitespace).trim}"
 
       (format(name.firstName) === format(comparedName.firstName)) && (format(
         name.lastName

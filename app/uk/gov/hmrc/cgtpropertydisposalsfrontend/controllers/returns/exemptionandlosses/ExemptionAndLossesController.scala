@@ -552,7 +552,7 @@ class ExemptionAndLossesController @Inject() (
                 .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
                 .map(Some(_))
             else
-              EitherT.pure(None)
+              EitherT.pure[Future, Error](None)
 
           furtherReturnCalculationEligibilityCheck.foldF(
             { e =>
@@ -567,7 +567,7 @@ class ExemptionAndLossesController @Inject() (
                       c,
                       disposalDate,
                       fillingOutReturn.subscribedDetails.isATrust,
-                      draftReturn.representativeType,
+                      draftReturn.representativeType(),
                       fillingOutReturn.isFurtherOrAmendReturn,
                       furtherOrAmendReturnCalculationEligibility.forall(_.isEligible)
                     )
@@ -623,7 +623,7 @@ class ExemptionAndLossesController @Inject() (
                           completeAnswers,
                           disposalDate,
                           fillingOutReturn.subscribedDetails.isATrust,
-                          draftReturn.representativeType,
+                          draftReturn.representativeType(),
                           fillingOutReturn.isFurtherOrAmendReturn,
                           furtherOrAmendReturnCalculationEligibility.forall(_.isEligible)
                         )

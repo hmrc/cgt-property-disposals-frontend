@@ -48,7 +48,7 @@
     @messages(s"$key.p2")
   </p>
 
-  @form(routes.StartController.signOutAndSignIn(), 'novalidate -> "novalidate") {
+  @form(routes.StartController.signOutAndSignIn(), Symbol("novalidate") -> "novalidate") {
     @govukButton(Button(
       content = Text(messages(s"$key.button.tryAgain"))
     ))

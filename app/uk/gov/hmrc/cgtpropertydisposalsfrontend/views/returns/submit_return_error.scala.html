@@ -46,7 +46,7 @@
   <p class="govuk-body">@messages(s"$key.p3")</p>
   <p class="govuk-body">@messages(s"$key.p4")</p>
 
-    @formWrapper(routes.CheckAllAnswersAndSubmitController.submissionErrorSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.CheckAllAnswersAndSubmitController.submissionErrorSubmit(), Symbol("novalidate") -> "novalidate") {
         @submitButton(messages(s"$key.button"))
     }
 

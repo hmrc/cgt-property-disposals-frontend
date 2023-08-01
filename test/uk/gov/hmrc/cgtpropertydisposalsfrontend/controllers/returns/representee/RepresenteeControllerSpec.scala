@@ -3575,7 +3575,7 @@ object RepresenteeControllerSpec extends Matchers {
       case RepresenteeCgtReference(cgtRef) =>
         Some(
           messagesApi("representee.cyaLabel.cgtReference", cgtRef.value)
-            .replaceAllLiterally("<br>", " ")
+            .replace("<br>", " ")
         )
       case _                               =>
         None
@@ -3600,7 +3600,7 @@ object RepresenteeControllerSpec extends Matchers {
     doc
       .select("#address-answer")
       .text()
-      .replaceAllLiterally(" ", "") shouldBe addressLines.mkString("")
+      .replace(" ", "") shouldBe addressLines.mkString("")
 
     doc
       .select("#email-answer")

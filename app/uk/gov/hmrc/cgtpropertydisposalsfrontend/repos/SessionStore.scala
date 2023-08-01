@@ -70,8 +70,8 @@ class SessionStoreImpl @Inject() (
     hc: HeaderCarrier
   ): Future[Either[Error, Option[SessionData]]] =
     hc.sessionId.map(_.value) match {
-      case Some(sessionId) ⇒ get[SessionData](sessionId)
-      case None =>
+      case Some(sessionId) => get[SessionData](sessionId)
+      case None            =>
         Future.successful(
           Left(Error("no session id found in headers - cannot query mongo"))
         )
@@ -81,8 +81,8 @@ class SessionStoreImpl @Inject() (
     sessionData: SessionData
   )(implicit hc: HeaderCarrier): Future[Either[Error, Unit]] =
     hc.sessionId.map(_.value) match {
-      case Some(sessionId) ⇒ store(sessionId, sessionData)
-      case None ⇒
+      case Some(sessionId) => store(sessionId, sessionData)
+      case None            =>
         Future.successful(
           Left(
             Error("no session id found in headers - cannot store data in mongo")

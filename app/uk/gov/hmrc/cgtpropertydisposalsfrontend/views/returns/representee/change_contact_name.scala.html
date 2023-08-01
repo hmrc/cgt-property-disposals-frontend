@@ -69,7 +69,7 @@
     @messages("representee.caption")
   </span>
 
-  @formWrapper(routes.RepresenteeController.changeContactNameSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.RepresenteeController.changeContactNameSubmit(), Symbol("novalidate") -> "novalidate") {
     @govukInput(Input(
       id = contactNameKey,
       name = contactNameKey,

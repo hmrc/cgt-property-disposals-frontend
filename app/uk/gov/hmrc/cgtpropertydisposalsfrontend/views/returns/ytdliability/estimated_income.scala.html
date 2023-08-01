@@ -88,7 +88,7 @@
 
   @caption(messages("ytdLiability.caption"))
 
-  @formWrapper(routes.YearToDateLiabilityController.estimatedIncomeSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.YearToDateLiabilityController.estimatedIncomeSubmit(), Symbol("novalidate") -> "novalidate") {
     @govukInput(Input(
       id = key,
       name = key,

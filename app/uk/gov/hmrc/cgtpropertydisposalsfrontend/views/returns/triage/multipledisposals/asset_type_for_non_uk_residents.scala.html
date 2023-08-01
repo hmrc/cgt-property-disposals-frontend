@@ -119,7 +119,7 @@
     @messages("triage.caption")
   </span>
 
-  @formWrapper(triage.routes.MultipleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(triage.routes.MultipleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), Symbol("novalidate") -> "novalidate") {
     @viewHelpers.govukCheckboxes(Checkboxes(
       fieldset = Some(Fieldset(
         legend = Some(Legend(

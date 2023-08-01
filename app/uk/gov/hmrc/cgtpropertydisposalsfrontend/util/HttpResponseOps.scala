@@ -32,7 +32,7 @@ object HttpResponseOps {
       Try(
         path.fold[JsLookupResult](JsDefined(response.json))(response.json \ _)
       ) match {
-        case Success(jsLookupResult) ⇒
+        case Success(jsLookupResult) =>
           // use Option here to filter out null values
           jsLookupResult.toOption
             .flatMap(Option(_))
@@ -40,7 +40,7 @@ object HttpResponseOps {
               Left("No JSON found in body of http response")
             )(
               _.validate[A].fold[Either[String, A]](
-                errors ⇒
+                errors =>
                   // there was JSON in the response but we couldn't read it
                   Left(
                     s"Could not parse http response JSON: ${JsError(errors).prettyPrint()}"
@@ -48,7 +48,7 @@ object HttpResponseOps {
                 Right(_)
               )
             )
-        case Failure(error) ⇒
+        case Failure(error)          =>
           // response.json failed in this case - there was no JSON in the response
           Left(s"Could not read http response as JSON: ${error.getMessage}")
       }

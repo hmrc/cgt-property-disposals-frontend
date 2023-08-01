@@ -104,7 +104,7 @@
 
   @caption(messages("acquisitionDetails.caption"))
 
-  @formWrapper(routes.AcquisitionDetailsController.rebasedAcquisitionPriceSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.AcquisitionDetailsController.rebasedAcquisitionPriceSubmit(), Symbol("novalidate") -> "novalidate") {
     @govukInput(Input(
       id = key,
       name = key,

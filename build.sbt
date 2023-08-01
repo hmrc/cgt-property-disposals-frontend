@@ -17,7 +17,15 @@ lazy val wartremoverSettings =
       Wart.ImplicitParameter,
       Wart.Nothing,
       Wart.Overloading,
-      Wart.ToString
+      Wart.ToString,
+      Wart.Any,
+      Wart.StringPlusAny,
+      Wart.SizeIs,
+      Wart.PlatformDefault,
+      Wart.Throw,
+      Wart.Equals,
+      Wart.GetGetOrElse,
+      Wart.GlobalExecutionContext,
     ),
     wartremover.WartRemover.autoImport.wartremoverExcluded ++=
       (Compile / routes).value ++
@@ -38,9 +46,8 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"))
-  .settings(addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.full))
   .settings(addCompilerPlugin(scalafixSemanticdb))
-  .settings(scalaVersion := "2.12.12")
+  .settings(scalaVersion := "2.13.8")
   .settings(
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
@@ -50,8 +57,14 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     scalacOptions ++= Seq(
       "-Yrangepos",
-      "-language:postfixOps"
+      "-language:postfixOps",
+      "-Ymacro-annotations",
     ),
+    scalacOptions -= "-Xlint:byname-implicit",
+    scalacOptions -= "-Ywarn-by-name",
+    scalacOptions -= "-Werror",
+    scalacOptions -= "-Xfatal-warnings",
+    scalacOptions += "-Xnon-strict-patmat-analysis",
     Test / scalacOptions --= Seq("-Ywarn-value-discard")
   )
   .configs(IntegrationTest)

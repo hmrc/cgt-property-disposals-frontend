@@ -35,7 +35,7 @@ object TaxableAmountOfMoney {
         t.taxRate.toString
       ))) / BigDecimal("100")
 
-      AmountInPence(result.setScale(0, RoundingMode.DOWN).longValue())
+      AmountInPence(result.setScale(0, RoundingMode.DOWN).longValue)
     }
 
   }

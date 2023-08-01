@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
-import play.api.test.Helpers.{contentAsString, status, _}
+import play.api.test.Helpers._
 
 import scala.concurrent.Future
 

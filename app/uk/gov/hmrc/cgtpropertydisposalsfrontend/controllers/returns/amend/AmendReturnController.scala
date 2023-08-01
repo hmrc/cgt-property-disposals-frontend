@@ -140,8 +140,8 @@ class AmendReturnController @Inject() (
                 journey.originalReturn.completeReturn,
                 rebasingEligibilityUtil,
                 journey.subscribedDetails,
-                journey.originalReturn.completeReturn.representativeType(),
-                journey.originalReturn.completeReturn.isIndirectDisposal(),
+                journey.originalReturn.completeReturn.representativeType,
+                journey.originalReturn.completeReturn.isIndirectDisposal,
                 Some(journey.originalReturn.returnType.isFurtherOrAmendReturn),
                 controllers.returns.routes.ViewReturnController.displayReturn()
               )

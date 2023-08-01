@@ -32,6 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.NameMatchError.{ServiceError, ValidationError}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualRepresenteeNameMatchDetails
@@ -53,6 +54,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import java.time.LocalDate
+import java.util.Locale
 import scala.concurrent.{ExecutionContext, Future}
 
 class RepresenteeController @Inject() (
@@ -437,7 +439,7 @@ class RepresenteeController @Inject() (
                                  .bindFromRequest()
                                  .fold(
                                    formWithErrors =>
-                                     EitherT.leftT(
+                                     EitherT.leftT[Future, RepresenteeReferenceId](
                                        ValidationError(formWithErrors)
                                      ),
                                    id =>
@@ -919,7 +921,7 @@ class RepresenteeController @Inject() (
 
       case NameMatchServiceError.NameMatchFailed(u) =>
         logger.info(
-          s"Name match failed: ${u.unsuccessfulAttempts} attempts made out of a maximum ${u.maximumAttempts}"
+          s"Name match failed: ${u.unsuccessfulAttempts.toString} attempts made out of a maximum ${u.maximumAttempts.toString}"
         )
         Redirect(routes.RepresenteeController.nameMatchError())
 
@@ -978,7 +980,7 @@ object RepresenteeController {
       InnerOption { data =>
         FormUtils
           .readValue(ninoId, data, identity)
-          .map(_.toUpperCase.replaceAllLiterally(" ", ""))
+          .map(_.toUpperCase(Locale.UK).replace(" ", ""))
           .flatMap(nino =>
             if (nino.length > 9)
               Left(FormError(ninoId, "error.tooLong"))
@@ -998,7 +1000,7 @@ object RepresenteeController {
       InnerOption { data =>
         FormUtils
           .readValue(sautrId, data, identity)
-          .map(_.replaceAllLiterally(" ", ""))
+          .map(_.replace(" ", ""))
           .flatMap(sautr =>
             if (sautr.exists(!_.isDigit))
               Left(FormError(sautrId, "error.invalid"))

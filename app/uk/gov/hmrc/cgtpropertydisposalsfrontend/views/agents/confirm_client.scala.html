@@ -54,7 +54,7 @@
 
   <br>
 
-  @formWrapper(routes.AgentAccessController.confirmClientSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(routes.AgentAccessController.confirmClientSubmit(), Symbol("novalidate") -> "novalidate") {
    @submitButton(messages("button.continue"))
   }
 

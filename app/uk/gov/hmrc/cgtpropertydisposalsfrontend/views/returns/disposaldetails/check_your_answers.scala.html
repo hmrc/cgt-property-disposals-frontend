@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalMethod, RepresentativeType}
 @import uk.gov.hmrc.govukfrontend.views.Aliases.{Button, Text}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, _}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
@@ -47,7 +47,7 @@
 
     @summary(answers, disposalMethod, isATrust, representativeType, isIndirectDisposal)
 
-    @formHelper(returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+    @formHelper(returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
         @govukButton(Button(content = Text(messages("button.confirmAndContinue"))))
     }
 

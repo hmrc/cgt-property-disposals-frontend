@@ -77,7 +77,7 @@
     }
 <span class="govuk-caption-xl">@messages("triage.caption")</span>
 
-    @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.amendsHaveYouAlreadySentSelfAssessmentSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.amendsHaveYouAlreadySentSelfAssessmentSubmit(), Symbol("novalidate") -> "novalidate") {
         @yesNo(
             fieldId = key,
             label = title,
