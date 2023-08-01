@@ -1,38 +1,11 @@
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
-import wartremover.Wart
-import wartremover.WartRemover.autoImport.wartremoverErrors
 
 val appName = "cgt-property-disposals-frontend"
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
 addCommandAlias("fix", "all compile:scalafix test:scalafix")
-
-lazy val wartremoverSettings =
-  Seq(
-    (Compile / compile / wartremoverErrors) ++= Warts.allBut(
-      Wart.DefaultArguments,
-      Wart.ImplicitConversion,
-      Wart.ImplicitParameter,
-      Wart.Nothing,
-      Wart.Overloading,
-      Wart.ToString,
-      Wart.Any,
-      Wart.StringPlusAny,
-      Wart.SizeIs,
-      Wart.PlatformDefault,
-      Wart.Throw,
-      Wart.Equals,
-      Wart.GetGetOrElse,
-      Wart.GlobalExecutionContext,
-    ),
-    wartremover.WartRemover.autoImport.wartremoverExcluded ++=
-      (Compile / routes).value ++
-        (baseDirectory.value ** "*.sc").get ++
-        Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala"),
-    (Test / compile / wartremoverErrors) --= Seq(Wart.Any, Wart.NonUnitStatements, Wart.Null, Wart.PublicInference)
-  )
 
 lazy val scoverageSettings =
   Seq(
@@ -69,7 +42,6 @@ lazy val microservice = Project(appName, file("."))
   )
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
-  .settings(wartremoverSettings: _*)
   .settings(scoverageSettings: _*)
   .settings(PlayKeys.playDefaultPort := 7020)
   .settings(scalafmtOnCompile := true)
