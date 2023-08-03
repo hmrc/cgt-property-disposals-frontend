@@ -208,7 +208,7 @@ accessibilityStatement.usingThisService.making-device-easier.part1=AbilityNet ha
 accessibilityStatement.usingThisService.making-device-easier.part2=' on making your device easier to use if you have a disability.'
 accessibilityStatement.howAccessible.title=How accessible this service is
 accessibilityStatement.howAccessible.p1=HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
-accessibilityStatement.howAccessible.p2=This service was tested on 15 May 2020 by the Digital Accessibility Centre. It was found to be compliant with the <a class="govuk-link" href="{0}">Web Content Accessibility Guidelines version 2.1 AA standard</a>. Since then, it has been extended. We cannot be certain that it is fully compliant. The service will book a full accessibility audit by 31 December 2022.
+accessibilityStatement.howAccessible.p2=This service was tested on 15 May 2020 by the Digital Accessibility Centre. It was found to be compliant with the <a class="govuk-link" href="{0}">Web Content Accessibility Guidelines version 2.1 AA standard</a>. Since then, it has been extended. We cannot be certain that it is fully compliant. The service will book a full accessibility audit by 31 December 2023.
 
 ## Contact
 accessibilityStatement.contact.heading=What to do if you have difficulty using this service
@@ -227,7 +227,7 @@ accessibilityStatement.contactingUs.p2=We can provide a British Sign Language (B
 accessibilityStatement.contactingUs.p3=Find out <a class="govuk-link" href="{0}">how to get extra support from HMRC</a>.
 accessibilityStatement.howWeTested.title=How we tested this service
 accessibilityStatement.howWeTested.p1=The service was tested on 15 May 2020 and checked for compliance with WCAG 2.1 AA. It was built using parts that were tested by the <a class="govuk-link" href="{0}">Digital Accessibility Centre</a>.
-accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 9 June 2022.
+accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 3 August 2023.
 
 #===================================================
 # SERVICE WIDE AND GENERIC - END
