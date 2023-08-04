@@ -214,7 +214,7 @@ accessibilityStatement.usingThisService.making-device-easier.part1=Mae gan Abili
 accessibilityStatement.usingThisService.making-device-easier.part2=' ar wneud eich dyfais yn haws i’w defnyddio os oes gennych anabledd.'
 accessibilityStatement.howAccessible.title=Pa mor hygyrch yw’r gwasanaeth hwn
 accessibilityStatement.howAccessible.p1=Mae CThEF wedi ymrwymo i wneud y gwasanaeth hwn yn hygyrch, yn unol â Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018.
-accessibilityStatement.howAccessible.p2=Cafodd y gwasanaeth hwn ei brofi ar 15 Mai 2020 gan y Ganolfan Hygyrchedd Digidol. Canfuwyd ei fod yn cydymffurfio â <a class="govuk-link" href="{0}">safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1</a>. Ers hynny, mae’r gwasanaeth wedi’i ehangu. Ni allwn fod yn sicr ei fod yn cydymffurfio’n llawn. Bydd y gwasanaeth yn trefnu archwiliad hygyrchedd llawn erbyn 31 Rhagfyr 2022
+accessibilityStatement.howAccessible.p2=Cafodd y gwasanaeth hwn ei brofi ar 15 Mai 2020 gan y Ganolfan Hygyrchedd Digidol. Canfuwyd ei fod yn cydymffurfio â <a class="govuk-link" href="{0}">safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1</a>. Ers hynny, mae’r gwasanaeth wedi’i ehangu. Ni allwn fod yn sicr ei fod yn cydymffurfio’n llawn. Bydd y gwasanaeth yn trefnu archwiliad hygyrchedd llawn erbyn 31 Rhagfyr 2023
 
 ## Contact
 accessibilityStatement.contact.heading=Yr hyn i’w wneud os ydych yn cael anhawster wrth ddefnyddio’r gwasanaeth hwn
@@ -233,7 +233,7 @@ accessibilityStatement.contactingUs.p2=Gallwn ddarparu dehonglydd Iaith Arwyddio
 accessibilityStatement.contactingUs.p3=Dysgwch <a class="govuk-link" href="{0}">sut i gael cymorth ychwanegol oddi wrth CThEF</a>.
 accessibilityStatement.howWeTested.title=Sut gwnaethom brofi’r gwasanaeth hwn
 accessibilityStatement.howWeTested.p1=Cafodd y gwasanaeth ei brofi ar 15 Mai 2020 a gwiriwyd ei fod yn cydymffurfio â safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Cafodd ei adeiladu gan ddefnyddio rhannau a brofwyd gan y <a class="govuk-link" href="{0}">Ganolfan Hygyrchedd Digidol</a>.
-accessibilityStatement.howWeTested.p2=Paratowyd y dudalen hon ar 6 Ebrill 2020. Cafodd ei diweddaru ddiwethaf ar 9 Mehefin 2022.
+accessibilityStatement.howWeTested.p2=Paratowyd y dudalen hon ar 6 Ebrill 2020. Cafodd ei diweddaru ddiwethaf ar 3 Awst 2023.
 #===================================================
 # SERVICE WIDE AND GENERIC - END
 #===================================================
