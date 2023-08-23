@@ -1,5 +1,3 @@
-import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
-
 val appName = "cgt-property-disposals-frontend"
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
@@ -31,8 +29,6 @@ lazy val microservice = Project(appName, file("."))
     scalacOptions += "-Xnon-strict-patmat-analysis",
     Test / scalacOptions --= Seq("-Ywarn-value-discard")
   )
-  .configs(IntegrationTest)
-  .settings(integrationTestSettings() *)
   .settings(CodeCoverageSettings.settings *)
   .settings(PlayKeys.playDefaultPort := 7020)
   .settings(scalafmtOnCompile := true)
