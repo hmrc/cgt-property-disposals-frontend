@@ -37,7 +37,7 @@ address and email address.
 
 We attempt to automatically retrieve user details in ETMP using an identifier associated with the user's Government
 Gateway
-account. The API used to retrieve this data is called the Registier with ID API. If we can retrieve the data, the
+account. The API used to retrieve this data is called the Register with ID API. If we can retrieve the data, the
 retrieved
 details will be used as a baseline set of details the user can use to subscribe to CGT with. The user can choose to
 supply
@@ -88,8 +88,8 @@ The other services this service relies on can be run using the `CGTPD_ALL` servi
 `CGTPD_FRONTEND` service if you want to run this frontend service from source, e.g.:
 
 ```
-sm --start CGTPD_ALL -r
-sm --stop CGTPD_FRONTEND
+sm2 --start CGTPD_ALL
+sm2 --stop CGTPD_FRONTEND
 ```   
 
 ### License
