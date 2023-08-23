@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Eq
+import cats.implicits.catsSyntaxPartialOrder
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
@@ -28,6 +29,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPa
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+
+import java.time.LocalDate
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -87,8 +90,34 @@ object JourneyStatus {
 
   object Subscribed {
     implicit class SubscribedOps(private val s: Subscribed) extends AnyVal {
-      def totalLeftToPay(): AmountInPence =
+      def totalLeftToPay(): AmountInPence                                                  =
         AmountInPence(s.sentReturns.map(_.totalOutstanding().value).sum)
+      private def optionalDateOrdering(date1: Option[LocalDate], date2: Option[LocalDate]) =
+        (date1, date2) match {
+          case (None, None)         => true
+          case (Some(_), None)      => true
+          case (None, Some(_))      => false
+          case (Some(d1), Some(d2)) => d1.isBefore(d2)
+        }
+
+      def returnsWithDueDates(): List[(ReturnSummary, Option[LocalDate])] =
+        s.sentReturns
+          .map { r =>
+            val dueDate = r.charges
+              .filter(_.totalOutstanding() > AmountInPence.zero)
+              .map(_.dueDate)
+              .sortWith(TimeUtils.localDateOrder.compare(_, _) < 0)
+              .headOption
+            (r, dueDate)
+          }
+          .sortWith { case ((r1, d1), (r2, d2)) =>
+            if (!d1.exists(d2.contains(_))) optionalDateOrdering(d1, d2)
+            else if (!r1.lastUpdatedDate.exists(r2.lastUpdatedDate.contains(_)))
+              optionalDateOrdering(r1.lastUpdatedDate, r2.lastUpdatedDate)
+            else r1.submissionDate.isAfter(r2.submissionDate)
+          }
+
+      def taxDueDate(): Option[LocalDate] = returnsWithDueDates().headOption.flatMap(_._2)
     }
   }
 

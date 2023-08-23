@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[PaymentsServiceImpl])
@@ -42,6 +43,7 @@ trait PaymentsService {
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
+    dueDate: Option[LocalDate],
     returnUrl: Call,
     backUrl: Call
   )(implicit
@@ -63,6 +65,7 @@ class PaymentsServiceImpl @Inject() (
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
+    dueDate: Option[LocalDate],
     returnUrl: Call,
     backUrl: Call
   )(implicit
@@ -74,6 +77,7 @@ class PaymentsServiceImpl @Inject() (
         cgtReference,
         chargeReference,
         amount,
+        dueDate,
         returnUrl,
         backUrl
       )

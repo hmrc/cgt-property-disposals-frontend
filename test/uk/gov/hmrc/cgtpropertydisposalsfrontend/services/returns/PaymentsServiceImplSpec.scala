@@ -37,6 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -48,6 +49,7 @@ class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
+    dueDate: Option[LocalDate],
     returnUrl: Call,
     backUrl: Call
   )(response: Either[Error, HttpResponse]) =
@@ -56,10 +58,11 @@ class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory
         _: CgtReference,
         _: Option[String],
         _: AmountInPence,
+        _: Option[LocalDate],
         _: Call,
         _: Call
       )(_: HeaderCarrier))
-      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
+      .expects(cgtReference, chargeReference, amount, dueDate, returnUrl, backUrl, *)
       .returning(EitherT.fromEither[Future](response))
 
   val service = new PaymentsServiceImpl(mockConnector, stub[AuditService])
@@ -76,6 +79,7 @@ class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory
       val cgtReference    = sample[CgtReference]
       val chargeReference = Some(sample[String])
       val amount          = sample[AmountInPence]
+      val dueDate         = LocalDate.parse("2023-05-04")
       val returnCall      = controllers.routes.StartController.start()
       val backCall        = controllers.returns.routes.TaskListController.taskList()
 
@@ -86,6 +90,7 @@ class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory
             cgtReference,
             chargeReference,
             amount,
+            Some(dueDate),
             returnCall,
             backCall
           )(response)
@@ -96,6 +101,7 @@ class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory
                 cgtReference,
                 chargeReference,
                 amount,
+                Some(dueDate),
                 returnCall,
                 backCall
               )
@@ -130,6 +136,7 @@ class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory
             cgtReference,
             chargeReference,
             amount,
+            Some(dueDate),
             returnCall,
             backCall
           )(
@@ -153,6 +160,7 @@ class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory
                 cgtReference,
                 chargeReference,
                 amount,
+                Some(dueDate),
                 returnCall,
                 backCall
               )

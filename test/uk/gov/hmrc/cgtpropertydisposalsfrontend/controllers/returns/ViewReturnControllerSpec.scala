@@ -99,21 +99,25 @@ class ViewReturnControllerSpec
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
+    dueDate: Option[LocalDate],
     returnUrl: Call,
     backUrl: Call
   )(response: Either[Error, PaymentsJourney]) =
-    (mockPaymentsService
-      .startPaymentJourney(
-        _: CgtReference,
-        _: Option[String],
-        _: AmountInPence,
-        _: Call,
-        _: Call
-      )(
-        _: HeaderCarrier,
-        _: Request[_]
-      ))
-      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
+    (
+      mockPaymentsService
+        .startPaymentJourney(
+          _: CgtReference,
+          _: Option[String],
+          _: AmountInPence,
+          _: Option[LocalDate],
+          _: Call,
+          _: Call
+        )(
+          _: HeaderCarrier,
+          _: Request[_]
+        )
+      )
+      .expects(cgtReference, chargeReference, amount, dueDate, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
   def setNameForUserType(
@@ -889,6 +893,7 @@ class ViewReturnControllerSpec
               viewingReturn.subscribedDetails.cgtReference,
               Some(charge.chargeReference),
               charge.amount,
+              Some(charge.dueDate),
               controllers.accounts.homepage.routes.HomePageController
                 .homepage(),
               controllers.returns.routes.ViewReturnController.displayReturn()
@@ -914,6 +919,7 @@ class ViewReturnControllerSpec
               viewingReturn.subscribedDetails.cgtReference,
               Some(charge.chargeReference),
               charge.amount,
+              Some(charge.dueDate),
               controllers.accounts.homepage.routes.HomePageController
                 .homepage(),
               controllers.returns.routes.ViewReturnController.displayReturn()

@@ -250,6 +250,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
               j.subscribedDetails.cgtReference,
               Some(charge.chargeReference),
               charge.amount,
+              Some(charge.dueDate),
               homepage.routes.HomePageController.homepage(),
               routes.CheckAllAnswersAndSubmitController
                 .confirmationOfSubmission()

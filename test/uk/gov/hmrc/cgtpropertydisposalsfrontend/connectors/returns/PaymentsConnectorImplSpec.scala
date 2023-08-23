@@ -32,6 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class PaymentsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
@@ -69,6 +70,7 @@ class PaymentsConnectorImplSpec extends AnyWordSpec with Matchers with MockFacto
       val cgtReference    = sample[CgtReference]
       val chargeReference = sample[String]
       val amount          = sample[AmountInPence]
+      val dueDate         = LocalDate.parse("2023-04-05")
       val returnCall      = controllers.routes.StartController.start()
       val backCall        = controllers.returns.routes.TaskListController.taskList()
       val expectedUrl     =
@@ -84,6 +86,7 @@ class PaymentsConnectorImplSpec extends AnyWordSpec with Matchers with MockFacto
               |  "cgtReference": "${cgtReference.value}",
               |  "chargeReference": "$chargeReference",
               |  "amountInPence": ${amount.value},
+              |  "dueDate": "2023-04-05",
               |  "returnUrl": "$selfUrl${returnCall.url}",
               |  "backUrl": "$selfUrl${backCall.url}"
               |}
@@ -95,6 +98,7 @@ class PaymentsConnectorImplSpec extends AnyWordSpec with Matchers with MockFacto
             cgtReference,
             Some(chargeReference),
             amount,
+            Some(dueDate),
             returnCall,
             backCall
           )
