@@ -26,11 +26,11 @@ object AppDependencies {
     "org.jsoup"                   % "jsoup"                     % "1.12.1"      % "test",
     "com.typesafe.play"          %% "play-test"                 % current       % "test",
     "org.scalamock"              %% "scalamock"                 % "5.2.0"       % "test",
-    "org.scalatestplus"          %% "scalatestplus-scalacheck"  % "3.1.0.0-RC2" % "test, it",
+    "org.scalatestplus"          %% "scalatestplus-scalacheck"  % "3.1.0.0-RC2" % "test",
     "com.vladsch.flexmark"        % "flexmark-all"              % "0.35.10"     % "test",
     "uk.gov.hmrc.mongo"          %% "hmrc-mongo-test-play-28"   % "0.70.0"      % "test",
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.16" % "1.3.1"       % "test",
-    "org.scalatestplus.play"     %% "scalatestplus-play"        % "5.1.0"       % "test, it",
+    "org.scalatestplus.play"     %% "scalatestplus-play"        % "5.1.0"       % "test",
     "uk.gov.hmrc"                %% s"bootstrap-test-$playVersion" % bootstrapVersion % "test"
   )
 
