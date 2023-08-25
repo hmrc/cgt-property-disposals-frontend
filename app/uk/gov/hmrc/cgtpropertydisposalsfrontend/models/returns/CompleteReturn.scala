@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.syntax.eq._
-import com.github.ghik.silencer.silent
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
@@ -440,7 +439,6 @@ object CompleteReturn {
         Some(None)
     }
 
-  @silent
   implicit val format: OFormat[CompleteReturn] = {
     implicit val singleDisposalTriageFormat: OFormat[CompleteSingleDisposalTriageAnswers]              = Json.format
     implicit val multipleDisposalsTriageFormat: OFormat[CompleteMultipleDisposalsTriageAnswers]        = Json.format
