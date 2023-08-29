@@ -14,6 +14,8 @@ lazy val microservice = Project(appName, file("."))
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
+  .settings(scalacOptions += "-Wconf:src=routes/.*:s")
+  .settings(scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s")
   .settings(routesImport := Seq.empty)
   .settings(TwirlKeys.templateImports := Seq.empty)
   .settings(
