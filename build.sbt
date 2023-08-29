@@ -16,20 +16,10 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(scalacOptions += "-Wconf:src=routes/.*:s")
   .settings(scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s")
-  .settings(routesImport := Seq.empty)
-  .settings(TwirlKeys.templateImports := Seq.empty)
   .settings(
     scalacOptions ++= Seq(
-      "-Yrangepos",
-      "-language:postfixOps",
-      "-Ymacro-annotations",
-    ),
-    scalacOptions -= "-Xlint:byname-implicit",
-    scalacOptions -= "-Ywarn-by-name",
-    scalacOptions -= "-Werror",
-    scalacOptions -= "-Xfatal-warnings",
-    scalacOptions += "-Xnon-strict-patmat-analysis",
-    Test / scalacOptions --= Seq("-Ywarn-value-discard")
+      "-Ymacro-annotations"
+    )
   )
   .settings(CodeCoverageSettings.settings *)
   .settings(PlayKeys.playDefaultPort := 7020)
