@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -70,11 +71,11 @@ import scala.concurrent.Future
 
 class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory with GuiceOneAppPerSuite {
 
-  val mockConnector = mock[ReturnsConnector]
-  val config        = app.injector.instanceOf[ViewConfig]
-  val language      = Lang("en")
+  private val mockConnector = mock[ReturnsConnector]
+  private val config        = app.injector.instanceOf[ViewConfig]
+  private val language      = Lang("en")
 
-  def mockStoreDraftReturn(
+  private def mockStoreDraftReturn(
     draftReturn: DraftReturn,
     cgtReference: CgtReference
   )(
@@ -85,7 +86,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
       .expects(draftReturn, cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockGetDraftReturns(
+  private def mockGetDraftReturns(
     cgtReference: CgtReference
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
@@ -93,7 +94,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockSubmitReturn(
+  private def mockSubmitReturn(
     submitReturnRequest: SubmitReturnRequest,
     lang: Lang
   )(response: Either[Error, HttpResponse]) =
@@ -102,7 +103,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
       .expects(submitReturnRequest, lang, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockListReturn(
+  private def mockListReturn(
     cgtReference: CgtReference,
     fromDate: LocalDate,
     toDate: LocalDate
@@ -116,7 +117,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
       .expects(cgtReference, fromDate, toDate, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(
+  private def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(
     response: Either[Error, HttpResponse]
   ) =
     (mockConnector
@@ -124,7 +125,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
       .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockDeleteDraftReturns(
+  private def mockDeleteDraftReturns(
     draftReturnIds: List[UUID]
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
@@ -1773,7 +1774,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
       "return an error" when {
 
-        def test(response: Either[Error, HttpResponse]) = {
+        def test(response: Either[Error, HttpResponse]): Assertion = {
           mockSubmitReturn(submitReturnRequest, Lang("en"))(response)
 
           await(

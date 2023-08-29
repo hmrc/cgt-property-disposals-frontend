@@ -69,10 +69,7 @@ object DisposalDetailsAnswers {
       }
 
     def unset[A](
-      fieldLens: IncompleteDisposalDetailsAnswers.type => Lens[
-        IncompleteDisposalDetailsAnswers,
-        Option[A]
-      ]
+      fieldLens: IncompleteDisposalDetailsAnswers.type => Lens[IncompleteDisposalDetailsAnswers, Option[A]]
     ): IncompleteDisposalDetailsAnswers =
       fieldLens(IncompleteDisposalDetailsAnswers).set(None)(
         fold(identity, IncompleteDisposalDetailsAnswers.fromCompleteAnswers)

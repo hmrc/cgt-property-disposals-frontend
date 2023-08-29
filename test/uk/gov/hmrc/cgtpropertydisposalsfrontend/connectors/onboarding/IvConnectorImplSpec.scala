@@ -30,13 +30,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class IvConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
 
-  val config = Configuration(
+  private val config = Configuration(
     ConfigFactory.parseString(
       """
         |microservice {
         |  services {
         |    iv {
-        |      protocol = http
+        |      protocol = https
         |      host     = host
         |      port     = 123
         |    }
@@ -57,7 +57,7 @@ class IvConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory wit
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val journeyId                  = UUID.randomUUID()
       val expectedUrl                =
-        s"http://host:123/mdtp/journey/journeyId/${journeyId.toString}"
+        s"https://host:123/mdtp/journey/journeyId/${journeyId.toString}"
 
       behave like connectorBehaviour(
         mockGet[HttpResponse](expectedUrl),

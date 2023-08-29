@@ -240,11 +240,11 @@ class MixedUsePropertyDetailsController @Inject() (
                 answers
                   .fold(_.disposalPrice, c => Some(c.disposalPrice))
                   .contains(AmountInPence.fromPounds(disposalPrice))
-              )
+              ) {
                 Redirect(
                   routes.MixedUsePropertyDetailsController.checkYourAnswers()
                 )
-              else {
+              } else {
                 val updatedAnswers     =
                   answers
                     .fold(
@@ -340,11 +340,11 @@ class MixedUsePropertyDetailsController @Inject() (
                 answers
                   .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
                   .contains(AmountInPence.fromPounds(acquisitionPrice))
-              )
+              ) {
                 Redirect(
                   routes.MixedUsePropertyDetailsController.checkYourAnswers()
                 )
-              else {
+              } else {
                 val updatedAnswers     =
                   answers
                     .fold(

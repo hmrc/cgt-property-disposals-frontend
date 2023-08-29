@@ -49,9 +49,8 @@ class SubscriptionChangeContactNameControllerSpec
     )
   }
 
-  override val mockUpdateContactName: Option[
-    (SubscriptionReady, SubscriptionReady, Either[models.Error, Unit]) => Unit
-  ] = None
+  override val mockUpdateContactName
+    : Option[(SubscriptionReady, SubscriptionReady, Either[models.Error, Unit]) => Unit] = None
 
   override def updateContactName(
     journey: SubscriptionReady,

@@ -41,17 +41,17 @@ class SubscriptionAddressControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val subscriptionDetails: SubscriptionDetails =
+  private val subscriptionDetails =
     sample[SubscriptionDetails].copy(
       address = ukAddress(1),
       addressSource = AddressSource.BusinessPartnerRecord
     )
 
-  val validJourneyStatus = SubscriptionReadyAddressJourney(
+  protected override val validJourneyStatus: SubscriptionReadyAddressJourney = SubscriptionReadyAddressJourney(
     SubscriptionReady(subscriptionDetails, sample[GGCredId])
   )
 
-  lazy val controller = instanceOf[SubscriptionAddressController]
+  protected override lazy val controller: SubscriptionAddressController = instanceOf[SubscriptionAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -64,9 +64,7 @@ class SubscriptionAddressControllerSpec
         .copy(address = address, addressSource = AddressSource.ManuallyEntered)
     )
 
-  override val mockUpdateAddress: Option[
-    (SubscriptionReadyAddressJourney, Address, Either[Error, Unit]) => Unit
-  ] = None
+  override val mockUpdateAddress: Option[(SubscriptionReadyAddressJourney, Address, Either[Error, Unit]) => Unit] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(

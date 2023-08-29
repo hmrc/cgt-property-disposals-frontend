@@ -49,7 +49,7 @@ object SingleDisposalTriageAnswers {
     val empty: IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers(
         None,
-        false,
+        hasConfirmedSingleDisposal = false,
         None,
         None,
         None,
@@ -65,10 +65,10 @@ object SingleDisposalTriageAnswers {
     ): IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers(
         c.individualUserType,
-        true,
+        hasConfirmedSingleDisposal = true,
         Some(c.disposalMethod),
-        Some(c.countryOfResidence.isUk()),
-        if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
+        Some(c.countryOfResidence.isUk),
+        if (c.countryOfResidence.isUk) None else Some(c.countryOfResidence),
         Some(c.assetType),
         Some(c.disposalDate),
         c.alreadySentSelfAssessment,
@@ -106,10 +106,7 @@ object SingleDisposalTriageAnswers {
       }
 
     def unset[A](
-      fieldLens: IncompleteSingleDisposalTriageAnswers.type => Lens[
-        IncompleteSingleDisposalTriageAnswers,
-        Option[A]
-      ]
+      fieldLens: IncompleteSingleDisposalTriageAnswers.type => Lens[IncompleteSingleDisposalTriageAnswers, Option[A]]
     ): IncompleteSingleDisposalTriageAnswers =
       fieldLens(IncompleteSingleDisposalTriageAnswers).set(None)(
         fold(

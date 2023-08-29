@@ -53,7 +53,8 @@ trait ChangeRepresenteeContactAddressControllerSpec
       bind[ReturnsService].toInstance(mockReturnsService)
     ) ::: super.overrideBindings
 
-  lazy val controller = instanceOf[ChangeRepresenteeContactAddressController]
+  protected override lazy val controller: ChangeRepresenteeContactAddressController =
+    instanceOf[ChangeRepresenteeContactAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -119,11 +120,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
   }
 
   override val mockUpdateAddress: Option[
-    (
-      ChangingRepresenteeContactAddressJourney,
-      Address,
-      Either[Error, Unit]
-    ) => Unit
+    (ChangingRepresenteeContactAddressJourney, Address, Either[Error, Unit]) => Unit
   ]
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit = {

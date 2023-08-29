@@ -78,13 +78,13 @@ class TaskListControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore)
     )
 
-  lazy val controller = instanceOf[TaskListController]
+  private lazy val controller = instanceOf[TaskListController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -492,7 +492,7 @@ class TaskListControllerSpec
           def test(
             draftReturn: DraftSingleDisposalReturn,
             expectedStatus: TaskListStatus
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "reliefDetails",
               messageFromMessageKey("task-list.relief-details.link"),
@@ -638,7 +638,7 @@ class TaskListControllerSpec
             previousSentReturns: Option[List[ReturnSummary]],
             amendReturnData: Option[AmendReturnData],
             expectedStatus: TaskListStatus
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "gainOrLossAfterReliefs",
               messageFromMessageKey("task-list.gain-or-loss-after-reliefs.link"),
@@ -800,7 +800,7 @@ class TaskListControllerSpec
             draftReturn: DraftSingleDisposalReturn,
             expectedStatus: TaskListStatus,
             previousSentReturns: Option[List[ReturnSummary]] = None
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "exemptionsAndLosses",
               messageFromMessageKey("task-list.exemptions-and-losses.link"),
@@ -941,7 +941,7 @@ class TaskListControllerSpec
           def test(
             draftReturn: DraftSingleDisposalReturn,
             expectedStatus: TaskListStatus
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "enterCgtLiability",
               messageFromMessageKey("task-list.enter-cgt-liability.link"),
@@ -1036,7 +1036,7 @@ class TaskListControllerSpec
           def test(
             draftReturn: DraftSingleDisposalReturn,
             expectedStatus: TaskListStatus
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "initialGainOrLoss",
               messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
@@ -1412,7 +1412,7 @@ class TaskListControllerSpec
             previousSentReturns: Option[List[ReturnSummary]],
             amendReturnData: Option[AmendReturnData],
             expectedStatus: TaskListStatus
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "gainOrLossAfterReliefs",
               messageFromMessageKey("task-list.gain-or-loss-after-reliefs.link"),
@@ -1924,7 +1924,7 @@ class TaskListControllerSpec
             previousSentReturns: Option[List[ReturnSummary]],
             amendReturnData: Option[AmendReturnData],
             expectedStatus: TaskListStatus
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "gainOrLossAfterReliefs",
               messageFromMessageKey("task-list.gain-or-loss-after-reliefs.link"),
@@ -2066,7 +2066,7 @@ class TaskListControllerSpec
             draftReturn: DraftSingleIndirectDisposalReturn,
             expectedStatus: TaskListStatus,
             previousSentReturns: Option[List[ReturnSummary]] = None
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "exemptionsAndLosses",
               messageFromMessageKey("task-list.exemptions-and-losses.link"),
@@ -2202,7 +2202,7 @@ class TaskListControllerSpec
           def test(
             draftReturn: DraftSingleIndirectDisposalReturn,
             expectedStatus: TaskListStatus
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "enterCgtLiability",
               messageFromMessageKey("task-list.enter-cgt-liability.link"),
@@ -2536,7 +2536,7 @@ class TaskListControllerSpec
             previousSentReturns: Option[List[ReturnSummary]],
             amendReturnData: Option[AmendReturnData],
             expectedStatus: TaskListStatus
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "gainOrLossAfterReliefs",
               messageFromMessageKey("task-list.gain-or-loss-after-reliefs.link"),
@@ -2952,7 +2952,7 @@ class TaskListControllerSpec
             previousSentReturns: Option[List[ReturnSummary]],
             amendReturnData: Option[AmendReturnData],
             expectedStatus: TaskListStatus
-          ) =
+          ): Unit =
             testStateOfSection(draftReturn)(
               "gainOrLossAfterReliefs",
               messageFromMessageKey("task-list.gain-or-loss-after-reliefs.link"),

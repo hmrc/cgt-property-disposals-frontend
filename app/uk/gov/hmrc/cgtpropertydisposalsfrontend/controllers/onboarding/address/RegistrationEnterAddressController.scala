@@ -66,10 +66,7 @@ class RegistrationEnterAddressController @Inject() (
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[
-    Future[Result],
-    (SessionData, IndividualSupplyingInformationAddressJourney)
-  ] =
+  ): Either[Future[Result], (SessionData, IndividualSupplyingInformationAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some(
             (

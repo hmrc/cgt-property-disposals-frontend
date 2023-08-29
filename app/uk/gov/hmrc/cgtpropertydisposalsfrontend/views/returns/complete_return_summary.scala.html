@@ -63,7 +63,7 @@
         @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust, representativeType, s.representeeAnswers)
 
         <h2 class="govuk-heading-m">@messages("task-list.enter-property-address.link")</h2>
-        @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())
+        @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType)
 
         <h2 class="govuk-heading-m">@messages("task-list.disposals-details.link")</h2>
         @disposalDetailsSummary(
@@ -114,7 +114,7 @@
                 isAmend,
                 s.triageAnswers.disposalDate.taxYear,
                 hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails,
-                s.triageAnswers.countryOfResidence.isUk()
+                s.triageAnswers.countryOfResidence.isUk
             ),
             calculatedYearToDateLiabilitySummary(
                 _,
@@ -122,7 +122,7 @@
                 showFiles = false,
                 subscribedDetails.isATrust,
                 representativeType,
-                s.triageAnswers.countryOfResidence.isUk(),
+                s.triageAnswers.countryOfResidence.isUk,
                 hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails
             )
         )
@@ -161,7 +161,7 @@
             isAmend,
             m.triageAnswers.taxYear,
             hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails,
-            m.triageAnswers.countryOfResidence.isUk()
+            m.triageAnswers.countryOfResidence.isUk
         )
 
         @if(m.hasAttachments) {
@@ -217,7 +217,7 @@
             isAmend,
             s.triageAnswers.disposalDate.taxYear,
             hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails,
-            s.triageAnswers.countryOfResidence.isUk()
+            s.triageAnswers.countryOfResidence.isUk
         )
 
         @if(s.hasAttachments) {
@@ -261,7 +261,7 @@
             isAmend,
             multipleIndirect.triageAnswers.taxYear,
             hideEstimatesQuestion  = !completeReturn.hasEstimatedDetails,
-            multipleIndirect.triageAnswers.countryOfResidence.isUk()
+            multipleIndirect.triageAnswers.countryOfResidence.isUk
         )
 
         @if(multipleIndirect.hasAttachments) {
@@ -298,7 +298,7 @@
             isAmend,
             singleMixedUse.triageAnswers.disposalDate.taxYear,
             hideEstimatesQuestion = !completeReturn.hasEstimatedDetails,
-            singleMixedUse.triageAnswers.countryOfResidence.isUk()
+            singleMixedUse.triageAnswers.countryOfResidence.isUk
         )
 
         @if(singleMixedUse.hasAttachments) {

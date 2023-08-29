@@ -67,7 +67,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -78,16 +78,16 @@ class ViewReturnControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val mockPaymentsService = mock[PaymentsService]
+  private val mockPaymentsService = mock[PaymentsService]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[PaymentsService].toInstance(mockPaymentsService)
     )
 
-  lazy val controller = instanceOf[ViewReturnController]
+  private lazy val controller = instanceOf[ViewReturnController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -95,7 +95,7 @@ class ViewReturnControllerSpec
 
   val rebasingUtil: RebasingEligibilityUtil = new RebasingEligibilityUtil()
 
-  def mockStartPaymentJourney(
+  private def mockStartPaymentJourney(
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
@@ -132,15 +132,11 @@ class ViewReturnControllerSpec
       case _              => None
     }
 
-  def deriveUserKey(isAgent: Boolean, isATrust: Boolean) =
-    if (isAgent) ".agent"
-    else if (isATrust) ".trust"
-    else ""
+  private def deriveUserKey(isAgent: Boolean, isATrust: Boolean) =
+    if (isAgent) ".agent" else if (isATrust) ".trust" else ""
 
-  def nameLabelUserKey(isAgent: Boolean, isATrust: Boolean) =
-    if (isATrust) ".trust"
-    else if (isAgent) ".agent"
-    else ""
+  private def nameLabelUserKey(isAgent: Boolean, isATrust: Boolean) =
+    if (isATrust) ".trust" else if (isAgent) ".agent" else ""
 
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
     case UserType.Agent | UserType.Organisation | UserType.Individual => true
@@ -365,7 +361,7 @@ class ViewReturnControllerSpec
           document
             .select("#account-name-table-answer")
             .text()                                         shouldBe subscribedDetails.name
-            .fold(_.value, e => e.makeSingleName())
+            .fold(_.value, e => e.makeSingleName)
           document
             .select("#date-sent-table-question")
             .text()                                         shouldBe messageFromMessageKey("viewReturn.sentToHmrc")
@@ -488,7 +484,7 @@ class ViewReturnControllerSpec
           document
             .select("#account-name-table-answer")
             .text() shouldBe subscribedDetails.name
-            .fold(_.value, e => e.makeSingleName())
+            .fold(_.value, e => e.makeSingleName)
 
           document
             .select("#date-sent-table-question")
@@ -626,7 +622,7 @@ class ViewReturnControllerSpec
           document
             .select("#account-name-table-answer")
             .text() shouldBe subscribedDetails.name
-            .fold(_.value, e => e.makeSingleName())
+            .fold(_.value, e => e.makeSingleName)
 
           document.select("#warning").text()                shouldBe "! " + messageFromMessageKey(
             "generic.warning"
@@ -741,7 +737,7 @@ class ViewReturnControllerSpec
           document
             .select("#account-name-table-answer")
             .text()                                         shouldBe subscribedDetails.name
-            .fold(_.value, e => e.makeSingleName())
+            .fold(_.value, e => e.makeSingleName)
           document
             .select("#date-sent-table-question")
             .text()                                         shouldBe "Return sent to HMRC"

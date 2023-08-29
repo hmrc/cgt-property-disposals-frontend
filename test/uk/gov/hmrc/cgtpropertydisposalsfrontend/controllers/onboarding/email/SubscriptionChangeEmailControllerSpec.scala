@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.ChangingSubscriptionEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 
 import java.util.UUID
@@ -65,13 +65,8 @@ class SubscriptionChangeEmailControllerSpec
     )
   }
 
-  override val mockUpdateEmail: Option[
-    (
-      ChangingSubscriptionEmail,
-      ChangingSubscriptionEmail,
-      Either[Error, Unit]
-    ) => Unit
-  ] =
+  override val mockUpdateEmail
+    : Option[(ChangingSubscriptionEmail, ChangingSubscriptionEmail, Either[Error, Unit]) => Unit] =
     None
 
   override lazy val controller: SubscriptionChangeEmailController =
@@ -146,7 +141,7 @@ class SubscriptionChangeEmailControllerSpec
 
     }
 
-    "handling requests to display the email verfied page" must {
+    "handling requests to display the email verified page" must {
 
       def performAction(): Future[Result] =
         controller.emailVerified()(FakeRequest())

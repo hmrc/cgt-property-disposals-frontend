@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sam
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
@@ -61,18 +61,12 @@ trait ChangeRepresenteeEmailControllerSpec
 
   val validVerificationCompleteJourneyStatus: ChangingRepresenteeEmail
 
-  val mockUpdateEmail: Option[
-    (
-      ChangingRepresenteeEmail,
-      ChangingRepresenteeEmail,
-      Either[Error, Unit]
-    ) => Unit
-  ]
+  val mockUpdateEmail: Option[(ChangingRepresenteeEmail, ChangingRepresenteeEmail, Either[Error, Unit]) => Unit]
 
   override lazy val controller: ChangeRepresenteeEmailController =
     instanceOf[ChangeRepresenteeEmailController]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -268,13 +262,8 @@ class StartingNewDraftReturnChangeRepresenteeEmailSpec extends ChangeRepresentee
 
   override val validVerificationCompleteJourneyStatus: ChangingRepresenteeEmail = validJourneyStatus
 
-  override val mockUpdateEmail: Option[
-    (
-      ChangingRepresenteeEmail,
-      ChangingRepresenteeEmail,
-      Either[Error, Unit]
-    ) => Unit
-  ] = None
+  override val mockUpdateEmail
+    : Option[(ChangingRepresenteeEmail, ChangingRepresenteeEmail, Either[Error, Unit]) => Unit] = None
 
 }
 
@@ -298,13 +287,8 @@ class FillingOutReturnChangeRepresenteeEmailSpec extends ChangeRepresenteeEmailC
 
   override val validVerificationCompleteJourneyStatus: ChangingRepresenteeEmail = validJourneyStatus
 
-  override val mockUpdateEmail: Option[
-    (
-      ChangingRepresenteeEmail,
-      ChangingRepresenteeEmail,
-      Either[Error, Unit]
-    ) => Unit
-  ] = Some {
+  override val mockUpdateEmail
+    : Option[(ChangingRepresenteeEmail, ChangingRepresenteeEmail, Either[Error, Unit]) => Unit] = Some {
     case (
           journey: ChangingRepresenteeEmail,
           newDetails: ChangingRepresenteeEmail,

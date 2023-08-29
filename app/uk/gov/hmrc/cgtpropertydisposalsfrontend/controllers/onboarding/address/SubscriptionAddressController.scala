@@ -17,11 +17,10 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address
 
 import cats.data.EitherT
-import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
-import shapeless.{Lens, lens}
+import shapeless.lens
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
@@ -63,10 +62,10 @@ class SubscriptionAddressController @Inject() (
 
   override val toJourneyStatus: SubscriptionReadyAddressJourney => JourneyStatus = _.journey
 
-  val subscriptionReadyAddressLens: Lens[SubscriptionReady, Address] =
+  private val subscriptionReadyAddressLens =
     lens[SubscriptionReady].subscriptionDetails.address
 
-  val subscriptionReadyAddressSourceLens: Lens[SubscriptionReady, AddressSource] =
+  private val subscriptionReadyAddressSourceLens =
     lens[SubscriptionReady].subscriptionDetails.addressSource
 
   def isATrust(journey: SubscriptionReadyAddressJourney): Boolean =
@@ -100,9 +99,11 @@ class SubscriptionAddressController @Inject() (
     )
 
     val addressSource =
-      if (address === journey.journey.subscriptionDetails.address)
+      if (address === journey.journey.subscriptionDetails.address) {
         journey.journey.subscriptionDetails.addressSource
-      else AddressSource.ManuallyEntered
+      } else {
+        AddressSource.ManuallyEntered
+      }
 
     EitherT.pure[Future, Error](
       (subscriptionReadyAddressLens ~ subscriptionReadyAddressSourceLens)

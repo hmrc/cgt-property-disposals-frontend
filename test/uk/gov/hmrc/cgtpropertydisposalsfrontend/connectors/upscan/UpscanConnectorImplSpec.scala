@@ -39,7 +39,7 @@ import scala.concurrent.Future
 
 class UpscanConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport {
 
-  val config = Configuration(
+  private val config = Configuration(
     ConfigFactory.parseString(
       """
         | self {
@@ -48,14 +48,14 @@ class UpscanConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory
         |  microservice {
         |    services {
         |      upscan-initiate {
-        |        protocol = http
+        |        protocol = https
         |        host     = host2
         |        port     = 123
         |        user-agent = agent
         |        max-file-size = 1234
         |      },
         |      cgt-property-disposals {
-        |        protocol = http
+        |        protocol = https
         |        host     = host3
         |        port     = 123
         |      }
@@ -79,17 +79,17 @@ class UpscanConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val reference                  = sample[UploadReference]
     val upload                     = sample[UpscanUpload]
-    val baseUrl                    = "http://host3:123/cgt-property-disposals"
+    val baseUrl                    = "https://host3:123/cgt-property-disposals"
 
-    "Inititalising" must {
-      val expectedUrl  = "http://host2:123/upscan/v2/initiate"
-      val mockSuccess  = Call("GET", "/mock-success")
-      val mockFailiure = Call("GET", "/mock-fail")
+    "Initialising" must {
+      val expectedUrl = "https://host2:123/upscan/v2/initiate"
+      val mockSuccess = Call("GET", "/mock-success")
+      val mockFailure = Call("GET", "/mock-fail")
 
       val payload = UpscanInitiateRequest(
         s"$baseUrl/upscan-call-back/upload-reference/${reference.value}",
         s"host1.com${mockSuccess.url}",
-        s"host1.com${mockFailiure.url}",
+        s"host1.com${mockFailure.url}",
         0,
         1234
       )
@@ -99,7 +99,7 @@ class UpscanConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory
           Seq.empty,
           payload
         ),
-        () => connector.initiate(mockFailiure, mockSuccess, reference)
+        () => connector.initiate(mockFailure, mockSuccess, reference)
       )
     }
 
@@ -120,10 +120,10 @@ class UpscanConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory
 
   }
 
-  def upscanConnectorBehaviour(
+  private def upscanConnectorBehaviour(
     mockResponse: Option[HttpResponse] => Unit,
     performCall: () => EitherT[Future, Error, HttpResponse]
-  ) = {
+  ): Unit = {
     "do a get http call and return the result" in {
       List(
         HttpResponse(200, emptyJsonBody),

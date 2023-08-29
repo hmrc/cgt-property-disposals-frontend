@@ -41,7 +41,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
 
   val validJourney: J
 
-  lazy val sessionDataWithValidJourney =
+  private lazy val sessionDataWithValidJourney =
     SessionData.empty.copy(journeyStatus = Some(validJourney))
 
   def updateName(name: IndividualName, journey: J): J

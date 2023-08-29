@@ -50,9 +50,9 @@ class DraftReturnSavedController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
         case Some(fillingOutReturn: FillingOutReturn) =>
-          if (fillingOutReturn.isAmendReturn)
+          if (fillingOutReturn.isAmendReturn) {
             Redirect(routes.TaskListController.taskList())
-          else {
+          } else {
             val draftReturnWithLastUpdated = fillingOutReturn.draftReturn.fold(
               _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today()),

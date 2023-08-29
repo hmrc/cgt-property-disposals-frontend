@@ -78,7 +78,7 @@ class ExemptionAndLossesControllerSpec
     with StartingToAmendToFillingOutReturnSpecBehaviour
     with FurtherReturnCalculationEligibilityUtilSupport {
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -86,13 +86,11 @@ class ExemptionAndLossesControllerSpec
       bind[FurtherReturnCalculationEligibilityUtil].toInstance(mockFurtherReturnCalculationEligibilityUtil)
     )
 
-  lazy val controller = instanceOf[ExemptionAndLossesController]
-  val individualName  = Right(IndividualName("Hodor", "Hodor"))
-  val trustName       = Left(TrustName("Littlefinger"))
+  private lazy val controller = instanceOf[ExemptionAndLossesController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) =
+  private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
@@ -132,7 +130,7 @@ class ExemptionAndLossesControllerSpec
       case other                                                   => sys.error(s"User type '$other' not handled")
     }
 
-  def representeeAnswers(individualUserType: Option[IndividualUserType], isFurtherReturn: Boolean) =
+  private def representeeAnswers(individualUserType: Option[IndividualUserType], isFurtherReturn: Boolean) =
     individualUserType match {
       case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) =>
         Some(
@@ -201,8 +199,9 @@ class ExemptionAndLossesControllerSpec
             None
           )
         )
-      } else
-        None,
+      } else {
+        None
+      },
       amendReturnData = None
     )
 
@@ -341,8 +340,9 @@ class ExemptionAndLossesControllerSpec
             None
           )
         )
-      } else
-        None,
+      } else {
+        None
+      },
       amendReturnData = None
     )
 
@@ -579,7 +579,7 @@ class ExemptionAndLossesControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
+                mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
               }
 
               val userKey = userMessageKey(individualUserType, userType)
@@ -612,7 +612,7 @@ class ExemptionAndLossesControllerSpec
 
       "show an error page" when {
 
-        "the user is on a further return journey and there is a problem checking their eligibility for a calculatino" in {
+        "the user is on a further return journey and there is a problem checking their eligibility for a calculation" in {
           val (session, fillingOutReturn, _) = sessionWithSingleDisposalsState(
             None,
             Some(sample[DisposalDate]),
@@ -623,7 +623,7 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("")))
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -927,7 +927,7 @@ class ExemptionAndLossesControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
               mockStoreDraftReturn(newFillingOutReturn)(Right(()))
               mockStoreSession(session.copy(journeyStatus = Some(newFillingOutReturn)))(Right(()))
             }
@@ -965,7 +965,7 @@ class ExemptionAndLossesControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
               mockStoreDraftReturn(newFillingOutReturn)(Right(()))
               mockStoreSession(session.copy(journeyStatus = Some(newFillingOutReturn)))(Right(()))
             }
@@ -2408,7 +2408,7 @@ class ExemptionAndLossesControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
+                mockFurtherReturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
                 mockStoreDraftReturn(updatedJourney)(Right(()))
                 mockStoreSession(updatedSession)(Right(()))
               }
@@ -2439,7 +2439,7 @@ class ExemptionAndLossesControllerSpec
           }
         }
 
-        "the user is on a further return journey where they are eligible for a calulation" in {
+        "the user is on a further return journey where they are eligible for a calculation" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, updatedSession, journey, updatedDraftReturn) =
@@ -2449,7 +2449,7 @@ class ExemptionAndLossesControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Eligible]))
+                mockFurtherReturnCalculationEligibilityCheck(journey)(Right(sample[Eligible]))
                 mockStoreDraftReturn(updatedJourney)(Right(()))
                 mockStoreSession(updatedSession)(Right(()))
               }
@@ -2668,9 +2668,9 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     showAnnualExemptAmount: Boolean
   ): Unit = {
 
-    if (completeExemptionAndLossesAnswers.inYearLosses.isZero)
+    if (completeExemptionAndLossesAnswers.inYearLosses.isZero) {
       doc.select("#inYearLosses-answer").text shouldBe "No"
-    else {
+    } else {
       doc.select("#inYearLosses-answer").text shouldBe "Yes"
       doc
         .select("#inYearLossesValue-answer")
@@ -2679,9 +2679,9 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       )
     }
 
-    if (completeExemptionAndLossesAnswers.previousYearsLosses.isZero)
+    if (completeExemptionAndLossesAnswers.previousYearsLosses.isZero) {
       doc.select("#previousYearsLosses-answer").text shouldBe "No"
-    else {
+    } else {
       doc.select("#previousYearsLosses-answer").text shouldBe "Yes"
       doc
         .select("#previousYearsLossesValue-answer")
@@ -2690,41 +2690,44 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       )
     }
 
-    if (!showAnnualExemptAmount)
+    if (!showAnnualExemptAmount) {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe ""
-    else if (individualUserType === IndividualUserType.PersonalRepresentative)
+    } else if (individualUserType === IndividualUserType.PersonalRepresentative) {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?"
-    else if (individualUserType === IndividualUserType.Capacitor)
+    } else if (individualUserType === IndividualUserType.Capacitor) {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?"
-    else if (individualUserType === PersonalRepresentativeInPeriodOfAdmin)
+    } else if (individualUserType === PersonalRepresentativeInPeriodOfAdmin) {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of the estate’s Capital Gains Tax Annual Exempt Amount is being used?"
-    else if (isATrust)
+    } else if (isATrust) {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?"
-    else if (isAnAgent)
+    } else if (isAnAgent) {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of your client’s Capital Gains Tax Annual Exempt Amount do they want to use?"
-    else
+    } else {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of your Capital Gains Tax Annual Exempt Amount do you want to use?"
+    }
 
     doc
       .select("#annualExemptAmount-answer")
-      .text     shouldBe (
-      if (showAnnualExemptAmount)
+      .text shouldBe (
+      if (showAnnualExemptAmount) {
         formatAmountOfMoneyWithPoundSign(completeExemptionAndLossesAnswers.annualExemptAmount.inPounds())
-      else ""
+      } else {
+        ""
+      }
     )
   }
 

@@ -51,11 +51,11 @@ class PaymentsConnectorImpl @Inject() (
 )(implicit ec: ExecutionContext)
     extends PaymentsConnector {
 
-  val paymentsBaseUrl: String = servicesConfig.baseUrl("payments")
+  private val paymentsBaseUrl: String = servicesConfig.baseUrl("payments")
 
   val selfBaseUrl: String = servicesConfig.getString("self.url")
 
-  val startPaymentJourneyUrl: String =
+  private val startPaymentJourneyUrl: String =
     s"$paymentsBaseUrl/pay-api/capital-gains-tax/journey/start"
 
   override def startPaymentJourney(

@@ -17,10 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
 
 import cats.data.EitherT
-import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
-import shapeless.{Lens, lens}
+import shapeless.lens
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
@@ -28,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.EnteringSubscriptionEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
@@ -74,7 +73,7 @@ class SubscriptionEnterEmailController @Inject() (
   ): Either[Result, (SessionData, EnteringSubscriptionEmail)] =
     validJourney(request)
 
-  val subscriptionMissingDataEmailLens: Lens[SubscriptionMissingData, Option[Email]] =
+  private val subscriptionMissingDataEmailLens =
     lens[SubscriptionMissingData].businessPartnerRecord.emailAddress
 
   override def updateEmail(
@@ -110,7 +109,7 @@ class SubscriptionEnterEmailController @Inject() (
   ): ContactName =
     ContactName(
       enteringSubscriptionEmail.journey.businessPartnerRecord.name
-        .fold(_.value, n => n.makeSingleName())
+        .fold(_.value, n => n.makeSingleName)
     )
 
   override lazy protected val backLinkCall: Option[Call]      = None

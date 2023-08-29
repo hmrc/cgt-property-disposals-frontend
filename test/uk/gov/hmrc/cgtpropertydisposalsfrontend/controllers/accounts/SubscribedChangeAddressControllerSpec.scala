@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.ggCredIdGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{SubscribedDetails, SubscribedUpdateDetails}
@@ -48,7 +48,7 @@ class SubscribedChangeAddressControllerSpec
   val subscribedDetails: SubscribedDetails =
     sample[SubscribedDetails].copy(address = ukAddress(1))
 
-  val validJourneyStatus = SubscribedAddressJourney(
+  protected override val validJourneyStatus: SubscribedAddressJourney = SubscribedAddressJourney(
     Subscribed(
       subscribedDetails,
       sample[GGCredId],
@@ -58,7 +58,8 @@ class SubscribedChangeAddressControllerSpec
     )
   )
 
-  lazy val controller = instanceOf[SubscribedChangeAddressController]
+  protected override lazy val controller: SubscribedChangeAddressController =
+    instanceOf[SubscribedChangeAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -83,7 +84,7 @@ class SubscribedChangeAddressControllerSpec
         )(r)
     }
 
-  def mockUpdateSubscribedDetails(
+  private def mockUpdateSubscribedDetails(
     subscribedAndVerifierDetails: SubscribedUpdateDetails
   )(result: Either[Error, Unit]) =
     (mockSubscriptionService
@@ -230,21 +231,21 @@ class SubscribedChangeAddressControllerSpec
         UserType.Individual,
         None,
         performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails
+        controllers.accounts.routes.AccountController.manageYourDetails()
       )
 
       behave like displaySelectAddress(
         UserType.Agent,
         None,
         performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails
+        controllers.accounts.routes.AccountController.manageYourDetails()
       )
 
       behave like displaySelectAddress(
         UserType.Organisation,
         None,
         performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails
+        controllers.accounts.routes.AccountController.manageYourDetails()
       )
     }
 
@@ -259,7 +260,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like submitSelectAddress(
         performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails,
+        controllers.accounts.routes.AccountController.manageYourDetails(),
         controllers.accounts.routes.AccountController.contactAddressUpdated()
       )
 

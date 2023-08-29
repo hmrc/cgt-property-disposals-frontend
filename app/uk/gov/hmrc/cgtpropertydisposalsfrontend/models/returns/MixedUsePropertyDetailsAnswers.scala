@@ -72,9 +72,7 @@ object MixedUsePropertyDetailsAnswers {
     def unset[A](
       fieldLens: IncompleteMixedUsePropertyDetailsAnswers.type => Lens[
         IncompleteMixedUsePropertyDetailsAnswers,
-        Option[
-          A
-        ]
+        Option[A]
       ]
     ): IncompleteMixedUsePropertyDetailsAnswers =
       fieldLens(IncompleteMixedUsePropertyDetailsAnswers).set(None)(
@@ -86,9 +84,7 @@ object MixedUsePropertyDetailsAnswers {
 
   }
 
-  implicit val format: OFormat[MixedUsePropertyDetailsAnswers] = {
-    implicit val ukAddressFormat: OFormat[UkAddress] = Json.format
-    derived.oformat()
-  }
+  implicit val ukAddressFormat: OFormat[UkAddress]             = Json.format
+  implicit val format: OFormat[MixedUsePropertyDetailsAnswers] = derived.oformat()
 
 }

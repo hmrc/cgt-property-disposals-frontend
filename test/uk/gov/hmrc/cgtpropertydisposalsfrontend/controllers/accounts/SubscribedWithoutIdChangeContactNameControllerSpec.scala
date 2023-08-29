@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{SubscribedDetails, SubscribedUpdateDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -45,7 +45,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     with IndividualNameControllerSpec[Subscribed]
     with ScalaCheckDrivenPropertyChecks {
 
-  def mockSubscriptionUpdate(
+  private def mockSubscriptionUpdate(
     subscribedAndVerifierDetails: SubscribedUpdateDetails
   )(result: Either[Error, Unit]) =
     (mockSubscriptionService
@@ -66,11 +66,11 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     SubscribedDetails(
       Right(IndividualName("Joe", "Smith")),
       Email("joe.smith@gmail.com"),
-      UkAddress("21 Joe Streee", None, None, None, Postcode("BN112JJ")),
+      UkAddress("21 Joe Street", None, None, None, Postcode("BN112JJ")),
       ContactName("Bob Smith"),
       CgtReference("XDCGT01234568798"),
       None,
-      false
+      registeredWithId = false
     ),
     GGCredId("id"),
     None,

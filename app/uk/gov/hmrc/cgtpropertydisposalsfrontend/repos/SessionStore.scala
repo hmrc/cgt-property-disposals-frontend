@@ -50,7 +50,7 @@ class SessionStoreImpl @Inject() (
 ) extends SessionStore
     with Repo {
 
-  val cacheRepository = {
+  val cacheRepository: MongoCacheRepository[String] = {
     val expireAfter: FiniteDuration = configuration.underlying
       .get[FiniteDuration]("session-store.expiry-time")
       .value

@@ -76,7 +76,7 @@ class CompanyDetailsControllerSpec
 
   val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) =
+  private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
@@ -87,14 +87,14 @@ class CompanyDetailsControllerSpec
       }
     )
 
-  override val overrideBindings = List[GuiceableModule](
+  protected override val overrideBindings: List[GuiceableModule] = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
     bind[SessionStore].toInstance(mockSessionStore),
     bind[ReturnsService].toInstance(mockReturnsService),
     bind[UUIDGenerator].toInstance(mockUUIDGenerator)
   )
 
-  lazy val controller = instanceOf[CompanyDetailsController]
+  private lazy val controller = instanceOf[CompanyDetailsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -134,9 +134,7 @@ class CompanyDetailsControllerSpec
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber =
-        if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber])
-        else None,
+      agentReferenceNumber = if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber]) else None,
       amendReturnData = amendReturnData,
       previousSentReturns = updatedPreviousReturnData
     )
@@ -1378,7 +1376,6 @@ class CompanyDetailsControllerSpec
             result,
             messageFromMessageKey(expectedTitleKey),
             { doc =>
-              println(doc)
               doc
                 .select(".govuk-caption-xl")
                 .text() shouldBe messageFromMessageKey(
@@ -1460,18 +1457,19 @@ class CompanyDetailsControllerSpec
             result,
             messageFromMessageKey(expectedTitleKey),
             { doc =>
-              if (isPeriodOfAdmin)
+              if (isPeriodOfAdmin) {
                 doc
                   .select(".govuk-caption-xl")
                   .text() shouldBe messageFromMessageKey(
                   "companyDetails.caption"
                 )
-              else
+              } else {
                 doc
                   .select(".govuk-caption-xl")
                   .text() shouldBe messageFromMessageKey(
                   "returns.company-details.multipleIndirectDisposals.caption"
                 )
+              }
 
               doc
                 .select("label[for='nonUkAddress-line1']")
@@ -1502,12 +1500,12 @@ class CompanyDetailsControllerSpec
 
             val userMsgKey = userMessageKey(individualUserType)
 
-            test(performAction(), s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title")(false)
+            test(performAction(), s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title")(isPeriodOfAdmin =
+              false
+            )
           }
         }
-
       }
-
     }
 
     "handling submitted non-uk company address" must {
@@ -2059,13 +2057,9 @@ class CompanyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name =
-                        if (userType === Organisation) Left(sample[TrustName])
-                        else Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     ),
-                    agentReferenceNumber =
-                      if (userType === Agent) Some(sample[AgentReferenceNumber])
-                      else None
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None
                   )
                 )
               )
@@ -2386,7 +2380,7 @@ class CompanyDetailsControllerSpec
 
       "show a form error for amount" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+        def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -2564,13 +2558,9 @@ class CompanyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name =
-                        if (userType === Organisation) Left(sample[TrustName])
-                        else Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     ),
-                    agentReferenceNumber =
-                      if (userType === Agent) Some(sample[AgentReferenceNumber])
-                      else None
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None
                   )
                 )
               )
@@ -2870,7 +2860,7 @@ class CompanyDetailsControllerSpec
 
       "show a form error for amount" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+        def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(

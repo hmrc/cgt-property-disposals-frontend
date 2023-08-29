@@ -64,7 +64,7 @@ class UKAddressLookupServiceImpl @Inject() (
 
     connector.lookupAddress(postcode, filter).subflatMap { response =>
       timer.close()
-      if (response.status === OK)
+      if (response.status === OK) {
         response
           .parseJSON[AddressLookupResponse]()
           .flatMap(toAddressLookupResult(_, postcode, filter))
@@ -72,7 +72,7 @@ class UKAddressLookupServiceImpl @Inject() (
             metrics.postcodeLookupErrorCounter.inc()
             Error(e)
           }
-      else {
+      } else {
         metrics.postcodeLookupErrorCounter.inc()
         Left(
           Error(
@@ -83,12 +83,11 @@ class UKAddressLookupServiceImpl @Inject() (
     }
   }
 
-  def toAddressLookupResult(
+  private def toAddressLookupResult(
     r: AddressLookupResponse,
     postcode: Postcode,
     filter: Option[String]
-  ): Either[String, AddressLookupResult] = {
-
+  ) = {
     def isValidAddressLine(s: String): Boolean =
       (s.length <= Address.addressLineMaxLength) &&
         s.forall(Address.addressLineAllowedCharacters.contains(_))

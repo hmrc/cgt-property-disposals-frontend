@@ -79,9 +79,11 @@ class SubscriptionChangeContactNameController @Inject() (
       "subscription-contact-name-changed"
     )
     val source =
-      if (journey.subscriptionDetails.contactName === contactName)
+      if (journey.subscriptionDetails.contactName === contactName) {
         journey.subscriptionDetails.contactNameSource
-      else ContactNameSource.ManuallyEntered
+      } else {
+        ContactNameSource.ManuallyEntered
+      }
 
     EitherT.rightT[Future, Error](
       journey.copy(

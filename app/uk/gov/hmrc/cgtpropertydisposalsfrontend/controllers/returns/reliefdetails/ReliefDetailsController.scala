@@ -112,7 +112,7 @@ class ReliefDetailsController @Inject() (
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
-  private def commonDisplayBehaviour[A, P : Writeable, R](
+  private def commonDisplayBehaviour[A, P : Writeable](
     currentAnswers: ReliefDetailsAnswers
   )(form: ReliefDetailsAnswers => Form[A])(
     page: (Form[A], Call) => P
@@ -126,10 +126,11 @@ class ReliefDetailsController @Inject() (
         _ => routes.ReliefDetailsController.checkYourAnswers()
       )
       Ok(page(form(currentAnswers), backLink))
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer(currentAnswers))
+    }
 
-  private def commonSubmitBehaviour[A, P : Writeable, R](
+  private def commonSubmitBehaviour[A, P : Writeable](
     currentFillingOutReturn: FillingOutReturn,
     currentDraftReturn: DraftSingleDisposalReturn,
     currentAnswers: ReliefDetailsAnswers
@@ -163,9 +164,11 @@ class ReliefDetailsController @Inject() (
               currentFillingOutReturn.copy(draftReturn = newDraftReturn).withForceDisplayGainOrLossAfterReliefsForAmends
 
             val result = for {
-              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure[Future, Error](())
-                   else
+              _ <- if (newDraftReturn === currentDraftReturn) {
+                     EitherT.pure[Future, Error](())
+                   } else {
                      returnsService.storeDraftReturn(newJourney)
+                   }
               _ <- EitherT(
                      updateSession(sessionStore, request)(
                        _.copy(journeyStatus = Some(newJourney))
@@ -182,8 +185,9 @@ class ReliefDetailsController @Inject() (
 
           }
         )
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer(currentAnswers))
+    }
 
   def privateResidentsRelief(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -241,19 +245,20 @@ class ReliefDetailsController @Inject() (
                 )
                 .map(_.inPounds())
                 .contains(p)
-            )
+            ) {
               draftReturn
-            else {
+            } else {
               val updatedAnswers =
-                if (draftReturn.triageAnswers.isPeriodOfAdmin)
+                if (draftReturn.triageAnswers.isPeriodOfAdmin) {
                   answers.fold(
                     _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p))),
                     _.copy(privateResidentsRelief = AmountInPence.fromPounds(p))
                   )
-                else
+                } else {
                   answers
                     .unset(_.lettingsRelief)
                     .copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p)))
+                }
 
               draftReturn.copy(
                 reliefDetailsAnswers = Some(updatedAnswers),
@@ -261,9 +266,11 @@ class ReliefDetailsController @Inject() (
                   _.unsetAllButIncomeDetails()
                 ),
                 gainOrLossAfterReliefs = None,
-                exemptionAndLossesAnswers =
-                  if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) None
-                  else draftReturn.exemptionAndLossesAnswers
+                exemptionAndLossesAnswers = if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
+                  None
+                } else {
+                  draftReturn.exemptionAndLossesAnswers
+                }
               )
             }
           }
@@ -327,9 +334,9 @@ class ReliefDetailsController @Inject() (
                   .fold(_.lettingsRelief, c => Some(c.lettingsRelief))
                   .map(_.inPounds())
                   .contains(p)
-              )
+              ) {
                 draftReturn
-              else
+              } else {
                 draftReturn.copy(
                   reliefDetailsAnswers = Some(
                     answers.fold(
@@ -337,13 +344,16 @@ class ReliefDetailsController @Inject() (
                       _.copy(lettingsRelief = AmountInPence.fromPounds(p))
                     )
                   ),
-                  exemptionAndLossesAnswers =
-                    if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) None
-                    else draftReturn.exemptionAndLossesAnswers,
+                  exemptionAndLossesAnswers = if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
+                    None
+                  } else {
+                    draftReturn.exemptionAndLossesAnswers
+                  },
                   yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(
                     _.unsetAllButIncomeDetails()
                   )
                 )
+              }
             }
           )
         }
@@ -361,9 +371,11 @@ class ReliefDetailsController @Inject() (
     )
 
   private def otherReliefsBackLink(answers: SingleDisposalTriageAnswers): Call =
-    if (answers.isPeriodOfAdmin)
+    if (answers.isPeriodOfAdmin) {
       routes.ReliefDetailsController.privateResidentsRelief()
-    else routes.ReliefDetailsController.lettingsRelief()
+    } else {
+      routes.ReliefDetailsController.lettingsRelief()
+    }
 
   def otherReliefs(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -435,9 +447,9 @@ class ReliefDetailsController @Inject() (
               )
               .merge
 
-            if (existingOtherReliefs.contains(otherReliefs))
+            if (existingOtherReliefs.contains(otherReliefs)) {
               draftReturn
-            else {
+            } else {
               val updatedReliefDetailsAnswers =
                 answers.fold(
                   _.copy(otherReliefs = Some(otherReliefs)),
@@ -449,23 +461,26 @@ class ReliefDetailsController @Inject() (
                   selectedOtherReliefs
                 ) -> selectedOtherReliefs(otherReliefs)
 
-              if (hadSelectedOtherReliefs =!= hasSelectedOtherReliefs)
+              if (hadSelectedOtherReliefs =!= hasSelectedOtherReliefs) {
                 draftReturn.copy(
                   reliefDetailsAnswers = Some(updatedReliefDetailsAnswers),
                   exemptionAndLossesAnswers = None,
                   yearToDateLiabilityAnswers = None,
                   supportingEvidenceAnswers = None
                 )
-              else
+              } else {
                 draftReturn.copy(
                   reliefDetailsAnswers = Some(updatedReliefDetailsAnswers),
-                  exemptionAndLossesAnswers =
-                    if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) None
-                    else draftReturn.exemptionAndLossesAnswers,
+                  exemptionAndLossesAnswers = if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
+                    None
+                  } else {
+                    draftReturn.exemptionAndLossesAnswers
+                  },
                   yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(
                     _.unsetAllButIncomeDetails()
                   )
                 )
+              }
             }
 
           }
@@ -590,7 +605,7 @@ class ReliefDetailsController @Inject() (
 
 object ReliefDetailsController {
 
-  val privateResidentsReliefForm: Form[BigDecimal] =
+  private val privateResidentsReliefForm =
     MoneyUtils.amountInPoundsYesNoForm(
       "privateResidentsRelief",
       "privateResidentsReliefValue"
@@ -627,10 +642,10 @@ object ReliefDetailsController {
         .leftMap(Seq(_))
     }
 
-  def lettingsReliefForm(
+  private def lettingsReliefForm(
     answers: ReliefDetailsAnswers,
     lettingsReliefLimit: AmountInPence
-  ): Form[BigDecimal] = {
+  ) = {
     val reliefAmount =
       answers.fold[AmountInPence](
         _.privateResidentsRelief.fold(AmountInPence(0L))(identity),
@@ -645,7 +660,7 @@ object ReliefDetailsController {
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  val otherReliefsForm: Form[Either[(String, BigDecimal), Unit]] = {
+  private val otherReliefsForm = {
     val formatter: Formatter[Either[(String, BigDecimal), Unit]] = {
       val (otherReliefKey, otherReliefsNameKey, otherReliefsAmountKey) =
         ("otherReliefs", "otherReliefsName", "otherReliefsAmount")
@@ -654,10 +669,9 @@ object ReliefDetailsController {
         "^[A-Za-z0-9 ]{1,105}$".r.pattern.asPredicate()
 
       def validateReliefsName(s: String): Either[FormError, String] =
-        if (s.length > 105)
+        if (s.length > 105) {
           Left(FormError(otherReliefsNameKey, "error.tooLong"))
-        else if (!otherReliefsNamePredicate.test(s))
-          Left(FormError(otherReliefsNameKey, "error.invalid"))
+        } else if (!otherReliefsNamePredicate.test(s)) Left(FormError(otherReliefsNameKey, "error.invalid"))
         else Right(s)
 
       val innerOption = InnerOption { data =>
@@ -668,7 +682,7 @@ object ReliefDetailsController {
                 .readValue(otherReliefsNameKey, data, identity)
                 .flatMap(validateReliefsName)
             )
-            .leftMap(NonEmptyList.one(_))
+            .leftMap(NonEmptyList.one)
 
         val amountResult: ValidatedNel[FormError, BigDecimal] =
           Validated
@@ -683,7 +697,7 @@ object ReliefDetailsController {
                   )(_)
                 )
             )
-            .leftMap(NonEmptyList.one(_))
+            .leftMap(NonEmptyList.one)
 
         (nameResult, amountResult).mapN(_ -> _).toEither.leftMap(_.toList)
       }

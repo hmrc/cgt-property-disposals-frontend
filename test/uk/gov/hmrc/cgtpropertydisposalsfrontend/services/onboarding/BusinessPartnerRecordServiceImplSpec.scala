@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.i18n.Lang
@@ -34,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -42,11 +43,11 @@ import scala.concurrent.Future
 
 class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
-  val mockConnector = mock[CGTPropertyDisposalsConnector]
+  private val mockConnector = mock[CGTPropertyDisposalsConnector]
 
   val service = new BusinessPartnerRecordServiceImpl(mockConnector)
 
-  def mockGetBPR(
+  private def mockGetBPR(
     request: BusinessPartnerRecordRequest,
     lang: Lang
   )(response: Either[Error, HttpResponse]) =
@@ -58,11 +59,11 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
       .returning(EitherT.fromEither[Future](response))
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  val bprRequest                 = sample[BusinessPartnerRecordRequest]
-  val bpr                        = sample[BusinessPartnerRecord].copy(emailAddress = Some(Email("abc@test.com")))
+  private val bprRequest         = sample[BusinessPartnerRecordRequest]
+  private val bpr                = sample[BusinessPartnerRecord].copy(emailAddress = Some(Email("abc@test.com")))
   private val emptyJsonBody      = "{}"
   private val noJsonInBody       = ""
-  val lang                       = Lang.defaultLang
+  private val lang               = Lang.defaultLang
 
   "The BusinessPartnerRecordServiceImpl" when {
 
@@ -70,7 +71,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
 
       "return an error" when {
 
-        def testError(response: => Either[Error, HttpResponse]) = {
+        def testError(response: => Either[Error, HttpResponse]): Assertion = {
           mockGetBPR(bprRequest, lang)(response)
 
           await(
@@ -142,7 +143,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
           Postcode("abc")
         )
 
-        def response(a: Address) =
+        def response(a: Address): BusinessPartnerRecordResponse =
           BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None, None)
 
         mockGetBPR(bprRequest, lang)(
@@ -175,7 +176,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
           country
         )
 
-        def response(a: Address) =
+        def response(a: Address): BusinessPartnerRecordResponse =
           BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None, None)
 
         mockGetBPR(bprRequest, lang)(
@@ -204,7 +205,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
           Postcode("abc")
         )
 
-        def response(a: Address) =
+        def response(a: Address): BusinessPartnerRecordResponse =
           BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None, None)
 
         mockGetBPR(bprRequest, lang)(
@@ -237,7 +238,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
           country
         )
 
-        def response(a: Address) =
+        def response(a: Address): BusinessPartnerRecordResponse =
           BusinessPartnerRecordResponse(Some(bpr.copy(address = Some(a))), None, None)
 
         mockGetBPR(bprRequest, lang)(
@@ -250,7 +251,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
       }
 
       "filter out invalid characters in trust names if a trust name is found" in {
-        def response(t: TrustName) =
+        def response(t: TrustName): BusinessPartnerRecordResponse =
           BusinessPartnerRecordResponse(Some(bpr.copy(name = Left(t))), None, None)
 
         val trustName          = TrustName("Trust (name)")
@@ -266,7 +267,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
       }
 
       "filter out invalid characters in individual names if an individual name is found" in {
-        def response(n: IndividualName) =
+        def response(n: IndividualName): BusinessPartnerRecordResponse =
           BusinessPartnerRecordResponse(Some(bpr.copy(name = Right(n))), None, None)
 
         val name          = IndividualName("First (name)", "Last name!")
@@ -282,7 +283,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
       }
 
       "filter out invalid email addresses if an email is found" in {
-        def response(e: Option[Email]) =
+        def response(e: Option[Email]): BusinessPartnerRecordResponse =
           BusinessPartnerRecordResponse(Some(bpr.copy(emailAddress = e)), None, None)
 
         mockGetBPR(bprRequest, lang)(

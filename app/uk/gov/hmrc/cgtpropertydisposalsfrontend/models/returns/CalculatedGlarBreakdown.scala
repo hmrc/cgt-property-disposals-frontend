@@ -38,14 +38,13 @@ object CalculatedGlarBreakdown {
     def initialGainOrLoss: AmountInPence                  = propertyDisposalAmountLessCosts -- propertyAcquisitionAmountPlusCosts
 
     def gainOrLossAfterReliefs: AmountInPence =
-      if (initialGainOrLoss.isPositive)
+      if (initialGainOrLoss.isPositive) {
         (initialGainOrLoss -- totalReliefs).withFloorZero
-      else if (initialGainOrLoss.isNegative)
+      } else if (initialGainOrLoss.isNegative) {
         (initialGainOrLoss ++ totalReliefs).withCeilingZero
-      else
+      } else {
         AmountInPence.zero
-
-    def isGain: Boolean = gainOrLossAfterReliefs.isPositive
+      }
 
   }
 

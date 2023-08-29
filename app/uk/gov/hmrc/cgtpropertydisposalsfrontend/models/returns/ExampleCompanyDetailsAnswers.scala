@@ -70,12 +70,7 @@ object ExampleCompanyDetailsAnswers {
       }
 
     def unset[A](
-      fieldLens: IncompleteExampleCompanyDetailsAnswers.type => Lens[
-        IncompleteExampleCompanyDetailsAnswers,
-        Option[
-          A
-        ]
-      ]
+      fieldLens: IncompleteExampleCompanyDetailsAnswers.type => Lens[IncompleteExampleCompanyDetailsAnswers, Option[A]]
     ): IncompleteExampleCompanyDetailsAnswers =
       fieldLens(IncompleteExampleCompanyDetailsAnswers).set(None)(
         fold(

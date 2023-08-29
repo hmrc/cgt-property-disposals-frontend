@@ -42,11 +42,11 @@ class CgtCalculationServiceImplSpec
     with ScalaCheckDrivenPropertyChecks
     with MockFactory {
 
-  val mockReturnsConnector = mock[ReturnsConnector]
+  private val mockReturnsConnector = mock[ReturnsConnector]
 
   val service = new CgtCalculationServiceImpl(mockReturnsConnector)
 
-  def mockCalculateTaxDue(
+  private def mockCalculateTaxDue(
     request: CalculateCgtTaxDueRequest
   )(response: Either[Error, HttpResponse]) =
     (mockReturnsConnector
@@ -54,7 +54,7 @@ class CgtCalculationServiceImplSpec
       .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockCalculateTaxableGainOrLoss(
+  private def mockCalculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
   )(response: Either[Error, HttpResponse]) =
     (mockReturnsConnector
@@ -62,7 +62,7 @@ class CgtCalculationServiceImplSpec
       .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockCalculateYearToDateLiability(
+  private def mockCalculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest
   )(response: Either[Error, HttpResponse]) =
     (mockReturnsConnector

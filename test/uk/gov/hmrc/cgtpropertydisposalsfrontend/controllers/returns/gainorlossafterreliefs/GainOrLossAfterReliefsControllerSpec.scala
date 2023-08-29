@@ -77,9 +77,9 @@ class GainOrLossAfterReliefsControllerSpec
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
-  val mockUUIDGenerator = mock[UUIDGenerator]
+  private val mockUUIDGenerator = mock[UUIDGenerator]
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) =
+  private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
@@ -89,13 +89,13 @@ class GainOrLossAfterReliefsControllerSpec
       }
     )
 
-  lazy val controller = instanceOf[GainOrLossAfterReliefsController]
+  private lazy val controller = instanceOf[GainOrLossAfterReliefsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   implicit val hc: HeaderCarrier = mock[HeaderCarrier]
 
-  override val overrideBindings = List[GuiceableModule](
+  protected override val overrideBindings: List[GuiceableModule] = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
     bind[SessionStore].toInstance(mockSessionStore),
     bind[ReturnsService].toInstance(mockReturnsService),
@@ -214,7 +214,7 @@ class GainOrLossAfterReliefsControllerSpec
     isMultipleDisposal: Boolean = false,
     previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(false)
   ): (SessionData, FillingOutReturn, DraftReturn) =
-    if (isMultipleDisposal)
+    if (isMultipleDisposal) {
       sessionWithMultipleDisposalsState(
         gainOrLossAfterReliefs,
         individualUserType,
@@ -222,7 +222,7 @@ class GainOrLossAfterReliefsControllerSpec
         subscribedDetails,
         previousReturnsImplyEligibilityForFurtherReturnCalculation
       )
-    else
+    } else {
       sessionWithSingleDisposalState(
         gainOrLossAfterReliefs,
         individualUserType,
@@ -230,8 +230,9 @@ class GainOrLossAfterReliefsControllerSpec
         subscribedDetails,
         previousReturnsImplyEligibilityForFurtherReturnCalculation
       )
+    }
 
-  def individualSesssion(
+  private def individualSession(
     gainOrLossAfterReliefs: Option[AmountInPence] = None,
     isMultipleDisposal: Boolean = false,
     previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(false)
@@ -243,7 +244,7 @@ class GainOrLossAfterReliefsControllerSpec
         previousReturnsImplyEligibilityForFurtherReturnCalculation
     )
 
-  def agentSession(
+  private def agentSession(
     gainOrLossAfterReliefs: Option[AmountInPence] = None,
     isMultipleDisposal: Boolean = false,
     previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(false)
@@ -256,7 +257,7 @@ class GainOrLossAfterReliefsControllerSpec
         previousReturnsImplyEligibilityForFurtherReturnCalculation
     )
 
-  def trustSession(
+  private def trustSession(
     gainOrLossAfterReliefs: Option[AmountInPence] = None,
     isMultipleDisposal: Boolean = false,
     previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(false)
@@ -270,7 +271,7 @@ class GainOrLossAfterReliefsControllerSpec
         previousReturnsImplyEligibilityForFurtherReturnCalculation
     )
 
-  def capacitorSession(
+  private def capacitorSession(
     gainOrLossAfterReliefs: Option[AmountInPence] = None,
     isMultipleDisposal: Boolean = false,
     previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(false)
@@ -283,7 +284,7 @@ class GainOrLossAfterReliefsControllerSpec
         previousReturnsImplyEligibilityForFurtherReturnCalculation
     )
 
-  def personalRepSession(
+  private def personalRepSession(
     gainOrLossAfterReliefs: Option[AmountInPence] = None,
     isMultipleDisposal: Boolean = false,
     previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(false)
@@ -296,7 +297,7 @@ class GainOrLossAfterReliefsControllerSpec
         previousReturnsImplyEligibilityForFurtherReturnCalculation
     )
 
-  def periodOfAdminSession(
+  private def periodOfAdminSession(
     gainOrLossAfterReliefs: Option[AmountInPence] = None,
     isMultipleDisposal: Boolean = false,
     previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(false)
@@ -309,7 +310,7 @@ class GainOrLossAfterReliefsControllerSpec
         previousReturnsImplyEligibilityForFurtherReturnCalculation
     )
 
-  def agentOfPeriodOfAdminSession(
+  private def agentOfPeriodOfAdminSession(
     gainOrLossAfterReliefs: Option[AmountInPence] = None,
     isMultipleDisposal: Boolean = false,
     previousReturnsImplyEligibilityForFurtherReturnCalculation: Option[Boolean] = Some(false)
@@ -323,8 +324,8 @@ class GainOrLossAfterReliefsControllerSpec
         previousReturnsImplyEligibilityForFurtherReturnCalculation
     )
 
-  val testCasesWithUserKeys = List(
-    individualSesssion()          -> "",
+  private val testCasesWithUserKeys = List(
+    individualSession()           -> "",
     agentSession()                -> ".agent",
     trustSession()                -> ".trust",
     capacitorSession()            -> ".capacitor",
@@ -361,7 +362,7 @@ class GainOrLossAfterReliefsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData._1)
-              mockFurthereturnCalculationEligibilityCheck(sessionData._2)(Right(Ineligible(Some(false))))
+              mockFurtherReturnCalculationEligibilityCheck(sessionData._2)(Right(Ineligible(Some(false))))
             }
             checkPageIsDisplayed(
               performAction(),
@@ -406,7 +407,7 @@ class GainOrLossAfterReliefsControllerSpec
 
             "the user is an individual doing the return for themselves" in {
               test(
-                individualSesssion(),
+                individualSession(),
                 "gainOrLossAfterReliefs.title",
                 returns.routes.TaskListController.taskList(),
                 "",
@@ -486,7 +487,7 @@ class GainOrLossAfterReliefsControllerSpec
 
             "the user is an individual doing the return for themselves" in {
               test(
-                individualSesssion(isMultipleDisposal = true),
+                individualSession(isMultipleDisposal = true),
                 "gainOrLossAfterReliefs.multipleDisposals.title",
                 returns.routes.TaskListController.taskList(),
                 "",
@@ -576,7 +577,7 @@ class GainOrLossAfterReliefsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData._1)
-              mockFurthereturnCalculationEligibilityCheck(sessionData._2)(
+              mockFurtherReturnCalculationEligibilityCheck(sessionData._2)(
                 Right(
                   Eligible(
                     CalculatedGlarBreakdown(
@@ -800,7 +801,7 @@ class GainOrLossAfterReliefsControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(
+                mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(
                   Right(
                     Eligible(
                       CalculatedGlarBreakdown(
@@ -876,7 +877,7 @@ class GainOrLossAfterReliefsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("Error on eligibility check")))
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("Error on eligibility check")))
           }
           checkIsTechnicalErrorPage(performAction())
         }
@@ -895,7 +896,7 @@ class GainOrLossAfterReliefsControllerSpec
       def updateDraftReturn(
         d: DraftSingleDisposalReturn,
         newAnswer: AmountInPence
-      ) =
+      ): DraftSingleDisposalReturn =
         d.copy(gainOrLossAfterReliefs = Some(newAnswer))
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -918,7 +919,7 @@ class GainOrLossAfterReliefsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(Some(false))))
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(Some(false))))
           }
 
           checkPageIsDisplayed(
@@ -1054,7 +1055,7 @@ class GainOrLossAfterReliefsControllerSpec
         def test(
           newGainOrLossAfterReliefs: AmountInPence,
           formData: (String, String)*
-        ) = {
+        ): Unit = {
           val (session, journey, draftReturn) = sessionWithSingleDisposalState(None)
           val newDraftReturn                  = updateDraftReturn(draftReturn, newGainOrLossAfterReliefs)
             .copy(exemptionAndLossesAnswers = None, yearToDateLiabilityAnswers = None)
@@ -1193,7 +1194,7 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is an individual doing the return for themselves" in {
           test(
-            individualSesssion(Some(AmountInPence(600L)), isMultipleDisposal = true)._1,
+            individualSession(Some(AmountInPence(600L)), isMultipleDisposal = true)._1,
             "gainOrLossAfterReliefs.multipleDisposals.h2",
             "gainOrLossAfterReliefs.gain.outerLabel",
             Some("gainOrLossAfterReliefs.gain.innerLabel"),
@@ -1309,9 +1310,7 @@ object GainOrLossAfterReliefsControllerSpec extends Matchers {
         case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAnAgent => ".personalRepInPeriodOfAdmin"
         case Some(Capacitor)                                           => ".capacitor"
         case _                                                         =>
-          if (isAnAgent) ".agent"
-          else if (isATrust) ".trust"
-          else ""
+          if (isAnAgent) ".agent" else if (isATrust) ".trust" else ""
       }
       val multipleDisposalKeys = if (isMultipleDisposal) ".multipleDisposals" else ""
       s"gainOrLossAfterReliefs$userTypeKey$multipleDisposalKeys.h2"
@@ -1323,20 +1322,21 @@ object GainOrLossAfterReliefsControllerSpec extends Matchers {
         case _                                     => ".notSelf"
       }
 
-      if (gainOrLossAfterReliefs > AmountInPence.zero)
+      if (gainOrLossAfterReliefs > AmountInPence.zero) {
         (
           s"gainOrLossAfterReliefs.gain$userKey.outerLabel",
           Some("gainOrLossAfterReliefs.gain.innerLabel"),
           Some(MoneyUtils.formatAmountOfMoneyWithPoundSign(gainOrLossAfterReliefs.inPounds()))
         )
-      else if (gainOrLossAfterReliefs < AmountInPence.zero)
+      } else if (gainOrLossAfterReliefs < AmountInPence.zero) {
         (
           s"gainOrLossAfterReliefs.loss$userKey.outerLabel",
           Some("gainOrLossAfterReliefs.loss.innerLabel"),
           Some(MoneyUtils.formatAmountOfMoneyWithPoundSign(gainOrLossAfterReliefs.inPounds().abs))
         )
-      else
+      } else {
         (s"gainOrLossAfterReliefs.noGainOrLoss$userKey.outerLabel", None, None)
+      }
     }
 
     doc.select("#gainOrLossAfterReliefs-question").text() shouldBe messages(expectedQuestionKey)

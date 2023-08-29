@@ -101,10 +101,7 @@ object CompleteReturn {
     acquisitionDetails: CompleteAcquisitionDetailsAnswers,
     reliefDetails: CompleteReliefDetailsAnswers,
     exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
-    yearToDateLiabilityAnswers: Either[
-      CompleteNonCalculatedYTDAnswers,
-      CompleteCalculatedYTDAnswers
-    ],
+    yearToDateLiabilityAnswers: Either[CompleteNonCalculatedYTDAnswers, CompleteCalculatedYTDAnswers],
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     initialGainOrLoss: Option[AmountInPence],
     representeeAnswers: Option[CompleteRepresenteeAnswers],
@@ -194,7 +191,7 @@ object CompleteReturn {
       private val c: CompleteSingleDisposalReturn
     ) extends AnyVal {
 
-      def hasNonResidentialAssetType(): Boolean =
+      def hasNonResidentialAssetType: Boolean =
         c.triageAnswers.assetType === AssetType.NonResidential
 
     }

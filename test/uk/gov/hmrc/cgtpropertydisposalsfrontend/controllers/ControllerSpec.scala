@@ -88,9 +88,9 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
 
   implicit val lang: Lang = Lang("en")
 
-  def overrideBindings: List[GuiceableModule] = List.empty[GuiceableModule]
+  protected def overrideBindings: List[GuiceableModule] = List.empty[GuiceableModule]
 
-  lazy val additionalConfig = Configuration()
+  protected lazy val additionalConfig: Configuration = Configuration()
 
   def buildFakeApplication(): Application = {
     val metricsBinding: GuiceableModule =
@@ -119,7 +119,7 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
   def instanceOf[A : ClassTag]: A = fakeApplication.injector.instanceOf[A]
 
   lazy implicit val materializer: Materializer = fakeApplication.materializer
-  lazy val viewConfig                          = instanceOf[ViewConfig]
+  protected lazy val viewConfig: ViewConfig    = instanceOf[ViewConfig]
 
   abstract override def beforeAll(): Unit = {
     Play.start(fakeApplication)

@@ -25,10 +25,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait HttpSupport { this: MockFactory with Matchers =>
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val mockHttp: HttpClient = mock[HttpClient]
 
-  def mockGet[A](
+  protected def mockGet[A](
     url: String
   )(
     response: Option[A]
@@ -58,7 +57,7 @@ trait HttpSupport { this: MockFactory with Matchers =>
       })
       .returning(response.fold(Future.failed[A](new Exception("Test exception message")))(Future.successful))
 
-  def mockGetWithQueryWithHeaders[A](
+  protected def mockGetWithQueryWithHeaders[A](
     url: String,
     queryParams: Seq[(String, String)],
     headers: Seq[(String, String)]
@@ -93,7 +92,7 @@ trait HttpSupport { this: MockFactory with Matchers =>
         )(Future.successful)
       )
 
-  def mockPost[A](url: String, headers: Seq[(String, String)], body: A)(
+  protected def mockPost[A](url: String, headers: Seq[(String, String)], body: A)(
     result: Option[HttpResponse]
   ): Unit =
     (mockHttp
@@ -110,7 +109,7 @@ trait HttpSupport { this: MockFactory with Matchers =>
         )(Future.successful)
       )
 
-  def mockPut[A](
+  protected def mockPut[A](
     url: String,
     body: A,
     headers: Seq[(String, String)] = Seq.empty

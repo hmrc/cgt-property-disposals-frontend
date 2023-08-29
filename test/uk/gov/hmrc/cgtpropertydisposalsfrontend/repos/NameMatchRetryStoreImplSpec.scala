@@ -37,7 +37,7 @@ import scala.concurrent.duration._
 
 object BusinessPartnerRecordNameMatchRetryStoreSpec {
 
-  val config = Configuration(
+  val config: Configuration = Configuration(
     ConfigFactory.parseString(
       """
         |bpr-name-match.store.expiry-time = 30minutes
@@ -46,8 +46,8 @@ object BusinessPartnerRecordNameMatchRetryStoreSpec {
   )
 
   class TestEnvironment {
-    val ggCredId             = sample[GGCredId]
-    val unsuccessfulAttempts =
+    protected val ggCredId: GGCredId                                                                   = sample[GGCredId]
+    protected val unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails] =
       sample[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]]
   }
 

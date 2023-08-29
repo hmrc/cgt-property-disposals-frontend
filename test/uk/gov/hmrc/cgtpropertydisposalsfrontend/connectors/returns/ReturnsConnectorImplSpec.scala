@@ -40,13 +40,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
 
-  val config = Configuration(
+  private val config = Configuration(
     ConfigFactory.parseString(
       """
         |microservice {
         |  services {
         |    cgt-property-disposals {
-        |      protocol = http
+        |      protocol = https
         |      host     = host
         |      port     = 123
         |    }
@@ -69,7 +69,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
 
       val draftReturn  = sample[DraftReturn]
       val cgtReference = sample[CgtReference]
-      val expectedUrl  = s"http://host:123/draft-return/${cgtReference.value}"
+      val expectedUrl  = s"https://host:123/draft-return/${cgtReference.value}"
 
       behave like connectorBehaviour(
         mockPost(expectedUrl, Seq.empty, draftReturn),
@@ -80,7 +80,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
     "handling requests to delete a draft returns" must {
 
       val ids         = List.fill(3)(UUID.randomUUID())
-      val expectedUrl = s"http://host:123/draft-returns/delete"
+      val expectedUrl = s"https://host:123/draft-returns/delete"
 
       behave like connectorBehaviour(
         mockPost(expectedUrl, Seq.empty, DeleteDraftReturnsRequest(ids)),
@@ -91,7 +91,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
     "handling requests to get a draft returns" must {
 
       val cgtReference = sample[CgtReference]
-      val expectedUrl  = s"http://host:123/draft-returns/${cgtReference.value}"
+      val expectedUrl  = s"https://host:123/draft-returns/${cgtReference.value}"
 
       behave like connectorBehaviour(
         mockGet[HttpResponse](expectedUrl),
@@ -101,7 +101,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
 
     "handling request to submit a return" must {
       val submitReturnRequest = sample[SubmitReturnRequest]
-      val expectedUrl         = s"http://host:123/return"
+      val expectedUrl         = s"https://host:123/return"
       val language            = Seq("Accept-Language" -> "en")
 
       behave like connectorBehaviour(
@@ -117,7 +117,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
       val (fromDate, toDate) =
         LocalDate.of(2020, 1, 2) -> LocalDate.of(2020, 3, 4)
       val expectedUrl =
-        s"http://host:123/returns/${cgtReference.value}/2020-01-02/2020-03-04"
+        s"https://host:123/returns/${cgtReference.value}/2020-01-02/2020-03-04"
 
       behave like connectorBehaviour(
         mockGet[HttpResponse](expectedUrl),
@@ -129,7 +129,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
 
       val cgtReference = sample[CgtReference]
       val submissionId = "id"
-      val expectedUrl  = s"http://host:123/return/${cgtReference.value}/id"
+      val expectedUrl  = s"https://host:123/return/${cgtReference.value}/id"
 
       behave like connectorBehaviour(
         mockGet[HttpResponse](expectedUrl),
@@ -140,7 +140,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
     "handling requests to calculate cgt tax due" must {
 
       val request     = sample[CalculateCgtTaxDueRequest]
-      val expectedUrl = s"http://host:123/calculate-tax-due"
+      val expectedUrl = s"https://host:123/calculate-tax-due"
 
       behave like connectorBehaviour(
         mockPost(expectedUrl, Seq.empty, request),
@@ -151,7 +151,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
     "handling requests to calculate taxable gain or loss" must {
 
       val request     = sample[TaxableGainOrLossCalculationRequest]
-      val expectedUrl = s"http://host:123/calculate-taxable-gain-or-loss"
+      val expectedUrl = s"https://host:123/calculate-taxable-gain-or-loss"
 
       behave like connectorBehaviour(
         mockPost(expectedUrl, Seq.empty, request),
@@ -162,7 +162,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
     "handling requests to calculate year to date liability" must {
 
       val request     = sample[YearToDateLiabilityCalculationRequest]
-      val expectedUrl = s"http://host:123/calculate-year-to-date-liability"
+      val expectedUrl = s"https://host:123/calculate-year-to-date-liability"
 
       behave like connectorBehaviour(
         mockPost(expectedUrl, Seq.empty, request),
@@ -172,7 +172,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
 
     "handling requests to get tax years" must {
       val date        = LocalDate.of(2020, 1, 31)
-      val expectedUrl = s"http://host:123/tax-year/2020-01-31"
+      val expectedUrl = s"https://host:123/tax-year/2020-01-31"
 
       behave like connectorBehaviour(
         mockGet[HttpResponse](expectedUrl),
@@ -181,7 +181,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
     }
 
     "handling requests to get available tax years" must {
-      val expectedUrl = s"http://host:123/available-tax-years"
+      val expectedUrl = s"https://host:123/available-tax-years"
 
       behave like connectorBehaviour(
         mockGet[HttpResponse](expectedUrl),

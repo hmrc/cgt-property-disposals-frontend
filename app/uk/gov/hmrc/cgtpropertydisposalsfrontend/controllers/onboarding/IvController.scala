@@ -65,9 +65,9 @@ class IvController @Inject() (
 
   def ivSuccessCallback(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      if (request.sessionData.forall(_ === SessionData.empty))
+      if (request.sessionData.forall(_ === SessionData.empty)) {
         SeeOther(controllers.routes.StartController.start().url)
-      else
+      } else {
         updateSession(sessionStore, request)(_ => SessionData.empty).map {
           case Left(e) =>
             logger.warn("Could not clear session after IV success", e)
@@ -76,6 +76,7 @@ class IvController @Inject() (
           case Right(_) =>
             SeeOther(controllers.routes.StartController.start().url)
         }
+      }
     }
 
   def retry(): Action[AnyContent] =

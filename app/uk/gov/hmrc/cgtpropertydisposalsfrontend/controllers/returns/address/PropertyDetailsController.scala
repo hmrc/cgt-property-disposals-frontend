@@ -174,9 +174,9 @@ class PropertyDetailsController @Inject() (
             val answers = m.examplePropertyDetailsAnswers.getOrElse(
               IncompleteExamplePropertyDetailsAnswers.empty
             )
-            if (answers.fold(_.address, c => Some(c.address)).contains(a))
+            if (answers.fold(_.address, c => Some(c.address)).contains(a)) {
               EitherT.pure[Future, Error](journey.journey)
-            else {
+            } else {
               val updatedDraftReturn = m.copy(
                 examplePropertyDetailsAnswers = Some(answers.unset(_.disposalDate).copy(address = Some(a))),
                 exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else m.exemptionAndLossesAnswers,
@@ -189,9 +189,9 @@ class PropertyDetailsController @Inject() (
             }
 
           case Right(d: DraftSingleDisposalReturn) =>
-            if (d.propertyAddress.contains(a))
+            if (d.propertyAddress.contains(a)) {
               EitherT.pure[Future, Error](journey.journey)
-            else {
+            } else {
               val updatedDraftReturn = d.copy(
                 propertyAddress = Some(a),
                 exemptionAndLossesAnswers = if (isFurtherOrAmendReturn) None else d.exemptionAndLossesAnswers,
@@ -223,9 +223,9 @@ class PropertyDetailsController @Inject() (
     addressRoutes.PropertyDetailsController.checkYourAnswers()
 
   override protected val enterPostcodePageBackLink: FillingOutReturnAddressJourney => Call = { fillingOutReturn =>
-    if (assetTypes(fillingOutReturn).exists(shouldAskIfPostcodeExists))
+    if (assetTypes(fillingOutReturn).exists(shouldAskIfPostcodeExists)) {
       routes.PropertyDetailsController.singleDisposalHasUkPostcode()
-    else
+    } else {
       fillingOutReturn.draftReturn.fold(
         _.examplePropertyDetailsAnswers
           .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
@@ -237,6 +237,7 @@ class PropertyDetailsController @Inject() (
           returnsRoutes.TaskListController.taskList()
         )(_ => addressRoutes.PropertyDetailsController.checkYourAnswers())
       )
+    }
   }
 
   private def hasUkPostcodeBackLink(
@@ -248,10 +249,13 @@ class PropertyDetailsController @Inject() (
         _.examplePropertyDetailsAnswers.exists(_.fold(_ => false, _ => true)),
         _.propertyAddress.isDefined
       )
-    if (isComplete) routes.PropertyDetailsController.checkYourAnswers()
-    else if (isSingleDisposal)
+    if (isComplete) {
+      routes.PropertyDetailsController.checkYourAnswers()
+    } else if (isSingleDisposal) {
       controllers.returns.routes.TaskListController.taskList()
-    else routes.PropertyDetailsController.multipleDisposalsGuidance()
+    } else {
+      routes.PropertyDetailsController.multipleDisposalsGuidance()
+    }
   }
 
   def singleDisposalHasUkPostcode(): Action[AnyContent] =
@@ -275,8 +279,9 @@ class PropertyDetailsController @Inject() (
               fillingOutReturn.journey.isAmendReturn
             )
           )
-        } else
+        } else {
           Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        }
       }
     }
 
@@ -308,18 +313,20 @@ class PropertyDetailsController @Inject() (
                 ),
               hasValidPostcode =>
                 Redirect(
-                  if (hasValidPostcode)
+                  if (hasValidPostcode) {
                     routes.PropertyDetailsController.enterPostcode()
-                  else if (isSingleDisposal)
+                  } else if (isSingleDisposal) {
                     routes.PropertyDetailsController
                       .singleDisposalEnterLandUprn()
-                  else
+                  } else {
                     routes.PropertyDetailsController
                       .multipleDisposalsEnterLandUprn()
+                  }
                 )
             )
-        } else
+        } else {
           Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        }
       }
     }
 
@@ -345,8 +352,9 @@ class PropertyDetailsController @Inject() (
               fillingOutReturn.journey.isAmendReturn
             )
           )
-        } else
+        } else {
           Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        }
       }
     }
 
@@ -384,8 +392,9 @@ class PropertyDetailsController @Inject() (
                 isManuallyEnteredAddress = true
               )
             )
-        } else
+        } else {
           Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        }
       }
     }
 
@@ -427,10 +436,12 @@ class PropertyDetailsController @Inject() (
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
                   .fold(
                     _ =>
-                      if (shouldAskIfPostcodeExists(assetTypes))
+                      if (shouldAskIfPostcodeExists(assetTypes)) {
                         routes.PropertyDetailsController
                           .singleDisposalHasUkPostcode()
-                      else routes.PropertyDetailsController.enterPostcode(),
+                      } else {
+                        routes.PropertyDetailsController.enterPostcode()
+                      },
                     _ => routes.PropertyDetailsController.checkYourAnswers()
                   )
 
@@ -521,11 +532,11 @@ class PropertyDetailsController @Inject() (
                           answers
                             .fold(_.disposalDate, c => Some(c.disposalDate))
                             .contains(disposalDate)
-                        )
+                        ) {
                           Redirect(
                             routes.PropertyDetailsController.checkYourAnswers()
                           )
-                        else {
+                        } else {
                           val isFurtherOrAmendReturn = r.journey.isFurtherOrAmendReturn.contains(true)
                           val updatedAnswers         =
                             answers
@@ -642,11 +653,11 @@ class PropertyDetailsController @Inject() (
                     answers
                       .fold(_.disposalPrice, c => Some(c.disposalPrice))
                       .contains(AmountInPence.fromPounds(disposalPrice))
-                  )
+                  ) {
                     Redirect(
                       routes.PropertyDetailsController.checkYourAnswers()
                     )
-                  else {
+                  } else {
                     val updatedAnswers     =
                       answers
                         .fold(
@@ -746,11 +757,11 @@ class PropertyDetailsController @Inject() (
                     answers
                       .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
                       .contains(AmountInPence.fromPounds(acquisitionPrice))
-                  )
+                  ) {
                     Redirect(
                       routes.PropertyDetailsController.checkYourAnswers()
                     )
-                  else {
+                  } else {
                     val updatedAnswers     =
                       answers
                         .fold(
@@ -867,11 +878,12 @@ class PropertyDetailsController @Inject() (
             case Right(s: DraftSingleDisposalReturn) =>
               s.propertyAddress.fold(
                 Redirect(
-                  if (shouldAskIfPostcodeExists(assetTypes))
+                  if (shouldAskIfPostcodeExists(assetTypes)) {
                     routes.PropertyDetailsController
                       .singleDisposalHasUkPostcode()
-                  else
+                  } else {
                     routes.PropertyDetailsController.enterPostcode()
+                  }
                 )
               )(address =>
                 Ok(
@@ -900,8 +912,7 @@ class PropertyDetailsController @Inject() (
     val endDateOfTaxYear   = taxYear.endDateExclusive
 
     val maximumDateInclusive =
-      if (endDateOfTaxYear.isBefore(completionDate.value)) endDateOfTaxYear
-      else completionDate.value
+      if (endDateOfTaxYear.isBefore(completionDate.value)) endDateOfTaxYear else completionDate.value
 
     disposalDateForm(
       maximumDateInclusive,
@@ -970,19 +981,19 @@ class PropertyDetailsController @Inject() (
 
 object PropertyDetailsController {
 
-  val hasValidPostcodeForm: Form[Boolean] =
+  private val hasValidPostcodeForm =
     Form(
       mapping(
         "hasValidPostcode" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
-  val enterUPRNForm: Form[UkAddress] = {
+  private val enterUPRNForm = {
     val uprnConstraint: Constraint[String] = Constraint(s =>
-      if (s.isEmpty) Invalid("error.required")
-      else if (s.exists(!_.isDigit)) Invalid("error.invalid")
-      else if (s.length > 12) Invalid("error.tooLong")
-      else Valid
+      if (s.isEmpty) { Invalid("error.required") }
+      else if (s.exists(!_.isDigit)) { Invalid("error.invalid") }
+      else if (s.length > 12) { Invalid("error.tooLong") }
+      else { Valid }
     )
 
     Form(
@@ -1016,7 +1027,7 @@ object PropertyDetailsController {
             key,
             None,
             Some(false),
-            false,
+            isPOA = false,
             List(
               TimeUtils.personalRepresentativeDateValidation(
                 personalRepresentativeDetails,

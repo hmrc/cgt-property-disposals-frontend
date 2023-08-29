@@ -53,13 +53,13 @@ class DraftReturnSavedControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  override val overrideBindings = List[GuiceableModule](
+  protected override val overrideBindings: List[GuiceableModule] = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
     bind[SessionStore].toInstance(mockSessionStore),
     bind[ReturnsService].toInstance(mockReturnsService)
   )
 
-  lazy val controller                  = instanceOf[DraftReturnSavedController]
+  private lazy val controller          = instanceOf[DraftReturnSavedController]
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   private def performAction(): Future[Result] =
@@ -94,7 +94,7 @@ class DraftReturnSavedControllerSpec
           journey: FillingOutReturn,
           updatedDraftReturn: DraftReturn,
           expectedWarningMessageKey: String
-        ) = {
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
@@ -129,7 +129,7 @@ class DraftReturnSavedControllerSpec
           )
         }
 
-        def fillingOutReturn(name: Either[TrustName, IndividualName]) =
+        def fillingOutReturn(name: Either[TrustName, IndividualName]): FillingOutReturn =
           sample[FillingOutReturn].copy(
             subscribedDetails = sample[SubscribedDetails].copy(name = name),
             amendReturnData = None

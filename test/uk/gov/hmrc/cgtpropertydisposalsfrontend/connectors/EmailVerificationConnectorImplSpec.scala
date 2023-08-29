@@ -21,12 +21,12 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.Configuration
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.{JsString, JsValue, Json}
 import play.api.mvc.Call
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,7 +38,7 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
   val linkExpiryTimeMinutes  = 30
   val selfUrl                = "self"
 
-  val config = Configuration(
+  private val config = Configuration(
     ConfigFactory.parseString(
       s"""
         |microservice.services.email-verification{
@@ -68,7 +68,7 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
       val trustName                  = ContactName("trust")
       val continueCall: Call         = Call("GET", s"/url")
 
-      def body(name: ContactName) =
+      def body(name: ContactName): JsValue =
         Json.parse(
           s"""
              |{
@@ -135,7 +135,7 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
       val trustName                  = ContactName("trust")
       val continueCall: Call         = Call("GET", s"/url")
 
-      def body(name: ContactName) =
+      def body(name: ContactName): JsValue =
         Json.parse(
           s"""
            |{

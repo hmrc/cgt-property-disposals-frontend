@@ -35,7 +35,7 @@ import scala.concurrent.duration._
 
 object AgentVerifierMatchRetryStoreImplSpec {
 
-  val config = Configuration(
+  val config: Configuration = Configuration(
     ConfigFactory.parseString(
       """
         |agent-verifier-match.store.expiry-time = 30minutes
@@ -44,9 +44,9 @@ object AgentVerifierMatchRetryStoreImplSpec {
   )
 
   class TestEnvironment {
-    val agentGGCredId        = sample[GGCredId]
-    val clientCgtReference   = sample[CgtReference]
-    val unsuccessfulAttempts = sample[UnsuccessfulVerifierAttempts]
+    protected val agentGGCredId: GGCredId                            = sample[GGCredId]
+    protected val clientCgtReference: CgtReference                   = sample[CgtReference]
+    protected val unsuccessfulAttempts: UnsuccessfulVerifierAttempts = sample[UnsuccessfulVerifierAttempts]
   }
 
 }
@@ -59,7 +59,7 @@ class AgentVerifierMatchRetryStoreImplSpec extends AnyWordSpec with Matchers wit
   "AgentVerifierMatchRetryStoreImpl" must {
 
     "be able to insert retry data into mongo and read it back" in new TestEnvironment {
-      val result = retryStore
+      private val result = retryStore
         .store(agentGGCredId, clientCgtReference, unsuccessfulAttempts)
 
       await(result) should be(Right(()))

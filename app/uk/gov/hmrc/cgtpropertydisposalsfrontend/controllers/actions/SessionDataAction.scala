@@ -41,10 +41,7 @@ class SessionDataAction @Inject() (
   val errorHandler: ErrorHandler
 )(implicit
   val executionContext: ExecutionContext
-) extends SessionDataActionBase[
-      AuthenticatedRequest,
-      RequestWithSessionData
-    ] {
+) extends SessionDataActionBase[AuthenticatedRequest, RequestWithSessionData] {
 
   def sessionDataAction[A](
     sessionData: Option[SessionData],

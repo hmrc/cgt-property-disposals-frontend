@@ -106,11 +106,11 @@
   }
   @cyaRow(
    messages(s"wereYouAUKResident$userKey.title"),
-    Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
+    Html(messages(s"yesNo.${answers.countryOfResidence.isUk.toString}")),
     Some(cyaChange(messages("wereYouAUKResident.cyaChange"), routes.SingleDisposalsTriageController.wereYouAUKResident().url)),
       "wereYouAUKResident"
   )
-    @if(!answers.countryOfResidence.isUk()){
+    @if(!answers.countryOfResidence.isUk){
         @cyaRow(
             countryOfResidentTitle,
             Html(messages.translate(s"country.${answers.countryOfResidence.code}", Seq.empty).getOrElse(answers.countryOfResidence.code)),

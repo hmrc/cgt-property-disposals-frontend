@@ -42,7 +42,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
 
   val validJourney: J
 
-  lazy val sessionDataWithValidJourney =
+  private lazy val sessionDataWithValidJourney =
     SessionData.empty.copy(journeyStatus = Some(validJourney))
 
   def updateContactName(journey: J, contactName: ContactName): J

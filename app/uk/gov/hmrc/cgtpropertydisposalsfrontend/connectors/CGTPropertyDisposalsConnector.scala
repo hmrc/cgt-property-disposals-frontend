@@ -78,15 +78,15 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (
 
   val bprUrl: String = s"$baseUrl/business-partner-record"
 
-  val subscribeUrl: String = s"$baseUrl/subscription"
+  private val subscribeUrl = s"$baseUrl/subscription"
 
-  val registerWithoutIdAndSubscribeUrl: String = s"$baseUrl/register-without-id"
+  private val registerWithoutIdAndSubscribeUrl = s"$baseUrl/register-without-id"
 
   val subscriptionStatusUrl: String = s"$baseUrl/check-subscription-status"
 
-  val subscriptionUpdateUrl: String = s"$baseUrl/subscription"
+  private val subscriptionUpdateUrl = s"$baseUrl/subscription"
 
-  def getSubscribedDetailsUrl(cgtReference: CgtReference): String =
+  private def getSubscribedDetailsUrl(cgtReference: CgtReference) =
     s"$baseUrl/subscription/${cgtReference.value}"
 
   override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(implicit

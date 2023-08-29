@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email
 
 import cats.Eq
 import cats.instances.string._

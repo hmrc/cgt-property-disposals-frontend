@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.Configuration
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -29,18 +30,18 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Credentials
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, StartController, agents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NewEnrolmentCreatedForMissingEnrolment, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, Subscribed, SubscriptionStatus, ViewingReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
@@ -55,7 +56,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, Contac
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOffTIvEvent, WrongGGAccountEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftSingleDisposalReturn, ReturnSummary, ReturnType}
@@ -76,13 +76,13 @@ class StartControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val mockBprService = mock[BusinessPartnerRecordService]
+  private val mockBprService = mock[BusinessPartnerRecordService]
 
-  val mockAuditService = mock[AuditService]
+  private val mockAuditService = mock[AuditService]
 
-  val mockReturnsService = mock[ReturnsService]
+  private val mockReturnsService = mock[ReturnsService]
 
-  override val overrideBindings =
+  override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -92,13 +92,13 @@ class StartControllerSpec
       bind[ReturnsService].toInstance(mockReturnsService)
     )
 
-  override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
+  override lazy val additionalConfig: Configuration = ivConfig(useRelativeUrls = false)
 
-  lazy val controller = instanceOf[StartController]
+  private lazy val controller = instanceOf[StartController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  def mockGetBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(
+  private def mockGetBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (mockBprService
@@ -108,7 +108,7 @@ class StartControllerSpec
       .expects(request, lang, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockHasFailedCgtEnrolment()(
+  private def mockHasFailedCgtEnrolment()(
     response: Either[Error, Option[CgtReference]]
   ) =
     (mockSubscriptionService
@@ -116,7 +116,7 @@ class StartControllerSpec
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
-  def mockGetSubscribedDetails(
+  private def mockGetSubscribedDetails(
     cgtReference: CgtReference
   )(response: Either[Error, Option[SubscribedDetails]]) =
     (mockSubscriptionService
@@ -124,7 +124,7 @@ class StartControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockGetDraftReturns(
+  private def mockGetDraftReturns(
     cgtReference: CgtReference,
     sentReturns: List[ReturnSummary]
   )(
@@ -137,7 +137,7 @@ class StartControllerSpec
       .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockUpdateCorrectTaxYearToSentReturns(
+  private def mockUpdateCorrectTaxYearToSentReturns(
     cgtReference: CgtReference,
     sentReturns: List[ReturnSummary]
   )(
@@ -150,7 +150,7 @@ class StartControllerSpec
       .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockSendAuditEvent[A : Writes](
+  private def mockSendAuditEvent[A : Writes](
     event: A,
     auditType: String,
     transactionName: String
@@ -165,7 +165,7 @@ class StartControllerSpec
       .expects(auditType, event, transactionName, *, *, *, *)
       .returning(())
 
-  def mockGetReturnsList(cgtReference: CgtReference)(
+  private def mockGetReturnsList(cgtReference: CgtReference)(
     response: Either[Error, List[ReturnSummary]]
   ) =
     (mockReturnsService
@@ -173,14 +173,12 @@ class StartControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  val nino         = NINO("AB123456C")
-  val name         = IndividualName("forename", "surname")
-  val trustName    = TrustName("trust")
-  val emailAddress = Email("email")
+  private val nino         = NINO("AB123456C")
+  private val name         = IndividualName("forename", "surname")
+  private val emailAddress = Email("email")
 
-  val retrievedGGCredId = Credentials("gg", "GovernmentGateway")
-  val ggCredId          = GGCredId(retrievedGGCredId.providerId)
-  val individual        = Individual(Right(nino), None, ggCredId)
+  private val retrievedGGCredId = Credentials("gg", "GovernmentGateway")
+  private val ggCredId          = GGCredId(retrievedGGCredId.providerId)
 
   "The StartController" when {
 
@@ -434,12 +432,12 @@ class StartControllerSpec
                 )
               }
 
-              checkIsRedirectToIv(performAction(request), false)
+              checkIsRedirectToIv(performAction(request), useRelativeUrls = false)
             }
 
             "the user does not have sufficient confidence level and there is a NINO in the auth record and " +
-              "the application is configured to use absoluate URLs for IV" in new ControllerSpec {
-                override val overrideBindings =
+              "the application is configured to use absolute URLs for IV" in new ControllerSpec {
+                override val overrideBindings: List[GuiceableModule] =
                   List[GuiceableModule](
                     bind[AuthConnector].toInstance(mockAuthConnector),
                     bind[SessionStore].toInstance(mockSessionStore),
@@ -447,10 +445,10 @@ class StartControllerSpec
                     bind[SubscriptionService].toInstance(mockSubscriptionService)
                   )
 
-                override lazy val additionalConfig =
+                override lazy val additionalConfig: Configuration =
                   ivConfig(useRelativeUrls = true)
-                val controller                     = instanceOf[StartController]
-                val request                        = FakeRequest("GET", "/uri")
+                private val controller                            = instanceOf[StartController]
+                private val request                               = FakeRequest("GET", "/uri")
 
                 inSequence {
                   mockAuthWithAllRetrievals(
@@ -466,7 +464,7 @@ class StartControllerSpec
                   mockGetSession(SessionData.empty)
                 }
 
-                checkIsRedirectToIv(controller.start()(request), true)
+                checkIsRedirectToIv(controller.start()(request), useRelativeUrls = true)
               }
 
           }
@@ -556,7 +554,7 @@ class StartControllerSpec
         "the session data has been updated to indicate so" when {
 
           "redirect to the do you have a nino page" in {
-            def sessionData =
+            def sessionData: SessionData =
               SessionData.empty.copy(
                 journeyStatus = Some(
                   TryingToGetIndividualsFootprint(
@@ -722,7 +720,7 @@ class StartControllerSpec
             Right(name),
             emailAddress,
             address,
-            ContactName(name.makeSingleName()),
+            ContactName(name.makeSingleName),
             bpr.sapNumber,
             EmailSource.BusinessPartnerRecord,
             AddressSource.BusinessPartnerRecord,
@@ -3084,7 +3082,7 @@ class StartControllerSpec
                     sample[GGCredId],
                     None,
                     sample[CompleteReturnWithSummary],
-                    false,
+                    isFirstReturn = false,
                     None,
                     None
                   )

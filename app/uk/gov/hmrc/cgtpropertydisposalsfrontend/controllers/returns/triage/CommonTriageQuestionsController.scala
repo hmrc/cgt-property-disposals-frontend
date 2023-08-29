@@ -92,9 +92,9 @@ class CommonTriageQuestionsController @Inject() (
   def whoIsIndividualRepresenting(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
-        if (!isIndividual(state))
+        if (!isIndividual(state)) {
           Redirect(routes.CommonTriageQuestionsController.howManyProperties())
-        else {
+        } else {
           val form = {
             val f = whoAreYouReportingForForm(
               request.userType.contains(UserType.Agent)
@@ -117,9 +117,9 @@ class CommonTriageQuestionsController @Inject() (
   def whoIsIndividualRepresentingSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
-        if (!isIndividual(state))
+        if (!isIndividual(state)) {
           Redirect(routes.CommonTriageQuestionsController.howManyProperties())
-        else
+        } else {
           whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
             .bindFromRequest()
             .fold(
@@ -144,18 +144,19 @@ class CommonTriageQuestionsController @Inject() (
                   updateIndividualUserType(state, individualUserType)
 
                 val redirectTo =
-                  if (state.fold(_ => false, _.isAmendReturn) && (individualUserType =!= Self))
+                  if (state.fold(_ => false, _.isAmendReturn) && (individualUserType =!= Self)) {
                     routes.CommonTriageQuestionsController.amendWhoAreYouSubmittingFor()
-                  else redirectToCheckYourAnswers(state)
+                  } else {
+                    redirectToCheckYourAnswers(state)
+                  }
 
                 if (
                   oldIndividualUserType
                     .contains(individualUserType) || (state
                     .fold(_ => false, _.isAmendReturn) && (individualUserType =!= Self))
-                )
+                ) {
                   Redirect(redirectTo)
-                else {
-
+                } else {
                   val result =
                     for {
                       _ <- updatedState.fold(
@@ -179,6 +180,7 @@ class CommonTriageQuestionsController @Inject() (
                 }
               }
             )
+        }
       }
     }
 
@@ -189,10 +191,11 @@ class CommonTriageQuestionsController @Inject() (
         _.isFurtherOrAmendReturn.contains(true)
       )
 
-      if (isFurtherOrAmendReturns)
+      if (isFurtherOrAmendReturns) {
         Redirect(routes.CommonTriageQuestionsController.howManyPropertiesFurtherReturn())
-      else
+      } else {
         howManyPropertiesCommon(state, isFurtherOrAmendReturn = false)
+      }
     }
   }
 
@@ -204,10 +207,11 @@ class CommonTriageQuestionsController @Inject() (
           _.isFurtherOrAmendReturn.contains(true)
         )
 
-        if (isFurtherOrAmendReturns)
+        if (isFurtherOrAmendReturns) {
           howManyPropertiesCommon(state, isFurtherOrAmendReturn = true)
-        else
+        } else {
           Redirect(routes.CommonTriageQuestionsController.howManyProperties())
+        }
       }
   }
 
@@ -253,11 +257,11 @@ class CommonTriageQuestionsController @Inject() (
           _.isFurtherOrAmendReturn.contains(true)
         )
 
-        if (isFurtherOrAmendReturns)
+        if (isFurtherOrAmendReturns) {
           Redirect(routes.CommonTriageQuestionsController.howManyPropertiesFurtherReturn())
-        else
+        } else {
           howManyPropertiesSubmitCommon(state, isFurtherOrAmendReturn = false)
-
+        }
       }
     }
 
@@ -269,10 +273,11 @@ class CommonTriageQuestionsController @Inject() (
           _.isFurtherOrAmendReturn.contains(true)
         )
 
-        if (isFurtherOrAmendReturns)
+        if (isFurtherOrAmendReturns) {
           howManyPropertiesSubmitCommon(state, isFurtherOrAmendReturn = true)
-        else
+        } else {
           Redirect(routes.CommonTriageQuestionsController.howManyProperties())
+        }
       }
     }
 
@@ -299,9 +304,9 @@ class CommonTriageQuestionsController @Inject() (
             )
           ),
         numberOfProperties =>
-          if (getNumberOfProperties(state).contains(numberOfProperties))
+          if (getNumberOfProperties(state).contains(numberOfProperties)) {
             Redirect(redirectToCheckYourAnswers(state))
-          else {
+          } else {
             val updatedState =
               updateNumberOfProperties(state, numberOfProperties)
 
@@ -343,8 +348,8 @@ class CommonTriageQuestionsController @Inject() (
           )
         )
         val wasUkResident                      = triageAnswers.fold(
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk)),
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk))
         )
 
         wasUkResident match {
@@ -370,14 +375,15 @@ class CommonTriageQuestionsController @Inject() (
               )
 
             Ok(
-              if (disposedOfNonResidentialAssetInOriginalReturn)
+              if (disposedOfNonResidentialAssetInOriginalReturn) {
                 cannotAmendResidentialStatusForAssetTypePage(backLink, isATrust)
-              else
+              } else {
                 ukResidentCanOnlyDisposeResidentialPage(
                   backLink,
                   isATrust,
                   triageAnswers.fold(_.representativeType(), _.representativeType())
                 )
+              }
             )
 
           case _ => Redirect(redirectToCheckYourAnswers(state))
@@ -397,13 +403,16 @@ class CommonTriageQuestionsController @Inject() (
         )
 
         triageAnswers.fold(
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk)),
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk))
         ) match {
           case None        => Redirect(redirectToCheckYourAnswers(state))
           case Some(wasUk) =>
-            if (wasUk) Ok(disposalDateTooEarlyUkResidents(backLink))
-            else Ok(disposalDateTooEarlyNonUkResidents(backLink))
+            if (wasUk) {
+              Ok(disposalDateTooEarlyUkResidents(backLink))
+            } else {
+              Ok(disposalDateTooEarlyNonUkResidents(backLink))
+            }
         }
       }
     }
@@ -426,11 +435,17 @@ class CommonTriageQuestionsController @Inject() (
         val backLink =
           triageAnswersFomState(state) match {
             case Left(multiple) =>
-              if (multiple.isIndirectDisposal) routes.MultipleDisposalsTriageController.disposalDateOfShares()
-              else routes.MultipleDisposalsTriageController.completionDate()
+              if (multiple.isIndirectDisposal) {
+                routes.MultipleDisposalsTriageController.disposalDateOfShares()
+              } else {
+                routes.MultipleDisposalsTriageController.completionDate()
+              }
             case Right(single)  =>
-              if (single.isIndirectDisposal) routes.SingleDisposalsTriageController.disposalDateOfShares()
-              else routes.SingleDisposalsTriageController.whenWasCompletionDate()
+              if (single.isIndirectDisposal) {
+                routes.SingleDisposalsTriageController.disposalDateOfShares()
+              } else {
+                routes.SingleDisposalsTriageController.whenWasCompletionDate()
+              }
           }
 
         withCompletionDate(state) { completionDate =>
@@ -625,11 +640,11 @@ class CommonTriageQuestionsController @Inject() (
                   _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment),
                   _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
                 )
-              if (alreadySentSA)
+              if (alreadySentSA) {
                 Redirect(routes.CommonTriageQuestionsController.amendsSelfAssessmentAlreadySubmitted())
-              else if (alreadySentSelfAssessment.contains(alreadySentSA))
+              } else if (alreadySentSelfAssessment.contains(alreadySentSA)) {
                 Redirect(redirectToCheckYourAnswers(state))
-              else {
+              } else {
                 def updateSingleDisposalAnswers(
                   s: SingleDisposalTriageAnswers
                 ): SingleDisposalTriageAnswers =
@@ -701,10 +716,11 @@ class CommonTriageQuestionsController @Inject() (
                     errorHandler.errorResult()
                   },
                   _ =>
-                    if (alreadySentSA)
+                    if (alreadySentSA) {
                       Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
-                    else
+                    } else {
                       Redirect(redirectToCheckYourAnswers(updatedState))
+                    }
                 )
               }
             }
@@ -732,7 +748,7 @@ class CommonTriageQuestionsController @Inject() (
       }
     }
 
-  def haveYouAlreadySentSelfAssessment(): Action[AnyContent] =
+  def haveYouAlreadySentSelfAssessment: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
         val triageAnswers      = triageAnswersFomState(state)
@@ -772,7 +788,7 @@ class CommonTriageQuestionsController @Inject() (
       }
     }
 
-  def haveYouAlreadySentSelfAssessmentSubmit(): Action[AnyContent] =
+  def haveYouAlreadySentSelfAssessmentSubmit: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState { (_, state) =>
         val triageAnswers = triageAnswersFomState(state)
@@ -811,11 +827,11 @@ class CommonTriageQuestionsController @Inject() (
                   _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment),
                   _.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
                 )
-              if (alreadySentSA)
+              if (alreadySentSA) {
                 Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
-              else if (alreadySentSelfAssessment.contains(alreadySentSA))
+              } else if (alreadySentSelfAssessment.contains(alreadySentSA)) {
                 Redirect(redirectToCheckYourAnswers(state))
-              else {
+              } else {
                 def updateSingleDisposalAnswers(
                   s: SingleDisposalTriageAnswers
                 ): SingleDisposalTriageAnswers =
@@ -887,10 +903,11 @@ class CommonTriageQuestionsController @Inject() (
                     errorHandler.errorResult()
                   },
                   _ =>
-                    if (alreadySentSA)
+                    if (alreadySentSA) {
                       Redirect(routes.CommonTriageQuestionsController.selfAssessmentAlreadySubmitted())
-                    else
+                    } else {
                       Redirect(redirectToCheckYourAnswers(updatedState))
+                    }
                 )
               }
             }
@@ -907,14 +924,20 @@ class CommonTriageQuestionsController @Inject() (
     triageAnswers.fold(
       _.fold(
         _ =>
-          if (isIndirectDisposal) routes.MultipleDisposalsTriageController.disposalDateOfShares()
-          else routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+          if (isIndirectDisposal) {
+            routes.MultipleDisposalsTriageController.disposalDateOfShares()
+          } else {
+            routes.MultipleDisposalsTriageController.whenWereContractsExchanged()
+          },
         _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
       ),
       _.fold(
         _ =>
-          if (isIndirectDisposal) routes.SingleDisposalsTriageController.disposalDateOfShares()
-          else routes.SingleDisposalsTriageController.whenWasDisposalDate(),
+          if (isIndirectDisposal) {
+            routes.SingleDisposalsTriageController.disposalDateOfShares()
+          } else {
+            routes.SingleDisposalsTriageController.whenWasDisposalDate()
+          },
         _ => routes.SingleDisposalsTriageController.checkYourAnswers()
       )
     )
@@ -953,10 +976,7 @@ class CommonTriageQuestionsController @Inject() (
     )
 
   private def isIndividualASelfUserType(
-    triageAnswers: Either[
-      MultipleDisposalsTriageAnswers,
-      SingleDisposalTriageAnswers
-    ]
+    triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers]
   ): Boolean =
     triageAnswers
       .fold(
@@ -979,25 +999,32 @@ class CommonTriageQuestionsController @Inject() (
     val triageAnswers  = triageAnswersFomState(state)
     val isSelfUserType = isIndividualASelfUserType(triageAnswers)
 
-    if (!isIndividual(state))
+    if (!isIndividual(state)) {
       None
-    else
+    } else {
       Some(
         triageAnswers.fold(
           _.fold(
             _ =>
-              if (!isSelfUserType) representee.routes.RepresenteeController.checkYourAnswers()
-              else routes.CommonTriageQuestionsController.whoIsIndividualRepresenting(),
+              if (!isSelfUserType) {
+                representee.routes.RepresenteeController.checkYourAnswers()
+              } else {
+                routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+              },
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           ),
           _.fold(
             _ =>
-              if (isSelfUserType) routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
-              else representee.routes.RepresenteeController.checkYourAnswers(),
+              if (isSelfUserType) {
+                routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+              } else {
+                representee.routes.RepresenteeController.checkYourAnswers()
+              },
             _ => routes.SingleDisposalsTriageController.checkYourAnswers()
           )
         )
       )
+    }
   }
 
   private def updateNumberOfProperties(
@@ -1111,10 +1138,11 @@ class CommonTriageQuestionsController @Inject() (
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss = None,
                 supportingEvidenceAnswers = None,
-                exemptionAndLossesAnswers =
-                  if (furtherReturn)
-                    single.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                  else None,
+                exemptionAndLossesAnswers = if (furtherReturn) {
+                  single.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                } else {
+                  None
+                },
                 gainOrLossAfterReliefs = None
               ),
             singleIndirect =>
@@ -1126,10 +1154,11 @@ class CommonTriageQuestionsController @Inject() (
                 acquisitionDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
                 supportingEvidenceAnswers = None,
-                exemptionAndLossesAnswers =
-                  if (furtherReturn)
-                    singleIndirect.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                  else None,
+                exemptionAndLossesAnswers = if (furtherReturn) {
+                  singleIndirect.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                } else {
+                  None
+                },
                 gainOrLossAfterReliefs = None
               ),
             multipleIndirect =>
@@ -1139,11 +1168,12 @@ class CommonTriageQuestionsController @Inject() (
                 exampleCompanyDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
                 supportingEvidenceAnswers = None,
-                exemptionAndLossesAnswers =
-                  if (furtherReturn)
-                    multipleIndirect.exemptionAndLossesAnswers
-                      .map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                  else None,
+                exemptionAndLossesAnswers = if (furtherReturn) {
+                  multipleIndirect.exemptionAndLossesAnswers
+                    .map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                } else {
+                  None
+                },
                 gainOrLossAfterReliefs = None
               ),
             singleMixedUse =>
@@ -1153,10 +1183,11 @@ class CommonTriageQuestionsController @Inject() (
                 mixedUsePropertyDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
                 supportingEvidenceAnswers = None,
-                exemptionAndLossesAnswers =
-                  if (furtherReturn)
-                    singleMixedUse.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
-                  else None,
+                exemptionAndLossesAnswers = if (furtherReturn) {
+                  singleMixedUse.exemptionAndLossesAnswers.map(_.unset(_.inYearLosses).unset(_.previousYearsLosses))
+                } else {
+                  None
+                },
                 gainOrLossAfterReliefs = None
               )
           )
@@ -1185,9 +1216,11 @@ class CommonTriageQuestionsController @Inject() (
     ) =
       singleDisposalTriageAnswers.fold(
         incomplete =>
-          if (incomplete.hasConfirmedSingleDisposal)
+          if (incomplete.hasConfirmedSingleDisposal) {
             Some(NumberOfProperties.One)
-          else None,
+          } else {
+            None
+          },
         _ => Some(NumberOfProperties.One)
       )
 
@@ -1243,10 +1276,13 @@ class CommonTriageQuestionsController @Inject() (
 
 object CommonTriageQuestionsController {
 
-  def whoAreYouReportingForForm(isAgent: Boolean): Form[IndividualUserType] = {
+  private def whoAreYouReportingForForm(isAgent: Boolean) = {
     val options =
-      if (isAgent) List(Self, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
-      else List(Self, Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
+      if (isAgent) {
+        List(Self, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
+      } else {
+        List(Self, Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
+      }
 
     Form(
       mapping(
@@ -1285,15 +1321,15 @@ object CommonTriageQuestionsController {
             key,
             None,
             Some(false),
-            false,
+            isPOA = false,
             List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, key))
           )
         )
-      )(ShareDisposalDate(_))(d => Some(d.value))
+      )(ShareDisposalDate)(d => Some(d.value))
     )
   }
 
-  val alreadySentSelfAssessmentForm: Form[Boolean] = Form(
+  private val alreadySentSelfAssessmentForm = Form(
     mapping(
       "alreadySentSelfAssessment" -> of(BooleanFormatter.formatter)
     )(identity)(Some(_))

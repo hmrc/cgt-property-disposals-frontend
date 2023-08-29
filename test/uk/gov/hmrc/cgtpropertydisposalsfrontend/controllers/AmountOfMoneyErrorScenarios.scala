@@ -34,7 +34,7 @@ object AmountOfMoneyErrorScenarios {
     key: String,
     maximumAmountInclusive: BigDecimal = MoneyUtils.maxAmountOfPounds,
     errorContext: Option[String] = None
-  ) =
+  ): Seq[AmountOfMoneyErrorScenario] =
     List(
       AmountOfMoneyErrorScenario(
         key,

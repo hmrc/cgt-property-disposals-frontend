@@ -1341,7 +1341,7 @@ class HomePageControllerSpec
                 "account.home.title"
               ),
               { doc =>
-                if (subscribed.sentReturns.isEmpty && subscribed.draftReturns.isEmpty)
+                if (subscribed.sentReturns.isEmpty && subscribed.draftReturns.isEmpty) {
                   doc
                     .select(".govuk-button")
                     .text should include(
@@ -1349,7 +1349,7 @@ class HomePageControllerSpec
                       "account.home.button.start-a-new-return"
                     )
                   )
-                else if (subscribed.totalLeftToPay().isZero && subscribed.draftReturns.isEmpty)
+                } else if (subscribed.totalLeftToPay().isZero && subscribed.draftReturns.isEmpty) {
                   doc
                     .select(".govuk-button")
                     .text should include(
@@ -1357,7 +1357,7 @@ class HomePageControllerSpec
                       "account.home.button.start-a-new-return"
                     )
                   )
-                else
+                } else {
                   doc
                     .select(
                       ".account-header a"
@@ -1367,6 +1367,7 @@ class HomePageControllerSpec
                       "account.home.button.start-a-new-return"
                     )
                   )
+                }
 
                 doc.select("#account-details").text should include(
                   messageFromMessageKey(
@@ -1375,7 +1376,7 @@ class HomePageControllerSpec
                   )
                 )
                 if (subscribed.sentReturns.nonEmpty) {
-                  if (subscribed.totalLeftToPay() > AmountInPence.zero)
+                  if (subscribed.totalLeftToPay() > AmountInPence.zero) {
                     doc
                       .select(
                         ".account-balance > a"
@@ -1385,18 +1386,20 @@ class HomePageControllerSpec
                       ) shouldBe controllers.accounts.homepage.routes.HomePageController
                       .payTotalAmountLeftToPay()
                       .url
-                  else
+                  } else {
                     doc.body().text() shouldNot include(
                       controllers.accounts.homepage.routes.HomePageController
                         .payTotalAmountLeftToPay()
                         .url
                     )
-                } else
+                  }
+                } else {
                   doc.body().text shouldNot include(
                     messageFromMessageKey(
                       "account.totalLeftToPay"
                     )
                   )
+                }
               }
             )
           }

@@ -68,7 +68,7 @@ object RepresenteeAnswers {
       }
 
     def makeAccountName(): String =
-      r.fold(_.name.fold("")(_.makeSingleName()), _.name.makeSingleName())
+      r.fold(_.name.fold("")(_.makeSingleName), _.name.makeSingleName)
 
   }
 

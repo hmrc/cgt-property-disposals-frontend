@@ -54,9 +54,6 @@ object Address {
     country: Country
   ) extends Address
 
-  // the format instance using the play-json-derived-codecs library wraps
-  // the case class inside a JsObject with case class type name as the key
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[Address] = derived.oformat()
 
   implicit val eq: Eq[Address] = Eq.fromUniversalEquals
@@ -74,9 +71,13 @@ object Address {
   val addressLineMapping: Mapping[String] = {
 
     def validateAddressLine(s: String): ValidationResult =
-      if (s.length > addressLineMaxLength) Invalid("error.tooLong")
-      else if (!s.forall(addressLineAllowedCharacters.contains(_))) Invalid("error.pattern")
-      else Valid
+      if (s.length > addressLineMaxLength) {
+        Invalid("error.tooLong")
+      } else if (!s.forall(addressLineAllowedCharacters.contains(_))) {
+        Invalid("error.pattern")
+      } else {
+        Valid
+      }
 
     nonEmptyText
       .transform[String](_.trim, identity)

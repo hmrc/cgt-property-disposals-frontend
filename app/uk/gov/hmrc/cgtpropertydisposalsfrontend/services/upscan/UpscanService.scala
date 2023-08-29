@@ -84,12 +84,12 @@ class UpscanServiceImpl @Inject() (
     uploadReference: UploadReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanUpload] =
     upscanConnector.getUpscanUpload(uploadReference).subflatMap { response =>
-      if (response.status === OK)
+      if (response.status === OK) {
         response
           .parseJSON[UpscanUpload]()
           .leftMap(Error(_))
-      else
+      } else {
         Left(Error(s"call to get upscan upload failed ${response.status}"))
+      }
     }
-
 }

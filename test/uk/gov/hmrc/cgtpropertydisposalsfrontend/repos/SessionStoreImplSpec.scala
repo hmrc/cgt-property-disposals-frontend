@@ -89,7 +89,7 @@ class SessionStoreFailureSpec extends AnyWordSpec with Matchers with MongoSuppor
 
 object SessionStoreSpec {
 
-  val config = Configuration(
+  val config: Configuration = Configuration(
     ConfigFactory.parseString(
       """
         | upscan-store.expiry-time = 2 days,
@@ -100,7 +100,7 @@ object SessionStoreSpec {
 
   class TestEnvironment {
 
-    val sessionId = SessionId(UUID.randomUUID().toString)
+    protected val sessionId: SessionId = SessionId(UUID.randomUUID().toString)
 
     implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(sessionId))
 

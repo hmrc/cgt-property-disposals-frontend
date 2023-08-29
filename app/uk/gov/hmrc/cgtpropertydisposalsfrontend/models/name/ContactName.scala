@@ -41,9 +41,9 @@ object ContactName {
       "^[a-zA-Z0-9 &,`\\-\'.^]{1,105}$".r.pattern.asPredicate()
 
     def validateContactName(s: String): ValidationResult =
-      if (s.length > 105) Invalid("error.tooLong")
-      else if (!regexPredicate.test(s)) Invalid("error.pattern")
-      else Valid
+      if (s.length > 105) { Invalid("error.tooLong") }
+      else if (!regexPredicate.test(s)) { Invalid("error.pattern") }
+      else { Valid }
 
     nonEmptyText
       .transform[String](_.trim, identity)

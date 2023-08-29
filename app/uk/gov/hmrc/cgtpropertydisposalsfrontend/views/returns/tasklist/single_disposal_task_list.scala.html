@@ -75,7 +75,7 @@
     ) = {
         (individualUserType, countryOfResidence, assetType, acquisitionDetailsAnswers) match {
             case (Some(PersonalRepresentativeInPeriodOfAdmin), _, _, _) => false
-            case (_, _, _, _) if countryOfResidence.isUk() => false
+            case (_, _, _, _) if countryOfResidence.isUk => false
             case (_, _, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _, _)))
                 if acquisitionDate.isBefore(RebasingCutoffDates.nonUkResidentsResidentialProperty) => true
             case (_, _, _, _) => false

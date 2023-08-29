@@ -99,10 +99,10 @@ trait AddressController[A <: AddressJourneyType] {
       Ok(exitPage(isUkCall))
     }
 
-  def isUk(): Action[AnyContent] =
+  def isUk: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { case (sessionData, journey) =>
-        if (sessionData.addressLookupResult.nonEmpty)
+        if (sessionData.addressLookupResult.nonEmpty) {
           updateSession(sessionStore, request)(
             _.copy(addressLookupResult = None)
           ).map {
@@ -119,7 +119,7 @@ trait AddressController[A <: AddressJourneyType] {
                 )
               )
           }
-        else
+        } else {
           Ok(
             isUkPage(
               Address.isUkForm,
@@ -128,10 +128,11 @@ trait AddressController[A <: AddressJourneyType] {
               journey
             )
           )
+        }
       }
     }
 
-  def isUkSubmit(): Action[AnyContent] =
+  def isUkSubmit: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { case (_, journey) =>
         Address.isUkForm
@@ -148,8 +149,11 @@ trait AddressController[A <: AddressJourneyType] {
               ),
             {
               case true  =>
-                if (registeredWithId(journey)) Redirect(enterPostcodeCall)
-                else Redirect(ukAddressNotAllowedExitPageCall.getOrElse(enterPostcodeCall))
+                if (registeredWithId(journey)) {
+                  Redirect(enterPostcodeCall)
+                } else {
+                  Redirect(ukAddressNotAllowedExitPageCall.getOrElse(enterPostcodeCall))
+                }
               case false => Redirect(enterNonUkAddressCall)
             }
           )
@@ -193,7 +197,7 @@ trait AddressController[A <: AddressJourneyType] {
                   extractIsAmend(journey)
                 )
               ),
-            storeAddress(continueCall, journey, true)
+            storeAddress(continueCall, journey, isManuallyEnteredAddress = true)
           )
       }
     }
@@ -229,7 +233,7 @@ trait AddressController[A <: AddressJourneyType] {
                   extractIsAmend(journey)
                 )
               ),
-            storeAddress(continueCall, journey, true)
+            storeAddress(continueCall, journey, isManuallyEnteredAddress = true)
           )
       }
     }
@@ -295,8 +299,7 @@ trait AddressController[A <: AddressJourneyType] {
 
               sessionData.addressLookupResult match {
                 case Some(a: AddressLookupResult) if a.postcode.value === postcode.value && a.filter === filter =>
-                  if (a.addresses.isEmpty) handleEmptyAddresses(a)
-                  else Redirect(selectAddressCall)
+                  if (a.addresses.isEmpty) handleEmptyAddresses(a) else Redirect(selectAddressCall)
 
                 case _ =>
                   val result = for {
@@ -317,12 +320,13 @@ trait AddressController[A <: AddressJourneyType] {
                       errorHandler.errorResult()
                     },
                     r =>
-                      if (r.addresses.isEmpty)
+                      if (r.addresses.isEmpty) {
                         handleEmptyAddresses(r)
-                      else Redirect(selectAddressCall)
+                      } else {
+                        Redirect(selectAddressCall)
+                      }
                   )
               }
-
             }
           )
       }
@@ -380,7 +384,7 @@ trait AddressController[A <: AddressJourneyType] {
                       extractIsAmend(journey)
                     )
                   ),
-                storeAddress(continueCall, journey, false)
+                storeAddress(continueCall, journey, isManuallyEnteredAddress = false)
               )
         }
       }
@@ -395,14 +399,15 @@ trait AddressController[A <: AddressJourneyType] {
   )(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val result = for {
       journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address, isManuallyEnteredAddress)
-      _                         <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus))
+      _                         <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus)) {
                                      EitherT.pure[Future, Error](())
-                                   else
+                                   } else {
                                      EitherT[Future, Error, Unit](
                                        updateSession(sessionStore, request)(
                                          _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
                                        )
                                      )
+                                   }
     } yield ()
 
     result.fold(

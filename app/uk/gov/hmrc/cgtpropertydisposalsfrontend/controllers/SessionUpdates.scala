@@ -36,14 +36,13 @@ trait SessionUpdates {
     val session        = sessionProvider.toSession(request)
     val updatedSession = update(session)
 
-    if (session === updatedSession)
+    if (session === updatedSession) {
       // don't bother updating the session if it's the same
       Future.successful(Right(()))
-    else
+    } else {
       sessionStore.store(update(sessionProvider.toSession(request)))
-
+    }
   }
-
 }
 
 object SessionUpdates {

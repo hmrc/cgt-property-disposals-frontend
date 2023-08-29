@@ -64,7 +64,7 @@ class AmendReturnControllerSpec
 
   val mockAuditService: AuditService = mock[AuditService]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -72,7 +72,7 @@ class AmendReturnControllerSpec
       bind[AuditService].toInstance(mockAuditService)
     )
 
-  lazy val controller = instanceOf[AmendReturnController]
+  private lazy val controller = instanceOf[AmendReturnController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -89,7 +89,7 @@ class AmendReturnControllerSpec
 
   "AmendReturnController" when {
 
-    def redirectToStartBehaviour(performAction: () => Future[Result]) =
+    def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         {
@@ -363,7 +363,7 @@ class AmendReturnControllerSpec
 
       "display the page" when {
 
-        def test(session: SessionData, expectedTitle: String) = {
+        def test(session: SessionData, expectedTitle: String): Unit = {
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -537,10 +537,11 @@ class AmendReturnControllerSpec
               val key =
                 if (
                   titleKey === "initialGainOrLoss" || titleKey === "annualExemptAmount" || titleKey === "income" || titleKey === "personalAllowance"
-                )
+                ) {
                   "unmetDependency.x1"
-                else
+                } else {
                   "unmetDependency.x2"
+                }
               test(unmetDependencyFieldUrl, key)
             }
 

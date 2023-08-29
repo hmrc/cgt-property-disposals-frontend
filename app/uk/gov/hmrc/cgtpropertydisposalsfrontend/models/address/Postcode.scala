@@ -41,12 +41,15 @@ object Postcode {
     def validatePostcode(p: Postcode): ValidationResult = {
       val postcodeWithoutSpaces =
         p.value.toUpperCase(Locale.UK).replace(" ", "")
-      if (p.value.length > 8) Invalid("error.tooLong")
-      else if (!postcodeWithoutSpaces.forall(_.isLetterOrDigit))
+      if (p.value.length > 8) {
+        Invalid("error.tooLong")
+      } else if (!postcodeWithoutSpaces.forall(_.isLetterOrDigit)) {
         Invalid("error.invalidCharacters")
-      else if (!postcodeRegexPredicate.test(postcodeWithoutSpaces))
+      } else if (!postcodeRegexPredicate.test(postcodeWithoutSpaces)) {
         Invalid("error.pattern")
-      else Valid
+      } else {
+        Valid
+      }
     }
 
     nonEmptyText

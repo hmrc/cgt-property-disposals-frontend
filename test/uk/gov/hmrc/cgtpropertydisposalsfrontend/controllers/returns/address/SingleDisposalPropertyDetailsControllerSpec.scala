@@ -52,7 +52,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, User
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 class SingleDisposalPropertyDetailsControllerSpec
@@ -62,16 +62,16 @@ class SingleDisposalPropertyDetailsControllerSpec
     with ReturnsServiceSupport
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
-  val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
+  private val mockUUIDGenerator = mock[UUIDGenerator]
 
-  val draftReturn: DraftSingleDisposalReturn =
+  private val draftReturn =
     sample[DraftSingleDisposalReturn].copy(
       triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
         .copy(assetType = AssetType.Residential, individualUserType = None),
       propertyAddress = Some(ukAddress(1))
     )
 
-  val validJourneyStatus = FillingOutReturnAddressJourney(
+  protected override val validJourneyStatus: FillingOutReturnAddressJourney = FillingOutReturnAddressJourney(
     FillingOutReturn(
       sample[SubscribedDetails],
       sample[GGCredId],
@@ -90,7 +90,7 @@ class SingleDisposalPropertyDetailsControllerSpec
       bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     ) ::: super.overrideBindings
 
-  lazy val controller = instanceOf[PropertyDetailsController]
+  protected override lazy val controller: PropertyDetailsController = instanceOf[PropertyDetailsController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -114,9 +114,7 @@ class SingleDisposalPropertyDetailsControllerSpec
     }
   }
 
-  override val mockUpdateAddress: Option[
-    (FillingOutReturnAddressJourney, Address, Either[Error, Unit]) => Unit
-  ] =
+  override val mockUpdateAddress: Option[(FillingOutReturnAddressJourney, Address, Either[Error, Unit]) => Unit] =
     Some {
       case (
             newDetails: FillingOutReturnAddressJourney,

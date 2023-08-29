@@ -44,10 +44,7 @@ object TaxYear {
   def thisTaxYearStartDate(): LocalDate = {
     val today     = TimeUtils.today()
     val startYear =
-      if (today >= LocalDate.of(today.getYear, 4, 6))
-        today.getYear
-      else
-        today.getYear - 1
+      if (today >= LocalDate.of(today.getYear, 4, 6)) today.getYear else today.getYear - 1
 
     LocalDate.of(startYear, 4, 6)
   }
@@ -60,8 +57,7 @@ object TaxYear {
 
     def isItInLatestTaxYear(futureTaxYearsEnabled: Boolean = false): Boolean = {
       val today =
-        if (futureTaxYearsEnabled) TimeUtils.today().plusYears(1L)
-        else TimeUtils.today()
+        if (futureTaxYearsEnabled) TimeUtils.today().plusYears(1L) else TimeUtils.today()
       today < taxTear.endDateExclusive && today >= taxTear.startDateInclusive
     }
   }

@@ -112,7 +112,9 @@ class AmendReturnController @Inject() (
                       )
                       auditService.sendEvent("CancelAmendReturn", auditEvent, "cancel-amend-return")
                       controllers.returns.routes.ViewReturnController.displayReturn()
-                    } else backLink
+                    } else {
+                      backLink
+                    }
 
                   Redirect(redirectTo)
                 }
@@ -190,25 +192,26 @@ class AmendReturnController @Inject() (
     def is(s: String): Boolean = unmetDependencyFieldUrl === s
 
     val key =
-      if (is(exemptionsAndLossesRoutes.inYearLosses().url)) Some("inYearLosses")
-      else if (is(exemptionsAndLossesRoutes.previousYearsLosses().url)) Some("previousYearLosses")
-      else if (is(exemptionsAndLossesRoutes.annualExemptAmount().url)) Some("annualExemptAmount")
-      else if (is(ytdRoutes.estimatedIncome().url)) Some("income")
-      else if (is(ytdRoutes.personalAllowance().url)) Some("personalAllowance")
-      else if (is(ytdRoutes.taxableGainOrLoss().url)) Some("taxableGainOrLoss")
-      else if (is(ytdRoutes.yearToDateLiability().url)) Some("yearToDateLiability")
-      else if (is(ytdRoutes.taxDue().url)) Some("taxOwed")
-      else if (is(ytdRoutes.nonCalculatedEnterTaxDue().url)) Some("taxOwed")
-      else if (is(ytdRoutes.repayment().url)) Some("repayment")
-      else if (is(ytdRoutes.hasEstimatedDetails().url)) Some("hasEstimated")
-      else if (is(initialGainorLossRoutes.enterInitialGainOrLoss().url)) Some("initialGainOrLoss")
-      else None
+      if (is(exemptionsAndLossesRoutes.inYearLosses().url)) { Some("inYearLosses") }
+      else if (is(exemptionsAndLossesRoutes.previousYearsLosses().url)) { Some("previousYearLosses") }
+      else if (is(exemptionsAndLossesRoutes.annualExemptAmount().url)) { Some("annualExemptAmount") }
+      else if (is(ytdRoutes.estimatedIncome().url)) { Some("income") }
+      else if (is(ytdRoutes.personalAllowance().url)) { Some("personalAllowance") }
+      else if (is(ytdRoutes.taxableGainOrLoss().url)) { Some("taxableGainOrLoss") }
+      else if (is(ytdRoutes.yearToDateLiability().url)) { Some("yearToDateLiability") }
+      else if (is(ytdRoutes.taxDue().url)) { Some("taxOwed") }
+      else if (is(ytdRoutes.nonCalculatedEnterTaxDue().url)) { Some("taxOwed") }
+      else if (is(ytdRoutes.repayment().url)) { Some("repayment") }
+      else if (is(ytdRoutes.hasEstimatedDetails().url)) { Some("hasEstimated") }
+      else if (is(initialGainorLossRoutes.enterInitialGainOrLoss().url)) { Some("initialGainOrLoss") }
+      else { None }
 
     key.map(k =>
-      if (k === "initialGainOrLoss" || k === "annualExemptAmount" || k === "income" || k === "personalAllowance")
+      if (k === "initialGainOrLoss" || k === "annualExemptAmount" || k === "income" || k === "personalAllowance") {
         s"unmetDependency.x1"
-      else
+      } else {
         s"unmetDependency.x2"
+      }
     )
   }
 
@@ -249,7 +252,7 @@ object AmendReturnController {
         .checkAllAnswers()
     )
 
-  val confirmCancelForm: Form[Boolean] =
+  private val confirmCancelForm =
     Form(
       mapping(
         "confirmCancelAmendReturn" -> of(BooleanFormatter.formatter)

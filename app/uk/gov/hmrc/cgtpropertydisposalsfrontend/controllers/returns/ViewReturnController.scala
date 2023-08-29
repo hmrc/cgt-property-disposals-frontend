@@ -155,7 +155,7 @@ class ViewReturnController @Inject() (
       }
     }
 
-  def withViewingReturn()(
+  private def withViewingReturn()(
     f: ViewingReturn => Future[Result]
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {

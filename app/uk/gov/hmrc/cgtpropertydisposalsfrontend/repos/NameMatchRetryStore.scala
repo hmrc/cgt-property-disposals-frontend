@@ -53,7 +53,7 @@ class NameMatchRetryStoreImpl @Inject() (
 ) extends NameMatchRetryStore
     with Repo {
 
-  val cacheRepository = {
+  val cacheRepository: MongoCacheRepository[String] = {
     val expireAfter: FiniteDuration = configuration.underlying
       .get[FiniteDuration]("bpr-name-match.store.expiry-time")
       .value

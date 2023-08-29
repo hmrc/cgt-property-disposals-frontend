@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
@@ -51,7 +51,7 @@ class EmailVerificationConnectorImpl @Inject() (
 )(implicit ec: ExecutionContext)
     extends EmailVerificationConnector {
 
-  def getEmailVerificationConfig[A : ConfigReader](key: String): A =
+  private def getEmailVerificationConfig[A : ConfigReader](key: String) =
     config.underlying
       .get[A](s"microservice.services.email-verification.$key")
       .value
@@ -65,7 +65,7 @@ class EmailVerificationConnectorImpl @Inject() (
 
   val templateId: String = getEmailVerificationConfig[String]("template-id")
 
-  val linkExpiryTime: String = {
+  private val linkExpiryTime = {
     val minutes =
       getEmailVerificationConfig[FiniteDuration]("link-expiry-time").toMinutes
     java.time.Duration.ofMinutes(minutes).toString
@@ -108,7 +108,7 @@ object EmailVerificationConnectorImpl {
   implicit val formats: Format[EmailVerificationRequest] =
     Json.format[EmailVerificationRequest]
 
-  def getEmailTemplate(language: AcceptLanguage, baseTemplateName: String): String =
+  private def getEmailTemplate(language: AcceptLanguage, baseTemplateName: String) =
     language match {
       case AcceptLanguage.EN => baseTemplateName
       case AcceptLanguage.CY => baseTemplateName + "_" + AcceptLanguage.CY.toString.toLowerCase(Locale.UK)

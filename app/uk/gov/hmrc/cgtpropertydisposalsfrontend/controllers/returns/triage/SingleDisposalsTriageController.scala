@@ -154,9 +154,9 @@ class SingleDisposalsTriageController @Inject() (
               answers
                 .fold(_.disposalMethod, c => Some(c.disposalMethod))
                 .contains(disposalMethod)
-            )
+            ) {
               state.map(_._2)
-            else {
+            } else {
               val newAnswers = answers.fold(
                 _.copy(disposalMethod = Some(disposalMethod)),
                 _.copy(disposalMethod = disposalMethod)
@@ -215,10 +215,11 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def wereYouUKResidentBackLinkUrl(triageAnswers: SingleDisposalTriageAnswers): Call =
-    if (triageAnswers.isPeriodOfAdmin)
+    if (triageAnswers.isPeriodOfAdmin) {
       routes.CommonTriageQuestionsController.howManyProperties()
-    else
+    } else {
       routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
+    }
 
   def wereYouAUKResident(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -227,7 +228,7 @@ class SingleDisposalsTriageController @Inject() (
           _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
           _ => routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
         )(_ => wasAUkResidentForm)(
-          extractField = _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+          extractField = _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk)),
           page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
             val isATrust = journeyStatus
               .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
@@ -274,11 +275,11 @@ class SingleDisposalsTriageController @Inject() (
           updateState = { (wasAUKResident, state, answers) =>
             if (
               answers
-                .fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+                .fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk))
                 .contains(wasAUKResident)
-            )
+            ) {
               state.map(_._2)
-            else {
+            } else {
               val newAnswers = answers
                 .unset(_.assetType)
                 .unset(_.countryOfResidence)
@@ -339,7 +340,7 @@ class SingleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         displayTriagePage(state, triageAnswers)(
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk)),
           _ => routes.SingleDisposalsTriageController.wereYouAUKResident()
         )(_ => wasResidentialPropertyForm)(
           extractField = _.fold(
@@ -369,7 +370,7 @@ class SingleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withSingleDisposalTriageAnswers { (_, state, triageAnswers) =>
         handleTriagePageSubmit(state, triageAnswers)(
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk)),
           _ => routes.SingleDisposalsTriageController.wereYouAUKResident()
         )(_ => wasResidentialPropertyForm)(
           page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
@@ -389,16 +390,15 @@ class SingleDisposalsTriageController @Inject() (
           },
           updateState = { (wasResidentialProperty, state, answers) =>
             val assetType =
-              if (wasResidentialProperty) AssetType.Residential
-              else AssetType.NonResidential
+              if (wasResidentialProperty) AssetType.Residential else AssetType.NonResidential
 
             if (
               answers
                 .fold(_.assetType, c => Some(c.assetType))
                 .contains(assetType)
-            )
+            ) {
               state.map(_._2)
-            else {
+            } else {
               // make sure we unset first to avoid being in a complete state with non residential
               val newAnswers =
                 answers
@@ -434,11 +434,12 @@ class SingleDisposalsTriageController @Inject() (
   ): Call =
     triageAnswers.fold(
       incomplete =>
-        if (incomplete.wasAUKResident.exists(identity))
+        if (incomplete.wasAUKResident.exists(identity)) {
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
-        else
-          routes.SingleDisposalsTriageController.assetTypeForNonUkResidents(),
+        } else {
+          routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
+        },
       _ => routes.SingleDisposalsTriageController.checkYourAnswers()
     )
 
@@ -749,9 +750,9 @@ class SingleDisposalsTriageController @Inject() (
               answers
                 .fold(_.completionDate, c => Some(c.completionDate))
                 .contains(date)
-            )
+            ) {
               state.map(_._2)
-            else {
+            } else {
               val newAnswers = answers.unset(_.completionDate).copy(completionDate = Some(date))
 
               state.bimap(
@@ -762,13 +763,14 @@ class SingleDisposalsTriageController @Inject() (
                       draftReturn = d.copy(
                         triageAnswers = newAnswers,
                         acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map { a =>
-                          if (d.triageAnswers.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin))
+                          if (d.triageAnswers.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin)) {
                             a.unset(_.acquisitionPrice)
-                          else
+                          } else {
                             a.unset(_.acquisitionDate)
                               .unset(_.acquisitionPrice)
                               .unset(_.rebasedAcquisitionPrice)
                               .unset(_.shouldUseRebase)
+                          }
                         },
                         initialGainOrLoss = None,
                         reliefDetailsAnswers = d.reliefDetailsAnswers
@@ -807,7 +809,7 @@ class SingleDisposalsTriageController @Inject() (
         displayTriagePage(state, triageAnswers)(
           _.fold(
             _.wasAUKResident.filterNot(identity),
-            c => Some(c.countryOfResidence.isUk()).filterNot(identity)
+            c => Some(c.countryOfResidence.isUk).filterNot(identity)
           ),
           _ => routes.SingleDisposalsTriageController.wereYouAUKResident()
         )(_ => countryOfResidenceForm)(
@@ -843,7 +845,7 @@ class SingleDisposalsTriageController @Inject() (
         handleTriagePageSubmit(state, triageAnswers)(
           _.fold(
             _.wasAUKResident.filterNot(identity),
-            c => Some(c.countryOfResidence.isUk()).filterNot(identity)
+            c => Some(c.countryOfResidence.isUk).filterNot(identity)
           ),
           _ => routes.SingleDisposalsTriageController.wereYouAUKResident()
         )(_ => countryOfResidenceForm)(
@@ -873,9 +875,9 @@ class SingleDisposalsTriageController @Inject() (
               answers
                 .fold(_.countryOfResidence, c => Some(c.countryOfResidence))
                 .contains(country)
-            )
+            ) {
               state.map(_._2)
-            else {
+            } else {
               val newAnswers =
                 answers.fold(
                   _.copy(countryOfResidence = Some(country)),
@@ -920,7 +922,7 @@ class SingleDisposalsTriageController @Inject() (
         displayTriagePage(state, triageAnswers)(
           _.fold(
             _.countryOfResidence,
-            c => Some(c.countryOfResidence).filterNot(_.isUk())
+            c => Some(c.countryOfResidence).filterNot(_.isUk)
           ),
           _ => routes.SingleDisposalsTriageController.countryOfResidence()
         )(_ => assetTypeForNonUkResidentsForm)(
@@ -950,7 +952,7 @@ class SingleDisposalsTriageController @Inject() (
         handleTriagePageSubmit(state, triageAnswers)(
           _.fold(
             _.countryOfResidence,
-            c => Some(c.countryOfResidence).filterNot(_.isUk())
+            c => Some(c.countryOfResidence).filterNot(_.isUk)
           ),
           _ => routes.SingleDisposalsTriageController.countryOfResidence()
         )(_ => assetTypeForNonUkResidentsForm)(
@@ -974,9 +976,9 @@ class SingleDisposalsTriageController @Inject() (
               answers
                 .fold(_.assetType, c => Some(c.assetType))
                 .contains(assetType)
-            )
+            ) {
               state.map(_._2)
-            else {
+            } else {
               val oldAssetType                       = answers.fold(_.assetType, c => Some(c.assetType))
               val (wasIndirectDisposal, wasMixedUse) =
                 oldAssetType.contains(IndirectDisposal) -> oldAssetType.contains(MixedUse)
@@ -984,23 +986,24 @@ class SingleDisposalsTriageController @Inject() (
                 (assetType === IndirectDisposal) -> (assetType === MixedUse)
 
               val newAnswers =
-                if (!wasIndirectDisposal === !isNowIndirectDisposal && !wasMixedUse === !isNowMixedUse)
+                if (!wasIndirectDisposal === !isNowIndirectDisposal && !wasMixedUse === !isNowMixedUse) {
                   answers.fold(
                     _.copy(assetType = Some(assetType)),
                     _.copy(assetType = assetType)
                   )
-                else
+                } else {
                   answers
                     .unset(_.disposalDate)
                     .unset(_.completionDate)
                     .unset(_.tooEarlyDisposalDate)
                     .copy(assetType = Some(assetType))
+                }
 
               state.bimap(
                 _.copy(newReturnTriageAnswers = Right(newAnswers)),
                 {
                   case (Right(d), r) =>
-                    if (isNowIndirectDisposal)
+                    if (isNowIndirectDisposal) {
                       r.copy(
                         draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
                           d.id,
@@ -1008,7 +1011,7 @@ class SingleDisposalsTriageController @Inject() (
                           d.representeeAnswers
                         )
                       ).withForceDisplayGainOrLossAfterReliefsForAmends
-                    else if (isNowMixedUse)
+                    } else if (isNowMixedUse) {
                       r.copy(
                         draftReturn = DraftSingleMixedUseDisposalReturn.newDraftReturn(
                           d.id,
@@ -1016,7 +1019,7 @@ class SingleDisposalsTriageController @Inject() (
                           d.representeeAnswers
                         )
                       ).withForceDisplayGainOrLossAfterReliefsForAmends
-                    else
+                    } else {
                       r.copy(
                         draftReturn = d.copy(
                           triageAnswers = newAnswers,
@@ -1032,9 +1035,10 @@ class SingleDisposalsTriageController @Inject() (
                           gainOrLossAfterReliefs = None
                         )
                       ).withForceDisplayGainOrLossAfterReliefsForAmends
+                    }
 
                   case (Left(Right(indirectDraftReturn)), r) =>
-                    if (isNowMixedUse)
+                    if (isNowMixedUse) {
                       r.copy(
                         draftReturn = DraftSingleMixedUseDisposalReturn.newDraftReturn(
                           indirectDraftReturn.id,
@@ -1042,7 +1046,7 @@ class SingleDisposalsTriageController @Inject() (
                           indirectDraftReturn.representeeAnswers
                         )
                       ).withForceDisplayGainOrLossAfterReliefsForAmends
-                    else
+                    } else {
                       r.copy(
                         draftReturn = DraftSingleDisposalReturn.newDraftReturn(
                           indirectDraftReturn.id,
@@ -1050,9 +1054,10 @@ class SingleDisposalsTriageController @Inject() (
                           indirectDraftReturn.representeeAnswers
                         )
                       ).withForceDisplayGainOrLossAfterReliefsForAmends
+                    }
 
                   case (Left(Left(mixedUseDraftReturn)), r) =>
-                    if (isNowIndirectDisposal)
+                    if (isNowIndirectDisposal) {
                       r.copy(
                         draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
                           mixedUseDraftReturn.id,
@@ -1060,7 +1065,7 @@ class SingleDisposalsTriageController @Inject() (
                           mixedUseDraftReturn.representeeAnswers
                         )
                       ).withForceDisplayGainOrLossAfterReliefsForAmends
-                    else
+                    } else {
                       r.copy(
                         draftReturn = DraftSingleDisposalReturn.newDraftReturn(
                           mixedUseDraftReturn.id,
@@ -1068,6 +1073,7 @@ class SingleDisposalsTriageController @Inject() (
                           mixedUseDraftReturn.representeeAnswers
                         )
                       ).withForceDisplayGainOrLossAfterReliefsForAmends
+                    }
                 }
               )
             }
@@ -1608,27 +1614,28 @@ class SingleDisposalsTriageController @Inject() (
               startingNewDraftReturn: StartingNewDraftReturn
             ): Future[Result] = {
               val newDraftReturn =
-                if (complete.assetType === IndirectDisposal)
+                if (complete.assetType === IndirectDisposal) {
                   DraftSingleIndirectDisposalReturn
                     .newDraftReturn(
                       uuidGenerator.nextId(),
                       complete,
                       startingNewDraftReturn.representeeAnswers
                     )
-                else if (complete.assetType === MixedUse)
+                } else if (complete.assetType === MixedUse) {
                   DraftSingleMixedUseDisposalReturn
                     .newDraftReturn(
                       uuidGenerator.nextId(),
                       complete,
                       startingNewDraftReturn.representeeAnswers
                     )
-                else
+                } else {
                   DraftSingleDisposalReturn
                     .newDraftReturn(
                       uuidGenerator.nextId(),
                       complete,
                       startingNewDraftReturn.representeeAnswers
                     )
+                }
 
               val newJourney = FillingOutReturn(
                 startingNewDraftReturn.subscribedDetails,
@@ -1721,9 +1728,10 @@ class SingleDisposalsTriageController @Inject() (
                            state.exists(
                              _._2.draftReturn === newFillingOutReturn.draftReturn
                            )
-                         ) EitherT.pure[Future, Error](())
-                         else
+                         ) { EitherT.pure[Future, Error](()) }
+                         else {
                            returnsService.storeDraftReturn(newFillingOutReturn)
+                         }
                      )
                 _ <- EitherT(
                        updateSession(sessionStore, request)(
@@ -1830,12 +1838,12 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def populateDisposalMethodInPeriodOfAdmin(s: SingleDisposalTriageAnswers): SingleDisposalTriageAnswers =
-    if (s.isPeriodOfAdmin)
+    if (s.isPeriodOfAdmin) {
       s.fold(
         _.copy(disposalMethod = Some(DisposalMethod.Sold)),
         _.copy(disposalMethod = DisposalMethod.Sold)
       )
-    else s
+    } else { s }
 
   private def backLink(
     currentState: SingleDisposalTriageAnswers,
@@ -1853,9 +1861,11 @@ class SingleDisposalsTriageController @Inject() (
     val alreadySentSA = answers.fold(_.alreadySentSelfAssessment, _.alreadySentSelfAssessment)
     answers.fold(
       _ =>
-        if (alreadySentSA.contains(false))
+        if (alreadySentSA.contains(false)) {
           routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
-        else ifIncomplete,
+        } else {
+          ifIncomplete
+        },
       _ => routes.SingleDisposalsTriageController.checkYourAnswers()
     )
   }
@@ -1922,7 +1932,7 @@ object SingleDisposalsTriageController {
     )(identity)(Some(_))
   )
 
-  val disposalMethodForm: Form[DisposalMethod] = Form(
+  private val disposalMethodForm = Form(
     mapping(
       "disposalMethod" -> of(
         FormUtils
@@ -1937,7 +1947,7 @@ object SingleDisposalsTriageController {
     )(identity)(Some(_))
   )
 
-  val wasResidentialPropertyForm: Form[Boolean] = Form(
+  private val wasResidentialPropertyForm = Form(
     mapping(
       "didYouDisposeOfResidentialProperty" -> of(BooleanFormatter.formatter)
     )(identity)(Some(_))
@@ -1959,7 +1969,7 @@ object SingleDisposalsTriageController {
             "disposalDate",
             None,
             Some(false),
-            false,
+            isPOA = false,
             List(
               TimeUtils.personalRepresentativeDateValidation(
                 personalRepresentativeDetails,

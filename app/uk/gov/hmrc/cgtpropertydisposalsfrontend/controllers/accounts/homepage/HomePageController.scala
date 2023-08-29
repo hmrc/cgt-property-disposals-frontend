@@ -83,17 +83,18 @@ class HomePageController @Inject() (
       withSubscribedUser { (_, subscribed) =>
         val redirectToExitPage = subscribed.draftReturns.nonEmpty
 
-        if (redirectToExitPage)
+        if (redirectToExitPage) {
           Redirect(routes.HomePageController.exitForMultipleDraftReturn())
-        else {
+        } else {
           val redirectTo = subscribed.subscribedDetails
             .userType()
             .fold(
               _ =>
-                if (subscribed.sentReturns.isEmpty)
+                if (subscribed.sentReturns.isEmpty) {
                   triage.routes.CommonTriageQuestionsController.howManyProperties()
-                else
-                  triage.routes.CommonTriageQuestionsController.howManyPropertiesFurtherReturn(),
+                } else {
+                  triage.routes.CommonTriageQuestionsController.howManyPropertiesFurtherReturn()
+                },
               _ =>
                 triage.routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresenting()
@@ -369,9 +370,11 @@ class HomePageController @Inject() (
                                                      sentReturns
                                                    )
 
-      updatedDraftReturns = if (unsetDraftReturnFlagAndUpdatedSentReturns._1)
+      updatedDraftReturns = if (unsetDraftReturnFlagAndUpdatedSentReturns._1) {
                               draftReturns.map(returnsService.unsetUnwantedSectionsToDraftReturn)
-                            else draftReturns
+                            } else {
+                              draftReturns
+                            }
 
       subscribed = uplift(journey, updatedDraftReturns, unsetDraftReturnFlagAndUpdatedSentReturns._2)
       _         <- EitherT(

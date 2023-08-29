@@ -22,7 +22,7 @@ import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TelephoneNumber, UserType}
 
@@ -42,7 +42,7 @@ object SubscribedDetails {
 
   implicit class SubscribedDetailsOps(private val details: SubscribedDetails) extends AnyVal {
     def makeAccountName(): String                                                =
-      details.name.fold(n => n.value, n => n.makeSingleName())
+      details.name.fold(n => n.value, n => n.makeSingleName)
     def userType(): Either[UserType.Organisation.type, UserType.Individual.type] =
       details.name.bimap(_ => UserType.Organisation, _ => UserType.Individual)
     def isATrust: Boolean                                                        = userType().isLeft

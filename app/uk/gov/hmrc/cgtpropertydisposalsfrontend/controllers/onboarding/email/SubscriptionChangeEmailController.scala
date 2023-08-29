@@ -17,10 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
 
 import cats.data.EitherT
-import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
-import shapeless.{Lens, lens}
+import shapeless.lens
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
@@ -29,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.On
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{SubscriptionChangeEmailAddressAttemptedEvent, SubscriptionChangeEmailAddressVerifiedEvent}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
@@ -75,10 +74,10 @@ class SubscriptionChangeEmailController @Inject() (
   ): Either[Result, (SessionData, ChangingSubscriptionEmail)] =
     validJourney(request)
 
-  val subscriptionReadyEmailLens: Lens[SubscriptionReady, Email] =
+  private val subscriptionReadyEmailLens =
     lens[SubscriptionReady].subscriptionDetails.emailAddress
 
-  val subscriptionReadyEmailSourceLens: Lens[SubscriptionReady, EmailSource] =
+  private val subscriptionReadyEmailSourceLens =
     lens[SubscriptionReady].subscriptionDetails.emailSource
 
   override def updateEmail(

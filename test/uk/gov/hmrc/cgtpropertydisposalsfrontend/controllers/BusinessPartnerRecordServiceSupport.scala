@@ -28,15 +28,12 @@ import scala.concurrent.Future
 trait BusinessPartnerRecordServiceSupport {
   this: ControllerSpec with SessionSupport =>
 
-  val mockBusinessPartnerRecordService = mock[BusinessPartnerRecordService]
+  private val mockBusinessPartnerRecordService = mock[BusinessPartnerRecordService]
   def mockGetBusinessPartnerRecord(
     businessPartnerRecordRequest: BusinessPartnerRecordRequest,
-    expectedBusinessPartnerRecordResponse: Either[
-      Error,
-      BusinessPartnerRecordResponse
-    ],
+    expectedBusinessPartnerRecordResponse: Either[Error, BusinessPartnerRecordResponse],
     lang: Lang
-  ): Unit                              =
+  ): Unit                                      =
     (mockBusinessPartnerRecordService
       .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
         _: HeaderCarrier

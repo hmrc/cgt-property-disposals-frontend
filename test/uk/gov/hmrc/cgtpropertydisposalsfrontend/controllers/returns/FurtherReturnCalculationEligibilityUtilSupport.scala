@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.scalamock.handlers.CallHandler3
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
@@ -33,11 +34,15 @@ trait FurtherReturnCalculationEligibilityUtilSupport { this: ControllerSpec =>
   val mockFurtherReturnCalculationEligibilityUtil: FurtherReturnCalculationEligibilityUtil =
     mock[FurtherReturnCalculationEligibilityUtil]
 
-  def mockFurthereturnCalculationEligibilityCheck(
+  protected def mockFurtherReturnCalculationEligibilityCheck(
     fillingOutReturn: FillingOutReturn
   )(
     result: Either[Error, FurtherReturnCalculationEligibility]
-  ) =
+  ): CallHandler3[FillingOutReturn, HeaderCarrier, RequestWithSessionData[_], EitherT[
+    Future,
+    Error,
+    FurtherReturnCalculationEligibility
+  ]] =
     (
       mockFurtherReturnCalculationEligibilityUtil
         .isEligibleForFurtherReturnOrAmendCalculation(

@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.On
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 
 import java.util.UUID
@@ -64,13 +64,8 @@ class RegistrationChangeEmailControllerSpec
       )
     )
 
-  override val mockUpdateEmail: Option[
-    (
-      ChangingRegistrationEmail,
-      ChangingRegistrationEmail,
-      Either[Error, Unit]
-    ) => Unit
-  ] =
+  override val mockUpdateEmail
+    : Option[(ChangingRegistrationEmail, ChangingRegistrationEmail, Either[Error, Unit]) => Unit] =
     None
 
   override lazy val controller: RegistrationChangeEmailController =
@@ -111,7 +106,7 @@ class RegistrationChangeEmailControllerSpec
       behave like enterEmailSubmit(
         performAction,
         ContactName(
-          validJourneyStatus.journey.registrationDetails.name.makeSingleName()
+          validJourneyStatus.journey.registrationDetails.name.makeSingleName
         ),
         emailRoutes.RegistrationChangeEmailController.verifyEmail,
         emailRoutes.RegistrationChangeEmailController.checkYourInbox()
@@ -147,7 +142,7 @@ class RegistrationChangeEmailControllerSpec
 
     }
 
-    "handling requests to display the email verfied page" must {
+    "handling requests to display the email verified page" must {
 
       def performAction(): Future[Result] =
         controller.emailVerified()(FakeRequest())

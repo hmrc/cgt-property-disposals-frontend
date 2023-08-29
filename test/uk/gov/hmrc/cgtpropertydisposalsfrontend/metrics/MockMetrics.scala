@@ -22,7 +22,7 @@ import org.scalamock.scalatest.MockFactory
 
 object MockMetrics extends MockFactory {
 
-  val metrics = new Metrics(stub[PlayMetrics]) {
+  val metrics: Metrics = new Metrics(stub[PlayMetrics]) {
     override def timer(name: String): Timer = new Timer()
 
     override def counter(name: String): Counter = new Counter()

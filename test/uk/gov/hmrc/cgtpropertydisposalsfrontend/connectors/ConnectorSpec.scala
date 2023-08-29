@@ -28,10 +28,10 @@ import scala.concurrent.Future
 
 trait ConnectorSpec { this: Matchers with AnyWordSpec =>
 
-  def connectorBehaviour(
+  protected def connectorBehaviour(
     mockResponse: Option[HttpResponse] => Unit,
     performCall: () => EitherT[Future, Error, HttpResponse]
-  ) = {
+  ): Unit = {
     "do a get http call and return the result" in {
       List(
         HttpResponse(200, "{}"),

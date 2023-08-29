@@ -54,12 +54,15 @@ object MoneyUtils {
     Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
       .leftMap(_ => FormError(key, "error.invalid"))
       .flatMap { d =>
-        if (isTooSmall(d)) Left(FormError(key, "error.tooSmall", tooSmallArgs))
-        else if (isTooLarge(d))
+        if (isTooSmall(d)) {
+          Left(FormError(key, "error.tooSmall", tooSmallArgs))
+        } else if (isTooLarge(d)) {
           Left(FormError(key, "error.tooLarge", tooLargeArgs))
-        else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2))
+        } else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) {
           Left(FormError(key, "error.tooManyDecimals"))
-        else Right(d)
+        } else {
+          Right(d)
+        }
       }
 
   def validateValueIsLessThan(
@@ -69,8 +72,9 @@ object MoneyUtils {
   )(
     value: BigDecimal
   ): Either[FormError, BigDecimal] =
-    if (value <= limitInclusive.inPounds()) Right(value)
-    else
+    if (value <= limitInclusive.inPounds()) {
+      Right(value)
+    } else {
       Left(
         FormError(
           key,
@@ -78,6 +82,7 @@ object MoneyUtils {
           List(limitInclusive.inPounds().toString())
         )
       )
+    }
 
   def amountInPoundsFormatter(
     isTooSmall: BigDecimal => Boolean,
@@ -138,13 +143,14 @@ object MoneyUtils {
           Right(BigDecimal("0"))
         )
       ) { d =>
-        if (d === BigDecimal("0"))
+        if (d === BigDecimal("0")) {
           Map(optionId -> "1")
-        else
+        } else {
           Map(
-            optionId   -> "0",
-            valueId    -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
+            optionId -> "0",
+            valueId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
           )
+        }
       }
 
     Form(

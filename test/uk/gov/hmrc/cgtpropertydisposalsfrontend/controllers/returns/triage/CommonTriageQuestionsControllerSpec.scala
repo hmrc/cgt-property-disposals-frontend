@@ -70,9 +70,9 @@ class CommonTriageQuestionsControllerSpec
     with ReturnsServiceSupport
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
-  val mockUUIDGenerator = mock[UUIDGenerator]
+  private val mockUUIDGenerator = mock[UUIDGenerator]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -80,7 +80,7 @@ class CommonTriageQuestionsControllerSpec
       bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     )
 
-  lazy val controller = instanceOf[CommonTriageQuestionsController]
+  private lazy val controller = instanceOf[CommonTriageQuestionsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -117,10 +117,7 @@ class CommonTriageQuestionsControllerSpec
     }
 
   def sessionDataWithStartingNewDraftReturn(
-    triageAnswers: Either[
-      MultipleDisposalsTriageAnswers,
-      SingleDisposalTriageAnswers
-    ],
+    triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
     name: Either[TrustName, IndividualName],
     userType: UserType = UserType.Individual,
     representeeAnswers: Option[RepresenteeAnswers] = None,
@@ -177,9 +174,7 @@ class CommonTriageQuestionsControllerSpec
       gainOrLossAfterReliefs = None,
       exemptionAndLossesAnswers = None,
       reliefDetailsAnswers =
-        if (singleDisposalTriageAnswers.isPeriodOfAdmin)
-          Some(IncompleteReliefDetailsAnswers.empty)
-        else None,
+        if (singleDisposalTriageAnswers.isPeriodOfAdmin) Some(IncompleteReliefDetailsAnswers.empty) else None,
       representeeAnswers = representeeAnswers
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
@@ -213,10 +208,7 @@ class CommonTriageQuestionsControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       previousSentReturns = previousReturns,
-      amendReturnData =
-        if (isAmend)
-          Some(sample[AmendReturnData])
-        else None
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -243,10 +235,7 @@ class CommonTriageQuestionsControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       previousSentReturns = previousReturns,
-      amendReturnData =
-        if (isAmend)
-          Some(sample[AmendReturnData])
-        else None
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -257,7 +246,7 @@ class CommonTriageQuestionsControllerSpec
     (sessionData, fillingOutReturn, draftReturn)
   }
 
-  def sessionDataWithFillingOutReturnForMultpleDisposals(
+  def sessionDataWithFillingOutReturnForMultipleDisposals(
     multipleDisposalsTriageAnswers: MultipleDisposalsTriageAnswers,
     isAmend: Boolean = false,
     amendReturnData: Option[AmendReturnData] = None
@@ -268,10 +257,13 @@ class CommonTriageQuestionsControllerSpec
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
-      amendReturnData =
-        if (amendReturnData.isDefined) amendReturnData
-        else if (isAmend) Some(sample[AmendReturnData])
-        else None,
+      amendReturnData = if (amendReturnData.isDefined) {
+        amendReturnData
+      } else if (isAmend) {
+        Some(sample[AmendReturnData])
+      } else {
+        None
+      },
       previousSentReturns = None
     )
 
@@ -282,7 +274,7 @@ class CommonTriageQuestionsControllerSpec
     (sessionData, fillingOutReturn, draftReturn)
   }
 
-  def sessionDataWithFillingOutReturnForMultpleIndirectDisposals(
+  def sessionDataWithFillingOutReturnForMultipleIndirectDisposals(
     multipleDisposalsTriageAnswers: MultipleDisposalsTriageAnswers,
     isAmend: Boolean = false
   ): (SessionData, FillingOutReturn, DraftMultipleIndirectDisposalsReturn) = {
@@ -292,10 +284,7 @@ class CommonTriageQuestionsControllerSpec
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
-      amendReturnData =
-        if (isAmend)
-          Some(sample[AmendReturnData])
-        else None
+      amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -1304,7 +1293,7 @@ class CommonTriageQuestionsControllerSpec
 
         "there is an error updating a draft return" in {
           val formData                        = "numberOfProperties" -> "0"
-          val (session, journey, draftReturn) = sessionDataWithFillingOutReturnForMultpleDisposals(
+          val (session, journey, draftReturn) = sessionDataWithFillingOutReturnForMultipleDisposals(
             IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(IndividualUserType.Self)
             )
@@ -1868,7 +1857,7 @@ class CommonTriageQuestionsControllerSpec
             )
           }
 
-          "they are on a mutliple disposals journey" in {
+          "they are on a muliple disposals journey" in {
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -2093,7 +2082,9 @@ class CommonTriageQuestionsControllerSpec
 
       "display the page" when {
 
-        def singleDisposalTriageAnswers(individualUserType: Option[IndividualUserType]) =
+        def singleDisposalTriageAnswers(
+          individualUserType: Option[IndividualUserType]
+        ): IncompleteSingleDisposalTriageAnswers =
           IncompleteSingleDisposalTriageAnswers.empty.copy(
             individualUserType = individualUserType,
             hasConfirmedSingleDisposal = true,
@@ -2279,7 +2270,7 @@ class CommonTriageQuestionsControllerSpec
               }
             )
 
-          def amendReturnData(completeReturn: CompleteReturn) =
+          def amendReturnData(completeReturn: CompleteReturn): AmendReturnData =
             sample[AmendReturnData].copy(
               originalReturn = sample[CompleteReturnWithSummary].copy(
                 completeReturn = completeReturn
@@ -2374,7 +2365,7 @@ class CommonTriageQuestionsControllerSpec
 
     "handling requests to display the previous return has same completion date exit page" must {
 
-      def previousReturnData(id: String, date: LocalDate) =
+      def previousReturnData(id: String, date: LocalDate): PreviousReturnData =
         sample[PreviousReturnData]
           .copy(summaries = List(sample[ReturnSummary].copy(submissionId = id, completionDate = date)))
 
@@ -2737,7 +2728,7 @@ class CommonTriageQuestionsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                sessionDataWithFillingOutReturnForMultpleDisposals(
+                sessionDataWithFillingOutReturnForMultipleDisposals(
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(
                     taxYear = taxYear
                   ),
@@ -2796,7 +2787,7 @@ class CommonTriageQuestionsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                sessionDataWithFillingOutReturnForMultpleIndirectDisposals(
+                sessionDataWithFillingOutReturnForMultipleIndirectDisposals(
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(
                     countryOfResidence = Country("NZ"),
                     assetTypes = List(AssetType.IndirectDisposal),
@@ -3497,11 +3488,11 @@ class CommonTriageQuestionsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            sessionDataWithFillingOutReturnForMultpleDisposals(
+            sessionDataWithFillingOutReturnForMultipleDisposals(
               multipleDisposalsTriageAnswers.copy(
                 taxYear = newTaxYear
               ),
-              true,
+              isAmend = true,
               amendReturnData = Some(amendReturnData)
             )._1
           )
@@ -3603,20 +3594,12 @@ class CommonTriageQuestionsControllerSpec
 
   def testSuccessfulUpdateStartingNewDraftReturn(
     performAction: => Future[Result],
-    answers: Either[
-      MultipleDisposalsTriageAnswers,
-      SingleDisposalTriageAnswers
-    ],
+    answers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
     name: Either[TrustName, IndividualName]
   )(
-    updatedAnswers: Either[
-      MultipleDisposalsTriageAnswers,
-      SingleDisposalTriageAnswers
-    ],
+    updatedAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
     expectedRedirect: Call,
-    updateRepresenteeAnswers: Option[RepresenteeAnswers] => Option[
-      RepresenteeAnswers
-    ] = identity
+    updateRepresenteeAnswers: Option[RepresenteeAnswers] => Option[RepresenteeAnswers] = identity
   ): Unit = {
     val (session, journey) =
       sessionDataWithStartingNewDraftReturn(answers, name)
@@ -3689,7 +3672,7 @@ class CommonTriageQuestionsControllerSpec
     updatedDraftReturn: DraftMultipleDisposalsReturn => DraftReturn,
     expectedRedirect: Call
   ): Unit = {
-    val (session, journey, draftReturn) = sessionDataWithFillingOutReturnForMultpleDisposals(
+    val (session, journey, draftReturn) = sessionDataWithFillingOutReturnForMultipleDisposals(
       answers
     )
     val updatedJourney                  =

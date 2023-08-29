@@ -67,18 +67,18 @@ object ReliefDetailsAnswers {
       }
 
     def unset[A](
-      fieldLens: IncompleteReliefDetailsAnswers.type => Lens[
-        IncompleteReliefDetailsAnswers,
-        Option[A]
-      ]
+      fieldLens: IncompleteReliefDetailsAnswers.type => Lens[IncompleteReliefDetailsAnswers, Option[A]]
     ): IncompleteReliefDetailsAnswers =
       fieldLens(IncompleteReliefDetailsAnswers).set(None)(
         fold(identity, IncompleteReliefDetailsAnswers.fromCompleteAnswers)
       )
 
     def unsetPrrAndLettingRelief(isPeriodOfAdmin: Boolean): IncompleteReliefDetailsAnswers =
-      if (isPeriodOfAdmin) unset(_.privateResidentsRelief).copy(lettingsRelief = Some(AmountInPence.zero))
-      else unset(_.privateResidentsRelief).unset(_.lettingsRelief)
+      if (isPeriodOfAdmin) {
+        unset(_.privateResidentsRelief).copy(lettingsRelief = Some(AmountInPence.zero))
+      } else {
+        unset(_.privateResidentsRelief).unset(_.lettingsRelief)
+      }
 
   }
 

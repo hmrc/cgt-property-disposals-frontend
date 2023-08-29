@@ -54,16 +54,12 @@ trait NameMatchRetryService {
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
-  ): EitherT[Future, NameMatchServiceError[A], Option[
-    UnsuccessfulNameMatchAttempts[A]
-  ]]
+  ): EitherT[Future, NameMatchServiceError[A], Option[UnsuccessfulNameMatchAttempts[A]]]
 
   def attemptBusinessPartnerRecordNameMatch(
     nameMatchDetails: IndividualSautrNameMatchDetails,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]
-    ],
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]],
     lang: Lang
   )(implicit
     hc: HeaderCarrier,
@@ -75,9 +71,7 @@ trait NameMatchRetryService {
   def attemptBusinessPartnerRecordNameMatch(
     nameMatchDetails: TrustNameMatchDetails,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
-    ],
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]],
     lang: Lang
   )(implicit
     hc: HeaderCarrier,
@@ -89,16 +83,12 @@ trait NameMatchRetryService {
   def attemptNameMatch(
     nameMatchDetails: IndividualRepresenteeNameMatchDetails,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
-    ],
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]],
     lang: Lang
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
-  ): EitherT[Future, NameMatchServiceError[
-    IndividualRepresenteeNameMatchDetails
-  ], RepresenteeReferenceId]
+  ): EitherT[Future, NameMatchServiceError[IndividualRepresenteeNameMatchDetails], RepresenteeReferenceId]
 
 }
 
@@ -112,7 +102,7 @@ class NameMatchRetryServiceImpl @Inject() (
 )(implicit ec: ExecutionContext)
     extends NameMatchRetryService {
 
-  val maxUnsuccessfulAttempts: Int =
+  private val maxUnsuccessfulAttempts =
     config.underlying.getInt("bpr-name-match.max-retries")
 
   def getNumberOfUnsuccessfulAttempts[A <: NameMatchDetails : Reads](
@@ -120,29 +110,25 @@ class NameMatchRetryServiceImpl @Inject() (
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
-  ): EitherT[Future, NameMatchServiceError[A], Option[
-    UnsuccessfulNameMatchAttempts[A]
-  ]] =
+  ): EitherT[Future, NameMatchServiceError[A], Option[UnsuccessfulNameMatchAttempts[A]]] =
     EitherT(nameMatchRetryStore.get(ggCredId))
       .leftMap(NameMatchServiceError.BackendError)
       .subflatMap {
-        _.fold[Either[NameMatchServiceError[A], Option[
-          UnsuccessfulNameMatchAttempts[A]
-        ]]](Right(None))((unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]) =>
-          if (unsuccessfulAttempts.unsuccessfulAttempts >= maxUnsuccessfulAttempts) {
-            auditTooManyAttempts(unsuccessfulAttempts)
-            Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
-          } else
-            Right(Some(unsuccessfulAttempts))
+        _.fold[Either[NameMatchServiceError[A], Option[UnsuccessfulNameMatchAttempts[A]]]](Right(None))(
+          (unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]) =>
+            if (unsuccessfulAttempts.unsuccessfulAttempts >= maxUnsuccessfulAttempts) {
+              auditTooManyAttempts(unsuccessfulAttempts)
+              Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
+            } else {
+              Right(Some(unsuccessfulAttempts))
+            }
         )
       }
 
   def attemptBusinessPartnerRecordNameMatch(
     nameMatchDetails: IndividualSautrNameMatchDetails,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]
-    ],
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]],
     lang: Lang
   )(implicit
     hc: HeaderCarrier,
@@ -171,9 +157,7 @@ class NameMatchRetryServiceImpl @Inject() (
   def attemptBusinessPartnerRecordNameMatch(
     nameMatchDetails: TrustNameMatchDetails,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
-    ],
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]],
     lang: Lang
   )(implicit
     hc: HeaderCarrier,
@@ -202,16 +186,12 @@ class NameMatchRetryServiceImpl @Inject() (
   def attemptNameMatch(
     nameMatchDetails: IndividualRepresenteeNameMatchDetails,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
-    ],
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]],
     lang: Lang
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
-  ): EitherT[Future, NameMatchServiceError[
-    IndividualRepresenteeNameMatchDetails
-  ], RepresenteeReferenceId] =
+  ): EitherT[Future, NameMatchServiceError[IndividualRepresenteeNameMatchDetails], RepresenteeReferenceId] =
     withValidPreviousUnsuccessfulNameMatchAttempts(
       previousUnsuccessfulNameMatchAttempts,
       nameMatchDetails
@@ -257,20 +237,11 @@ class NameMatchRetryServiceImpl @Inject() (
       }
     }
 
-  private def withValidPreviousUnsuccessfulNameMatchAttempts[
-    A <: NameMatchDetails,
-    B
-  ](
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[A]
-    ],
+  private def withValidPreviousUnsuccessfulNameMatchAttempts[A <: NameMatchDetails, B](
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[A]],
     nameMatchDetails: A
   )(
-    f: Option[UnsuccessfulNameMatchAttempts[A]] => EitherT[
-      Future,
-      NameMatchServiceError[A],
-      B
-    ]
+    f: Option[UnsuccessfulNameMatchAttempts[A]] => EitherT[Future, NameMatchServiceError[A], B]
   )(implicit
     hc: HeaderCarrier,
     request: Request[_]
@@ -306,15 +277,11 @@ class NameMatchRetryServiceImpl @Inject() (
     bprRequest: BusinessPartnerRecordRequest,
     nameMatchDetails: A,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[A]
-    ],
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[A]],
     lang: Lang
   )(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, NameMatchServiceError[
-    A
-  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
+  ): EitherT[Future, NameMatchServiceError[A], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
     for {
       bprResponse <- bprService
                        .getBusinessPartnerRecord(bprRequest, lang)
@@ -415,17 +382,15 @@ class NameMatchRetryServiceImpl @Inject() (
     )
   }
 
-  def handleCgtAccountNameMatch[A <: NameMatchDetails : Writes](
+  private def handleCgtAccountNameMatch[A <: NameMatchDetails : Writes](
     cgtReference: CgtReference,
     name: IndividualName,
     nameMatchDetails: A,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[NameMatchDetails]
-    ]
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[NameMatchDetails]]
   )(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, NameMatchServiceError[A], SubscribedDetails] = {
+  ) = {
     def doNamesMatch(
       name: IndividualName,
       comparedName: IndividualName
@@ -464,38 +429,27 @@ class NameMatchRetryServiceImpl @Inject() (
     bprResponse: BusinessPartnerRecordResponse,
     nameMatchDetails: A,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[A]
-    ]
-  ): EitherT[Future, NameMatchServiceError[
-    A
-  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] = {
-    val result: Either[Future[
-      NameMatchServiceError[A]
-    ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] = Either
-      .fromOption(
-        bprResponse.businessPartnerRecord.map(bpr => bpr -> bprResponse),
-        updateNumberOfUnsuccessfulNameMatchAttempts(
-          nameMatchDetails,
-          ggCredId,
-          previousUnsuccessfulNameMatchAttempts
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[A]]
+  ): EitherT[Future, NameMatchServiceError[A], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] = {
+    val result: Either[Future[NameMatchServiceError[A]], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
+      Either
+        .fromOption(
+          bprResponse.businessPartnerRecord.map(bpr => bpr -> bprResponse),
+          updateNumberOfUnsuccessfulNameMatchAttempts(
+            nameMatchDetails,
+            ggCredId,
+            previousUnsuccessfulNameMatchAttempts
+          )
         )
-      )
-    EitherT[Future, NameMatchServiceError[
-      A
-    ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] {
+    EitherT[Future, NameMatchServiceError[A], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] {
       result.leftSequence[Future, NameMatchServiceError[A]]
     }
   }
 
-  private def updateNumberOfUnsuccessfulNameMatchAttempts[
-    A <: NameMatchDetails : Writes
-  ](
+  private def updateNumberOfUnsuccessfulNameMatchAttempts[A <: NameMatchDetails : Writes](
     nameMatchDetails: A,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[NameMatchDetails]
-    ]
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[NameMatchDetails]]
   ): Future[NameMatchServiceError[A]] = {
     val updatedNumberOfUnsuccessfulAttempts =
       previousUnsuccessfulNameMatchAttempts
@@ -516,10 +470,11 @@ class NameMatchRetryServiceImpl @Inject() (
       )
     ).leftMap(NameMatchServiceError.BackendError)
       .map(_ =>
-        if (updatedNumberOfUnsuccessfulAttempts >= maxUnsuccessfulAttempts)
+        if (updatedNumberOfUnsuccessfulAttempts >= maxUnsuccessfulAttempts) {
           NameMatchServiceError.TooManyUnsuccessfulAttempts()
-        else
+        } else {
           NameMatchServiceError.NameMatchFailed(unsuccessfulNameMatchAttempts)
+        }
       )
       .merge
   }

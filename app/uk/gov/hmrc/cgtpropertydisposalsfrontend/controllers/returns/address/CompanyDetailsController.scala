@@ -297,11 +297,11 @@ class CompanyDetailsController @Inject() (
                     answers
                       .fold(_.disposalPrice, c => Some(c.disposalPrice))
                       .contains(AmountInPence.fromPounds(disposalPrice))
-                  )
+                  ) {
                     Redirect(
                       routes.CompanyDetailsController.checkYourAnswers()
                     )
-                  else {
+                  } else {
                     val updatedAnswers     =
                       answers
                         .fold(
@@ -401,11 +401,11 @@ class CompanyDetailsController @Inject() (
                     answers
                       .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
                       .contains(AmountInPence.fromPounds(acquisitionPrice))
-                  )
+                  ) {
                     Redirect(
                       routes.CompanyDetailsController.checkYourAnswers()
                     )
-                  else {
+                  } else {
                     val updatedAnswers     =
                       answers
                         .fold(
@@ -556,7 +556,7 @@ class CompanyDetailsController @Inject() (
 
 object CompanyDetailsController {
 
-  val multipleIndirectDisposalPriceForm: Form[BigDecimal] =
+  private val multipleIndirectDisposalPriceForm =
     Form(
       mapping(
         "multipleIndirectDisposalsDisposalPrice" -> of(
@@ -566,7 +566,7 @@ object CompanyDetailsController {
       )(identity)(Some(_))
     )
 
-  val multipleIndirectAcquisitionPriceForm: Form[BigDecimal] =
+  private val multipleIndirectAcquisitionPriceForm =
     Form(
       mapping(
         "multipleIndirectDisposalsAcquisitionPrice" -> of(

@@ -104,11 +104,11 @@ class YearToDateLiabilityControllerSpec
 
   import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
 
-  val mockCgtCalculationService = mock[CgtCalculationService]
+  private val mockCgtCalculationService = mock[CgtCalculationService]
 
-  val mockUpscanService = mock[UpscanService]
+  private val mockUpscanService = mock[UpscanService]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -118,7 +118,7 @@ class YearToDateLiabilityControllerSpec
       bind[FurtherReturnCalculationEligibilityUtil].toInstance(mockFurtherReturnCalculationEligibilityUtil)
     )
 
-  lazy val controller = instanceOf[YearToDateLiabilityController]
+  private lazy val controller = instanceOf[YearToDateLiabilityController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -164,7 +164,7 @@ class YearToDateLiabilityControllerSpec
   ): IndividualUserType =
     representativeType.getOrElse(Self)
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) =
+  private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
@@ -174,7 +174,7 @@ class YearToDateLiabilityControllerSpec
       }
     )
 
-  def singleDisposalTriageAnswers(
+  private def singleDisposalTriageAnswers(
     disposalDate: Option[DisposalDate],
     wasUkResident: Boolean,
     individualUserType: Option[IndividualUserType]
@@ -189,7 +189,7 @@ class YearToDateLiabilityControllerSpec
       disposalDate = disposalDate
     )
 
-  def representeeAnswers(individualUserType: Option[IndividualUserType], isFurtherReturn: Boolean) =
+  private def representeeAnswers(individualUserType: Option[IndividualUserType], isFurtherReturn: Boolean) =
     individualUserType match {
       case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) =>
         Some(
@@ -207,16 +207,6 @@ class YearToDateLiabilityControllerSpec
         )
       case _                                                                    => None
     }
-
-  def fillingOutReturn(draftReturn: DraftReturn, userType: UserType) =
-    sample[FillingOutReturn].copy(
-      agentReferenceNumber = setAgentReferenceNumber(userType),
-      subscribedDetails = sample[SubscribedDetails].copy(
-        name = setNameForUserType(userType)
-      ),
-      draftReturn = draftReturn,
-      amendReturnData = None
-    )
 
   def sessionWithSingleIndirectDisposalState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
@@ -254,17 +244,18 @@ class YearToDateLiabilityControllerSpec
         name = setNameForUserType(userType)
       ),
       draftReturn = draftReturn,
-      previousSentReturns =
-        if (isFurtherReturn)
-          Some(
-            PreviousReturnData(
-              List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
-              None,
-              None,
-              None
-            )
+      previousSentReturns = if (isFurtherReturn) {
+        Some(
+          PreviousReturnData(
+            List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+            None,
+            None,
+            None
           )
-        else None,
+        )
+      } else {
+        None
+      },
       amendReturnData = None
     )
     (
@@ -322,17 +313,18 @@ class YearToDateLiabilityControllerSpec
         name = setNameForUserType(userType)
       ),
       draftReturn = draftReturn,
-      previousSentReturns =
-        if (isFurtherReturn)
-          Some(
-            PreviousReturnData(
-              List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
-              None,
-              None,
-              None
-            )
+      previousSentReturns = if (isFurtherReturn) {
+        Some(
+          PreviousReturnData(
+            List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+            None,
+            None,
+            None
           )
-        else None,
+        )
+      } else {
+        None
+      },
       amendReturnData = None
     )
     (
@@ -401,17 +393,18 @@ class YearToDateLiabilityControllerSpec
         name = setNameForUserType(userType)
       ),
       draftReturn = draftReturn,
-      previousSentReturns =
-        if (isFurtherReturn)
-          Some(
-            PreviousReturnData(
-              List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
-              Some(sample[AmountInPence]),
-              None,
-              None
-            )
+      previousSentReturns = if (isFurtherReturn) {
+        Some(
+          PreviousReturnData(
+            List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+            Some(sample[AmountInPence]),
+            None,
+            None
           )
-        else None,
+        )
+      } else {
+        None
+      },
       amendReturnData = amendReturnData
     )
     (
@@ -474,17 +467,18 @@ class YearToDateLiabilityControllerSpec
       agentReferenceNumber = setAgentReferenceNumber(userType),
       subscribedDetails = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
       draftReturn = draftReturn,
-      previousSentReturns =
-        if (isFurtherReturn)
-          Some(
-            PreviousReturnData(
-              List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
-              None,
-              None,
-              None
-            )
+      previousSentReturns = if (isFurtherReturn) {
+        Some(
+          PreviousReturnData(
+            List(sample[ReturnSummary].copy(taxYear = taxYearStartYear)),
+            None,
+            None,
+            None
           )
-        else None,
+        )
+      } else {
+        None
+      },
       amendReturnData = amendReturnData
     )
     (
@@ -537,7 +531,7 @@ class YearToDateLiabilityControllerSpec
       TimeUtils.today()
     )
 
-  def mockCalculateTaxDue(
+  private def mockCalculateTaxDue(
     request: CalculateCgtTaxDueRequest
   )(result: Either[Error, CalculatedTaxDue]) =
     (mockCgtCalculationService
@@ -545,7 +539,7 @@ class YearToDateLiabilityControllerSpec
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockCalculateTaxableGainOrLoss(
+  private def mockCalculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
   )(result: Either[Error, TaxableGainOrLossCalculation]) =
     (mockCgtCalculationService
@@ -553,7 +547,7 @@ class YearToDateLiabilityControllerSpec
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockCalculateYearToDateLiability(
+  private def mockCalculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest
   )(result: Either[Error, YearToDateLiabilityCalculation]) =
     (mockCgtCalculationService
@@ -561,7 +555,7 @@ class YearToDateLiabilityControllerSpec
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockUpscanInitiate(
+  private def mockUpscanInitiate(
     errorRedirectCall: Call,
     successRedirectCall: UploadReference => Call
   )(
@@ -587,7 +581,7 @@ class YearToDateLiabilityControllerSpec
       )
       .returning(EitherT.fromEither(result))
 
-  def mockGetUpscanUpload(
+  private def mockGetUpscanUpload(
     uploadReference: UploadReference
   )(result: Either[Error, UpscanUpload]) =
     (mockUpscanService
@@ -605,7 +599,7 @@ class YearToDateLiabilityControllerSpec
       case gain: GainCalculatedTaxDue                        => gain.copy(amountOfTaxDue = taxDue)
     }
 
-  val completeReliefDetailsAnswersWithNoOtherReliefs =
+  private val completeReliefDetailsAnswersWithNoOtherReliefs =
     sample[CompleteReliefDetailsAnswers].copy(otherReliefs = None)
 
   "YearToDateLiabilityController" when {
@@ -745,7 +739,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
           }
 
           checkPageIsDisplayed(
@@ -997,7 +991,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
             mockStoreDraftReturn(newFillingOutReturn)(Right(()))
             mockStoreSession(newSession)(Right(()))
           }
@@ -1056,7 +1050,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
               mockStoreDraftReturn(newFillingOutReturn)(Right(()))
               mockStoreSession(newSession)(Right(()))
             }
@@ -1515,7 +1509,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
             mockStoreDraftReturn(newFillingOutReturn)(Right(()))
             mockStoreSession(newSession)(Right(()))
           }
@@ -1576,7 +1570,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
               mockStoreDraftReturn(newFillingOutReturn)(Right(()))
               mockStoreSession(newSession)(Right(()))
             }
@@ -1807,7 +1801,7 @@ class YearToDateLiabilityControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+                mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
               }
 
               checkIsRedirect(
@@ -1836,7 +1830,7 @@ class YearToDateLiabilityControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+                mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
               }
 
               checkIsRedirect(
@@ -1863,7 +1857,7 @@ class YearToDateLiabilityControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+                mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
               }
 
               checkIsRedirect(
@@ -1886,7 +1880,7 @@ class YearToDateLiabilityControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData)
               furtherReturnCalculationEligibility.foreach(e =>
-                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(e))
+                mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(e))
               )
             }
 
@@ -2143,7 +2137,7 @@ class YearToDateLiabilityControllerSpec
             wasUkResident = true
           )._1
 
-          def test(data: (String, String)*)(expectedErrorMessageKey: String) =
+          def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
             testFormError(data: _*)(expectedErrorMessageKey)(
               "hasEstimatedDetails.title"
             )(performAction, currentSession)
@@ -2311,7 +2305,7 @@ class YearToDateLiabilityControllerSpec
             None
           )._1
 
-          def test(data: (String, String)*)(expectedErrorMessageKey: String) =
+          def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
             testFormError(data: _*)(expectedErrorMessageKey)(
               "hasEstimatedDetails.title"
             )(performAction, currentSession)
@@ -2524,7 +2518,7 @@ class YearToDateLiabilityControllerSpec
         personalAllowance: AmountInPence,
         isATrust: Boolean,
         triageAnswers: CompleteSingleDisposalTriageAnswers
-      ) =
+      ): CalculateCgtTaxDueRequest =
         CalculateCgtTaxDueRequest(
           triageAnswers,
           address,
@@ -3139,7 +3133,7 @@ class YearToDateLiabilityControllerSpec
             val answers     = CompleteCalculatedYTDAnswers(
               AmountInPence(1L),
               Some(AmountInPence(2L)),
-              false,
+              hasEstimatedDetails = false,
               setTaxDue(sample[CalculatedTaxDue], AmountInPence(100L)),
               AmountInPence(1L),
               Some(sample[MandatoryEvidence])
@@ -3362,7 +3356,7 @@ class YearToDateLiabilityControllerSpec
             )
           }
 
-          "there is no calulated tax due" in {
+          "there is no calculated tax due" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
                 calculatedTaxDue = None
@@ -3628,7 +3622,7 @@ class YearToDateLiabilityControllerSpec
 
         val completeAnswers = CompleteNonCalculatedYTDAnswers(
           AmountInPence(1L),
-          true,
+          hasEstimatedDetails = true,
           AmountInPence(2L),
           Some(sample[MandatoryEvidence]),
           None,
@@ -3691,7 +3685,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionDataWithIndividual)
             furtherReturnCalculationEligibility.foreach(e =>
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturnWithIndividual)(Right(e))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturnWithIndividual)(Right(e))
             )
           }
 
@@ -3716,7 +3710,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
             furtherReturnCalculationEligibility.foreach(e =>
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(e))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(e))
             )
           }
 
@@ -4015,7 +4009,7 @@ class YearToDateLiabilityControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
+                mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
               }
 
               checkPageIsDisplayed(
@@ -4061,7 +4055,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
+              mockFurtherReturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
               mockStoreDraftReturn(updatedJourney)(Right(()))
               mockStoreSession(updatedSession)(Right(()))
             }
@@ -4141,7 +4135,7 @@ class YearToDateLiabilityControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockFurthereturnCalculationEligibilityCheck(journey)(
+                mockFurtherReturnCalculationEligibilityCheck(journey)(
                   Right(sample[Eligible].copy(calculation = glarCalculation))
                 )
                 mockStoreDraftReturn(updatedJourney)(Right(()))
@@ -4330,7 +4324,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(journey)(
+              mockFurtherReturnCalculationEligibilityCheck(journey)(
                 Right(sample[Eligible].copy(calculation = glarCalculation))
               )
             }
@@ -4363,10 +4357,11 @@ class YearToDateLiabilityControllerSpec
             draftReturn = draftReturn,
             previousSentReturns = Some(
               PreviousReturnData(
-                if (furtherReturnCalculationEligibility.isDefined)
+                if (furtherReturnCalculationEligibility.isDefined) {
                   List(sample[ReturnSummary].copy(taxYear = taxYearStartYear))
-                else
-                  List.empty,
+                } else {
+                  List.empty
+                },
                 None,
                 None,
                 None
@@ -4397,7 +4392,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             furtherReturnCalculationEligibility.foreach(e =>
-              mockFurthereturnCalculationEligibilityCheck(journey)(Right(e))
+              mockFurtherReturnCalculationEligibilityCheck(journey)(Right(e))
             )
             mockUpscanInitiate(
               routes.YearToDateLiabilityController
@@ -4631,7 +4626,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligible))
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligible))
             mockCalculateTaxableGainOrLoss(
               TaxableGainOrLossCalculationRequest(
                 eligible.previousReturnCalculationData,
@@ -4835,7 +4830,7 @@ class YearToDateLiabilityControllerSpec
                   .url
               },
               extraMockActions = { _ =>
-                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(None)))
+                mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(None)))
               }
             )
 
@@ -5057,7 +5052,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligible))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligible))
               mockCalculateTaxableGainOrLoss(
                 TaxableGainOrLossCalculationRequest(
                   eligible.previousReturnCalculationData,
@@ -5186,7 +5181,7 @@ class YearToDateLiabilityControllerSpec
               performAction,
               state._1,
               extraMockActions = { _ =>
-                mockFurthereturnCalculationEligibilityCheck(state._2)(Right(Ineligible(None)))
+                mockFurtherReturnCalculationEligibilityCheck(state._2)(Right(Ineligible(None)))
               }
             )
 
@@ -5368,7 +5363,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(None)))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(None)))
               mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
               mockStoreSession(updatedSession)(Right(()))
             }
@@ -5428,7 +5423,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(None)))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(None)))
               mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
               mockStoreSession(updatedSession)(Right(()))
             }
@@ -5476,7 +5471,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(None)))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(Ineligible(None)))
               mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
               mockStoreSession(updatedSession)(Right(()))
             }
@@ -5544,7 +5539,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligible))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligible))
               mockCalculateTaxableGainOrLoss(calculationRequest)(Right(calculation))
               mockStoreDraftReturn(updatedFillingOutReturn)(Right(()))
               mockStoreSession(updatedSession)(Right(()))
@@ -5753,8 +5748,7 @@ class YearToDateLiabilityControllerSpec
                   ),
                   subscribedDetails = sample[SubscribedDetails].copy(
                     name =
-                      if (userType == UserType.Organisation) Left(sample[TrustName])
-                      else Right(sample[IndividualName])
+                      if (userType == UserType.Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                   ),
                   amendReturnData = None
                 )
@@ -5874,8 +5868,7 @@ class YearToDateLiabilityControllerSpec
                   ),
                   subscribedDetails = sample[SubscribedDetails].copy(
                     name =
-                      if (userType == UserType.Organisation) Left(sample[TrustName])
-                      else Right(sample[IndividualName])
+                      if (userType == UserType.Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                   ),
                   amendReturnData = None
                 )
@@ -5986,8 +5979,7 @@ class YearToDateLiabilityControllerSpec
                   ),
                   subscribedDetails = sample[SubscribedDetails].copy(
                     name =
-                      if (userType == UserType.Organisation) Left(sample[TrustName])
-                      else Right(sample[IndividualName])
+                      if (userType == UserType.Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                   ),
                   amendReturnData = Some(
                     sample[AmendReturnData].copy(
@@ -6088,8 +6080,7 @@ class YearToDateLiabilityControllerSpec
                   previousSentReturns = None,
                   subscribedDetails = sample[SubscribedDetails].copy(
                     name =
-                      if (userType == UserType.Organisation) Left(sample[TrustName])
-                      else Right(sample[IndividualName])
+                      if (userType == UserType.Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                   ),
                   amendReturnData = Some(sample[AmendReturnData])
                 )
@@ -6526,7 +6517,7 @@ class YearToDateLiabilityControllerSpec
 
       behave like markUnmetDependencyBehaviour(controller.scanningMandatoryEvidence())
 
-      behave like noPendingUploadbBehaviour(performAction)
+      behave like noPendingUploadBehaviour(performAction)
 
       "show an error page" when {
 
@@ -6837,7 +6828,7 @@ class YearToDateLiabilityControllerSpec
 
       behave like markUnmetDependencyBehaviour(controller.uploadMandatoryEvidenceFailure())
 
-      behave like noPendingUploadbBehaviour(performAction)
+      behave like noPendingUploadBehaviour(performAction)
 
       "show an error page" when {
         val answers = sample[IncompleteCalculatedYTDAnswers]
@@ -7062,7 +7053,7 @@ class YearToDateLiabilityControllerSpec
             )
           }
 
-          "the user is on a non-calulated jouney" in {
+          "the user is on a non-calculated jouney" in {
             test(
               sample[IncompleteCalculatedYTDAnswers]
                 .copy(expiredEvidence = None)
@@ -7084,7 +7075,7 @@ class YearToDateLiabilityControllerSpec
       "display the page" when {
         val expiredEvidence = sample[MandatoryEvidence]
 
-        def checkPage(result: Future[Result]) =
+        def checkPage(result: Future[Result]): Unit =
           checkPageIsDisplayed(
             result,
             messageFromMessageKey("mandatoryEvidenceExpired.title"),
@@ -7213,7 +7204,7 @@ class YearToDateLiabilityControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
-          mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
+          mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
         }
 
         checkIsRedirect(performAction(), routes.YearToDateLiabilityController.hasEstimatedDetails())
@@ -7251,7 +7242,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
           }
 
           checkIsRedirect(performAction(), routes.YearToDateLiabilityController.taxableGainOrLoss())
@@ -7278,7 +7269,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligibility))
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligibility))
             calculation.foreach { case (request, result) => mockCalculateYearToDateLiability(request)(Right(result)) }
           }
 
@@ -7887,7 +7878,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("")))
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -7906,7 +7897,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -7923,7 +7914,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -7965,7 +7956,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -7983,7 +7974,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -8013,7 +8004,7 @@ class YearToDateLiabilityControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
+              mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Eligible]))
               mockCalculateYearToDateLiability(calculationRequest)(Left(Error("")))
             }
 
@@ -8063,7 +8054,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
+            mockFurtherReturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
             mockStoreDraftReturn(updatedJourney)(Left(Error("")))
           }
 
@@ -8075,7 +8066,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
+            mockFurtherReturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
             mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
@@ -8120,7 +8111,7 @@ class YearToDateLiabilityControllerSpec
           )(expectedTitleKey, expectedTitleArgs: _*)(
             performAction,
             sessionData,
-            _ => mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
+            _ => mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
           )
 
         val taxYear = sample[TaxYear]
@@ -8172,7 +8163,7 @@ class YearToDateLiabilityControllerSpec
           testCases.foreach { case (userKey, session) =>
             AmountOfMoneyErrorScenarios
               .amountOfMoneyErrorScenarios("yearToDateLiability")
-              .filter(s => s.input.filter(_.nonEmpty).isDefined)
+              .filter(s => s.input.exists(_.nonEmpty))
               .foreach { scenario =>
                 withClue(s"For user key '$userKey' and $scenario: ") {
                   test(session._1, session._2)(scenario.formData: _*)(
@@ -8221,7 +8212,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
+            mockFurtherReturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
             mockStoreDraftReturn(newJourney)(
               Right(())
             )
@@ -8314,7 +8305,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Eligible]))
+            mockFurtherReturnCalculationEligibilityCheck(journey)(Right(sample[Eligible]))
             mockCalculateYearToDateLiability(calculationRequest)(Right(calculationResult))
             mockStoreDraftReturn(newJourney)(
               Right(())
@@ -8349,7 +8340,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockFurthereturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
+            mockFurtherReturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
 
           }
 
@@ -8763,7 +8754,7 @@ class YearToDateLiabilityControllerSpec
 
   }
 
-  def noPendingUploadbBehaviour(performAction: () => Future[Result]): Unit =
+  def noPendingUploadBehaviour(performAction: () => Future[Result]): Unit =
     "redirect to the check your answers page" when {
 
       def test(answers: YearToDateLiabilityAnswers): Unit = {
@@ -8794,7 +8785,7 @@ class YearToDateLiabilityControllerSpec
           )
         }
 
-        "the user is on a non-calulated jouney" in {
+        "the user is on a non-calculated journey" in {
           test(
             sample[IncompleteCalculatedYTDAnswers]
               .copy(pendingUpscanUpload = None)
@@ -8866,7 +8857,7 @@ class YearToDateLiabilityControllerSpec
 
   def noYearToDateLiabilityBehaviour(performAction: () => Future[Result]): Unit =
     "redirect to the check your answers page" when {
-      "no year to date liability can be found for a furthe return" in {
+      "no year to date liability can be found for a further return" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
@@ -9460,7 +9451,7 @@ class YearToDateLiabilityControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
-          mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
+          mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
         }
 
         checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
@@ -9470,11 +9461,11 @@ class YearToDateLiabilityControllerSpec
 
     "show an error page" when {
 
-      "there is an error checking eligibility for a calclation for a further return" in {
+      "there is an error checking eligibility for a calculation for a further return" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
-          mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("")))
+          mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Left(Error("")))
         }
 
         checkIsTechnicalErrorPage(performAction())
@@ -9497,26 +9488,37 @@ object YearToDateLiabilityControllerSpec extends Matchers {
   ): Unit = {
 
     doc.select("#estimatedIncome-value-answer").text() shouldBe (
-      if (isATrust) ""
-      else if (isPeriodOfAdmin) ""
-      else
+      if (isATrust) {
+        ""
+      } else if (isPeriodOfAdmin) {
+        ""
+      } else {
         formatAmountOfMoneyWithPoundSign(
           completeYearToDateLiabilityAnswers.estimatedIncome.inPounds()
         )
+      }
     )
 
     completeYearToDateLiabilityAnswers.personalAllowance.foreach(f =>
       doc.select("#personalAllowance-value-answer").text() shouldBe (
-        if (isATrust) ""
-        else if (isPeriodOfAdmin) ""
-        else formatAmountOfMoneyWithPoundSign(f.inPounds())
+        if (isATrust) {
+          ""
+        } else if (isPeriodOfAdmin) {
+          ""
+        } else {
+          formatAmountOfMoneyWithPoundSign(f.inPounds())
+        }
       )
     )
 
     doc.select("#hasEstimatedDetails-value-answer").text() shouldBe (
-      if (hideEstimatesQuestion) ""
-      else if (completeYearToDateLiabilityAnswers.hasEstimatedDetails) "Yes"
-      else "No"
+      if (hideEstimatesQuestion) {
+        ""
+      } else if (completeYearToDateLiabilityAnswers.hasEstimatedDetails) {
+        "Yes"
+      } else {
+        "No"
+      }
     )
 
     doc
@@ -9566,15 +9568,20 @@ object YearToDateLiabilityControllerSpec extends Matchers {
         .text                                            shouldBe formatAmountOfMoneyWithPoundSign(
         answers.taxableGainOrLoss.inPounds()
       )
-    } else
+    } else {
       doc.select("#taxableGainOrLossAnswer-answer").text shouldBe messages(
         s"taxableGainOrLoss$furtherReturnKey.noLossOrGain.label"
       )
+    }
 
     doc.select("#hasEstimatedDetails-value-answer").text() shouldBe (
-      if (hideEstimatesQuestion) ""
-      else if (answers.hasEstimatedDetails) "Yes"
-      else "No"
+      if (hideEstimatesQuestion) {
+        ""
+      } else if (answers.hasEstimatedDetails) {
+        "Yes"
+      } else {
+        "No"
+      }
     )
 
     if (isFurtherOrAmendReturn) {

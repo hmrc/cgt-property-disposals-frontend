@@ -41,7 +41,7 @@ class SubscriptionEnterAddressControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val subscriptionMissingData = SubscriptionMissingData(
+  private val subscriptionMissingData = SubscriptionMissingData(
     sample[BusinessPartnerRecord].copy(address = None),
     None,
     None,
@@ -49,11 +49,14 @@ class SubscriptionEnterAddressControllerSpec
     None
   )
 
-  val validJourneyStatus = SubscriptionEnterAddressJourney(subscriptionMissingData)
+  protected override lazy val controller: SubscriptionEnterAddressController =
+    instanceOf[SubscriptionEnterAddressController]
 
-  lazy val controller = instanceOf[SubscriptionEnterAddressController]
+  protected override val validJourneyStatus: SubscriptionEnterAddressJourney = SubscriptionEnterAddressJourney(
+    subscriptionMissingData
+  )
 
-  lazy implicit val messagesApi: MessagesApi = controller.messagesApi
+  private lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   override def updateAddress(
     journey: SubscriptionEnterAddressJourney,
@@ -61,9 +64,7 @@ class SubscriptionEnterAddressControllerSpec
   ): SubscriptionMissingData =
     journey.journey.copy(manuallyEnteredAddress = Some(address))
 
-  override val mockUpdateAddress: Option[
-    (SubscriptionEnterAddressJourney, Address, Either[Error, Unit]) => Unit
-  ] = None
+  override val mockUpdateAddress: Option[(SubscriptionEnterAddressJourney, Address, Either[Error, Unit]) => Unit] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(

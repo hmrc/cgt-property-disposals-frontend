@@ -78,9 +78,9 @@ class ReliefDetailsControllerSpec
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
-  val mockUUIDGenerator = mock[UUIDGenerator]
+  private val mockUUIDGenerator = mock[UUIDGenerator]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -88,15 +88,15 @@ class ReliefDetailsControllerSpec
       bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     )
 
-  lazy val controller = instanceOf[ReliefDetailsController]
+  private lazy val controller = instanceOf[ReliefDetailsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
-  val maxLettingsReliefValue = AmountInPence.fromPounds(40000)
+  private val maxLettingsReliefValue = AmountInPence.fromPounds(40000)
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) =
+  private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
@@ -209,8 +209,7 @@ class ReliefDetailsControllerSpec
     }
 
   def isPeriodOfAdmin(individualUserType: IndividualUserType): Boolean =
-    if (individualUserType === PersonalRepresentativeInPeriodOfAdmin) true
-    else false
+    if (individualUserType === PersonalRepresentativeInPeriodOfAdmin) true else false
 
   "ReliefDetailsController" when {
 
@@ -330,7 +329,7 @@ class ReliefDetailsControllerSpec
         d: DraftSingleDisposalReturn,
         newAnswers: ReliefDetailsAnswers,
         isFurtherOrAmendReturn: Boolean
-      ) =
+      ): DraftSingleDisposalReturn =
         d.copy(
           reliefDetailsAnswers = Some(newAnswers),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
@@ -356,7 +355,7 @@ class ReliefDetailsControllerSpec
           userType: UserType,
           individualUserType: IndividualUserType,
           userKey: String
-        ) = {
+        ): Unit = {
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -412,8 +411,7 @@ class ReliefDetailsControllerSpec
         ): (SessionData, FillingOutReturn, DraftReturn) = {
 
           val lettingRelief =
-            if (isPeriodOfAdmin(individualUserType)) Some(AmountInPence.zero)
-            else None
+            if (isPeriodOfAdmin(individualUserType)) Some(AmountInPence.zero) else None
 
           val currentAnswers = sample[IncompleteReliefDetailsAnswers].copy(
             privateResidentsRelief = Some(AmountInPence.fromPounds(1d)),
@@ -538,8 +536,7 @@ class ReliefDetailsControllerSpec
               .copy(reliefDetailsAnswers = Some(oldAnswers))
 
             val lettingsRelief =
-              if (oldDraftReturn.triageAnswers.isPeriodOfAdmin) Some(AmountInPence.zero)
-              else None
+              if (oldDraftReturn.triageAnswers.isPeriodOfAdmin) Some(AmountInPence.zero) else None
 
             val newDraftReturn =
               updateDraftReturn(
@@ -603,8 +600,7 @@ class ReliefDetailsControllerSpec
               forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
                 (userType: UserType, individualUserType: IndividualUserType) =>
                   val lettingRelief =
-                    if (isPeriodOfAdmin(individualUserType)) Some(AmountInPence.zero)
-                    else None
+                    if (isPeriodOfAdmin(individualUserType)) Some(AmountInPence.zero) else None
 
                   val completeAnswers                 = ic.copy(
                     privateResidentsRelief = Some(AmountInPence.fromPounds(5)),
@@ -810,7 +806,7 @@ class ReliefDetailsControllerSpec
         d: DraftSingleDisposalReturn,
         newAnswers: ReliefDetailsAnswers,
         isFurtherOrAmendReturn: Boolean
-      ) =
+      ): DraftSingleDisposalReturn =
         d.copy(
           reliefDetailsAnswers = Some(newAnswers),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
@@ -835,7 +831,7 @@ class ReliefDetailsControllerSpec
           userType: UserType,
           individualUserType: IndividualUserType,
           userKey: String
-        ) = {
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -942,7 +938,7 @@ class ReliefDetailsControllerSpec
         def getSessionDataJourneyAndDraftReturn(
           userType: UserType,
           individualUserType: IndividualUserType
-        ) = {
+        ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
           val (session, journey, draftReturn) =
             sessionWithReliefDetailsAnswers(
               currentAnswers,
@@ -1363,7 +1359,7 @@ class ReliefDetailsControllerSpec
           userType: UserType,
           individualUserType: IndividualUserType,
           userKey: String
-        ) = {
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1421,7 +1417,7 @@ class ReliefDetailsControllerSpec
           userType: UserType,
           individualUserType: IndividualUserType,
           userKey: String
-        ) = {
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -2323,9 +2319,9 @@ object ReliefDetailsControllerSpec extends Matchers {
     isPeriodOfAdmin: Boolean = false
   ): Unit = {
 
-    if (reliefDetailsAnswers.privateResidentsRelief.isZero)
+    if (reliefDetailsAnswers.privateResidentsRelief.isZero) {
       doc.select("#privateResidentsReliefValue-answer").text shouldBe "No"
-    else {
+    } else {
       doc.select("#privateResidentsRelief-answer").text shouldBe "Yes"
       doc
         .select("#privateResidentsReliefValue-answer")
@@ -2334,11 +2330,11 @@ object ReliefDetailsControllerSpec extends Matchers {
       )
     }
 
-    if (!isPeriodOfAdmin)
-      if (reliefDetailsAnswers.privateResidentsRelief.isPositive)
-        if (reliefDetailsAnswers.lettingsRelief.isZero)
+    if (!isPeriodOfAdmin) {
+      if (reliefDetailsAnswers.privateResidentsRelief.isPositive) {
+        if (reliefDetailsAnswers.lettingsRelief.isZero) {
           doc.select("#lettingsReliefValue-answer").text shouldBe "No"
-        else {
+        } else {
           doc.select("#lettingsRelief-answer").text shouldBe "Yes"
           doc
             .select("#lettingsReliefValue-answer")
@@ -2346,10 +2342,11 @@ object ReliefDetailsControllerSpec extends Matchers {
             reliefDetailsAnswers.lettingsRelief.inPounds()
           )
         }
-      else {
+      } else {
         doc.select("#lettingsReliefValue-answer").hasText shouldBe false
         doc.select("#lettingsRelief-answer").hasText      shouldBe false
       }
+    }
 
     reliefDetailsAnswers.otherReliefs.foreach {
       case a: OtherReliefsOption.OtherReliefs =>

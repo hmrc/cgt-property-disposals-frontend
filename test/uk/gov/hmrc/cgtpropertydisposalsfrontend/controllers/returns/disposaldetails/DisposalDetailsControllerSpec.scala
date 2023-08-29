@@ -78,7 +78,7 @@ class DisposalDetailsControllerSpec
 
   val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -86,11 +86,11 @@ class DisposalDetailsControllerSpec
       bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     )
 
-  lazy val controller = instanceOf[DisposalDetailsController]
+  private lazy val controller = instanceOf[DisposalDetailsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) =
+  private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
@@ -127,11 +127,13 @@ class DisposalDetailsControllerSpec
       individualUserType = individualUserType
     )
     val reliefDetails      =
-      if (individualUserType.contains(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin))
+      if (individualUserType.contains(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)) {
         sample[CompleteReliefDetailsAnswers].copy(
           lettingsRelief = AmountInPence.zero
         )
-      else sample[CompleteReliefDetailsAnswers]
+      } else {
+        sample[CompleteReliefDetailsAnswers]
+      }
     val representeeAnswers = individualUserType.flatMap {
       case Self => None
       case _    => Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true))
@@ -414,7 +416,7 @@ class DisposalDetailsControllerSpec
         d: DraftSingleDisposalReturn,
         newAnswers: DisposalDetailsAnswers,
         isFurtherOrAmendReturn: Boolean
-      ) =
+      ): DraftSingleDisposalReturn =
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
           acquisitionDetailsAnswers = None,
@@ -444,7 +446,7 @@ class DisposalDetailsControllerSpec
           disposalMethod: DisposalMethod,
           userType: UserType,
           individualUserType: IndividualUserType
-        ) = {
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -638,13 +640,7 @@ class DisposalDetailsControllerSpec
               val currentAnswers                  = sample[CompleteDisposalDetailsAnswers]
                 .copy(shareOfProperty = ShareOfProperty.Half)
               val (session, journey, draftReturn) =
-                sessionWithDisposalDetailsAnswers(
-                  currentAnswers,
-                  disposalMethod,
-                  userType,
-                  Some(individualUserType),
-                  isAmend = false
-                )
+                sessionWithDisposalDetailsAnswers(currentAnswers, disposalMethod, userType, Some(individualUserType))
               val newShare                        = ShareOfProperty.Full
               val newDraftReturn                  =
                 updateDraftReturn(
@@ -1033,7 +1029,7 @@ class DisposalDetailsControllerSpec
       def disposalPriceTitleScenarios(
         individualUserType: IndividualUserType,
         userType: UserType
-      ) = {
+      ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
         val userMsgKey = userMessageKey(individualUserType, userType)
         List(
           (
@@ -1233,7 +1229,7 @@ class DisposalDetailsControllerSpec
         d: DraftSingleDisposalReturn,
         newAnswers: DisposalDetailsAnswers,
         isFurtherOrAmendReturn: Boolean
-      ) =
+      ): DraftSingleDisposalReturn =
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
@@ -1273,7 +1269,7 @@ class DisposalDetailsControllerSpec
           disposalMethod: DisposalMethod,
           userType: UserType,
           individualUserType: IndividualUserType
-        ) = {
+        ): Unit = {
 
           val disposalMethodKey = disposalMethodErrorKey(disposalMethod)
 
@@ -1886,7 +1882,7 @@ class DisposalDetailsControllerSpec
         d: DraftSingleDisposalReturn,
         newAnswers: DisposalDetailsAnswers,
         isFurtherOrAmendReturn: Boolean
-      ) =
+      ): DraftSingleDisposalReturn =
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
@@ -2367,7 +2363,7 @@ class DisposalDetailsControllerSpec
       def disposalFeesTitleScenarios(
         individualUserType: IndividualUserType,
         userType: UserType
-      ) = {
+      ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
         val userKey = userMessageKey(individualUserType, userType)
         List(
           (
@@ -2596,7 +2592,7 @@ class DisposalDetailsControllerSpec
         d: DraftSingleDisposalReturn,
         newAnswers: DisposalDetailsAnswers,
         isFurtherOrAmendReturn: Boolean
-      ) =
+      ): DraftSingleDisposalReturn =
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
@@ -2668,7 +2664,7 @@ class DisposalDetailsControllerSpec
           disposalMethod: DisposalMethod,
           userType: UserType,
           individualUserType: IndividualUserType
-        ) = {
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -3660,16 +3656,17 @@ object DisposalDetailsControllerSpec extends Matchers {
     doc: Document,
     isIndirectDisposal: Boolean = false
   ): Unit = {
-    if (isIndirectDisposal)
+    if (isIndirectDisposal) {
       doc
         .select("#propertyShare-answer")
         .text()
         .stripSuffix("%") shouldBe ""
-    else
+    } else {
       doc
         .select("#propertyShare-answer")
         .text()
         .stripSuffix("%") shouldBe disposalDetailsAnswers.shareOfProperty.percentageValue.toString()
+    }
 
     doc
       .select("#disposalPrice-answer")

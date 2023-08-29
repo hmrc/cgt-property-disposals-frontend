@@ -42,8 +42,8 @@ import java.time.LocalDate
 
 class JourneyStatusSpec extends AnyWordSpec with Matchers {
 
-  val date    = LocalDate.of(2020, 4, 6)
-  val taxYear = sample[TaxYear].copy(startDateInclusive = date)
+  private val date    = LocalDate.of(2020, 4, 6)
+  private val taxYear = sample[TaxYear].copy(startDateInclusive = date)
 
   "FillingOutReturn" must {
 
@@ -51,9 +51,9 @@ class JourneyStatusSpec extends AnyWordSpec with Matchers {
 
       "tries to say when a draft is return is a further return" when {
 
-        def getdraftReturn(): DraftReturn = {
+        def getDraftReturn: DraftReturn = {
 
-          val sampleDisosalDate        = DisposalDate(date, taxYear)
+          val sampleDisposalDate       = DisposalDate(date, taxYear)
           val draftReturn: DraftReturn = sample[DraftReturn].fold(
             _.copy(triageAnswers =
               sample[CompleteMultipleDisposalsTriageAnswers].copy(
@@ -62,12 +62,12 @@ class JourneyStatusSpec extends AnyWordSpec with Matchers {
             ),
             _.copy(triageAnswers =
               sample[CompleteSingleDisposalTriageAnswers].copy(
-                disposalDate = sampleDisosalDate
+                disposalDate = sampleDisposalDate
               )
             ),
             _.copy(triageAnswers =
               sample[CompleteSingleDisposalTriageAnswers].copy(
-                disposalDate = sampleDisosalDate
+                disposalDate = sampleDisposalDate
               )
             ),
             _.copy(triageAnswers =
@@ -77,7 +77,7 @@ class JourneyStatusSpec extends AnyWordSpec with Matchers {
             ),
             _.copy(triageAnswers =
               sample[CompleteSingleDisposalTriageAnswers].copy(
-                disposalDate = sampleDisosalDate
+                disposalDate = sampleDisposalDate
               )
             )
           )
@@ -85,8 +85,8 @@ class JourneyStatusSpec extends AnyWordSpec with Matchers {
           draftReturn
         }
 
-        def getPrviousReturnDate(): PreviousReturnData = {
-          val taxYearStartYear: String = getdraftReturn()
+        def getPreviousReturnDate: PreviousReturnData = {
+          val taxYearStartYear: String = getDraftReturn
             .fold(
               _.triageAnswers.fold(
                 _.taxYear.map(_.startDateInclusive.getYear),
@@ -140,21 +140,21 @@ class JourneyStatusSpec extends AnyWordSpec with Matchers {
             fillingOutReturn(
               Left(sample[TrustName]),
               None,
-              getdraftReturn()
+              getDraftReturn
             ).isFurtherOrAmendReturn shouldBe Some(false)
 
             fillingOutReturn(
               Left(sample[TrustName]),
               Some(PreviousReturnData(List.empty, None, None, None)),
-              getdraftReturn()
+              getDraftReturn
             ).isFurtherOrAmendReturn shouldBe Some(false)
           }
 
           "the user has previously sent returns" in {
             fillingOutReturn(
               Left(sample[TrustName]),
-              Some(getPrviousReturnDate()),
-              getdraftReturn()
+              Some(getPreviousReturnDate),
+              getDraftReturn
             ).isFurtherOrAmendReturn shouldBe Some(true)
           }
 
@@ -199,7 +199,7 @@ class JourneyStatusSpec extends AnyWordSpec with Matchers {
             "the user has previously sent returns" in {
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(getPrviousReturnDate()),
+                Some(getPreviousReturnDate),
                 draftReturn
               ).isFurtherOrAmendReturn shouldBe Some(true)
             }
@@ -280,7 +280,9 @@ class JourneyStatusSpec extends AnyWordSpec with Matchers {
         val fillingOutReturn = sample[FillingOutReturn].copy(amendReturnData = None)
         val amendReturnData  = sample[AmendReturnData]
 
-        def fillingOutReturnWithDisplayGainOrLossAfterReliefsForAmends(shouldDisplayGainOrLossAfterReliefs: Boolean) =
+        def fillingOutReturnWithDisplayGainOrLossAfterReliefsForAmends(
+          shouldDisplayGainOrLossAfterReliefs: Boolean
+        ): FillingOutReturn =
           fillingOutReturn.copy(amendReturnData =
             Some(amendReturnData.copy(shouldDisplayGainOrLossAfterReliefs = shouldDisplayGainOrLossAfterReliefs))
           )

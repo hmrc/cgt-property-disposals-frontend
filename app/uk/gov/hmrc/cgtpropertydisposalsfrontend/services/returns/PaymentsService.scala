@@ -78,13 +78,13 @@ class PaymentsServiceImpl @Inject() (
         backUrl
       )
       .subflatMap { response =>
-        if (response.status =!= CREATED)
+        if (response.status =!= CREATED) {
           Left(
             Error(
               s"Call to start payments journey came back with status other than 201 (CREATED): ${response.status}"
             )
           )
-        else
+        } else {
           response
             .parseJSON[PaymentsJourney]()
             .leftMap(Error(_))
@@ -100,6 +100,7 @@ class PaymentsServiceImpl @Inject() (
               )
               journey
             }
+        }
       }
 
 }

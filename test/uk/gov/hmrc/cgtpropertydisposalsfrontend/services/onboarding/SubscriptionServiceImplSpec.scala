@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactNameSource.{ManuallyEntered => ManuallyEnteredContactName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource.{ManuallyEntered => ManuallyEnteredEmail}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource.{ManuallyEntered => ManuallyEnteredEmail}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
@@ -46,11 +46,11 @@ import scala.concurrent.Future
 
 class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
-  val mockConnector = mock[CGTPropertyDisposalsConnector]
+  private val mockConnector = mock[CGTPropertyDisposalsConnector]
 
   val service = new SubscriptionServiceImpl(mockConnector, MockMetrics.metrics)
 
-  def mockSubscribe(
+  private def mockSubscribe(
     expectedSubscriptionDetails: SubscriptionDetails,
     expectedLang: Lang
   )(response: Either[Error, HttpResponse]) =
@@ -59,13 +59,13 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
       .expects(expectedSubscriptionDetails, expectedLang, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockHasSubscription()(response: Either[Error, HttpResponse]) =
+  private def mockHasSubscription()(response: Either[Error, HttpResponse]) =
     (mockConnector
       .getSubscriptionStatus()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
-  def mockRegisterWithoutId(
+  private def mockRegisterWithoutId(
     expectedRegistrationDetails: RegistrationDetails
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
@@ -73,7 +73,7 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
       .expects(expectedRegistrationDetails, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockGetSusbcribedDetails(
+  private def mockGetSubscribedDetails(
     cgtReference: CgtReference
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
@@ -81,7 +81,7 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockUpdateSubscriptionDetails(
+  private def mockUpdateSubscriptionDetails(
     subscribedAndVerifierDetails: SubscribedUpdateDetails
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
@@ -262,7 +262,7 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
       "return an error" when {
 
         "the http call comes back with a status other than 200" in {
-          mockGetSusbcribedDetails(cgtReference)(Right(HttpResponse(500, emptyJsonBody)))
+          mockGetSubscribedDetails(cgtReference)(Right(HttpResponse(500, emptyJsonBody)))
 
           await(
             service.getSubscribedDetails(cgtReference).value
@@ -270,7 +270,7 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
         }
 
         "there is no JSON in the body of the http response" in {
-          mockGetSusbcribedDetails(cgtReference)(Right(HttpResponse(200, noJsonInBody)))
+          mockGetSubscribedDetails(cgtReference)(Right(HttpResponse(200, noJsonInBody)))
 
           await(
             service.getSubscribedDetails(cgtReference).value
@@ -278,7 +278,7 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
         }
 
         "the JSON body of the response cannot be parsed" in {
-          mockGetSusbcribedDetails(cgtReference)(
+          mockGetSubscribedDetails(cgtReference)(
             Right(HttpResponse(200, JsNumber(1), Map[String, Seq[String]]().empty))
           )
 
@@ -292,7 +292,7 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
         "body of the response can be parsed" in {
           val subscribedDetails = sample[SubscribedDetails]
 
-          mockGetSusbcribedDetails(cgtReference)(
+          mockGetSubscribedDetails(cgtReference)(
             Right(
               HttpResponse(
                 200,
@@ -311,7 +311,7 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
 
       "return None if the call comes back with status 200 and the JSON " +
         "body of the response doesn't contain subscribed details" in {
-          mockGetSusbcribedDetails(cgtReference)(
+          mockGetSubscribedDetails(cgtReference)(
             Right(HttpResponse(200, Json.parse("{}"), Map[String, Seq[String]]().empty))
           )
 

@@ -98,11 +98,11 @@ class InitialGainOrLossController @Inject() (
                 )
               ),
             value =>
-              if (answers.map(_.inPounds()).contains(value))
+              if (answers.map(_.inPounds()).contains(value)) {
                 Redirect(
                   routes.InitialGainOrLossController.checkYourAnswers()
                 )
-              else {
+              } else {
                 val updatedDraftReturn =
                   draftReturn.copy(
                     initialGainOrLoss = Some(AmountInPence.fromPounds(value)),
@@ -208,7 +208,7 @@ class InitialGainOrLossController @Inject() (
 
 object InitialGainOrLossController {
 
-  val initialGainOrLossForm: Form[BigDecimal] = {
+  private val initialGainOrLossForm = {
     val (outerId, gainId, lossId) = ("initialGainOrLoss", "gain", "loss")
 
     def innerOption(id: String): InnerOption[BigDecimal] =
@@ -234,18 +234,19 @@ object InitialGainOrLossController {
         Right(BigDecimal(0))
       )
     ) { d =>
-      if (d > 0)
+      if (d > 0) {
         Map(
           outerId -> "0",
           gainId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
         )
-      else if (d < 0)
+      } else if (d < 0) {
         Map(
-          outerId   -> "1",
-          lossId    -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign((d * -1))
+          outerId -> "1",
+          lossId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d * -1)
         )
-      else
+      } else {
         Map(outerId -> "2")
+      }
     }
 
     Form[BigDecimal](

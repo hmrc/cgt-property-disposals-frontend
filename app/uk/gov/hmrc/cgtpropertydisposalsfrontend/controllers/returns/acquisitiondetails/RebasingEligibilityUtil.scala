@@ -69,10 +69,11 @@ class RebasingEligibilityUtil {
     wasUkResident: Boolean,
     representativeType: Option[RepresentativeType]
   ): Option[LocalDate] =
-    if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
+    if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)) {
       None
-    else
+    } else {
       Some(getRebasingCutOffDate(assetType, wasUkResident)).filter(acquisitionDate.value.minusDays(1L).isBefore)
+    }
 
   def getRebasingCutOffDate(
     completeReturn: CompleteSingleDisposalReturn
@@ -86,15 +87,17 @@ class RebasingEligibilityUtil {
     assetType: AssetType,
     wasUkResident: Boolean
   ): LocalDate =
-    if (wasUkResident)
+    if (wasUkResident) {
       RebasingCutoffDates.ukResidents
-    else if (assetType === AssetType.Residential)
+    } else if (assetType === AssetType.Residential) {
       RebasingCutoffDates.nonUkResidentsResidentialProperty
-    else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
+    } else {
+      RebasingCutoffDates.nonUkResidentsNonResidentialProperty
+    }
 
   private def extractIsUk(
     completeReturn: CompleteSingleDisposalReturn
   ): Boolean =
-    completeReturn.triageAnswers.countryOfResidence.isUk()
+    completeReturn.triageAnswers.countryOfResidence.isUk
 
 }

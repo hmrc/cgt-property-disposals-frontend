@@ -38,10 +38,10 @@ import scala.concurrent.Future
 
 class UpscanServiceImplSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks with MockFactory {
 
-  val mockConnector                = mock[UpscanConnector]
+  private val mockConnector        = mock[UpscanConnector]
   val service                      = new UpscanServiceImpl(mockConnector)
-  val reference                    = sample[UploadReference]
-  val upload                       = sample[UpscanUpload]
+  private val reference            = sample[UploadReference]
+  private val upload               = sample[UpscanUpload]
   implicit val hc: HeaderCarrier   = HeaderCarrier()
   implicit val request: Request[_] = FakeRequest()
 

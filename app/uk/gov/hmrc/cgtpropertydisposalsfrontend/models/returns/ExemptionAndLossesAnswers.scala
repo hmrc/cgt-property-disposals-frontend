@@ -71,10 +71,7 @@ object ExemptionAndLossesAnswers {
       }
 
     def unset[A](
-      fieldLens: IncompleteExemptionAndLossesAnswers.type => Lens[
-        IncompleteExemptionAndLossesAnswers,
-        Option[A]
-      ]
+      fieldLens: IncompleteExemptionAndLossesAnswers.type => Lens[IncompleteExemptionAndLossesAnswers, Option[A]]
     ): IncompleteExemptionAndLossesAnswers =
       fieldLens(IncompleteExemptionAndLossesAnswers).set(None)(
         fold(identity, IncompleteExemptionAndLossesAnswers.fromCompleteAnswers)

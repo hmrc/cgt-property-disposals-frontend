@@ -25,7 +25,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait ExamplePropertyDetailsAnswers extends Product with Serializable
 
-@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object ExamplePropertyDetailsAnswers {
 
   @Lenses
@@ -49,7 +48,6 @@ object ExamplePropertyDetailsAnswers {
         Some(c.disposalPrice),
         Some(c.acquisitionPrice)
       )
-
   }
 
   final case class CompleteExamplePropertyDetailsAnswers(
@@ -73,12 +71,9 @@ object ExamplePropertyDetailsAnswers {
       }
 
     def unset[A](
-      fieldLens: IncompleteExamplePropertyDetailsAnswers.type => Lens[
-        IncompleteExamplePropertyDetailsAnswers,
-        Option[
-          A
-        ]
-      ]
+      fieldLens: IncompleteExamplePropertyDetailsAnswers.type => Lens[IncompleteExamplePropertyDetailsAnswers, Option[
+        A
+      ]]
     ): IncompleteExamplePropertyDetailsAnswers =
       fieldLens(IncompleteExamplePropertyDetailsAnswers).set(None)(
         fold(
@@ -89,9 +84,7 @@ object ExamplePropertyDetailsAnswers {
 
   }
 
-  implicit val format: OFormat[ExamplePropertyDetailsAnswers] = {
-    implicit val ukAddressFormat: OFormat[UkAddress] = Json.format
-    derived.oformat()
-  }
+  implicit val ukAddressFormat: OFormat[UkAddress]            = Json.format
+  implicit val format: OFormat[ExamplePropertyDetailsAnswers] = derived.oformat()
 
 }
