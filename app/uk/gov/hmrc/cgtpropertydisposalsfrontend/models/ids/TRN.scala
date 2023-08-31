@@ -31,10 +31,10 @@ object TRN {
     val regexPredicate = "^[a-zA-Z0-9]{15}$".r.pattern.asPredicate()
 
     def validateTrn(s: String): ValidationResult =
-      if (s.length > 15) Invalid("error.tooLong")
-      else if (s.length < 15) Invalid("error.tooShort")
-      else if (!regexPredicate.test(s)) Invalid("error.pattern")
-      else Valid
+      if (s.length > 15) { Invalid("error.tooLong") }
+      else if (s.length < 15) { Invalid("error.tooShort") }
+      else if (!regexPredicate.test(s)) { Invalid("error.pattern") }
+      else { Valid }
 
     nonEmptyText
       .transform[String](_.trim, identity)

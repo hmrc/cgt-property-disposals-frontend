@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
@@ -63,31 +63,29 @@ class RegistrationControllerSpec
     with NameFormValidationTests
     with RedirectToStartBehaviour {
 
-  override val overrideBindings =
+  override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
-  lazy val controller = instanceOf[RegistrationController]
+  private lazy val controller = instanceOf[RegistrationController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
   implicit val subscriptionStatusEq: Eq[SubscriptionStatus] =
     Eq.fromUniversalEquals
 
-  val name = sample[IndividualName]
+  private val ggCredId = sample[GGCredId]
 
-  val ggCredId = sample[GGCredId]
-
-  val individualWithInsufficentCLSubscriptionStatus =
+  private val individualWithInsufficientCLSubscriptionStatus =
     TryingToGetIndividualsFootprint(Some(false), Some(false), None, ggCredId)
 
   val journeyStatusLens: Lens[SessionData, Option[JourneyStatus]] =
     lens[SessionData].journeyStatus
 
-  def mockRegisterWithoutId(
+  private def mockRegisterWithoutId(
     registrationDetails: RegistrationDetails
   )(result: Either[Error, RegisteredWithoutId]) =
     (mockSubscriptionService
@@ -95,7 +93,7 @@ class RegistrationControllerSpec
       .expects(registrationDetails, *)
       .returning(EitherT(Future.successful(result)))
 
-  def mockSubscribe(
+  private def mockSubscribe(
     subscriptionDetails: SubscriptionDetails,
     lang: Lang
   )(result: Either[Error, SubscriptionResponse]) =
@@ -134,7 +132,7 @@ class RegistrationControllerSpec
         "the session data indicates that the user has no digital footprint and " +
           "the user has opted to start registration" in {
             val sessionData =
-              SessionData.empty.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
+              SessionData.empty.copy(journeyStatus = Some(individualWithInsufficientCLSubscriptionStatus))
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -185,7 +183,7 @@ class RegistrationControllerSpec
         )
 
       val sessionData =
-        SessionData.empty.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
+        SessionData.empty.copy(journeyStatus = Some(individualWithInsufficientCLSubscriptionStatus))
 
       behave like redirectToStartBehaviour(() => performAction())
 

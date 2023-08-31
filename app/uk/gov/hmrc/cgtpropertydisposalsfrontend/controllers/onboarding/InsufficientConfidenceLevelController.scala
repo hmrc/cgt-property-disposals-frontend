@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOffTIvEvent, WrongGGAccountEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, NameMatchServiceError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, NameMatchRetryService}
@@ -120,11 +120,12 @@ class InsufficientConfidenceLevelController @Inject() (
                       "handoff-to-iv"
                     )
                     redirectToIv
-                  } else
+                  } else {
                     Redirect(
                       routes.InsufficientConfidenceLevelController
                         .doYouHaveAnSaUtr()
                     )
+                  }
               }
           )
       }
@@ -184,13 +185,14 @@ class InsufficientConfidenceLevelController @Inject() (
                     errorHandler.errorResult()
 
                   case Right(_) =>
-                    if (hasSautr)
+                    if (hasSautr) {
                       Redirect(
                         routes.InsufficientConfidenceLevelController
                           .enterSautrAndName()
                       )
-                    else
+                    } else {
                       Redirect(routes.RegistrationController.selectEntityType())
+                    }
                 }
             )
         }
@@ -353,7 +355,7 @@ class InsufficientConfidenceLevelController @Inject() (
                                  request.messages.lang
                                )
                                .subflatMap { case (bpr, bprResponse) =>
-                                 if (bpr.name.isLeft)
+                                 if (bpr.name.isLeft) {
                                    Left(
                                      NameMatchServiceError
                                        .BackendError(
@@ -362,8 +364,9 @@ class InsufficientConfidenceLevelController @Inject() (
                                          )
                                        )
                                    )
-                                 else
+                                 } else {
                                    Right(bpr -> bprResponse)
+                                 }
                                }
       _                   <- EitherT(
                                updateSession(sessionStore, request)(
@@ -434,21 +437,21 @@ object InsufficientConfidenceLevelController {
 
   }
 
-  val haveANinoForm: Form[Boolean] =
+  private val haveANinoForm =
     Form(
       mapping(
         "hasNino" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
-  val hasSaUtrForm: Form[Boolean] =
+  private val hasSaUtrForm =
     Form(
       mapping(
         "hasSaUtr" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
-  val sautrAndNameForm: Form[IndividualSautrNameMatchDetails] =
+  private val sautrAndNameForm =
     Form(
       mapping(
         "saUtr"     -> SAUTR.mapping,
@@ -475,9 +478,7 @@ object InsufficientConfidenceLevelController {
   ) extends AnyVal {
 
     def withUnsuccessfulAttemptsError(
-      numberOfUnsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[
-        IndividualSautrNameMatchDetails
-      ]
+      numberOfUnsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]
     ): Form[IndividualSautrNameMatchDetails] =
       form
         .withGlobalError(

@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.OnboardingDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -49,13 +49,13 @@ class CGTPropertyDisposalsConnectorImplSpec
     with HttpSupport
     with ConnectorSpec {
 
-  val config = Configuration(
+  private val config = Configuration(
     ConfigFactory.parseString(
       """
       |microservice {
       |  services {
       |    cgt-property-disposals {
-      |      protocol = http
+      |      protocol = https
       |      host     = host
       |      port     = 123
       |    }
@@ -78,7 +78,7 @@ class CGTPropertyDisposalsConnectorImplSpec
     "handling request to update to the subscription details" must {
 
       val subscriptionStatusUrl =
-        "http://host:123/cgt-property-disposals/subscription"
+        "https://host:123/cgt-property-disposals/subscription"
 
       val newSubscribedDetails = SubscribedDetails(
         Right(IndividualName("Stephen", "Wood")),
@@ -93,7 +93,7 @@ class CGTPropertyDisposalsConnectorImplSpec
         ContactName("Stephen Wood"),
         CgtReference("XFCGT123456789"),
         Some(TelephoneNumber("(+013)32752856")),
-        true
+        registeredWithId = true
       )
 
       val previousSubscribedDetails = SubscribedDetails(
@@ -109,7 +109,7 @@ class CGTPropertyDisposalsConnectorImplSpec
         ContactName("John Wick"),
         CgtReference("XFCGT123456789"),
         Some(TelephoneNumber("(+013)32752856")),
-        true
+        registeredWithId = true
       )
 
       val subscribedUpdateDetails =
@@ -124,7 +124,7 @@ class CGTPropertyDisposalsConnectorImplSpec
     "handling request to get the subscription status" must {
 
       val subscriptionStatusUrl =
-        "http://host:123/cgt-property-disposals/check-subscription-status"
+        "https://host:123/cgt-property-disposals/check-subscription-status"
 
       behave like connectorBehaviour(
         mockGet(subscriptionStatusUrl)(_),
@@ -135,7 +135,7 @@ class CGTPropertyDisposalsConnectorImplSpec
     "handling request to get the business partner record" must {
 
       val bprUrl     =
-        "http://host:123/cgt-property-disposals/business-partner-record"
+        "https://host:123/cgt-property-disposals/business-partner-record"
       val bprRequest = sample[BusinessPartnerRecordRequest]
       val lang       = Lang.defaultLang
 
@@ -153,7 +153,7 @@ class CGTPropertyDisposalsConnectorImplSpec
 
       behave like connectorBehaviour(
         mockPost(
-          "http://host:123/cgt-property-disposals/subscription",
+          "https://host:123/cgt-property-disposals/subscription",
           Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language),
           Json.toJson(subscriptionDetails)
         )(_),
@@ -166,7 +166,7 @@ class CGTPropertyDisposalsConnectorImplSpec
 
       behave like connectorBehaviour(
         mockPost(
-          "http://host:123/cgt-property-disposals/register-without-id",
+          "https://host:123/cgt-property-disposals/register-without-id",
           Seq.empty,
           Json.toJson(registrationDetails)
         )(_),
@@ -180,7 +180,7 @@ class CGTPropertyDisposalsConnectorImplSpec
 
       behave like connectorBehaviour(
         mockGet(
-          s"http://host:123/cgt-property-disposals/subscription/${cgtReference.value}"
+          s"https://host:123/cgt-property-disposals/subscription/${cgtReference.value}"
         )(_),
         () => connector.getSubscribedDetails(cgtReference)
       )

@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import cats.data.EitherT
-import cats.instances.future._
 import play.api.Configuration
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
@@ -26,13 +24,10 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Retrieval, ~
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthSupport {
@@ -41,17 +36,6 @@ trait AuthSupport {
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
   val mockSubscriptionService: SubscriptionService = mock[SubscriptionService]
-
-  def mockGetSubscriptionDetails(
-    cgtReference: CgtReference,
-    expectedSubscribedDetails: Either[Error, Option[SubscribedDetails]]
-  ): Unit =
-    (mockSubscriptionService
-      .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
-      .expects(cgtReference, *)
-      .returning(
-        EitherT.fromEither[Future](expectedSubscribedDetails)
-      )
 
   lazy val testAuthenticatedAction = new AuthenticatedActionWithRetrievedData(
     mockSubscriptionService,
@@ -75,7 +59,7 @@ trait AuthSupport {
   def mockAuthWithNoRetrievals(): Unit =
     mockAuth(EmptyPredicate, EmptyRetrieval)(Future.successful(()))
 
-  val expectedRetrievals =
+  private val expectedRetrievals =
     Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and
       Retrievals.saUtr and Retrievals.email and Retrievals.allEnrolments and Retrievals.credentials
 

@@ -28,7 +28,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.NameMatchError.{ServiceError, ValidationError}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
-
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.DeterminingIfOrganisationIsTrust
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment, SubscriptionStatus}
@@ -38,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.WrongGGAccountEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, NameMatchServiceError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, NameMatchRetryService}
@@ -132,12 +131,12 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                   errorHandler.errorResult()
 
                 case Right(_) =>
-                  if (isReportingForTrust)
+                  if (isReportingForTrust) {
                     Redirect(
                       routes.DeterminingIfOrganisationIsTrustController
                         .doYouHaveATrn()
                     )
-                  else {
+                  } else {
                     metrics.nonTrustOrganisationCounter.inc()
                     Redirect(
                       routes.DeterminingIfOrganisationIsTrustController
@@ -152,15 +151,16 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
   def reportWithCorporateTax(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidUser(request) { determiningIfOrganisationIsTrust =>
-        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(false))
+        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(false)) {
           Ok(
             reportWithCorporateTaxPage(
               routes.DeterminingIfOrganisationIsTrustController
                 .doYouWantToReportForATrust()
             )
           )
-        else
+        } else {
           Redirect(controllers.routes.StartController.start())
+        }
       }
     }
 
@@ -179,15 +179,16 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                 .doYouWantToReportForATrust()
             )
           )
-        } else
+        } else {
           Redirect(controllers.routes.StartController.start())
+        }
       }
     }
 
   def doYouHaveATrnSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidUser(request) { determiningIfOrganisationIsTrust =>
-        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true))
+        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true)) {
           doYouHaveATrnForm
             .bindFromRequest()
             .fold(
@@ -216,12 +217,12 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                     errorHandler.errorResult()
 
                   case Right(_) =>
-                    if (hasTrn)
+                    if (hasTrn) {
                       Redirect(
                         routes.DeterminingIfOrganisationIsTrustController
                           .enterTrn()
                       )
-                    else {
+                    } else {
                       metrics.unregisteredTrustCounter.inc()
                       Redirect(
                         routes.DeterminingIfOrganisationIsTrustController
@@ -230,9 +231,9 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                     }
                 }
             )
-        else
+        } else {
           Redirect(controllers.routes.StartController.start())
-
+        }
       }
     }
 
@@ -275,11 +276,9 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                           .leftMap(ServiceError(_))
                 bprWithCgtReference  <- enterTrnAndNameForm
                                           .bindFromRequest()
-                                          .fold[EitherT[
-                                            Future,
-                                            NameMatchError[TrustNameMatchDetails],
-                                            (BusinessPartnerRecord, BusinessPartnerRecordResponse)
-                                          ]](
+                                          .fold[EitherT[Future, NameMatchError[
+                                            TrustNameMatchDetails
+                                          ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)]](
                                             e => EitherT.fromEither[Future](Left(ValidationError(e))),
                                             trustNameMatchDetails =>
                                               attemptNameMatchAndUpdateSession(
@@ -364,9 +363,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
     trustNameMatchDetails: TrustNameMatchDetails,
     ggCredId: GGCredId,
     ggEmail: Option[Email],
-    previousUnsuccessfulAttempt: Option[
-      UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
-    ]
+    previousUnsuccessfulAttempt: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]]
   )(implicit
     hc: HeaderCarrier,
     request: RequestWithSessionData[_]
@@ -382,7 +379,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                 request.messages.lang
                               )
                               .subflatMap { case (bpr, bprResponse) =>
-                                if (bpr.name.isRight)
+                                if (bpr.name.isRight) {
                                   Left(
                                     NameMatchServiceError
                                       .BackendError(
@@ -391,8 +388,9 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                         )
                                       )
                                   )
-                                else
+                                } else {
                                   Right(bpr -> bprResponse)
+                                }
                               }
       _                  <- EitherT(
                               updateSession(sessionStore, request)(
@@ -465,21 +463,21 @@ object DeterminingIfOrganisationIsTrustController {
 
   }
 
-  val doYouWantToReportForATrustForm: Form[Boolean] =
+  private val doYouWantToReportForATrustForm =
     Form(
       mapping(
         "isReportingForATrust" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
-  val doYouHaveATrnForm: Form[Boolean] =
+  private val doYouHaveATrnForm =
     Form(
       mapping(
         "hasTrn" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
-  val enterTrnAndNameForm: Form[TrustNameMatchDetails] =
+  private val enterTrnAndNameForm =
     Form(
       mapping(
         "trn"       -> TRN.mapping,
@@ -498,9 +496,7 @@ object DeterminingIfOrganisationIsTrustController {
   ) extends AnyVal {
 
     def withUnsuccessfulAttemptsError(
-      numberOfUnsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[
-        TrustNameMatchDetails
-      ]
+      numberOfUnsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
     ): Form[TrustNameMatchDetails] =
       form
         .withGlobalError(
@@ -508,7 +504,5 @@ object DeterminingIfOrganisationIsTrustController {
           numberOfUnsuccessfulNameMatchAttempts.unsuccessfulAttempts,
           numberOfUnsuccessfulNameMatchAttempts.maximumAttempts
         )
-
   }
-
 }

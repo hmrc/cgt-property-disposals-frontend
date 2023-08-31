@@ -123,8 +123,11 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
             }
           }
         )
-      _                       <- if (updatedJourney === updatedFillingOutReturn) EitherT.pure[Future, Error](())
-                                 else EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+      _                       <- if (updatedJourney === updatedFillingOutReturn) {
+                                   EitherT.pure[Future, Error](())
+                                 } else {
+                                   EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+                                 }
     } yield eligibility
 
   private def filterPreviousTaxYearReturns(
@@ -159,9 +162,9 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
         .getOrElse(List.empty[ReturnSummary])
 
     val previousReturnsImplyEligibilityForCalculation =
-      fillingOutReturn.previousSentReturns.map(_.previousReturnsImplyEligibilityForCalculation).flatten
+      fillingOutReturn.previousSentReturns.flatMap(_.previousReturnsImplyEligibilityForCalculation)
 
-    val calculationData = fillingOutReturn.previousSentReturns.map(_.calculationData).flatten
+    val calculationData = fillingOutReturn.previousSentReturns.flatMap(_.calculationData)
 
     val updatedFillingOutReturn = for {
       newPreviousYTDLiability <- getPreviousYearToDateLiability(
@@ -211,9 +214,9 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
         val moreThanOneReturnOnLatestDate =
           previousSentReturns
             .count(r => r.lastUpdatedDate.contains(latestDate) || localDateOrder.eqv(r.submissionDate, latestDate)) > 1
-        if (moreThanOneReturnOnLatestDate)
+        if (moreThanOneReturnOnLatestDate) {
           EitherT.pure(None)
-        else
+        } else {
           returnData match {
             case Some(CompleteReturnWithSummary(completeReturn, summary, _))
                 if summary.submissionId === latestReturn.submissionId =>
@@ -223,6 +226,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
                 Some(fromCompleteReturn(displayReturn.completeReturn))
               }
           }
+        }
     }
   }
 
@@ -270,7 +274,9 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
                           ).gainOrLossAfterReliefs
                         )
                         Some(FurtherReturnCalculationData(c.propertyAddress, gainOrLossAfterReliefs))
-                      } else None
+                      } else {
+                        None
+                      }
                     case _                               => None
                   })
               }
@@ -278,15 +284,13 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
             results.sequence[EitherT[Future, Error, *], Option[FurtherReturnCalculationData]].map { results =>
               val (ineligibleResults, eligibleResults) = results.partitionWith(Either.fromOption(_, ()))
 
-              if (ineligibleResults.isEmpty)
+              if (ineligibleResults.isEmpty) {
                 Eligible(glarBreakdown, eligibleResults, address)
-              else
+              } else {
                 Ineligible(Some(false))
-
+              }
             }
-
         }
-
     }
 
   private def eligibleGlarCalculation(
@@ -308,9 +312,9 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
             _,
             _
           ) =>
-        if (!fillingOutReturn.subscribedDetails.isATrust && !triageAnswers.individualUserType.contains(Self))
+        if (!fillingOutReturn.subscribedDetails.isATrust && !triageAnswers.individualUserType.contains(Self)) {
           Right(None)
-        else
+        } else {
           fillingOutReturn.previousSentReturns match {
             case None =>
               Left(Error("Could not find previous return data for individual further or amend return"))
@@ -330,7 +334,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
                   val underPreviousReturnLimit = previousReturnData.summaries.length <= maxPreviousReturns
                   val currentReturnIsEligible  = noOtherReliefs && underPreviousReturnLimit
 
-                  if (currentReturnIsEligible && noOtherReliefs)
+                  if (currentReturnIsEligible && noOtherReliefs) {
                     Some(
                       EligibleData(
                         calculatedGlarBreakdown(
@@ -343,11 +347,14 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
                         address
                       )
                     )
-                  else None
+                  } else {
+                    None
+                  }
               }
 
               Right(result)
           }
+        }
 
       case _: DraftSingleDisposalReturn =>
         Left(Error("Insufficient data in DraftSingleDisposalReturn to determine eligibility for calculation"))

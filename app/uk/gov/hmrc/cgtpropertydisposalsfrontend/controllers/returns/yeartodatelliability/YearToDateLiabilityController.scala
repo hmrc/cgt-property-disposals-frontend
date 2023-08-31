@@ -112,11 +112,12 @@ class YearToDateLiabilityController @Inject() (
       fillingOutReturn.amendReturnData.fold(
         IncompleteNonCalculatedYTDAnswers.empty
       ) { amendReturnData =>
-        if (amendReturnData.preserveEstimatesAnswer)
+        if (amendReturnData.preserveEstimatesAnswer) {
           IncompleteNonCalculatedYTDAnswers.empty
             .copy(hasEstimatedDetails = Some(amendReturnData.originalReturn.completeReturn.hasEstimatedDetails))
-        else
+        } else {
           IncompleteNonCalculatedYTDAnswers.empty
+        }
       }
 
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
@@ -329,7 +330,7 @@ class YearToDateLiabilityController @Inject() (
   )(f: (AssetType, Boolean) => Future[Result]): Future[Result] =
     draftReturn.triageAnswers.fold(
       i => i.assetType -> i.wasAUKResident,
-      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
+      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk)
     ) match {
       case (Some(a), Some(w)) => f(a, w)
       case _                  =>
@@ -344,11 +345,11 @@ class YearToDateLiabilityController @Inject() (
       .fold(
         _.fold(
           _.wasAUKResident,
-          c => Some(c.countryOfResidence.isUk())
+          c => Some(c.countryOfResidence.isUk)
         ),
         _.fold(
           _.wasAUKResident,
-          c => Some(c.countryOfResidence.isUk())
+          c => Some(c.countryOfResidence.isUk)
         )
       ) match {
       case Some(u) => f(u)
@@ -389,14 +390,15 @@ class YearToDateLiabilityController @Inject() (
     answers: CalculatedYTDAnswers
   )(f: AmountInPence => Future[Result]): Future[Result] =
     withEstimatedIncome(answers) { estimatedIncome =>
-      if (estimatedIncome.value > 0L)
+      if (estimatedIncome.value > 0L) {
         answers
           .fold(_.personalAllowance, c => c.personalAllowance)
           .fold[Future[Result]](
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
           )(f)
-      else
+      } else {
         f(AmountInPence.zero)
+      }
     }
 
   private def withHasEstimatedDetails(
@@ -428,12 +430,7 @@ class YearToDateLiabilityController @Inject() (
     }
   }
 
-  private def commonDisplayBehaviour[
-    Y <: YearToDateLiabilityAnswers,
-    A,
-    P : Writeable,
-    R
-  ](
+  private def commonDisplayBehaviour[Y <: YearToDateLiabilityAnswers, A, P : Writeable, R](
     currentAnswers: Y
   )(form: Y => Form[A])(
     page: (Form[A], Call) => P
@@ -457,16 +454,11 @@ class YearToDateLiabilityController @Inject() (
       }
 
       Ok(page(form(currentAnswers), backLink))
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
 
-  private def commonSubmitBehaviour[
-    Y <: YearToDateLiabilityAnswers,
-    D <: DraftReturn : Eq,
-    A,
-    P : Writeable,
-    R
-  ](
+  private def commonSubmitBehaviour[Y <: YearToDateLiabilityAnswers, D <: DraftReturn : Eq, A, P : Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
     currentDraftReturn: D,
     currentAnswers: Y
@@ -503,10 +495,11 @@ class YearToDateLiabilityController @Inject() (
             val newJourney     = currentFillingOutReturn.copy(draftReturn = newDraftReturn)
 
             val result = for {
-              _ <- if (newDraftReturn === currentDraftReturn)
+              _ <- if (newDraftReturn === currentDraftReturn) {
                      EitherT.pure[Future, Error](())
-                   else
+                   } else {
                      returnsService.storeDraftReturn(newJourney)
+                   }
               _ <- EitherT(
                      updateSession(sessionStore, request)(
                        _.copy(journeyStatus = Some(newJourney))
@@ -523,11 +516,11 @@ class YearToDateLiabilityController @Inject() (
                   routes.YearToDateLiabilityController.checkYourAnswers()
                 )
             )
-
           }
         )
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
 
   def estimatedIncome(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -634,9 +627,9 @@ class YearToDateLiabilityController @Inject() (
 
                       val estimatedIncome = AmountInPence.fromPounds(i)
 
-                      if (existingEstimatedIncome.contains(estimatedIncome))
+                      if (existingEstimatedIncome.contains(estimatedIncome)) {
                         draftReturn
-                      else {
+                      } else {
                         val newAnswers = answers match {
                           case calculatedAnswers: CalculatedYTDAnswers =>
                             calculatedAnswers
@@ -653,10 +646,11 @@ class YearToDateLiabilityController @Inject() (
                               taxableGainOrLoss = n.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
                               estimatedIncome = Some(estimatedIncome),
                               hasEstimatedDetails =
-                                if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
+                                if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)) {
                                   n.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
-                                else
-                                  None,
+                                } else {
+                                  None
+                                },
                               taxableGainOrLossCalculation =
                                 n.fold(_.taxableGainOrLossCalculation, _.taxableGainOrLossCalculation)
                             )
@@ -690,7 +684,7 @@ class YearToDateLiabilityController @Inject() (
               withAssetTypeAndResidentialStatus(draftReturn) { (_, wasUkResident) =>
                 withTaxYear(draftReturn) { taxYear =>
                   withEstimatedIncome(answers) { estimatedIncome =>
-                    if (estimatedIncome.value > 0L)
+                    if (estimatedIncome.value > 0L) {
                       commonDisplayBehaviour(answers)(
                         form = { _ =>
                           val emptyForm         = personalAllowanceForm(taxYear)
@@ -719,11 +713,12 @@ class YearToDateLiabilityController @Inject() (
                         },
                         routes.YearToDateLiabilityController.estimatedIncome()
                       )
-                    else
+                    } else {
                       Redirect(
                         routes.YearToDateLiabilityController
                           .checkYourAnswers()
                       )
+                    }
                   }
                 }
               }
@@ -748,7 +743,7 @@ class YearToDateLiabilityController @Inject() (
               withAssetTypeAndResidentialStatus(draftReturn) { (_, wasUkResident) =>
                 withTaxYear(draftReturn) { taxYear =>
                   withEstimatedIncome(answers) { estimatedIncome =>
-                    if (estimatedIncome.value > 0L)
+                    if (estimatedIncome.value > 0L) {
                       commonSubmitBehaviour(
                         fillingOutReturn,
                         draftReturn,
@@ -779,9 +774,9 @@ class YearToDateLiabilityController @Inject() (
                           case n: NonCalculatedYTDAnswers => n.fold(_.personalAllowance, _.personalAllowance)
                         }
                         val personalAllowance         = AmountInPence.fromPounds(p)
-                        if (existingPersonalAllowance.contains(personalAllowance))
+                        if (existingPersonalAllowance.contains(personalAllowance)) {
                           draftReturn
-                        else {
+                        } else {
                           val newAnswers = {
                             answers match {
                               case calculatedAnswers: CalculatedYTDAnswers =>
@@ -800,10 +795,11 @@ class YearToDateLiabilityController @Inject() (
                                   estimatedIncome = Some(estimatedIncome),
                                   personalAllowance = Some(AmountInPence.fromPounds(p)),
                                   hasEstimatedDetails =
-                                    if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
+                                    if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)) {
                                       n.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
-                                    else
-                                      None,
+                                    } else {
+                                      None
+                                    },
                                   taxableGainOrLossCalculation =
                                     n.fold(_.taxableGainOrLossCalculation, _.taxableGainOrLossCalculation)
                                 )
@@ -814,11 +810,12 @@ class YearToDateLiabilityController @Inject() (
 
                         }
                       }
-                    else
+                    } else {
                       Redirect(
                         routes.YearToDateLiabilityController
                           .checkYourAnswers()
                       )
+                    }
                   }
                 }
               }
@@ -830,12 +827,12 @@ class YearToDateLiabilityController @Inject() (
       }
     }
 
-  def hasEstimatedDetails(): Action[AnyContent] =
+  def hasEstimatedDetails: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
-        if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
+        if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)) {
           Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-        else
+        } else {
           (answers, fillingOutReturn.draftReturn) match {
             case (
                   nonCalculatedAnswers: NonCalculatedYTDAnswers,
@@ -858,24 +855,28 @@ class YearToDateLiabilityController @Inject() (
                   )
                 )(
                   requiredPreviousAnswer = answers =>
-                    if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
-                      if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+                    if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn)) {
+                      if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive)) {
                         answers.fold(_.personalAllowance, _.personalAllowance)
-                      else
+                      } else {
                         answers.fold(_.estimatedIncome, _.estimatedIncome)
-                    else
+                      }
+                    } else {
                       answers.fold(
                         _.taxableGainOrLoss,
                         c => Some(c.taxableGainOrLoss)
-                      ),
+                      )
+                    },
                   redirectToIfNoRequiredPreviousAnswer =
-                    if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
-                      if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+                    if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn)) {
+                      if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive)) {
                         routes.YearToDateLiabilityController.personalAllowance()
-                      else
+                      } else {
                         routes.YearToDateLiabilityController.estimatedIncome()
-                    else
+                      }
+                    } else {
                       routes.YearToDateLiabilityController.taxableGainOrLoss()
+                    }
                 )
               }
 
@@ -905,6 +906,7 @@ class YearToDateLiabilityController @Inject() (
               Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
           }
+        }
       }
     }
 
@@ -943,12 +945,12 @@ class YearToDateLiabilityController @Inject() (
       }
     )
 
-  def hasEstimatedDetailsSubmit(): Action[AnyContent] =
+  def hasEstimatedDetailsSubmit: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
-        if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
+        if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)) {
           Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-        else
+        } else {
           (answers, fillingOutReturn.draftReturn) match {
             case (
                   nonCalculatedAnswers: NonCalculatedYTDAnswers,
@@ -973,6 +975,7 @@ class YearToDateLiabilityController @Inject() (
             case _ =>
               Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
           }
+        }
       }
     }
 
@@ -981,14 +984,14 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftSingleDisposalReturn,
     fillingOutReturn: FillingOutReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
-    if (isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn))
+    if (isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn)) {
       estimatedDetailsSubmit(
         calculatedAnswers,
         draftReturn,
         fillingOutReturn,
         None
       )
-    else
+    } else {
       withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
         estimatedDetailsSubmit(
           calculatedAnswers,
@@ -997,6 +1000,7 @@ class YearToDateLiabilityController @Inject() (
           Some(estimatedIncome)
         )
       }
+    }
 
   private def estimatedDetailsSubmit(
     calculatedAnswers: CalculatedYTDAnswers,
@@ -1033,9 +1037,9 @@ class YearToDateLiabilityController @Inject() (
         calculatedAnswers
           .fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
           .contains(hasEstimated)
-      )
+      ) {
         draftReturn
-      else {
+      } else {
         val newAnswers = calculatedAnswers
           .unset(_.calculatedTaxDue)
           .unset(_.mandatoryEvidence)
@@ -1063,34 +1067,38 @@ class YearToDateLiabilityController @Inject() (
         )
       )(
         requiredPreviousAnswer = answers =>
-          if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
-            if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+          if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn)) {
+            if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive)) {
               answers.fold(_.personalAllowance, _.personalAllowance)
-            else
+            } else {
               answers.fold(_.estimatedIncome, _.estimatedIncome)
-          else
+            }
+          } else {
             answers.fold(
               _.taxableGainOrLoss,
               c => Some(c.taxableGainOrLoss)
-            ),
+            )
+          },
         redirectToIfNoRequiredPreviousAnswer =
-          if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn))
-            if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+          if (furtherReturnCalculationEligibility.exists(_.isEligible) && !isATrust(fillingOutReturn)) {
+            if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive)) {
               routes.YearToDateLiabilityController.personalAllowance()
-            else
+            } else {
               routes.YearToDateLiabilityController.estimatedIncome()
-          else
+            }
+          } else {
             routes.YearToDateLiabilityController.taxableGainOrLoss()
+          }
       ) { (hasEstimated, draftReturn) =>
         if (
           nonCalculatedAnswers
             .fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
             .contains(hasEstimated)
-        )
+        ) {
           draftReturn
-        else {
+        } else {
           val newAnswers =
-            if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
+            if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
               nonCalculatedAnswers
                 .unset(_.checkForRepayment)
                 .unset(_.expiredEvidence)
@@ -1099,13 +1107,14 @@ class YearToDateLiabilityController @Inject() (
                 .unset(_.yearToDateLiability)
                 .unset(_.yearToDateLiabilityCalculation)
                 .copy(hasEstimatedDetails = Some(hasEstimated))
-            else
+            } else {
               nonCalculatedAnswers
                 .unset(_.taxDue)
                 .unset(_.mandatoryEvidence)
                 .unset(_.expiredEvidence)
                 .unset(_.pendingUpscanUpload)
                 .copy(hasEstimatedDetails = Some(hasEstimated))
+            }
 
           updateDraftReturn(newAnswers, draftReturn)
         }
@@ -1319,9 +1328,9 @@ class YearToDateLiabilityController @Inject() (
                 calculatedAnswers
                   .fold(_.taxDue, c => Some(c.taxDue))
                   .contains(taxDue)
-              )
+              ) {
                 draftReturn
-              else {
+              } else {
                 val updatedAnswers =
                   calculatedAnswers
                     .unset(_.mandatoryEvidence)
@@ -1393,11 +1402,11 @@ class YearToDateLiabilityController @Inject() (
                 _: DraftSingleDisposalReturn
               ) =>
             withTaxDueAndCalculatedTaxDue(calculatedAnswers) { (taxDue, calculatedTaxDue) =>
-              if (calculatedTaxDue.amountOfTaxDue === taxDue)
+              if (calculatedTaxDue.amountOfTaxDue === taxDue) {
                 Redirect(
                   routes.YearToDateLiabilityController.checkYourAnswers()
                 )
-              else {
+              } else {
                 val backLink = calculatedAnswers.fold(
                   _ => routes.YearToDateLiabilityController.taxDue(),
                   _ => routes.YearToDateLiabilityController.checkYourAnswers()
@@ -1409,10 +1418,11 @@ class YearToDateLiabilityController @Inject() (
           case (nonCalculatedYTDAnswers: NonCalculatedYTDAnswers, _) =>
             val backLink = nonCalculatedYTDAnswers.fold(
               _ =>
-                if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
+                if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
                   routes.YearToDateLiabilityController.repayment()
-                else
-                  routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
+                } else {
+                  routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
+                },
               _ => routes.YearToDateLiabilityController.checkYourAnswers()
             )
 
@@ -1423,10 +1433,11 @@ class YearToDateLiabilityController @Inject() (
                   fillingOutReturn.draftReturn,
                   nonCalculatedYTDAnswers
                 )
-              )
+              ) {
                 commonDisposalMandatoryEvidence(backLink)
-              else
+              } else {
                 Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+              }
             }
 
           case _ =>
@@ -1545,10 +1556,10 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         answers match {
-          case (_: CalculatedYTDAnswers) =>
+          case _: CalculatedYTDAnswers =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
-          case (nonCalculatedAnswers: NonCalculatedYTDAnswers) =>
+          case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
             withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
               def displayPageBehaviour(page: (Form[BigDecimal], Call) => play.twirl.api.Html): Future[Result] =
                 commonDisplayBehaviour(
@@ -1609,12 +1620,12 @@ class YearToDateLiabilityController @Inject() (
                       .contains(taxableGainOrLoss)
                     && nonCalculatedAnswers
                       .fold(_.taxableGainOrLossCalculation, _.taxableGainOrLossCalculation) === calculation
-                  )
+                  ) {
                     draftReturn
-                  else {
+                  } else {
                     val newAnswers =
-                      if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
-                        if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
+                      if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
+                        if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)) {
                           nonCalculatedAnswers
                             .unset(_.yearToDateLiability)
                             .unset(_.taxDue)
@@ -1625,7 +1636,7 @@ class YearToDateLiabilityController @Inject() (
                               taxableGainOrLoss = Some(taxableGainOrLoss),
                               taxableGainOrLossCalculation = calculation
                             )
-                        else
+                        } else {
                           nonCalculatedAnswers
                             .unset(_.hasEstimatedDetails)
                             .unset(_.yearToDateLiability)
@@ -1637,7 +1648,8 @@ class YearToDateLiabilityController @Inject() (
                               taxableGainOrLoss = Some(taxableGainOrLoss),
                               taxableGainOrLossCalculation = calculation
                             )
-                      else
+                        }
+                      } else {
                         nonCalculatedAnswers
                           .unset(_.hasEstimatedDetails)
                           .unset(_.taxDue)
@@ -1645,6 +1657,7 @@ class YearToDateLiabilityController @Inject() (
                           .unset(_.expiredEvidence)
                           .unset(_.pendingUpscanUpload)
                           .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
+                      }
 
                     updateDraftReturn(newAnswers, draftReturn)
                   }
@@ -1678,9 +1691,9 @@ class YearToDateLiabilityController @Inject() (
                     Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
                   case Some(yearToDateLiability) =>
-                    if (nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability).isEmpty)
+                    if (nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability).isEmpty) {
                       Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
-                    else {
+                    } else {
                       val taxOwedOnOriginalReturn = fillingOutReturn.amendReturnData
                         .map(
                           _.originalReturn.completeReturn.fold(
@@ -1715,38 +1728,41 @@ class YearToDateLiabilityController @Inject() (
                         c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
                       )
                     )(
-                      page =
-                        if (isFurtherOrAmendReturn)
-                          furtherReturnEnterTaxDuePage(
-                            _,
-                            _,
-                            taxYear,
-                            fillingOutReturn.subscribedDetails.isATrust,
-                            fillingOutReturn.draftReturn.representativeType(),
-                            fillingOutReturn.isAmendReturn
-                          )
-                        else
-                          nonCalculatedEnterTaxDuePage(
-                            _,
-                            _,
-                            fillingOutReturn.isAmendReturn,
-                            fillingOutReturn.subscribedDetails.isATrust,
-                            wasUkResident
-                          )
+                      page = if (isFurtherOrAmendReturn) {
+                        furtherReturnEnterTaxDuePage(
+                          _,
+                          _,
+                          taxYear,
+                          fillingOutReturn.subscribedDetails.isATrust,
+                          fillingOutReturn.draftReturn.representativeType(),
+                          fillingOutReturn.isAmendReturn
+                        )
+                      } else {
+                        nonCalculatedEnterTaxDuePage(
+                          _,
+                          _,
+                          fillingOutReturn.isAmendReturn,
+                          fillingOutReturn.subscribedDetails.isATrust,
+                          wasUkResident
+                        )
+                      }
                     )(
                       requiredPreviousAnswer = { answers =>
-                        if (isFurtherOrAmendReturn)
+                        if (isFurtherOrAmendReturn) {
                           answers.fold(_.yearToDateLiability, _.yearToDateLiability).map(_ => ())
-                        else answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).map(_ => ())
+                        } else {
+                          answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).map(_ => ())
+                        }
                       },
-                      redirectToIfNoRequiredPreviousAnswer =
-                        if (isFurtherOrAmendReturn) routes.YearToDateLiabilityController.yearToDateLiability()
-                        else routes.YearToDateLiabilityController.hasEstimatedDetails()
+                      redirectToIfNoRequiredPreviousAnswer = if (isFurtherOrAmendReturn) {
+                        routes.YearToDateLiabilityController.yearToDateLiability()
+                      } else {
+                        routes.YearToDateLiabilityController.hasEstimatedDetails()
+                      }
                     )
                   }
                 }
             }
-
         }
       }
     }
@@ -1784,33 +1800,37 @@ class YearToDateLiabilityController @Inject() (
                       fillingOutReturn.draftReturn,
                       nonCalculatedAnswers
                     )(form = nonCalculatedTaxDueForm)(
-                      page =
-                        if (isFurtherReturnorAmendReturn)
-                          furtherReturnEnterTaxDuePage(
-                            _,
-                            _,
-                            taxYear,
-                            fillingOutReturn.subscribedDetails.isATrust,
-                            fillingOutReturn.draftReturn.representativeType(),
-                            fillingOutReturn.isAmendReturn
-                          )
-                        else
-                          nonCalculatedEnterTaxDuePage(
-                            _,
-                            _,
-                            fillingOutReturn.isAmendReturn,
-                            fillingOutReturn.subscribedDetails.isATrust,
-                            wasUkResident
-                          )
+                      page = if (isFurtherReturnorAmendReturn) {
+                        furtherReturnEnterTaxDuePage(
+                          _,
+                          _,
+                          taxYear,
+                          fillingOutReturn.subscribedDetails.isATrust,
+                          fillingOutReturn.draftReturn.representativeType(),
+                          fillingOutReturn.isAmendReturn
+                        )
+                      } else {
+                        nonCalculatedEnterTaxDuePage(
+                          _,
+                          _,
+                          fillingOutReturn.isAmendReturn,
+                          fillingOutReturn.subscribedDetails.isATrust,
+                          wasUkResident
+                        )
+                      }
                     )(
                       requiredPreviousAnswer = { answers =>
-                        if (isFurtherReturnorAmendReturn)
+                        if (isFurtherReturnorAmendReturn) {
                           answers.fold(_.yearToDateLiability, _.yearToDateLiability).map(_ => ())
-                        else answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).map(_ => ())
+                        } else {
+                          answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).map(_ => ())
+                        }
                       },
-                      redirectToIfNoRequiredPreviousAnswer =
-                        if (isFurtherReturnorAmendReturn) routes.YearToDateLiabilityController.yearToDateLiability()
-                        else routes.YearToDateLiabilityController.hasEstimatedDetails()
+                      redirectToIfNoRequiredPreviousAnswer = if (isFurtherReturnorAmendReturn) {
+                        routes.YearToDateLiabilityController.yearToDateLiability()
+                      } else {
+                        routes.YearToDateLiabilityController.hasEstimatedDetails()
+                      }
                     ) { (amount, draftReturn) =>
                       val taxDue = AmountInPence.fromPounds(amount)
 
@@ -1818,9 +1838,9 @@ class YearToDateLiabilityController @Inject() (
                         nonCalculatedAnswers
                           .fold(_.taxDue, c => Some(c.taxDue))
                           .contains(taxDue)
-                      )
+                      ) {
                         draftReturn
-                      else {
+                      } else {
                         val newAnswers = nonCalculatedAnswers
                           .unset(_.checkForRepayment)
                           .unset(_.mandatoryEvidence)
@@ -1844,9 +1864,9 @@ class YearToDateLiabilityController @Inject() (
     yearToDateLiability: AmountInPence,
     fillingOutReturn: FillingOutReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
-    if (nonCalculatedAnswers.fold(_.yearToDateLiability, c => c.yearToDateLiability).isEmpty)
+    if (nonCalculatedAnswers.fold(_.yearToDateLiability, c => c.yearToDateLiability).isEmpty) {
       Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
-    else {
+    } else {
       val taxOwedOnOriginalReturn = fillingOutReturn.amendReturnData
         .map(
           _.originalReturn.completeReturn.fold(
@@ -1859,23 +1879,24 @@ class YearToDateLiabilityController @Inject() (
         )
       val taxOwed                 = taxOwedOnOriginalReturn.getOrElse(AmountInPence.zero)
       val taxDue                  = (taxOwed ++ (yearToDateLiability -- previousYearToDateLiability): AmountInPence).withFloorZero
-      if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue))
+      if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue)) {
         Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-      else {
+      } else {
         val newAnswers = {
-          if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
+          if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
             nonCalculatedAnswers
               .unset(_.checkForRepayment)
               .unset(_.mandatoryEvidence)
               .unset(_.expiredEvidence)
               .unset(_.pendingUpscanUpload)
               .copy(taxDue = Some(taxDue))
-          else
+          } else {
             nonCalculatedAnswers
               .unset(_.mandatoryEvidence)
               .unset(_.expiredEvidence)
               .unset(_.pendingUpscanUpload)
               .copy(taxDue = Some(taxDue))
+          }
         }
 
         val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
@@ -1944,10 +1965,7 @@ class YearToDateLiabilityController @Inject() (
       withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         def checkAndHandleUpscanStatus(
           pendingUpscanUpload: UpscanUpload,
-          answers: Either[
-            IncompleteNonCalculatedYTDAnswers,
-            IncompleteCalculatedYTDAnswers
-          ]
+          answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
         ): Future[Result] = {
           val result = for {
             newUpscanUpload <- upscanService.getUpscanUpload(
@@ -2004,9 +2022,11 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _
               ) =>
-            if (pendingUpscanUpload.upscanCallBack.nonEmpty)
+            if (pendingUpscanUpload.upscanCallBack.nonEmpty) {
               handleUpscanCallback(pendingUpscanUpload.upscanCallBack)
-            else checkAndHandleUpscanStatus(pendingUpscanUpload, Left(n))
+            } else {
+              checkAndHandleUpscanStatus(pendingUpscanUpload, Left(n))
+            }
 
           case c @ IncompleteCalculatedYTDAnswers(
                 _,
@@ -2018,9 +2038,11 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 Some(pendingUpscanUpload)
               ) =>
-            if (pendingUpscanUpload.upscanCallBack.nonEmpty)
+            if (pendingUpscanUpload.upscanCallBack.nonEmpty) {
               handleUpscanCallback(pendingUpscanUpload.upscanCallBack)
-            else checkAndHandleUpscanStatus(pendingUpscanUpload, Right(c))
+            } else {
+              checkAndHandleUpscanStatus(pendingUpscanUpload, Right(c))
+            }
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -2043,10 +2065,7 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers { (_, fillingOutReturn, answers) =>
         def handlePendingUpscanUpload(
-          answers: Either[
-            IncompleteNonCalculatedYTDAnswers,
-            IncompleteCalculatedYTDAnswers
-          ]
+          answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
         ): Future[Result] =
           removePendingUpscanUpload(answers, fillingOutReturn).fold(
             { e =>
@@ -2089,7 +2108,7 @@ class YearToDateLiabilityController @Inject() (
         case _                            =>
           Left(
             Error(
-              "Did not get DraftSingleDisposalReturn for further/amend return eligible for a calcualtion"
+              "Did not get DraftSingleDisposalReturn for further/amend return eligible for a calculation"
             )
           )
       }
@@ -2190,40 +2209,43 @@ class YearToDateLiabilityController @Inject() (
                     page
                   )(
                     requiredPreviousAnswer = { answers =>
-                      if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
-                        if (eligibility.isEligible && !isATrust(fillingOutReturn))
-                          if (answers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+                      if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)) {
+                        if (eligibility.isEligible && !isATrust(fillingOutReturn)) {
+                          if (answers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive)) {
                             answers.fold(_.personalAllowance, _.personalAllowance).map(_ => ())
-                          else
+                          } else {
                             answers.fold(_.estimatedIncome, _.estimatedIncome).map(_ => ())
-                        else
+                          }
+                        } else {
                           answers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)).map(_ => ())
-                      else
+                        }
+                      } else {
                         answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).map(_ => ())
+                      }
                     },
                     redirectToIfNoRequiredPreviousAnswer =
-                      if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
-                        if (eligibility.isEligible && !isATrust(fillingOutReturn))
-                          if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+                      if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)) {
+                        if (eligibility.isEligible && !isATrust(fillingOutReturn)) {
+                          if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive)) {
                             routes.YearToDateLiabilityController.personalAllowance()
-                          else
+                          } else {
                             routes.YearToDateLiabilityController.estimatedIncome()
-                        else
+                          }
+                        } else {
                           routes.YearToDateLiabilityController.taxableGainOrLoss()
-                      else
+                        }
+                      } else {
                         routes.YearToDateLiabilityController.hasEstimatedDetails()
+                      }
                   )
                 }
               )
-
             }
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
         }
       }
-
     }
 
   def yearToDateLiabilitySubmit(): Action[AnyContent] =
@@ -2246,28 +2268,34 @@ class YearToDateLiabilityController @Inject() (
                     page
                   )(
                     requiredPreviousAnswer = { answers =>
-                      if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
-                        if (eligibility.isEligible && !isATrust(fillingOutReturn))
-                          if (answers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+                      if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)) {
+                        if (eligibility.isEligible && !isATrust(fillingOutReturn)) {
+                          if (answers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive)) {
                             answers.fold(_.personalAllowance, _.personalAllowance).map(_ => ())
-                          else
+                          } else {
                             answers.fold(_.estimatedIncome, _.estimatedIncome).map(_ => ())
-                        else
+                          }
+                        } else {
                           answers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)).map(_ => ())
-                      else
+                        }
+                      } else {
                         answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).map(_ => ())
+                      }
                     },
                     redirectToIfNoRequiredPreviousAnswer =
-                      if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer))
-                        if (eligibility.isEligible && !isATrust(fillingOutReturn))
-                          if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive))
+                      if (fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer)) {
+                        if (eligibility.isEligible && !isATrust(fillingOutReturn)) {
+                          if (nonCalculatedAnswers.fold(_.estimatedIncome, _.estimatedIncome).exists(_.isPositive)) {
                             routes.YearToDateLiabilityController.personalAllowance()
-                          else
+                          } else {
                             routes.YearToDateLiabilityController.estimatedIncome()
-                        else
+                          }
+                        } else {
                           routes.YearToDateLiabilityController.taxableGainOrLoss()
-                      else
+                        }
+                      } else {
                         routes.YearToDateLiabilityController.hasEstimatedDetails()
+                      }
                   ) { (amount, draftReturn) =>
                     import cats.instances.option._
 
@@ -2278,9 +2306,9 @@ class YearToDateLiabilityController @Inject() (
                         .contains(yearToDateLiability)
                       && nonCalculatedAnswers
                         .fold(_.yearToDateLiabilityCalculation, _.yearToDateLiabilityCalculation) === calculation
-                    )
+                    ) {
                       draftReturn
-                    else {
+                    } else {
                       val newAnswers =
                         nonCalculatedAnswers
                           .unset(_.taxDue)
@@ -2360,9 +2388,9 @@ class YearToDateLiabilityController @Inject() (
                 nonCalculatedAnswers
                   .fold(_.checkForRepayment, _.checkForRepayment)
                   .contains(checkForRepayment)
-              )
+              ) {
                 draftReturn
-              else {
+              } else {
                 val newAnswers = nonCalculatedAnswers
                   .unset(_.checkForRepayment)
                   .copy(checkForRepayment = Some(checkForRepayment))
@@ -2378,10 +2406,7 @@ class YearToDateLiabilityController @Inject() (
     }
 
   private def removePendingUpscanUpload(
-    answers: Either[
-      IncompleteNonCalculatedYTDAnswers,
-      IncompleteCalculatedYTDAnswers
-    ],
+    answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers],
     fillingOutReturn: FillingOutReturn
   )(implicit
     request: RequestWithSessionData[_]
@@ -2406,10 +2431,7 @@ class YearToDateLiabilityController @Inject() (
   private def storeUpscanSuccessOrFailure(
     upscanUpload: UpscanUpload,
     upscanCallBack: UpscanCallBack,
-    answers: Either[
-      IncompleteNonCalculatedYTDAnswers,
-      IncompleteCalculatedYTDAnswers
-    ],
+    answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers],
     fillingOutReturn: FillingOutReturn
   )(implicit
     request: RequestWithSessionData[_],
@@ -2914,11 +2936,13 @@ class YearToDateLiabilityController @Inject() (
     f: Option[FurtherReturnCalculationEligibility] => Future[Result]
   )(implicit r: RequestWithSessionData[_], hc: HeaderCarrier): Future[Result] = {
     val result =
-      if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
+      if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
         furtherReturnCalculationEligibilityUtil
           .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
           .map(Some(_))
-      else EitherT.pure[Future, Error](None)
+      } else {
+        EitherT.pure[Future, Error](None)
+      }
 
     result.foldF(
       { e =>
@@ -2933,7 +2957,7 @@ class YearToDateLiabilityController @Inject() (
 
 object YearToDateLiabilityController {
 
-  val estimatedIncomeForm: Form[BigDecimal] =
+  private val estimatedIncomeForm =
     Form(
       mapping(
         "estimatedIncome" -> of(
@@ -2943,7 +2967,7 @@ object YearToDateLiabilityController {
       )(identity)(Some(_))
     )
 
-  def personalAllowanceForm(taxYear: TaxYear): Form[BigDecimal] =
+  private def personalAllowanceForm(taxYear: TaxYear) =
     Form(
       mapping(
         "personalAllowance" -> of(
@@ -2967,14 +2991,14 @@ object YearToDateLiabilityController {
       )(identity)(Some(_))
     )
 
-  val hasEstimatedDetailsForm: Form[Boolean] =
+  private val hasEstimatedDetailsForm =
     Form(
       mapping(
         "hasEstimatedDetails" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
-  def taxDueForm(calculatedTaxDue: CalculatedTaxDue): Form[BigDecimal] = {
+  private def taxDueForm(calculatedTaxDue: CalculatedTaxDue) = {
     val calculatedTaxDueInPounds = calculatedTaxDue.amountOfTaxDue.inPounds()
     val (outerId, innerId)       = "agreeWithCalculation" -> "taxDue"
 
@@ -2997,15 +3021,16 @@ object YearToDateLiabilityController {
         Left(innerOption)
       )
     ) { d =>
-      if (d === calculatedTaxDueInPounds)
+      if (d === calculatedTaxDueInPounds) {
         Map(
           outerId -> "0"
         )
-      else
+      } else {
         Map(
           outerId -> "1",
           innerId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
         )
+      }
     }
 
     Form(
@@ -3015,7 +3040,7 @@ object YearToDateLiabilityController {
     )
   }
 
-  val taxableGainOrLossForm: Form[BigDecimal] = {
+  private val taxableGainOrLossForm = {
     val (outerId, gainId, lossId) =
       ("taxableGainOrLoss", "taxableGain", "netLoss")
 
@@ -3040,18 +3065,19 @@ object YearToDateLiabilityController {
         Right(BigDecimal(0))
       )
     ) { d =>
-      if (d > 0)
+      if (d > 0) {
         Map(
           outerId -> "0",
           gainId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
         )
-      else if (d < 0)
+      } else if (d < 0) {
         Map(
-          outerId   -> "1",
-          lossId    -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign((d * -1))
+          outerId -> "1",
+          lossId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d * -1)
         )
-      else
+      } else {
         Map(outerId -> "2")
+      }
     }
 
     Form(
@@ -3061,7 +3087,7 @@ object YearToDateLiabilityController {
     )
   }
 
-  val nonCalculatedTaxDueForm: Form[BigDecimal] =
+  private val nonCalculatedTaxDueForm =
     Form(
       mapping(
         "nonCalculatedTaxDue" -> of(
@@ -3071,7 +3097,7 @@ object YearToDateLiabilityController {
       )(identity)(Some(_))
     )
 
-  def yearToDateLiabilityForm(taxYear: TaxYear): Form[BigDecimal] =
+  private def yearToDateLiabilityForm(taxYear: TaxYear) =
     Form(
       mapping(
         "yearToDateLiability" -> of(
@@ -3087,7 +3113,7 @@ object YearToDateLiabilityController {
       )(identity)(Some(_))
     )
 
-  val repaymentForm: Form[Boolean] =
+  private val repaymentForm =
     Form(
       mapping(
         "repayment" -> of(BooleanFormatter.formatter)

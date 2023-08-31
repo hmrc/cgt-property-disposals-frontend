@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{SubscribedChangeEmailAddressAttemptedEvent, SubscribedChangeEmailAddressVerifiedEvent}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
@@ -88,9 +88,9 @@ class SubscribedChangeEmailController @Inject() (
     val journey                 = changingAccountEmail.journey
     val journeyWithUpdatedEmail =
       journey.subscribedDetails.copy(emailAddress = email)
-    if (journey.subscribedDetails === journeyWithUpdatedEmail)
+    if (journey.subscribedDetails === journeyWithUpdatedEmail) {
       EitherT.pure[Future, Error](journey)
-    else
+    } else {
       subscriptionService
         .updateSubscribedDetails(
           SubscribedUpdateDetails(
@@ -99,6 +99,7 @@ class SubscribedChangeEmailController @Inject() (
           )
         )
         .map(_ => journey.copy(journeyWithUpdatedEmail))
+    }
   }
 
   override def auditEmailVerifiedEvent(

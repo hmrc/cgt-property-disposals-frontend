@@ -80,36 +80,41 @@ class MultipleDisposalsTriageControllerSpec
     with ReturnsServiceSupport
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
-  val mockTaxYearService = mock[TaxYearService]
+  private val mockTaxYearService = mock[TaxYearService]
 
-  val mockUUIDGenerator = mock[UUIDGenerator]
+  private val mockUUIDGenerator = mock[UUIDGenerator]
 
-  val trustDisplay         =
+  private val trustDisplay =
     UserTypeDisplay(UserType.Organisation, None, Left(sample[TrustName]))
-  val agentDisplay         =
+
+  private val agentDisplay =
     UserTypeDisplay(UserType.Agent, None, Right(sample[IndividualName]))
-  val individualDisplay    =
+
+  private val individualDisplay =
     UserTypeDisplay(UserType.Individual, None, Right(sample[IndividualName]))
-  val personalRepDisplay   =
+
+  private val personalRepDisplay =
     UserTypeDisplay(
       UserType.Individual,
       Some(PersonalRepresentative),
       Right(sample[IndividualName])
     )
-  val capacitorDisplay     =
+
+  private val capacitorDisplay =
     UserTypeDisplay(
       UserType.Individual,
       Some(Capacitor),
       Right(sample[IndividualName])
     )
-  val periodOfAdminDisplay =
+
+  private val periodOfAdminDisplay =
     UserTypeDisplay(
       UserType.Individual,
       Some(PersonalRepresentativeInPeriodOfAdmin),
       Right(sample[IndividualName])
     )
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -118,11 +123,11 @@ class MultipleDisposalsTriageControllerSpec
       bind[ReturnsService].toInstance(mockReturnsService)
     )
 
-  lazy val controller = instanceOf[MultipleDisposalsTriageController]
+  private lazy val controller = instanceOf[MultipleDisposalsTriageController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  def mockGetTaxYear(
+  private def mockGetTaxYear(
     date: LocalDate
   )(response: Either[Error, Option[TaxYear]]) =
     (mockTaxYearService
@@ -130,7 +135,7 @@ class MultipleDisposalsTriageControllerSpec
       .expects(date, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockAvailableTaxYears()(response: Either[Error, List[Int]]) =
+  private def mockAvailableTaxYears()(response: Either[Error, List[Int]]) =
     (mockTaxYearService
       .availableTaxYears()(_: HeaderCarrier))
       .expects(*)
@@ -161,21 +166,21 @@ class MultipleDisposalsTriageControllerSpec
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       newReturnTriageAnswers = Left(multipleDisposalsAnswers),
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber =
-        if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
-        else None,
+      agentReferenceNumber = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
       representeeAnswers = representeeAnswers.orElse {
         if (
           individualUserType.contains(PersonalRepresentative) || individualUserType
             .contains(PersonalRepresentativeInPeriodOfAdmin)
-        )
+        ) {
           Some(
             sample[CompleteRepresenteeAnswers]
               .copy(dateOfDeath = Some(sample[DateOfDeath]))
           )
-        else if (individualUserType.contains(Capacitor))
+        } else if (individualUserType.contains(Capacitor)) {
           Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
-        else None
+        } else {
+          None
+        }
       },
       previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None, None, None))
     )
@@ -185,7 +190,7 @@ class MultipleDisposalsTriageControllerSpec
     ) -> startingNewDraftReturn
   }
 
-  def sessionDataWithFillingOutReturn(
+  private def sessionDataWithFillingOutReturn(
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
@@ -200,22 +205,22 @@ class MultipleDisposalsTriageControllerSpec
         if (
           individualUserType.contains(PersonalRepresentative) || individualUserType
             .contains(PersonalRepresentativeInPeriodOfAdmin)
-        )
+        ) {
           Some(
             sample[CompleteRepresenteeAnswers]
               .copy(dateOfDeath = Some(sample[DateOfDeath]))
           )
-        else if (individualUserType.contains(Capacitor))
+        } else if (individualUserType.contains(Capacitor)) {
           Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
-        else None
+        } else {
+          None
+        }
       }
     )
     val journey            = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber =
-        if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
-        else None,
+      agentReferenceNumber = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
       previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None, None, None)),
       amendReturnData = amendReturnData
     )
@@ -758,7 +763,7 @@ class MultipleDisposalsTriageControllerSpec
 
       "display form error" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) =
+        def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
           testFormError(data: _*)(expectedErrorMessageKey)(s"$key.title")(
             performAction
           )
@@ -1009,7 +1014,7 @@ class MultipleDisposalsTriageControllerSpec
       def updateDraftReturn(
         d: DraftMultipleDisposalsReturn,
         newAnswers: MultipleDisposalsTriageAnswers
-      ) =
+      ): DraftMultipleDisposalsReturn =
         d.copy(
           triageAnswers = newAnswers,
           examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
@@ -2327,7 +2332,7 @@ class MultipleDisposalsTriageControllerSpec
           val userKey         = displayType.getSubKey(separatePeriodOfAdminKey = true)
           val isPeriodOfAdmin = displayType.representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)
           val titleArgs       =
-            if (isPeriodOfAdmin)
+            if (isPeriodOfAdmin) {
               representeeAnswers
                 .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
                 .map { dateOfDeath =>
@@ -2338,8 +2343,9 @@ class MultipleDisposalsTriageControllerSpec
                   )
                 }
                 .getOrElse(sys.error("Could not find date of death for period of admin"))
-            else
+            } else {
               List.empty
+            }
 
           testPageIsDisplayed(
             performAction,
@@ -2352,11 +2358,11 @@ class MultipleDisposalsTriageControllerSpec
             List(
               SelectorAndValue(
                 "#countryCode-hint",
-                if (isPeriodOfAdmin) ""
-                else
-                  messageFromMessageKey(
-                    s"multipleDisposalsCountryOfResidence$userKey.helpText"
-                  )
+                if (isPeriodOfAdmin) {
+                  ""
+                } else {
+                  messageFromMessageKey(s"multipleDisposalsCountryOfResidence$userKey.helpText")
+                }
               ),
               SelectorAndValue(
                 "form > p:first-of-type",
@@ -2509,7 +2515,7 @@ class MultipleDisposalsTriageControllerSpec
       def updateDraftReturn(
         d: DraftMultipleDisposalsReturn,
         newAnswers: MultipleDisposalsTriageAnswers
-      ) =
+      ): DraftMultipleDisposalsReturn =
         d.copy(
           triageAnswers = newAnswers,
           yearToDateLiabilityAnswers = None
@@ -2982,15 +2988,18 @@ class MultipleDisposalsTriageControllerSpec
         d: DraftMultipleDisposalsReturn,
         newAnswers: MultipleDisposalsTriageAnswers,
         isFurtherReturn: Boolean
-      ) =
+      ): DraftMultipleDisposalsReturn =
         d.copy(
           triageAnswers = newAnswers,
           examplePropertyDetailsAnswers = None,
-          yearToDateLiabilityAnswers = if (isFurtherReturn) d.yearToDateLiabilityAnswers.map {
-            case answers: CalculatedYTDAnswers    => answers.unset(_.hasEstimatedDetails)
-            case answers: NonCalculatedYTDAnswers => answers.unset(_.hasEstimatedDetails)
-          }
-          else None,
+          yearToDateLiabilityAnswers = if (isFurtherReturn) {
+            d.yearToDateLiabilityAnswers.map {
+              case answers: CalculatedYTDAnswers    => answers.unset(_.hasEstimatedDetails)
+              case answers: NonCalculatedYTDAnswers => answers.unset(_.hasEstimatedDetails)
+            }
+          } else {
+            None
+          },
           supportingEvidenceAnswers = None
         )
 
@@ -3468,7 +3477,7 @@ class MultipleDisposalsTriageControllerSpec
       def updateDraftReturn(
         d: DraftMultipleDisposalsReturn,
         newAnswers: MultipleDisposalsTriageAnswers
-      ) =
+      ): DraftMultipleDisposalsReturn =
         d.copy(
           triageAnswers = newAnswers,
           examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
@@ -3499,7 +3508,7 @@ class MultipleDisposalsTriageControllerSpec
 
         def testFormError(
           formData: List[(String, String)]
-        )(expectedErrorMessageKey: String, args: Seq[String] = Seq()) = {
+        )(expectedErrorMessageKey: String, args: Seq[String] = Seq()): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -3861,7 +3870,7 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
         checkPageIsDisplayed(
-          performAction,
+          performAction(),
           messageFromMessageKey("sharesDisposalDate.title"),
           doc => {
             doc
@@ -3895,9 +3904,9 @@ class MultipleDisposalsTriageControllerSpec
 
       def formData(d: LocalDate): List[(String, String)] =
         List(
-          "sharesDisposalDate-day"   -> d.getDayOfMonth().toString,
-          "sharesDisposalDate-month" -> d.getMonthValue().toString,
-          "sharesDisposalDate-year"  -> d.getYear().toString
+          "sharesDisposalDate-day"   -> d.getDayOfMonth.toString,
+          "sharesDisposalDate-month" -> d.getMonthValue.toString,
+          "sharesDisposalDate-year"  -> d.getYear.toString
         )
 
       val today = TimeUtils.today()
@@ -3917,7 +3926,7 @@ class MultipleDisposalsTriageControllerSpec
       def updateDraftReturn(
         d: DraftMultipleDisposalsReturn,
         newAnswers: MultipleDisposalsTriageAnswers
-      ) =
+      ): DraftMultipleDisposalsReturn =
         d.copy(
           triageAnswers = newAnswers,
           examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
@@ -3934,7 +3943,7 @@ class MultipleDisposalsTriageControllerSpec
           representeeAnswers: Option[RepresenteeAnswers] = None
         )(
           formData: List[(String, String)]
-        )(expectedErrorMessageKey: String) = {
+        )(expectedErrorMessageKey: String): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -4074,7 +4083,7 @@ class MultipleDisposalsTriageControllerSpec
           representeeAnswers: Option[RepresenteeAnswers],
           submittedDate: LocalDate,
           taxYear: Option[TaxYear]
-        ) = {
+        ): Unit = {
 
           val (session, journey, draftReturn) =
             sessionDataWithFillingOutReturn(
@@ -4177,7 +4186,7 @@ class MultipleDisposalsTriageControllerSpec
           representeeAnswers: Option[RepresenteeAnswers],
           submittedDate: LocalDate,
           taxYear: Option[TaxYear]
-        ) = {
+        ): Unit = {
           val amendReturnData                 = sample[AmendReturnData]
           val (session, journey, draftReturn) =
             sessionDataWithFillingOutReturn(
@@ -4548,7 +4557,7 @@ class MultipleDisposalsTriageControllerSpec
                 assetTypes = Some(List(IndirectDisposal)),
                 taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020)
               ),
-            routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly
+            routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
           )
         }
 
@@ -4924,7 +4933,7 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user has a completion date which already exists in a previous return and" when {
 
-          def test(representativeType: RepresentativeType) = {
+          def test(representativeType: RepresentativeType): Unit = {
             val triageAnswers = completeAnswersUk.copy(individualUserType = Some(representativeType))
             inSequence {
               mockAuthWithNoRetrievals()
@@ -5108,16 +5117,14 @@ class MultipleDisposalsTriageControllerSpec
           expectedButtonMessageKey
         )
         doc.select("#returnToSummaryLink").text()          shouldBe (
-          if (expectReturnToSummaryLink)
-            messageFromMessageKey("returns.return-to-summary-link")
-          else ""
+          if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link") else ""
         )
         expectedAdditionalIdKeyValues.map(a => doc.select(a.selector).html() should be(a.value))
         expectedAdditionalNameAttributeKeyValues.map(v =>
           doc
             .select(v.tagName)
             .attr(v.attributeName, v.attributeValue)
-            .text() shouldBe (v.value)
+            .text() shouldBe v.value
         )
       }
     )
@@ -5153,16 +5160,14 @@ class MultipleDisposalsTriageControllerSpec
           expectedButtonMessageKey
         )
         doc.select("#returnToSummaryLink").text()          shouldBe (
-          if (expectReturnToSummaryLink)
-            messageFromMessageKey("returns.return-to-summary-link")
-          else ""
+          if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link") else ""
         )
         expectedAdditionalIdKeyValues.map(a => doc.select(a.selector).html() should be(a.value))
         expectedAdditionalNameAttributeKeyValues.map(v =>
           doc
             .select(v.tagName)
             .attr(v.attributeName, v.attributeValue)
-            .text() shouldBe (v.value)
+            .text() shouldBe v.value
         )
       }
     )
@@ -5219,9 +5224,13 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
           if (separatePeriodOfAdminKey) ".personalRepInPeriodOfAdmin" else ".personalRep"
         case Some(Capacitor)                             => ".capacitor"
         case None                                        =>
-          if (userType === UserType.Agent) ".agent"
-          else if (name.isLeft) ".trust"
-          else ""
+          if (userType === UserType.Agent) {
+            ".agent"
+          } else if (name.isLeft) {
+            ".trust"
+          } else {
+            ""
+          }
       }
   }
 
@@ -5232,12 +5241,15 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
   )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {
     implicit val messages: Messages = MessagesImpl(lang, messagesApi)
 
-    if (answers.individualUserType.contains(Self))
+    if (answers.individualUserType.contains(Self)) {
       doc.select("#individualUserType-answer").text() shouldBe messages(
-        if (userType.contains(UserType.Agent))
+        if (userType.contains(UserType.Agent)) {
           s"individualUserType.agent.Self"
-        else s"individualUserType.Self"
+        } else {
+          s"individualUserType.Self"
+        }
       )
+    }
 
     doc.select("#numberOfProperties-answer").text() shouldBe messages(
       "numberOfProperties.MoreThanOne"
@@ -5247,14 +5259,15 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
       .select("#multipleDisposalsNumberOfProperties-answer")
       .text() shouldBe answers.numberOfProperties.toString
 
-    if (answers.countryOfResidence.isUk())
+    if (answers.countryOfResidence.isUk) {
       doc.select("#wereYouAUKResident-answer").text() shouldBe "Yes"
-    else
+    } else {
       doc.select("#wereYouAUKResident-answer").text() shouldBe "No"
+    }
 
-    if (answers.countryOfResidence.isUk())
+    if (answers.countryOfResidence.isUk) {
       doc.select("#wereAllPropertiesResidential-answer").text() shouldBe "Yes"
-    else {
+    } else {
       doc
         .select("#countryOfResidence-answer")
         .text() shouldBe messages
@@ -5274,8 +5287,11 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
     doc
       .select("#taxYear-answer")
       .text()                                   shouldBe (
-      if (answers.isIndirectDisposal) ""
-      else s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"
+      if (answers.isIndirectDisposal) {
+        ""
+      } else {
+        s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"
+      }
     )
     doc.select("#completionDate-answer").text() shouldBe TimeUtils
       .govDisplayFormat(answers.completionDate.value)

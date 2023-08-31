@@ -30,9 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.iv.IvErrorStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -45,22 +43,20 @@ import scala.concurrent.Future
 
 class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
 
-  val mockIvService = mock[IvService]
+  private val mockIvService = mock[IvService]
 
-  override val overrideBindings =
+  override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[IvService].toInstance(mockIvService),
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore)
     )
 
-  lazy val controller = instanceOf[IvController]
+  private lazy val controller = instanceOf[IvController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  val name = sample[IndividualName]
-
-  def mockGetFailedJourneyStatus(
+  private def mockGetFailedJourneyStatus(
     journeyId: UUID
   )(result: Either[Error, IvErrorStatus]) =
     (mockIvService

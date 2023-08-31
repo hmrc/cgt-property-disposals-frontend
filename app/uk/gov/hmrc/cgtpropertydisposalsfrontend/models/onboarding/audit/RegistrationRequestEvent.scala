@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
-import cats.syntax.eq._
+import cats.implicits.catsSyntaxEq
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.RegistrationDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource
 
 final case class RegistrationRequestEvent(
   prePopulatedUserData: RegistrationPrePopulatedUserData,
@@ -53,12 +53,13 @@ object RegistrationRequestEvent {
     registrationDetails: RegistrationDetails
   ): RegistrationRequestEvent = {
     val prepopulatedEmailSource =
-      if (registrationDetails.emailSource === EmailSource.BusinessPartnerRecord)
+      if (registrationDetails.emailSource === EmailSource.BusinessPartnerRecord) {
         Some("ETMP business partner record")
-      else if (registrationDetails.emailSource === EmailSource.GovernmentGateway)
+      } else if (registrationDetails.emailSource === EmailSource.GovernmentGateway) {
         Some("government-gateway")
-      else
+      } else {
         None
+      }
 
     val prePopulatedUserData =
       RegistrationPrePopulatedUserData(
@@ -69,9 +70,11 @@ object RegistrationRequestEvent {
     val manuallyEnteredData =
       RegistrationManuallyEnteredData(
         s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}",
-        if (prepopulatedEmailSource.isEmpty)
+        if (prepopulatedEmailSource.isEmpty) {
           Some(registrationDetails.emailAddress.value)
-        else None,
+        } else {
+          None
+        },
         AuditAddress.fromAddress(registrationDetails.address)
       )
 

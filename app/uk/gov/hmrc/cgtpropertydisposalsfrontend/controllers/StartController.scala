@@ -25,11 +25,10 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.BuildSubscriptionDataError
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{routes => addressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.{routes => agentsRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{routes => addressRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{IvBehaviour, routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.{Individual, NonGovernmentGatewayRetrievedUser, Trust}
@@ -42,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOffTIvEvent, WrongGGAccountEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
@@ -350,9 +349,11 @@ class StartController @Inject() (
                                                      sentReturns
                                                    )
 
-      updatedDraftReturns = if (unsetDraftReturnFlagAndUpdatedSentReturns._1)
+      updatedDraftReturns = if (unsetDraftReturnFlagAndUpdatedSentReturns._1) {
                               draftReturns.map(returnsService.unsetUnwantedSectionsToDraftReturn)
-                            else draftReturns
+                            } else {
+                              draftReturns
+                            }
 
       _ <- EitherT(
              updateSession(sessionStore, request)(
@@ -528,9 +529,7 @@ class StartController @Inject() (
                   BuildSubscriptionDataError.DataMissing(bprWithTrustName._1)
                 )
               ) { case (emailWithSource, addressWithSource) =>
-                bprResponse.cgtReference.fold[
-                  Either[BuildSubscriptionDataError, SubscriptionDetails]
-                ](
+                bprResponse.cgtReference.fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
                   Right(
                     SubscriptionDetails(
                       Left(bprWithTrustName._2),

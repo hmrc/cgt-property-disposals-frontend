@@ -54,27 +54,27 @@ class SubscriptionControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override val overrideBindings =
+  override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
-  lazy val controller = instanceOf[SubscriptionController]
+  private lazy val controller = instanceOf[SubscriptionController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  val requestWithCSRFToken = FakeRequest().withCSRFToken
+  private val requestWithCSRFToken = FakeRequest().withCSRFToken
 
-  val subscriptionDetails = sample[SubscriptionDetails]
+  private val subscriptionDetails = sample[SubscriptionDetails]
 
-  val ggCredId = sample[GGCredId]
+  private val ggCredId = sample[GGCredId]
 
-  val sessionWithSubscriptionDetails =
+  private val sessionWithSubscriptionDetails =
     SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails, ggCredId)))
 
-  def mockSubscribe(
+  private def mockSubscribe(
     expectedSubscriptionDetails: SubscriptionDetails,
     expectedLang: Lang
   )(response: Either[Error, SubscriptionResponse]) =
@@ -83,7 +83,7 @@ class SubscriptionControllerSpec
       .expects(expectedSubscriptionDetails, expectedLang, *)
       .returning(EitherT(Future.successful(response)))
 
-  def redirectToStart(performAction: () => Future[Result]) =
+  private def redirectToStart(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {

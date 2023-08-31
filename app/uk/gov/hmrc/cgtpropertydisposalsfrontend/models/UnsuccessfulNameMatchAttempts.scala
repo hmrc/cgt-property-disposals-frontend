@@ -63,9 +63,8 @@ object UnsuccessfulNameMatchAttempts {
     : Reads[UnsuccessfulNameMatchAttempts[A]] =
     Json.reads[UnsuccessfulNameMatchAttempts[A]]
 
-  implicit def unsuccessfulNameMatchAttemptsWrites[
-    A <: NameMatchDetails : Writes
-  ]: Writes[UnsuccessfulNameMatchAttempts[A]] =
+  implicit def unsuccessfulNameMatchAttemptsWrites[A <: NameMatchDetails : Writes]
+    : Writes[UnsuccessfulNameMatchAttempts[A]] =
     Json.writes[UnsuccessfulNameMatchAttempts[A]]
 
 }

@@ -61,7 +61,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     @cyaRow(
         messages("representee.cyaLabel.personRepresented"),
         Html(s"""${
-            answers.name.makeSingleName()}<br>
+            answers.name.makeSingleName}<br>
             ${answers.id match {
                 case RepresenteeCgtReference(cgtReference) => messages("representee.cyaLabel.cgtReference", cgtReference.value)
                 case _ => ""

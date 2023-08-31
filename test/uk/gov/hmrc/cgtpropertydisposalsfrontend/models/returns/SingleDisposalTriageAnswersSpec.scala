@@ -39,7 +39,7 @@ class SingleDisposalTriageAnswersSpec extends AnyWordSpec with Matchers with Sca
           completeAnswers
         ) shouldBe IncompleteSingleDisposalTriageAnswers(
           completeAnswers.individualUserType,
-          true,
+          hasConfirmedSingleDisposal = true,
           Some(completeAnswers.disposalMethod),
           wasAUKResident = Some(true),
           None,
@@ -60,7 +60,7 @@ class SingleDisposalTriageAnswersSpec extends AnyWordSpec with Matchers with Sca
           completeAnswers
         ) shouldBe IncompleteSingleDisposalTriageAnswers(
           completeAnswers.individualUserType,
-          true,
+          hasConfirmedSingleDisposal = true,
           Some(completeAnswers.disposalMethod),
           wasAUKResident = Some(false),
           Some(completeAnswers.countryOfResidence),
@@ -87,7 +87,7 @@ class SingleDisposalTriageAnswersSpec extends AnyWordSpec with Matchers with Sca
 
       val incompleteAnswers = IncompleteSingleDisposalTriageAnswers(
         Some(IndividualUserType.Self),
-        true,
+        hasConfirmedSingleDisposal = true,
         Some(completeAnswers.disposalMethod),
         wasAUKResident = Some(false),
         Some(completeAnswers.countryOfResidence),

@@ -73,7 +73,7 @@ class MixedUsePropertyDetailsControllerSpec
 
   val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) =
+  private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
@@ -83,14 +83,14 @@ class MixedUsePropertyDetailsControllerSpec
       }
     )
 
-  override val overrideBindings = List[GuiceableModule](
+  protected override val overrideBindings: List[GuiceableModule] = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
     bind[SessionStore].toInstance(mockSessionStore),
     bind[ReturnsService].toInstance(mockReturnsService),
     bind[UUIDGenerator].toInstance(mockUUIDGenerator)
   )
 
-  lazy val controller = instanceOf[MixedUsePropertyDetailsController]
+  private lazy val controller = instanceOf[MixedUsePropertyDetailsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -139,9 +139,7 @@ class MixedUsePropertyDetailsControllerSpec
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber =
-        if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber])
-        else None,
+      agentReferenceNumber = if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber]) else None,
       previousSentReturns = updatedPreviousReturnData,
       amendReturnData = amendReturnData
     )
@@ -201,9 +199,7 @@ class MixedUsePropertyDetailsControllerSpec
     )
 
   def deriveUserKey(isAgent: Boolean, isATrust: Boolean): String =
-    if (isAgent) ".agent"
-    else if (isATrust) ".trust"
-    else ""
+    if (isAgent) ".agent" else if (isATrust) ".trust" else ""
 
   def userMessageKey(
     individualUserType: Option[IndividualUserType],
@@ -789,13 +785,9 @@ class MixedUsePropertyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name =
-                        if (userType === Organisation) Left(sample[TrustName])
-                        else Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     ),
-                    agentReferenceNumber =
-                      if (userType === Agent) Some(sample[AgentReferenceNumber])
-                      else None
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None
                   )
                 )
               )
@@ -1015,7 +1007,7 @@ class MixedUsePropertyDetailsControllerSpec
 
       "show a form error for amount" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+        def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit = {
           val draftReturn = sample[DraftSingleMixedUseDisposalReturn].copy(
             mixedUsePropertyDetailsAnswers = Some(
               sample[CompleteMixedUsePropertyDetailsAnswers]
@@ -1198,13 +1190,9 @@ class MixedUsePropertyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name =
-                        if (userType === Organisation) Left(sample[TrustName])
-                        else Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     ),
-                    agentReferenceNumber =
-                      if (userType === Agent) Some(sample[AgentReferenceNumber])
-                      else None
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None
                   )
                 )
               )
@@ -1435,7 +1423,7 @@ class MixedUsePropertyDetailsControllerSpec
           draftReturn: DraftSingleMixedUseDisposalReturn,
           agentReferenceNumber: Option[AgentReferenceNumber],
           expectedErrorMessageKey: String
-        ) = {
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(

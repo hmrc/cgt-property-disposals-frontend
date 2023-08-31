@@ -56,13 +56,13 @@ class FurtherReturnGuidanceControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore)
     )
 
-  lazy val controller = instanceOf[FurtherReturnGuidanceController]
+  private lazy val controller = instanceOf[FurtherReturnGuidanceController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -103,10 +103,7 @@ class FurtherReturnGuidanceControllerSpec
     }
 
   def sessionDataWithStartingNewDraftReturn(
-    triageAnswers: Either[
-      MultipleDisposalsTriageAnswers,
-      SingleDisposalTriageAnswers
-    ],
+    triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
     userType: UserType = UserType.Individual,
     representeeAnswers: Option[IncompleteRepresenteeAnswers] = None,
     previousSentReturns: Option[PreviousReturnData] = None

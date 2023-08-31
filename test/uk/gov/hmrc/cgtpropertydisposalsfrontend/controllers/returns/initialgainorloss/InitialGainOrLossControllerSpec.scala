@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss
 
 import org.scalacheck.Gen
+import org.scalatest.Assertion
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -59,7 +60,7 @@ class InitialGainOrLossControllerSpec
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) =
+  private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
@@ -70,13 +71,13 @@ class InitialGainOrLossControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  override val overrideBindings = List[GuiceableModule](
+  protected override val overrideBindings: List[GuiceableModule] = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
     bind[SessionStore].toInstance(mockSessionStore),
     bind[ReturnsService].toInstance(mockReturnsService)
   )
 
-  lazy val controller                  = instanceOf[InitialGainOrLossController]
+  private lazy val controller          = instanceOf[InitialGainOrLossController]
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   def sessionWithState(
@@ -197,17 +198,18 @@ class InitialGainOrLossControllerSpec
         key: String,
         fillingOutReturn: FillingOutReturn,
         isAgent: Boolean
-      ) = {
+      ): Unit = {
         val session =
-          if (isAgent)
+          if (isAgent) {
             SessionData.empty.copy(
               userType = Some(UserType.Agent),
               journeyStatus = Some(fillingOutReturn)
             )
-          else
+          } else {
             SessionData.empty.copy(
               journeyStatus = Some(fillingOutReturn)
             )
+          }
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -271,7 +273,7 @@ class InitialGainOrLossControllerSpec
       def updateDraftReturn(
         d: DraftSingleDisposalReturn,
         newAnswer: AmountInPence
-      ) =
+      ): DraftSingleDisposalReturn =
         d.copy(
           initialGainOrLoss = Some(newAnswer),
           reliefDetailsAnswers =
@@ -355,7 +357,7 @@ class InitialGainOrLossControllerSpec
           (".agent", individualFillingOutReturn, true)
         )
 
-        def checkIfValueExistsForKey(expectedErrorMessageKey: String) = {
+        def checkIfValueExistsForKey(expectedErrorMessageKey: String): Assertion = {
           (messages(
             expectedErrorMessageKey
           ) === expectedErrorMessageKey)                   shouldBe false
@@ -376,15 +378,16 @@ class InitialGainOrLossControllerSpec
           checkIfValueExistsForKey(expectedErrorMessageKey)
 
           val session =
-            if (isAgent)
+            if (isAgent) {
               SessionData.empty.copy(
                 userType = Some(UserType.Agent),
                 journeyStatus = Some(fillingOutReturn)
               )
-            else
+            } else {
               SessionData.empty.copy(
                 journeyStatus = Some(fillingOutReturn)
               )
+            }
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -599,17 +602,18 @@ class InitialGainOrLossControllerSpec
         userKey: String,
         fillingOutReturn: FillingOutReturn,
         isAgent: Boolean
-      ) = {
+      ): Unit = {
         val session =
-          if (isAgent)
+          if (isAgent) {
             SessionData.empty.copy(
               userType = Some(UserType.Agent),
               journeyStatus = Some(fillingOutReturn)
             )
-          else
+          } else {
             SessionData.empty.copy(
               journeyStatus = Some(fillingOutReturn)
             )
+          }
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
@@ -659,25 +663,25 @@ class InitialGainOrLossControllerSpec
 
   }
 
-  def generateTrustSubscribedDetails() =
+  private def generateTrustSubscribedDetails() =
     sample[SubscribedDetails].copy(name = Left(sample[TrustName]))
 
-  def generateIndividualSubscribedDetails() =
+  private def generateIndividualSubscribedDetails() =
     sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
 
-  def generateTriageAnswersWithPersonalRepresentative() =
+  private def generateTriageAnswersWithPersonalRepresentative() =
     sample[IncompleteSingleDisposalTriageAnswers]
       .copy(individualUserType = Some(PersonalRepresentative))
 
-  def generateTriageAnswersWithCapacitor() =
+  private def generateTriageAnswersWithCapacitor() =
     sample[IncompleteSingleDisposalTriageAnswers]
       .copy(individualUserType = Some(Capacitor))
 
-  def generateTriageAnswersWithSelf() =
+  private def generateTriageAnswersWithSelf() =
     sample[IncompleteSingleDisposalTriageAnswers]
       .copy(individualUserType = Some(Self))
 
-  def generateTriageAnswersForTrust() =
+  private def generateTriageAnswersForTrust() =
     sample[IncompleteSingleDisposalTriageAnswers]
       .copy(individualUserType = None)
 

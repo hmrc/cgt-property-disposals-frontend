@@ -67,11 +67,9 @@ object MultipleDisposalsTriageAnswers {
       IncompleteMultipleDisposalsTriageAnswers(
         c.individualUserType,
         Some(c.numberOfProperties),
-        Some(c.countryOfResidence.isUk()),
-        if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
-        if (c.countryOfResidence.isUk())
-          Some(c.assetTypes === List(AssetType.Residential))
-        else None,
+        Some(c.countryOfResidence.isUk),
+        if (c.countryOfResidence.isUk) None else Some(c.countryOfResidence),
+        if (c.countryOfResidence.isUk) Some(c.assetTypes === List(AssetType.Residential)) else None,
         Some(c.assetTypes),
         c.taxYearExchanged,
         Some(c.taxYear),
@@ -106,9 +104,7 @@ object MultipleDisposalsTriageAnswers {
     def unset[A](
       fieldLens: IncompleteMultipleDisposalsTriageAnswers.type => Lens[
         IncompleteMultipleDisposalsTriageAnswers,
-        Option[
-          A
-        ]
+        Option[A]
       ]
     ): IncompleteMultipleDisposalsTriageAnswers =
       fieldLens(IncompleteMultipleDisposalsTriageAnswers).set(None)(

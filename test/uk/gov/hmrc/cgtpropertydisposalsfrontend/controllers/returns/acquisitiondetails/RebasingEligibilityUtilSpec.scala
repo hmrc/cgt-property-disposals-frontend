@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails;
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -32,29 +32,29 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 
 class RebasingEligibilityUtilSpec extends AnyWordSpec with Matchers {
 
-  object uk {
-    val beforeCutoff = sample[CompleteAcquisitionDetailsAnswers]
+  private object uk {
+    val beforeCutoff: CompleteAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
       .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1)))
-    val afterCutoff  = sample[CompleteAcquisitionDetailsAnswers]
+    val afterCutoff: CompleteAcquisitionDetailsAnswers  = sample[CompleteAcquisitionDetailsAnswers]
       .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents.plusDays(1)))
-    val triage       = sample[CompleteSingleDisposalTriageAnswers]
+    val triage: CompleteSingleDisposalTriageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
       .copy(countryOfResidence = Country.uk, individualUserType = None)
   }
 
-  object nonUkNonResidential {
-    val beforeCutoff = sample[CompleteAcquisitionDetailsAnswers]
+  private object nonUkNonResidential {
+    val beforeCutoff: CompleteAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
       .copy(acquisitionDate =
         AcquisitionDate(
           RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1)
         )
       )
-    val afterCutoff  = sample[CompleteAcquisitionDetailsAnswers]
+    val afterCutoff: CompleteAcquisitionDetailsAnswers  = sample[CompleteAcquisitionDetailsAnswers]
       .copy(acquisitionDate =
         AcquisitionDate(
           RebasingCutoffDates.nonUkResidentsNonResidentialProperty.plusDays(1)
         )
       )
-    val triage       = sample[CompleteSingleDisposalTriageAnswers]
+    val triage: CompleteSingleDisposalTriageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
       .copy(
         countryOfResidence = Country("US"),
         assetType = NonResidential,
@@ -62,20 +62,20 @@ class RebasingEligibilityUtilSpec extends AnyWordSpec with Matchers {
       )
   }
 
-  object nonUkResidential {
-    val beforeCutoff = sample[CompleteAcquisitionDetailsAnswers]
+  private object nonUkResidential {
+    val beforeCutoff: CompleteAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
       .copy(acquisitionDate =
         AcquisitionDate(
           RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1)
         )
       )
-    val afterCutoff  = sample[CompleteAcquisitionDetailsAnswers]
+    val afterCutoff: CompleteAcquisitionDetailsAnswers  = sample[CompleteAcquisitionDetailsAnswers]
       .copy(acquisitionDate =
         AcquisitionDate(
           RebasingCutoffDates.nonUkResidentsResidentialProperty.plusDays(1)
         )
       )
-    val triage       = sample[CompleteSingleDisposalTriageAnswers]
+    val triage: CompleteSingleDisposalTriageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
       .copy(
         countryOfResidence = Country("US"),
         assetType = Residential,
@@ -83,7 +83,7 @@ class RebasingEligibilityUtilSpec extends AnyWordSpec with Matchers {
       )
   }
 
-  val underTest = new RebasingEligibilityUtil();
+  val underTest = new RebasingEligibilityUtil()
 
   "RebasingEligibilityUtil" must {
 

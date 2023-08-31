@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import com.github.ghik.silencer.silent
 import julienrf.json.derived
 import monocle.Lens
 import monocle.macros.Lenses
@@ -71,12 +70,7 @@ object ExampleCompanyDetailsAnswers {
       }
 
     def unset[A](
-      fieldLens: IncompleteExampleCompanyDetailsAnswers.type => Lens[
-        IncompleteExampleCompanyDetailsAnswers,
-        Option[
-          A
-        ]
-      ]
+      fieldLens: IncompleteExampleCompanyDetailsAnswers.type => Lens[IncompleteExampleCompanyDetailsAnswers, Option[A]]
     ): IncompleteExampleCompanyDetailsAnswers =
       fieldLens(IncompleteExampleCompanyDetailsAnswers).set(None)(
         fold(
@@ -87,7 +81,6 @@ object ExampleCompanyDetailsAnswers {
 
   }
 
-  @silent
   implicit val format: OFormat[ExampleCompanyDetailsAnswers] = derived.oformat()
 
 }

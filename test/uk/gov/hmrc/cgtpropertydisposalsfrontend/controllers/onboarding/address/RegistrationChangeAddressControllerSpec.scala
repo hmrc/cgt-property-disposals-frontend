@@ -27,8 +27,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{routes => addressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.registrationReadyGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.RegistrationReadyAddressJourney
 
@@ -39,23 +39,22 @@ class RegistrationChangeAddressControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val validJourneyStatus = RegistrationReadyAddressJourney(
-    sample[RegistrationReady]
+  protected override val validJourneyStatus: RegistrationReadyAddressJourney = RegistrationReadyAddressJourney(
+    Generators.sample[RegistrationReady]
   )
 
-  lazy val controller = instanceOf[RegistrationChangeAddressController]
+  protected override lazy val controller: RegistrationChangeAddressController =
+    instanceOf[RegistrationChangeAddressController]
 
-  lazy implicit val messagesApi: MessagesApi = controller.messagesApi
+  private lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  override def updateAddress(
+  protected override def updateAddress(
     journey: RegistrationReadyAddressJourney,
     address: Address
   ): RegistrationReady =
     journey.journey.copy(registrationDetails = journey.journey.registrationDetails.copy(address = address))
 
-  override val mockUpdateAddress: Option[
-    (RegistrationReadyAddressJourney, Address, Either[Error, Unit]) => Unit
-  ] = None
+  override val mockUpdateAddress: Option[(RegistrationReadyAddressJourney, Address, Either[Error, Unit]) => Unit] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(

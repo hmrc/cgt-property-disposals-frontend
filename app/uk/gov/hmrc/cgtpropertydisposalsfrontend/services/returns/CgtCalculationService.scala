@@ -57,48 +57,50 @@ class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector)(implicit
     request: CalculateCgtTaxDueRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue] =
     connector.calculateTaxDue(request).subflatMap { response =>
-      if (response.status === OK)
+      if (response.status === OK) {
         response
           .parseJSON[CalculatedTaxDue]()
           .leftMap(Error(_))
-      else
+      } else {
         Left(
           Error(
             s"Call to calculate cgt tax due came back with status ${response.status}"
           )
         )
+      }
     }
 
   def calculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, TaxableGainOrLossCalculation] =
     connector.calculateTaxableGainOrLoss(request).subflatMap { response =>
-      if (response.status === OK)
+      if (response.status === OK) {
         response
           .parseJSON[TaxableGainOrLossCalculation]()
           .leftMap(Error(_))
-      else
+      } else {
         Left(
           Error(
             s"Call to calculate taxable gain or loss came back with status ${response.status}"
           )
         )
+      }
     }
 
   def calculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, YearToDateLiabilityCalculation] =
     connector.calculateYearToDateLiability(request).subflatMap { response =>
-      if (response.status === OK)
+      if (response.status === OK) {
         response
           .parseJSON[YearToDateLiabilityCalculation]()
           .leftMap(Error(_))
-      else
+      } else {
         Left(
           Error(
             s"Call to calculate year to date liability came back with status ${response.status}"
           )
         )
+      }
     }
-
 }

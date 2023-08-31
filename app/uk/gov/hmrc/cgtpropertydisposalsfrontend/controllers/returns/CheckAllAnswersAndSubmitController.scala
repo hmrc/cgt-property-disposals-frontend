@@ -73,16 +73,17 @@ class CheckAllAnswersAndSubmitController @Inject() (
     f: Option[FurtherReturnCalculationEligibility] => Future[Result]
   )(implicit r: RequestWithSessionData[_]): Future[Result] = {
     val furtherReturnCalculationEligibilityCheck =
-      if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
+      if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
         furtherReturnCalculationEligibilityUtil
           .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
           .map(Some(_))
-      else
+      } else {
         EitherT.pure(None)
+      }
 
     furtherReturnCalculationEligibilityCheck.foldF(
       { e =>
-        logger.warn("Could not check eligibility for further return calulation", e)
+        logger.warn("Could not check eligibility for further return calculation", e)
         errorHandler.errorResult()
       },
       f
@@ -289,9 +290,9 @@ class CheckAllAnswersAndSubmitController @Inject() (
       case _                           => Redirect(baseRoutes.StartController.start())
     }
 
-  def withGeneratedCGTReference(
+  private def withGeneratedCGTReference(
     completeReturn: CompleteReturn
-  )(f: CompleteReturn => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(f: CompleteReturn => Future[Result])(implicit request: RequestWithSessionData[_]) =
     completeReturn.representeeAnswers match {
       case Some(a @ CompleteRepresenteeAnswers(_, NoReferenceId, _, _, _)) =>
         subscriptionService

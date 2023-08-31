@@ -65,14 +65,15 @@ class DmsSubmissionController @Inject() (
           cgtPropertyDisposalsConnector
             .testSubmitToDms(subscribed.subscribedDetails.cgtReference)
             .subflatMap { response =>
-              if (response.status === OK)
+              if (response.status === OK) {
                 Right(())
-              else
+              } else {
                 Left(
                   Error(
                     s"Call to get subscribed details came back with status ${response.status}"
                   )
                 )
+              }
             }
         result.fold(
           _ => BadRequest("failed submission to dms"),

@@ -68,7 +68,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 
 import java.time.LocalDate
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 class MultipleDisposalsPropertyDetailsControllerSpec
@@ -80,20 +80,20 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
   val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
-  val incompleteAnswers =
+  private val incompleteAnswers =
     IncompleteExamplePropertyDetailsAnswers.empty.copy(
       address = Some(ukAddress(1)),
       disposalDate = Some(sample[DisposalDate])
     )
 
-  val draftReturn: DraftMultipleDisposalsReturn =
+  private val draftReturn =
     sample[DraftMultipleDisposalsReturn].copy(
       examplePropertyDetailsAnswers = Some(incompleteAnswers),
       triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
         .copy(individualUserType = Some(Self))
     )
 
-  override val validJourneyStatus = FillingOutReturnAddressJourney(
+  protected override val validJourneyStatus: FillingOutReturnAddressJourney = FillingOutReturnAddressJourney(
     FillingOutReturn(
       sample[SubscribedDetails],
       sample[GGCredId],
@@ -112,13 +112,13 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     ) ::: super.overrideBindings
 
-  lazy val controller = instanceOf[PropertyDetailsController]
+  protected override lazy val controller: PropertyDetailsController = instanceOf[PropertyDetailsController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   implicit val messages: Messages = MessagesImpl(lang, messagesApi)
 
-  def messageKey(
+  private def messageKey(
     userType: UserType,
     individualUserType: Option[IndividualUserType]
   ) =
@@ -153,9 +153,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     }
   }
 
-  override val mockUpdateAddress: Option[
-    (FillingOutReturnAddressJourney, Address, Either[Error, Unit]) => Unit
-  ] =
+  override val mockUpdateAddress: Option[(FillingOutReturnAddressJourney, Address, Either[Error, Unit]) => Unit] =
     Some {
       case (
             newDetails: FillingOutReturnAddressJourney,
@@ -183,15 +181,15 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       }
     )
 
-  val taxYear = sample[TaxYear].copy(
+  private val taxYear = sample[TaxYear].copy(
     startDateInclusive = LocalDate.of(2019, 4, 6),
     endDateExclusive = LocalDate.of(2020, 4, 6)
   )
 
-  val disposalDate =
+  private val disposalDate =
     DisposalDate(value = LocalDate.of(2020, 3, 10), taxYear = taxYear)
 
-  def expectedSubmitText(isAmend: Boolean) =
+  private def expectedSubmitText(isAmend: Boolean) =
     messageFromMessageKey(if (isAmend) "button.continue" else "button.saveAndContinue")
 
   "AddressController" when {
@@ -245,13 +243,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name =
-                        if (userType === Organisation) Left(sample[TrustName])
-                        else Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     ),
-                    agentReferenceNumber =
-                      if (userType === Agent) Some(sample[AgentReferenceNumber])
-                      else None,
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None,
                     draftReturn = draftReturn
                   )
                 )
@@ -1327,13 +1321,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name =
-                        if (userType === Organisation) Left(sample[TrustName])
-                        else Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     ),
-                    agentReferenceNumber =
-                      if (userType === Agent) Some(sample[AgentReferenceNumber])
-                      else None
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None
                   )
                 )
               )
@@ -1606,7 +1596,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           representeeAnswers: Option[RepresenteeAnswers] = None
         )(
           formData: List[(String, String)]
-        )(expectedErrorMessageKey: String, args: Seq[String] = Seq()) = {
+        )(expectedErrorMessageKey: String, args: Seq[String] = Seq()): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1929,13 +1919,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name =
-                        if (userType === Organisation) Left(sample[TrustName])
-                        else Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     ),
-                    agentReferenceNumber =
-                      if (userType === Agent) Some(sample[AgentReferenceNumber])
-                      else None
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None
                   )
                 )
               )
@@ -2153,7 +2139,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "show a form error for amount" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+        def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -2360,13 +2346,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                         Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath))))
                     ),
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name =
-                        if (userType === Organisation) Left(sample[TrustName])
-                        else Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     ),
-                    agentReferenceNumber =
-                      if (userType === Agent) Some(sample[AgentReferenceNumber])
-                      else None,
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None,
                     amendReturnData = if (isAmend) Some(sample[AmendReturnData]) else None
                   )
                 )
@@ -2729,7 +2711,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         def test(
           data: (String, String)*
-        )(draftReturn: DraftMultipleDisposalsReturn, expectedTitle: String, expectedErrorMessage: String) = {
+        )(draftReturn: DraftMultipleDisposalsReturn, expectedTitle: String, expectedErrorMessage: String): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(

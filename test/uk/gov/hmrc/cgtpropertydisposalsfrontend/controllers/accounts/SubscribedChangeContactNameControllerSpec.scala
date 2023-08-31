@@ -42,7 +42,7 @@ class SubscribedChangeContactNameControllerSpec
     with ContactNameControllerSpec[Subscribed]
     with ScalaCheckDrivenPropertyChecks {
 
-  def mockSubscriptionUpdate(
+  private def mockSubscriptionUpdate(
     subscribedUpdateDetails: SubscribedUpdateDetails
   )(result: Either[Error, Unit]) =
     (mockSubscriptionService

@@ -34,8 +34,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RetrievedUserType}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -57,16 +57,13 @@ class AuthenticatedActionWithRetrievedDataSpec
       mockSessionStore
     )
 
-  def mockHasSubscription()(response: Either[Error, Option[CgtReference]]) =
+  private def mockHasSubscription()(response: Either[Error, Option[CgtReference]]) =
     (mockSubscriptionService
       .hasFailedCgtEnrolment()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
   implicit val userTypeFormat: Writes[RetrievedUserType] = derived.owrites()
-
-  def toJson(retrievedUserType: RetrievedUserType) =
-    userTypeFormat.writes(retrievedUserType)
 
   def performAction[A](r: FakeRequest[A]): Future[Result] = {
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
@@ -80,13 +77,13 @@ class AuthenticatedActionWithRetrievedDataSpec
     )
   }
 
-  val retrievals =
+  private val retrievals =
     Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and
       Retrievals.saUtr and Retrievals.email and Retrievals.allEnrolments and Retrievals.credentials
 
-  val emptyEnrolments = Enrolments(Set.empty)
+  private val emptyEnrolments = Enrolments(Set.empty)
 
-  val cgtEnrolment = Enrolments(
+  private val cgtEnrolment = Enrolments(
     Set(
       Enrolment(
         CgtEnrolment.key,
@@ -321,7 +318,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           checkIsTechnicalErrorPage(performAction(FakeRequest()))
         }
 
-        "a gg cred id and an agent enrolment can be found but no agent reference nubmer can be found" in {
+        "a gg cred id and an agent enrolment can be found but no agent reference number can be found" in {
           val enrolments = Enrolments(Set(Enrolment(AgentsEnrolment.key)))
 
           val retrievalsResult = Future successful (

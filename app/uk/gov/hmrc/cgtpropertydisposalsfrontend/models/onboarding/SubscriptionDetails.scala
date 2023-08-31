@@ -24,7 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SapNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 
 final case class SubscriptionDetails(
@@ -67,7 +67,7 @@ object SubscriptionDetails {
         bpr.name,
         email,
         address,
-        ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
+        ContactName(bpr.name.fold(_.value, n => n.makeSingleName)),
         bpr.sapNumber,
         emailSource,
         addressSource,

@@ -111,9 +111,11 @@ class AgentAccessController @Inject() (
         verifierMatchingDetails.clientDetails.address match {
           case UkAddress(_, _, _, _, postcode) =>
             val form =
-              if (verifierMatchingDetails.correctVerifierSupplied)
+              if (verifierMatchingDetails.correctVerifierSupplied) {
                 postcodeForm.fill(postcode)
-              else postcodeForm
+              } else {
+                postcodeForm
+              }
             Ok(enterClientsPostcodePage(form))
 
           case _: NonUkAddress =>
@@ -159,9 +161,11 @@ class AgentAccessController @Inject() (
         verifierMatchingDetails.clientDetails.address match {
           case NonUkAddress(_, _, _, _, _, country) =>
             val form =
-              if (verifierMatchingDetails.correctVerifierSupplied)
+              if (verifierMatchingDetails.correctVerifierSupplied) {
                 countryForm.fill(country)
-              else countryForm
+              } else {
+                countryForm
+              }
             Ok(enterClientsCountryPage(form))
 
           case _: UkAddress =>
@@ -208,12 +212,11 @@ class AgentAccessController @Inject() (
         val backLink =
           enterVerifierCall(verifierMatchingDetails.clientDetails)
 
-        if (verifierMatchingDetails.correctVerifierSupplied)
-          Ok(
-            confirmClientPage(verifierMatchingDetails.clientDetails, backLink)
-          )
-        else
+        if (verifierMatchingDetails.correctVerifierSupplied) {
+          Ok(confirmClientPage(verifierMatchingDetails.clientDetails, backLink))
+        } else {
           Redirect(backLink)
+        }
       }
     }
 
@@ -231,9 +234,11 @@ class AgentAccessController @Inject() (
                                                            sentReturns
                                                          )
 
-            updatedDraftReturns = if (unsetDraftReturnFlagAndUpdatedSentReturns._1)
+            updatedDraftReturns = if (unsetDraftReturnFlagAndUpdatedSentReturns._1) {
                                     draftReturns.map(returnsService.unsetUnwantedSectionsToDraftReturn)
-                                  else draftReturns
+                                  } else {
+                                    draftReturns
+                                  }
 
             _ <- EitherT(
                    updateSession(sessionStore, request)(
@@ -265,8 +270,9 @@ class AgentAccessController @Inject() (
                   .homepage()
               )
           )
-        } else
+        } else {
           Redirect(enterVerifierCall(verifierMatchingDetails.clientDetails))
+        }
       }
     }
 
@@ -325,7 +331,7 @@ class AgentAccessController @Inject() (
                        AgentSupplyingClientDetails(
                          agentReferenceNumber,
                          ggCredId,
-                         Some(VerifierMatchingDetails(details, false))
+                         Some(VerifierMatchingDetails(details, correctVerifierSupplied = false))
                        )
                      )
                    )
@@ -429,12 +435,13 @@ class AgentAccessController @Inject() (
             errorHandler.errorResult()
 
           case Right(_) =>
-            if (updatedUnsuccessfulAttempts >= maxVerifierNameMatchAttempts)
+            if (updatedUnsuccessfulAttempts >= maxVerifierNameMatchAttempts) {
               Redirect(
                 routes.AgentAccessController.tooManyVerifierMatchAttempts()
               )
-            else
+            } else {
               noMatchResult(submittedVerifier)
+            }
         }
 
     def sendAuditEvent(
@@ -500,7 +507,6 @@ class AgentAccessController @Inject() (
           }
         }
       )
-
   }
 
   private def withAgentSupplyingClientDetails(
@@ -546,21 +552,21 @@ object AgentAccessController {
 
   val postcodeKey: String = "postcode"
 
-  val countryKey: String = "countryCode"
+  private val countryKey = "countryCode"
 
-  val cgtReferenceForm: Form[CgtReference] = Form(
+  private val cgtReferenceForm = Form(
     mapping(
       cgtReferenceKey -> CgtReference.mapping
     )(identity)(Some(_))
   )
 
-  val postcodeForm: Form[Postcode] = Form(
+  private val postcodeForm = Form(
     mapping(
       postcodeKey -> Postcode.mapping
     )(identity)(Some(_))
   )
 
-  val countryForm: Form[Country] = Form(
+  private val countryForm = Form(
     mapping(
       countryKey -> of(Country.formatter)
     )(identity)(Some(_))

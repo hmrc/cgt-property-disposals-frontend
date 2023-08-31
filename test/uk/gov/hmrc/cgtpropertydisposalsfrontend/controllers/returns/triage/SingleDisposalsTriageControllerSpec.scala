@@ -2354,8 +2354,8 @@ class SingleDisposalsTriageControllerSpec
                     DisposalMethod.Sold
                   else completeJourney.disposalMethod
                 ),
-                Some(completeJourney.countryOfResidence.isUk()),
-                if (completeJourney.countryOfResidence.isUk()) None
+                Some(completeJourney.countryOfResidence.isUk),
+                if (completeJourney.countryOfResidence.isUk) None
                 else Some(completeJourney.countryOfResidence),
                 Some(completeJourney.assetType),
                 Some(DisposalDate(date, taxYear)),
@@ -2414,8 +2414,8 @@ class SingleDisposalsTriageControllerSpec
                   completeJourney.individualUserType,
                   true,
                   Some(completeJourney.disposalMethod),
-                  Some(completeJourney.countryOfResidence.isUk()),
-                  if (completeJourney.countryOfResidence.isUk()) None
+                  Some(completeJourney.countryOfResidence.isUk),
+                  if (completeJourney.countryOfResidence.isUk) None
                   else Some(completeJourney.countryOfResidence),
                   Some(completeJourney.assetType),
                   Some(DisposalDate(date, taxYear)),
@@ -4753,8 +4753,8 @@ class SingleDisposalsTriageControllerSpec
                 completeJourney.individualUserType,
                 true,
                 Some(completeJourney.disposalMethod),
-                Some(completeJourney.countryOfResidence.isUk()),
-                if (completeJourney.countryOfResidence.isUk()) None
+                Some(completeJourney.countryOfResidence.isUk),
+                if (completeJourney.countryOfResidence.isUk) None
                 else Some(completeJourney.countryOfResidence),
                 Some(completeJourney.assetType),
                 Some(DisposalDate(date, taxYear)),
@@ -4821,8 +4821,8 @@ class SingleDisposalsTriageControllerSpec
                   completeJourney.individualUserType,
                   true,
                   Some(completeJourney.disposalMethod),
-                  Some(completeJourney.countryOfResidence.isUk()),
-                  if (completeJourney.countryOfResidence.isUk()) None
+                  Some(completeJourney.countryOfResidence.isUk),
+                  if (completeJourney.countryOfResidence.isUk) None
                   else Some(completeJourney.countryOfResidence),
                   Some(completeJourney.assetType),
                   Some(DisposalDate(date, taxYear)),
@@ -5001,8 +5001,8 @@ class SingleDisposalsTriageControllerSpec
                   completeJourney.individualUserType,
                   true,
                   Some(completeJourney.disposalMethod),
-                  Some(completeJourney.countryOfResidence.isUk()),
-                  if (completeJourney.countryOfResidence.isUk()) None
+                  Some(completeJourney.countryOfResidence.isUk),
+                  if (completeJourney.countryOfResidence.isUk) None
                   else Some(completeJourney.countryOfResidence),
                   Some(completeJourney.assetType),
                   None,
@@ -6233,12 +6233,12 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
         s"disposalMethod.${completeSingleDisposalTriageAnswers.disposalMethod}"
       )
 
-    if (completeSingleDisposalTriageAnswers.countryOfResidence.isUk())
+    if (completeSingleDisposalTriageAnswers.countryOfResidence.isUk)
       doc.select("#wereYouAUKResident-answer").text() shouldBe "Yes"
     else
       doc.select("#wereYouAUKResident-answer").text() shouldBe "No"
 
-    if (completeSingleDisposalTriageAnswers.countryOfResidence.isUk())
+    if (completeSingleDisposalTriageAnswers.countryOfResidence.isUk)
       completeSingleDisposalTriageAnswers.assetType match {
         case Residential      =>
           doc.select("#propertyType-answer").text() shouldBe "Yes"

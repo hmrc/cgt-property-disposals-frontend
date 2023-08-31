@@ -40,7 +40,7 @@ object ReturnSummary {
 
   implicit class ReturnSummaryOps(private val r: ReturnSummary) extends AnyVal {
 
-    def totalCharges(): AmountInPence =
+    private def totalCharges() =
       AmountInPence(r.charges.map(_.amount.withFloorZero.value).sum)
 
     def totalPaid(): AmountInPence =

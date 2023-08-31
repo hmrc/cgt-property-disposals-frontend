@@ -106,9 +106,9 @@ class ReturnsServiceImpl @Inject() (
     hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, Unit] =
-    if (fillingOutReturn.isAmendReturn)
+    if (fillingOutReturn.isAmendReturn) {
       EitherT.pure(())
-    else
+    } else {
       connector
         .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.subscribedDetails.cgtReference)
         .subflatMap { httpResponse =>
@@ -123,26 +123,29 @@ class ReturnsServiceImpl @Inject() (
               "draft-return-updated"
             )
             Right(())
-          } else
+          } else {
             Left(
               Error(
                 s"Call to store draft return came back with status ${httpResponse.status}}"
               )
             )
+          }
         }
+    }
 
   def deleteDraftReturns(
     draftReturnIds: List[UUID]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
     connector.deleteDraftReturns(draftReturnIds).subflatMap { httpResponse =>
-      if (httpResponse.status === OK)
+      if (httpResponse.status === OK) {
         Right(())
-      else
+      } else {
         Left(
           Error(
             s"Call to delete draft returns came back with status ${httpResponse.status}"
           )
         )
+      }
     }
 
   def getDraftReturns(
@@ -154,13 +157,15 @@ class ReturnsServiceImpl @Inject() (
       httpResponse <- connector
                         .getDraftReturns(cgtReference)
                         .subflatMap(r =>
-                          if (r.status === OK) Right(r)
-                          else
+                          if (r.status === OK) {
+                            Right(r)
+                          } else {
                             Left(
                               Error(
                                 s"Call to get draft returns came back with status ${r.status}}"
                               )
                             )
+                          }
                         )
       draftReturns <- EitherT.fromEither(
                         httpResponse
@@ -179,11 +184,13 @@ class ReturnsServiceImpl @Inject() (
         unsentDraftReturnsTaxYearExchanged.map(updateSAStatusToDraftReturn)
 
       toDelete = invalidDraftReturns ::: sentDraftReturns
-      _       <- if (toDelete.nonEmpty)
+      _       <- if (toDelete.nonEmpty) {
                    EitherT.liftF[Future, Error, Unit](
                      deleteSentOrInvalidDraftReturns(toDelete)
                    )
-                 else EitherT.rightT[Future, Error](())
+                 } else {
+                   EitherT.rightT[Future, Error](())
+                 }
     } yield unsentDraftReturnsWithTaxYearExchangedAndSAStatus
 
   def updateCorrectTaxYearToSentReturns(
@@ -196,7 +203,7 @@ class ReturnsServiceImpl @Inject() (
       result              <- returnSummary
                                .map(r => updateCorrectTaxYearToSentReturn(r, cgtReference))
                                .sequence[EitherT[Future, Error, *], (Boolean, ReturnSummary)]
-      usentDraftReturnFlag = result.map(_._1).contains(true)
+      usentDraftReturnFlag = result.exists(_._1)
       updatedSentReturns   = result.map(_._2)
     } yield (usentDraftReturnFlag, updatedSentReturns)
   }
@@ -221,8 +228,11 @@ class ReturnsServiceImpl @Inject() (
           .getYear
           .toString
       val actualTaxYear   = returnSummary.taxYear
-      if (expectedTaxYear === actualTaxYear) (false, returnSummary)
-      else (true, returnSummary.copy(taxYear = expectedTaxYear))
+      if (expectedTaxYear === actualTaxYear) {
+        (false, returnSummary)
+      } else {
+        (true, returnSummary.copy(taxYear = expectedTaxYear))
+      }
     }
 
   def unsetUnwantedSectionsToDraftReturn(draftReturn: DraftReturn): DraftReturn =
@@ -280,9 +290,9 @@ class ReturnsServiceImpl @Inject() (
     answers: MultipleDisposalsTriageAnswers
   ): MultipleDisposalsTriageAnswers = {
     val actualTaxYearExchanged = answers.fold(_.taxYearExchanged, _.taxYearExchanged)
-    if (actualTaxYearExchanged.isDefined)
+    if (actualTaxYearExchanged.isDefined) {
       answers
-    else {
+    } else {
       val taxYear = answers.fold(_.taxYear, c => Some(c.taxYear))
       taxYear match {
         case Some(t) =>
@@ -319,59 +329,69 @@ class ReturnsServiceImpl @Inject() (
         if (
           isSAStatusRequiredToUpdateSentMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers, submissionDate)
             .contains(true)
-        )
+        ) {
           sentReturn.copy(
             completeReturn = whenMultiple.copy(
               triageAnswers = whenMultiple.triageAnswers.copy(alreadySentSelfAssessment = Some(false))
             )
           )
-        else sentReturn,
+        } else {
+          sentReturn
+        },
       whenSingle =>
         if (
           isSAStatusRequiredToUpdateSentSingleDisposalTriageAnswers(whenSingle.triageAnswers, submissionDate)
             .contains(true)
-        )
+        ) {
           sentReturn.copy(
             completeReturn = whenSingle.copy(
               triageAnswers = whenSingle.triageAnswers.copy(alreadySentSelfAssessment = Some(false))
             )
           )
-        else sentReturn,
+        } else {
+          sentReturn
+        },
       whenSingleIndirect =>
         if (
           isSAStatusRequiredToUpdateSentSingleDisposalTriageAnswers(whenSingleIndirect.triageAnswers, submissionDate)
             .contains(true)
-        )
+        ) {
           sentReturn.copy(
             completeReturn = whenSingleIndirect.copy(
               triageAnswers = whenSingleIndirect.triageAnswers.copy(alreadySentSelfAssessment = Some(false))
             )
           )
-        else sentReturn,
+        } else {
+          sentReturn
+        },
       whenMultipleIndirect =>
         if (
           isSAStatusRequiredToUpdateSentMultipleDisposalsTriageAnswers(
             whenMultipleIndirect.triageAnswers,
             submissionDate
           ).contains(true)
-        )
+        ) {
           sentReturn.copy(
             completeReturn = whenMultipleIndirect.copy(
               triageAnswers = whenMultipleIndirect.triageAnswers.copy(alreadySentSelfAssessment = Some(false))
             )
           )
-        else sentReturn,
+        } else {
+          sentReturn
+        },
       whenSingleMixedUse =>
         if (
           isSAStatusRequiredToUpdateSentSingleDisposalTriageAnswers(whenSingleMixedUse.triageAnswers, submissionDate)
             .contains(true)
-        )
+        ) {
           sentReturn.copy(
             completeReturn = whenSingleMixedUse.copy(
               triageAnswers = whenSingleMixedUse.triageAnswers.copy(alreadySentSelfAssessment = Some(false))
             )
           )
-        else sentReturn
+        } else {
+          sentReturn
+        }
     )
 
   private def isSAStatusRequiredToUpdateSentMultipleDisposalsTriageAnswers(
@@ -406,36 +426,41 @@ class ReturnsServiceImpl @Inject() (
   private def updateSAStatusToDraftReturn(draftReturn: DraftReturn): DraftReturn =
     draftReturn.fold(
       whenMultiple =>
-        if (isSAStatusUpdatedToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers))
+        if (isSAStatusUpdatedToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers)) {
           whenMultiple
-        else
-          whenMultiple.copy(triageAnswers = unsetSAStatusToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers)),
+        } else {
+          whenMultiple.copy(triageAnswers = unsetSAStatusToMultipleDisposalsTriageAnswers(whenMultiple.triageAnswers))
+        },
       whenSingle =>
-        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingle.triageAnswers))
+        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingle.triageAnswers)) {
           whenSingle
-        else
-          whenSingle.copy(triageAnswers = unsetSAStatusToSingleDisposalTriageAnswers(whenSingle.triageAnswers)),
+        } else {
+          whenSingle.copy(triageAnswers = unsetSAStatusToSingleDisposalTriageAnswers(whenSingle.triageAnswers))
+        },
       whenSingleIndirect =>
-        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingleIndirect.triageAnswers))
+        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingleIndirect.triageAnswers)) {
           whenSingleIndirect
-        else
+        } else {
           whenSingleIndirect.copy(triageAnswers =
             unsetSAStatusToSingleDisposalTriageAnswers(whenSingleIndirect.triageAnswers)
-          ),
+          )
+        },
       whenMultipleIndirect =>
-        if (isSAStatusUpdatedToMultipleDisposalsTriageAnswers(whenMultipleIndirect.triageAnswers))
+        if (isSAStatusUpdatedToMultipleDisposalsTriageAnswers(whenMultipleIndirect.triageAnswers)) {
           whenMultipleIndirect
-        else
+        } else {
           whenMultipleIndirect.copy(triageAnswers =
             unsetSAStatusToMultipleDisposalsTriageAnswers(whenMultipleIndirect.triageAnswers)
-          ),
+          )
+        },
       whenSingleMixedUse =>
-        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingleMixedUse.triageAnswers))
+        if (isSAStatusUpdatedToSingleDisposalTriageAnswers(whenSingleMixedUse.triageAnswers)) {
           whenSingleMixedUse
-        else
+        } else {
           whenSingleMixedUse.copy(triageAnswers =
             unsetSAStatusToSingleDisposalTriageAnswers(whenSingleMixedUse.triageAnswers)
           )
+        }
     )
 
   private def unsetSAStatusToMultipleDisposalsTriageAnswers(
@@ -484,24 +509,29 @@ class ReturnsServiceImpl @Inject() (
     }
 
     val periodOfAdminDateOfDeathValid =
-      if (draftReturn.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin))
+      if (draftReturn.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin)) {
         dateOfDeath.forall(death => disposalDate.forall(_ > death.value))
-      else
+      } else {
         true
+      }
 
     val nonPeriodOfAdminDateOfDeathValid =
-      if (draftReturn.representativeType().contains(PersonalRepresentative))
+      if (draftReturn.representativeType().contains(PersonalRepresentative)) {
         dateOfDeath.forall(death => disposalDate.forall(_ <= death.value))
-      else true
+      } else {
+        true
+      }
 
-    if (!periodOfAdminDateOfDeathValid)
+    if (!periodOfAdminDateOfDeathValid) {
       logger.warn(
         s"Found draft return for cgt reference ${cgtReference.value} for period of admin personal rep with invalid disposal or completion date"
       )
-    if (!nonPeriodOfAdminDateOfDeathValid)
+    }
+    if (!nonPeriodOfAdminDateOfDeathValid) {
       logger.warn(
         s"Found draft return for cgt reference $cgtReference non-period of admin personal rep with invalid disposal or completion date"
       )
+    }
 
     periodOfAdminDateOfDeathValid && nonPeriodOfAdminDateOfDeathValid
   }
@@ -579,16 +609,17 @@ class ReturnsServiceImpl @Inject() (
     lang: Lang
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubmitReturnResponse] =
     connector.submitReturn(submitReturnRequest, lang).subflatMap { httpResponse =>
-      if (httpResponse.status === OK)
+      if (httpResponse.status === OK) {
         httpResponse
           .parseJSON[SubmitReturnResponse]()
           .leftMap(Error(_))
-      else
+      } else {
         Left(
           Error(
             s"Call to get submit return came back with status ${httpResponse.status}}"
           )
         )
+      }
     }
 
   def listReturns(cgtReference: CgtReference)(implicit
@@ -601,16 +632,17 @@ class ReturnsServiceImpl @Inject() (
     // satisfy this logic by using the end of the current tax year as our toDate
     val toDate   = TimeUtils.getTaxYearEndDateInclusive(today)
     connector.listReturns(cgtReference, fromDate, toDate).subflatMap { response =>
-      if (response.status === OK)
+      if (response.status === OK) {
         response
           .parseJSON[ListReturnsResponse]()
           .bimap(Error(_), _.returns)
-      else
+      } else {
         Left(
           Error(
             s"call to list returns came back with status ${response.status}"
           )
         )
+      }
     }
   }
 
@@ -618,16 +650,16 @@ class ReturnsServiceImpl @Inject() (
     hc: HeaderCarrier
   ): EitherT[Future, Error, DisplayReturn] =
     connector.displayReturn(cgtReference, submissionId).subflatMap { response =>
-      if (response.status === OK)
+      if (response.status === OK) {
         response.parseJSON[DisplayReturn]().leftMap(Error(_))
-      else
+      } else {
         Left(
           Error(
             s"call to list returns came back with status ${response.status}"
           )
         )
+      }
     }
-
 }
 
 object ReturnsServiceImpl {

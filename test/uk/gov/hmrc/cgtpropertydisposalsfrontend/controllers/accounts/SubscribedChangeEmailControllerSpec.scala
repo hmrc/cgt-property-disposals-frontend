@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -64,7 +64,7 @@ class SubscribedChangeEmailControllerSpec
   override lazy val controller: SubscribedChangeEmailController =
     instanceOf[SubscribedChangeEmailController]
 
-  override val overrideBindings =
+  override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -73,7 +73,7 @@ class SubscribedChangeEmailControllerSpec
       bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
-  def mockSubscriptionUpdate(
+  private def mockSubscriptionUpdate(
     subscribedUpdateDetails: SubscribedUpdateDetails
   )(result: Either[Error, Unit]) =
     (mockSubscriptionService
@@ -91,9 +91,7 @@ class SubscribedChangeEmailControllerSpec
     )
   }
 
-  override val mockUpdateEmail: Option[
-    (ChangingAccountEmail, ChangingAccountEmail, Either[Error, Unit]) => Unit
-  ] =
+  override val mockUpdateEmail: Option[(ChangingAccountEmail, ChangingAccountEmail, Either[Error, Unit]) => Unit] =
     Some({
       case (
             oldDetails: ChangingAccountEmail,

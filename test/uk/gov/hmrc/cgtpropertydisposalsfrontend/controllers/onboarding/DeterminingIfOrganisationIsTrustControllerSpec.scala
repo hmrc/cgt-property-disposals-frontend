@@ -60,16 +60,16 @@ class DeterminingIfOrganisationIsTrustControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val mockBprNameMatchService = mock[NameMatchRetryService]
+  private val mockBprNameMatchService = mock[NameMatchRetryService]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[NameMatchRetryService].toInstance(mockBprNameMatchService),
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore)
     )
 
-  lazy val controller = instanceOf[DeterminingIfOrganisationIsTrustController]
+  private lazy val controller = instanceOf[DeterminingIfOrganisationIsTrustController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -85,7 +85,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
   def sessionDataWithStatus(journeyStatus: JourneyStatus): SessionData =
     SessionData.empty.copy(journeyStatus = Some(journeyStatus))
 
-  def mockGetNumberOfUnsuccessfulAttempts(
+  private def mockGetNumberOfUnsuccessfulAttempts(
     ggCredId: GGCredId
   )(
     result: Either[NameMatchServiceError[TrustNameMatchDetails], Option[
@@ -103,18 +103,14 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       .expects(ggCredId, *, *, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockAttemptNameMatch(
+  private def mockAttemptNameMatch(
     trn: TRN,
     name: TrustName,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
-    ],
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]],
     lang: Lang
   )(
-    result: Either[NameMatchServiceError[
-      TrustNameMatchDetails
-    ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)]
+    result: Either[NameMatchServiceError[TrustNameMatchDetails], (BusinessPartnerRecord, BusinessPartnerRecordResponse)]
   ) =
     (
       mockBprNameMatchService
@@ -138,7 +134,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       )
       .returning(EitherT.fromEither[Future](result))
 
-  val ggCredId = sample[GGCredId]
+  private val ggCredId = sample[GGCredId]
 
   "DeterminingIfOrganisationIsTrustController" when {
 
@@ -772,7 +768,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       "redirect to the start endpoint" when {
 
-        def test(hasTrn: Option[Boolean]) = {
+        def test(hasTrn: Option[Boolean]): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -827,11 +823,11 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           contentAsString(result) should include(
             messageFromMessageKey("enterTrn.title")
           )
-          contentAsString(result) should not include (messageFromMessageKey(
+          contentAsString(result) should not include messageFromMessageKey(
             "enterTrn.error.notFound",
             0,
             2
-          ))
+          )
         }
 
         "the user has indicated that they have a TRN and they have " +
@@ -865,11 +861,11 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             contentAsString(result) should include(
               messageFromMessageKey("enterTrn.title")
             )
-            contentAsString(result) should not include (messageFromMessageKey(
+            contentAsString(result) should not include messageFromMessageKey(
               "enterTrn.error.notFound",
               1,
               2
-            ))
+            )
           }
 
       }
@@ -962,7 +958,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       "redirect to the start endpoint" when {
 
-        def test(hasTrn: Option[Boolean]) = {
+        def test(hasTrn: Option[Boolean]): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1482,7 +1478,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
     "handling requests to display the too many attempts page" must {
 
-      def performAction() = controller.tooManyAttempts()(FakeRequest())
+      def performAction(): Future[Result] = controller.tooManyAttempts()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 

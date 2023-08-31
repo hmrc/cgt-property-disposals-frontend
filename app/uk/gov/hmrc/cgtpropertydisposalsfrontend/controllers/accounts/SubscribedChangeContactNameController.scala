@@ -71,9 +71,9 @@ class SubscribedChangeContactNameController @Inject() (
   ): EitherT[Future, Error, Subscribed] = {
     val journeyWithUpdatedContactName =
       journey.subscribedDetails.copy(contactName = contactName)
-    if (journey.subscribedDetails === journeyWithUpdatedContactName)
+    if (journey.subscribedDetails === journeyWithUpdatedContactName) {
       EitherT.rightT[Future, Error](journey)
-    else {
+    } else {
       auditService.sendEvent(
         "contactNameChanged",
         SubscribedContactNameChangedEvent(

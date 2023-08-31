@@ -40,14 +40,14 @@ object IndividualName {
   }
 
   implicit class IndividualNameOps(private val name: IndividualName) extends AnyVal {
-    def makeSingleName(): String = name.firstName + " " + name.lastName
+    def makeSingleName: String = name.firstName + " " + name.lastName
   }
 
   val mapping: Mapping[String] = {
     def validateName(s: String): ValidationResult =
-      if (s.length > maxLength) Invalid("error.tooLong")
-      else if (!s.forall(allowedCharacters.contains(_))) Invalid("error.pattern")
-      else Valid
+      if (s.length > maxLength) { Invalid("error.tooLong") }
+      else if (!s.forall(allowedCharacters.contains(_))) { Invalid("error.pattern") }
+      else { Valid }
 
     nonEmptyText
       .transform[String](_.trim, identity)

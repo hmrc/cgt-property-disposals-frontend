@@ -58,11 +58,11 @@ class SupportingEvidenceControllerSpec
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
-  val mockUUIDGenerator = mock[UUIDGenerator]
+  private val mockUUIDGenerator = mock[UUIDGenerator]
 
   val mockUpscanService: UpscanService = mock[UpscanService]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -71,13 +71,13 @@ class SupportingEvidenceControllerSpec
       bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     )
 
-  lazy val controller = instanceOf[SupportingEvidenceController]
+  private lazy val controller = instanceOf[SupportingEvidenceController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
-  def mockUpscanInitiate(
+  private def mockUpscanInitiate(
     errorRedirectCall: Call,
     successRedirectCall: UploadReference => Call
   )(
@@ -102,7 +102,7 @@ class SupportingEvidenceControllerSpec
       )
       .returning(EitherT.fromEither(result))
 
-  def mockGetUpscanUpload(uploadReference: UploadReference)(
+  private def mockGetUpscanUpload(uploadReference: UploadReference)(
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
@@ -110,7 +110,7 @@ class SupportingEvidenceControllerSpec
       .expects(uploadReference, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) =
+  private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
@@ -335,7 +335,7 @@ class SupportingEvidenceControllerSpec
           Some(answers)
         )._1
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) =
+        def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
           testFormError(data: _*)(expectedErrorMessageKey)(
             "supporting-evidence.do-you-want-to-upload.title"
           )(
@@ -962,7 +962,7 @@ class SupportingEvidenceControllerSpec
           )
 
           val updatedAnswers =
-            CompleteSupportingEvidenceAnswers(false, List.empty)
+            CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence = false, List.empty)
 
           val (session, journey, draftReturn) =
             sessionWithSingleDisposalState(Some(answers))
@@ -1001,7 +1001,7 @@ class SupportingEvidenceControllerSpec
           )
 
           val updatedAnswers =
-            CompleteSupportingEvidenceAnswers(false, List.empty)
+            CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence = false, List.empty)
 
           val (session, journey, draftReturn) =
             sessionWithSingleDisposalState(Some(answers))
@@ -1035,7 +1035,7 @@ class SupportingEvidenceControllerSpec
           )
 
           val updatedAnswers =
-            CompleteSupportingEvidenceAnswers(false, List.empty)
+            CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence = false, List.empty)
 
           val (session, journey, draftReturn) =
             sessionWithMultipleDisposalsState(Some(answers))
@@ -1105,7 +1105,7 @@ class SupportingEvidenceControllerSpec
           }
 
           checkIsTechnicalErrorPage(
-            performAction(uploadReference, false)
+            performAction(uploadReference, addNew = false)
           )
         }
       }
@@ -1147,7 +1147,7 @@ class SupportingEvidenceControllerSpec
           }
 
           checkIsRedirect(
-            performAction(uploadReference, false),
+            performAction(uploadReference, addNew = false),
             routes.SupportingEvidenceController.checkYourAnswers()
           )
 
@@ -1187,7 +1187,7 @@ class SupportingEvidenceControllerSpec
           }
 
           checkIsRedirect(
-            performAction(uploadReference, false),
+            performAction(uploadReference, addNew = false),
             routes.SupportingEvidenceController.checkYourAnswers()
           )
 
@@ -1227,7 +1227,7 @@ class SupportingEvidenceControllerSpec
           }
 
           checkIsRedirect(
-            performAction(uploadReference, true),
+            performAction(uploadReference, addNew = true),
             routes.SupportingEvidenceController.uploadSupportingEvidence()
           )
         }

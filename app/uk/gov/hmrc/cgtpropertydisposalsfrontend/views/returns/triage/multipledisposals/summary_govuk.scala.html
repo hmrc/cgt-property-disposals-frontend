@@ -101,11 +101,11 @@
 
   @cyaRow(
     messages(s"multipleDisposalsWereYouAUKResident$userKeyWithSeparatePeriodOfAdmin.title"),
-    Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
+    Html(messages(s"yesNo.${answers.countryOfResidence.isUk.toString}")),
     Some(cyaChange(messages("multipleDisposalsWereYouAUKResident.cyaChange"), routes.MultipleDisposalsTriageController.wereYouAUKResident().url)),
       "wereYouAUKResident"
   )
-    @if(!answers.countryOfResidence.isUk()){
+    @if(!answers.countryOfResidence.isUk){
         @cyaRow(
             countryOfResidenceTitle,
             Html(messages.translate(s"country.${answers.countryOfResidence.code}", Seq.empty).getOrElse(answers.countryOfResidence.code)),

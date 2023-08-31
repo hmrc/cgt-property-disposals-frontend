@@ -77,7 +77,7 @@ class UpscanConnectorImpl @Inject() (
     s"$protocol://$host:$port/upscan/v2/initiate"
   }
 
-  val backEndBaseUrl: String = servicesConfig.baseUrl("cgt-property-disposals")
+  private val backEndBaseUrl = servicesConfig.baseUrl("cgt-property-disposals")
 
   val selfBaseUrl: String = config.underlying.get[String]("self.url").value
 
@@ -119,8 +119,9 @@ class UpscanConnectorImpl @Inject() (
                 s"status ${response.status} and body ${response.body}"
             )
             Left(Error("could not initiate upscan"))
-          } else
+          } else {
             Right(response)
+          }
         }
         .recover { case e => Left(Error(e)) }
     )
@@ -145,8 +146,9 @@ class UpscanConnectorImpl @Inject() (
                 s"status ${response.status} and body ${response.body}"
             )
             Left(Error("could not get upscan upload"))
-          } else
+          } else {
             Right(response)
+          }
         }
         .recover { case e => Left(Error(e)) }
     )

@@ -68,7 +68,7 @@ class AgentAccessControllerSpec
   val mockAgentVerifierMatchRetryStore: AgentVerifierMatchRetryStore =
     mock[AgentVerifierMatchRetryStore]
 
-  val mockReturnsService = mock[ReturnsService]
+  private val mockReturnsService = mock[ReturnsService]
 
   val maxVerifierMatchAttempts = 5
 
@@ -76,7 +76,7 @@ class AgentAccessControllerSpec
     "agent-verifier-match.max-retries" -> maxVerifierMatchAttempts
   )
 
-  override val overrideBindings =
+  override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -86,25 +86,25 @@ class AgentAccessControllerSpec
       bind[ReturnsService].toInstance(mockReturnsService)
     )
 
-  lazy val controller = instanceOf[AgentAccessController]
+  private lazy val controller = instanceOf[AgentAccessController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  val agentGGCredId = sample[GGCredId]
+  private val agentGGCredId = sample[GGCredId]
 
-  val agentReferenceNumber = sample[AgentReferenceNumber]
+  private val agentReferenceNumber = sample[AgentReferenceNumber]
 
-  val validCgtReference = CgtReference("XYCGTP123456789")
+  private val validCgtReference = CgtReference("XYCGTP123456789")
 
   val nonUkCountryCode = "AL"
 
-  val nonUkAddress = sample[NonUkAddress].copy(country = Country(nonUkCountryCode))
+  private val nonUkAddress = sample[NonUkAddress].copy(country = Country(nonUkCountryCode))
 
-  val ukAddress = sample[UkAddress].copy(postcode = Postcode("ZZ011ZZ"))
+  private val ukAddress = sample[UkAddress].copy(postcode = Postcode("ZZ011ZZ"))
 
-  val ukClientDetails = newClientDetails(validCgtReference, ukAddress)
+  private val ukClientDetails = newClientDetails(validCgtReference, ukAddress)
 
-  val nonUkClientDetails = newClientDetails(validCgtReference, nonUkAddress)
+  private val nonUkClientDetails = newClientDetails(validCgtReference, nonUkAddress)
 
   def newClientDetails(
     cgtReference: CgtReference,
@@ -113,7 +113,7 @@ class AgentAccessControllerSpec
     sample[SubscribedDetails]
       .copy(cgtReference = cgtReference, address = address)
 
-  def sessionData(
+  private def sessionData(
     clientDetails: SubscribedDetails,
     correctVerifierSupplied: Boolean
   ) =
@@ -137,7 +137,7 @@ class AgentAccessControllerSpec
       EmptyRetrieval
     )(result)
 
-  def mockGetSubscriptionDetails(
+  private def mockGetSubscriptionDetails(
     cgtReference: CgtReference
   )(result: Either[Error, Option[SubscribedDetails]]) =
     (mockSubscriptionService
@@ -145,7 +145,7 @@ class AgentAccessControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockGetUnsuccessfulVerifierAttempts(
+  private def mockGetUnsuccessfulVerifierAttempts(
     agentGGCredId: GGCredId,
     clientCgtReference: CgtReference
   )(result: Either[Error, Option[UnsuccessfulVerifierAttempts]]) =
@@ -154,7 +154,7 @@ class AgentAccessControllerSpec
       .expects(agentGGCredId, clientCgtReference)
       .returning(Future.successful(result))
 
-  def mockStoreUnsuccessfulVerifierAttempts(
+  private def mockStoreUnsuccessfulVerifierAttempts(
     agentGGCredId: GGCredId,
     clientCgtReference: CgtReference,
     unsuccessfulVerifierAttempts: UnsuccessfulVerifierAttempts
@@ -166,7 +166,7 @@ class AgentAccessControllerSpec
       .expects(agentGGCredId, clientCgtReference, unsuccessfulVerifierAttempts)
       .returning(Future.successful(result))
 
-  def mockGetDraftReturns(
+  private def mockGetDraftReturns(
     cgtReference: CgtReference,
     sentReturns: List[ReturnSummary]
   )(
@@ -179,7 +179,7 @@ class AgentAccessControllerSpec
       .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockGetReturnsList(cgtReference: CgtReference)(
+  private def mockGetReturnsList(cgtReference: CgtReference)(
     response: Either[Error, List[ReturnSummary]]
   ) =
     (mockReturnsService
@@ -187,7 +187,7 @@ class AgentAccessControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockUpdateCorrectTaxYearToSentReturns(
+  private def mockUpdateCorrectTaxYearToSentReturns(
     cgtReference: CgtReference,
     sentReturns: List[ReturnSummary]
   )(
@@ -364,7 +364,7 @@ class AgentAccessControllerSpec
                     AgentSupplyingClientDetails(
                       agentReferenceNumber,
                       agentGGCredId,
-                      Some(VerifierMatchingDetails(clientDetails, false))
+                      Some(VerifierMatchingDetails(clientDetails, correctVerifierSupplied = false))
                     )
                   )
                 )
@@ -456,7 +456,7 @@ class AgentAccessControllerSpec
                     AgentSupplyingClientDetails(
                       agentReferenceNumber,
                       agentGGCredId,
-                      Some(VerifierMatchingDetails(ukClientDetails, false))
+                      Some(VerifierMatchingDetails(ukClientDetails, correctVerifierSupplied = false))
                     )
                   )
                 )
@@ -492,7 +492,7 @@ class AgentAccessControllerSpec
                     AgentSupplyingClientDetails(
                       agentReferenceNumber,
                       agentGGCredId,
-                      Some(VerifierMatchingDetails(nonUkClientDetails, false))
+                      Some(VerifierMatchingDetails(nonUkClientDetails, correctVerifierSupplied = false))
                     )
                   )
                 )
@@ -539,7 +539,7 @@ class AgentAccessControllerSpec
                     Some(
                       VerifierMatchingDetails(
                         ukClientDetails.copy(address = sample[NonUkAddress]),
-                        false
+                        correctVerifierSupplied = false
                       )
                     )
                   )
@@ -580,7 +580,7 @@ class AgentAccessControllerSpec
           content should include(
             messageFromMessageKey("agent.enter-client-postcode.title")
           )
-          content should not include (ukAddress.postcode.value)
+          content should not include ukAddress.postcode.value
         }
 
         "the session data is valid and the agent has already supplied the correct postcode" in {
@@ -753,7 +753,7 @@ class AgentAccessControllerSpec
                     Some(
                       VerifierMatchingDetails(
                         ukClientDetails.copy(address = sample[NonUkAddress]),
-                        false
+                        correctVerifierSupplied = false
                       )
                     )
                   )
@@ -923,7 +923,7 @@ class AgentAccessControllerSpec
                     Some(
                       VerifierMatchingDetails(
                         nonUkClientDetails.copy(address = sample[UkAddress]),
-                        false
+                        correctVerifierSupplied = false
                       )
                     )
                   )
@@ -964,7 +964,7 @@ class AgentAccessControllerSpec
           content should include(
             messageFromMessageKey("agent.enter-client-country.title")
           )
-          content should not include (s""""$nonUkCountryCode" selected""")
+          content should not include s""""$nonUkCountryCode" selected"""
         }
 
         "the session data is valid and the agent has already supplied the correct country" in {
@@ -1016,7 +1016,7 @@ class AgentAccessControllerSpec
         def testFormValidationError(formData: (String, String)*)(
           errorKey: String,
           currentUnsuccessfulAttempt: Option[UnsuccessfulVerifierAttempts],
-          updatedUnsucessfulAttempt: Option[UnsuccessfulVerifierAttempts]
+          updatedUnsuccessfulAttempt: Option[UnsuccessfulVerifierAttempts]
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1029,7 +1029,7 @@ class AgentAccessControllerSpec
             )(
               Right(currentUnsuccessfulAttempt)
             )
-            updatedUnsucessfulAttempt.foreach(
+            updatedUnsuccessfulAttempt.foreach(
               mockStoreUnsuccessfulVerifierAttempts(
                 agentGGCredId,
                 nonUkClientDetails.cgtReference,
@@ -1103,7 +1103,7 @@ class AgentAccessControllerSpec
                     Some(
                       VerifierMatchingDetails(
                         nonUkClientDetails.copy(address = sample[UkAddress]),
-                        false
+                        correctVerifierSupplied = false
                       )
                     )
                   )

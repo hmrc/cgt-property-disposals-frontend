@@ -113,8 +113,11 @@ class AcquisitionDetailsController @Inject() (
             Some(IncompleteAcquisitionDetailsAnswers.empty)
         }
 
-      if (isIndirectDisposal) answers.map(_.copy(improvementCosts = Some(AmountInPence.zero)))
-      else answers
+      if (isIndirectDisposal) {
+        answers.map(_.copy(improvementCosts = Some(AmountInPence.zero)))
+      } else {
+        answers
+      }
     }
 
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
@@ -160,7 +163,7 @@ class AcquisitionDetailsController @Inject() (
       .fold(_.triageAnswers, _.triageAnswers)
       .fold(
         i => i.assetType -> i.wasAUKResident,
-        c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
+        c => Some(c.assetType) -> Some(c.countryOfResidence.isUk)
       ) match {
       case (Some(a), Some(w)) => f(a, w)
       case _                  =>
@@ -220,7 +223,7 @@ class AcquisitionDetailsController @Inject() (
         Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
       )(f)
 
-  private def commonDisplayBehaviour[A, P : Writeable, R](
+  private def commonDisplayBehaviour[A, P : Writeable](
     currentAnswers: AcquisitionDetailsAnswers
   )(form: AcquisitionDetailsAnswers => Form[A])(
     page: (Form[A], Call) => P
@@ -235,10 +238,11 @@ class AcquisitionDetailsController @Inject() (
       )
 
       Ok(page(form(currentAnswers), backLink))
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
 
-  private def commonSubmitBehaviour[A, P : Writeable, R](
+  private def commonSubmitBehaviour[A, P : Writeable](
     currentFillingOutReturn: FillingOutReturn,
     currentState: JourneyState,
     currentAnswers: AcquisitionDetailsAnswers
@@ -268,10 +272,11 @@ class AcquisitionDetailsController @Inject() (
               .withForceDisplayGainOrLossAfterReliefsForAmends
 
             val result = for {
-              _ <- if (newDraftReturn.merge === currentState.merge)
+              _ <- if (newDraftReturn.merge === currentState.merge) {
                      EitherT.pure[Future, Error](())
-                   else
+                   } else {
                      returnsService.storeDraftReturn(newJourney)
+                   }
               _ <- EitherT(
                      updateSession(sessionStore, request)(
                        _.copy(journeyStatus = Some(newJourney))
@@ -288,8 +293,9 @@ class AcquisitionDetailsController @Inject() (
             )
           }
         )
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
 
   private def commonUpdateDraftReturn(
     d: JourneyState,
@@ -378,9 +384,9 @@ class AcquisitionDetailsController @Inject() (
                 answers
                   .fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
                   .contains(m)
-              )
+              ) {
                 draftReturn
-              else {
+              } else {
                 val newAnswers = answers
                   .unset(_.acquisitionPrice)
                   .unset(_.rebasedAcquisitionPrice)
@@ -398,7 +404,7 @@ class AcquisitionDetailsController @Inject() (
   def acquisitionDate(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
-        withDisposalDate(state) { case (disposalDate) =>
+        withDisposalDate(state) { case disposalDate =>
           withAssetType(state) { assetType =>
             val form = acquisitionDateForm(disposalDate.value)
 
@@ -431,7 +437,7 @@ class AcquisitionDetailsController @Inject() (
   def acquisitionDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
-        withDisposalDate(state) { case (disposalDate) =>
+        withDisposalDate(state) { case disposalDate =>
           withAssetType(state) { assetType =>
             commonSubmitBehaviour(
               fillingOutReturn,
@@ -460,9 +466,9 @@ class AcquisitionDetailsController @Inject() (
                   answers
                     .fold(_.acquisitionDate, c => Some(c.acquisitionDate))
 
-                if (existingAcquisitionDate.contains(d))
+                if (existingAcquisitionDate.contains(d)) {
                   draftReturn
-                else {
+                } else {
                   val newAnswers = answers
                     .unset(_.acquisitionPrice)
                     .unset(_.rebasedAcquisitionPrice)
@@ -472,8 +478,11 @@ class AcquisitionDetailsController @Inject() (
 
                   commonUpdateDraftReturn(
                     draftReturn,
-                    if (assetType === AssetType.IndirectDisposal) newAnswers
-                    else newAnswers.unset(_.improvementCosts),
+                    if (assetType === AssetType.IndirectDisposal) {
+                      newAnswers
+                    } else {
+                      newAnswers.unset(_.improvementCosts)
+                    },
                     fillingOutReturn
                   )
                 }
@@ -555,9 +564,9 @@ class AcquisitionDetailsController @Inject() (
                       .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
                       .map(_.inPounds())
                       .contains(p)
-                  )
+                  ) {
                     draftReturn
-                  else {
+                  } else {
                     val newAnswers = answers.fold(
                       _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(p))),
                       _.copy(acquisitionPrice = AmountInPence.fromPounds(p))
@@ -632,9 +641,9 @@ class AcquisitionDetailsController @Inject() (
                     .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
                     .map(_.inPounds())
                     .contains(p)
-                )
+                ) {
                   draftReturn
-                else {
+                } else {
                   val newAnswers = answers.fold(
                     _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(p))),
                     _.copy(acquisitionPrice = AmountInPence.fromPounds(p))
@@ -660,9 +669,9 @@ class AcquisitionDetailsController @Inject() (
                 acquisitionDate,
                 representativeType(state)
               )
-            )
+            ) {
               Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
-            else
+            } else {
               commonDisplayBehaviour(answers)(
                 form = _.fold(
                   _.rebasedAcquisitionPrice
@@ -691,12 +700,13 @@ class AcquisitionDetailsController @Inject() (
                     answers,
                     acquisitionDate
                   ),
-                redirectToIfNoRequiredPreviousAnswer =
-                  if (wasUkResident)
-                    routes.AcquisitionDetailsController.acquisitionDate()
-                  else
-                    routes.AcquisitionDetailsController.acquisitionPrice()
+                redirectToIfNoRequiredPreviousAnswer = if (wasUkResident) {
+                  routes.AcquisitionDetailsController.acquisitionDate()
+                } else {
+                  routes.AcquisitionDetailsController.acquisitionPrice()
+                }
               )
+            }
           }
         }
       }
@@ -739,14 +749,16 @@ class AcquisitionDetailsController @Inject() (
                   }
                 )(
                   requiredPreviousAnswer = answers => {
-                    if (wasUkResident) noAnswersRequired
-                    else
+                    if (wasUkResident) {
+                      noAnswersRequired
+                    } else {
                       answers
                         .fold(
                           _.acquisitionPrice,
                           c => Some(c.acquisitionPrice)
                         )
                         .isDefined
+                    }
                   },
                   redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionPrice()
                 )(
@@ -759,11 +771,11 @@ class AcquisitionDetailsController @Inject() (
                         )
                         .map(_.inPounds())
                         .contains(p)
-                    )
+                    ) {
                       draftReturn
-                    else {
+                    } else {
                       val newAnswers =
-                        if (wasUkResident)
+                        if (wasUkResident) {
                           answers.fold(
                             _.copy(
                               rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p)),
@@ -776,11 +788,12 @@ class AcquisitionDetailsController @Inject() (
                               acquisitionPrice = AmountInPence.fromPounds(p)
                             )
                           )
-                        else
+                        } else {
                           answers.fold(
                             _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p))),
                             _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p)))
                           )
+                        }
 
                       commonUpdateDraftReturn(draftReturn, newAnswers, fillingOutReturn)
                     }
@@ -823,22 +836,23 @@ class AcquisitionDetailsController @Inject() (
               )
             )(
               requiredPreviousAnswer = { a =>
-                if (rebaseDate.isDefined)
+                if (rebaseDate.isDefined) {
                   a.fold(
                     _.rebasedAcquisitionPrice,
                     _.rebasedAcquisitionPrice
                   ).isDefined
-                else
+                } else {
                   a.fold(_.acquisitionPrice, c => Some(c.acquisitionPrice)).isDefined
+                }
               },
-              redirectToIfNoRequiredPreviousAnswer =
-                if (rebaseDate.isDefined)
-                  routes.AcquisitionDetailsController
-                    .rebasedAcquisitionPrice()
-                else if (isPeriodOfAdmin(state))
-                  routes.AcquisitionDetailsController.periodOfAdminMarketValue()
-                else
-                  routes.AcquisitionDetailsController.acquisitionPrice()
+              redirectToIfNoRequiredPreviousAnswer = if (rebaseDate.isDefined) {
+                routes.AcquisitionDetailsController
+                  .rebasedAcquisitionPrice()
+              } else if (isPeriodOfAdmin(state)) {
+                routes.AcquisitionDetailsController.periodOfAdminMarketValue()
+              } else {
+                routes.AcquisitionDetailsController.acquisitionPrice()
+              }
             )
           }
         }
@@ -877,26 +891,27 @@ class AcquisitionDetailsController @Inject() (
               )
             )(
               requiredPreviousAnswer = { answers =>
-                if (rebaseDate.isDefined)
+                if (rebaseDate.isDefined) {
                   answers
                     .fold(
                       _.rebasedAcquisitionPrice,
                       _.rebasedAcquisitionPrice
                     )
                     .isDefined
-                else
+                } else {
                   answers
                     .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
                     .isDefined
+                }
               },
-              redirectToIfNoRequiredPreviousAnswer =
-                if (rebaseDate.isDefined)
-                  routes.AcquisitionDetailsController
-                    .rebasedAcquisitionPrice()
-                else if (isPeriodOfAdmin(state))
-                  routes.AcquisitionDetailsController.periodOfAdminMarketValue()
-                else
-                  routes.AcquisitionDetailsController.acquisitionPrice()
+              redirectToIfNoRequiredPreviousAnswer = if (rebaseDate.isDefined) {
+                routes.AcquisitionDetailsController
+                  .rebasedAcquisitionPrice()
+              } else if (isPeriodOfAdmin(state)) {
+                routes.AcquisitionDetailsController.periodOfAdminMarketValue()
+              } else {
+                routes.AcquisitionDetailsController.acquisitionPrice()
+              }
             )(
               updateState = { (p, answers, draftReturn) =>
                 if (
@@ -904,9 +919,9 @@ class AcquisitionDetailsController @Inject() (
                     .fold(_.improvementCosts, c => Some(c.improvementCosts))
                     .map(_.inPounds())
                     .contains(p)
-                )
+                ) {
                   draftReturn
-                else {
+                } else {
                   val newAnswers = answers.fold(
                     _.copy(improvementCosts = Some(AmountInPence.fromPounds(p))),
                     _.copy(improvementCosts = AmountInPence.fromPounds(p))
@@ -925,9 +940,9 @@ class AcquisitionDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasAUkResident) =>
-          if (wasAUkResident)
+          if (wasAUkResident) {
             Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
-          else
+          } else {
             Ok(
               shouldUseRebasePage(
                 answers
@@ -943,6 +958,7 @@ class AcquisitionDetailsController @Inject() (
                 wasAUkResident
               )
             )
+          }
         }
       }
     }
@@ -959,11 +975,11 @@ class AcquisitionDetailsController @Inject() (
                 acquisitionDate,
                 representativeType(state)
               )
-            )
+            ) {
               Redirect(
                 routes.AcquisitionDetailsController.checkYourAnswers()
               )
-            else
+            } else {
               commonSubmitBehaviour(
                 fillingOutReturn,
                 state,
@@ -996,9 +1012,9 @@ class AcquisitionDetailsController @Inject() (
                         c => Some(c.shouldUseRebase)
                       )
                       .contains(p)
-                  )
+                  ) {
                     draftReturn
-                  else {
+                  } else {
                     val newAnswers = answers.fold(
                       _.copy(shouldUseRebase = Some(p)),
                       _.copy(shouldUseRebase = p)
@@ -1008,6 +1024,7 @@ class AcquisitionDetailsController @Inject() (
                   }
                 }
               )
+            }
           }
         }
       }
@@ -1092,9 +1109,9 @@ class AcquisitionDetailsController @Inject() (
                     .fold(_.acquisitionFees, c => Some(c.acquisitionFees))
                     .map(_.inPounds())
                     .contains(p)
-                )
+                ) {
                   draftReturn
-                else {
+                } else {
                   val newAnswers = answers.fold(
                     _.copy(acquisitionFees = Some(AmountInPence.fromPounds(p))),
                     _.copy(acquisitionFees = AmountInPence.fromPounds(p))
@@ -1383,23 +1400,24 @@ class AcquisitionDetailsController @Inject() (
       wasUkResident && RebasingCutoffDates.ukResidents.isAfter(
         acquisitionDate.value
       )
-    )
+    ) {
       acquisitionDetailsAnswers
         .fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
         .isDefined
-    else if (!wasUkResident)
+    } else if (!wasUkResident) {
       acquisitionDetailsAnswers
         .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
         .isDefined
-    else true
-
+    } else {
+      true
+    }
 }
 
 object AcquisitionDetailsController {
 
-  val noAnswersRequired: Boolean = true
+  private val noAnswersRequired = true
 
-  val acquisitionMethodForm: Form[AcquisitionMethod] = {
+  private val acquisitionMethodForm = {
     val formatter: Formatter[AcquisitionMethod] = {
       val (acquisitionMethodKey, otherAcquisitionMethodKey) =
         "acquisitionMethod" -> "otherAcquisitionMethod"
@@ -1409,11 +1427,13 @@ object AcquisitionDetailsController {
       def validateOtherAcquisitionMethod(
         s: String
       ): Either[FormError, AcquisitionMethod] =
-        if (s.length > 35)
+        if (s.length > 35) {
           Left(FormError(otherAcquisitionMethodKey, "error.tooLong"))
-        else if (!otherAcquisitionMethodPredicate.test(s))
+        } else if (!otherAcquisitionMethodPredicate.test(s)) {
           Left(FormError(otherAcquisitionMethodKey, "error.invalid"))
-        else Right(AcquisitionMethod.Other(s))
+        } else {
+          Right(AcquisitionMethod.Other(s))
+        }
 
       val innerOption = InnerOption { data =>
         FormUtils
@@ -1445,7 +1465,7 @@ object AcquisitionDetailsController {
     )
   }
 
-  def acquisitionDateForm(today: LocalDate): Form[AcquisitionDate] =
+  private def acquisitionDateForm(today: LocalDate) =
     Form(
       mapping(
         "" -> of(
@@ -1471,7 +1491,7 @@ object AcquisitionDetailsController {
       )(identity)(Some(_))
     )
 
-  val rebasedAcquisitionPriceForm: Form[BigDecimal] =
+  private val rebasedAcquisitionPriceForm =
     Form(
       mapping(
         "rebaseAcquisitionPrice" -> of(
@@ -1481,7 +1501,7 @@ object AcquisitionDetailsController {
       )(identity)(Some(_))
     )
 
-  def periodOfAdminMarketValueForm(dateOfDeath: DateOfDeath)(implicit m: Messages): Form[BigDecimal] =
+  private def periodOfAdminMarketValueForm(dateOfDeath: DateOfDeath)(implicit m: Messages) =
     Form(
       mapping(
         "periodOfAdminMarketValue" -> of(
@@ -1495,17 +1515,17 @@ object AcquisitionDetailsController {
       )(identity)(Some(_))
     )
 
-  val shouldUseRebaseForm: Form[Boolean] = Form(
+  private val shouldUseRebaseForm = Form(
     mapping(
       "shouldUseRebase" -> of(BooleanFormatter.formatter)
     )(identity)(Some(_))
   )
 
-  val improvementCostsForm: Form[BigDecimal] =
+  private val improvementCostsForm =
     MoneyUtils
       .amountInPoundsYesNoForm("improvementCosts", "improvementCostsValue")
 
-  def acquisitionFeesForm(errorArgs: Seq[String] = Seq.empty): Form[BigDecimal] =
+  private def acquisitionFeesForm(errorArgs: Seq[String] = Seq.empty) =
     MoneyUtils
       .amountInPoundsYesNoForm("acquisitionFees", "acquisitionFeesValue", None, errorArgs)
 

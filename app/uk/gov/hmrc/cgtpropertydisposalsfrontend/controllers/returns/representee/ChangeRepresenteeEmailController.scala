@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOut
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Returns.ChangingRepresenteeEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresenteeAnswers, RepresenteeContactDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
@@ -120,9 +120,9 @@ class ChangeRepresenteeEmailController @Inject() (
     hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] =
-    if (changingRepresenteeEmail.contactDetails.emailAddress === email)
+    if (changingRepresenteeEmail.contactDetails.emailAddress === email) {
       EitherT.pure[Future, Error](changingRepresenteeEmail.journey.merge)
-    else {
+    } else {
       val newContactDetails =
         changingRepresenteeEmail.contactDetails.copy(emailAddress = email)
       val newAnswers        = changingRepresenteeEmail.answers.fold(

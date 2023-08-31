@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import com.github.ghik.silencer.silent
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
@@ -41,7 +40,6 @@ final case class CalculateCgtTaxDueRequest(
 
 object CalculateCgtTaxDueRequest {
 
-  @silent
   implicit val format: OFormat[CalculateCgtTaxDueRequest] = {
     implicit val triageFormat: OFormat[CompleteSingleDisposalTriageAnswers]           =
       Json.format

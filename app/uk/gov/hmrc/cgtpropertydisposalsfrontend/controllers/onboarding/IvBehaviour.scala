@@ -42,13 +42,14 @@ trait IvBehaviour {
         "iv.failure-relative-url"
       )
 
-    if (useRelativeUrls)
-      successRelativeUrl                 -> failureRelativeUrl
-    else
+    if (useRelativeUrls) {
+      successRelativeUrl -> failureRelativeUrl
+    } else {
       (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
+    }
   }
 
-  val redirectToIvUrl: String = s"$ivUrl/uplift"
+  private val redirectToIvUrl = s"$ivUrl/uplift"
 
   val redirectToIv: Result =
     Redirect(

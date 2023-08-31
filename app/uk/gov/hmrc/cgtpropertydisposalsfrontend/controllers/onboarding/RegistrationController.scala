@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SapNum
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{RegistrationRequestEvent, SubscriptionRequestEvent, WrongGGAccountEvent}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
@@ -71,9 +71,7 @@ class RegistrationController @Inject() (
   import RegistrationController._
 
   private def withValidUser(request: RequestWithSessionData[_])(
-    f: Either[TryingToGetIndividualsFootprint, RegistrationStatus] => Future[
-      Result
-    ]
+    f: Either[TryingToGetIndividualsFootprint, RegistrationStatus] => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(
@@ -413,7 +411,7 @@ object RegistrationController {
     final case object Trust extends EntityType
   }
 
-  val selectEntityTypeForm: Form[EntityType] =
+  private val selectEntityTypeForm =
     Form(
       mapping(
         "entityType" -> number

@@ -57,7 +57,7 @@ class IvServiceImpl @Inject() (connector: IvConnector, metrics: Metrics)(implici
       .getFailedJourneyStatus(journeyId)
       .subflatMap[Error, IvErrorStatus] { response =>
         timer.close()
-        if (response.status === OK)
+        if (response.status === OK) {
           response
             .parseJSON[IvStatusResponse]()
             .bimap(
@@ -67,7 +67,7 @@ class IvServiceImpl @Inject() (connector: IvConnector, metrics: Metrics)(implici
               },
               r => IvErrorStatus.fromString(r.result)
             )
-        else {
+        } else {
           metrics.ivGetFailedJourneyStatusErrorCounter.inc()
           Left(
             Error(

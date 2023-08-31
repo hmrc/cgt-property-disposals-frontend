@@ -172,11 +172,11 @@ class MultipleDisposalsTriageController @Inject() (
                 answers
                   .fold(_.numberOfProperties, c => Some(c.numberOfProperties))
                   .contains(numberOfProperties)
-              )
+              ) {
                 Redirect(
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-              else {
+              } else {
                 val (newState, redirectTo) =
                   updateNumberOfPropertiesWithRedirect(
                     numberOfProperties,
@@ -195,28 +195,23 @@ class MultipleDisposalsTriageController @Inject() (
     currentState: JourneyState
   ): (Either[StartingNewDraftReturn, FillingOutReturn], Call) = {
     val newAnswersWithRedirectTo =
-      if (numberOfProperties > 1)
-        Left[
-          MultipleDisposalsTriageAnswers,
-          IncompleteSingleDisposalTriageAnswers
-        ](
+      if (numberOfProperties > 1) {
+        Left[MultipleDisposalsTriageAnswers, IncompleteSingleDisposalTriageAnswers](
           IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = currentAnswers.fold(_.individualUserType, _.individualUserType),
             numberOfProperties = Some(numberOfProperties)
           )
         ) -> routes.MultipleDisposalsTriageController.checkYourAnswers()
-      else
-        Right[
-          MultipleDisposalsTriageAnswers,
-          IncompleteSingleDisposalTriageAnswers
-        ](
+      } else {
+        Right[MultipleDisposalsTriageAnswers, IncompleteSingleDisposalTriageAnswers](
           IncompleteSingleDisposalTriageAnswers.empty.copy(
             individualUserType = currentAnswers.fold(_.individualUserType, _.individualUserType),
             hasConfirmedSingleDisposal = true
           )
         ) -> routes.SingleDisposalsTriageController.checkYourAnswers()
+      }
 
-    val newState                 = currentState.bimap(
+    val newState = currentState.bimap(
       _.copy(newReturnTriageAnswers = newAnswersWithRedirectTo._1),
       {
         case (r, Right(d)) =>
@@ -247,7 +242,7 @@ class MultipleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val wereYouUKResident =
-          answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+          answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk))
         val form              =
           wereYouUKResident.fold(wasAUkResidentForm)(wasAUkResidentForm.fill)
         val backLink          = answers.fold(
@@ -302,14 +297,14 @@ class MultipleDisposalsTriageController @Inject() (
                 answers
                   .fold(
                     _.wasAUKResident,
-                    c => Some(c.countryOfResidence.isUk())
+                    c => Some(c.countryOfResidence.isUk)
                   )
                   .contains(wereUKResident)
-              )
+              ) {
                 Redirect(
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-              else {
+              } else {
                 val updatedAnswers = answers
                   .unset(_.countryOfResidence)
                   .unset(_.assetTypes)
@@ -405,11 +400,11 @@ class MultipleDisposalsTriageController @Inject() (
                     c => Some(isResidentialAssetType(c.assetTypes))
                   )
                   .contains(wereAllPropertiesResidential)
-              )
+              ) {
                 Redirect(
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-              else {
+              } else {
                 val updatedAnswers =
                   answers
                     .fold(
@@ -448,11 +443,11 @@ class MultipleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
         val wasUkResident =
-          answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+          answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk))
 
-        if (!wasUkResident.contains(false))
+        if (!wasUkResident.contains(false)) {
           Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-        else {
+        } else {
           val countryOfResidence =
             answers.fold(_.countryOfResidence, c => Some(c.countryOfResidence))
           val form               =
@@ -513,11 +508,11 @@ class MultipleDisposalsTriageController @Inject() (
                 answers
                   .fold(_.countryOfResidence, c => Some(c.countryOfResidence))
                   .contains(countryOfResidence)
-              )
+              ) {
                 Redirect(
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-              else {
+              } else {
                 val updatedAnswers =
                   answers.fold[MultipleDisposalsTriageAnswers](
                     _.copy(countryOfResidence = Some(countryOfResidence)),
@@ -548,9 +543,9 @@ class MultipleDisposalsTriageController @Inject() (
   def whenWereContractsExchanged(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
-        if (answers.isIndirectDisposal)
+        if (answers.isIndirectDisposal) {
           Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-        else {
+        } else {
           val taxYears =
             for {
               taxYears <- taxYearService.availableTaxYears()
@@ -601,9 +596,9 @@ class MultipleDisposalsTriageController @Inject() (
   def whenWereContractsExchangedSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers { (_, state, answers) =>
-        if (answers.isIndirectDisposal)
+        if (answers.isIndirectDisposal) {
           Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-        else {
+        } else {
           val taxYears =
             for {
               taxYears <- taxYearService.availableTaxYears()
@@ -654,11 +649,11 @@ class MultipleDisposalsTriageController @Inject() (
                   answers
                     .fold(_.taxYearExchanged, _.taxYearExchanged)
                     .contains(taxYearExchanged)
-                )
+                ) {
                   Redirect(
                     routes.MultipleDisposalsTriageController.checkYourAnswers()
                   )
-                else {
+                } else {
                   val result =
                     for {
                       taxYear <- taxYearService.taxYear(TimeUtils.getTaxYearStartDate(taxYearExchanged.year))
@@ -779,20 +774,21 @@ class MultipleDisposalsTriageController @Inject() (
                 answers
                   .fold(_.assetTypes, c => Some(c.assetTypes))
                   .contains(assetTypes)
-              )
+              ) {
                 Redirect(
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-              else {
+              } else {
                 val oldAssetTypes: Option[List[AssetType]] = answers.fold(_.assetTypes, c => Some(c.assetTypes))
                 val wasIndirectDisposal                    = oldAssetTypes.contains(List(IndirectDisposal))
                 val isNowIndirectDisposal                  = assetTypes === List(IndirectDisposal)
 
                 val newAnswers =
-                  if (!wasIndirectDisposal === !isNowIndirectDisposal)
+                  if (!wasIndirectDisposal === !isNowIndirectDisposal) {
                     answers.unset(_.assetTypes).copy(assetTypes = Some(assetTypes))
-                  else
+                  } else {
                     answers.unset(_.completionDate).copy(assetTypes = Some(assetTypes))
+                  }
 
                 val newState = updateState(
                   state,
@@ -808,7 +804,7 @@ class MultipleDisposalsTriageController @Inject() (
                           )
                       )
                     case Right(draftReturn)            =>
-                      if (isNowIndirectDisposal)
+                      if (isNowIndirectDisposal) {
                         Left(
                           DraftMultipleIndirectDisposalsReturn
                             .newDraftReturn(
@@ -817,21 +813,24 @@ class MultipleDisposalsTriageController @Inject() (
                               draftReturn.representeeAnswers
                             )
                         )
-                      else
+                      } else {
                         Right(
                           draftReturn.copy(
                             triageAnswers = newAnswers,
                             examplePropertyDetailsAnswers = None,
                             yearToDateLiabilityAnswers =
-                              if (state.fold(_.isFurtherReturn, _._1.isFurtherReturn).contains(true))
+                              if (state.fold(_.isFurtherReturn, _._1.isFurtherReturn).contains(true)) {
                                 draftReturn.yearToDateLiabilityAnswers.map {
                                   case answers: CalculatedYTDAnswers    => answers.unset(_.hasEstimatedDetails)
                                   case answers: NonCalculatedYTDAnswers => answers.unset(_.hasEstimatedDetails)
                                 }
-                              else None,
+                              } else {
+                                None
+                              },
                             supportingEvidenceAnswers = None
                           )
                         )
+                      }
                   },
                   forceDisplayGainOrLossAfterReliefsForAmends = true
                 )
@@ -882,10 +881,11 @@ class MultipleDisposalsTriageController @Inject() (
 
     answers.fold(
       _ =>
-        if (alreadySentSA.contains(false))
+        if (alreadySentSA.contains(false)) {
           routes.CommonTriageQuestionsController.haveYouAlreadySentSelfAssessment()
-        else
-          routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+        } else {
+          routes.MultipleDisposalsTriageController.whenWereContractsExchanged()
+        },
       _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
     )
   }
@@ -932,11 +932,11 @@ class MultipleDisposalsTriageController @Inject() (
                 answers
                   .fold(_.completionDate, c => Some(c.completionDate))
                   .contains(completionDate)
-              )
+              ) {
                 Redirect(
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-              else {
+              } else {
                 val updatedAnswers =
                   answers.unset(_.completionDate).copy(completionDate = Some(completionDate))
 
@@ -1177,9 +1177,7 @@ class MultipleDisposalsTriageController @Inject() (
             fb => fb._2.fold(_.representeeAnswers, _.representeeAnswers)
           )
 
-        val representeeAnswersIncomplete = !representeeAnswers
-          .map(_.fold(_ => false, _ => true))
-          .getOrElse(false)
+        val representeeAnswersIncomplete = !representeeAnswers.exists(_.fold(_ => false, _ => true))
 
         val originalSubmissionYear: Option[String] =
           state.toOption.flatMap(_._1.amendReturnData.map(_.originalReturn.summary.taxYear))
@@ -1390,14 +1388,15 @@ class MultipleDisposalsTriageController @Inject() (
                 _
               ) if !isAValidCGTTaxTear(taxYearExchanged) =>
             val redirectPage =
-              if (isAmendReturn(state))
+              if (isAmendReturn(state)) {
                 routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
-              else if (assetTypes.contains(List(IndirectDisposal)))
+              } else if (assetTypes.contains(List(IndirectDisposal))) {
                 routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
-              else if (taxYearExchanged === TaxYearExchanged.differentTaxYears & taxYearExchanged.year === -1)
+              } else if (taxYearExchanged === TaxYearExchanged.differentTaxYears & taxYearExchanged.year === -1) {
                 routes.MultipleDisposalsTriageController.exchangedInDifferentTaxYears()
-              else
+              } else {
                 routes.CommonTriageQuestionsController.disposalDateTooEarly()
+              }
 
             Redirect(redirectPage)
 
@@ -1562,18 +1561,19 @@ class MultipleDisposalsTriageController @Inject() (
 
               case complete: CompleteMultipleDisposalsTriageAnswers =>
                 val newDraftReturn =
-                  if (complete.assetTypes === List(IndirectDisposal))
+                  if (complete.assetTypes === List(IndirectDisposal)) {
                     DraftMultipleIndirectDisposalsReturn.newDraftReturn(
                       uuidGenerator.nextId(),
                       complete,
                       startingNewDraftReturn.representeeAnswers
                     )
-                  else
+                  } else {
                     DraftMultipleDisposalsReturn.newDraftReturn(
                       uuidGenerator.nextId(),
                       complete,
                       startingNewDraftReturn.representeeAnswers
                     )
+                  }
 
                 val newJourney = FillingOutReturn(
                   startingNewDraftReturn.subscribedDetails,
@@ -1598,9 +1598,11 @@ class MultipleDisposalsTriageController @Inject() (
     }
 
   private def incompleteJourneyTaxYearBackLink(wasAUKResident: Boolean): Call =
-    if (wasAUKResident)
+    if (wasAUKResident) {
       routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()
-    else routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents()
+    } else {
+      routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents()
+    }
 
   private def isResidentialAssetType(assetType: List[AssetType]): Boolean =
     assetType match {
@@ -1609,8 +1611,7 @@ class MultipleDisposalsTriageController @Inject() (
     }
 
   private def assetType(isResidential: Boolean): List[AssetType] =
-    if (isResidential) List(AssetType.Residential)
-    else List(AssetType.NonResidential)
+    if (isResidential) List(AssetType.Residential) else List(AssetType.NonResidential)
 
   private def withMultipleDisposalTriageAnswers(
     f: (SessionData, JourneyState, MultipleDisposalsTriageAnswers) => Future[Result]
@@ -1693,9 +1694,11 @@ class MultipleDisposalsTriageController @Inject() (
           )
         )
 
-        if (forceDisplayGainOrLossAfterReliefsForAmends)
+        if (forceDisplayGainOrLossAfterReliefsForAmends) {
           newFillingOutReturn.withForceDisplayGainOrLossAfterReliefsForAmends
-        else newFillingOutReturn
+        } else {
+          newFillingOutReturn
+        }
       }
     )
 
@@ -1748,8 +1751,9 @@ object MultipleDisposalsTriageController {
 
     val numberOfPropertiesFormatter: Formatter[Int] = {
       def validateNumberOfProperties(i: Int): Either[FormError, Int] =
-        if (i <= 0) Left(FormError(numberOfDisposalsKey, "error.tooSmall"))
-        else if (i > 999) Left(FormError(numberOfDisposalsKey, "error.tooLong"))
+        if (i <= 0) {
+          Left(FormError(numberOfDisposalsKey, "error.tooSmall"))
+        } else if (i > 999) Left(FormError(numberOfDisposalsKey, "error.tooLong"))
         else Right(i)
 
       new Formatter[Int] {
@@ -1781,7 +1785,7 @@ object MultipleDisposalsTriageController {
     )(identity)(Some(_))
   )
 
-  val wereAllPropertiesResidentialForm: Form[Boolean] = Form(
+  private val wereAllPropertiesResidentialForm = Form(
     mapping(
       "multipleDisposalsWereAllPropertiesResidential" -> of(
         BooleanFormatter.formatter
@@ -1795,10 +1799,10 @@ object MultipleDisposalsTriageController {
     )(identity)(Some(_))
   )
 
-  def taxYearExchangedForm(
+  private def taxYearExchangedForm(
     taxYearOfDateOfDeath: TaxYearExchanged,
     representativeType: Option[RepresentativeType]
-  ): Form[TaxYearExchanged] = {
+  ) = {
 
     // Taxyear 2020/21
     val conditionExpr1 = !(taxYearOfDateOfDeath.year === 2020 || taxYearOfDateOfDeath.year === -2020)
@@ -1834,33 +1838,37 @@ object MultipleDisposalsTriageController {
           readValue(key, data, identity)
             .flatMap {
               case "2023"  =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr7)
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr7) {
                   Left(FormError(key, "error.before.invalid"))
-                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr8)
+                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr8) {
                   Left(FormError(key, "error.after.invalid"))
-                else
+                } else {
                   Right(TaxYearExchanged(2023))
+                }
               case "2022"  =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr5)
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr5) {
                   Left(FormError(key, "error.before.invalid"))
-                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr6)
+                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr6) {
                   Left(FormError(key, "error.after.invalid"))
-                else
+                } else {
                   Right(TaxYearExchanged(2022))
+                }
               case "2021"  =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr3)
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr3) {
                   Left(FormError(key, "error.before.invalid"))
-                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr4)
+                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr4) {
                   Left(FormError(key, "error.after.invalid"))
-                else
+                } else {
                   Right(TaxYearExchanged(2021))
+                }
               case "2020"  =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr2)
+                if (representativeType.contains(PersonalRepresentative) && conditionExpr2) {
                   Left(FormError(key, "error.before.invalid"))
-                else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr1)
+                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr1) {
                   Left(FormError(key, "error.after.invalid"))
-                else
+                } else {
                   Right(TaxYearExchanged(2020))
+                }
               case "-2020" => Right(TaxYearExchanged.taxYearExchangedBefore2020)
               case "-1"    => Right(TaxYearExchanged.differentTaxYears)
               case _       => Left(FormError(key, "error.required"))

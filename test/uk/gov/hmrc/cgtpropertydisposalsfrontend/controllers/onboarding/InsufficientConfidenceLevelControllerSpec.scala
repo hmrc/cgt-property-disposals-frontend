@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.Configuration
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -58,27 +59,25 @@ class InsufficientConfidenceLevelControllerSpec
     with NameFormValidationTests
     with RedirectToStartBehaviour {
 
-  val mockBprNameMatchService = mock[NameMatchRetryService]
+  private val mockBprNameMatchService = mock[NameMatchRetryService]
 
-  override val overrideBindings =
+  override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[NameMatchRetryService].toInstance(mockBprNameMatchService)
     )
 
-  override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
+  override lazy val additionalConfig: Configuration = ivConfig(useRelativeUrls = false)
 
-  lazy val controller = instanceOf[InsufficientConfidenceLevelController]
+  private lazy val controller = instanceOf[InsufficientConfidenceLevelController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  def mockGetNumberOfUnsuccessfulAttempts(
+  private def mockGetNumberOfUnsuccessfulAttempts(
     ggCredId: GGCredId
   )(
-    result: Either[NameMatchServiceError[
-      IndividualSautrNameMatchDetails
-    ], Option[
+    result: Either[NameMatchServiceError[IndividualSautrNameMatchDetails], Option[
       UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]
     ]]
   ) =
@@ -95,13 +94,11 @@ class InsufficientConfidenceLevelControllerSpec
       .expects(ggCredId, *, *, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockAttemptNameMatch(
+  private def mockAttemptNameMatch(
     sautr: SAUTR,
     name: IndividualName,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]
-    ],
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]],
     lang: Lang
   )(
     result: Either[NameMatchServiceError[
@@ -113,9 +110,7 @@ class InsufficientConfidenceLevelControllerSpec
         .attemptBusinessPartnerRecordNameMatch(
           _: IndividualSautrNameMatchDetails,
           _: GGCredId,
-          _: Option[
-            UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]
-          ],
+          _: Option[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]],
           _: Lang
         )(
           _: HeaderCarrier,
@@ -135,9 +130,7 @@ class InsufficientConfidenceLevelControllerSpec
   def session(subscriptionStatus: JourneyStatus): SessionData =
     SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
 
-  val name = IndividualName("name", "surname")
-
-  def commonBehaviour(performAction: () => Future[Result]) =
+  private def commonBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction,
       {
@@ -281,24 +274,24 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction("hasNino" -> "true")
-          checkIsRedirectToIv(result, false)
+          checkIsRedirectToIv(result, useRelativeUrls = false)
         }
 
         "the user indicates that they do have a NINO and the application " +
           "has been configured to used absolute urls to iv" in new ControllerSpec {
 
-            override val overrideBindings =
+            override val overrideBindings: List[GuiceableModule] =
               List[GuiceableModule](
                 bind[NameMatchRetryService].toInstance(mockBprNameMatchService),
                 bind[AuthConnector].toInstance(mockAuthConnector),
                 bind[SessionStore].toInstance(mockSessionStore)
               )
 
-            override lazy val additionalConfig = ivConfig(useRelativeUrls = true)
+            override lazy val additionalConfig: Configuration = ivConfig(useRelativeUrls = true)
 
-            lazy val controller =
+            private lazy val controller =
               instanceOf[InsufficientConfidenceLevelController]
-            val credId          = sample[GGCredId]
+            private val credId          = sample[GGCredId]
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -312,14 +305,14 @@ class InsufficientConfidenceLevelControllerSpec
               )(Right(()))
             }
 
-            val result =
+            private val result =
               controller.doYouHaveNINOSubmit()(
                 FakeRequest()
                   .withFormUrlEncodedBody("hasNino" -> "true")
                   .withCSRFToken
                   .withMethod("POST")
               )
-            checkIsRedirectToIv(result, true)
+            checkIsRedirectToIv(result, useRelativeUrls = true)
           }
 
       }
@@ -367,7 +360,7 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction("hasNino" -> "true")
-          checkIsRedirectToIv(result, false)
+          checkIsRedirectToIv(result, useRelativeUrls = false)
         }
 
         "the user has previously indicated that they do not have a NINO" in {
@@ -634,7 +627,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       "redirect to the select entity type page" when {
 
-        def test(hasNino: Option[Boolean], hasSautr: Option[Boolean]) = {
+        def test(hasNino: Option[Boolean], hasSautr: Option[Boolean]): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -696,11 +689,11 @@ class InsufficientConfidenceLevelControllerSpec
           contentAsString(result) should include(
             messageFromMessageKey("enterSaUtr.title")
           )
-          contentAsString(result) should not include (messageFromMessageKey(
+          contentAsString(result) should not include messageFromMessageKey(
             "enterSaUtr.error.notFound",
             0,
             2
-          ))
+          )
         }
 
         "the user has indicated that they have no NINO but they do have an SA UTR and they have " +
@@ -734,11 +727,11 @@ class InsufficientConfidenceLevelControllerSpec
             contentAsString(result) should include(
               messageFromMessageKey("enterSaUtr.title")
             )
-            contentAsString(result) should not include (messageFromMessageKey(
+            contentAsString(result) should not include messageFromMessageKey(
               "enterSaUtr.error.notFound",
               1,
               2
-            ))
+            )
           }
 
       }
@@ -798,7 +791,7 @@ class InsufficientConfidenceLevelControllerSpec
 
     }
 
-    "handling sumitted SAUTRs and names" must {
+    "handling submitted SAUTRs and names" must {
 
       val validSautr = SAUTR("1234567890")
 
@@ -854,7 +847,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       "redirect to the select entity type page" when {
 
-        def test(hasNino: Option[Boolean], hasSautr: Option[Boolean]) = {
+        def test(hasNino: Option[Boolean], hasSautr: Option[Boolean]): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1301,7 +1294,7 @@ class InsufficientConfidenceLevelControllerSpec
 
     "handling requests to display the too many attempts page" must {
 
-      def performAction() = controller.tooManyAttempts()(FakeRequest())
+      def performAction(): Future[Result] = controller.tooManyAttempts()(FakeRequest())
 
       val ggCredId = sample[GGCredId]
 

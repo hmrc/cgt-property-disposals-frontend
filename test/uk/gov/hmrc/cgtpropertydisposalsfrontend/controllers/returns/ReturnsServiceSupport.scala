@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.scalamock.handlers.CallHandler3
 import org.scalamock.scalatest.MockFactory
 import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
@@ -34,11 +35,11 @@ trait ReturnsServiceSupport { this: MockFactory =>
 
   val mockReturnsService: ReturnsService = mock[ReturnsService]
 
-  def mockStoreDraftReturn(
+  protected def mockStoreDraftReturn(
     fillingOutReturn: FillingOutReturn
   )(
     result: Either[Error, Unit]
-  ) =
+  ): CallHandler3[FillingOutReturn, HeaderCarrier, Request[_], EitherT[Future, Error, Unit]] =
     (mockReturnsService
       .storeDraftReturn(
         _: FillingOutReturn
@@ -49,12 +50,12 @@ trait ReturnsServiceSupport { this: MockFactory =>
       .expects(fillingOutReturn, *, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockDisplayReturn(
+  protected def mockDisplayReturn(
     cgtReference: CgtReference,
     submissionId: String
   )(
     result: Either[Error, DisplayReturn]
-  ) =
+  ): CallHandler3[CgtReference, String, HeaderCarrier, EitherT[Future, Error, DisplayReturn]] =
     (mockReturnsService
       .displayReturn(
         _: CgtReference,

@@ -156,8 +156,8 @@ class ExemptionAndLossesController @Inject() (
       draftReturn
         .triageAnswers()
         .fold(
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk)),
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk))
         )
 
     wasUk match {
@@ -182,8 +182,9 @@ class ExemptionAndLossesController @Inject() (
       )
 
       Ok(page(form(currentAnswers), backLink))
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
 
   private def commonSubmitBehaviour[A, P : Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
@@ -211,9 +212,9 @@ class ExemptionAndLossesController @Inject() (
           { value =>
             val newAnswers = updateAnswers(value, currentAnswers)
 
-            if (currentAnswers === newAnswers)
+            if (currentAnswers === newAnswers) {
               Redirect(routes.ExemptionAndLossesController.checkYourAnswers())
-            else {
+            } else {
               val newDraftReturn = currentDraftReturn.fold(
                 m =>
                   m.copy(
@@ -272,8 +273,9 @@ class ExemptionAndLossesController @Inject() (
             }
           }
         )
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
 
   def inYearLosses(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -288,25 +290,25 @@ class ExemptionAndLossesController @Inject() (
                 c => inYearLossesForm.fill(c.inYearLosses.inPounds())
               )
             )(
-              page =
-                if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
-                  furtherReturnInYearLossesPage(
-                    _,
-                    _,
-                    fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType(),
-                    fillingOutReturn.isAmendReturn
-                  )
-                else
-                  inYearLossesPage(
-                    _,
-                    _,
-                    wasAUkResident,
-                    disposalDate,
-                    fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType(),
-                    fillingOutReturn.isAmendReturn
-                  )
+              page = if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
+                furtherReturnInYearLossesPage(
+                  _,
+                  _,
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  draftReturn.representativeType(),
+                  fillingOutReturn.isAmendReturn
+                )
+              } else {
+                inYearLossesPage(
+                  _,
+                  _,
+                  wasAUkResident,
+                  disposalDate,
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  draftReturn.representativeType(),
+                  fillingOutReturn.isAmendReturn
+                )
+              }
             )(
               _ => Some(()),
               controllers.returns.routes.TaskListController.taskList()
@@ -326,25 +328,25 @@ class ExemptionAndLossesController @Inject() (
               draftReturn,
               answers
             )(form = inYearLossesForm)(
-              page =
-                if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
-                  furtherReturnInYearLossesPage(
-                    _,
-                    _,
-                    fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType(),
-                    fillingOutReturn.isAmendReturn
-                  )
-                else
-                  inYearLossesPage(
-                    _,
-                    _,
-                    wasAUkResident,
-                    disposalDate,
-                    fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType(),
-                    fillingOutReturn.isAmendReturn
-                  )
+              page = if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
+                furtherReturnInYearLossesPage(
+                  _,
+                  _,
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  draftReturn.representativeType(),
+                  fillingOutReturn.isAmendReturn
+                )
+              } else {
+                inYearLossesPage(
+                  _,
+                  _,
+                  wasAUkResident,
+                  disposalDate,
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  draftReturn.representativeType(),
+                  fillingOutReturn.isAmendReturn
+                )
+              }
             )(
               _ => Some(()),
               controllers.returns.routes.TaskListController.taskList()
@@ -380,25 +382,25 @@ class ExemptionAndLossesController @Inject() (
               c => previousYearsLossesForm.fill(c.previousYearsLosses.inPounds())
             )
           )(
-            page =
-              if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
-                furtherReturnPreviousYearsLossesPage(
-                  _,
-                  _,
-                  wasAUkResident,
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType(),
-                  fillingOutReturn.isAmendReturn
-                )
-              else
-                previousYearsLossesPage(
-                  _,
-                  _,
-                  wasAUkResident,
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType(),
-                  fillingOutReturn.isAmendReturn
-                )
+            page = if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
+              furtherReturnPreviousYearsLossesPage(
+                _,
+                _,
+                wasAUkResident,
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.representativeType(),
+                fillingOutReturn.isAmendReturn
+              )
+            } else {
+              previousYearsLossesPage(
+                _,
+                _,
+                wasAUkResident,
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.representativeType(),
+                fillingOutReturn.isAmendReturn
+              )
+            }
           )(
             requiredPreviousAnswer = _.fold(
               _.inYearLosses,
@@ -419,25 +421,25 @@ class ExemptionAndLossesController @Inject() (
             draftReturn,
             answers
           )(form = previousYearsLossesForm)(
-            page =
-              if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
-                furtherReturnPreviousYearsLossesPage(
-                  _,
-                  _,
-                  wasAUkResident,
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType(),
-                  fillingOutReturn.isAmendReturn
-                )
-              else
-                previousYearsLossesPage(
-                  _,
-                  _,
-                  wasAUkResident,
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType(),
-                  fillingOutReturn.isAmendReturn
-                )
+            page = if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
+              furtherReturnPreviousYearsLossesPage(
+                _,
+                _,
+                wasAUkResident,
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.representativeType(),
+                fillingOutReturn.isAmendReturn
+              )
+            } else {
+              previousYearsLossesPage(
+                _,
+                _,
+                wasAUkResident,
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.representativeType(),
+                fillingOutReturn.isAmendReturn
+              )
+            }
           )(
             requiredPreviousAnswer = _.fold(
               _.inYearLosses,
@@ -547,16 +549,17 @@ class ExemptionAndLossesController @Inject() (
       withFillingOutReturnAndAnswers { (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
           val furtherReturnCalculationEligibilityCheck =
-            if (fillingOutReturn.isFurtherOrAmendReturn.contains(true))
+            if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
               furtherReturnCalculationEligibilityUtil
                 .isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
                 .map(Some(_))
-            else
+            } else {
               EitherT.pure[Future, Error](None)
+            }
 
           furtherReturnCalculationEligibilityCheck.foldF(
             { e =>
-              logger.warn("Could not check eligibility for further return calulation", e)
+              logger.warn("Could not check eligibility for further return calculation", e)
               errorHandler.errorResult()
             },
             furtherOrAmendReturnCalculationEligibility =>
@@ -646,18 +649,18 @@ class ExemptionAndLossesController @Inject() (
 
 object ExemptionAndLossesController {
 
-  val inYearLossesForm: Form[BigDecimal] =
+  private val inYearLossesForm =
     MoneyUtils.amountInPoundsYesNoForm("inYearLosses", "inYearLossesValue")
 
-  val previousYearsLossesForm: Form[BigDecimal] =
+  private val previousYearsLossesForm =
     MoneyUtils.amountInPoundsYesNoForm(
       "previousYearsLosses",
       "previousYearsLossesValue"
     )
 
-  def annualExemptAmountForm(
+  private def annualExemptAmountForm(
     maximumAnnualExemptAmount: AmountInPence
-  ): Form[BigDecimal] =
+  ) =
     Form(
       mapping(
         "annualExemptAmount" -> of(

@@ -28,13 +28,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.{routes => nameRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.EmailGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.EmailGen.{emailGen, emailSourceGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.ggCredIdGen
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.individualNameGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.IndividualSupplyingInformationAddressJourney
 
@@ -45,7 +45,7 @@ class RegistrationEnterAddressControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val validJourneyStatus =
+  protected override val validJourneyStatus: IndividualSupplyingInformationAddressJourney =
     IndividualSupplyingInformationAddressJourney(
       IndividualSupplyingInformation(
         Some(sample[IndividualName]),
@@ -56,9 +56,10 @@ class RegistrationEnterAddressControllerSpec
       )
     )
 
-  lazy val controller = instanceOf[RegistrationEnterAddressController]
+  protected override lazy val controller: RegistrationEnterAddressController =
+    instanceOf[RegistrationEnterAddressController]
 
-  lazy implicit val messagesApi: MessagesApi = controller.messagesApi
+  private lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   override def updateAddress(
     journey: IndividualSupplyingInformationAddressJourney,
@@ -66,13 +67,8 @@ class RegistrationEnterAddressControllerSpec
   ): IndividualSupplyingInformation =
     journey.journey.copy(address = Some(address))
 
-  override val mockUpdateAddress: Option[
-    (
-      IndividualSupplyingInformationAddressJourney,
-      Address,
-      Either[Error, Unit]
-    ) => Unit
-  ] = None
+  override val mockUpdateAddress
+    : Option[(IndividualSupplyingInformationAddressJourney, Address, Either[Error, Unit]) => Unit] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(

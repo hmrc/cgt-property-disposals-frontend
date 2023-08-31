@@ -27,7 +27,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
 import play.api.mvc._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -142,8 +142,9 @@ class SupportingEvidenceController @Inject() (
         _ => routes.SupportingEvidenceController.checkYourAnswers()
       )
       Ok(page(form(currentAnswers), backLink))
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
 
   def doYouWantToUploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -284,9 +285,9 @@ class SupportingEvidenceController @Inject() (
   def uploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, f, answers) =>
-        if (answers.fold(_.evidences, _.evidences).length >= maxUploads)
+        if (answers.fold(_.evidences, _.evidences).length >= maxUploads) {
           Redirect(routes.SupportingEvidenceController.checkYourAnswers())
-        else
+        } else {
           upscanService
             .initiate(
               routes.SupportingEvidenceController
@@ -308,6 +309,7 @@ class SupportingEvidenceController @Inject() (
                   )
                 )
             )
+        }
       }
     }
 
@@ -475,12 +477,13 @@ class SupportingEvidenceController @Inject() (
             errorHandler.errorResult()
           },
           _ =>
-            if (addNew)
+            if (addNew) {
               Redirect(
                 routes.SupportingEvidenceController.uploadSupportingEvidence()
               )
-            else
+            } else {
               Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+            }
         )
       }
     }
@@ -666,7 +669,7 @@ class SupportingEvidenceController @Inject() (
 }
 
 object SupportingEvidenceController {
-  val doYouWantToUploadForm: Form[Boolean] =
+  private val doYouWantToUploadForm =
     Form(
       mapping(
         "supporting-evidence.do-you-want-to-upload" -> of(

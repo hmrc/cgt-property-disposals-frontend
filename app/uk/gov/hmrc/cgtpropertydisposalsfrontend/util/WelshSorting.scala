@@ -69,8 +69,9 @@ object WelshSorting {
   implicit class WelshStringOps(private val s: String) extends AnyVal {
 
     def isBeforeInWelsh(other: String): Boolean =
-      if (other === s) false
-      else {
+      if (other === s) {
+        false
+      } else {
         val listOfWeights        = toCharacterValues(clean(s), List.empty)
         val compareListOfWeights = toCharacterValues(clean(other), List.empty)
         isBefore(listOfWeights, compareListOfWeights)
@@ -90,7 +91,7 @@ object WelshSorting {
 
     @scala.annotation.tailrec
     private def isBefore(l1: List[Int], l2: List[Int]): Boolean =
-      (l1 -> l2) match {
+      l1 -> l2 match {
         case (h1 :: Nil, h2 :: Nil) => h1 < h2
         case (h1 :: Nil, h2 :: _)   => h1 <= h2
         case (h1 :: _, h2 :: Nil)   => h1 < h2

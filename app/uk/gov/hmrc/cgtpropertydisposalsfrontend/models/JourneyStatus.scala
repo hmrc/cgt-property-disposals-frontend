@@ -25,7 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 
@@ -96,10 +96,7 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    newReturnTriageAnswers: Either[
-      MultipleDisposalsTriageAnswers,
-      SingleDisposalTriageAnswers
-    ],
+    newReturnTriageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
     representeeAnswers: Option[RepresenteeAnswers],
     previousSentReturns: Option[PreviousReturnData]
   ) extends JourneyStatus
@@ -288,7 +285,7 @@ object JourneyStatus {
 
     val originalReturnTaxYearStartYear: Option[String] = taxYear.map(_.startDateInclusive.getYear.toString)
 
-    if (!taxYear.isDefined) {
+    if (taxYear.isEmpty) {
       None
     } else {
 

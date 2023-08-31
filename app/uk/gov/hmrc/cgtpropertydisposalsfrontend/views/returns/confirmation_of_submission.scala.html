@@ -86,9 +86,9 @@
   }
 }
 @isPeriodOfAdmin = @{representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)}
-@name = @{justSubmittedReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName())}
+@name = @{justSubmittedReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName)}
 @representeeName = @{
-  representeeAnswers.map(_.name.makeSingleName())
+  representeeAnswers.map(_.name.makeSingleName)
 }
 @nameLabel = @{
   representativeType match {

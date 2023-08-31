@@ -48,7 +48,7 @@ object Country {
   }
 
   implicit class CountryOps(private val c: Country) extends AnyVal {
-    def isUk(): Boolean = c === Country.uk
+    def isUk: Boolean = c === Country.uk
   }
 
   val formatter: Formatter[Country] = new Formatter[Country] {
@@ -58,8 +58,7 @@ object Country {
     ): Either[Seq[FormError], Country] =
       data.get(key).filter(_.nonEmpty) match {
         case Some(c) =>
-          if (countryCodes.contains(c)) Right(Country(c))
-          else Left(Seq(FormError(key, "error.notFound")))
+          if (countryCodes.contains(c)) Right(Country(c)) else Left(Seq(FormError(key, "error.notFound")))
         case None    => Left(Seq(FormError(key, "error.required")))
       }
 

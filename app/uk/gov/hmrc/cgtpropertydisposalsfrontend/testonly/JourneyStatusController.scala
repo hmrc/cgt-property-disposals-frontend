@@ -159,7 +159,7 @@ object JourneyStatusController {
     completionDate: Option[LocalDate]
   )
 
-  val individualUserTypeFormatter: Formatter[Option[IndividualUserType]] =
+  private val individualUserTypeFormatter =
     optionFormatter[IndividualUserType](
       Map(
         IndividualUserType.Self                   -> "self",
@@ -176,7 +176,7 @@ object JourneyStatusController {
       )
     )
 
-  val disposalMethodFormatter: Formatter[Option[DisposalMethod]] =
+  private val disposalMethodFormatter =
     optionFormatter[DisposalMethod](
       Map(
         DisposalMethod.Sold   -> "sold",
@@ -184,7 +184,7 @@ object JourneyStatusController {
       )
     )
 
-  val optionalBooleanFormatter: Formatter[Option[Boolean]] =
+  private val optionalBooleanFormatter =
     new Formatter[Option[Boolean]] {
       override def bind(
         key: String,
@@ -212,7 +212,7 @@ object JourneyStatusController {
 
     }
 
-  val optionalDateFormatter: Formatter[Option[LocalDate]] =
+  private val optionalDateFormatter =
     new Formatter[Option[LocalDate]] {
       override def bind(
         key: String,
@@ -239,7 +239,7 @@ object JourneyStatusController {
         value.fold(Map.empty[String, String])(d => Map(key -> d.format(DateTimeFormatter.ISO_DATE)))
     }
 
-  val returnStateForm: Form[Answers] =
+  private val returnStateForm =
     Form(
       mapping(
         "individual-user-type"             -> of(individualUserTypeFormatter),
@@ -292,7 +292,7 @@ object JourneyStatusController {
 
   // empty strings will map to `None`, strings not recognised by `stringToA` will result in a form
   // error
-  def optionFormatter[A](aToString: Map[A, String]): Formatter[Option[A]] =
+  private def optionFormatter[A](aToString: Map[A, String]) =
     new Formatter[Option[A]] {
       override def bind(
         key: String,

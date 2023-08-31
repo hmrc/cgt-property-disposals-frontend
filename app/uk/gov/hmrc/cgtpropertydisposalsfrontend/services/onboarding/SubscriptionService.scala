@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactNameSource.{ManuallyEntered => ManuallyEnteredContactName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource.{ManuallyEntered => ManuallyEnteredEmail}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource.{ManuallyEntered => ManuallyEnteredEmail}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService.GetSubscriptionResponse
@@ -85,16 +85,16 @@ class SubscriptionServiceImpl @Inject() (
     connector
       .subscribe(subscriptionDetails, lang)
       .subflatMap { response =>
-        if (response.status === OK)
+        if (response.status === OK) {
           response.parseJSON[SubscriptionSuccessful]().leftMap(Error(_))
-        else if (response.status === CONFLICT) {
+        } else if (response.status === CONFLICT) {
           metrics.accessWithWrongGGAccountCounter.inc()
           Right(AlreadySubscribed)
-        } else
+        } else {
           Left(
             Error(s"call to subscribe came back with status ${response.status}")
           )
-
+        }
       }
 
   override def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
@@ -103,47 +103,51 @@ class SubscriptionServiceImpl @Inject() (
     connector
       .registerWithoutId(registrationDetails)
       .subflatMap { response =>
-        if (response.status === OK)
+        if (response.status === OK) {
           response.parseJSON[RegisteredWithoutId]().leftMap(Error(_))
-        else
+        } else {
           Left(
             Error(
               s"Call to register without id came back with status ${response.status}"
             )
           )
+        }
       }
 
   override def hasFailedCgtEnrolment(
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]] =
     connector.getSubscriptionStatus().subflatMap { response =>
-      if (response.status === OK)
+      if (response.status === OK) {
         response
           .parseJSON[CgtReference]()
           .leftMap(Error(_))
           .map(cgtReference => Some(cgtReference))
-      else if (response.status === NO_CONTENT) Right(None)
-      else
+      } else if (response.status === NO_CONTENT) {
+        Right(None)
+      } else {
         Left(
           Error(
             s"call to get subscription status came back with status ${response.status}"
           )
         )
+      }
     }
 
   override def getSubscribedDetails(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, Option[SubscribedDetails]] =
     connector.getSubscribedDetails(cgtReference).subflatMap { response =>
-      if (response.status === OK)
+      if (response.status === OK) {
         response
           .parseJSON[GetSubscriptionResponse]()
           .bimap(Error(_), _.subscribedDetails)
-      else
+      } else {
         Left(
           Error(
             s"Call to get subscribed details came back with status ${response.status}"
           )
         )
+      }
     }
 
   override def updateSubscribedDetails(
@@ -152,14 +156,15 @@ class SubscriptionServiceImpl @Inject() (
     hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] =
     connector.updateSubscribedDetails(subscribedUpdateDetails).subflatMap { response =>
-      if (response.status === OK)
+      if (response.status === OK) {
         Right(())
-      else
+      } else {
         Left(
           Error(
             s"Call to get subscribed details came back with status ${response.status}"
           )
         )
+      }
     }
 
   override def registerWithoutIdAndSubscribe(

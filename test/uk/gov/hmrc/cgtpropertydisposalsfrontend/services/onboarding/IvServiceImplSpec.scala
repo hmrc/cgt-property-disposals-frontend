@@ -35,13 +35,13 @@ import scala.concurrent.Future
 
 class IvServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
-  val mockConnector = mock[IvConnector]
+  private val mockConnector = mock[IvConnector]
 
   val service = new IvServiceImpl(mockConnector, MockMetrics.metrics)
 
   private val emptyJsonBody = "{}"
 
-  def mockIvGetFailedJourneyStatus(
+  private def mockIvGetFailedJourneyStatus(
     journeyId: UUID
   )(result: Either[Error, HttpResponse]) =
     (mockConnector

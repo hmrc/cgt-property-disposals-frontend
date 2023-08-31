@@ -77,13 +77,13 @@ class AcquisitionDetailsControllerSpec
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
-  lazy val controller = instanceOf[AcquisitionDetailsController]
+  private lazy val controller = instanceOf[AcquisitionDetailsController]
 
-  val mockRebasingUtil = new RebasingEligibilityUtil()
+  private val mockRebasingUtil = new RebasingEligibilityUtil()
 
-  val mockUUIDGenerator = mock[UUIDGenerator]
+  private val mockUUIDGenerator = mock[UUIDGenerator]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -113,11 +113,11 @@ class AcquisitionDetailsControllerSpec
   def assetTypeMessageKey(assetType: AssetType): String =
     if (assetType === IndirectDisposal) ".indirect" else ""
 
-  def expectedSubmitText(isAmend: Boolean) =
+  private def expectedSubmitText(isAmend: Boolean) =
     messageFromMessageKey(if (isAmend) "button.continue" else "button.saveAndContinue")
   def setAgentReferenceNumber(
     userType: UserType
-  ): Option[AgentReferenceNumber]          =
+  ): Option[AgentReferenceNumber]                  =
     userType match {
       case UserType.Agent => Some(sample[AgentReferenceNumber])
       case _              => None
@@ -131,14 +131,14 @@ class AcquisitionDetailsControllerSpec
       case _                     => Right(sample[IndividualName])
     }
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) = {
+  private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit = {
     def hasValidPeriodOfAdminState(
       triageAnswers: SingleDisposalTriageAnswers,
       representeeAnswers: Option[RepresenteeAnswers]
     ) =
       triageAnswers.fold(_.individualUserType, _.individualUserType).forall {
         case PersonalRepresentativeInPeriodOfAdmin =>
-          representeeAnswers.map(_.fold(_ => false, _.dateOfDeath.isDefined)).getOrElse(false)
+          representeeAnswers.exists(_.fold(_ => false, _.dateOfDeath.isDefined))
 
         case _ =>
           true
@@ -177,7 +177,7 @@ class AcquisitionDetailsControllerSpec
                 IndividualUserType.PersonalRepresentativeInPeriodOfAdmin,
                 Some(sample[DisposalDate]),
                 None,
-                false
+                isAmend = false
               )._1
             )
           }
@@ -197,7 +197,7 @@ class AcquisitionDetailsControllerSpec
                 IndividualUserType.PersonalRepresentativeInPeriodOfAdmin,
                 Some(sample[DisposalDate]),
                 Some(sample[IncompleteRepresenteeAnswers]),
-                false
+                isAmend = false
               )._1
             )
           }
@@ -217,7 +217,7 @@ class AcquisitionDetailsControllerSpec
                 IndividualUserType.PersonalRepresentativeInPeriodOfAdmin,
                 Some(sample[DisposalDate]),
                 Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)),
-                false
+                isAmend = false
               )._1
             )
           }
@@ -331,7 +331,7 @@ class AcquisitionDetailsControllerSpec
     (sessionData, journey, draftReturn)
   }
 
-  def commonUpdateDraftReturn(
+  private def commonUpdateDraftReturn(
     d: DraftSingleDisposalReturn,
     newAnswers: AcquisitionDetailsAnswers,
     fillingOutReturn: FillingOutReturn
@@ -346,7 +346,7 @@ class AcquisitionDetailsControllerSpec
       gainOrLossAfterReliefs = None
     )
 
-  def commonUpdateDraftReturn(
+  private def commonUpdateDraftReturn(
     d: DraftSingleIndirectDisposalReturn,
     newAnswers: AcquisitionDetailsAnswers,
     fillingOutReturn: FillingOutReturn
@@ -412,7 +412,7 @@ class AcquisitionDetailsControllerSpec
                           Some(
                             sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
                           ),
-                          false
+                          isAmend = false
                         )._1
                       )
                     }
@@ -918,9 +918,7 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (incompleteAnswers, completeAnswers) =
-                sample[IncompleteAcquisitionDetailsAnswers] -> sample[
-                  CompleteAcquisitionDetailsAnswers
-                ]
+                sample[IncompleteAcquisitionDetailsAnswers] -> sample[CompleteAcquisitionDetailsAnswers]
               List(
                 Seq(key -> "0") -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Bought)),
                 Seq(key -> "1") -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Inherited)),
@@ -990,7 +988,7 @@ class AcquisitionDetailsControllerSpec
                     Some(
                       sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
                     ),
-                    false
+                    isAmend = false
                   )._1
                 )
               }
@@ -1165,7 +1163,7 @@ class AcquisitionDetailsControllerSpec
                     Some(
                       sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
                     ),
-                    false
+                    isAmend = false
                   )._1
                 )
               }
@@ -1271,7 +1269,7 @@ class AcquisitionDetailsControllerSpec
         def getSessionDataJourneyAndDraftReturn(
           userType: UserType,
           individualUserType: IndividualUserType
-        ) = {
+        ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
           val answers = sample[CompleteAcquisitionDetailsAnswers].copy(
             acquisitionDate = AcquisitionDate(acquisitionDate.value.plusDays(1L))
@@ -1372,14 +1370,16 @@ class AcquisitionDetailsControllerSpec
             isAmend = isAmend
           )
           val updatedNewAnswers               =
-            if (assetType === IndirectDisposal)
+            if (assetType === IndirectDisposal) {
               newAnswers.fold(
                 _.copy(improvementCosts = oldAnswers.fold(_.improvementCosts, e => Some(e.improvementCosts))),
                 _.copy(improvementCosts =
                   oldAnswers.fold(_.improvementCosts.getOrElse(AmountInPence.zero), _.improvementCosts)
                 )
               )
-            else newAnswers
+            } else {
+              newAnswers
+            }
 
           val updatedDraftReturn =
             commonUpdateDraftReturn(draftReturn, updatedNewAnswers, journey)
@@ -1487,7 +1487,7 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
-                false,
+                wasUkResident = false,
                 UserType.Individual,
                 PersonalRepresentative
               )._1
@@ -1518,7 +1518,7 @@ class AcquisitionDetailsControllerSpec
                   acquisitionMethod = Some(AcquisitionMethod.Other("period of admin"))
                 ),
                 assetType,
-                true,
+                wasUkResident = true,
                 if (isAgent) UserType.Agent else UserType.Individual,
                 PersonalRepresentativeInPeriodOfAdmin,
                 representeeAnswers = Some(representeeAnswers),
@@ -1546,8 +1546,11 @@ class AcquisitionDetailsControllerSpec
                 .url
 
               val expectedHelpTextKey =
-                if (isAgent) s"periodOfAdminMarketValue.agent${assetTypeMessageKey(assetType)}.helpText"
-                else s"periodOfAdminMarketValue${assetTypeMessageKey(assetType)}.helpText"
+                if (isAgent) {
+                  s"periodOfAdminMarketValue.agent${assetTypeMessageKey(assetType)}.helpText"
+                } else {
+                  s"periodOfAdminMarketValue${assetTypeMessageKey(assetType)}.helpText"
+                }
 
               doc
                 .select("#periodOfAdminMarketValue-hint")
@@ -1620,7 +1623,7 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
-                false,
+                wasUkResident = false,
                 UserType.Individual,
                 PersonalRepresentative
               )._1
@@ -1639,7 +1642,7 @@ class AcquisitionDetailsControllerSpec
 
         def test(data: (String, String)*)(
           expectedErrorMessageKey: String
-        ) = {
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1648,7 +1651,7 @@ class AcquisitionDetailsControllerSpec
                   acquisitionDate = AcquisitionDate(dateOfDeath.value)
                 ),
                 AssetType.Residential,
-                true,
+                wasUkResident = true,
                 UserType.Individual,
                 PersonalRepresentativeInPeriodOfAdmin,
                 representeeAnswers = Some(representeeAnswers)
@@ -1682,7 +1685,7 @@ class AcquisitionDetailsControllerSpec
           test()(s"$key.error.required")
         }
 
-        "the number submitted is larger than the maxium value" in {
+        "the number submitted is larger than the maximum value" in {
           test(key -> (MoneyUtils.maxAmountOfPounds + 1).toString)(s"$key.error.tooLarge")
         }
 
@@ -1703,7 +1706,7 @@ class AcquisitionDetailsControllerSpec
         val (session, journey, draftReturn) = sessionWithState(
           answers,
           AssetType.Residential,
-          true,
+          wasUkResident = true,
           UserType.Agent,
           PersonalRepresentativeInPeriodOfAdmin,
           representeeAnswers = Some(representeeAnswers)
@@ -1809,7 +1812,7 @@ class AcquisitionDetailsControllerSpec
               val (session, journey, draftReturn) = sessionWithState(
                 answers,
                 AssetType.Residential,
-                true,
+                wasUkResident = true,
                 UserType.Agent,
                 PersonalRepresentativeInPeriodOfAdmin,
                 representeeAnswers = Some(representeeAnswers)
@@ -2298,7 +2301,7 @@ class AcquisitionDetailsControllerSpec
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
-                    false,
+                    wasUkResident = false,
                     userType,
                     individualUserType
                   )._1
@@ -2330,7 +2333,7 @@ class AcquisitionDetailsControllerSpec
                     acquisitionMethod = None
                   ),
                   sample[AssetType],
-                  true,
+                  wasUkResident = true,
                   userType,
                   individualUserType
                 )._1
@@ -2357,7 +2360,7 @@ class AcquisitionDetailsControllerSpec
                       acquisitionDate = AcquisitionDate(ukResidents.plusDays(1))
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )._1
@@ -2390,7 +2393,7 @@ class AcquisitionDetailsControllerSpec
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
-                    false,
+                    wasUkResident = false,
                     userType,
                     individualUserType
                   )._1
@@ -2450,12 +2453,13 @@ class AcquisitionDetailsControllerSpec
                 .attr("action")                  shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
-              if (displayHelpText)
+              if (displayHelpText) {
                 doc
                   .select("#rebaseAcquisitionPrice-hint")
-                  .text()                        shouldBe messageFromMessageKey(
+                  .text() shouldBe messageFromMessageKey(
                   s"rebaseAcquisitionPrice$userKey.helpText"
                 )
+              }
               doc.select("#submitButton").text() shouldBe expectedSubmitText(isAmend)
             }
           )
@@ -2610,8 +2614,11 @@ class AcquisitionDetailsControllerSpec
             )
           }
           val expectedTitleKey =
-            if (assetType === IndirectDisposal) "rebaseAcquisitionPrice.indirect.title"
-            else "rebaseAcquisitionPrice.title"
+            if (assetType === IndirectDisposal) {
+              "rebaseAcquisitionPrice.indirect.title"
+            } else {
+              "rebaseAcquisitionPrice.title"
+            }
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
@@ -2700,7 +2707,7 @@ class AcquisitionDetailsControllerSpec
           individualUserType: IndividualUserType
         )(
           expectedErrorMessageKey: String
-        ) = {
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -2753,7 +2760,7 @@ class AcquisitionDetailsControllerSpec
         def getSessionDataJourneyAndDraftReturn(
           userType: UserType,
           individualUserType: IndividualUserType
-        ) = {
+        ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
           val answers                         = IncompleteAcquisitionDetailsAnswers.empty.copy(
             acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(2))),
             acquisitionPrice = Some(sample[AmountInPence])
@@ -2761,7 +2768,7 @@ class AcquisitionDetailsControllerSpec
           val (session, journey, draftReturn) = sessionWithState(
             answers,
             AssetType.Residential,
-            true,
+            wasUkResident = true,
             userType,
             individualUserType
           )
@@ -2846,7 +2853,7 @@ class AcquisitionDetailsControllerSpec
                   val (session, journey, draftReturn) = sessionWithState(
                     answers,
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )
@@ -2894,7 +2901,7 @@ class AcquisitionDetailsControllerSpec
                   val (session, journey, draftReturn) = sessionWithState(
                     answers,
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     UserType.Individual,
                     individualUserType,
                     isAmend = true
@@ -2964,7 +2971,7 @@ class AcquisitionDetailsControllerSpec
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )._1
@@ -2996,7 +3003,7 @@ class AcquisitionDetailsControllerSpec
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )._1
@@ -3029,7 +3036,7 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                true,
+                wasUkResident = true,
                 userType,
                 individualUserType,
                 isAmend = isAmend
@@ -3078,7 +3085,7 @@ class AcquisitionDetailsControllerSpec
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType,
                     isAmend = isAmend
@@ -3119,7 +3126,7 @@ class AcquisitionDetailsControllerSpec
                       rebasedAcquisitionPrice = Some(sample[AmountInPence])
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType,
                     isAmend = isAmend
@@ -3162,7 +3169,7 @@ class AcquisitionDetailsControllerSpec
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType,
                     isAmend = isAmend
@@ -3205,7 +3212,7 @@ class AcquisitionDetailsControllerSpec
                       improvementCosts = AmountInPence.zero
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )._1
@@ -3241,7 +3248,7 @@ class AcquisitionDetailsControllerSpec
                       improvementCosts = AmountInPence(2L)
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType,
                     isAmend = isAmend
@@ -3310,7 +3317,7 @@ class AcquisitionDetailsControllerSpec
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )._1
@@ -3340,7 +3347,7 @@ class AcquisitionDetailsControllerSpec
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )._1
@@ -3365,7 +3372,7 @@ class AcquisitionDetailsControllerSpec
           individualUserType: IndividualUserType,
           assetType: AssetType,
           userKey: String
-        )(expectedErrorKey: String) =
+        )(expectedErrorKey: String): Unit =
           testFormError(data: _*)(userType, individualUserType, assetType)(
             expectedErrorKey
           )(s"$key$userKey.title")(performAction)
@@ -3429,7 +3436,7 @@ class AcquisitionDetailsControllerSpec
         def getSessionDataJourneyAndDraftReturn(
           userType: UserType,
           individualUserType: IndividualUserType
-        ) = {
+        ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
           val answers                         = IncompleteAcquisitionDetailsAnswers.empty.copy(
             acquisitionDate = Some(acquisitionDate),
             acquisitionPrice = Some(sample[AmountInPence]),
@@ -3438,7 +3445,7 @@ class AcquisitionDetailsControllerSpec
           val (session, journey, draftReturn) = sessionWithState(
             answers,
             AssetType.Residential,
-            true,
+            wasUkResident = true,
             userType,
             individualUserType
           )
@@ -3519,7 +3526,7 @@ class AcquisitionDetailsControllerSpec
                   val (session, journey, draftReturn) = sessionWithState(
                     answers,
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )
@@ -3564,7 +3571,7 @@ class AcquisitionDetailsControllerSpec
                   val (session, journey, draftReturn) = sessionWithState(
                     answers,
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType,
                     isAmend = true
@@ -3662,7 +3669,7 @@ class AcquisitionDetailsControllerSpec
                       improvementCosts = Some(sample[AmountInPence])
                     ),
                     AssetType.NonResidential,
-                    false,
+                    wasUkResident = false,
                     userType,
                     individualUserType,
                     isAmend = isAmend
@@ -3709,7 +3716,7 @@ class AcquisitionDetailsControllerSpec
                       improvementCosts = Some(sample[AmountInPence])
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType,
                     isAmend = isAmend
@@ -3797,7 +3804,7 @@ class AcquisitionDetailsControllerSpec
                       shouldUseRebase = true
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType,
                     isAmend = isAmend
@@ -3926,7 +3933,7 @@ class AcquisitionDetailsControllerSpec
                       improvementCosts = Some(sample[AmountInPence])
                     ),
                     AssetType.NonResidential,
-                    false,
+                    wasUkResident = false,
                     userType,
                     PersonalRepresentativeInPeriodOfAdmin,
                     isAmend = isAmend
@@ -4033,7 +4040,7 @@ class AcquisitionDetailsControllerSpec
               val userKey      = userMessageKey(individualUserType, userType)
               val userErrorKey = if (userKey.startsWith(".")) "" else ".individual"
               val assetTypeKey = assetTypeMessageKey(assetType)
-              test()(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
+              test()(userType, individualUserType, assetType, userKey + assetTypeKey, wasUkResident = false)(
                 s"$key$userErrorKey$assetTypeKey.error.required"
               )
           }
@@ -4045,7 +4052,7 @@ class AcquisitionDetailsControllerSpec
               val assetTypeKey = assetTypeMessageKey(assetType)
               val userKey      = userMessageKey(individualUserType, userType)
               val userErrorKey = if (userKey.startsWith(".")) "" else ".individual"
-              test(key -> "2")(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
+              test(key -> "2")(userType, individualUserType, assetType, userKey + assetTypeKey, wasUkResident = false)(
                 s"$key$userErrorKey$assetTypeKey.error.invalid"
               )
           }
@@ -4059,7 +4066,13 @@ class AcquisitionDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
+                  test(data: _*)(
+                    userType,
+                    individualUserType,
+                    assetType,
+                    userKey + assetTypeKey,
+                    wasUkResident = false
+                  )(
                     scenario.expectedErrorMessageKey
                   )
                 }
@@ -4077,7 +4090,7 @@ class AcquisitionDetailsControllerSpec
                 individualUserType,
                 assetType,
                 userKey + assetTypeKey,
-                false
+                wasUkResident = false
               )(
                 s"$valueKey.error.tooSmall"
               )
@@ -4283,7 +4296,7 @@ class AcquisitionDetailsControllerSpec
                       improvementCosts = Some(sample[AmountInPence])
                     ),
                     AssetType.Residential,
-                    false,
+                    wasUkResident = false,
                     userType,
                     individualUserType
                   )._1
@@ -4397,7 +4410,7 @@ class AcquisitionDetailsControllerSpec
           data: (String, String)*
         )(userType: UserType, individualUserType: IndividualUserType)(
           expectedErrorKey: String
-        ) =
+        ): Unit =
           testFormError(data: _*)(userType, individualUserType, NonResidential)(
             expectedErrorKey
           )("shouldUseRebase.title", date)(
@@ -4437,7 +4450,7 @@ class AcquisitionDetailsControllerSpec
           data: (String, String)*
         )(userType: UserType, individualUserType: IndividualUserType)(
           expectedErrorKey: String
-        ) =
+        ): Unit =
           testFormError(data: _*)(userType, individualUserType, Residential)(
             expectedErrorKey
           )("shouldUseRebase.title", date)(
@@ -4446,7 +4459,7 @@ class AcquisitionDetailsControllerSpec
               sample[CompleteAcquisitionDetailsAnswers]
                 .copy(acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty)),
               Residential,
-              false,
+              wasUkResident = false,
               userType,
               individualUserType,
               disposalDate
@@ -4611,7 +4624,7 @@ class AcquisitionDetailsControllerSpec
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )._1,
@@ -4634,7 +4647,7 @@ class AcquisitionDetailsControllerSpec
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
-                    false,
+                    wasUkResident = false,
                     userType,
                     individualUserType
                   )._1,
@@ -4658,7 +4671,7 @@ class AcquisitionDetailsControllerSpec
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.NonResidential,
-                    false,
+                    wasUkResident = false,
                     userType,
                     individualUserType
                   )._1,
@@ -4813,7 +4826,7 @@ class AcquisitionDetailsControllerSpec
                 Some(sample[AmountInPence]),
                 sample[AmountInPence],
                 sample[AmountInPence],
-                false
+                shouldUseRebase = false
               )
               val assetType     = AssetType.NonResidential
               inSequence {
@@ -4822,7 +4835,7 @@ class AcquisitionDetailsControllerSpec
                   sessionWithState(
                     nonUkRebasing,
                     assetType,
-                    false,
+                    wasUkResident = false,
                     userType,
                     individualUserType
                   )._1
@@ -4836,8 +4849,8 @@ class AcquisitionDetailsControllerSpec
                   validateAcquisitionDetailsCheckYourAnswersPage(
                     nonUkRebasing,
                     doc,
-                    false,
-                    true,
+                    isUk = false,
+                    isRebasing = true,
                     assetType
                   )
                   doc
@@ -4860,7 +4873,7 @@ class AcquisitionDetailsControllerSpec
                 Some(sample[AmountInPence]),
                 sample[AmountInPence],
                 sample[AmountInPence],
-                true
+                shouldUseRebase = true
               )
               val assetType     = AssetType.NonResidential
               inSequence {
@@ -4869,7 +4882,7 @@ class AcquisitionDetailsControllerSpec
                   sessionWithState(
                     nonUkRebasing,
                     assetType,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )._1
@@ -4883,8 +4896,8 @@ class AcquisitionDetailsControllerSpec
                   validateAcquisitionDetailsCheckYourAnswersPage(
                     nonUkRebasing,
                     doc,
-                    true,
-                    true,
+                    isUk = true,
+                    isRebasing = true,
                     assetType
                   )
                   doc
@@ -4907,7 +4920,7 @@ class AcquisitionDetailsControllerSpec
                 Some(sample[AmountInPence]),
                 sample[AmountInPence],
                 sample[AmountInPence],
-                true
+                shouldUseRebase = true
               )
               val assetType     = AssetType.NonResidential
               inSequence {
@@ -4916,7 +4929,7 @@ class AcquisitionDetailsControllerSpec
                   sessionWithState(
                     nonUkRebasing,
                     assetType,
-                    true,
+                    wasUkResident = true,
                     userType,
                     individualUserType
                   )._1
@@ -4930,8 +4943,8 @@ class AcquisitionDetailsControllerSpec
                   validateAcquisitionDetailsCheckYourAnswersPage(
                     nonUkRebasing,
                     doc,
-                    true,
-                    false,
+                    isUk = true,
+                    isRebasing = false,
                     assetType
                   )
                   doc
@@ -4956,7 +4969,7 @@ class AcquisitionDetailsControllerSpec
                 Some(sample[AmountInPence]),
                 sample[AmountInPence],
                 sample[AmountInPence],
-                false
+                shouldUseRebase = false
               )
               val assetType     = AssetType.NonResidential
               inSequence {
@@ -4965,7 +4978,7 @@ class AcquisitionDetailsControllerSpec
                   sessionWithState(
                     nonUkRebasing,
                     assetType,
-                    false,
+                    wasUkResident = false,
                     userType,
                     individualUserType
                   )._1
@@ -4979,8 +4992,8 @@ class AcquisitionDetailsControllerSpec
                   validateAcquisitionDetailsCheckYourAnswersPage(
                     nonUkRebasing,
                     doc,
-                    false,
-                    false,
+                    isUk = false,
+                    isRebasing = false,
                     assetType
                   )
                   doc
@@ -5035,7 +5048,7 @@ class AcquisitionDetailsControllerSpec
                       Some(sample[AmountInPence]),
                       sample[AmountInPence],
                       sample[AmountInPence],
-                      false
+                      shouldUseRebase = false
                     )
                     val assetType     = AssetType.NonResidential
                     inSequence {
@@ -5044,7 +5057,7 @@ class AcquisitionDetailsControllerSpec
                         sessionWithState(
                           nonUkRebasing,
                           assetType,
-                          false,
+                          wasUkResident = false,
                           userType,
                           individualUserType
                         )._1
@@ -5102,7 +5115,7 @@ class AcquisitionDetailsControllerSpec
 
     def missingAssetTypeAndResidentialStatusBehaviour(
       performAction: () => Future[Result]
-    ) =
+    ): Unit =
       "redirect to the task list page" when {
 
         "there is no asset type" in {
@@ -5121,7 +5134,7 @@ class AcquisitionDetailsControllerSpec
                     Some(
                       sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
                     ),
-                    false
+                    isAmend = false
                   )._1
                 )
               }
@@ -5149,7 +5162,7 @@ class AcquisitionDetailsControllerSpec
                     Some(
                       sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
                     ),
-                    false
+                    isAmend = false
                   )._1
                 )
               }
@@ -5163,7 +5176,7 @@ class AcquisitionDetailsControllerSpec
 
       }
 
-    def missingAcquisitionDateBehaviour(performAction: () => Future[Result]) =
+    def missingAcquisitionDateBehaviour(performAction: () => Future[Result]): Unit =
       "redirect to the check you answers page" when {
 
         "there is no acquisition date" in {
@@ -5200,7 +5213,7 @@ class AcquisitionDetailsControllerSpec
                     Some(
                       sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
                     ),
-                    false
+                    isAmend = false
                   )._1
                 )
               }
@@ -5214,7 +5227,7 @@ class AcquisitionDetailsControllerSpec
 
       }
 
-    def missingAcquisitionMethodBehaviour(performAction: () => Future[Result]) =
+    def missingAcquisitionMethodBehaviour(performAction: () => Future[Result]): Unit =
       "redirect to the check you answers page" when {
 
         "there is no acquisition method" in {
@@ -5249,7 +5262,7 @@ class AcquisitionDetailsControllerSpec
                     Some(
                       sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
                     ),
-                    false
+                    isAmend = false
                   )._1
                 )
               }
@@ -5335,19 +5348,20 @@ object AcquisitionDetailsControllerSpec extends Matchers {
       .select("#acquisitionMethod-answer")
       .text() shouldBe expectedAcquisitionMethodDisplayName
 
-    if (!isRebasing || !isUk)
+    if (!isRebasing || !isUk) {
       doc
         .select("#acquisitionPrice-answer")
-        .text()                                     shouldBe formatAmountOfMoneyWithPoundSign(
+        .text() shouldBe formatAmountOfMoneyWithPoundSign(
         acquisitionDetailsAnswers.acquisitionPrice.inPounds()
       )
-    else
+    } else {
       doc.select("#acquisitionPrice-answer").text() shouldBe ""
+    }
 
-    if (!(assetType === IndirectDisposal) || isUk || (!isUk && !isRebasing))
-      if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero)
+    if (!(assetType === IndirectDisposal) || isUk || (!isUk && !isRebasing)) {
+      if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero) {
         doc.select("#improvementCosts-answer").text shouldBe "No"
-      else {
+      } else {
         doc.select("#improvementCosts-answer").text shouldBe "Yes"
         doc
           .select("#improvementCosts-value-answer")
@@ -5355,10 +5369,11 @@ object AcquisitionDetailsControllerSpec extends Matchers {
           acquisitionDetailsAnswers.improvementCosts.inPounds()
         )
       }
+    }
 
-    if (acquisitionDetailsAnswers.acquisitionFees === AmountInPence.zero)
+    if (acquisitionDetailsAnswers.acquisitionFees === AmountInPence.zero) {
       doc.select("#acquisitionFees-answer").text shouldBe "No"
-    else {
+    } else {
       doc.select("#acquisitionFees-answer").text shouldBe "Yes"
       doc
         .select("#acquisitionFees-value-answer")
@@ -5368,7 +5383,7 @@ object AcquisitionDetailsControllerSpec extends Matchers {
     }
 
     acquisitionDetailsAnswers.rebasedAcquisitionPrice.foreach { rebasedAcquisitionPrice =>
-      if (!isUk && isRebasing)
+      if (!isUk && isRebasing) {
         if (acquisitionDetailsAnswers.shouldUseRebase) {
           doc.select("#shouldRebase-answer").text shouldBe "Yes"
           doc
@@ -5376,8 +5391,10 @@ object AcquisitionDetailsControllerSpec extends Matchers {
             .text                                 shouldBe formatAmountOfMoneyWithPoundSign(
             rebasedAcquisitionPrice.inPounds()
           )
-        } else
+        } else {
           doc.select("#shouldRebase-answer").text shouldBe "No"
+        }
+      }
     }
   }
 }

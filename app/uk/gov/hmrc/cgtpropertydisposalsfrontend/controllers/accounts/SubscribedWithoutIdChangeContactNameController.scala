@@ -76,9 +76,9 @@ class SubscribedWithoutIdChangeContactNameController @Inject() (
       journey.subscribedDetails
         .copy(name = Right(name), contactName = ContactName(contactName))
 
-    if (journey.subscribedDetails === journeyWithUpdatedName)
+    if (journey.subscribedDetails === journeyWithUpdatedName) {
       EitherT.rightT[Future, Error](journey)
-    else {
+    } else {
       auditService.sendEvent(
         "contactNameChanged",
         SubscribedContactNameChangedEvent(

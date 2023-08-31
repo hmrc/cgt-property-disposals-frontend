@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -37,9 +37,9 @@ import scala.concurrent.Future
 
 class EmailVerificationServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
-  val mockConnector = mock[EmailVerificationConnector]
+  private val mockConnector = mock[EmailVerificationConnector]
 
-  def mockVerifyEmail(
+  private def mockVerifyEmail(
     expectedEmail: Email,
     expectedName: ContactName,
     expectedContinueCall: Call,

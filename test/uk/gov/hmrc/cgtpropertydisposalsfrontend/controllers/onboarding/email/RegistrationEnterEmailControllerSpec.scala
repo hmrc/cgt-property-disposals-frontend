@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sam
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.RegistrationDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 
 import java.util.UUID
@@ -46,7 +46,7 @@ class RegistrationEnterEmailControllerSpec
     journeyType: EnteringRegistrationEmail
   ): JourneyStatus = journeyType.journey.merge
 
-  val individualMissingEmail = sample[IndividualMissingEmail]
+  private val individualMissingEmail = sample[IndividualMissingEmail]
 
   override val validJourneyStatus: EnteringRegistrationEmail =
     EnteringRegistrationEmail(Right(individualMissingEmail))
@@ -72,13 +72,8 @@ class RegistrationEnterEmailControllerSpec
       )
     )
 
-  override val mockUpdateEmail: Option[
-    (
-      EnteringRegistrationEmail,
-      EnteringRegistrationEmail,
-      Either[Error, Unit]
-    ) => Unit
-  ] =
+  override val mockUpdateEmail
+    : Option[(EnteringRegistrationEmail, EnteringRegistrationEmail, Either[Error, Unit]) => Unit] =
     None
 
   override lazy val controller: RegistrationEnterEmailController =
@@ -118,7 +113,7 @@ class RegistrationEnterEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        ContactName(individualMissingEmail.name.makeSingleName()),
+        ContactName(individualMissingEmail.name.makeSingleName),
         emailRoutes.RegistrationEnterEmailController.verifyEmail,
         emailRoutes.RegistrationEnterEmailController.checkYourInbox()
       )

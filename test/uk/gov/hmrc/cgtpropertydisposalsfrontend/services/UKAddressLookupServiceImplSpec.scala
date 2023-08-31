@@ -35,9 +35,9 @@ import scala.concurrent.Future
 
 class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
-  val mockConnector = mock[AddressLookupConnector]
+  private val mockConnector = mock[AddressLookupConnector]
 
-  def mockLookupAddress(
+  private def mockLookupAddress(
     expectedPostcode: Postcode,
     filter: Option[String] = None
   )(

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import org.scalamock.handlers.{CallHandler1, CallHandler2}
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -27,19 +28,25 @@ trait SessionSupport { this: MockFactory =>
 
   val mockSessionStore: SessionStore = mock[SessionStore]
 
-  def mockGetSession(result: Either[Error, Option[SessionData]]) =
+  protected def mockGetSession(
+    result: Either[Error, Option[SessionData]]
+  ): CallHandler1[HeaderCarrier, Future[Either[Error, Option[SessionData]]]] =
     (mockSessionStore
       .get()(_: HeaderCarrier))
       .expects(*)
       .returning(Future.successful(result))
 
-  def mockGetSession(session: SessionData) =
+  protected def mockGetSession(
+    session: SessionData
+  ): CallHandler1[HeaderCarrier, Future[Either[Error, Option[SessionData]]]] =
     (mockSessionStore
       .get()(_: HeaderCarrier))
       .expects(*)
       .returning(Future.successful(Right(Some(session))))
 
-  def mockStoreSession(session: SessionData)(result: Either[Error, Unit]) =
+  protected def mockStoreSession(
+    session: SessionData
+  )(result: Either[Error, Unit]): CallHandler2[SessionData, HeaderCarrier, Future[Either[Error, Unit]]] =
     (mockSessionStore
       .store(_: SessionData)(_: HeaderCarrier))
       .expects(session, *)

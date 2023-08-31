@@ -40,8 +40,6 @@ class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
     "email-verification.errors.count"
   )
 
-  val ivSuccessCounter: Counter = counter("iv.journey-status.success.count")
-
   val ivIncompleteCounter: Counter = counter(
     "iv.journey-status.incomplete.count"
   )

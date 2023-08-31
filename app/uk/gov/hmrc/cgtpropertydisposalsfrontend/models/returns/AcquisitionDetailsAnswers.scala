@@ -92,10 +92,7 @@ object AcquisitionDetailsAnswers {
       }
 
     def unset[A](
-      fieldLens: IncompleteAcquisitionDetailsAnswers.type => Lens[
-        IncompleteAcquisitionDetailsAnswers,
-        Option[A]
-      ]
+      fieldLens: IncompleteAcquisitionDetailsAnswers.type => Lens[IncompleteAcquisitionDetailsAnswers, Option[A]]
     ): IncompleteAcquisitionDetailsAnswers =
       fieldLens(IncompleteAcquisitionDetailsAnswers).set(None)(
         fold(identity, IncompleteAcquisitionDetailsAnswers.fromCompleteAnswers)
@@ -116,14 +113,15 @@ object AcquisitionDetailsAnswers {
         .unset(_.shouldUseRebase)
         .unset(_.acquisitionFees)
 
-      if (isPeriodOfAdmin && isIndirectDisposal)
+      if (isPeriodOfAdmin && isIndirectDisposal) {
         newAnswers
-      else if (isPeriodOfAdmin && !isIndirectDisposal)
+      } else if (isPeriodOfAdmin && !isIndirectDisposal) {
         newAnswers.unset(_.improvementCosts)
-      else if (!isPeriodOfAdmin && isIndirectDisposal)
+      } else if (!isPeriodOfAdmin && isIndirectDisposal) {
         newAnswers.unset(_.acquisitionDate)
-      else
+      } else {
         newAnswers.unset(_.acquisitionDate).unset(_.improvementCosts)
+      }
     }
 
   }

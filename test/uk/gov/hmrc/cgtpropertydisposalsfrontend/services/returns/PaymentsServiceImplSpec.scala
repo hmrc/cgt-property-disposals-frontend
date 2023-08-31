@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsNumber, Json}
@@ -41,9 +42,9 @@ import scala.concurrent.Future
 
 class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
-  val mockConnector = mock[PaymentsConnector]
+  private val mockConnector = mock[PaymentsConnector]
 
-  def mockStartPaymentJourney(
+  private def mockStartPaymentJourney(
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
@@ -80,7 +81,7 @@ class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory
 
       "return an error" when {
 
-        def test(response: Either[Error, HttpResponse]) = {
+        def test(response: Either[Error, HttpResponse]): Assertion = {
           mockStartPaymentJourney(
             cgtReference,
             chargeReference,

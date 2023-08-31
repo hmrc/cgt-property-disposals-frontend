@@ -110,11 +110,11 @@ class CheckAllAnswersAndSubmitControllerSpec
     with RedirectToStartBehaviour
     with FurtherReturnCalculationEligibilityUtilSupport {
 
-  val mockReturnsService = mock[ReturnsService]
+  private val mockReturnsService = mock[ReturnsService]
 
-  val mockPaymentsService = mock[PaymentsService]
+  private val mockPaymentsService = mock[PaymentsService]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -124,11 +124,11 @@ class CheckAllAnswersAndSubmitControllerSpec
       bind[FurtherReturnCalculationEligibilityUtil].toInstance(mockFurtherReturnCalculationEligibilityUtil)
     )
 
-  lazy val controller = instanceOf[CheckAllAnswersAndSubmitController]
+  private lazy val controller = instanceOf[CheckAllAnswersAndSubmitController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  implicit val messages = MessagesImpl(lang, messagesApi)
+  private implicit val messages: MessagesImpl = MessagesImpl(lang, messagesApi)
 
   val rebasingEligibilityUtil = new RebasingEligibilityUtil()
 
@@ -160,7 +160,7 @@ class CheckAllAnswersAndSubmitControllerSpec
   def sessionWithJourney(journeyStatus: JourneyStatus): SessionData =
     SessionData.empty.copy(journeyStatus = Some(journeyStatus))
 
-  def mockSubmitReturn(
+  private def mockSubmitReturn(
     submitReturnRequest: SubmitReturnRequest,
     lang: Lang
   )(response: Either[Error, SubmitReturnResponse]) =
@@ -169,7 +169,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       .expects(submitReturnRequest, lang, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockStartPaymentJourney(
+  private def mockStartPaymentJourney(
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
@@ -190,7 +190,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockCgtRegistrationService(
+  private def mockCgtRegistrationService(
     response: Either[Error, RepresenteeCgtReference],
     completeRepresenteeAnswers: CompleteRepresenteeAnswers,
     lang: Lang
@@ -295,7 +295,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData)
               furtherReturnCalculationEligibility.foreach(eligibility =>
-                mockFurthereturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligibility))
+                mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(eligibility))
               )
             }
 
@@ -1417,7 +1417,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       def submitReturnRequestForOverriddenReferenceId(
         representeeCgtReference: RepresenteeCgtReference,
         hideEstimatesQuestion: Boolean
-      ) = {
+      ): SubmitReturnRequest = {
         val cyaPge                                                     = instanceOf[views.html.returns.check_all_answers]
         implicit val requestWithSessionData: RequestWithSessionData[_] =
           RequestWithSessionData(
@@ -2019,10 +2019,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                   triageAnswers = triageAnswers,
                   representeeAnswers = representeeAnswers
                 ),
-                agentReferenceNumber =
-                  if (userType === UserType.Agent)
-                    Some(sample[AgentReferenceNumber])
-                  else None
+                agentReferenceNumber = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None
               )
 
               val userKey = userMessageKey(individualUserType, userType)
@@ -2059,10 +2056,11 @@ class CheckAllAnswersAndSubmitControllerSpec
                         .exists(
                           _.fold(_.id, c => Some(c.id)).contains(NoReferenceId)
                         )
-                    )
+                    ) {
                       s"confirmationOfSubmission.capacitor.noId.printPage"
-                    else
-                      s"confirmationOfSubmission$userKey.printPage",
+                    } else {
+                      s"confirmationOfSubmission$userKey.printPage"
+                    },
                     "#print-dialogue"
                   )
 
@@ -2287,10 +2285,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                   triageAnswers = triageAnswers,
                   representeeAnswers = representeeAnswers
                 ),
-                agentReferenceNumber =
-                  if (userType === UserType.Agent)
-                    Some(sample[AgentReferenceNumber])
-                  else None
+                agentReferenceNumber = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None
               )
 
               val userKey = userMessageKey(individualUserType, userType)
@@ -2327,10 +2322,11 @@ class CheckAllAnswersAndSubmitControllerSpec
                         .exists(
                           _.fold(_.id, c => Some(c.id)).contains(NoReferenceId)
                         )
-                    )
+                    ) {
                       s"confirmationOfSubmission.capacitor.noId.printPage"
-                    else
-                      s"confirmationOfSubmission$userKey.printPage",
+                    } else {
+                      s"confirmationOfSubmission$userKey.printPage"
+                    },
                     "#print-dialogue"
                   )
 
@@ -2758,7 +2754,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "redirect to the payment journey next url" when {
 
-        "the payments journey has been succesfulyl started" in {
+        "the payments journey has been successfully started" in {
           val paymentJourney      = PaymentsJourney("/next", "id")
           val charge              = sample[ReturnCharge]
           val justSubmittedReturn = justSubmittedReturnWithCharge(Some(charge))
@@ -2786,10 +2782,10 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   }
 
-  def incompleteSingleDisposalJourneyBehaviour(
+  private def incompleteSingleDisposalJourneyBehaviour(
     performAction: () => Future[Result],
     completeDraftReturn: DraftSingleDisposalReturn
-  ) = {
+  ): Unit = {
     val makeIncompleteFunctions =
       List[DraftSingleDisposalReturn => DraftSingleDisposalReturn](
         _.copy(triageAnswers = sample[IncompleteSingleDisposalTriageAnswers]),
@@ -2871,10 +2867,10 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   }
 
-  def incompleteSingleIndirectDisposalJourneyBehaviour(
+  private def incompleteSingleIndirectDisposalJourneyBehaviour(
     performAction: () => Future[Result],
     completeDraftReturn: DraftSingleIndirectDisposalReturn
-  ) = {
+  ): Unit = {
     val makeIncompleteFunctions =
       List[DraftSingleIndirectDisposalReturn => DraftSingleIndirectDisposalReturn](
         _.copy(triageAnswers = sample[IncompleteSingleDisposalTriageAnswers]),

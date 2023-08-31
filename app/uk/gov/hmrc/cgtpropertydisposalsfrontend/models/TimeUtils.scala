@@ -35,9 +35,9 @@ object TimeUtils {
     LocalDate.parse(config.getString(key), DateTimeFormatter.ISO_DATE)
   }
 
-  val clock: Clock = Clock.systemUTC()
+  private val clock = Clock.systemUTC()
 
-  val minimumDate: LocalDate = LocalDate.of(1900, 1, 1)
+  private val minimumDate = LocalDate.of(1900, 1, 1)
 
   def getTaxYearStartDate(year: Int): LocalDate = LocalDate.of(year, 4, 6)
 
@@ -112,27 +112,28 @@ object TimeUtils {
               .fromTry(Try(LocalDate.of(year, month, day)))
               .leftMap(_ => FormError(dateKey, "error.invalid"))
               .flatMap(date =>
-                if (maximumDateInclusive.exists(_.isBefore(date)))
+                if (maximumDateInclusive.exists(_.isBefore(date))) {
                   Left(FormError(dateKey, "error.tooFarInFuture"))
-                else if (isDateOfDeathValid.exists(d => d && isPOA && minimumDateInclusive.exists(_.isAfter(date))))
+                } else if (isDateOfDeathValid.exists(d => d && isPOA && minimumDateInclusive.exists(_.isAfter(date)))) {
                   Left(FormError(dateKey, "error.dateOfDeath"))
-                else if (minimumDateInclusive.exists(_.isAfter(date)))
+                } else if (minimumDateInclusive.exists(_.isAfter(date))) {
                   Left(FormError(dateKey, "error.tooFarInPast"))
-                else if (date.isBefore(minimumDate))
+                } else if (date.isBefore(minimumDate)) {
                   Left(FormError(dateKey, "error.before1900"))
-                else if (
+                } else if (
                   taxYearStartYear
                     .exists(tyStartYear =>
                       !isValidDate(tyStartYear, date, minimumDateInclusive, maximumDateInclusive, isPOA)
                     )
-                )
+                ) {
                   Left(FormError(dateKey, "error.dateNotWithinTaxYear"))
-                else
+                } else {
                   extraValidation
                     .map(_(date))
                     .find(_.isLeft)
                     .getOrElse(Right(()))
                     .map(_ => date)
+                }
               )
         } yield date
 
@@ -148,13 +149,13 @@ object TimeUtils {
 
     }
 
-  def isValidDate(
+  private def isValidDate(
     taxYearStartYear: Int,
     completionDate: LocalDate,
     minimumDateInclusive: Option[LocalDate],
     maximumDateInclusive: Option[LocalDate],
     isPOA: Boolean
-  ): Boolean =
+  ) =
     if (isPOA) {
       val minDatesTaxYearStartYear = minimumDateInclusive match {
         case Some(d) => taxYearStart(d).getYear
@@ -162,10 +163,11 @@ object TimeUtils {
       }
 
       val minDateInclusive =
-        if (taxYearStartYear > minDatesTaxYearStartYear)
+        if (taxYearStartYear > minDatesTaxYearStartYear) {
           LocalDate.of(taxYearStartYear, 4, 6)
-        else
+        } else {
           minimumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear, 4, 6))
+        }
 
       val maxDateInclusive = maximumDateInclusive.getOrElse(LocalDate.of(taxYearStartYear + 1, 4, 5))
       completionDate <= maxDateInclusive && completionDate >= minDateInclusive
@@ -176,24 +178,27 @@ object TimeUtils {
     }
 
   def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
-    s"""${date.getDayOfMonth()} ${messages(
-      s"date.${date.getMonthValue()}"
-    )} ${date.getYear()}"""
+    s"""${date.getDayOfMonth} ${messages(
+      s"date.${date.getMonthValue}"
+    )} ${date.getYear}"""
 
   def govShortDisplayFormat(
     date: LocalDate
   )(implicit messages: Messages): String =
-    s"""${date.getDayOfMonth()} ${messages(
-      s"date.short.${date.getMonthValue()}"
-    )} ${date.getYear()}"""
+    s"""${date.getDayOfMonth} ${messages(
+      s"date.short.${date.getMonthValue}"
+    )} ${date.getYear}"""
 
   implicit val localDateOrder: Order[LocalDate] = Order.from(_ compareTo _)
 
   // what's the  start date of the tax year the given date falls into?
   def taxYearStart(date: LocalDate): LocalDate = {
     val currentCalendarTaxYearStart = LocalDate.of(date.getYear, 4, 6)
-    if (date < currentCalendarTaxYearStart) currentCalendarTaxYearStart.minusYears(1L)
-    else currentCalendarTaxYearStart
+    if (date < currentCalendarTaxYearStart) {
+      currentCalendarTaxYearStart.minusYears(1L)
+    } else {
+      currentCalendarTaxYearStart
+    }
   }
 
   def personalRepresentativeDateValidation(
@@ -207,33 +212,39 @@ object TimeUtils {
     ) { case PersonalRepresentativeDetails(personalRepType, dateOfDeath) =>
       personalRepType.fold(
         _ =>
-          if (date >= dateOfDeath.value) Right(())
-          else Left(FormError(formErrorKey, "error.periodOfAdminDeathNotAfterDate")),
+          if (date >= dateOfDeath.value) {
+            Right(())
+          } else {
+            Left(FormError(formErrorKey, "error.periodOfAdminDeathNotAfterDate"))
+          },
         _ =>
-          if (date > dateOfDeath.value)
+          if (date > dateOfDeath.value) {
             Left(FormError(formErrorKey, "error.nonPeriodOfAdminDeathAfterDate"))
-          else Right(())
+          } else {
+            Right(())
+          }
       )
-
     }
 
   def getMaximumDateForDisposalsAndCompletion(
     enableFutureDateForDisposalAndCompletion: Boolean,
     maxYearForDisposalsAndCompletion: Int
   ): LocalDate =
-    if (enableFutureDateForDisposalAndCompletion)
+    if (enableFutureDateForDisposalAndCompletion) {
       TimeUtils.getMaximumDateOf(TimeUtils.today(), LocalDate.of(maxYearForDisposalsAndCompletion, 4, 5))
-    else
+    } else {
       TimeUtils.today()
+    }
 
-  def getMaximumDateOf(date1: LocalDate, date2: LocalDate): LocalDate =
-    if (date1.isAfter(date2))
-      date1
-    else date2
+  private def getMaximumDateOf(date1: LocalDate, date2: LocalDate) =
+    if (date1.isAfter(date2)) date1 else date2
 
   def getTaxYearExchangedOfADate(d: LocalDate): TaxYearExchanged = {
     val taxYearStartDate = taxYearStart(d)
-    if (taxYearStartDate.getYear < 2020) TaxYearExchanged.taxYearExchangedBefore2020
-    else TaxYearExchanged(taxYearStartDate.getYear)
+    if (taxYearStartDate.getYear < 2020) {
+      TaxYearExchanged.taxYearExchangedBefore2020
+    } else {
+      TaxYearExchanged(taxYearStartDate.getYear)
+    }
   }
 }

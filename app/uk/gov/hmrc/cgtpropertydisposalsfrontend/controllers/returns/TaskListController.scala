@@ -134,9 +134,9 @@ class TaskListController @Inject() (
         }
       }
 
-    if (updatedUploadSupportingEvidenceAnswers.isEmpty && updatedYearToDateAnswers.isEmpty)
+    if (updatedUploadSupportingEvidenceAnswers.isEmpty && updatedYearToDateAnswers.isEmpty) {
       EitherT.pure[Future, Error](draftReturn)
-    else {
+    } else {
       val updatedDraftReturn = draftReturn.fold(
         multiple =>
           multiple.copy(

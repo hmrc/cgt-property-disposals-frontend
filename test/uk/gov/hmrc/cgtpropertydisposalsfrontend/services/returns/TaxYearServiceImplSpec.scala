@@ -37,19 +37,19 @@ import scala.concurrent.Future
 
 class TaxYearServiceImplSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks with MockFactory {
 
-  val mockReturnsConnector = mock[ReturnsConnector]
+  private val mockReturnsConnector = mock[ReturnsConnector]
 
   val service = new TaxYearServiceImpl(mockReturnsConnector)
 
   private val emptyJsonBody = "{}"
 
-  def mockGetTaxYear(date: LocalDate)(response: Either[Error, HttpResponse]) =
+  private def mockGetTaxYear(date: LocalDate)(response: Either[Error, HttpResponse]) =
     (mockReturnsConnector
       .taxYear(_: LocalDate)(_: HeaderCarrier))
       .expects(date, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockAvailableTaxYears()(response: Either[Error, HttpResponse]) =
+  private def mockAvailableTaxYears()(response: Either[Error, HttpResponse]) =
     (mockReturnsConnector
       .availableTaxYears()(_: HeaderCarrier))
       .expects(*)

@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, NonGovernmentGatewayUser, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RetrievedUserType, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
@@ -114,10 +114,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
   }
 
   private def handleIndividualOrOrganisation[A](
-    affinityGroup: Either[
-      AffinityGroup.Organisation.type,
-      AffinityGroup.Individual.type
-    ],
+    affinityGroup: Either[AffinityGroup.Organisation.type, AffinityGroup.Individual.type],
     confidenceLevel: ConfidenceLevel,
     maybeNino: Option[String],
     maybeSautr: Option[String],
@@ -194,10 +191,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
   private def handleSubscribedUser[A](
     cgtReference: CgtReference,
     ggCredId: GGCredId,
-    affinityGroup: Either[
-      AffinityGroup.Organisation.type,
-      AffinityGroup.Individual.type
-    ],
+    affinityGroup: Either[AffinityGroup.Organisation.type, AffinityGroup.Individual.type],
     request: MessagesRequest[A]
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
     def authenticatedRequest(userType: UserType) =
@@ -222,9 +216,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     credentials: Option[Credentials],
     request: MessagesRequest[A]
   )(
-    f: GGCredId => Future[
-      Either[Result, AuthenticatedRequestWithRetrievedData[A]]
-    ]
+    f: GGCredId => Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]]
   ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] =
     credentials match {
       case None =>

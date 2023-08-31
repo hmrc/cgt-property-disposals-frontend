@@ -78,7 +78,7 @@ class RepresenteeControllerSpec
   val mockNameMatchRetryService: NameMatchRetryService =
     mock[NameMatchRetryService]
 
-  override val overrideBindings =
+  protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -86,7 +86,7 @@ class RepresenteeControllerSpec
       bind[NameMatchRetryService].toInstance(mockNameMatchRetryService)
     )
 
-  lazy val controller = instanceOf[RepresenteeController]
+  private lazy val controller = instanceOf[RepresenteeController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -153,10 +153,8 @@ class RepresenteeControllerSpec
       isAmend
     )
 
-  def mockGetPreviousNameMatchAttempts(ggCredId: GGCredId)(
-    result: Either[NameMatchServiceError[
-      IndividualRepresenteeNameMatchDetails
-    ], Option[
+  private def mockGetPreviousNameMatchAttempts(ggCredId: GGCredId)(
+    result: Either[NameMatchServiceError[IndividualRepresenteeNameMatchDetails], Option[
       UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
     ]]
   ) =
@@ -171,26 +169,20 @@ class RepresenteeControllerSpec
       .expects(ggCredId, *, *, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockNameMatch(
+  private def mockNameMatch(
     details: IndividualRepresenteeNameMatchDetails,
     ggCredId: GGCredId,
-    previousNameMatchAttempts: Option[
-      UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
-    ],
+    previousNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]],
     lang: Lang
   )(
-    result: Either[NameMatchServiceError[
-      IndividualRepresenteeNameMatchDetails
-    ], RepresenteeReferenceId]
+    result: Either[NameMatchServiceError[IndividualRepresenteeNameMatchDetails], RepresenteeReferenceId]
   ) =
     (
       mockNameMatchRetryService
         .attemptNameMatch(
           _: IndividualRepresenteeNameMatchDetails,
           _: GGCredId,
-          _: Option[
-            UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
-          ],
+          _: Option[UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]],
           _: Lang
         )(
           _: HeaderCarrier,
@@ -216,7 +208,7 @@ class RepresenteeControllerSpec
 
       behave like nonCapacitorOrPersonalRepBehaviour(performAction)
 
-      "redirect to the chec your answers page" when {
+      "redirect to the check your answers page" when {
 
         "there are no contact details in session" in {
           val session =
@@ -262,11 +254,8 @@ class RepresenteeControllerSpec
                 .changeContactName()
                 .url
               doc.select("#returnToSummaryLink").text()          shouldBe (
-                if (expectReturnToSummaryLink)
-                  messageFromMessageKey("returns.return-to-summary-link")
-                else ""
+                if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link") else ""
               )
-
             }
           )
         }
@@ -281,7 +270,7 @@ class RepresenteeControllerSpec
             session,
             "representeeContactName.change.title",
             routes.RepresenteeController.checkYourAnswers(),
-            true
+            expectReturnToSummaryLink = true
           )
         }
 
@@ -297,7 +286,7 @@ class RepresenteeControllerSpec
             session,
             "representeeContactName.change.title",
             routes.RepresenteeController.checkContactDetails(),
-            false
+            expectReturnToSummaryLink = false
           )
         }
       }
@@ -384,8 +373,8 @@ class RepresenteeControllerSpec
                 Some(answers.id),
                 answers.dateOfDeath,
                 Some(answers.contactDetails.copy(contactName = newContactName)),
-                true,
-                false,
+                hasConfirmedPerson = true,
+                hasConfirmedContactDetails = false,
                 Some(answers.isFirstReturn)
               )
 
@@ -452,9 +441,7 @@ class RepresenteeControllerSpec
                 .enterNameSubmit()
                 .url
               doc.select("#returnToSummaryLink").text()          shouldBe (
-                if (expectReturnToSummaryLink)
-                  messageFromMessageKey("returns.return-to-summary-link")
-                else ""
+                if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link") else ""
               )
               expectedPrepopulatedValue.foreach { name =>
                 doc
@@ -557,7 +544,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.personalRep.title",
-              routes.RepresenteeController.isFirstReturn,
+              routes.RepresenteeController.isFirstReturn(),
               expectReturnToSummaryLink = true,
               Some(name)
             )
@@ -873,9 +860,7 @@ class RepresenteeControllerSpec
                 .enterDateOfDeathSubmit()
                 .url
               doc.select("#returnToSummaryLink").text()          shouldBe (
-                if (expectReturnToSummaryLink)
-                  messageFromMessageKey("returns.return-to-summary-link")
-                else ""
+                if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link") else ""
               )
               expectedPrepopulatedValue.foreach { date =>
                 doc
@@ -1283,9 +1268,7 @@ class RepresenteeControllerSpec
                 .enterIdSubmit()
                 .url
               doc.select("#returnToSummaryLink").text()          shouldBe (
-                if (expectReturnToSummaryLink)
-                  messageFromMessageKey("returns.return-to-summary-link")
-                else ""
+                if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link") else ""
               )
               expectedPrepopulatedValue.foreach {
 
@@ -1498,19 +1481,21 @@ class RepresenteeControllerSpec
             doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
             doc
               .select("#name-question")
-              .text                                            shouldBe (messageFromMessageKey(
+              .text                                            shouldBe messageFromMessageKey(
               "representeeConfirmPerson.summaryLine1"
-            ))
+            )
             doc
               .select("#name-answer")
               .text                                            shouldBe s"${expectedName.firstName} ${expectedName.lastName}"
-            if (isCgtRow)
+            if (isCgtRow) {
               doc
                 .select("#account-question")
-                .text                                          shouldBe messageFromMessageKey(
+                .text shouldBe messageFromMessageKey(
                 "representeeConfirmPerson.summaryLine2.cgtReferenceId"
               )
-            else ()
+            } else {
+              ()
+            }
             doc
               .select("#content > article > form, #main-content form")
               .attr("action")                                  shouldBe routes.RepresenteeController
@@ -1535,8 +1520,8 @@ class RepresenteeControllerSpec
               Some(RepresenteeNino(NINO("AB123456C"))),
               Some(sample[DateOfDeath]),
               None,
-              false,
-              false,
+              hasConfirmedPerson = false,
+              hasConfirmedContactDetails = false,
               None
             )
           "show the summary" ignore {
@@ -1547,7 +1532,7 @@ class RepresenteeControllerSpec
               )._1,
               routes.RepresenteeController.enterId(),
               name,
-              false
+              isCgtRow = false
             )
           }
         }
@@ -1562,8 +1547,8 @@ class RepresenteeControllerSpec
               None,
               None,
               None,
-              false,
-              false,
+              hasConfirmedPerson = false,
+              hasConfirmedContactDetails = false,
               None
             )
 
@@ -1589,8 +1574,8 @@ class RepresenteeControllerSpec
               Some(sample[RepresenteeReferenceId]),
               None,
               None,
-              true,
-              true,
+              hasConfirmedPerson = true,
+              hasConfirmedContactDetails = true,
               None
             )
 
@@ -1631,8 +1616,8 @@ class RepresenteeControllerSpec
             Some(sample[RepresenteeNino]),
             Some(sample[DateOfDeath]),
             None,
-            false,
-            false,
+            hasConfirmedPerson = false,
+            hasConfirmedContactDetails = false,
             Some(false)
           ),
           Capacitor
@@ -1658,8 +1643,8 @@ class RepresenteeControllerSpec
             Some(RepresenteeNino(NINO("AB123456C"))),
             None,
             None,
-            false,
-            false,
+            hasConfirmedPerson = false,
+            hasConfirmedContactDetails = false,
             Some(false)
           )
 
@@ -1675,8 +1660,8 @@ class RepresenteeControllerSpec
                   None,
                   None,
                   None,
-                  false,
-                  false,
+                  hasConfirmedPerson = false,
+                  hasConfirmedContactDetails = false,
                   None
                 )
               )
@@ -1700,8 +1685,8 @@ class RepresenteeControllerSpec
             Some(RepresenteeNino(NINO("AB123456C"))),
             None,
             None,
-            false,
-            false,
+            hasConfirmedPerson = false,
+            hasConfirmedContactDetails = false,
             Some(false)
           )
 
@@ -1788,7 +1773,7 @@ class RepresenteeControllerSpec
             "representeeReferenceIdType.title",
             session,
             () => mockGetPreviousNameMatchAttempts(journey.ggCredId)(Right(None))
-          ) _
+          )
 
         "nothing is selected" in {
           test(Seq.empty, "representeeReferenceIdType.error.required")
@@ -2273,7 +2258,7 @@ class RepresenteeControllerSpec
           result: Future[Result],
           contactDetails: RepresenteeContactDetails,
           expectReturnToSummaryLink: Boolean
-        ) =
+        ): Unit =
           checkPageIsDisplayed(
             result,
             messageFromMessageKey("representeeContactDetails.title"),
@@ -2318,9 +2303,7 @@ class RepresenteeControllerSpec
                 .checkContactDetailsSubmit()
                 .url
               doc.select("#returnToSummaryLink").text() shouldBe (
-                if (expectReturnToSummaryLink)
-                  messageFromMessageKey("returns.return-to-summary-link")
-                else ""
+                if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link") else ""
               )
             }
           )
@@ -2599,8 +2582,8 @@ class RepresenteeControllerSpec
         Some(completeAnswers.id),
         Some(dateOfDeath),
         Some(sample[RepresenteeContactDetails]),
-        true,
-        true,
+        hasConfirmedPerson = true,
+        hasConfirmedContactDetails = true,
         Some(completeAnswers.isFirstReturn)
       )
 
@@ -2987,7 +2970,7 @@ class RepresenteeControllerSpec
 
         def test(
           session: SessionData
-        )(expectedTitleKey: String, expectedBackLink: Call, expectedPreselectedAnswer: Option[Boolean]) = {
+        )(expectedTitleKey: String, expectedBackLink: Call, expectedPreselectedAnswer: Option[Boolean]): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
@@ -3522,9 +3505,9 @@ class RepresenteeControllerSpec
       }
     }
 
-  def noIsFirstReturnAnswerBehaviour(
+  private def noIsFirstReturnAnswerBehaviour(
     performAction: () => Future[Result]
-  ) =
+  ): Unit =
     "redirect to the check your answers endpoint" when {
 
       "there is no answer to the 'is first return?' question" in {
@@ -3584,14 +3567,12 @@ object RepresenteeControllerSpec extends Matchers {
     doc
       .select("#isFirstReturn-answer")
       .text() shouldBe messagesApi(
-      if (answers.isFirstReturn) "generic.yes"
-      else "generic.no"
+      if (answers.isFirstReturn) "generic.yes" else "generic.no"
     )
 
     doc
       .select("#personRepresented-answer")
-      .text() shouldBe s"${answers.name
-      .makeSingleName()}${expectedIdContent.fold("")(s => s" $s")}"
+      .text() shouldBe s"${answers.name.makeSingleName}${expectedIdContent.fold("")(s => s" $s")}"
 
     doc
       .select("#contactName-answer")

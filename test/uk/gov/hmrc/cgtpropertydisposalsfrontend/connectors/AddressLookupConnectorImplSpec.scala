@@ -32,13 +32,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport {
 
-  val config = Configuration(
+  private val config = Configuration(
     ConfigFactory.parseString(
       """
       |microservice {
       |  services {
       |    address-lookup {
-      |      protocol = http
+      |      protocol = https
       |      host     = host
       |      port     = 123
       |      user-agent = agent
@@ -49,7 +49,7 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
     )
   )
 
-  val addresssLookupUrl = "http://host:123/lookup"
+  val addressLookupUrl = "https://host:123/lookup"
 
   val connector             = new AddressLookupConnectorImpl(
     mockHttp,
@@ -78,7 +78,7 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockPost(
-              addresssLookupUrl,
+              addressLookupUrl,
               Seq("User-Agent" -> "agent"),
               lookupAddressByPostcode
             )(Some(httpResponse))
@@ -98,7 +98,7 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
         )
         val httpResponse            = HttpResponse(200, emptyJsonBody)
         mockPost(
-          addresssLookupUrl,
+          addressLookupUrl,
           Seq("User-Agent" -> "agent"),
           lookupAddressByPostcode
         )(Some(httpResponse))
@@ -117,8 +117,8 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
           None
         )
         mockPost(
-          addresssLookupUrl,
-          Seq(("User-Agent" -> "agent")),
+          addressLookupUrl,
+          Seq("User-Agent" -> "agent"),
           lookupAddressByPostcode
         )(Some(response))
 
@@ -135,7 +135,7 @@ class AddressLookupConnectorImplSpec extends AnyWordSpec with Matchers with Mock
 
         "the future fails" in {
           mockPost(
-            addresssLookupUrl,
+            addressLookupUrl,
             Seq("User-Agent" -> "agent"),
             lookupAddressByPostcode
           )(None)

@@ -160,8 +160,9 @@ class DisposalDetailsController @Inject() (
       )
 
       Ok(page(form(answers), backLink))
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
 
   private def submitBehaviour[A, P : Writeable, R](
     fillingOutReturn: FillingOutReturn,
@@ -196,10 +197,11 @@ class DisposalDetailsController @Inject() (
               fillingOutReturn.copy(draftReturn = newDraftReturn.merge).withForceDisplayGainOrLossAfterReliefsForAmends
 
             val result = for {
-              _ <- if (newDraftReturn.merge === draftReturn.merge)
+              _ <- if (newDraftReturn.merge === draftReturn.merge) {
                      EitherT.pure[Future, Error](())
-                   else
+                   } else {
                      returnsService.storeDraftReturn(newJourney)
+                   }
               _ <- EitherT[Future, Error, Unit](
                      updateSession(sessionStore, request)(
                        _.copy(journeyStatus = Some(newJourney))
@@ -216,8 +218,9 @@ class DisposalDetailsController @Inject() (
             )
           }
         )
-    } else
+    } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
 
   private def representativeType(state: JourneyState) =
     state.fold(
@@ -277,9 +280,9 @@ class DisposalDetailsController @Inject() (
               answers
                 .fold(_.shareOfProperty, c => Some(c.shareOfProperty))
                 .contains(percentage)
-            )
+            ) {
               draftReturn
-            else {
+            } else {
               val isFurtherOrAmendReturn = fillingOutReturn.isFurtherOrAmendReturn.contains(true)
               val newAnswers             = answers
                 .unset(_.disposalPrice)
@@ -316,10 +319,11 @@ class DisposalDetailsController @Inject() (
     }
 
   private def disposalPriceBackLink(state: JourneyState): Call =
-    if (isIndirectDisposal(state))
+    if (isIndirectDisposal(state)) {
       controllers.returns.routes.TaskListController.taskList()
-    else
+    } else {
       controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
+    }
 
   def whatWasDisposalPrice(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -373,9 +377,9 @@ class DisposalDetailsController @Inject() (
                 answers
                   .fold(_.disposalPrice, c => Some(c.disposalPrice))
                   .exists(_.inPounds() === price)
-              )
+              ) {
                 draftReturn
-              else {
+              } else {
                 val isFurtherOrAmendReturn = fillingOutReturn.isFurtherOrAmendReturn.contains(true)
                 val newAnswers             = answers.fold(
                   _.copy(disposalPrice = Some(fromPounds(price))),
@@ -463,9 +467,9 @@ class DisposalDetailsController @Inject() (
                 answers
                   .fold(_.disposalFees, c => Some(c.disposalFees))
                   .exists(_.inPounds() === price)
-              )
+              ) {
                 draftReturn
-              else {
+              } else {
                 val isFurtherOrAmendReturn = fillingOutReturn.isFurtherOrAmendReturn.contains(true)
                 val newAnswers             =
                   answers.fold(
@@ -505,7 +509,7 @@ class DisposalDetailsController @Inject() (
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndDisposalDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
-        withDisposalMethod(state) { case (disposalMethod) =>
+        withDisposalMethod(state) { case disposalMethod =>
           answers match {
 
             case IncompleteDisposalDetailsAnswers(None, _, _) =>
@@ -589,7 +593,7 @@ class DisposalDetailsController @Inject() (
 
 object DisposalDetailsController {
 
-  val shareOfPropertyForm: Form[ShareOfProperty] = {
+  private val shareOfPropertyForm = {
 
     val formatter: Formatter[ShareOfProperty] = {
       val (shareOfPropertyKey, percentageKey) =
@@ -599,13 +603,19 @@ object DisposalDetailsController {
         Try(BigDecimal(s)).toEither
           .leftMap(_ => FormError(percentageKey, "error.invalid"))
           .flatMap { d =>
-            if (d > 100) Left(FormError(percentageKey, "error.tooLarge"))
-            else if (d < 0) Left(FormError(percentageKey, "error.tooSmall"))
-            else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2))
+            if (d > 100) {
+              Left(FormError(percentageKey, "error.tooLarge"))
+            } else if (d < 0) {
+              Left(FormError(percentageKey, "error.tooSmall"))
+            } else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) {
               Left(FormError(percentageKey, "error.tooManyDecimals"))
-            else if (d === BigDecimal(100)) Right(ShareOfProperty.Full)
-            else if (d === BigDecimal(50)) Right(ShareOfProperty.Half)
-            else Right(ShareOfProperty.Other(d))
+            } else if (d === BigDecimal(100)) {
+              Right(ShareOfProperty.Full)
+            } else if (d === BigDecimal(50)) {
+              Right(ShareOfProperty.Half)
+            } else {
+              Right(ShareOfProperty.Other(d))
+            }
           }
 
       ConditionalRadioUtils.formatter(shareOfPropertyKey)(
@@ -651,7 +661,7 @@ object DisposalDetailsController {
       )(identity)(Some(_))
     )
 
-  val disposalFeesForm: Form[BigDecimal] =
+  private val disposalFeesForm =
     Form(
       formMapping(
         "disposalFees" -> of(

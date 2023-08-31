@@ -18,6 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.{Arbitrary, Gen}
 
+import scala.language.implicitConversions
+
 object Generators {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)

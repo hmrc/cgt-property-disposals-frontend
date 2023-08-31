@@ -18,6 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
 import play.api.libs.json.JsError
 
+import scala.language.implicitConversions
+
 object JsErrorOps {
 
   implicit def j(jsError: JsError): JsErrorOps = new JsErrorOps(jsError)

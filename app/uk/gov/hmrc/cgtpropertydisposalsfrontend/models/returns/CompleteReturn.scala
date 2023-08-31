@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.syntax.eq._
-import com.github.ghik.silencer.silent
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
@@ -102,10 +101,7 @@ object CompleteReturn {
     acquisitionDetails: CompleteAcquisitionDetailsAnswers,
     reliefDetails: CompleteReliefDetailsAnswers,
     exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
-    yearToDateLiabilityAnswers: Either[
-      CompleteNonCalculatedYTDAnswers,
-      CompleteCalculatedYTDAnswers
-    ],
+    yearToDateLiabilityAnswers: Either[CompleteNonCalculatedYTDAnswers, CompleteCalculatedYTDAnswers],
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     initialGainOrLoss: Option[AmountInPence],
     representeeAnswers: Option[CompleteRepresenteeAnswers],
@@ -195,7 +191,7 @@ object CompleteReturn {
       private val c: CompleteSingleDisposalReturn
     ) extends AnyVal {
 
-      def hasNonResidentialAssetType(): Boolean =
+      def hasNonResidentialAssetType: Boolean =
         c.triageAnswers.assetType === AssetType.NonResidential
 
     }
@@ -440,7 +436,6 @@ object CompleteReturn {
         Some(None)
     }
 
-  @silent
   implicit val format: OFormat[CompleteReturn] = {
     implicit val singleDisposalTriageFormat: OFormat[CompleteSingleDisposalTriageAnswers]              = Json.format
     implicit val multipleDisposalsTriageFormat: OFormat[CompleteMultipleDisposalsTriageAnswers]        = Json.format

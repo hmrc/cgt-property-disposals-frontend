@@ -88,9 +88,9 @@ class SubscribedChangeAddressController @Inject() (
     val updatedSubscribedDetails =
       journey.journey.subscribedDetails.copy(address = address)
 
-    if (journey.journey.subscribedDetails === updatedSubscribedDetails)
+    if (journey.journey.subscribedDetails === updatedSubscribedDetails) {
       EitherT.pure[Future, Error](journey.journey)
-    else {
+    } else {
       auditService.sendEvent(
         "contactAddressChanged",
         SubscribedContactAddressChangedEvent(

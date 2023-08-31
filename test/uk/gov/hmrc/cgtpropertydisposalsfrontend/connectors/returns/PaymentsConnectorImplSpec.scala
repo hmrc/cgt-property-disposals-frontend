@@ -36,15 +36,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class PaymentsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
 
-  val selfUrl = "http://self:999"
+  val selfUrl = "https://self:999"
 
-  val config = Configuration(
+  private val config = Configuration(
     ConfigFactory.parseString(
       s"""
         |microservice {
         |  services {
         |    payments {
-        |      protocol = http
+        |      protocol = https
         |      host     = host
         |      port     = 123
         |    }
@@ -72,7 +72,7 @@ class PaymentsConnectorImplSpec extends AnyWordSpec with Matchers with MockFacto
       val returnCall      = controllers.routes.StartController.start()
       val backCall        = controllers.returns.routes.TaskListController.taskList()
       val expectedUrl     =
-        "http://host:123/pay-api/capital-gains-tax/journey/start"
+        "https://host:123/pay-api/capital-gains-tax/journey/start"
 
       behave like connectorBehaviour(
         mockPost(

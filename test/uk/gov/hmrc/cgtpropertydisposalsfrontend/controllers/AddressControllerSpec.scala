@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.scalamock.handlers.CallHandler3
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -56,25 +57,25 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     with SessionSupport
     with PostcodeFormValidationTests {
 
-  val validJourneyStatus: A
+  protected val validJourneyStatus: A
 
-  def updateAddress(journey: A, address: Address): JourneyStatus
+  protected def updateAddress(journey: A, address: Address): JourneyStatus
 
-  val mockUpdateAddress: Option[(A, Address, Either[Error, Unit]) => Unit]
+  protected val mockUpdateAddress: Option[(A, Address, Either[Error, Unit]) => Unit]
 
-  val controller: AddressController[A]
+  protected val controller: AddressController[A]
 
-  val mockService = mock[UKAddressLookupService]
+  protected val mockService: UKAddressLookupService = mock[UKAddressLookupService]
 
-  def mockAddressLookup(expectedPostcode: Postcode, filter: Option[String])(
+  protected def mockAddressLookup(expectedPostcode: Postcode, filter: Option[String])(
     result: Either[Error, AddressLookupResult]
-  ) =
+  ): CallHandler3[Postcode, Option[String], HeaderCarrier, EitherT[Future, Error, AddressLookupResult]] =
     (mockService
       .lookupAddress(_: Postcode, _: Option[String])(_: HeaderCarrier))
       .expects(expectedPostcode, filter, *)
       .returning(EitherT.fromEither[Future](result))
 
-  override def overrideBindings: List[GuiceableModule] =
+  protected override def overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
@@ -82,9 +83,9 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
-  val postcode = Postcode("AB1 2CD")
+  private val postcode = Postcode("AB1 2CD")
 
-  def ukAddress(i: Int): UkAddress =
+  def ukAddress(i: Int): UkAddress                       =
     UkAddress(s"$i the Street", Some("The Town"), None, None, postcode)
 
   val (addressHead, lastAddress, lastAddressIndex, addresses) = {
@@ -92,9 +93,9 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     val last = ukAddress(5)
     (head, last, 4, head :: ((2 to 4).map(ukAddress).toList ::: List(last)))
   }
-  val addressLookupResult          = AddressLookupResult(postcode, None, addresses)
+  protected val addressLookupResult: AddressLookupResult = AddressLookupResult(postcode, None, addresses)
 
-  lazy val sessionWithValidJourneyStatus =
+  protected lazy val sessionWithValidJourneyStatus: SessionData =
     SessionData.empty.copy(journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)))
 
   def userMessageKey(

@@ -24,7 +24,7 @@ object BooleanFormatter {
   //don't want to use out-of-box boolean formatter - that one defaults null values to false
   val formatter: Formatter[Boolean] = new Formatter[Boolean] {
 
-    override val format = Some(("format.boolean", Nil))
+    override val format: Option[(String, Nil.type)] = Some(("format.boolean", Nil))
 
     def bind(
       key: String,

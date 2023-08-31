@@ -18,11 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossa
 
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.Configuration
 import play.api.i18n.DefaultMessagesApi
-import play.api.mvc.MessagesRequest
+import play.api.mvc.{AnyContentAsEmpty, MessagesRequest}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionSupport
@@ -73,7 +74,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
 
   class TestEnvironment(maxPreviousReturns: Int = maxPreviousReturns) {
 
-    val config = Configuration(
+    private val config = Configuration(
       ConfigFactory.parseString(
         s"""
             |amend-and-further-returns-calculator{
@@ -106,13 +107,17 @@ class FurtherReturnCalculationEligibilityUtilSpec
         triageAnswers = if (withCompleteTriageDetails) {
           sample[CompleteSingleDisposalTriageAnswers]
             .copy(individualUserType = individualUserType, assetType = assetType)
-        } else sample[IncompleteSingleDisposalTriageAnswers],
+        } else {
+          sample[IncompleteSingleDisposalTriageAnswers]
+        },
         propertyAddress = address,
         disposalDetailsAnswers = Some(
           if (withCompleteDisposalDetails) {
             sample[CompleteDisposalDetailsAnswers]
               .copy(disposalPrice = AmountInPence(0), disposalFees = AmountInPence(0))
-          } else sample[IncompleteDisposalDetailsAnswers]
+          } else {
+            sample[IncompleteDisposalDetailsAnswers]
+          }
         ),
         gainOrLossAfterReliefs = gainOrLossAfterReliefs,
         acquisitionDetailsAnswers = Some(
@@ -122,7 +127,9 @@ class FurtherReturnCalculationEligibilityUtilSpec
               acquisitionPrice = AmountInPence(0),
               improvementCosts = AmountInPence(0)
             )
-          } else sample[IncompleteAcquisitionDetailsAnswers]
+          } else {
+            sample[IncompleteAcquisitionDetailsAnswers]
+          }
         ),
         reliefDetailsAnswers = Some(
           if (withCompleteReliefDetails) {
@@ -131,7 +138,9 @@ class FurtherReturnCalculationEligibilityUtilSpec
               privateResidentsRelief = AmountInPence(0),
               lettingsRelief = AmountInPence(0)
             )
-          } else sample[IncompleteReliefDetailsAnswers]
+          } else {
+            sample[IncompleteReliefDetailsAnswers]
+          }
         )
       )
 
@@ -144,7 +153,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
 
   }
 
-  def genDisplayReturn(
+  private def genDisplayReturn(
     assetType: AssetType = Residential,
     gainOrLossAfterReliefs: Option[AmountInPence] = Some(sample[AmountInPence]),
     disposalDetailsAnswers: CompleteDisposalDetailsAnswers = sample[CompleteDisposalDetailsAnswers],
@@ -168,7 +177,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  def requestWithSessionData(sessionData: SessionData) =
+  private def requestWithSessionData(sessionData: SessionData) =
     RequestWithSessionData(
       Some(sessionData),
       AuthenticatedRequest(new MessagesRequest(FakeRequest(), new DefaultMessagesApi()))
@@ -182,7 +191,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
         fillingOutReturn: FillingOutReturn,
         sessionData: SessionData,
         expected: FurtherReturnCalculationEligibility
-      )(service: FurtherReturnCalculationEligibilityUtil) = {
+      )(service: FurtherReturnCalculationEligibilityUtil): Assertion = {
         implicit val request: RequestWithSessionData[_] = requestWithSessionData(sessionData)
         await(service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn).value) shouldBe Right(expected)
       }
@@ -190,7 +199,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
       def test(
         fillingOutReturn: FillingOutReturn,
         expected: FurtherReturnCalculationEligibility
-      )(service: FurtherReturnCalculationEligibilityUtil) =
+      )(service: FurtherReturnCalculationEligibilityUtil): Assertion =
         testWithSession(fillingOutReturn, SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)), expected)(
           service
         )
@@ -198,7 +207,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
       "return an ineligible response" when {
 
         "the return is multiple disposal return" in new TestEnvironment() {
-          val previousReturnData = sample[PreviousReturnData].copy(
+          private val previousReturnData = sample[PreviousReturnData].copy(
             previousReturnsImplyEligibilityForCalculation = None,
             calculationData = None
           )
@@ -213,7 +222,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
         }
 
         "the return is single mixed use disposal return" in new TestEnvironment() {
-          val previousReturnData = sample[PreviousReturnData].copy(
+          private val previousReturnData = sample[PreviousReturnData].copy(
             previousReturnsImplyEligibilityForCalculation = None,
             calculationData = None
           )
@@ -231,7 +240,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
         }
 
         "the return is mixed use single indirect return" in new TestEnvironment() {
-          val previousReturnData = sample[PreviousReturnData].copy(
+          private val previousReturnData = sample[PreviousReturnData].copy(
             previousReturnsImplyEligibilityForCalculation = None,
             calculationData = None
           )
@@ -249,7 +258,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
         }
 
         "the return is mixed use multiple indirect return" in new TestEnvironment() {
-          val previousReturnData = sample[PreviousReturnData].copy(
+          private val previousReturnData = sample[PreviousReturnData].copy(
             previousReturnsImplyEligibilityForCalculation = None,
             calculationData = None
           )
@@ -271,12 +280,12 @@ class FurtherReturnCalculationEligibilityUtilSpec
         }
 
         "there are more than the configured maximum of previous returns" ignore new TestEnvironment() {
-          val previousReturnData     = sample[PreviousReturnData].copy(
+          private val previousReturnData     = sample[PreviousReturnData].copy(
             summaries = List.fill(maxPreviousReturns + 1)(sample[ReturnSummary]),
             previousReturnsImplyEligibilityForCalculation = None,
             calculationData = None
           )
-          val tooManyPreviousReturns = eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
+          private val tooManyPreviousReturns = eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
           test(tooManyPreviousReturns, Ineligible(None))(
             service
           )
@@ -307,13 +316,13 @@ class FurtherReturnCalculationEligibilityUtilSpec
         }
 
         "there is a previous return with an ineligible asset type" ignore new TestEnvironment() {
-          val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
-          val previousReturnData =
+          private val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          private val previousReturnData =
             sample[PreviousReturnData]
               .copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None, calculationData = None)
-          val fillingOutReturn   =
+          private val fillingOutReturn   =
             eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
-          val sessionData        = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+          private val sessionData        = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
 
           inSequence {
             returns.foreach { r =>
@@ -341,13 +350,13 @@ class FurtherReturnCalculationEligibilityUtilSpec
         }
 
         "there is previous returns which contains other reliefs" ignore new TestEnvironment() {
-          val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
-          val previousReturnData =
+          private val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          private val previousReturnData =
             sample[PreviousReturnData]
               .copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None, calculationData = None)
-          val fillingOutReturn   =
+          private val fillingOutReturn   =
             eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
-          val sessionData        = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+          private val sessionData        = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
 
           inSequence {
             returns.map { r =>
@@ -383,23 +392,23 @@ class FurtherReturnCalculationEligibilityUtilSpec
       "return an eligible response" when {
 
         "under limit and displays OK" ignore new TestEnvironment() {
-          val currentReturnAddress         = sample[UkAddress]
-          val (address1, address2)         = sample[UkAddress]     -> sample[UkAddress]
-          val (return1, return2)           = sample[ReturnSummary] -> sample[ReturnSummary]
-          val previousReturnData           =
+          private val currentReturnAddress         = sample[UkAddress]
+          val (address1, address2)                 = sample[UkAddress]     -> sample[UkAddress]
+          val (return1, return2)                   = sample[ReturnSummary] -> sample[ReturnSummary]
+          private val previousReturnData           =
             sample[PreviousReturnData]
               .copy(
                 summaries = List(return1, return2),
                 previousReturnsImplyEligibilityForCalculation = None,
                 calculationData = None
               )
-          val fillingOutReturn             =
+          private val fillingOutReturn             =
             eligibleFillingOutReturn(
               previousSentReturns = Some(previousReturnData),
               address = Some(currentReturnAddress)
             )
-          val sessionData                  = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
-          val furtherRetrunCalculationData =
+          private val sessionData                  = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+          private val furtherReturnCalculationData =
             List(
               FurtherReturnCalculationData(
                 address2,
@@ -446,7 +455,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
                     previousSentReturns = Some(
                       previousReturnData.copy(
                         previousReturnsImplyEligibilityForCalculation = Some(true),
-                        calculationData = Some(furtherRetrunCalculationData)
+                        calculationData = Some(furtherReturnCalculationData)
                       )
                     )
                   )
@@ -468,7 +477,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
                 AmountInPence(0),
                 AmountInPence(0)
               ),
-              furtherRetrunCalculationData,
+              furtherReturnCalculationData,
               currentReturnAddress
             )
           )(service)
@@ -479,13 +488,13 @@ class FurtherReturnCalculationEligibilityUtilSpec
             val (currentReturnAddress, previousReturnAddress) = sample[UkAddress]     -> sample[UkAddress]
             val (originalReturn, otherReturn)                 = sample[ReturnSummary] -> sample[ReturnSummary]
 
-            val previousReturnData           =
+            private val previousReturnData           =
               sample[PreviousReturnData].copy(
                 summaries = List(originalReturn, otherReturn),
                 previousReturnsImplyEligibilityForCalculation = None,
                 calculationData = None
               )
-            val fillingOutReturn             =
+            private val fillingOutReturn             =
               eligibleFillingOutReturn(
                 previousSentReturns = Some(previousReturnData),
                 amendReturnData = Some(
@@ -499,8 +508,8 @@ class FurtherReturnCalculationEligibilityUtilSpec
                 ),
                 address = Some(currentReturnAddress)
               )
-            val sessionData                  = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
-            val furtherReturnCalculationData =
+            private val sessionData                  = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+            private val furtherReturnCalculationData =
               List(
                 FurtherReturnCalculationData(
                   previousReturnAddress,
@@ -555,24 +564,24 @@ class FurtherReturnCalculationEligibilityUtilSpec
           }
 
         "there is no individual user type and the user is a trust" ignore new TestEnvironment() {
-          val currentReturnAddress                           = sample[UkAddress]
+          private val currentReturnAddress                   = sample[UkAddress]
           val (previousReturnAddress, previousReturnSummary) = sample[UkAddress] -> sample[ReturnSummary]
-          val previousReturnData                             =
+          private val previousReturnData                     =
             sample[PreviousReturnData]
               .copy(
                 summaries = List(previousReturnSummary),
                 previousReturnsImplyEligibilityForCalculation = None,
                 calculationData = None
               )
-          val fillingOutReturn                               =
+          private val fillingOutReturn                       =
             eligibleFillingOutReturn(
               previousSentReturns = Some(previousReturnData),
               address = Some(currentReturnAddress),
               individualUserType = None,
               name = Left(sample[TrustName])
             )
-          val sessionData                                    = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
-          val furtherRetrunCalculationData                   =
+          private val sessionData                            = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+          private val furtherReturnCalculationData           =
             List(
               FurtherReturnCalculationData(
                 previousReturnAddress,
@@ -593,7 +602,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
                     previousSentReturns = Some(
                       previousReturnData.copy(
                         previousReturnsImplyEligibilityForCalculation = Some(true),
-                        calculationData = Some(furtherRetrunCalculationData)
+                        calculationData = Some(furtherReturnCalculationData)
                       )
                     )
                   )
@@ -615,7 +624,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
                 AmountInPence(0),
                 AmountInPence(0)
               ),
-              furtherRetrunCalculationData,
+              furtherReturnCalculationData,
               currentReturnAddress
             )
           )(service)
@@ -694,14 +703,15 @@ class FurtherReturnCalculationEligibilityUtilSpec
         }
 
         "there is an error getting details of a previously sent return" ignore new TestEnvironment() {
-          val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
-          val previousReturnData =
+          private val returns                                                          = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          private val previousReturnData                                               =
             sample[PreviousReturnData]
               .copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None, calculationData = None)
-          val fillingOutReturn   =
+          private val fillingOutReturn                                                 =
             eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
-          val sessionData        = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
-          implicit val request   = requestWithSessionData(sessionData)
+          private val sessionData                                                      = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+          private implicit val request: RequestWithSessionData[AnyContentAsEmpty.type] =
+            requestWithSessionData(sessionData)
 
           inSequence {
             returns.foreach { r =>
@@ -711,19 +721,20 @@ class FurtherReturnCalculationEligibilityUtilSpec
             }
           }
 
-          val result = service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
+          private val result = service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
           await(result.value) shouldBe a[Left[_, _]]
         }
 
         "there is an error updating the session" ignore new TestEnvironment() {
-          val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
-          val previousReturnData =
+          private val returns                                                          = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          private val previousReturnData                                               =
             sample[PreviousReturnData]
               .copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None, calculationData = None)
-          val fillingOutReturn   =
+          private val fillingOutReturn                                                 =
             eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
-          val sessionData        = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
-          implicit val request   = requestWithSessionData(sessionData)
+          private val sessionData                                                      = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+          private implicit val request: RequestWithSessionData[AnyContentAsEmpty.type] =
+            requestWithSessionData(sessionData)
 
           inSequence {
             returns.foreach { r =>

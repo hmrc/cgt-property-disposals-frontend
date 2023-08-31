@@ -31,8 +31,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.NameMatchError.{ServiceError, ValidationError}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualRepresenteeNameMatchDetails
@@ -136,9 +136,7 @@ class RepresenteeController @Inject() (
   }
 
   private def withNotTooManyUnsuccessfulNameMatchAttempts(ggCredId: GGCredId)(
-    f: Option[
-      UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]
-    ] => Future[Result]
+    f: Option[UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]] => Future[Result]
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     nameMatchRetryService
       .getNumberOfUnsuccessfulAttempts[IndividualRepresenteeNameMatchDetails](
@@ -288,13 +286,15 @@ class RepresenteeController @Inject() (
                     ),
                   { isYes =>
                     val newAnswers =
-                      if (isYes)
+                      if (isYes) {
                         incompleteRepresenteeAnswers.copy(
                           hasConfirmedPerson = true,
                           hasConfirmedContactDetails = false,
                           contactDetails = None
                         )
-                      else IncompleteRepresenteeAnswers.empty
+                      } else {
+                        IncompleteRepresenteeAnswers.empty
+                      }
 
                     updateDraftReturnAndSession(newAnswers, journey)
                       .fold(
@@ -317,7 +317,7 @@ class RepresenteeController @Inject() (
       }
     }
 
-  def isFirstReturn(): Action[AnyContent] =
+  def isFirstReturn: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
         val form     = answers
@@ -342,7 +342,7 @@ class RepresenteeController @Inject() (
       }
     }
 
-  def isFirstReturnSubmit(): Action[AnyContent] =
+  def isFirstReturnSubmit: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
         isFirstReturnForm
@@ -367,9 +367,9 @@ class RepresenteeController @Inject() (
               )
             },
             isFirstReturn =>
-              if (answers.fold(_.isFirstReturn, c => Some(c.isFirstReturn)).contains(isFirstReturn))
+              if (answers.fold(_.isFirstReturn, c => Some(c.isFirstReturn)).contains(isFirstReturn)) {
                 Redirect(routes.RepresenteeController.checkYourAnswers())
-              else {
+              } else {
                 val newAnswers = IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(isFirstReturn))
 
                 updateDraftReturnAndSession(
@@ -566,9 +566,9 @@ class RepresenteeController @Inject() (
                       answers
                         .fold(_.dateOfDeath, c => c.dateOfDeath)
                         .contains(dateOfDeath)
-                    )
+                    ) {
                       Redirect(routes.RepresenteeController.checkYourAnswers())
-                    else {
+                    } else {
                       val newAnswers =
                         IncompleteRepresenteeAnswers.empty.copy(
                           name = answers.fold(_.name, c => Some(c.name)),
@@ -644,9 +644,9 @@ class RepresenteeController @Inject() (
                     c => Some(c.contactDetails.contactName)
                   )
                   .contains(contactName)
-              )
+              ) {
                 Redirect(routes.RepresenteeController.checkYourAnswers())
-              else {
+              } else {
                 val newAnswers =
                   answers.fold(
                     i =>
@@ -663,8 +663,8 @@ class RepresenteeController @Inject() (
                         Some(
                           c.contactDetails.copy(contactName = contactName)
                         ),
-                        true,
-                        false,
+                        hasConfirmedPerson = true,
+                        hasConfirmedContactDetails = false,
                         Some(c.isFirstReturn)
                       )
                   )
@@ -774,7 +774,7 @@ class RepresenteeController @Inject() (
             )
 
           val newDraftReturn =
-            if (clearDraftReturn)
+            if (clearDraftReturn) {
               DraftSingleDisposalReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 IncompleteSingleDisposalTriageAnswers.empty.copy(
@@ -782,7 +782,7 @@ class RepresenteeController @Inject() (
                 ),
                 Some(newAnswers)
               )
-            else
+            } else {
               fillingOutReturn.draftReturn.fold(
                 _.copy(representeeAnswers = Some(newAnswers)),
                 _.copy(representeeAnswers = Some(newAnswers)),
@@ -790,11 +790,15 @@ class RepresenteeController @Inject() (
                 _.copy(representeeAnswers = Some(newAnswers)),
                 _.copy(representeeAnswers = Some(newAnswers))
               )
+            }
 
           val newFillingOutReturn = fillingOutReturn.copy(draftReturn = newDraftReturn)
 
-          if (clearDraftReturn) newFillingOutReturn.withForceDisplayGainOrLossAfterReliefsForAmends
-          else newFillingOutReturn
+          if (clearDraftReturn) {
+            newFillingOutReturn.withForceDisplayGainOrLossAfterReliefsForAmends
+          } else {
+            newFillingOutReturn
+          }
         }
       )
     for {
@@ -946,10 +950,10 @@ object RepresenteeController {
 
   }
 
-  val nameForm: Form[IndividualName] =
+  private val nameForm =
     IndividualName.form("representeeFirstName", "representeeLastName")
 
-  def dateOfDeathForm(allowedDateOfDeath: LocalDate): Form[DateOfDeath] = {
+  private def dateOfDeathForm(allowedDateOfDeath: LocalDate) = {
     val key = "dateOfDeath"
     Form(
       mapping(
@@ -967,7 +971,7 @@ object RepresenteeController {
     )
   }
 
-  val idForm: Form[RepresenteeReferenceId] = {
+  private val idForm = {
     val (outerId, ninoId, sautrId, cgtReferenceId) =
       (
         "representeeReferenceIdType",
@@ -982,16 +986,17 @@ object RepresenteeController {
           .readValue(ninoId, data, identity)
           .map(_.toUpperCase(Locale.UK).replace(" ", ""))
           .flatMap(nino =>
-            if (nino.length > 9)
+            if (nino.length > 9) {
               Left(FormError(ninoId, "error.tooLong"))
-            else if (nino.length < 9)
+            } else if (nino.length < 9) {
               Left(FormError(ninoId, "error.tooShort"))
-            else if (nino.exists(!_.isLetterOrDigit))
+            } else if (nino.exists(!_.isLetterOrDigit)) {
               Left(FormError(ninoId, "error.invalidCharacters"))
-            else if (!Nino.isValid(nino))
+            } else if (!Nino.isValid(nino)) {
               Left(FormError(ninoId, "error.pattern"))
-            else
+            } else {
               Right(RepresenteeNino(NINO(nino)))
+            }
           )
           .leftMap(Seq(_))
       }
@@ -1002,14 +1007,15 @@ object RepresenteeController {
           .readValue(sautrId, data, identity)
           .map(_.replace(" ", ""))
           .flatMap(sautr =>
-            if (sautr.exists(!_.isDigit))
+            if (sautr.exists(!_.isDigit)) {
               Left(FormError(sautrId, "error.invalid"))
-            else if (sautr.length > 10)
+            } else if (sautr.length > 10) {
               Left(FormError(sautrId, "error.tooLong"))
-            else if (sautr.length < 10)
+            } else if (sautr.length < 10) {
               Left(FormError(sautrId, "error.tooShort"))
-            else
+            } else {
               Right(RepresenteeSautr(SAUTR(sautr)))
+            }
           )
           .leftMap(Seq(_))
       }
@@ -1046,14 +1052,14 @@ object RepresenteeController {
     )
   }
 
-  val confirmPersonForm: Form[Boolean] =
+  private val confirmPersonForm =
     Form(
       mapping(
         "confirmed" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
-  val isFirstReturnForm: Form[Boolean] = Form(
+  private val isFirstReturnForm = Form(
     mapping(
       "representeeIsFirstReturn" -> of(BooleanFormatter.formatter)
     )(identity)(Some(_))

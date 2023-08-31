@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailToBeVerified}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailToBeVerified}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
@@ -214,9 +214,9 @@ trait EmailController[T <: EmailJourneyType] {
               s"Received verify email request where id sent ($p) did not match the id in session (${emailToBeVerified.id})"
             )
             errorHandler.errorResult()
-          } else if (emailToBeVerified.verified)
+          } else if (emailToBeVerified.verified) {
             Redirect(emailVerifiedCall)
-          else {
+          } else {
             auditEmailVerifiedEvent(journey, emailToBeVerified.email)
 
             val result = for {
@@ -252,7 +252,7 @@ trait EmailController[T <: EmailJourneyType] {
             sessionData.emailToBeVerified.fold(
               Redirect(enterEmailCall)
             ) { emailToBeVerified =>
-              if (emailToBeVerified.verified)
+              if (emailToBeVerified.verified) {
                 Ok(
                   emailVerifiedPage(
                     emailToBeVerified.email,
@@ -260,8 +260,7 @@ trait EmailController[T <: EmailJourneyType] {
                     journey
                   )
                 )
-              else {
-
+              } else {
                 logger.warn(
                   "Email verified endpoint called but email was not verified"
                 )
@@ -270,9 +269,7 @@ trait EmailController[T <: EmailJourneyType] {
             }
           }
         )
-
     }
-
 }
 
 object EmailController {
@@ -282,7 +279,7 @@ object EmailController {
     resendVerificationEmail: Boolean
   )
 
-  val submitEmailForm: Form[SubmitEmailDetails] =
+  private val submitEmailForm =
     Form(
       mapping(
         "email"                   -> Email.mapping,

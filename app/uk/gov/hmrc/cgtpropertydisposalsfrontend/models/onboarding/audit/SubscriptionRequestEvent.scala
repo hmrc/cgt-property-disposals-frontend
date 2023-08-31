@@ -19,9 +19,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 import cats.syntax.eq._
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactNameSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource
 
 final case class SubscriptionRequestEvent(
   prePopulatedUserData: PrePopulatedUserData,
@@ -60,12 +60,13 @@ object SubscriptionRequestEvent {
     subscriptionDetails: SubscriptionDetails
   ): SubscriptionRequestEvent = {
     val prepopulatedEmailSource =
-      if (subscriptionDetails.emailSource === EmailSource.BusinessPartnerRecord)
+      if (subscriptionDetails.emailSource === EmailSource.BusinessPartnerRecord) {
         Some("ETMP business partner record")
-      else if (subscriptionDetails.emailSource === EmailSource.GovernmentGateway)
+      } else if (subscriptionDetails.emailSource === EmailSource.GovernmentGateway) {
         Some("government-gateway")
-      else
+      } else {
         None
+      }
 
     val auditAddress = AuditAddress.fromAddress(subscriptionDetails.address)
 
@@ -76,26 +77,23 @@ object SubscriptionRequestEvent {
         subscriptionDetails.name.toOption.map(i => IndividualAuditDetails(i.firstName, i.lastName)),
         subscriptionDetails.name.swap.toOption.map(t => TrustAuditDetails(t.value)),
         prepopulatedEmailSource.map(source => EmailAuditDetails(subscriptionDetails.emailAddress.value, source)),
-        if (subscriptionDetails.addressSource =!= AddressSource.ManuallyEntered)
-          Some(auditAddress)
-        else None,
-        if (subscriptionDetails.contactNameSource =!= ContactNameSource.ManuallyEntered)
+        if (subscriptionDetails.addressSource =!= AddressSource.ManuallyEntered) Some(auditAddress) else None,
+        if (subscriptionDetails.contactNameSource =!= ContactNameSource.ManuallyEntered) {
           Some(subscriptionDetails.contactName.value)
-        else None
+        } else {
+          None
+        }
       )
 
     val manuallyEnteredData =
       ManuallyEnteredData(
-        if (subscriptionDetails.contactNameSource === ContactNameSource.ManuallyEntered)
+        if (subscriptionDetails.contactNameSource === ContactNameSource.ManuallyEntered) {
           Some(subscriptionDetails.contactName.value)
-        else None,
-        if (prepopulatedEmailSource.isDefined)
+        } else {
           None
-        else
-          Some(subscriptionDetails.emailAddress.value),
-        if (subscriptionDetails.addressSource === AddressSource.ManuallyEntered)
-          Some(auditAddress)
-        else None
+        },
+        if (prepopulatedEmailSource.isDefined) None else Some(subscriptionDetails.emailAddress.value),
+        if (subscriptionDetails.addressSource === AddressSource.ManuallyEntered) Some(auditAddress) else None
       )
 
     SubscriptionRequestEvent(prePopulatedUserData, manuallyEnteredData)

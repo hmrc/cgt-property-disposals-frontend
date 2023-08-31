@@ -40,17 +40,17 @@ class AccountControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override val overrideBindings =
+  override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore)
     )
 
-  val controller = instanceOf[AccountController]
+  private val controller = instanceOf[AccountController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  val subscribed = sample[Subscribed]
+  private val subscribed = sample[Subscribed]
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
