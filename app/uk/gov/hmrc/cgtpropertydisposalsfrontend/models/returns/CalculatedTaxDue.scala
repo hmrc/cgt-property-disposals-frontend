@@ -32,6 +32,7 @@ object AmountInPenceWithSource {
 sealed trait Source
 object Source {
   case object UserSupplied extends Source
+  case object Calculated extends Source
   implicit val format: OFormat[Source] = derived.oformat()
 }
 

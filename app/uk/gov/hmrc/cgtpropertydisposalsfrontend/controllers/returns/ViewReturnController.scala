@@ -134,6 +134,7 @@ class ViewReturnController @Inject() (
                 cgtReference,
                 Some(charge.chargeReference),
                 charge.amount,
+                Some(charge.dueDate),
                 homeRoutes.HomePageController.homepage(),
                 routes.ViewReturnController.displayReturn()
               )

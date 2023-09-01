@@ -28,6 +28,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -38,6 +39,7 @@ trait PaymentsConnector {
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
+    dueDate: Option[LocalDate],
     returnUrl: Call,
     backUrl: Call
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, Error, HttpResponse]
@@ -62,6 +64,7 @@ class PaymentsConnectorImpl @Inject() (
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
+    dueDate: Option[LocalDate],
     returnUrl: Call,
     backUrl: Call
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
@@ -74,6 +77,7 @@ class PaymentsConnectorImpl @Inject() (
               cgtReference.value,
               chargeReference,
               amount.value,
+              dueDate,
               s"$selfBaseUrl${returnUrl.url}",
               s"$selfBaseUrl${backUrl.url}"
             )
@@ -95,6 +99,7 @@ object PaymentsConnectorImpl {
     cgtReference: String,
     chargeReference: Option[String],
     amountInPence: Long,
+    dueDate: Option[LocalDate],
     returnUrl: String,
     backUrl: String
   )

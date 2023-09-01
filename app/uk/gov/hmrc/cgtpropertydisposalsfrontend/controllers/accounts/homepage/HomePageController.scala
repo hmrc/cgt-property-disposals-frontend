@@ -255,6 +255,7 @@ class HomePageController @Inject() (
             subscribed.subscribedDetails.cgtReference,
             None,
             subscribed.totalLeftToPay(),
+            subscribed.taxDueDate(),
             routes.HomePageController.homepage(),
             routes.HomePageController.homepage()
           )

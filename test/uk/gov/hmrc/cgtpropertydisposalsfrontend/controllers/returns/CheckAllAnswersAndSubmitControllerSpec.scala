@@ -173,21 +173,25 @@ class CheckAllAnswersAndSubmitControllerSpec
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
+    dueDate: Option[LocalDate],
     returnUrl: Call,
     backUrl: Call
   )(response: Either[Error, PaymentsJourney]) =
-    (mockPaymentsService
-      .startPaymentJourney(
-        _: CgtReference,
-        _: Option[String],
-        _: AmountInPence,
-        _: Call,
-        _: Call
-      )(
-        _: HeaderCarrier,
-        _: Request[_]
-      ))
-      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
+    (
+      mockPaymentsService
+        .startPaymentJourney(
+          _: CgtReference,
+          _: Option[String],
+          _: AmountInPence,
+          _: Option[LocalDate],
+          _: Call,
+          _: Call
+        )(
+          _: HeaderCarrier,
+          _: Request[_]
+        )
+      )
+      .expects(cgtReference, chargeReference, amount, dueDate, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
   private def mockCgtRegistrationService(
@@ -2740,6 +2744,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               justSubmittedReturn.subscribedDetails.cgtReference,
               Some(charge.chargeReference),
               charge.amount,
+              Some(charge.dueDate),
               homepage.routes.HomePageController.homepage(),
               routes.CheckAllAnswersAndSubmitController
                 .confirmationOfSubmission()
@@ -2766,6 +2771,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               justSubmittedReturn.subscribedDetails.cgtReference,
               Some(charge.chargeReference),
               charge.amount,
+              Some(charge.dueDate),
               homepage.routes.HomePageController.homepage(),
               routes.CheckAllAnswersAndSubmitController
                 .confirmationOfSubmission()
