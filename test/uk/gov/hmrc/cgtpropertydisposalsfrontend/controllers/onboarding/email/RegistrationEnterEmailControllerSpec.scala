@@ -97,8 +97,8 @@ class RegistrationEnterEmailControllerSpec
       def performAction(): Future[Result] =
         controller.enterEmail()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
-      behave like enterEmailPage(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
+      behave like enterEmailPage(() => performAction())
 
     }
 
@@ -124,10 +124,10 @@ class RegistrationEnterEmailControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourInbox()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like checkYourInboxPage(
-        performAction,
+        () => performAction(),
         emailRoutes.RegistrationEnterEmailController.enterEmail(),
         emailRoutes.RegistrationEnterEmailController.enterEmail().url
       )
@@ -154,7 +154,7 @@ class RegistrationEnterEmailControllerSpec
         controller.emailVerified()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: RegistrationReady => true
           case _                    => false
@@ -162,7 +162,7 @@ class RegistrationEnterEmailControllerSpec
       )
 
       behave like emailVerifiedPage(
-        performAction,
+        () => performAction(),
         controllers.onboarding.routes.RegistrationController.checkYourAnswers(),
         emailRoutes.RegistrationEnterEmailController.enterEmail()
       )

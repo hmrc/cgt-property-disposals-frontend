@@ -359,7 +359,7 @@ class AmendReturnControllerSpec
 
       def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -436,7 +436,7 @@ class AmendReturnControllerSpec
 
       def performAction(): Future[Result] = controller.unmetDependency()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "redirect to the amend cya page" when {
 
@@ -557,7 +557,7 @@ class AmendReturnControllerSpec
 
       def performAction(): Future[Result] = controller.unmetDependencySubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.unmetDependencySubmit(),

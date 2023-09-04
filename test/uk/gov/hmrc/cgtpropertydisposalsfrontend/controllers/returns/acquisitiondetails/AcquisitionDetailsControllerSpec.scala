@@ -145,7 +145,7 @@ class AcquisitionDetailsControllerSpec
       }
 
     redirectToStartWhenInvalidJourney(
-      performAction,
+      () => performAction(),
       {
         case FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _)
             if hasValidPeriodOfAdminState(d.triageAnswers, d.representeeAnswers) =>
@@ -384,7 +384,7 @@ class AcquisitionDetailsControllerSpec
 
       val key = "acquisitionMethod"
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.acquisitionMethod(),
@@ -961,7 +961,7 @@ class AcquisitionDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.acquisitionDate()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.acquisitionDate(),
@@ -1464,7 +1464,7 @@ class AcquisitionDetailsControllerSpec
 
       val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath))
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.periodOfAdminMarketValue(),
@@ -1851,16 +1851,16 @@ class AcquisitionDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.acquisitionPrice()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.acquisitionPrice(),
         mockUUIDGenerator
       )
 
-      behave like missingAcquisitionDateBehaviour(performAction)
+      behave like missingAcquisitionDateBehaviour(() => performAction())
 
-      behave like missingAcquisitionMethodBehaviour(performAction)
+      behave like missingAcquisitionMethodBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -2046,10 +2046,7 @@ class AcquisitionDetailsControllerSpec
                 )(scenario.expectedErrorMessageKey)(
                   s"$contextKey.title",
                   TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
-                )(
-                  performAction,
-                  scenarioSession
-                )
+                )(performAction, scenarioSession)
               }
             }
           }
@@ -2090,10 +2087,7 @@ class AcquisitionDetailsControllerSpec
             )(
               s"$contextKey.title",
               TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
-            )(
-              performAction,
-              scenarioSession
-            )
+            )(performAction, scenarioSession)
           }
 
         "the user enters zero for amount" in {
@@ -2272,16 +2266,16 @@ class AcquisitionDetailsControllerSpec
 
       val acquisitionDate = AcquisitionDate(LocalDate.ofEpochDay(0L))
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.rebasedAcquisitionPrice(),
         mockUUIDGenerator
       )
 
-      behave like missingAssetTypeAndResidentialStatusBehaviour(performAction)
+      behave like missingAssetTypeAndResidentialStatusBehaviour(() => performAction())
 
-      behave like missingAcquisitionDateBehaviour(performAction)
+      behave like missingAcquisitionDateBehaviour(() => performAction())
 
       "redirect to the acquisition price page" when {
 
@@ -2946,16 +2940,16 @@ class AcquisitionDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.improvementCosts()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.improvementCosts(),
         mockUUIDGenerator
       )
 
-      behave like missingAssetTypeAndResidentialStatusBehaviour(performAction)
+      behave like missingAssetTypeAndResidentialStatusBehaviour(() => performAction())
 
-      behave like missingAcquisitionDateBehaviour(performAction)
+      behave like missingAcquisitionDateBehaviour(() => performAction())
 
       "redirect to the acquisition price page" when {
 
@@ -3612,7 +3606,7 @@ class AcquisitionDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.acquisitionFees()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.acquisitionFees(),
@@ -4276,7 +4270,7 @@ class AcquisitionDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.shouldUseRebase()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.shouldUseRebase(),
@@ -4503,14 +4497,14 @@ class AcquisitionDetailsControllerSpec
         Some(completeAnswers.shouldUseRebase)
       )
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswers(),
         mockUUIDGenerator
       )
 
-      behave like missingAssetTypeAndResidentialStatusBehaviour(performAction)
+      behave like missingAssetTypeAndResidentialStatusBehaviour(() => performAction())
 
       def testRedirectOnMissingData(
         session: SessionData,

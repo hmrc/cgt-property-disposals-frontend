@@ -99,7 +99,7 @@ class SubscriptionControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourDetails()(requestWithCSRFToken)
 
-      behave like redirectToStart(performAction)
+      behave like redirectToStart(() => performAction())
 
       "show the check your details page" when {
 
@@ -177,7 +177,7 @@ class SubscriptionControllerSpec
             )
           )
 
-      behave like redirectToStart(performAction)
+      behave like redirectToStart(() => performAction())
 
       "return an error" when {
 
@@ -256,7 +256,7 @@ class SubscriptionControllerSpec
         controller.subscribed()(FakeRequest())
 
       redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: Subscribed => true
           case _             => false
@@ -310,7 +310,7 @@ class SubscriptionControllerSpec
         controller.alreadySubscribedWithDifferentGGAccount()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case AlreadySubscribedWithDifferentGGAccount(_, _) => true
           case _                                             => false
@@ -347,7 +347,7 @@ class SubscriptionControllerSpec
         controller.changeGGAccountForSubscription()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: SubscriptionReady => true
           case _                    => false

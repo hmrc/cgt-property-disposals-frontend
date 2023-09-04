@@ -143,7 +143,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       def performAction(): Future[Result] =
         controller.doYouWantToReportForATrust()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "show the page" when {
 
@@ -343,7 +343,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       def performAction(): Future[Result] =
         controller.reportWithCorporateTax()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "redirect to the start endpoint" when {
 
@@ -421,7 +421,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       def performAction(): Future[Result] =
         controller.doYouHaveATrn()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "redirect to the start endpoint" when {
 
@@ -733,7 +733,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       def performAction(): Future[Result] =
         controller.registerYourTrust()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "show the register your trust page" when {
 
@@ -764,7 +764,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       def performAction(): Future[Result] =
         controller.enterTrn()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "redirect to the start endpoint" when {
 
@@ -1480,7 +1480,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       def performAction(): Future[Result] = controller.tooManyAttempts()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       val expectedSessionData =
         sessionDataWithStatus(

@@ -106,7 +106,7 @@ class RegistrationControllerSpec
 
     def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
       redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case TryingToGetIndividualsFootprint(
                 Some(false),
@@ -125,7 +125,7 @@ class RegistrationControllerSpec
       def performAction(): Future[Result] =
         controller.selectEntityType()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "show the page" when {
 
@@ -356,7 +356,7 @@ class RegistrationControllerSpec
           journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId))
         )
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "show the page" when {
         "the endpoint is requested" in {
@@ -408,7 +408,7 @@ class RegistrationControllerSpec
         controller.checkYourAnswers()(FakeRequest())
 
       redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: RegistrationStatus.RegistrationReady | _: RegistrationStatus.IndividualSupplyingInformation =>
             true
@@ -660,7 +660,7 @@ class RegistrationControllerSpec
         controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case RegistrationReady(_, _) => true
           case _                       => false

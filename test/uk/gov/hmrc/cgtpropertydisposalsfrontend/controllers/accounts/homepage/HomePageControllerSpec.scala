@@ -172,7 +172,7 @@ class HomePageControllerSpec
       def performAction(): Future[Result] = controller.homepage()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: Subscribed | _: StartingNewDraftReturn | _: FillingOutReturn | _: JustSubmittedReturn |
               _: ViewingReturn | _: SubmitReturnFailed =>
@@ -1615,7 +1615,7 @@ class HomePageControllerSpec
         controller.startNewReturn()(FakeRequest())
 
       redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: Subscribed => true
           case _             => false
@@ -1817,7 +1817,7 @@ class HomePageControllerSpec
       }
 
       behave like commonPreviousYearToDateBehaviour(
-        performAction,
+        () => performAction(),
         List.empty,
         (previousYearToDate, subscribed) =>
           StartingNewDraftReturn(
@@ -2181,7 +2181,7 @@ class HomePageControllerSpec
         controller.payTotalAmountLeftToPay()(FakeRequest())
 
       redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: Subscribed => true
           case _             => false

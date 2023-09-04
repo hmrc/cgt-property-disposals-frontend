@@ -144,7 +144,7 @@ trait ChangeRepresenteeEmailControllerSpec
       answers.exists(_.fold(_.contactDetails.isDefined, _ => true))
 
     redirectToStartWhenInvalidJourney(
-      performAction,
+      () => performAction(),
       {
         case StartingNewDraftReturn(_, _, _, _, representeeAnswers, _)
             if isDefinedAndContainsContactDetails(representeeAnswers) =>
@@ -176,8 +176,8 @@ trait ChangeRepresenteeEmailControllerSpec
       def performAction(): Future[Result] =
         controller.enterEmail()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
-      behave like enterEmailPage(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
+      behave like enterEmailPage(() => performAction())
 
     }
 
@@ -205,10 +205,10 @@ trait ChangeRepresenteeEmailControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourInbox()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like checkYourInboxPage(
-        performAction,
+        () => performAction(),
         routes.ChangeRepresenteeEmailController.enterEmail(),
         routes.ChangeRepresenteeEmailController.enterEmail().url
       )
@@ -234,10 +234,10 @@ trait ChangeRepresenteeEmailControllerSpec
       def performAction(): Future[Result] =
         controller.emailVerified()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like emailVerifiedPage(
-        performAction,
+        () => performAction(),
         routes.RepresenteeController.checkYourAnswers(),
         routes.ChangeRepresenteeEmailController.enterEmail()
       )

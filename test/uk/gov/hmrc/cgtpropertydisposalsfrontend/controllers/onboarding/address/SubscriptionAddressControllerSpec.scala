@@ -68,7 +68,7 @@ class SubscriptionAddressControllerSpec
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction,
+      () => performAction(),
       {
         case _: SubscriptionReady => true
         case _                    => false
@@ -80,9 +80,9 @@ class SubscriptionAddressControllerSpec
     "handling requests to display the is UK page" must {
       def performAction(): Future[Result] = controller.isUk()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like displayIsUkBehaviour(performAction)
+      behave like displayIsUkBehaviour(() => performAction())
     }
 
     "handling requests to submit the is UK page" must {
@@ -107,19 +107,11 @@ class SubscriptionAddressControllerSpec
       def performAction(): Future[Result] =
         controller.enterUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like displayEnterUkAddressPage(
-        UserType.Individual,
-        None,
-        performAction
-      )
-      behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
-      behave like displayEnterUkAddressPage(
-        UserType.Organisation,
-        None,
-        performAction
-      )
+      behave like displayEnterUkAddressPage(UserType.Individual, None, () => performAction())
+      behave like displayEnterUkAddressPage(UserType.Agent, None, () => performAction())
+      behave like displayEnterUkAddressPage(UserType.Organisation, None, () => performAction())
     }
 
     "handling submitted addresses from enter UK address page" must {
@@ -143,9 +135,9 @@ class SubscriptionAddressControllerSpec
       def performAction(): Future[Result] =
         controller.enterNonUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like displayEnterNonUkPage(performAction)
+      behave like displayEnterNonUkPage(() => performAction())
 
     }
 
@@ -168,10 +160,10 @@ class SubscriptionAddressControllerSpec
       def performAction(): Future[Result] =
         controller.enterPostcode()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
-      behave like enterPostcodePage(UserType.Individual, None, performAction)
-      behave like enterPostcodePage(UserType.Agent, None, performAction)
-      behave like enterPostcodePage(UserType.Organisation, None, performAction)
+      behave like redirectToStartBehaviour(() => performAction())
+      behave like enterPostcodePage(UserType.Individual, None, () => performAction())
+      behave like enterPostcodePage(UserType.Agent, None, () => performAction())
+      behave like enterPostcodePage(UserType.Organisation, None, () => performAction())
     }
 
     "handling submitted postcodes and filters" must {
@@ -183,10 +175,7 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like submitEnterPostcode(
-        performAction,
-        routes.SubscriptionAddressController.selectAddress()
-      )
+      behave like submitEnterPostcode(performAction, routes.SubscriptionAddressController.selectAddress())
 
     }
 
@@ -195,26 +184,26 @@ class SubscriptionAddressControllerSpec
       def performAction(): Future[Result] =
         controller.selectAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like displaySelectAddress(
         UserType.Individual,
         None,
-        performAction,
+        () => performAction(),
         controllers.onboarding.routes.SubscriptionController.checkYourDetails()
       )
 
       behave like displaySelectAddress(
         UserType.Agent,
         None,
-        performAction,
+        () => performAction(),
         controllers.onboarding.routes.SubscriptionController.checkYourDetails()
       )
 
       behave like displaySelectAddress(
         UserType.Organisation,
         None,
-        performAction,
+        () => performAction(),
         controllers.onboarding.routes.SubscriptionController.checkYourDetails()
       )
     }

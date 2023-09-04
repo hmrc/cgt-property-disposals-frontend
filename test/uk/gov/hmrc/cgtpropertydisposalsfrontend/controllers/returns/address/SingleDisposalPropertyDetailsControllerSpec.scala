@@ -131,7 +131,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction,
+      () => performAction(),
       {
         case _: FillingOutReturn      => true
         case _: StartingToAmendReturn => true
@@ -146,26 +146,18 @@ class SingleDisposalPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.enterUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterUkAddress(),
         mockUUIDGenerator
       )
 
-      behave like displayEnterUkAddressPage(
-        UserType.Individual,
-        None,
-        performAction
-      )
+      behave like displayEnterUkAddressPage(UserType.Individual, None, () => performAction())
 
-      behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, None, () => performAction())
 
-      behave like displayEnterUkAddressPage(
-        UserType.Organisation,
-        None,
-        performAction
-      )
+      behave like displayEnterUkAddressPage(UserType.Organisation, None, () => performAction())
     }
 
     "handling submitted addresses from enter UK address page" must {
@@ -182,10 +174,7 @@ class SingleDisposalPropertyDetailsControllerSpec
         mockUUIDGenerator
       )
 
-      behave like submitEnterUkAddress(
-        performAction,
-        returnsAddressRoutes.PropertyDetailsController.checkYourAnswers()
-      )
+      behave like submitEnterUkAddress(performAction, returnsAddressRoutes.PropertyDetailsController.checkYourAnswers())
 
     }
 
@@ -194,18 +183,18 @@ class SingleDisposalPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.enterPostcode()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterPostcode(),
         mockUUIDGenerator
       )
 
-      behave like enterPostcodePage(UserType.Individual, None, performAction)
+      behave like enterPostcodePage(UserType.Individual, None, () => performAction())
 
-      behave like enterPostcodePage(UserType.Agent, None, performAction)
+      behave like enterPostcodePage(UserType.Agent, None, () => performAction())
 
-      behave like enterPostcodePage(UserType.Organisation, None, performAction)
+      behave like enterPostcodePage(UserType.Organisation, None, () => performAction())
 
     }
 
@@ -223,10 +212,7 @@ class SingleDisposalPropertyDetailsControllerSpec
         mockUUIDGenerator
       )
 
-      behave like submitEnterPostcode(
-        performAction,
-        returnsAddressRoutes.PropertyDetailsController.selectAddress()
-      )
+      behave like submitEnterPostcode(performAction, returnsAddressRoutes.PropertyDetailsController.selectAddress())
 
     }
 
@@ -235,7 +221,7 @@ class SingleDisposalPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.selectAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.selectAddress(),
@@ -245,7 +231,7 @@ class SingleDisposalPropertyDetailsControllerSpec
       behave like displaySelectAddress(
         UserType.Individual,
         None,
-        performAction,
+        () => performAction(),
         controllers.returns.address.routes.PropertyDetailsController
           .enterPostcode()
       )
@@ -253,7 +239,7 @@ class SingleDisposalPropertyDetailsControllerSpec
       behave like displaySelectAddress(
         UserType.Agent,
         None,
-        performAction,
+        () => performAction(),
         controllers.returns.address.routes.PropertyDetailsController
           .enterPostcode()
       )
@@ -261,7 +247,7 @@ class SingleDisposalPropertyDetailsControllerSpec
       behave like displaySelectAddress(
         UserType.Organisation,
         None,
-        performAction,
+        () => performAction(),
         controllers.returns.address.routes.PropertyDetailsController
           .enterPostcode()
       )
@@ -315,14 +301,14 @@ class SingleDisposalPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswers(),
         mockUUIDGenerator
       )
 
-      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
       def testIsCheckYourAnswers(
         result: Future[Result],
@@ -404,7 +390,7 @@ class SingleDisposalPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswersSubmit(),
@@ -435,9 +421,9 @@ class SingleDisposalPropertyDetailsControllerSpec
         mockUUIDGenerator
       )
 
-      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
-      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -605,9 +591,9 @@ class SingleDisposalPropertyDetailsControllerSpec
         mockUUIDGenerator
       )
 
-      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
-      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
 
       "display the page" when {
 

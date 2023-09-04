@@ -341,7 +341,7 @@ class GainOrLossAfterReliefsControllerSpec
       def performAction(): Future[Result] =
         controller.enterGainOrLossAfterReliefs()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterGainOrLossAfterReliefs(),
@@ -1270,7 +1270,7 @@ class GainOrLossAfterReliefsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswersSubmit(),

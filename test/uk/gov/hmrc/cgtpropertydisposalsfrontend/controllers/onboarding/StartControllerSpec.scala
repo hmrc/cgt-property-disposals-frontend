@@ -3287,7 +3287,7 @@ class StartControllerSpec
         controller.weOnlySupportGG()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case NonGovernmentGatewayJourney => true
           case _                           => false

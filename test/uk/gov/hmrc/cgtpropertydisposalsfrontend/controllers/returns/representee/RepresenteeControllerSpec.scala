@@ -206,7 +206,7 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.changeContactName()(FakeRequest())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
 
       "redirect to the check your answers page" when {
 
@@ -406,13 +406,13 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.enterName()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
 
-      behave like tooManyNameMatchAttemptsBehaviour(performAction)
+      behave like tooManyNameMatchAttemptsBehaviour(() => performAction())
 
-      behave like noIsFirstReturnAnswerBehaviour(performAction)
+      behave like noIsFirstReturnAnswerBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -829,11 +829,11 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.enterDateOfDeath()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
 
-      behave like noIsFirstReturnAnswerBehaviour(performAction)
+      behave like noIsFirstReturnAnswerBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -1234,13 +1234,13 @@ class RepresenteeControllerSpec
 
       def performAction(): Future[Result] = controller.enterId()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
 
-      behave like tooManyNameMatchAttemptsBehaviour(performAction)
+      behave like tooManyNameMatchAttemptsBehaviour(() => performAction())
 
-      behave like noIsFirstReturnAnswerBehaviour(performAction)
+      behave like noIsFirstReturnAnswerBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -1459,9 +1459,9 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.confirmPerson()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
 
       def test(
         sessionData: SessionData,
@@ -1625,11 +1625,7 @@ class RepresenteeControllerSpec
 
         "nothing is selected" ignore {
 
-          testFormError(
-            performAction,
-            "representeeConfirmPerson.title",
-            session
-          )(
+          testFormError(performAction, "representeeConfirmPerson.title", session)(
             List.empty,
             "confirmed.error.required"
           )
@@ -2189,9 +2185,9 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.checkContactDetails()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
 
       "show an error page" when {
 
@@ -2445,9 +2441,9 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.checkContactDetailsSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
 
       "immediately redirect to the check your answers page" when {
 
@@ -2571,9 +2567,9 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
       val dateOfDeath     = sample[DateOfDeath]
       val completeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath))
 
@@ -2871,7 +2867,7 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       val completeAnswers = sample[CompleteRepresenteeAnswers]
 
@@ -2899,9 +2895,9 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.nameMatchError()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
 
       "display the page" in {
         inSequence {
@@ -2934,9 +2930,9 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.nameMatchErrorSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
 
       "redirect to the enter name page" in {
         inSequence {
@@ -2962,9 +2958,9 @@ class RepresenteeControllerSpec
       def performAction(): Future[Result] =
         controller.isFirstReturn()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -3405,7 +3401,7 @@ class RepresenteeControllerSpec
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction,
+      () => performAction(),
       {
         case _: StartingNewDraftReturn | _: FillingOutReturn => true
         case _                                               => false

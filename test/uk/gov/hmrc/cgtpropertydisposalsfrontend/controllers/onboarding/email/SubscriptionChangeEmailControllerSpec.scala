@@ -90,8 +90,8 @@ class SubscriptionChangeEmailControllerSpec
       def performAction(): Future[Result] =
         controller.enterEmail()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
-      behave like enterEmailPage(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
+      behave like enterEmailPage(() => performAction())
 
     }
 
@@ -117,10 +117,10 @@ class SubscriptionChangeEmailControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourInbox()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like checkYourInboxPage(
-        performAction,
+        () => performAction(),
         emailRoutes.SubscriptionChangeEmailController.enterEmail(),
         emailRoutes.SubscriptionChangeEmailController.enterEmail().url
       )
@@ -146,10 +146,10 @@ class SubscriptionChangeEmailControllerSpec
       def performAction(): Future[Result] =
         controller.emailVerified()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like emailVerifiedPage(
-        performAction,
+        () => performAction(),
         controllers.onboarding.routes.SubscriptionController.checkYourDetails(),
         emailRoutes.SubscriptionChangeEmailController.enterEmail()
       )

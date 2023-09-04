@@ -219,7 +219,7 @@ class AgentAccessControllerSpec
         controller.enterClientsCgtRef()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: AgentSupplyingClientDetails => true
           case _                              => false
@@ -516,14 +516,14 @@ class AgentAccessControllerSpec
         controller.enterClientsPostcode()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case AgentSupplyingClientDetails(_, _, Some(_)) => true
           case _                                          => false
         }
       )
 
-      behave like commonRedirectToTooManyAttemptsBehaviour(performAction)
+      behave like commonRedirectToTooManyAttemptsBehaviour(() => performAction())
 
       "redirect to the enter country page" when {
 
@@ -900,14 +900,14 @@ class AgentAccessControllerSpec
         controller.enterClientsCountry()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case AgentSupplyingClientDetails(_, _, Some(_)) => true
           case _                                          => false
         }
       )
 
-      behave like commonRedirectToTooManyAttemptsBehaviour(performAction)
+      behave like commonRedirectToTooManyAttemptsBehaviour(() => performAction())
 
       "redirect to the enter postcode page" when {
 
@@ -1240,7 +1240,7 @@ class AgentAccessControllerSpec
         controller.confirmClient()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case AgentSupplyingClientDetails(_, _, Some(_)) => true
           case _                                          => false
@@ -1337,14 +1337,14 @@ class AgentAccessControllerSpec
       val returnsList = List(sample[ReturnSummary])
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case AgentSupplyingClientDetails(_, _, Some(_)) => true
           case _                                          => false
         }
       )
 
-      behave like commonRedirectToTooManyAttemptsBehaviour(performAction)
+      behave like commonRedirectToTooManyAttemptsBehaviour(() => performAction())
 
       "redirect to the enter postcode page" when {
 
@@ -1520,7 +1520,7 @@ class AgentAccessControllerSpec
         controller.tooManyVerifierMatchAttempts()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: AgentSupplyingClientDetails => true
           case _                              => false

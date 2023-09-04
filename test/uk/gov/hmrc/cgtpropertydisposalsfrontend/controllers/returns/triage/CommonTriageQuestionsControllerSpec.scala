@@ -301,10 +301,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.whoIsIndividualRepresenting()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.whoIsIndividualRepresenting(),
@@ -896,10 +893,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.howManyProperties()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.howManyProperties(),
@@ -1538,10 +1532,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.howManyPropertiesFurtherReturn()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.howManyProperties(),
@@ -1959,10 +1950,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.ukResidentCanOnlyDisposeResidential()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.ukResidentCanOnlyDisposeResidential(),
@@ -2680,10 +2668,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.amendReturnDisposalDateDifferentTaxYear()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.ukResidentCanOnlyDisposeResidential(),
@@ -2881,10 +2866,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.amendsSelfAssessmentAlreadySubmitted()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.amendsSelfAssessmentAlreadySubmitted(),
@@ -2929,10 +2911,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.amendsHaveYouAlreadySentSelfAssessment()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.amendsHaveYouAlreadySentSelfAssessment(),
@@ -3175,10 +3154,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.selfAssessmentAlreadySubmitted()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.selfAssessmentAlreadySubmitted(),
@@ -3226,10 +3202,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.haveYouAlreadySentSelfAssessment()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.haveYouAlreadySentSelfAssessment(),
@@ -3443,10 +3416,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.exchangedYearIncompatibleWithTaxYear()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.exchangedYearIncompatibleWithTaxYear(),
@@ -3520,10 +3490,7 @@ class CommonTriageQuestionsControllerSpec
       def performAction(): Future[Result] =
         controller.disposalsOfSharesTooEarly()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.disposalsOfSharesTooEarly(),

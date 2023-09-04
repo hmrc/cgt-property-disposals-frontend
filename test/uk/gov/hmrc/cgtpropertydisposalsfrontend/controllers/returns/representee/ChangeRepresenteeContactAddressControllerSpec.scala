@@ -130,7 +130,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
       answers.exists(_.fold(_.contactDetails.isDefined, _ => true))
 
     redirectToStartWhenInvalidJourney(
-      performAction,
+      () => performAction(),
       {
         case StartingNewDraftReturn(_, _, _, _, representeeAnswers, _)
             if isDefinedAndContainsContactDetails(representeeAnswers) =>
@@ -168,9 +168,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
     "handling requests to display the is UK page" must {
       def performAction(): Future[Result] = controller.isUk()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like displayIsUkBehaviour(performAction)
+      behave like displayIsUkBehaviour(() => performAction())
     }
 
     "handling requests to submit the is UK page" must {
@@ -195,14 +195,10 @@ trait ChangeRepresenteeContactAddressControllerSpec
       def performAction(): Future[Result] =
         controller.enterUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like displayEnterUkAddressPage(
-        UserType.Individual,
-        None,
-        performAction
-      )
-      behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, None, () => performAction())
+      behave like displayEnterUkAddressPage(UserType.Agent, None, () => performAction())
 
     }
 
@@ -215,10 +211,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like submitEnterUkAddress(
-        performAction,
-        routes.RepresenteeController.checkYourAnswers()
-      )
+      behave like submitEnterUkAddress(performAction, routes.RepresenteeController.checkYourAnswers())
 
     }
 
@@ -227,9 +220,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
       def performAction(): Future[Result] =
         controller.enterNonUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like displayEnterNonUkPage(performAction)
+      behave like displayEnterNonUkPage(() => performAction())
 
     }
 
@@ -241,10 +234,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      behave like submitEnterNonUkAddress(
-        performAction,
-        routes.RepresenteeController.checkYourAnswers()
-      )
+      behave like submitEnterNonUkAddress(performAction, routes.RepresenteeController.checkYourAnswers())
     }
 
     "handling requests to display the enter postcode page" must {
@@ -252,9 +242,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
       def performAction(): Future[Result] =
         controller.enterPostcode()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like enterPostcodePage(UserType.Individual, None, performAction)
+      behave like enterPostcodePage(UserType.Individual, None, () => performAction())
 
     }
 
@@ -267,10 +257,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like submitEnterPostcode(
-        performAction,
-        routes.ChangeRepresenteeContactAddressController.selectAddress()
-      )
+      behave like submitEnterPostcode(performAction, routes.ChangeRepresenteeContactAddressController.selectAddress())
 
     }
 
@@ -279,12 +266,12 @@ trait ChangeRepresenteeContactAddressControllerSpec
       def performAction(): Future[Result] =
         controller.selectAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like displaySelectAddress(
         UserType.Individual,
         None,
-        performAction,
+        () => performAction(),
         routes.RepresenteeController.checkYourAnswers()
       )
 
