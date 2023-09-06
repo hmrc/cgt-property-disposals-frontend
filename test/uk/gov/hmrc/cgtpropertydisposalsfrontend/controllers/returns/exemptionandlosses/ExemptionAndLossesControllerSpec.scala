@@ -372,7 +372,7 @@ class ExemptionAndLossesControllerSpec
       def performAction(): Future[Result] =
         controller.inYearLosses()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.inYearLosses())
 
@@ -1025,7 +1025,7 @@ class ExemptionAndLossesControllerSpec
       def performAction(): Future[Result] =
         controller.previousYearsLosses()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.previousYearsLosses())
 
@@ -1526,7 +1526,7 @@ class ExemptionAndLossesControllerSpec
       def performAction(): Future[Result] =
         controller.annualExemptAmount()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.annualExemptAmount())
 
@@ -2222,7 +2222,7 @@ class ExemptionAndLossesControllerSpec
         (session, updatedSession, journey, updatedDraftReturn)
       }
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.checkYourAnswers())
 
@@ -2514,7 +2514,7 @@ class ExemptionAndLossesControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.checkYourAnswersSubmit())
 

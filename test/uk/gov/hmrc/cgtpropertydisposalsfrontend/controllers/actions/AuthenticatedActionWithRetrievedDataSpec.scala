@@ -66,7 +66,6 @@ class AuthenticatedActionWithRetrievedDataSpec
   implicit val userTypeFormat: Writes[RetrievedUserType] = derived.owrites()
 
   def performAction[A](r: FakeRequest[A]): Future[Result] = {
-    @SuppressWarnings(Array("org.wartremover.warts.Any"))
     val request = new MessagesRequest[A](r, stub[MessagesApi])
     authenticatedAction.invokeBlock(
       request,

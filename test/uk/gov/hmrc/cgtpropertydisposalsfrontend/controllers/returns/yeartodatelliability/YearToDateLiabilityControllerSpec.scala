@@ -609,13 +609,13 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] =
         controller.estimatedIncome()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.estimatedIncome())
 
-      behave like noDisposalDateBehaviour(performAction)
+      behave like noDisposalDateBehaviour(() => performAction())
 
-      behave like redirectToStartWhenFurtherReturnIneligibleForCalculation(performAction)
+      behave like redirectToStartWhenFurtherReturnIneligibleForCalculation(() => performAction())
 
       "display the page" when {
 
@@ -1123,17 +1123,15 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] =
         controller.personalAllowance()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.personalAllowance())
 
-      behave like noDisposalDateBehaviour(performAction)
+      behave like noDisposalDateBehaviour(() => performAction())
 
-      behave like noEstimatedIncomeBehaviour(performAction)
+      behave like noEstimatedIncomeBehaviour(() => performAction())
 
-      behave like redirectToStartWhenFurtherReturnIneligibleForCalculation(
-        performAction
-      )
+      behave like redirectToStartWhenFurtherReturnIneligibleForCalculation(() => performAction())
 
       "redirect to the check you answers page" when {
 
@@ -1650,11 +1648,11 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] =
         controller.hasEstimatedDetails()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.hasEstimatedDetails())
 
-      behave like noEstimatedIncomeBehaviour(performAction)
+      behave like noEstimatedIncomeBehaviour(() => performAction())
 
       "handling users on a calculated journey" must {
 
@@ -2532,17 +2530,15 @@ class YearToDateLiabilityControllerSpec
           isATrust
         )
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.taxDue())
 
-      behave like noEstimatedIncomeBehaviour(performAction)
+      behave like noEstimatedIncomeBehaviour(() => performAction())
 
-      behave like incompleteOtherJourneysBehaviour(performAction)
+      behave like incompleteOtherJourneysBehaviour(() => performAction())
 
-      behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(
-        performAction
-      )
+      behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(() => performAction())
 
       "redirect to the check your answers page" when {
 
@@ -3261,7 +3257,7 @@ class YearToDateLiabilityControllerSpec
           checkIsRedirect(performAction(), expectedRedirect)
         }
 
-        behave like redirectToStartBehaviour(performAction)
+        behave like redirectToStartBehaviour(() => performAction())
 
         behave like unsuccessfulUpdateBehaviourForSingleDisposal(
           allQuestionAnswered,
@@ -4189,11 +4185,11 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] =
         controller.uploadMandatoryEvidence()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.uploadMandatoryEvidence())
 
-      behave like commonUploadMandatoryEvidenceBehaviour(performAction)
+      behave like commonUploadMandatoryEvidenceBehaviour(() => performAction())
 
       "show an error page" when {
 
@@ -4529,7 +4525,7 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.checkYourAnswersSubmit())
 
@@ -4559,11 +4555,11 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] =
         controller.taxableGainOrLoss()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.taxableGainOrLoss())
 
-      behave like redirectWhenNotNonCalculatedJourneyBehaviour(performAction)
+      behave like redirectWhenNotNonCalculatedJourneyBehaviour(() => performAction())
 
       "show an error page" when {
 
@@ -5588,13 +5584,13 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] =
         controller.nonCalculatedEnterTaxDue()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.nonCalculatedEnterTaxDue())
 
-      behave like redirectWhenNotNonCalculatedJourneyBehaviour(performAction)
+      behave like redirectWhenNotNonCalculatedJourneyBehaviour(() => performAction())
 
-      behave like noYearToDateLiabilityBehaviour(performAction)
+      behave like noYearToDateLiabilityBehaviour(() => performAction())
 
       "redirect to the has estimated details page" when {
 
@@ -6513,11 +6509,11 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] =
         controller.scanningMandatoryEvidence()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.scanningMandatoryEvidence())
 
-      behave like noPendingUploadBehaviour(performAction)
+      behave like noPendingUploadBehaviour(() => performAction())
 
       "show an error page" when {
 
@@ -6824,11 +6820,11 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] =
         controller.uploadMandatoryEvidenceFailure()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.uploadMandatoryEvidenceFailure())
 
-      behave like noPendingUploadBehaviour(performAction)
+      behave like noPendingUploadBehaviour(() => performAction())
 
       "show an error page" when {
         val answers = sample[IncompleteCalculatedYTDAnswers]
@@ -7019,7 +7015,7 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] =
         controller.mandatoryEvidenceExpired()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.mandatoryEvidenceExpired())
 
@@ -7053,7 +7049,7 @@ class YearToDateLiabilityControllerSpec
             )
           }
 
-          "the user is on a non-calculated jouney" in {
+          "the user is on a non-calculated journey" in {
             test(
               sample[IncompleteCalculatedYTDAnswers]
                 .copy(expiredEvidence = None)

@@ -83,7 +83,7 @@ class AccountControllerSpec
 
       def performAction(): Future[Result] =
         controller.manageYourDetails()(FakeRequest())
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "display the manage your details page" in {
         val sessionData =
@@ -107,7 +107,7 @@ class AccountControllerSpec
       def performAction(): Future[Result] =
         controller.contactAddressUpdated()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "display the page" in {
         val sessionData =
@@ -131,7 +131,7 @@ class AccountControllerSpec
       def performAction(): Future[Result] =
         controller.contactEmailUpdated()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "display the page" in {
         val sessionData =
@@ -155,7 +155,7 @@ class AccountControllerSpec
       def performAction(): Future[Result] =
         controller.contactNameUpdated()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       "display the page" in {
         val sessionData =

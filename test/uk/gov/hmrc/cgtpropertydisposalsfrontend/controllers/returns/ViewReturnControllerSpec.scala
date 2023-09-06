@@ -306,7 +306,7 @@ class ViewReturnControllerSpec
         paymentDetails(10) shouldBe "Pay now"
       }
 
-      behave like journeyStatusBehaviour(performAction)
+      behave like journeyStatusBehaviour(() => performAction())
 
       val address = sample[UkAddress].copy(
         line1 = "123 fake street",

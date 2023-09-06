@@ -293,10 +293,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.guidance()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.guidance(),
@@ -312,7 +309,7 @@ class MultipleDisposalsTriageControllerSpec
           displayType: UserTypeDisplay
         ): Unit =
           testPageIsDisplayed(
-            performAction,
+            () => performAction(),
             session,
             s"multiple-disposals.guidance${displayType.getSubKey()}.title",
             routes.MultipleDisposalsTriageController.guidanceSubmit(),
@@ -417,10 +414,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.guidanceSubmit()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.guidanceSubmit(),
@@ -441,10 +435,7 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
 
-          checkIsRedirect(
-            performAction(),
-            routes.MultipleDisposalsTriageController.howManyDisposals()
-          )
+          checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.howManyDisposals())
         }
 
       }
@@ -475,10 +466,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.howManyDisposals()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.howManyDisposals(),
@@ -494,7 +482,7 @@ class MultipleDisposalsTriageControllerSpec
           expectReturnToSummaryLink: Boolean
         ): Unit =
           testPageIsDisplayed(
-            performAction,
+            () => performAction(),
             session,
             "multipleDisposalsNumberOfProperties.title",
             routes.MultipleDisposalsTriageController.howManyDisposalsSubmit(),
@@ -857,10 +845,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.wereYouAUKResident()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.wereYouAUKResident(),
@@ -877,7 +862,7 @@ class MultipleDisposalsTriageControllerSpec
           displayType: UserTypeDisplay = individualDisplay
         ): Unit =
           testPageIsDisplayed(
-            performAction,
+            () => performAction(),
             session,
             s"multipleDisposalsWereYouAUKResident${displayType.getSubKey(separatePeriodOfAdminKey = true)}.title",
             routes.MultipleDisposalsTriageController.wereYouAUKResidentSubmit(),
@@ -1291,10 +1276,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.wereAllPropertiesResidential()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.wereAllPropertiesResidential(),
@@ -1310,7 +1292,7 @@ class MultipleDisposalsTriageControllerSpec
           expectReturnToSummaryLink: Boolean
         ): Unit =
           testPageIsDisplayed(
-            performAction,
+            () => performAction(),
             session,
             "multipleDisposalsWereAllPropertiesResidential.title",
             routes.MultipleDisposalsTriageController
@@ -1696,10 +1678,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.whenWereContractsExchanged()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.whenWereContractsExchanged(),
@@ -1737,7 +1716,7 @@ class MultipleDisposalsTriageControllerSpec
           expectReturnToSummaryLink: Boolean
         ): Unit =
           testTaxYearExchangedPageIsDisplayed(
-            performAction,
+            () => performAction(),
             session,
             "multipleDisposalsTaxYear.title",
             routes.MultipleDisposalsTriageController
@@ -2309,10 +2288,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.countryOfResidence()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.countryOfResidence(),
@@ -2348,7 +2324,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
           testPageIsDisplayed(
-            performAction,
+            () => performAction(),
             session,
             s"multipleDisposalsCountryOfResidence$userKey.title",
             routes.MultipleDisposalsTriageController.countryOfResidenceSubmit(),
@@ -2832,10 +2808,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.assetTypeForNonUkResidents()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.assetTypeForNonUkResidents(),
@@ -2852,7 +2825,7 @@ class MultipleDisposalsTriageControllerSpec
           displayType: UserTypeDisplay
         ): Unit =
           testPageIsDisplayed(
-            performAction,
+            () => performAction(),
             session,
             s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey(separatePeriodOfAdminKey = true)}.title",
             routes.MultipleDisposalsTriageController
@@ -3347,10 +3320,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.completionDate()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.completionDate(),
@@ -3366,7 +3336,7 @@ class MultipleDisposalsTriageControllerSpec
           expectReturnToSummaryLink: Boolean
         ): Unit =
           testPageIsDisplayed(
-            performAction,
+            () => performAction(),
             session,
             "multipleDisposalsCompletionDate.title",
             routes.MultipleDisposalsTriageController.completionDateSubmit(),
@@ -3856,7 +3826,7 @@ class MultipleDisposalsTriageControllerSpec
         mockUUIDGenerator
       )
 
-      behave like noDateOfDeathForPersonalRepBehaviour(performAction)
+      behave like noDateOfDeathForPersonalRepBehaviour(() => performAction())
 
       "Page is displayed correctly" in {
         inSequence {
@@ -4375,10 +4345,7 @@ class MultipleDisposalsTriageControllerSpec
 
       }
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswers(),
@@ -4976,10 +4943,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        isValidJourney
-      )
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswersSubmit(),

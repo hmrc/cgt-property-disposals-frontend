@@ -100,7 +100,7 @@ class InitialGainOrLossControllerSpec
       def performAction(): Future[Result] =
         controller.enterInitialGainOrLoss()(FakeRequest().withFormUrlEncodedBody().withMethod("POST"))
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.enterInitialGainOrLoss)
 
@@ -645,7 +645,7 @@ class InitialGainOrLossControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like markUnmetDependencyBehaviour(controller.checkYourAnswersSubmit())
 

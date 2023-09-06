@@ -270,17 +270,14 @@ class CheckAllAnswersAndSubmitControllerSpec
             .copy(draftReturn = completeDraftReturn, previousSentReturns = None, amendReturnData = None)
 
         behave like redirectToStartWhenInvalidJourney(
-          performAction,
+          () => performAction(),
           {
             case _: FillingOutReturn => true
             case _                   => false
           }
         )
 
-        behave like incompleteSingleDisposalJourneyBehaviour(
-          performAction,
-          completeDraftReturn
-        )
+        behave like incompleteSingleDisposalJourneyBehaviour(() => performAction(), completeDraftReturn)
 
         "display the page" when {
 
@@ -553,10 +550,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(
-                performAction(),
-                routes.TaskListController.taskList()
-              )
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
 
             "the representee answers are incomplete" in {
@@ -575,10 +569,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(
-                performAction(),
-                routes.TaskListController.taskList()
-              )
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
 
           }
@@ -623,17 +614,14 @@ class CheckAllAnswersAndSubmitControllerSpec
             .copy(draftReturn = completeDraftReturn, previousSentReturns = None, amendReturnData = None)
 
         behave like redirectToStartWhenInvalidJourney(
-          performAction,
+          () => performAction(),
           {
             case _: FillingOutReturn => true
             case _                   => false
           }
         )
 
-        behave like incompleteMultipleDisposalsJourneyBehaviour(
-          performAction,
-          completeDraftReturn
-        )
+        behave like incompleteMultipleDisposalsJourneyBehaviour(() => performAction(), completeDraftReturn)
 
         "display the page" when {
 
@@ -737,10 +725,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(
-                performAction(),
-                routes.TaskListController.taskList()
-              )
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
 
             "the representee answers are incomplete" in {
@@ -759,10 +744,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(
-                performAction(),
-                routes.TaskListController.taskList()
-              )
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
 
           }
@@ -806,17 +788,14 @@ class CheckAllAnswersAndSubmitControllerSpec
             .copy(draftReturn = completeDraftReturn, previousSentReturns = None, amendReturnData = None)
 
         behave like redirectToStartWhenInvalidJourney(
-          performAction,
+          () => performAction(),
           {
             case _: FillingOutReturn => true
             case _                   => false
           }
         )
 
-        behave like incompleteSingleIndirectDisposalJourneyBehaviour(
-          performAction,
-          completeDraftReturn
-        )
+        behave like incompleteSingleIndirectDisposalJourneyBehaviour(() => performAction(), completeDraftReturn)
 
         "display the page" when {
 
@@ -927,10 +906,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(
-                performAction(),
-                routes.TaskListController.taskList()
-              )
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
 
             "the representee answers are incomplete" in {
@@ -949,10 +925,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(
-                performAction(),
-                routes.TaskListController.taskList()
-              )
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
 
           }
@@ -994,17 +967,14 @@ class CheckAllAnswersAndSubmitControllerSpec
             .copy(draftReturn = completeDraftReturn, previousSentReturns = None, amendReturnData = None)
 
         behave like redirectToStartWhenInvalidJourney(
-          performAction,
+          () => performAction(),
           {
             case _: FillingOutReturn => true
             case _                   => false
           }
         )
 
-        behave like incompleteMultipleIndirectDisposalsJourneyBehaviour(
-          performAction,
-          completeDraftReturn
-        )
+        behave like incompleteMultipleIndirectDisposalsJourneyBehaviour(() => performAction(), completeDraftReturn)
 
         "display the page" when {
 
@@ -1107,10 +1077,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(
-                performAction(),
-                routes.TaskListController.taskList()
-              )
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
 
             "the representee answers are incomplete" in {
@@ -1129,10 +1096,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(
-                performAction(),
-                routes.TaskListController.taskList()
-              )
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
 
           }
@@ -1174,17 +1138,14 @@ class CheckAllAnswersAndSubmitControllerSpec
             .copy(draftReturn = completeDraftReturn, previousSentReturns = None, amendReturnData = None)
 
         behave like redirectToStartWhenInvalidJourney(
-          performAction,
+          () => performAction(),
           {
             case _: FillingOutReturn => true
             case _                   => false
           }
         )
 
-        behave like incompleteSingleMixedUseDisposalsJourneyBehaviour(
-          performAction,
-          completeDraftReturn
-        )
+        behave like incompleteSingleMixedUseDisposalsJourneyBehaviour(() => performAction(), completeDraftReturn)
 
         "display the page" when {
 
@@ -1287,10 +1248,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(
-                performAction(),
-                routes.TaskListController.taskList()
-              )
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
 
             "the representee answers are incomplete" in {
@@ -1309,10 +1267,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(
-                performAction(),
-                routes.TaskListController.taskList()
-              )
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
 
           }
@@ -1464,17 +1419,14 @@ class CheckAllAnswersAndSubmitControllerSpec
       }
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: FillingOutReturn => true
           case _                   => false
         }
       )
 
-      behave like incompleteSingleDisposalJourneyBehaviour(
-        performAction,
-        completeDraftReturnNoRepresentee
-      )
+      behave like incompleteSingleDisposalJourneyBehaviour(() => performAction(), completeDraftReturnNoRepresentee)
 
       "show an error page" when {
 
@@ -1522,10 +1474,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockStoreSession(sessionWithJourney(justSubmittedReturn))(Right(()))
           }
 
-          checkIsRedirect(
-            performAction(),
-            routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
-          )
+          checkIsRedirect(performAction(), routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
         }
 
         "representees are handled correctly" in {
@@ -1563,10 +1512,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             )(Right(()))
           }
 
-          checkIsRedirect(
-            performAction(),
-            routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
-          )
+          checkIsRedirect(performAction(), routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
         }
 
         "representees returns error" in {
@@ -1581,9 +1527,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockCgtRegistrationService(Left(Error("error thrown")), representeeAnswersNoReferenceId, lang)
           }
 
-          checkIsTechnicalErrorPage(
-            performAction()
-          )
+          checkIsTechnicalErrorPage(performAction())
         }
       }
 
@@ -1605,10 +1549,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             )(Right(()))
           }
 
-          checkIsRedirect(
-            performAction(),
-            routes.CheckAllAnswersAndSubmitController.submissionError()
-          )
+          checkIsRedirect(performAction(), routes.CheckAllAnswersAndSubmitController.submissionError())
         }
       }
 
@@ -1620,7 +1561,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         controller.submissionError()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: SubmitReturnFailed | _: Subscribed => true
           case _                                     => false
@@ -1696,7 +1637,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         controller.submissionErrorSubmit()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: SubmitReturnFailed | _: Subscribed => true
           case _                                     => false
@@ -1714,10 +1655,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               )
             )
 
-            checkIsRedirect(
-              performAction(),
-              homepage.routes.HomePageController.homepage()
-            )
+            checkIsRedirect(performAction(), homepage.routes.HomePageController.homepage())
           }
 
         "the user is in the SubmitReturnFailed state" in {
@@ -1738,7 +1676,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         controller.confirmationOfSubmission()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: JustSubmittedReturn => true
           case _                      => false
@@ -2706,7 +2644,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: JustSubmittedReturn => true
           case _                      => false
@@ -2723,10 +2661,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             )
           }
 
-          checkIsRedirect(
-            performAction(),
-            homepage.routes.HomePageController.homepage()
-          )
+          checkIsRedirect(performAction(), homepage.routes.HomePageController.homepage())
         }
 
       }

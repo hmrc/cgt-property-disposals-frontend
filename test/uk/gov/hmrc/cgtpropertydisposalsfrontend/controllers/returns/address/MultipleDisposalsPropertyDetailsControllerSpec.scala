@@ -418,7 +418,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         checkIsRedirect(performAction(), expectedRedirect)
       }
 
-      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.multipleDisposalsGuidanceSubmit(),
@@ -549,11 +549,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         mockUUIDGenerator
       )
 
-      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
-      behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(
-        performAction
-      )
+      behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -721,11 +719,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         mockUUIDGenerator
       )
 
-      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
-      behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(
-        performAction
-      )
+      behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -1042,18 +1038,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.enterUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterUkAddress(),
         mockUUIDGenerator
       )
 
-      behave like displayEnterUkAddressPage(
-        UserType.Individual,
-        None,
-        performAction
-      )
+      behave like displayEnterUkAddressPage(UserType.Individual, None, () => performAction())
 
     }
 
@@ -1071,10 +1063,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         mockUUIDGenerator
       )
 
-      behave like submitEnterUkAddress(
-        performAction,
-        returnsAddressRoutes.PropertyDetailsController.checkYourAnswers()
-      )
+      behave like submitEnterUkAddress(performAction, returnsAddressRoutes.PropertyDetailsController.checkYourAnswers())
 
     }
 
@@ -1083,7 +1072,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.enterPostcode()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterPostcode(),
@@ -1091,21 +1080,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       )
 
       List(Some(Capacitor), Some(PersonalRepresentative), None).foreach { individualUserType =>
-        behave like enterPostcodePage(
-          UserType.Individual,
-          individualUserType,
-          performAction
-        )
-        behave like enterPostcodePage(
-          UserType.Agent,
-          individualUserType,
-          performAction
-        )
-        behave like enterPostcodePage(
-          UserType.Organisation,
-          individualUserType,
-          performAction
-        )
+        behave like enterPostcodePage(UserType.Individual, individualUserType, () => performAction())
+        behave like enterPostcodePage(UserType.Agent, individualUserType, () => performAction())
+        behave like enterPostcodePage(UserType.Organisation, individualUserType, () => performAction())
       }
 
     }
@@ -1124,10 +1101,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         mockUUIDGenerator
       )
 
-      behave like submitEnterPostcode(
-        performAction,
-        returnsAddressRoutes.PropertyDetailsController.selectAddress()
-      )
+      behave like submitEnterPostcode(performAction, returnsAddressRoutes.PropertyDetailsController.selectAddress())
 
     }
 
@@ -1136,7 +1110,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.selectAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.selectAddress(),
@@ -1147,7 +1121,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         behave like displaySelectAddress(
           UserType.Individual,
           individualUserType,
-          performAction,
+          () => performAction(),
           controllers.returns.address.routes.PropertyDetailsController
             .enterPostcode()
         )
@@ -1155,7 +1129,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         behave like displaySelectAddress(
           UserType.Agent,
           individualUserType,
-          performAction,
+          () => performAction(),
           controllers.returns.address.routes.PropertyDetailsController
             .enterPostcode()
         )
@@ -1163,7 +1137,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         behave like displaySelectAddress(
           UserType.Organisation,
           individualUserType,
-          performAction,
+          () => performAction(),
           controllers.returns.address.routes.PropertyDetailsController
             .enterPostcode()
         )
@@ -1218,14 +1192,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.disposalDate()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.disposalDate(),
         mockUUIDGenerator
       )
 
-      behave like noDateOfDeathForPersonalRepBehaviour(performAction)
+      behave like noDateOfDeathForPersonalRepBehaviour(() => performAction())
 
       "redirect to the check your answers page" when {
 
@@ -1869,7 +1843,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.disposalPrice()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.disposalPrice(),
@@ -2291,7 +2265,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.acquisitionPrice()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.acquisitionPrice(),
@@ -2896,7 +2870,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswers(),
@@ -2939,7 +2913,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         .copy(examplePropertyDetailsAnswers = Some(completeAnswers))
       val updatedJourney     = currentJourney.copy(draftReturn = updatedDraftReturn)
 
-      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
       "redirect to the guidance page" when {
 
@@ -3187,7 +3161,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswersSubmit(),

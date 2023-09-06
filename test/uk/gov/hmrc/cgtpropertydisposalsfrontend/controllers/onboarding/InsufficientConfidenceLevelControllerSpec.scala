@@ -146,7 +146,7 @@ class InsufficientConfidenceLevelControllerSpec
       def performAction(): Future[Result] =
         controller.doYouHaveNINO()(FakeRequest())
 
-      behave like commonBehaviour(performAction)
+      behave like commonBehaviour(() => performAction())
 
       "display the do you have a NINO page" when {
 
@@ -393,7 +393,7 @@ class InsufficientConfidenceLevelControllerSpec
       def performAction(): Future[Result] =
         controller.doYouHaveAnSaUtr()(FakeRequest())
 
-      behave like commonBehaviour(performAction)
+      behave like commonBehaviour(() => performAction())
 
       "redirect to the NINO page" when {
 
@@ -623,7 +623,7 @@ class InsufficientConfidenceLevelControllerSpec
       def performAction(): Future[Result] =
         controller.enterSautrAndName()(FakeRequest())
 
-      behave like commonBehaviour(performAction)
+      behave like commonBehaviour(() => performAction())
 
       "redirect to the select entity type page" when {
 
@@ -1308,7 +1308,7 @@ class InsufficientConfidenceLevelControllerSpec
           )
         )
 
-      behave like commonBehaviour(performAction)
+      behave like commonBehaviour(() => performAction())
 
       "display an error page" when {
 

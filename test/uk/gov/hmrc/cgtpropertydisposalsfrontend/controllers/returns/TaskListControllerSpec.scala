@@ -233,7 +233,7 @@ class TaskListControllerSpec
       }
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(),
         {
           case _: FillingOutReturn => true
           case _                   => false

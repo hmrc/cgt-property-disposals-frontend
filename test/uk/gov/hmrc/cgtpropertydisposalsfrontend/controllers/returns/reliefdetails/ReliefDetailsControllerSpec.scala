@@ -98,7 +98,7 @@ class ReliefDetailsControllerSpec
 
   private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction,
+      () => performAction(),
       {
         case _: FillingOutReturn      => true
         case _: StartingToAmendReturn => true
@@ -218,7 +218,7 @@ class ReliefDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.privateResidentsRelief()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.privateResidentsRelief(),
@@ -662,14 +662,14 @@ class ReliefDetailsControllerSpec
         privateResidentsRelief = Some(AmountInPence.fromPounds(1))
       )
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.lettingsRelief(),
         mockUUIDGenerator
       )
 
-      behave like noPrivateResidentsReliefBehaviour(performAction)
+      behave like noPrivateResidentsReliefBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -1195,14 +1195,14 @@ class ReliefDetailsControllerSpec
       val key      = "otherReliefs"
       val valueKey = "otherReliefsAmount"
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.otherReliefs(),
         mockUUIDGenerator
       )
 
-      behave like noLettingsReliefBehaviour(performAction)
+      behave like noLettingsReliefBehaviour(() => performAction())
 
       val otherReliefs =
         OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
@@ -1844,7 +1844,7 @@ class ReliefDetailsControllerSpec
         completeAnswers.otherReliefs
       )
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswers(),
@@ -2190,7 +2190,7 @@ class ReliefDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswersSubmit(),

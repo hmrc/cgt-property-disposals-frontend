@@ -1,13 +1,12 @@
-import play.core.PlayVersion.current
-import sbt._
+import sbt.*
 
 object AppDependencies {
 
-  val playVersion = "play-28"
+  val playVersion      = "play-28"
   val bootstrapVersion = "7.19.0"
-  val silencerVersion = "1.7.12"
+  val silencerVersion  = "1.7.12"
 
-  val compile = Seq(
+  val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"                %% "play-frontend-hmrc"               % s"7.7.0-$playVersion",
     "uk.gov.hmrc"                %% s"bootstrap-frontend-$playVersion" % bootstrapVersion,
     "uk.gov.hmrc.mongo"          %% s"hmrc-mongo-$playVersion"         % "0.70.0",
@@ -19,17 +18,14 @@ object AppDependencies {
     "com.github.julien-truffaut" %% "monocle-macro"                    % "2.0.0"
   )
 
-  val test = Seq(
-    "org.scalatest"              %% "scalatest"                 % "3.2.9"       % "test",
-    "org.jsoup"                   % "jsoup"                     % "1.12.1"      % "test",
-    "com.typesafe.play"          %% "play-test"                 % current       % "test",
-    "org.scalamock"              %% "scalamock"                 % "5.2.0"       % "test",
-    "org.scalatestplus"          %% "scalatestplus-scalacheck"  % "3.1.0.0-RC2" % "test",
-    "com.vladsch.flexmark"        % "flexmark-all"              % "0.35.10"     % "test",
-    "uk.gov.hmrc.mongo"          %% "hmrc-mongo-test-play-28"   % "0.70.0"      % "test",
-    "com.github.alexarchambault" %% "scalacheck-shapeless_1.16" % "1.3.1"       % "test",
-    "org.scalatestplus.play"     %% "scalatestplus-play"        % "5.1.0"       % "test",
-    "uk.gov.hmrc"                %% s"bootstrap-test-$playVersion" % bootstrapVersion % "test"
+  val test: Seq[ModuleID] = Seq(
+    "org.jsoup"                   % "jsoup"                         % "1.12.1"         % "test",
+    "org.scalamock"              %% "scalamock"                     % "5.2.0"          % "test",
+    "org.scalatestplus"          %% "scalatestplus-scalacheck"      % "3.1.0.0-RC2"    % "test",
+    "uk.gov.hmrc.mongo"          %% s"hmrc-mongo-test-$playVersion" % "0.70.0"         % "test",
+    "com.github.alexarchambault" %% "scalacheck-shapeless_1.16"     % "1.3.1"          % "test",
+    "org.scalatestplus.play"     %% "scalatestplus-play"            % "5.1.0"          % "test",
+    "uk.gov.hmrc"                %% s"bootstrap-test-$playVersion"  % bootstrapVersion % "test"
   )
 
 }

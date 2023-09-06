@@ -58,7 +58,7 @@ class RegistrationChangeAddressControllerSpec
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction,
+      () => performAction(),
       {
         case _: RegistrationReady => true
         case _                    => false
@@ -70,9 +70,9 @@ class RegistrationChangeAddressControllerSpec
     "handling requests to display the is UK page" must {
       def performAction(): Future[Result] = controller.isUk()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like displayIsUkBehaviour(performAction)
+      behave like displayIsUkBehaviour(() => performAction())
     }
 
     "handling requests to submit the is UK page" must {
@@ -97,14 +97,10 @@ class RegistrationChangeAddressControllerSpec
       def performAction(): Future[Result] =
         controller.enterUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like displayEnterUkAddressPage(
-        UserType.Individual,
-        None,
-        performAction
-      )
-      behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, None, () => performAction())
+      behave like displayEnterUkAddressPage(UserType.Agent, None, () => performAction())
 
     }
 
@@ -129,9 +125,9 @@ class RegistrationChangeAddressControllerSpec
       def performAction(): Future[Result] =
         controller.enterNonUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like displayEnterNonUkPage(performAction)
+      behave like displayEnterNonUkPage(() => performAction())
 
     }
 
@@ -154,10 +150,10 @@ class RegistrationChangeAddressControllerSpec
       def performAction(): Future[Result] =
         controller.enterPostcode()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
-      behave like enterPostcodePage(UserType.Individual, None, performAction)
-      behave like enterPostcodePage(UserType.Agent, None, performAction)
+      behave like enterPostcodePage(UserType.Individual, None, () => performAction())
+      behave like enterPostcodePage(UserType.Agent, None, () => performAction())
 
     }
 
@@ -170,10 +166,7 @@ class RegistrationChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like submitEnterPostcode(
-        performAction,
-        addressRoutes.RegistrationChangeAddressController.selectAddress()
-      )
+      behave like submitEnterPostcode(performAction, addressRoutes.RegistrationChangeAddressController.selectAddress())
 
     }
 
@@ -182,19 +175,19 @@ class RegistrationChangeAddressControllerSpec
       def performAction(): Future[Result] =
         controller.selectAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like displaySelectAddress(
         UserType.Individual,
         None,
-        performAction,
+        () => performAction(),
         controllers.onboarding.routes.RegistrationController.checkYourAnswers()
       )
 
       behave like displaySelectAddress(
         UserType.Agent,
         None,
-        performAction,
+        () => performAction(),
         controllers.onboarding.routes.RegistrationController.checkYourAnswers()
       )
 

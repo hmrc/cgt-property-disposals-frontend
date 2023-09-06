@@ -223,7 +223,7 @@ class MixedUsePropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.enterPostcode()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterPostcode(),
@@ -329,7 +329,7 @@ class MixedUsePropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.enterUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterUkAddress(),
@@ -762,7 +762,7 @@ class MixedUsePropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.enterDisposalValue()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterDisposalValue(),
@@ -1164,7 +1164,7 @@ class MixedUsePropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.enterAcquisitionValue()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterAcquisitionValue(),
@@ -1608,7 +1608,7 @@ class MixedUsePropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswers(),
@@ -1638,7 +1638,7 @@ class MixedUsePropertyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswersSubmit(),

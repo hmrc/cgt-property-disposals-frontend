@@ -92,7 +92,7 @@ class DisposalDetailsControllerSpec
 
   private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction,
+      () => performAction(),
       {
         case _: FillingOutReturn      => true
         case _: StartingToAmendReturn => true
@@ -292,7 +292,7 @@ class DisposalDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.howMuchDidYouOwn()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.howMuchDidYouOwn(),
@@ -1080,16 +1080,16 @@ class DisposalDetailsControllerSpec
         )
       }
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.whatWasDisposalPrice(),
         mockUUIDGenerator
       )
 
-      behave like noDisposalMethodBehaviour(performAction)
+      behave like noDisposalMethodBehaviour(() => performAction())
 
-      behave like noPropertyShareBehaviour(performAction)
+      behave like noPropertyShareBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -1732,16 +1732,16 @@ class DisposalDetailsControllerSpec
         )
       }
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.whatWasDisposalPrice(),
         mockUUIDGenerator
       )
 
-      behave like noDisposalMethodBehaviour(performAction)
+      behave like noDisposalMethodBehaviour(() => performAction())
 
-      behave like noPropertyShareBehaviour(performAction)
+      behave like noPropertyShareBehaviour(() => performAction())
 
       "display the page" when {
 
@@ -2414,16 +2414,16 @@ class DisposalDetailsControllerSpec
         )
       }
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.whatWereDisposalFees(),
         mockUUIDGenerator
       )
 
-      behave like noDisposalMethodBehaviour(performAction)
+      behave like noDisposalMethodBehaviour(() => performAction())
 
-      behave like noPropertyShareBehaviour(performAction)
+      behave like noPropertyShareBehaviour(() => performAction())
 
       "redirect to the disposal price page" when {
 
@@ -3115,7 +3115,7 @@ class DisposalDetailsControllerSpec
         Some(completeAnswers.disposalFees)
       )
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswers(),
@@ -3516,7 +3516,7 @@ class DisposalDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswersSubmit(),

@@ -305,7 +305,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(): Future[Result] = controller.isUk()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.isUk(),
@@ -609,7 +609,7 @@ class CompanyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.enterUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterUkAddress(),
@@ -1362,7 +1362,7 @@ class CompanyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.enterNonUkAddress()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.enterNonUkAddress(),
@@ -2034,7 +2034,7 @@ class CompanyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.multipleIndirectDisposalPrice()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.multipleIndirectDisposalPrice(),
@@ -2535,7 +2535,7 @@ class CompanyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.multipleIndirectAcquisitionPrice()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.multipleIndirectAcquisitionPrice(),
@@ -3007,7 +3007,7 @@ class CompanyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswers(),
@@ -3083,7 +3083,7 @@ class CompanyDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
         controller.checkYourAnswersSubmit(),
