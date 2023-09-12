@@ -475,7 +475,9 @@ class FurtherReturnCalculationEligibilityUtilSpec
                 AmountInPence(0),
                 AmountInPence(0),
                 AmountInPence(0),
-                AmountInPence(0)
+                AmountInPence(0),
+                false,
+                None
               ),
               furtherReturnCalculationData,
               currentReturnAddress
@@ -554,7 +556,9 @@ class FurtherReturnCalculationEligibilityUtilSpec
                   AmountInPence(0),
                   AmountInPence(0),
                   AmountInPence(0),
-                  AmountInPence(0)
+                  AmountInPence(0),
+                  false,
+                  None
                 ),
                 furtherReturnCalculationData,
                 currentReturnAddress
@@ -622,7 +626,9 @@ class FurtherReturnCalculationEligibilityUtilSpec
                 AmountInPence(0),
                 AmountInPence(0),
                 AmountInPence(0),
-                AmountInPence(0)
+                AmountInPence(0),
+                false,
+                None
               ),
               furtherReturnCalculationData,
               currentReturnAddress

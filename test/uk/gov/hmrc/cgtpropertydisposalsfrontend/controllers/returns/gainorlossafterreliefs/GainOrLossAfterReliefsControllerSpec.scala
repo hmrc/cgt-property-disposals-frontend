@@ -587,7 +587,9 @@ class GainOrLossAfterReliefsControllerSpec
                       AmountInPence(0),
                       AmountInPence(1L),
                       AmountInPence(0),
-                      AmountInPence(0)
+                      AmountInPence(0),
+                      false,
+                      None
                     ),
                     List.empty,
                     currentReturnAddress
@@ -811,7 +813,9 @@ class GainOrLossAfterReliefsControllerSpec
                         AmountInPence(0),
                         AmountInPence(0),
                         AmountInPence(0),
-                        AmountInPence(0)
+                        AmountInPence(0),
+                        false,
+                        None
                       ),
                       List.empty,
                       currentReturnAddress
