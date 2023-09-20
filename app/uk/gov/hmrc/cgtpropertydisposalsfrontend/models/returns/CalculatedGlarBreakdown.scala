@@ -42,11 +42,11 @@ object CalculatedGlarBreakdown {
     def acquisitionOrRebased: AmountInPence = {
       val initialGainOrLossRebase = (c.shouldUseRebase, c.rebasedAcquisitionPrice) match {
         case (true, Some(rebasedAcquisitionPrice)) => rebasedAcquisitionPrice
-        case (false, None)                         => c.acquisitionPrice
+        case (false, _)                            => c.acquisitionPrice
+        case (true, None)                          => throw new Exception("Unreachable")
       }
       initialGainOrLossRebase
     }
-
     def gainOrLossAfterReliefs: AmountInPence =
       if (initialGainOrLoss.isPositive) {
         (initialGainOrLoss -- totalReliefs).withFloorZero

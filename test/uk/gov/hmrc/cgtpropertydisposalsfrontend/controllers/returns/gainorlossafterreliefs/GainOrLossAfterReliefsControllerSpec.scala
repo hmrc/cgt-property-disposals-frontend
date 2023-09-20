@@ -847,6 +847,117 @@ class GainOrLossAfterReliefsControllerSpec
 
       }
 
+      "Display the correct working" when {
+
+        def validCalculatorState(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          previousReturnData: PreviousReturnData
+        ): (SessionData, FillingOutReturn, DraftReturn, PreviousReturnData) = {
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(individualUserType)
+          )
+          val draftReturn   = sample[DraftSingleDisposalReturn]
+            .copy(
+              gainOrLossAfterReliefs = Some(AmountInPence(1000)),
+              triageAnswers = triageAnswers,
+              representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false)),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers = Some(sample[CompleteReliefDetailsAnswers]),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers])
+            )
+
+          val taxYearStartYear: String =
+            triageAnswers
+              .fold(
+                _.disposalDate.map(_.taxYear.startDateInclusive.getYear),
+                c => Some(c.disposalDate.taxYear.startDateInclusive.getYear)
+              )
+              .map(_.toString)
+              .getOrElse("2020")
+
+          val updatedpreviousReturnData =
+            previousReturnData.copy(
+              summaries = previousReturnData.summaries.map(_.copy(taxYear = taxYearStartYear))
+            )
+
+          val journey = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            subscribedDetails = sample[SubscribedDetails]
+              .copy(name = if (userType === Trust) Left(sample[TrustName]) else Right(sample[IndividualName])),
+            previousSentReturns = Some(updatedpreviousReturnData)
+          )
+
+          (
+            SessionData.empty.copy(
+              journeyStatus = Some(journey),
+              userType = Some(userType)
+            ),
+            journey,
+            draftReturn,
+            updatedpreviousReturnData
+          )
+        }
+
+        "Given a regular data set" in {
+          val previousReturnData = PreviousReturnData(List(sample[ReturnSummary]), None, Some(true), None)
+
+          val (session, fillingOutReturn, _, _) =
+            validCalculatorState(Individual, Self, previousReturnData)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(
+              Right(
+                Eligible(
+                  CalculatedGlarBreakdown(
+                    acquisitionPrice = AmountInPence(100_000_00),
+                    acquisitionCosts = AmountInPence(0),
+                    disposalPrice = AmountInPence(200_000_00),
+                    disposalFees = AmountInPence(0),
+                    privateResidentReliefs = AmountInPence(0),
+                    lettingRelief = AmountInPence(0),
+                    improvementCosts = AmountInPence(0),
+                    shouldUseRebase = true,
+                    rebasedAcquisitionPrice = Some(AmountInPence(150_000_00))
+                  ),
+                  List.empty,
+                  currentReturnAddress
+                )
+              )
+            )
+          }
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("gainOrLossAfterReliefs.title"),
+            { doc =>
+              doc.text() should include("Enter your gain or loss after reliefs")
+              doc.text() should include("Property disposal amount £200,000")
+              doc.text() should include("Disposal costs - £0")
+              doc.text() should include("Property disposal amount less costs = £200,000")
+              doc.text() should include("Property acquisition amount (rebased) £150,000")
+              doc.text() should include("Improvement costs + £0")
+              doc.text() should include("Acquisition costs + £0")
+              doc.text() should include("Property acquisition amount plus costs = £150,000")
+              doc.text() should include("Property acquisition amount plus costs - £150,000")
+              doc.text() should include("Initial gain or loss = £50,000 (gain)")
+              doc.text() should include("Initial gain or loss £50,000 (gain)")
+              doc.text() should include("Total reliefs - £0")
+              doc.text() should include("Gain or loss after reliefs = £50,000 (gain)")
+
+              doc
+                .select("#main-content form")
+                .attr("action") shouldBe routes.GainOrLossAfterReliefsController
+                .enterGainOrLossAfterReliefsSubmit()
+                .url
+            }
+          )
+
+        }
+
+      }
+
       "show an error page" when {
 
         "there is an error determining eligibility for calculation" in {
@@ -1294,7 +1405,6 @@ class GainOrLossAfterReliefsControllerSpec
     }
 
   }
-
 }
 
 object GainOrLossAfterReliefsControllerSpec extends Matchers {
