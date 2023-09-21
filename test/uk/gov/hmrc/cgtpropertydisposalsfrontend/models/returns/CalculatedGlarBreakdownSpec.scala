@@ -57,22 +57,22 @@ class CalculatedGlarBreakdownSpec extends AnyWordSpec with Matchers {
         rebasedAcquisitionPrice = None
       )
       "Return an accurate propertyDisposalAmountLessCosts value" in {
-        breakdown.propertyDisposalAmountLessCosts shouldBe AmountInPence(38400000)
+        breakdown.propertyDisposalAmountLessCosts shouldBe AmountInPence(384_000_00)
       }
       "Return an accurate propertyAcquisitionAmountPlusCosts value" in {
-        breakdown.propertyAcquisitionAmountPlusCosts shouldBe AmountInPence(32500000)
+        breakdown.propertyAcquisitionAmountPlusCosts shouldBe AmountInPence(325_000_00)
       }
       "Return an accurate totalReliefs value" in {
-        breakdown.totalReliefs shouldBe AmountInPence(600000)
+        breakdown.totalReliefs shouldBe AmountInPence(6_000_00)
       }
       "Return an accurate initialGainOrLoss value" in {
-        breakdown.initialGainOrLoss shouldBe AmountInPence(5900000)
+        breakdown.initialGainOrLoss shouldBe AmountInPence(59_000_00)
       }
       "Return an accurate acquisitionOrRebased value" in {
-        breakdown.acquisitionOrRebased shouldBe AmountInPence(30000000)
+        breakdown.acquisitionOrRebased shouldBe AmountInPence(300_000_00)
       }
       "Return an accurate gainOrLossAfterReliefs value" in {
-        breakdown.gainOrLossAfterReliefs shouldBe AmountInPence(5300000)
+        breakdown.gainOrLossAfterReliefs shouldBe AmountInPence(53_000_00)
       }
 
     }
@@ -181,8 +181,8 @@ class CalculatedGlarBreakdownSpec extends AnyWordSpec with Matchers {
         shouldUseRebase = true,
         rebasedAcquisitionPrice = None
       )
-      "Throw an accurate exception" in {
-        assertThrows[Exception](breakdown.acquisitionOrRebased)
+      "Throw an exception" in {
+        assertThrows[Exception](breakdown.acquisitionOrRebased) //edge case - shouldn't happen
       }
     }
   }
