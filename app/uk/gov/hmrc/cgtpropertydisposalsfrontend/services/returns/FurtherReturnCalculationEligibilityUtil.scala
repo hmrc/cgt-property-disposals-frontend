@@ -374,9 +374,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
       acquisitionCosts = acquisitionDetailsAnswers.acquisitionFees,
       improvementCosts = acquisitionDetailsAnswers.improvementCosts,
       privateResidentReliefs = reliefDetailsAnswers.privateResidentsRelief,
-      lettingRelief = reliefDetailsAnswers.lettingsRelief,
-      shouldUseRebase = acquisitionDetailsAnswers.shouldUseRebase,
-      rebasedAcquisitionPrice = acquisitionDetailsAnswers.rebasedAcquisitionPrice
+      lettingRelief = reliefDetailsAnswers.lettingsRelief
     )
 
 }

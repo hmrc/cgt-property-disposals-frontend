@@ -51,13 +51,9 @@
     @calcSum(
         List(
             SumPartDisplay(
-                label = if(calculatedValues.shouldUseRebase){
-                            messages("calculator.acquisitionPrice.rebased")
-                        }else{
-                            messages("calculator.acquisitionPrice")
-                        },
+                label = messages("calculator.acquisitionPrice"),
                 operator = None,
-                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedValues.acquisitionOrRebased.inPounds())
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedValues.acquisitionPrice.inPounds())
             ),
             SumPartDisplay(
                 label = messages("calculator.improvementCosts"),

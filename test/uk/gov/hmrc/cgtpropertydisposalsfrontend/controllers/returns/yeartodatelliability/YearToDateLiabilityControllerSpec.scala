@@ -4086,9 +4086,7 @@ class YearToDateLiabilityControllerSpec
                 AmountInPence.zero,
                 AmountInPence.zero,
                 AmountInPence.zero,
-                AmountInPence.zero,
-                false,
-                None
+                AmountInPence.zero
               )
               val taxableGainOrLossCalculation   =
                 sample[TaxableGainOrLossCalculation].copy(taxableGainOrLoss = taxableGain)
@@ -4293,9 +4291,7 @@ class YearToDateLiabilityControllerSpec
               AmountInPence.zero,
               AmountInPence.zero,
               AmountInPence.zero,
-              AmountInPence.zero,
-              false,
-              None
+              AmountInPence.zero
             )
             val taxableGainOrLossCalculation   =
               sample[TaxableGainOrLossCalculation].copy(taxableGainOrLoss = taxableGain)

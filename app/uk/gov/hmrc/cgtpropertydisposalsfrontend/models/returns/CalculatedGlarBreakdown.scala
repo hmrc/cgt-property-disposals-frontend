@@ -25,9 +25,7 @@ final case class CalculatedGlarBreakdown(
   disposalFees: AmountInPence,
   privateResidentReliefs: AmountInPence,
   lettingRelief: AmountInPence,
-  improvementCosts: AmountInPence,
-  shouldUseRebase: Boolean,
-  rebasedAcquisitionPrice: Option[AmountInPence]
+  improvementCosts: AmountInPence
 )
 
 object CalculatedGlarBreakdown {
@@ -35,18 +33,10 @@ object CalculatedGlarBreakdown {
   implicit class CalculatedGlarBreakdownOps(private val c: CalculatedGlarBreakdown) extends AnyVal {
     def propertyDisposalAmountLessCosts: AmountInPence    = c.disposalPrice -- c.disposalFees
     def propertyAcquisitionAmountPlusCosts: AmountInPence =
-      acquisitionOrRebased ++ c.improvementCosts ++ c.acquisitionCosts
+      c.acquisitionPrice ++ c.improvementCosts ++ c.acquisitionCosts
     def totalReliefs: AmountInPence                       = c.privateResidentReliefs ++ c.lettingRelief
     def initialGainOrLoss: AmountInPence                  = propertyDisposalAmountLessCosts -- propertyAcquisitionAmountPlusCosts
 
-    def acquisitionOrRebased: AmountInPence = {
-      val initialGainOrLossRebase = (c.shouldUseRebase, c.rebasedAcquisitionPrice) match {
-        case (true, Some(rebasedAcquisitionPrice)) => rebasedAcquisitionPrice
-        case (false, _)                            => c.acquisitionPrice
-        case (true, None)                          => throw new Exception("Unreachable")
-      }
-      initialGainOrLossRebase
-    }
     def gainOrLossAfterReliefs: AmountInPence =
       if (initialGainOrLoss.isPositive) {
         (initialGainOrLoss -- totalReliefs).withFloorZero
