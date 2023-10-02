@@ -17,8 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
 import cats.instances.future._
-import cats.instances.option._
-import cats.syntax.traverse._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
@@ -28,8 +26,8 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, NonGovernmentGatewayUser, Organisation}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RetrievedUserType, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
@@ -58,11 +56,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     auth: AuthorisedFunctions,
     request: MessagesRequest[A]
   ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] = {
-
-    implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter
-        .fromRequestAndSession(request, request.session)
-
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
     auth
       .authorised()
       .retrieve(
@@ -79,21 +73,13 @@ class AuthenticatedActionWithRetrievedData @Inject() (
             case Some(AffinityGroup.Agent) =>
               Future.successful(handleAgent(request, ggCredId, enrolments))
 
-            case Some(AffinityGroup.Individual) =>
+            case Some(ag) if ag == AffinityGroup.Individual || ag == AffinityGroup.Organisation =>
+              val affinityGroup = ag match {
+                case AffinityGroup.Individual   => Right(AffinityGroup.Individual)
+                case AffinityGroup.Organisation => Left(AffinityGroup.Organisation)
+              }
               handleIndividualOrOrganisation(
-                Right(AffinityGroup.Individual),
-                cl,
-                maybeNino,
-                maybeSautr,
-                maybeEmail,
-                enrolments,
-                ggCredId,
-                request
-              )
-
-            case Some(AffinityGroup.Organisation) =>
-              handleIndividualOrOrganisation(
-                Left(AffinityGroup.Organisation),
+                affinityGroup,
                 cl,
                 maybeNino,
                 maybeSautr,
@@ -145,7 +131,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
               )
             )
 
-          case (Right(AffinityGroup.Individual), cl, Some(nino)) if cl >= ConfidenceLevel.L200 =>
+          case (Right(AffinityGroup.Individual), cl, Some(nino)) =>
             Right(
               AuthenticatedRequestWithRetrievedData(
                 RetrievedUserType.Individual(
@@ -198,7 +184,8 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     }
     Right(
       AuthenticatedRequestWithRetrievedData(
-        RetrievedUserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
+        RetrievedUserType
+          .Subscribed(CgtReference(cgtReference.value), ggCredId),
         Some(userType),
         request
       )
