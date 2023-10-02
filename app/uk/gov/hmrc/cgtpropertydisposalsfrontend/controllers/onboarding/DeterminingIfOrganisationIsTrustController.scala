@@ -124,10 +124,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                 )
               ).map {
                 case Left(e) =>
-                  logger.warn(
-                    "Could not update session data with reporting for trust answer",
-                    e
-                  )
+                  logger.warn("Could not update session data with reporting for trust answer", e)
                   errorHandler.errorResult()
 
                 case Right(_) =>
@@ -210,10 +207,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                   )
                 ).map {
                   case Left(e) =>
-                    logger.warn(
-                      "Could not update session data with has TRN answer",
-                      e
-                    )
+                    logger.warn("Could not update session data with has TRN answer", e)
                     errorHandler.errorResult()
 
                   case Right(_) =>

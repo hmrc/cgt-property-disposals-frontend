@@ -103,10 +103,7 @@ class InsufficientConfidenceLevelController @Inject() (
                 )
               ).map {
                 case Left(e) =>
-                  logger.warn(
-                    "Could not update session after has NINO page submit",
-                    e
-                  )
+                  logger.warn("Could not update session after has NINO page submit", e)
                   errorHandler.errorResult()
 
                 case Right(_) =>
@@ -178,10 +175,7 @@ class InsufficientConfidenceLevelController @Inject() (
                   )
                 ).map {
                   case Left(e) =>
-                    logger.warn(
-                      "Could not update session after has SAUTR page submit",
-                      e
-                    )
+                    logger.warn("Could not update session after has SAUTR page submit", e)
                     errorHandler.errorResult()
 
                   case Right(_) =>

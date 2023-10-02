@@ -261,10 +261,7 @@ class HomePageController @Inject() (
           )
           .fold(
             { e =>
-              logger.warn(
-                "Could not start payments journey to pay total amount outstanding",
-                e
-              )
+              logger.warn("Could not start payments journey to pay total amount outstanding", e)
               errorHandler.errorResult()
             },
             { journey =>

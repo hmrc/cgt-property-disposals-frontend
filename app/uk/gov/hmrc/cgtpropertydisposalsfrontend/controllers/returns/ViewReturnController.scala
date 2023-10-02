@@ -124,9 +124,7 @@ class ViewReturnController @Inject() (
         returnSummary.charges
           .find(_.chargeReference === chargeReference)
           .fold[Future[Result]] {
-            logger.warn(
-              s"Could not find charge with charge reference '$chargeReference' for $details"
-            )
+            logger.warn(s"Could not find charge with charge reference '$chargeReference' for $details")
             NotFound
           } { charge =>
             paymentsService
@@ -144,12 +142,7 @@ class ViewReturnController @Inject() (
                     .warn(s"Could not start payments journey for $details", e)
                   errorHandler.errorResult()
                 },
-                { paymentsJourney =>
-                  logger.info(
-                    s"Started payments journey with journey id ${paymentsJourney.journeyId} for $details}"
-                  )
-                  Redirect(paymentsJourney.nextUrl)
-                }
+                paymentsJourney => Redirect(paymentsJourney.nextUrl)
               )
           }
 

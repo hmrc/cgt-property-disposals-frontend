@@ -117,9 +117,7 @@ class SubscriptionController @Inject() (
         },
         {
           case SubscriptionSuccessful(cgtReferenceNumber) =>
-            logger.info(
-              s"Successfully subscribed with cgt id $cgtReferenceNumber"
-            )
+            logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
             auditService
               .sendEvent(
                 "subscriptionRequest",
@@ -128,9 +126,7 @@ class SubscriptionController @Inject() (
               )
             Redirect(routes.SubscriptionController.subscribed())
           case AlreadySubscribed                          =>
-            logger.info(
-              "Response to subscription request indicated that the user has already subscribed to cgt"
-            )
+            logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
             auditService.sendEvent(
               "accessWithWrongGGAccount",
               WrongGGAccountEvent(

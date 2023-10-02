@@ -314,11 +314,7 @@ class ReturnsServiceImpl @Inject() (
       s"Deleting draft returns that have been sent or are invalid: ${ids.mkString(", ")}"
     )
     deleteDraftReturns(ids).fold(
-      e =>
-        logger.warn(
-          s"Could not delete draft returns with ids [${ids.mkString(" ")}]",
-          e
-        ),
+      e => logger.warn(s"Could not delete draft returns with ids [${ids.mkString(" ")}]", e),
       _ => logger.info(s"Deleted draft returns with ids [${ids.mkString(" ")}] ")
     )
   }
