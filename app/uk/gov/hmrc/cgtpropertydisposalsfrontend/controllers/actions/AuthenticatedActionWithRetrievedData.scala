@@ -266,41 +266,23 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     enrolments: Enrolments,
     email: Option[String],
     ggCredId: GGCredId
-  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
+  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
     // work out if it is an organisation or not
-    enrolments.getEnrolment(TrustsEnrolment.key) match {
-      case None =>
-        Right(
-          AuthenticatedRequestWithRetrievedData(
-            RetrievedUserType
-              .OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId),
-            Some(Organisation),
-            request
-          )
-        )
-
+    val id = enrolments.getEnrolment(TrustsEnrolment.key) match {
+      case None                 => Right(RetrievedUserType.OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId))
       case Some(trustEnrolment) =>
-        trustEnrolment
-          .getIdentifier(TrustsEnrolment.sautrIdentifier)
-          .fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] {
+        trustEnrolment.getIdentifier(TrustsEnrolment.sautrIdentifier) match {
+          case None     =>
             logger.warn(
               s"Could not find SAUTR identifier for user with trust enrolment $trustEnrolment. " +
                 s"Found identifier keys [${trustEnrolment.identifiers.map(_.key).mkString(",")}]"
             )
             Left(errorHandler.errorResult(Some(Organisation))(request))
-          }(id =>
-            Right(
-              AuthenticatedRequestWithRetrievedData(
-                RetrievedUserType.Trust(
-                  SAUTR(id.value),
-                  email.filter(_.nonEmpty).map(Email(_)),
-                  ggCredId
-                ),
-                Some(Organisation),
-                request
-              )
-            )
-          )
+          case Some(id) =>
+            Right(RetrievedUserType.Trust(SAUTR(id.value), email.filter(_.nonEmpty).map(Email(_)), ggCredId))
+        }
     }
+    id.map(id => AuthenticatedRequestWithRetrievedData(id, Some(Organisation), request))
+  }
 
 }
