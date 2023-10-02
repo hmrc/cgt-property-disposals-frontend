@@ -61,25 +61,22 @@ class SubscriptionReadyAction @Inject() (
     implicit val hc: HeaderCarrier = HeaderCarrierConverter
       .fromRequestAndSession(request, request.session)
 
-    sessionStore
-      .get()
-      .map(
-        _.leftMap { e =>
-          logger.warn("Could not get session data", e)
-          errorHandler.errorResult(None)(request)
-        }.flatMap { maybeSessionData =>
-          (maybeSessionData, maybeSessionData.flatMap(_.journeyStatus)) match {
-            case (
-                  Some(sessionData),
-                  Some(ready: SubscriptionStatus.SubscriptionReady)
-                ) =>
-              Right(RequestWithSubscriptionReady(ready, sessionData, request))
-
-            case (_, _) =>
-              Left(Redirect(controllers.routes.StartController.start()))
-          }
-        }
-      )
+    lazy val redirect = Redirect(controllers.routes.StartController.start())
+    for {
+      response <- sessionStore.get()
+    } yield for {
+      maybeSessionData <- response.left.map { e =>
+                            logger.warn("Could not get session data", e)
+                            errorHandler.errorResult(None)(request)
+                          }
+      sessionData      <- maybeSessionData.toRight(redirect)
+      ready            <- sessionData.journeyStatus.toRight(redirect)
+      result           <- ready match {
+                            case ready: SubscriptionStatus.SubscriptionReady =>
+                              Right(RequestWithSubscriptionReady(ready, sessionData, request))
+                            case _                                           => Left(redirect)
+                          }
+    } yield result
   }
 
 }
