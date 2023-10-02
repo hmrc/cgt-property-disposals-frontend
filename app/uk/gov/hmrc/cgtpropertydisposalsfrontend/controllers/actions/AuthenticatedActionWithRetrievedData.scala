@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import cats.instances.either._
 import cats.instances.future._
 import cats.instances.option._
-import cats.syntax.either._
 import cats.syntax.traverse._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
@@ -244,34 +242,24 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     request: MessagesRequest[A],
     ggCredId: GGCredId,
     allEnrolments: Enrolments
-  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
-    val maybeArn = allEnrolments
+  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
+    allEnrolments
       .getEnrolment(AgentsEnrolment.key)
-      .map { enrolment =>
-        Either.fromOption(
-          enrolment
-            .getIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier)
-            .map(id => AgentReferenceNumber(id.value)),
+      .map(_.getIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier).map(x => AgentReferenceNumber(x.value)))
+      .sequence
+      .map(arn =>
+        AuthenticatedRequestWithRetrievedData(
+          RetrievedUserType.Agent(ggCredId, arn),
+          Some(UserType.Agent),
+          request
+        )
+      )
+      .toRight {
+        logger.warn(
           s"Agent has ${AgentsEnrolment.key} enrolment but does not have ${AgentsEnrolment.agentReferenceNumberIdentifier} identifier"
         )
+        errorHandler.errorResult(Some(UserType.Agent))(request)
       }
-      .sequence[Either[String, *], AgentReferenceNumber]
-
-    maybeArn.fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]](
-      { e =>
-        logger.warn(e)
-        Left(errorHandler.errorResult(Some(UserType.Agent))(request))
-      },
-      arn =>
-        Right(
-          AuthenticatedRequestWithRetrievedData(
-            RetrievedUserType.Agent(ggCredId, arn),
-            Some(UserType.Agent),
-            request
-          )
-        )
-    )
-  }
 
   private def handleOrganisation[A](
     request: MessagesRequest[A],
