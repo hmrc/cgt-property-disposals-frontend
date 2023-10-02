@@ -192,22 +192,17 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     affinityGroup: Either[AffinityGroup.Organisation.type, AffinityGroup.Individual.type],
     request: MessagesRequest[A]
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
-    def authenticatedRequest(userType: UserType) =
+    val userType = affinityGroup match {
+      case Right(AffinityGroup.Individual)  => UserType.Individual
+      case Left(AffinityGroup.Organisation) => UserType.Organisation
+    }
+    Right(
       AuthenticatedRequestWithRetrievedData(
-        RetrievedUserType
-          .Subscribed(CgtReference(cgtReference.value), ggCredId),
+        RetrievedUserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
         Some(userType),
         request
       )
-
-    affinityGroup match {
-      case Right(AffinityGroup.Individual) =>
-        Right(authenticatedRequest(UserType.Individual))
-
-      case Left(AffinityGroup.Organisation) =>
-        Right(authenticatedRequest(UserType.Organisation))
-
-    }
+    )
   }
 
   private def withGGCredentials[A](
