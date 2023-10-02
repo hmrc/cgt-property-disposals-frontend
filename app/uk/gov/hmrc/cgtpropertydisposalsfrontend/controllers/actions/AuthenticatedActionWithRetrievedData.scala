@@ -242,24 +242,27 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     request: MessagesRequest[A],
     ggCredId: GGCredId,
     allEnrolments: Enrolments
-  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
-    allEnrolments
-      .getEnrolment(AgentsEnrolment.key)
-      .map(_.getIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier).map(x => AgentReferenceNumber(x.value)))
-      .sequence
-      .map(arn =>
-        AuthenticatedRequestWithRetrievedData(
-          RetrievedUserType.Agent(ggCredId, arn),
-          Some(UserType.Agent),
-          request
-        )
+  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
+    val arn = allEnrolments.getEnrolment(AgentsEnrolment.key) match {
+      case None             => Right(None)
+      case Some(enrolments) =>
+        enrolments.getIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier) match {
+          case None    =>
+            logger.warn(
+              s"Agent has ${AgentsEnrolment.key} enrolment but does not have ${AgentsEnrolment.agentReferenceNumberIdentifier} identifier"
+            )
+            Left(errorHandler.errorResult(Some(UserType.Agent))(request))
+          case Some(x) => Right(Some(AgentReferenceNumber(x.value)))
+        }
+    }
+    arn.map(arn =>
+      AuthenticatedRequestWithRetrievedData(
+        RetrievedUserType.Agent(ggCredId, arn),
+        Some(UserType.Agent),
+        request
       )
-      .toRight {
-        logger.warn(
-          s"Agent has ${AgentsEnrolment.key} enrolment but does not have ${AgentsEnrolment.agentReferenceNumberIdentifier} identifier"
-        )
-        errorHandler.errorResult(Some(UserType.Agent))(request)
-      }
+    )
+  }
 
   private def handleOrganisation[A](
     request: MessagesRequest[A],
