@@ -328,26 +328,22 @@ class StartController @Inject() (
     subscribedDetails: Option[SubscribedDetails]
   )(implicit
     request: RequestWithSessionDataAndRetrievedData[_]
-  ): Future[Result] = {
-    val result = for {
-      subscribedDetails                         <- subscribedDetails.fold(
-                                                     subscriptionService
-                                                       .getSubscribedDetails(cgtReference)
-                                                       .subflatMap(
-                                                         Either.fromOption(
-                                                           _,
-                                                           Error(
-                                                             s"Could not find subscribed details for cgt reference ${cgtReference.value}"
-                                                           )
-                                                         )
-                                                       )
-                                                   )(EitherT.pure[Future, Error](_))
+  ): Future[Result] =
+    (for {
+      subscribedDetails                         <-
+        subscribedDetails match {
+          case None          =>
+            subscriptionService
+              .getSubscribedDetails(cgtReference)
+              .subflatMap(
+                _.toRight(Error(s"Could not find subscribed details for cgt reference ${cgtReference.value}"))
+              )
+          case Some(details) => EitherT.pure[Future, Error](details)
+        }
       sentReturns                               <- returnsService.listReturns(cgtReference)
       draftReturns                              <- returnsService.getDraftReturns(cgtReference, sentReturns)
-      unsetDraftReturnFlagAndUpdatedSentReturns <- returnsService.updateCorrectTaxYearToSentReturns(
-                                                     subscribedDetails.cgtReference,
-                                                     sentReturns
-                                                   )
+      unsetDraftReturnFlagAndUpdatedSentReturns <-
+        returnsService.updateCorrectTaxYearToSentReturns(subscribedDetails.cgtReference, sentReturns)
 
       updatedDraftReturns = if (unsetDraftReturnFlagAndUpdatedSentReturns._1) {
                               draftReturns.map(returnsService.unsetUnwantedSectionsToDraftReturn)
@@ -371,19 +367,11 @@ class StartController @Inject() (
                )
              )
            )
-    } yield ()
-
-    result.fold(
-      { e =>
+    } yield Redirect(controllers.accounts.homepage.routes.HomePageController.homepage()))
+      .valueOr { e =>
         logger.warn("Could not get subscribed details", e)
         errorHandler.errorResult(request.authenticatedRequest.userType)
-      },
-      _ =>
-        Redirect(
-          controllers.accounts.homepage.routes.HomePageController.homepage()
-        )
-    )
-  }
+      }
 
   private def handleNonTrustOrganisation(
     ggCredId: GGCredId,
