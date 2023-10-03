@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding
 
-import cats.data.EitherT
+import cats.data.{EitherT, RWS}
 import cats.instances.future._
 import cats.instances.int._
 import cats.syntax.either._
@@ -82,54 +82,37 @@ class SubscriptionServiceImpl @Inject() (
     subscriptionDetails: SubscriptionDetails,
     lang: Lang
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubscriptionResponse] =
-    connector
-      .subscribe(subscriptionDetails, lang)
-      .subflatMap { response =>
-        if (response.status === OK) {
-          response.parseJSON[SubscriptionSuccessful]().leftMap(Error(_))
-        } else if (response.status === CONFLICT) {
+    connector.subscribe(subscriptionDetails, lang).subflatMap { response =>
+      response.status match {
+        case OK       => response.parseJSON[SubscriptionSuccessful]().leftMap(Error(_))
+        case CONFLICT =>
           metrics.accessWithWrongGGAccountCounter.inc()
           Right(AlreadySubscribed)
-        } else {
-          Left(
-            Error(s"call to subscribe came back with status ${response.status}")
-          )
-        }
+        case _        => Left(Error(s"call to subscribe came back with status ${response.status}"))
       }
+    }
 
   override def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, RegisteredWithoutId] =
-    connector
-      .registerWithoutId(registrationDetails)
-      .subflatMap { response =>
-        if (response.status === OK) {
-          response.parseJSON[RegisteredWithoutId]().leftMap(Error(_))
-        } else {
-          Left(
-            Error(
-              s"Call to register without id came back with status ${response.status}"
-            )
-          )
-        }
+    connector.registerWithoutId(registrationDetails).subflatMap { response =>
+      response.status match {
+        case OK     => response.parseJSON[RegisteredWithoutId]().leftMap(Error(_))
+        case status => Left(Error(s"Call to register without id came back with status $status"))
       }
+    }
 
   override def hasFailedCgtEnrolment(
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]] =
     connector.getSubscriptionStatus().subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[CgtReference]()
-          .leftMap(Error(_))
-          .map(cgtReference => Some(cgtReference))
-      } else if (response.status === NO_CONTENT) {
-        Right(None)
-      } else {
-        Left(
-          Error(
-            s"call to get subscription status came back with status ${response.status}"
-          )
-        )
+      response.status match {
+        case OK         =>
+          response
+            .parseJSON[CgtReference]()
+            .leftMap(Error(_))
+            .map(cgtReference => Some(cgtReference))
+        case NO_CONTENT => Right(None)
+        case status     => Left(Error(s"call to get subscription status came back with status $status"))
       }
     }
 
@@ -137,16 +120,9 @@ class SubscriptionServiceImpl @Inject() (
     hc: HeaderCarrier
   ): EitherT[Future, Error, Option[SubscribedDetails]] =
     connector.getSubscribedDetails(cgtReference).subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[GetSubscriptionResponse]()
-          .bimap(Error(_), _.subscribedDetails)
-      } else {
-        Left(
-          Error(
-            s"Call to get subscribed details came back with status ${response.status}"
-          )
-        )
+      response.status match {
+        case OK     => response.parseJSON[GetSubscriptionResponse]().bimap(Error(_), _.subscribedDetails)
+        case status => Left(Error(s"Call to get subscribed details came back with status $status"))
       }
     }
 
@@ -155,16 +131,9 @@ class SubscriptionServiceImpl @Inject() (
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] =
-    connector.updateSubscribedDetails(subscribedUpdateDetails).subflatMap { response =>
-      if (response.status === OK) {
-        Right(())
-      } else {
-        Left(
-          Error(
-            s"Call to get subscribed details came back with status ${response.status}"
-          )
-        )
-      }
+    connector.updateSubscribedDetails(subscribedUpdateDetails).map(_.status).subflatMap {
+      case OK     => Right(())
+      case status => Left(Error(s"Call to get subscribed details came back with status $status"))
     }
 
   override def registerWithoutIdAndSubscribe(
