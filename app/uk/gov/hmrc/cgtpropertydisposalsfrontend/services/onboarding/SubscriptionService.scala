@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding
 
-import cats.data.{EitherT, RWS}
+import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.int._
 import cats.syntax.either._
-import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.{CONFLICT, NO_CONTENT, OK}
 import play.api.i18n.Lang
@@ -29,11 +27,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsC
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource.{ManuallyEntered => ManuallyEnteredAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource.{ManuallyEntered => ManuallyEnteredEmail}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactNameSource.{ManuallyEntered => ManuallyEnteredContactName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource.{ManuallyEntered => ManuallyEnteredEmail}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService.GetSubscriptionResponse

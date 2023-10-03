@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Redirect
