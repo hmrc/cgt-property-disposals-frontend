@@ -31,15 +31,12 @@ object HttpResponseOps {
       for {
         json          <-
           Try(response.json).toEither.leftMap(error => s"Could not read http response as JSON: ${error.getMessage}")
-        // response.json failed in this case - there was no JSON in the response
         jsLookupResult =
           path match {
             case None       => JsDefined(json)
             case Some(path) => json \ path
           }
-        // use Option here to filter out null values
         result        <- jsLookupResult.toOption.toRight("No JSON found in body of http response")
-        // there was JSON in the response but we couldn't read it
         deserialized  <- result
                            .validate[A]
                            .asEither
