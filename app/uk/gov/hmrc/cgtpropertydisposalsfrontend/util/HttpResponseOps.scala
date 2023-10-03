@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
-import play.api.libs.json.{JsDefined, JsError, JsLookupResult, Reads}
+import play.api.libs.json.{JsDefined, JsError, Reads}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.JsErrorOps._
 import uk.gov.hmrc.http.HttpResponse
 
@@ -29,21 +29,21 @@ object HttpResponseOps {
 
     def parseJSON[A](path: Option[String] = None)(implicit reads: Reads[A]): Either[String, A] =
       for {
+        json          <-
+          Try(response.json).toEither.leftMap(error => s"Could not read http response as JSON: ${error.getMessage}")
         // response.json failed in this case - there was no JSON in the response
-        jsLookupResult <-
-          try path match {
-            case None       => Right(JsDefined(response.json))
-            case Some(path) => Right(response.json \ path)
-          } catch {
-            case error: Throwable => Left(s"Could not read http response as JSON: ${error.getMessage}")
+        jsLookupResult =
+          path match {
+            case None       => JsDefined(json)
+            case Some(path) => json \ path
           }
         // use Option here to filter out null values
-        result         <- jsLookupResult.toOption.toRight("No JSON found in body of http response")
+        result        <- jsLookupResult.toOption.toRight("No JSON found in body of http response")
         // there was JSON in the response but we couldn't read it
-        deserialized   <- result
-                            .validate[A]
-                            .asEither
-                            .leftMap(errors => s"Could not parse http response JSON: ${JsError(errors).prettyPrint()}")
+        deserialized  <- result
+                           .validate[A]
+                           .asEither
+                           .leftMap(errors => s"Could not parse http response JSON: ${JsError(errors).prettyPrint()}")
       } yield deserialized
 
   }
