@@ -313,10 +313,7 @@ trait AddressController[A <: AddressJourneyType] {
 
                   result.fold(
                     { e =>
-                      logger.warn(
-                        s"Could not do address lookup for postcode",
-                        e
-                      )
+                      logger.warn(s"Could not do address lookup for postcode", e)
                       errorHandler.errorResult()
                     },
                     r =>

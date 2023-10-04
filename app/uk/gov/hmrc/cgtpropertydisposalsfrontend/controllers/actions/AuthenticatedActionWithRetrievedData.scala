@@ -16,11 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import cats.instances.either._
 import cats.instances.future._
-import cats.instances.option._
-import cats.syntax.either._
-import cats.syntax.traverse._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
@@ -30,8 +26,8 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, NonGovernmentGatewayUser, Organisation}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RetrievedUserType, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
@@ -60,11 +56,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     auth: AuthorisedFunctions,
     request: MessagesRequest[A]
   ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] = {
-
-    implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter
-        .fromRequestAndSession(request, request.session)
-
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
     auth
       .authorised()
       .retrieve(
@@ -81,21 +73,13 @@ class AuthenticatedActionWithRetrievedData @Inject() (
             case Some(AffinityGroup.Agent) =>
               Future.successful(handleAgent(request, ggCredId, enrolments))
 
-            case Some(AffinityGroup.Individual) =>
+            case Some(ag) if ag == AffinityGroup.Individual || ag == AffinityGroup.Organisation =>
+              val affinityGroup = ag match {
+                case AffinityGroup.Individual   => Right(AffinityGroup.Individual)
+                case AffinityGroup.Organisation => Left(AffinityGroup.Organisation)
+              }
               handleIndividualOrOrganisation(
-                Right(AffinityGroup.Individual),
-                cl,
-                maybeNino,
-                maybeSautr,
-                maybeEmail,
-                enrolments,
-                ggCredId,
-                request
-              )
-
-            case Some(AffinityGroup.Organisation) =>
-              handleIndividualOrOrganisation(
-                Left(AffinityGroup.Organisation),
+                affinityGroup,
                 cl,
                 maybeNino,
                 maybeSautr,
@@ -147,7 +131,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
               )
             )
 
-          case (Right(AffinityGroup.Individual), cl, Some(nino)) if cl >= ConfidenceLevel.L200 =>
+          case (Right(AffinityGroup.Individual), cl, Some(nino)) =>
             Right(
               AuthenticatedRequestWithRetrievedData(
                 RetrievedUserType.Individual(
@@ -194,22 +178,18 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     affinityGroup: Either[AffinityGroup.Organisation.type, AffinityGroup.Individual.type],
     request: MessagesRequest[A]
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
-    def authenticatedRequest(userType: UserType) =
+    val userType = affinityGroup match {
+      case Right(AffinityGroup.Individual)  => UserType.Individual
+      case Left(AffinityGroup.Organisation) => UserType.Organisation
+    }
+    Right(
       AuthenticatedRequestWithRetrievedData(
         RetrievedUserType
           .Subscribed(CgtReference(cgtReference.value), ggCredId),
         Some(userType),
         request
       )
-
-    affinityGroup match {
-      case Right(AffinityGroup.Individual) =>
-        Right(authenticatedRequest(UserType.Individual))
-
-      case Left(AffinityGroup.Organisation) =>
-        Right(authenticatedRequest(UserType.Organisation))
-
-    }
+    )
   }
 
   private def withGGCredentials[A](
@@ -245,31 +225,24 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     ggCredId: GGCredId,
     allEnrolments: Enrolments
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
-    val maybeArn = allEnrolments
-      .getEnrolment(AgentsEnrolment.key)
-      .map { enrolment =>
-        Either.fromOption(
-          enrolment
-            .getIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier)
-            .map(id => AgentReferenceNumber(id.value)),
-          s"Agent has ${AgentsEnrolment.key} enrolment but does not have ${AgentsEnrolment.agentReferenceNumberIdentifier} identifier"
-        )
-      }
-      .sequence[Either[String, *], AgentReferenceNumber]
-
-    maybeArn.fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]](
-      { e =>
-        logger.warn(e)
-        Left(errorHandler.errorResult(Some(UserType.Agent))(request))
-      },
-      arn =>
-        Right(
-          AuthenticatedRequestWithRetrievedData(
-            RetrievedUserType.Agent(ggCredId, arn),
-            Some(UserType.Agent),
-            request
-          )
-        )
+    val arn = allEnrolments.getEnrolment(AgentsEnrolment.key) match {
+      case None             => Right(None)
+      case Some(enrolments) =>
+        enrolments.getIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier) match {
+          case None    =>
+            logger.warn(
+              s"Agent has ${AgentsEnrolment.key} enrolment but does not have ${AgentsEnrolment.agentReferenceNumberIdentifier} identifier"
+            )
+            Left(errorHandler.errorResult(Some(UserType.Agent))(request))
+          case Some(x) => Right(Some(AgentReferenceNumber(x.value)))
+        }
+    }
+    arn.map(arn =>
+      AuthenticatedRequestWithRetrievedData(
+        RetrievedUserType.Agent(ggCredId, arn),
+        Some(UserType.Agent),
+        request
+      )
     )
   }
 
@@ -278,41 +251,23 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     enrolments: Enrolments,
     email: Option[String],
     ggCredId: GGCredId
-  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
+  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
     // work out if it is an organisation or not
-    enrolments.getEnrolment(TrustsEnrolment.key) match {
-      case None =>
-        Right(
-          AuthenticatedRequestWithRetrievedData(
-            RetrievedUserType
-              .OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId),
-            Some(Organisation),
-            request
-          )
-        )
-
+    val id = enrolments.getEnrolment(TrustsEnrolment.key) match {
+      case None                 => Right(RetrievedUserType.OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId))
       case Some(trustEnrolment) =>
-        trustEnrolment
-          .getIdentifier(TrustsEnrolment.sautrIdentifier)
-          .fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] {
+        trustEnrolment.getIdentifier(TrustsEnrolment.sautrIdentifier) match {
+          case None     =>
             logger.warn(
               s"Could not find SAUTR identifier for user with trust enrolment $trustEnrolment. " +
                 s"Found identifier keys [${trustEnrolment.identifiers.map(_.key).mkString(",")}]"
             )
             Left(errorHandler.errorResult(Some(Organisation))(request))
-          }(id =>
-            Right(
-              AuthenticatedRequestWithRetrievedData(
-                RetrievedUserType.Trust(
-                  SAUTR(id.value),
-                  email.filter(_.nonEmpty).map(Email(_)),
-                  ggCredId
-                ),
-                Some(Organisation),
-                request
-              )
-            )
-          )
+          case Some(id) =>
+            Right(RetrievedUserType.Trust(SAUTR(id.value), email.filter(_.nonEmpty).map(Email(_)), ggCredId))
+        }
     }
+    id.map(id => AuthenticatedRequestWithRetrievedData(id, Some(Organisation), request))
+  }
 
 }

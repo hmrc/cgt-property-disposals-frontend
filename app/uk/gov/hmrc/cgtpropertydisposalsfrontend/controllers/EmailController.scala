@@ -261,9 +261,7 @@ trait EmailController[T <: EmailJourneyType] {
                   )
                 )
               } else {
-                logger.warn(
-                  "Email verified endpoint called but email was not verified"
-                )
+                logger.warn("Email verified endpoint called but email was not verified")
                 errorHandler.errorResult()
               }
             }

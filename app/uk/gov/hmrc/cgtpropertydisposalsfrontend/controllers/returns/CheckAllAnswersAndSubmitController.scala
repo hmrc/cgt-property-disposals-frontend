@@ -180,9 +180,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                   )
 
                 case SubmitReturnSuccess(r) =>
-                  logger.info(
-                    s"Successfully submitted return with submission id ${r.formBundleId}"
-                  )
+                  logger.info(s"Successfully submitted return with submission id ${r.formBundleId}")
                   Redirect(
                     routes.CheckAllAnswersAndSubmitController
                       .confirmationOfSubmission()
@@ -240,9 +238,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withJustSubmittedReturn(request) { j =>
         j.submissionResponse.charge.fold[Future[Result]] {
-          logger.warn(
-            "Could not find charge in pay return call, redirecting to homepage"
-          )
+          logger.warn("Could not find charge in pay return call, redirecting to homepage")
           Redirect(homepage.routes.HomePageController.homepage())
         } { charge =>
           paymentsService

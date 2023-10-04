@@ -1985,10 +1985,7 @@ class YearToDateLiabilityController @Inject() (
 
           result.fold(
             { e =>
-              logger.warn(
-                "Error while trying to get and handle an upscan status",
-                e
-              )
+              logger.warn("Error while trying to get and handle an upscan status", e)
               errorHandler.errorResult()
             },
             upscanUpload => handleUpscanCallback(upscanUpload.upscanCallBack)
@@ -2500,33 +2497,25 @@ class YearToDateLiabilityController @Inject() (
             }
 
           case (_: CalculatedYTDAnswers, _: DraftMultipleDisposalsReturn) =>
-            logger.warn(
-              "Found calculated year to date liability answers on a multiple disposals draft return"
-            )
+            logger.warn("Found calculated year to date liability answers on a multiple disposals draft return")
             errorHandler.errorResult()
 
           case (_: CalculatedYTDAnswers, _: DraftSingleMixedUseDisposalReturn) =>
-            logger.warn(
-              "Found calculated year to date liability answers on a single mixed use draft return"
-            )
+            logger.warn("Found calculated year to date liability answers on a single mixed use draft return")
             errorHandler.errorResult()
 
           case (
                 _: CalculatedYTDAnswers,
                 _: DraftSingleIndirectDisposalReturn
               ) =>
-            logger.warn(
-              "Found calculated year to date liability answers on a single indirect disposal draft return"
-            )
+            logger.warn("Found calculated year to date liability answers on a single indirect disposal draft return")
             errorHandler.errorResult()
 
           case (
                 _: CalculatedYTDAnswers,
                 _: DraftMultipleIndirectDisposalsReturn
               ) =>
-            logger.warn(
-              "Found calculated year to date liability answers on a multiple indirect disposals draft return"
-            )
+            logger.warn("Found calculated year to date liability answers on a multiple indirect disposals draft return")
             errorHandler.errorResult()
 
         }

@@ -407,7 +407,7 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
             f(
               validJourneyStatus,
               updateEmail(validJourneyStatus, emailToBeVerified.email),
-              Right()
+              Right(())
             )
           }
           mockStoreSession(
@@ -460,7 +460,7 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
             f(
               validJourneyStatus,
               updateEmail(validJourneyStatus, emailToBeVerified.email),
-              Right()
+              Right(())
             )
           }
           mockStoreSession(

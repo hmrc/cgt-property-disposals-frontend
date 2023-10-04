@@ -367,9 +367,7 @@ class AgentAccessController @Inject() (
           )
 
         case NonFatal(error) =>
-          logger.warn(
-            s"Could not do delegated auth rule check for agent: ${error.getMessage}"
-          )
+          logger.warn(s"Could not do delegated auth rule check for agent: ${error.getMessage}")
           errorHandler.errorResult()
       }
 

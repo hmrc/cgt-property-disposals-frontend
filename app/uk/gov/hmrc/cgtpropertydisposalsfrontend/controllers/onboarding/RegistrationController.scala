@@ -235,10 +235,7 @@ class RegistrationController @Inject() (
             )
           ).map {
             case Left(error) =>
-              logger.warn(
-                "Could not update session for enter registration email journey",
-                error
-              )
+              logger.warn("Could not update session for enter registration email journey", error)
               errorHandler.errorResult()
 
             case Right(_) =>
@@ -264,10 +261,7 @@ class RegistrationController @Inject() (
           updateSession(sessionStore, request)(_.copy(journeyStatus = Some(r)))
             .map {
               case Left(error) =>
-                logger.warn(
-                  "Could not update session for registration ready",
-                  error
-                )
+                logger.warn("Could not update session for registration ready", error)
                 errorHandler.errorResult()
 
               case Right(_) =>
@@ -358,14 +352,10 @@ class RegistrationController @Inject() (
             },
             {
               case SubscriptionSuccessful(cgtReferenceNumber) =>
-                logger.info(
-                  s"Successfully subscribed with cgt id $cgtReferenceNumber"
-                )
+                logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
                 Redirect(routes.SubscriptionController.subscribed())
               case AlreadySubscribed                          =>
-                logger.info(
-                  "Response to subscription request indicated that the user has already subscribed to cgt"
-                )
+                logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
                 auditService.sendEvent(
                   "accessWithWrongGGAccount",
                   WrongGGAccountEvent(None, ggCredId.value),
