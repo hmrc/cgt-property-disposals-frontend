@@ -76,7 +76,7 @@ class CalculatedGlarBreakdownSpec extends AnyWordSpec with Matchers {
       }
 
     }
-    "Given a loosing disposal" should {
+    "Given a loosing disposal"                               should {
       val breakdown = CalculatedGlarBreakdown(
         acquisitionPrice = AmountInPence(300_000_00),
         acquisitionCosts = AmountInPence(15_000_00),
@@ -107,7 +107,7 @@ class CalculatedGlarBreakdownSpec extends AnyWordSpec with Matchers {
         breakdown.gainOrLossAfterReliefs shouldBe AmountInPence(-135_000_00)
       }
     }
-    "using a rebase value" should {
+    "using a rebase value"                                   should {
       val breakdown = CalculatedGlarBreakdown(
         acquisitionPrice = AmountInPence(300_000_00),
         acquisitionCosts = AmountInPence(15_000_00),
@@ -138,7 +138,7 @@ class CalculatedGlarBreakdownSpec extends AnyWordSpec with Matchers {
         breakdown.gainOrLossAfterReliefs shouldBe AmountInPence(3_000_00)
       }
     }
-    "Given a rebase value while not using rebase" should {
+    "Given a rebase value while not using rebase"            should {
       val breakdown = CalculatedGlarBreakdown(
         acquisitionPrice = AmountInPence(300_000_00),
         acquisitionCosts = AmountInPence(15_000_00),
