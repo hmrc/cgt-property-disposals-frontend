@@ -622,7 +622,9 @@ class ReturnsServiceImpl @Inject() (
     hc: HeaderCarrier
   ): EitherT[Future, Error, List[ReturnSummary]] = {
     val today    = LocalDate.now()
-    val fromDate = today.minusYears(viewConfig.numberOfTaxYearsForReturns).plusDays(1L)
+    // This is when this service first went online. We have to pull all data from the beginning of time, otherwise
+    // tax owed wouldn't be accurate for old submissions.
+    val fromDate = LocalDate.parse("2020-04-06")
     // ETMP build queries from our date range in tax year batches, they have logic to reject an
     // end date that is before the end of the tax year that the toDate falls within, so we need to
     // satisfy this logic by using the end of the current tax year as our toDate
