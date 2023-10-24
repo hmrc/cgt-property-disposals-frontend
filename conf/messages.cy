@@ -1723,6 +1723,19 @@ disposalFees.capacitor.indirect.error.tooManyDecimals=Mae’n rhaid i gostau ych
 disposalFees.cyaChange=swm y costau ychwanegol
 returns.disposal-details.cya.title=Gwiriwch eich atebion
 
+disposalPrice.6.title=Am faint y gwnaethoch werthu’ch cyfran chi o’r eiddo?
+disposalPrice.6.helpText=Dyma’r swm cyfan y gwnaethoch werthu’ch cyfran chi o’r eiddo amdano. Peidiwch â thynnu unrhyw gostau na ffioedd. Byddwch yn gallu cynnwys costau prynu neu gaffael yn nes ymlaen.
+disposalPrice.5.title=Beth oedd eich cyfran chi o werth marchnadol yr eiddo pan wnaethoch ei roi i ffwrdd?
+disposalPrice.5.helpText=Byddwch yn gallu nodi unrhyw gostau ychwanegol yn nes ymlaen.
+disposalPrice.1.title=Byddwch yn gallu nodi unrhyw gostau ychwanegol yn nes ymlaen.
+disposalPrice.1.helpText=Dyma’r swm cyfan o gyfran y person o’r pris gwerthu. Peidiwch â thynnu costau na ffioedd. Byddwch yn gallu nodi costau ychwanegol yn nes ymlaen.
+disposalPrice.2.title=Beth oedd cyfran yr ystâd o elw'r gwarediad?
+disposalPrice.2.helpText=Dyma’r swm cyfan o gyfran yr ystâd o’r pris gwerthu. Peidiwch â thynnu costau na ffioedd. Byddwch yn gallu nodi costau ychwanegol yn nes ymlaen.
+disposalPrice.3.title=Beth oedd cyfran eich cleient o’r swm gwaredu?
+disposalPrice.3.helpText=Dyma’r swm cyfan o gyfran eich cleient o’r pris gwerthu. Peidiwch â thynnu unrhyw gostau na ffioedd. Byddwch yn gallu nodi unrhyw gostau ychwanegol yn nes ymlaen.
+disposalPrice.4.title=Am faint y gwnaeth yr ymddiriedolaeth werthu ei chyfran o’r eiddo?
+disposalPrice.4.helpText=Dyma’r swm cyfan o gyfran yr ymddiriedolaeth o’r pris gwerthu. Peidiwch â thynnu unrhyw gostau na ffioedd. Byddwch yn gallu nodi unrhyw gostau ychwanegol yn nes ymlaen.
+
 #===================================================
 #  SALE OR DISPOSAL DETAILS PAGES - END
 #===================================================

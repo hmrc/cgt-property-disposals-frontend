@@ -43,7 +43,8 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
-    isAmend: Boolean
+    isAmend: Boolean,
+    isShare: Boolean,
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -69,7 +70,28 @@
 @key = @{ "disposalPrice" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@title = @{ messages(s"$key$userKey$indirectKey$disposalMethodKey.title") }
+@titleAndHelpText = @{
+  (isShare, disposalMethod, representativeType) match {
+    case (true, _, Some(Capacitor | PersonalRepresentative)) =>
+      (messages("disposalPrice.1.title"), messages("disposalPrice.1.helpText"))
+    case (true, _, Some(PersonalRepresentativeInPeriodOfAdmin)) =>
+      (messages("disposalPrice.2.title"), messages("disposalPrice.2.helpText"))
+    case (true, _, None) if isAgent =>
+      (messages("disposalPrice.3.title"), messages("disposalPrice.3.helpText"))
+    case (true, _, None) if isATrust =>
+      (messages("disposalPrice.4.title"), messages("disposalPrice.4.helpText"))
+    case (true, DisposalMethod.Gifted | DisposalMethod.Other, None) =>
+      (messages("disposalPrice.5.title"), messages("disposalPrice.5.helpText"))
+    case (true, DisposalMethod.Sold, None) =>
+      (messages("disposalPrice.6.title"), messages("disposalPrice.6.helpText"))
+    case _ =>
+      val title = messages(s"$key$userKey$indirectKey$disposalMethodKey.title")
+      val helpText = messages(s"$key$userKey$indirectKey$disposalMethodKey.helpText")
+      (title, helpText)
+  }
+}
+@title=@{titleAndHelpText._1}
+@helpText=@{titleAndHelpText._2}
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
@@ -78,7 +100,7 @@
     }
     <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
     <h1 class="govuk-heading-xl">@title</h1>
-    <p class="govuk-body">@Html(messages(s"$key$userKey$indirectKey$disposalMethodKey.helpText"))</p>
+    <p class="govuk-body">@Html(helpText)</p>
     @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPriceSubmit()) {
       @govukInput(Input(
         id = key,

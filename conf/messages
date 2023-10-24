@@ -1806,6 +1806,19 @@ disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.required=Enter
 disposalPrice.capacitor.SoldOther.error.required=Enter the disposal amount
 disposalPrice.capacitor.indirect.SoldOther.error.required=Enter the disposal amount
 
+disposalPrice.6.title=How much did you sell your share of the property for?
+disposalPrice.6.helpText=This is the entire amount you sold your share of the property for. Do not subtract any costs or fees. You'll be able to include buying or acquisition costs later.
+disposalPrice.5.title=What was your share of the market value of the property when you gave it away?
+disposalPrice.5.helpText=You'll be able to enter any additional costs later.
+disposalPrice.1.title=What was the person's share of the disposal amount?
+disposalPrice.1.helpText=This is the entire amount of the person's share of the sale price. Do not subtract costs or fees. You'll be able to enter additional costs later.
+disposalPrice.2.title=What was the estate's share of the proceeds of the disposal?
+disposalPrice.2.helpText=This is the entire amount of the estate's share of the sale price. Do not subtract costs or fees. You'll be able to enter additional costs later.
+disposalPrice.3.title=What was your client's share of the disposal amount?
+disposalPrice.3.helpText=This is the entire amount of your client's share of the sale price. Do not subtract any costs or fees. You'll be able to enter any additional costs later.
+disposalPrice.4.title=How much did the trust sell their share of the property for?
+disposalPrice.4.helpText=This is the entire amount of the trust's share of the sale price. Do not subtract any costs or fees. You'll be able to enter any additional costs later.
+
 disposalPrice.SoldOther.error.invalid=How much the property was sold for must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.indirect.SoldOther.error.invalid=How much you got when you sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.agent.SoldOther.error.invalid=How much your client sold the property for must be an amount of money, like 160,000 or 23,040.50
