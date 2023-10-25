@@ -88,34 +88,19 @@ class DisposalDetailsController @Inject() (
       case Some((_, s: StartingToAmendReturn)) =>
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
 
-      case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))
-          ) =>
-        d.disposalDetailsAnswers
-          .fold[Future[Result]](
-            f(s, r, Right(d), IncompleteDisposalDetailsAnswers.empty)
-          )(f(s, r, Right(d), _))
+      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _, _))) =>
+        d.disposalDetailsAnswers match {
+          case None          => f(s, r, Right(d), IncompleteDisposalDetailsAnswers.empty)
+          case Some(answers) => f(s, r, Right(d), answers)
+        }
 
-      case Some(
-            (
-              s,
-              r @ FillingOutReturn(
-                _,
-                _,
-                _,
-                d: DraftSingleIndirectDisposalReturn,
-                _,
-                _
-              )
-            )
-          ) =>
-        val answers = IncompleteDisposalDetailsAnswers.empty.copy(
-          shareOfProperty = Some(ShareOfProperty.Full)
-        )
-        d.disposalDetailsAnswers
-          .fold[Future[Result]](
+      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftSingleIndirectDisposalReturn, _, _))) =>
+        d.disposalDetailsAnswers match {
+          case None          =>
+            val answers = IncompleteDisposalDetailsAnswers.empty.copy(shareOfProperty = Some(ShareOfProperty.Full))
             f(s, r, Left(d), answers)
-          )(f(s, r, Left(d), _))
+          case Some(answers) => f(s, r, Left(d), answers)
+        }
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
