@@ -1736,6 +1736,17 @@ disposalPrice.3.helpText=Dyma’r swm cyfan o gyfran eich cleient o’r pris gwe
 disposalPrice.4.title=Am faint y gwnaeth yr ymddiriedolaeth werthu ei chyfran o’r eiddo?
 disposalPrice.4.helpText=Dyma’r swm cyfan o gyfran yr ymddiriedolaeth o’r pris gwerthu. Peidiwch â thynnu unrhyw gostau na ffioedd. Byddwch yn gallu nodi unrhyw gostau ychwanegol yn nes ymlaen.
 
+disposalFees.1.title=Faint oedd eich cyfran chi o unrhyw gostau ychwanegol pan wnaethoch werthu neu waredu’r eiddo?
+disposalFees.1.helpText=Er enghraifft, y swm a dalwyd gennych i asiant tai neu gyfreithiwr.
+disposalFees.2.title=Beth oedd cyfran y person o unrhyw gostau gwaredu ychwanegol?
+disposalFees.2.helpText=Er enghraifft, y swm a dalwyd gan y person i asiant tai neu gyfreithiwr.
+disposalFees.3.title=Beth oedd cyfran yr ystâd o unrhyw gostau gwaredu ychwanegol?
+disposalFees.3.helpText=Er enghraifft, y swm a dalwyd gennych chi, neu’r ystâd, i asiant tai neu gyfreithiwr.
+disposalFees.4.title=Beth oedd cyfran eich cleient o unrhyw gostau gwaredu ychwanegol?
+disposalFees.4.helpText=Er enghraifft, y swm a dalwyd gan eich cleient i asiant tai neu gyfreithiwr.
+disposalFees.5.title=Beth oedd cyfran yr ystâd o unrhyw gostau gwaredu ychwanegol?
+disposalFees.5.helpText=Beth oedd cyfran yr ystâd o unrhyw gostau gwaredu ychwanegol?
+
 #===================================================
 #  SALE OR DISPOSAL DETAILS PAGES - END
 #===================================================

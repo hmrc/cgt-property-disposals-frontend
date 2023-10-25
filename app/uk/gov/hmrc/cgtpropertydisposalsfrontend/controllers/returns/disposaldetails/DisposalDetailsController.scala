@@ -423,7 +423,7 @@ class DisposalDetailsController @Inject() (
   def whatWereDisposalFees(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndDisposalDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
-        withDisposalMethodAndShareOfProperty(state, answers) { case (_, _) =>
+        withDisposalMethodAndShareOfProperty(state, answers) { case (_, share) =>
           displayPage(answers)(
             form = _.fold(
               _.disposalFees.fold(disposalFeesForm)(a => disposalFeesForm.fill(a.inPounds())),
@@ -436,7 +436,8 @@ class DisposalDetailsController @Inject() (
               fillingOutReturn.subscribedDetails.isATrust,
               representativeType(state),
               isIndirectDisposal(state),
-              fillingOutReturn.isAmendReturn
+              fillingOutReturn.isAmendReturn,
+              isShare(share)
             )
           )(
             requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
@@ -450,7 +451,7 @@ class DisposalDetailsController @Inject() (
   def whatWereDisposalFeesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndDisposalDetailsAnswers { case (_, fillingOutReturn, state, answers) =>
-        withDisposalMethodAndShareOfProperty(state, answers) { case (_, _) =>
+        withDisposalMethodAndShareOfProperty(state, answers) { case (_, share) =>
           submitBehaviour(fillingOutReturn, state, answers)(
             form = disposalFeesForm
           )(
@@ -460,7 +461,8 @@ class DisposalDetailsController @Inject() (
               fillingOutReturn.subscribedDetails.isATrust,
               representativeType(state),
               isIndirectDisposal(state),
-              fillingOutReturn.isAmendReturn
+              fillingOutReturn.isAmendReturn,
+              isShare(share)
             )
           )(
             requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),

@@ -1967,6 +1967,18 @@ disposalFees.personalRepInPeriodOfAdmin.indirect.error.tooManyDecimals=Additiona
 disposalFees.capacitor.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.capacitor.indirect.error.tooManyDecimals=The person’s additional costs when they sold or disposed of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
+
+disposalFees.1.title=How much was your share of any additional costs when you sold or disposed of the property?
+disposalFees.1.helpText=For example, the amount you paid to an estate agent or solicitor.
+disposalFees.2.title=What was the person's share of any additional disposal costs?
+disposalFees.2.helpText=For example, the amount the person paid to an estate agent or solicitor.
+disposalFees.3.title=What was the estate's share of any additional disposal costs?
+disposalFees.3.helpText=For example, the amount you, or the estate, paid to an estate agent or solicitor.
+disposalFees.4.title=What was your client's share of any additional disposal costs?
+disposalFees.4.helpText=For example, the amount your client paid to an estate agent or solicitor.
+disposalFees.5.title=What was the trust's share of any additional disposal costs?
+disposalFees.5.helpText=For example, the amount the trust paid to an estate agent or solicitor.
+
 disposalFees.cyaChange=the amount of additional costs
 
 returns.disposal-details.cya.title=Check your answers
