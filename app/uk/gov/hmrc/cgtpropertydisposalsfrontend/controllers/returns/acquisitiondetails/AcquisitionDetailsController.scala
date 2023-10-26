@@ -156,6 +156,12 @@ class AcquisitionDetailsController @Inject() (
     }
   }
 
+  private def isShare(draft: Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn]): Option[Boolean] =
+    for {
+      disposal <- draft.fold(_.disposalDetailsAnswers, _.disposalDetailsAnswers)
+      share    <- disposal.fold(_.shareOfProperty, x => Some(x.shareOfProperty))
+    } yield share.percentageValue != BigDecimal(100)
+
   private def withAssetTypeAndResidentialStatus(
     state: JourneyState
   )(f: (AssetType, Boolean) => Future[Result]): Future[Result] =
