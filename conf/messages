@@ -2000,6 +2000,21 @@ acquisitionPrice.9.helpText=You can provide a valuation from a surveyor or a rea
 acquisitionPrice.10.title=How much did the trust pay for its share of the property?
 acquisitionPrice.10.helpText=You'll be able to enter any buying costs, like solicitor's or surveyor's fees later.
 
+improvementCosts.1.title=Do you want to claim your share of any improvement costs?
+improvementCosts.1.helpText=You can only claim costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.2.title=Do you want to claim for your share of any improvement costs?
+improvementCosts.2.helpText=You can only claim costs that added value to the property after March 1982 (date you rebased). You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.3.title=Does the person want to claim for their share of any improvement costs?
+improvementCosts.3.helpText=The person can only claim for costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.4.title=Do you want to claim for the estate's share of any improvement costs?
+improvementCosts.4.helpText=You can only claim for any costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.5.title=Does your client want to claim their share of any improvement costs?
+improvementCosts.5.helpText=Your client can only claim for costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.6.title=Does your client want to claim their share of any improvement costs?
+improvementCosts.6.helpText=Your client can only claim costs that added value to the property after {rebase date} (date they rebased). They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.7.title=Does the trust want to claim its share of any improvement costs?
+improvementCosts.7.helpText=The trust can only claim for costs that added value to the property. It cannot claim for mortgage interest, decorating or maintenance.
+
 disposalFees.cyaChange=the amount of additional costs
 
 returns.disposal-details.cya.title=Check your answers

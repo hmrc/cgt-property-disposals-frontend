@@ -841,7 +841,8 @@ class AcquisitionDetailsController @Inject() (
                 rebasingEligibilityUtil
                   .getRebasingCutOffDate(assetType, wasUkResident),
                 representativeType(state),
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                isShare(state)
               )
             )(
               requiredPreviousAnswer = { a =>
@@ -896,7 +897,8 @@ class AcquisitionDetailsController @Inject() (
                 rebasingEligibilityUtil
                   .getRebasingCutOffDate(assetType, wasUkResident),
                 representativeType(state),
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                isShare(state)
               )
             )(
               requiredPreviousAnswer = { answers =>
