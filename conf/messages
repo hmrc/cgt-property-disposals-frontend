@@ -1979,6 +1979,27 @@ disposalFees.4.helpText=For example, the amount your client paid to an estate ag
 disposalFees.5.title=What was the trust’s share of any additional disposal costs?
 disposalFees.5.helpText=For example, the amount the trust paid to an estate agent or solicitor.
 
+acquisitionPrice.1.title=How much did you pay for your share of the property?
+acquisitionPrice.1.helpText=You'll be able to enter any buying costs, like solicitor's or surveyor's fees later.
+acquisitionPrice.2.title=What was your share of the market value of the property on {acquisition date}?
+acquisitionPrice.2.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPrice.3.title=What was your share of the market value of the property on {rebase date}?
+acquisitionPrice.3.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPrice.4.title=How much did the person pay for their share of the property?
+acquisitionPrice.4.helpText=You'll be able to enter any buying costs, like solicitor's or surveyor's fees later.
+acquisitionPrice.5.title=What was the person's share of the market value of the property when it was acquired?
+acquisitionPrice.5.helpText=The person can provide a valuation from a surveyor or a realistic estimate
+acquisitionPrice.6.title=What was the the market value of the estate's share of the property on {acquisition date}?
+acquisitionPrice.6.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPrice.7.title=How much did your client pay for their share of the property?
+acquisitionPrice.7.helpText=You'll be able to enter any buying costs, like solicitor's fees later.
+acquisitionPrice.8.title=What was your client's share of the market value of the property on {date acquired property}?
+acquisitionPrice.8.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPrice.9.title=What was your client's share of the market value of the property on {rebase date}?
+acquisitionPrice.9.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPrice.10.title=How much did the trust pay for its share of the property?
+acquisitionPrice.10.helpText=You'll be able to enter any buying costs, like solicitor's or surveyor's fees later.
+
 disposalFees.cyaChange=the amount of additional costs
 
 returns.disposal-details.cya.title=Check your answers

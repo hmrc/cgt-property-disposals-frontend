@@ -156,11 +156,12 @@ class AcquisitionDetailsController @Inject() (
     }
   }
 
-  private def isShare(draft: Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn]): Option[Boolean] =
-    for {
+  private def isShare(draft: Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn]): Boolean =
+    (for {
       disposal <- draft.fold(_.disposalDetailsAnswers, _.disposalDetailsAnswers)
       share    <- disposal.fold(_.shareOfProperty, x => Some(x.shareOfProperty))
-    } yield share.percentageValue != BigDecimal(100)
+    } yield share.percentageValue != BigDecimal(100))
+      .getOrElse(false) // Journey completed out of order
 
   private def withAssetTypeAndResidentialStatus(
     state: JourneyState
@@ -519,7 +520,8 @@ class AcquisitionDetailsController @Inject() (
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
                   assetType,
-                  fillingOutReturn.isAmendReturn
+                  fillingOutReturn.isAmendReturn,
+                  isShare(state)
                 )
               )(
                 requiredPreviousAnswer = _.fold(
@@ -555,7 +557,8 @@ class AcquisitionDetailsController @Inject() (
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
                   assetType,
-                  fillingOutReturn.isAmendReturn
+                  fillingOutReturn.isAmendReturn,
+                  isShare(state)
                 )
               )(
                 requiredPreviousAnswer = _.fold(
