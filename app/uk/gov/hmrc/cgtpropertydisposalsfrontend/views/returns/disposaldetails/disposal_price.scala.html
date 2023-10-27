@@ -28,23 +28,23 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-        formHelper: FormWithCSRF,
-        govukButton: GovukButton,
-        govukInput: GovukInput,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
+  layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
+  formHelper: FormWithCSRF,
+  govukButton: GovukButton,
+  govukInput: GovukInput,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
 @(
-    form: Form[BigDecimal],
-    backLink: Call,
-    disposalMethod: DisposalMethod,
-    isATrust: Boolean,
-    representativeType: Option[RepresentativeType],
-    isIndirectDisposal: Boolean,
-    isAmend: Boolean,
-    isShare: Boolean,
+  form: Form[BigDecimal],
+  backLink: Call,
+  disposalMethod: DisposalMethod,
+  isATrust: Boolean,
+  representativeType: Option[RepresentativeType],
+  isIndirectDisposal: Boolean,
+  isAmend: Boolean,
+  isShare: Boolean,
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -61,8 +61,8 @@
 }
 
 @disposalMethodKey = @{ disposalMethod match {
-    case DisposalMethod.Gifted => ".Gifted"
-    case _      => ".SoldOther"
+  case DisposalMethod.Gifted => ".Gifted"
+  case _ => ".SoldOther"
 }}
 
 @indirectKey = @{ if(isIndirectDisposal) ".indirect" else ""}
@@ -95,36 +95,36 @@
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
-    @if(hasErrors) {
-        @errorSummary(form, Some(s"$key$userKey$indirectKey$disposalMethodKey"))
-    }
-    <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
-    <h1 class="govuk-heading-xl">@title</h1>
-    <p class="govuk-body">@Html(helpText)</p>
-    @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPriceSubmit()) {
-      @govukInput(Input(
-        id = key,
-        name = key,
-        value = form.data.get(key),
-        label = Label(
-          content = Text(title),
-          isPageHeading = false,
-          classes = "govuk-visually-hidden"
-        ),
-        classes = "govuk-input--width-10",
-        prefix = Some(PrefixOrSuffix(
-          content = Text("£")
-        )),
-        errorMessage = form.error(key).map(e => ErrorMessage(
-          content = Text(messages(s"$key$userKey$indirectKey$disposalMethodKey.${e.message}")),
-          visuallyHiddenText = Some(messages("generic.error"))
-        )),
-        autocomplete = Some(AutoCompleteType.On.value)
-      ))
+  @if(hasErrors) {
+    @errorSummary(form, Some(s"$key$userKey$indirectKey$disposalMethodKey"))
+  }
+  <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-body">@Html(helpText)</p>
+  @formHelper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPriceSubmit()) {
+    @govukInput(Input(
+      id = key,
+      name = key,
+      value = form.data.get(key),
+      label = Label(
+        content = Text(title),
+        isPageHeading = false,
+        classes = "govuk-visually-hidden"
+      ),
+      classes = "govuk-input--width-10",
+      prefix = Some(PrefixOrSuffix(
+        content = Text("£")
+      )),
+      errorMessage = form.error(key).map(e => ErrorMessage(
+        content = Text(messages(s"$key$userKey$indirectKey$disposalMethodKey.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )),
+      autocomplete = Some(AutoCompleteType.On.value)
+    ))
 
-      @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
-    }
+    @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
+  }
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }
