@@ -1062,7 +1062,8 @@ class AcquisitionDetailsController @Inject() (
                 wasUkResident,
                 representativeType(state),
                 assetType,
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                isShare(state)
               )
             )(
               requiredPreviousAnswer = _.fold(
@@ -1104,7 +1105,8 @@ class AcquisitionDetailsController @Inject() (
                 wasUkResident,
                 representativeType(state),
                 assetType,
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                isShare(state)
               )
             )(
               requiredPreviousAnswer = _.fold(

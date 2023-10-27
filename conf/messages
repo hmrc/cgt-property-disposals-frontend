@@ -2015,6 +2015,21 @@ improvementCosts.6.helpText=Your client can only claim costs that added value to
 improvementCosts.7.title=Does the trust want to claim its share of any improvement costs?
 improvementCosts.7.helpText=The trust can only claim for costs that added value to the property. It cannot claim for mortgage interest, decorating or maintenance.
 
+acquisitionFees.1.title=Do you want to claim your share of any additional costs you paid when you got the property?
+acquisitionFees.1.helpText=For example, fees for surveyors or solicitors.
+acquisitionFees.2.title=Do you want to claim your share of any additional costs you paid when you rebased the property?
+acquisitionFees.2.helpText=For example, fees for surveyors or solicitors. You cannot claim for any additional costs you paid for when you got the property.
+acquisitionFees.3.title=Does the person want to claim for their share of any additional acquisition costs?
+acquisitionFees.3.helpText=For example, fees for surveyors or solicitors.
+acquisitionFees.4.title=Do you want to claim for the estate's share of any additional costs?
+acquisitionFees.4.helpText=For example, legal costs in securing the rights to the property.
+acquisitionFees.5.title=Does your client want to claim their share of any additional acquisition costs?
+acquisitionFees.5.helpText=For example, fees for surveyors or solicitors.
+acquisitionFees.6.title=Does your client want to claim their share of any additional rebasing costs?
+acquisitionFees.6.helpText=For example, fees for surveyors or solicitors. Your client cannot claim for any additional costs they paid for when they acquired the property.
+acquisitionFees.7.title=Does the trust want claim its share of any additional acquisition costs?
+acquisitionFees.7.helpText=If the trust shared these costs, it can only claim its share.
+
 disposalFees.cyaChange=the amount of additional costs
 
 returns.disposal-details.cya.title=Check your answers
