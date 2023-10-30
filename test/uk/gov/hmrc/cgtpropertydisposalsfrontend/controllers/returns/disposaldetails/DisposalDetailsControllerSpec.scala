@@ -1032,51 +1032,15 @@ class DisposalDetailsControllerSpec
       ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
         val userMsgKey = userMessageKey(individualUserType, userType)
         List(
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Full,
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Half,
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Other(1),
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Full,
-            s"disposalPrice$userMsgKey.Gifted.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Half,
-            s"disposalPrice$userMsgKey.Gifted.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Other(1),
-            s"disposalPrice$userMsgKey.Gifted.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Full,
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Half,
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Other(1),
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          )
+          (DisposalMethod.Sold, ShareOfProperty.Full, s"disposalPrice$userMsgKey.SoldOther.title"),
+          (DisposalMethod.Sold, ShareOfProperty.Half, s"disposalPrice$userMsgKey.SoldOther.title"),
+          (DisposalMethod.Sold, ShareOfProperty.Other(1), s"disposalPrice$userMsgKey.SoldOther.title"),
+          (DisposalMethod.Gifted, ShareOfProperty.Full, s"disposalPrice$userMsgKey.Gifted.title"),
+          (DisposalMethod.Gifted, ShareOfProperty.Half, s"disposalPrice$userMsgKey.Gifted.title"),
+          (DisposalMethod.Gifted, ShareOfProperty.Other(1), s"disposalPrice$userMsgKey.Gifted.title"),
+          (DisposalMethod.Other, ShareOfProperty.Full, s"disposalPrice$userMsgKey.SoldOther.title"),
+          (DisposalMethod.Other, ShareOfProperty.Half, s"disposalPrice$userMsgKey.SoldOther.title"),
+          (DisposalMethod.Other, ShareOfProperty.Other(1), s"disposalPrice$userMsgKey.SoldOther.title")
         )
       }
 
@@ -1714,21 +1678,9 @@ class DisposalDetailsControllerSpec
         val key        = "disposalPrice"
 
         List(
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Full,
-            s"$key$userMsgKey.indirect.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Full,
-            s"$key$userMsgKey.indirect.Gifted.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Full,
-            s"$key$userMsgKey.indirect.SoldOther.title"
-          )
+          (DisposalMethod.Sold, ShareOfProperty.Full, s"$key$userMsgKey.indirect.SoldOther.title"),
+          (DisposalMethod.Gifted, ShareOfProperty.Full, s"$key$userMsgKey.indirect.Gifted.title"),
+          (DisposalMethod.Other, ShareOfProperty.Full, s"$key$userMsgKey.indirect.SoldOther.title")
         )
       }
 
@@ -2366,51 +2318,15 @@ class DisposalDetailsControllerSpec
       ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
         val userKey = userMessageKey(individualUserType, userType)
         List(
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Full,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Half,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Other(1),
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Full,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Half,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Other(1),
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Full,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Half,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Other(1),
-            s"disposalFees$userKey.title"
-          )
+          (DisposalMethod.Sold, ShareOfProperty.Full, s"disposalFees$userKey.title"),
+          (DisposalMethod.Sold, ShareOfProperty.Half, s"disposalFees$userKey.title"),
+          (DisposalMethod.Sold, ShareOfProperty.Other(1), s"disposalFees$userKey.title"),
+          (DisposalMethod.Gifted, ShareOfProperty.Full, s"disposalFees$userKey.title"),
+          (DisposalMethod.Gifted, ShareOfProperty.Half, s"disposalFees$userKey.title"),
+          (DisposalMethod.Gifted, ShareOfProperty.Other(1), s"disposalFees$userKey.title"),
+          (DisposalMethod.Other, ShareOfProperty.Full, s"disposalFees$userKey.title"),
+          (DisposalMethod.Other, ShareOfProperty.Half, s"disposalFees$userKey.title"),
+          (DisposalMethod.Other, ShareOfProperty.Other(1), s"disposalFees$userKey.title")
         )
       }
 
@@ -3583,52 +3499,32 @@ class DisposalDetailsControllerSpec
     "redirect to the what was your share page" when {
 
       "there is no property share" in {
-        List(Self, PersonalRepresentative, Capacitor).foreach { individualUserType =>
-          List(
-            DisposalMethod.Sold,
-            DisposalMethod.Gifted,
-            DisposalMethod.Other
-          ).foreach { disposalMethod =>
-            List[UserType](
-              UserType.Agent,
-              UserType.Individual,
-              UserType.Organisation
-            ).foreach { userType: UserType =>
-              val draftReturn = sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers],
-                disposalDetailsAnswers = Some(
-                  IncompleteDisposalDetailsAnswers(
-                    None,
-                    Some(sample[AmountInPence]),
-                    Some(sample[AmountInPence])
-                  )
-                )
+        for {
+          individualUserType <- List(Self, PersonalRepresentative, Capacitor)
+          disposalMethod     <- List(DisposalMethod.Sold, DisposalMethod.Gifted, DisposalMethod.Other)
+          userType           <- List(UserType.Agent, UserType.Individual, UserType.Organisation)
+        } yield {
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers],
+            disposalDetailsAnswers = Some(
+              IncompleteDisposalDetailsAnswers(
+                None,
+                Some(sample[AmountInPence]),
+                Some(sample[AmountInPence])
               )
+            )
+          )
 
-              val sessionData = SessionData.empty.copy(journeyStatus =
-                Some(
-                  fillingOutReturn(
-                    disposalMethod,
-                    userType,
-                    Some(individualUserType),
-                    isAmend = false
-                  )._1.copy(
-                    draftReturn = draftReturn
-                  )
-                )
-              )
+          val (journey, _) =
+            fillingOutReturn(disposalMethod, userType, Some(individualUserType), isAmend = false)
+          val sessionData  = SessionData.empty.copy(journeyStatus = Some(journey.copy(draftReturn = draftReturn)))
 
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(sessionData)
-              }
-
-              checkIsRedirect(
-                performAction(),
-                routes.DisposalDetailsController.howMuchDidYouOwn()
-              )
-            }
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
           }
+
+          checkIsRedirect(performAction(), routes.DisposalDetailsController.howMuchDidYouOwn())
         }
       }
     }
