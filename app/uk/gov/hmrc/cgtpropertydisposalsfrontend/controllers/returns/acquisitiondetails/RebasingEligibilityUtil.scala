@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails
 
-import cats.syntax.eq._
 import com.google.inject.Singleton
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
@@ -43,7 +42,7 @@ class RebasingEligibilityUtil {
     wasAUkResident: Boolean,
     purchaseDate: LocalDate
   ): Boolean =
-    !wasAUkResident || purchaseDate.isAfter(RebasingCutoffDates.ukResidents)
+    !wasAUkResident || purchaseDate.isAfter(RebasingCutoffDates.allResidents)
 
   def isEligibleForRebase(
     completeReturn: CompleteSingleDisposalReturn
@@ -87,12 +86,12 @@ class RebasingEligibilityUtil {
     assetType: AssetType,
     wasUkResident: Boolean
   ): LocalDate =
-    if (wasUkResident) {
-      RebasingCutoffDates.ukResidents
-    } else if (assetType === AssetType.Residential) {
+    if (!wasUkResident && assetType == AssetType.NonResidential) {
+      RebasingCutoffDates.nonUkResidentsNonResidentialProperty
+    } else if (!wasUkResident && assetType == AssetType.Residential) {
       RebasingCutoffDates.nonUkResidentsResidentialProperty
     } else {
-      RebasingCutoffDates.nonUkResidentsNonResidentialProperty
+      RebasingCutoffDates.allResidents
     }
 
   private def extractIsUk(
