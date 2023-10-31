@@ -1029,16 +1029,29 @@ class DisposalDetailsControllerSpec
         userType: UserType
       ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
         val userMsgKey = userMessageKey(individualUserType, userType)
+        def row(disposalMethod: DisposalMethod = DisposalMethod.Sold, shareOfProperty: ShareOfProperty) = {
+          val expectedMessage = (disposalMethod, individualUserType, userType) match {
+            case (_, Capacitor | PersonalRepresentative, _)                             => "disposalPrice.1.title"
+            case (_, PersonalRepresentativeInPeriodOfAdmin, _)                          => "disposalPrice.2.title"
+            case (DisposalMethod.Sold, _, UserType.Individual)                          => "disposalPrice.6.title"
+            case (DisposalMethod.Other | DisposalMethod.Gifted, _, UserType.Individual) => "disposalPrice.5.title"
+            case (_, _, UserType.Organisation)                                          => "disposalPrice.4.title"
+            case (_, _, UserType.Agent)                                                 => "disposalPrice.3.title"
+            case _                                                                      => "disposalPrice.6.title"
+          }
+          (disposalMethod, shareOfProperty, expectedMessage)
+        }
+
         List(
           (DisposalMethod.Sold, ShareOfProperty.Full, s"disposalPrice$userMsgKey.SoldOther.title"),
-          (DisposalMethod.Sold, ShareOfProperty.Half, s"disposalPrice$userMsgKey.SoldOther.title"),
-          (DisposalMethod.Sold, ShareOfProperty.Other(1), s"disposalPrice$userMsgKey.SoldOther.title"),
           (DisposalMethod.Gifted, ShareOfProperty.Full, s"disposalPrice$userMsgKey.Gifted.title"),
-          (DisposalMethod.Gifted, ShareOfProperty.Half, s"disposalPrice$userMsgKey.Gifted.title"),
-          (DisposalMethod.Gifted, ShareOfProperty.Other(1), s"disposalPrice$userMsgKey.Gifted.title"),
           (DisposalMethod.Other, ShareOfProperty.Full, s"disposalPrice$userMsgKey.SoldOther.title"),
-          (DisposalMethod.Other, ShareOfProperty.Half, s"disposalPrice$userMsgKey.SoldOther.title"),
-          (DisposalMethod.Other, ShareOfProperty.Other(1), s"disposalPrice$userMsgKey.SoldOther.title")
+          row(DisposalMethod.Sold, ShareOfProperty.Half),
+          row(DisposalMethod.Sold, ShareOfProperty.Other(1)),
+          row(DisposalMethod.Gifted, ShareOfProperty.Half),
+          row(DisposalMethod.Gifted, ShareOfProperty.Other(1)),
+          row(DisposalMethod.Other, ShareOfProperty.Half),
+          row(DisposalMethod.Other, ShareOfProperty.Other(1))
         )
       }
 
@@ -2310,17 +2323,27 @@ class DisposalDetailsControllerSpec
         individualUserType: IndividualUserType,
         userType: UserType
       ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
+        def row(disposalMethod: DisposalMethod = DisposalMethod.Sold, shareOfProperty: ShareOfProperty) = {
+          val expectedMessage = (individualUserType, userType) match {
+            case (Capacitor | PersonalRepresentative, _)    => "disposalFees.2.title"
+            case (PersonalRepresentativeInPeriodOfAdmin, _) => "disposalFees.3.title"
+            case (_, UserType.Individual)                   => "disposalFees.1.title"
+            case (_, UserType.Organisation)                 => "disposalFees.5.title"
+            case (_, UserType.Agent)                        => "disposalFees.4.title"
+          }
+          (disposalMethod, shareOfProperty, expectedMessage)
+        }
         val userKey = userMessageKey(individualUserType, userType)
         List(
           (DisposalMethod.Sold, ShareOfProperty.Full, s"disposalFees$userKey.title"),
-          (DisposalMethod.Sold, ShareOfProperty.Half, s"disposalFees$userKey.title"),
-          (DisposalMethod.Sold, ShareOfProperty.Other(1), s"disposalFees$userKey.title"),
           (DisposalMethod.Gifted, ShareOfProperty.Full, s"disposalFees$userKey.title"),
-          (DisposalMethod.Gifted, ShareOfProperty.Half, s"disposalFees$userKey.title"),
-          (DisposalMethod.Gifted, ShareOfProperty.Other(1), s"disposalFees$userKey.title"),
           (DisposalMethod.Other, ShareOfProperty.Full, s"disposalFees$userKey.title"),
-          (DisposalMethod.Other, ShareOfProperty.Half, s"disposalFees$userKey.title"),
-          (DisposalMethod.Other, ShareOfProperty.Other(1), s"disposalFees$userKey.title")
+          row(DisposalMethod.Sold, ShareOfProperty.Half),
+          row(DisposalMethod.Sold, ShareOfProperty.Other(1)),
+          row(DisposalMethod.Gifted, ShareOfProperty.Half),
+          row(DisposalMethod.Gifted, ShareOfProperty.Other(1)),
+          row(DisposalMethod.Other, ShareOfProperty.Half),
+          row(DisposalMethod.Other, ShareOfProperty.Other(1))
         )
       }
 
