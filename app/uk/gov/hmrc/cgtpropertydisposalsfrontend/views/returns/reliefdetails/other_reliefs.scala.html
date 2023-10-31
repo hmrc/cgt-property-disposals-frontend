@@ -56,7 +56,7 @@
       case Some(PersonalRepresentativeInPeriodOfAdmin) =>
         if(isAgent) ".personalRepInPeriodOfAdmin.agent" else ".personalRepInPeriodOfAdmin"
       case Some(Capacitor) => ".capacitor"
-      case None =>
+      case _ =>
         if (isAgent) ".agent"
         else if (isATrust) ".trust"
         else ""
@@ -69,7 +69,7 @@
         case Some(PersonalRepresentativeInPeriodOfAdmin) =>
             if(isAgent) "personalRepInPeriodOfAdmin.agent." else "personalRepInPeriodOfAdmin."
         case Some(Capacitor) => "capacitor."
-        case None =>
+        case _ =>
             if (isAgent) "agent."
             else if (isATrust) "trust."
             else ""

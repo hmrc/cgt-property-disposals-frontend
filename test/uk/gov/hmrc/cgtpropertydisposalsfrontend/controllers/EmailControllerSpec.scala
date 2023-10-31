@@ -81,7 +81,7 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
       .returning(EitherT.fromEither[Future](result))
 
   private def mockUuidGenerator(uuid: UUID): CallHandler0[UUID] =
-    (mockUuidGenerator.nextId: () => UUID).expects().returning(uuid)
+    (mockUuidGenerator.nextId _: () => UUID).expects().returning(uuid)
 
   private lazy val sessionDataWithValidJourneyStatus =
     SessionData.empty

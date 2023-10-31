@@ -38,7 +38,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
         case Some(PersonalRepresentative) => ".personalRep"
         case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
         case Some(Capacitor) => ".capacitor"
-        case None =>
+        case _ =>
             if (isAgent) ".agent"
             else if (isATrust) ".trust"
             else ""

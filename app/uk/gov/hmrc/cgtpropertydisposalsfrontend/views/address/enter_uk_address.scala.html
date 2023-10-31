@@ -47,7 +47,7 @@
       case Some(PersonalRepresentative) => ".personalRep"
       case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent" else ".personalRep"
       case Some(Capacitor) => ".capacitor"
-      case None =>
+      case _ =>
           if (isAgent) ".agent"
           else if (isATrust) ".trust"
           else ""
@@ -85,7 +85,7 @@
             case Some(PersonalRepresentative) => messages(s"$key.uk.companyDetails.personalRep.title")
             case Some(PersonalRepresentativeInPeriodOfAdmin) => messages(s"$key.uk.companyDetails.personalRepInPeriodOfAdmin.title")
             case Some(Capacitor) => messages(s"$key.uk.companyDetails.capacitor.title")
-            case None =>
+            case _ =>
                 if(c.isATrust)                                  messages(s"$key.uk.companyDetails.trust.title")
                 else if(isAgent)                                messages(s"$key.uk.companyDetails.agent.title")
                 else                                            messages(s"$key.uk.companyDetails.title")

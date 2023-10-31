@@ -37,7 +37,7 @@
         s"${messages("account.personalRepInPeriodOfAdmin.prefix")} $accountName"
     case Some(Capacitor) =>
         s"${messages("account.personalRep.prefix")} ${crOrPRAccountName}"
-    case None =>
+    case _ =>
     if (isAnAgent)
         s"${messages("account.agent.prefix")} $accountName"
     else if (fillingOutReturn.subscribedDetails.isATrust)
