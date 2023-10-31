@@ -1029,7 +1029,7 @@ class DisposalDetailsControllerSpec
         userType: UserType
       ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
         val userMsgKey = userMessageKey(individualUserType, userType)
-        def row(disposalMethod: DisposalMethod = DisposalMethod.Sold, shareOfProperty: ShareOfProperty) = {
+        def row(disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty) = {
           val expectedMessage = (disposalMethod, individualUserType, userType) match {
             case (_, Capacitor | PersonalRepresentative, _)                             => "disposalPrice.1.title"
             case (_, PersonalRepresentativeInPeriodOfAdmin, _)                          => "disposalPrice.2.title"
@@ -2323,13 +2323,14 @@ class DisposalDetailsControllerSpec
         individualUserType: IndividualUserType,
         userType: UserType
       ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
-        def row(disposalMethod: DisposalMethod = DisposalMethod.Sold, shareOfProperty: ShareOfProperty) = {
+        def row(disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty) = {
           val expectedMessage = (individualUserType, userType) match {
             case (Capacitor | PersonalRepresentative, _)    => "disposalFees.2.title"
             case (PersonalRepresentativeInPeriodOfAdmin, _) => "disposalFees.3.title"
             case (_, UserType.Individual)                   => "disposalFees.1.title"
             case (_, UserType.Organisation)                 => "disposalFees.5.title"
             case (_, UserType.Agent)                        => "disposalFees.4.title"
+            case _                                          => "disposalFees.1.title"
           }
           (disposalMethod, shareOfProperty, expectedMessage)
         }
