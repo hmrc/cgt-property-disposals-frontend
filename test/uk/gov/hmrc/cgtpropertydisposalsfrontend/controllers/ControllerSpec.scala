@@ -183,11 +183,10 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
     val bodyText = doc.select("body").text
     val regex    = """not_found_message\((.*?)\)""".r
 
-    val regexResult = regex.findAllMatchIn(bodyText).toList
-    if (regexResult.nonEmpty) fail(s"Missing message keys: ${regexResult.map(_.group(1)).mkString(", ")}")
-    else succeed
-
-    contentChecks(doc)
+    regex.findAllMatchIn(bodyText).toList match {
+      case Nil         => contentChecks(doc)
+      case regexResult => fail(s"Missing message keys: ${regexResult.map(_.group(1)).mkString(", ")}")
+    }
   }
 
   def urlEncode(s: String): String = URLEncoder.encode(s, "UTF-8")

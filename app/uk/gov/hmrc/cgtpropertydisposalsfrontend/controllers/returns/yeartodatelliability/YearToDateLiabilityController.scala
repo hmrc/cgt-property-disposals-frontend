@@ -242,9 +242,6 @@ class YearToDateLiabilityController @Inject() (
         incomplete.calculatedTaxDue match {
           case Some(c) => f(c)
 
-          case None if !calculateIfMissing =>
-            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
           case None if calculateIfMissing =>
             val result =
               for {
@@ -289,6 +286,8 @@ class YearToDateLiabilityController @Inject() (
                 f
               )
               .merge
+
+          case None => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
 
     }

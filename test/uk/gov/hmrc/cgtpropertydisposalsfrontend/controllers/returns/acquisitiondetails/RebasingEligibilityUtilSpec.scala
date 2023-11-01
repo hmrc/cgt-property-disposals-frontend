@@ -24,7 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDet
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
@@ -34,9 +34,9 @@ class RebasingEligibilityUtilSpec extends AnyWordSpec with Matchers {
 
   private object uk {
     val beforeCutoff: CompleteAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
-      .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1)))
+      .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.allResidents.minusDays(1)))
     val afterCutoff: CompleteAcquisitionDetailsAnswers  = sample[CompleteAcquisitionDetailsAnswers]
-      .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents.plusDays(1)))
+      .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.allResidents.plusDays(1)))
     val triage: CompleteSingleDisposalTriageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
       .copy(countryOfResidence = Country.uk, individualUserType = None)
   }
@@ -79,6 +79,27 @@ class RebasingEligibilityUtilSpec extends AnyWordSpec with Matchers {
       .copy(
         countryOfResidence = Country("US"),
         assetType = Residential,
+        individualUserType = None
+      )
+  }
+
+  private object nonUkOtherAssetTypes {
+    val beforeCutoff: CompleteAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
+      .copy(acquisitionDate =
+        AcquisitionDate(
+          RebasingCutoffDates.allResidents.minusDays(1)
+        )
+      )
+    val afterCutoff: CompleteAcquisitionDetailsAnswers  = sample[CompleteAcquisitionDetailsAnswers]
+      .copy(acquisitionDate =
+        AcquisitionDate(
+          RebasingCutoffDates.allResidents.plusDays(1)
+        )
+      )
+    val triage: CompleteSingleDisposalTriageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+      .copy(
+        countryOfResidence = Country("US"),
+        assetType = AssetType.IndirectDisposal,
         individualUserType = None
       )
   }
@@ -162,6 +183,24 @@ class RebasingEligibilityUtilSpec extends AnyWordSpec with Matchers {
           sample[CompleteSingleDisposalReturn].copy(
             triageAnswers = nonUkNonResidential.triage,
             acquisitionDetails = nonUkNonResidential.afterCutoff
+          )
+        underTest.isEligibleForRebase(completedReturn) shouldBe false
+      }
+
+      "complete return non uk, other property and eligible" in {
+        val completedReturn =
+          sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = nonUkOtherAssetTypes.triage,
+            acquisitionDetails = nonUkOtherAssetTypes.beforeCutoff
+          )
+        underTest.isEligibleForRebase(completedReturn) shouldBe true
+      }
+
+      "complete return non uk, other property and not eligible" in {
+        val completedReturn =
+          sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = nonUkOtherAssetTypes.triage,
+            acquisitionDetails = nonUkOtherAssetTypes.afterCutoff
           )
         underTest.isEligibleForRebase(completedReturn) shouldBe false
       }

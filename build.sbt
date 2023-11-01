@@ -18,7 +18,8 @@ lazy val microservice = Project(appName, file("."))
   .settings(scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s")
   .settings(
     scalacOptions ++= Seq(
-      "-Ymacro-annotations"
+      "-Ymacro-annotations",
+      "-Xlint:-byname-implicit"
     )
   )
   .settings(CodeCoverageSettings.settings *)

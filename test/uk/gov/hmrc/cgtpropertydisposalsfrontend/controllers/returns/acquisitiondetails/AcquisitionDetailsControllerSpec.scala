@@ -1699,7 +1699,7 @@ class AcquisitionDetailsControllerSpec
         val price = 1.23d
 
         val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-          acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(2))),
+          acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(2))),
           acquisitionPrice = Some(sample[AmountInPence])
         )
 
@@ -2321,7 +2321,7 @@ class AcquisitionDetailsControllerSpec
                   sample[IncompleteAcquisitionDetailsAnswers].copy(
                     acquisitionDate = Some(
                       AcquisitionDate(
-                        RebasingCutoffDates.ukResidents.minusDays(2)
+                        RebasingCutoffDates.allResidents.minusDays(2)
                       )
                     ),
                     acquisitionMethod = None
@@ -2351,7 +2351,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = AcquisitionDate(ukResidents.plusDays(1))
+                      acquisitionDate = AcquisitionDate(allResidents.plusDays(1))
                     ),
                     AssetType.Residential,
                     wasUkResident = true,
@@ -2415,7 +2415,7 @@ class AcquisitionDetailsControllerSpec
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
                   acquisitionDate = Some(
                     AcquisitionDate(
-                      RebasingCutoffDates.ukResidents.minusDays(1L)
+                      RebasingCutoffDates.allResidents.minusDays(1L)
                     )
                   ),
                   acquisitionPrice = Some(sample[AmountInPence]),
@@ -2434,7 +2434,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               s"rebaseAcquisitionPrice${assetTypeMessageKey(assetType)}.title",
-              TimeUtils.govDisplayFormat(ukResidents)
+              TimeUtils.govDisplayFormat(allResidents)
             ),
             { doc =>
               doc
@@ -2562,7 +2562,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              TimeUtils.govDisplayFormat(ukResidents)
+              TimeUtils.govDisplayFormat(allResidents)
             ),
             { doc =>
               doc
@@ -2617,7 +2617,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               expectedTitleKey,
-              TimeUtils.govDisplayFormat(ukResidents)
+              TimeUtils.govDisplayFormat(allResidents)
             ),
             doc =>
               doc
@@ -2646,7 +2646,7 @@ class AcquisitionDetailsControllerSpec
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
-      val acquisitionDate = AcquisitionDate(ukResidents.minusDays(1))
+      val acquisitionDate = AcquisitionDate(allResidents.minusDays(1))
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -2716,7 +2716,7 @@ class AcquisitionDetailsControllerSpec
             )
           }
 
-          val formattedRebaseDate = TimeUtils.govDisplayFormat(ukResidents)
+          val formattedRebaseDate = TimeUtils.govDisplayFormat(allResidents)
           checkPageIsDisplayed(
             performAction(data: _*),
             messageFromMessageKey(
@@ -2756,7 +2756,7 @@ class AcquisitionDetailsControllerSpec
           individualUserType: IndividualUserType
         ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
           val answers                         = IncompleteAcquisitionDetailsAnswers.empty.copy(
-            acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(2))),
+            acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(2))),
             acquisitionPrice = Some(sample[AmountInPence])
           )
           val (session, journey, draftReturn) = sessionWithState(
@@ -2961,7 +2961,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = Some(AcquisitionDate(ukResidents.plusDays(1L))),
+                      acquisitionDate = Some(AcquisitionDate(allResidents.plusDays(1L))),
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -2992,7 +2992,7 @@ class AcquisitionDetailsControllerSpec
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
                       acquisitionMethod = Some(AcquisitionMethod.Bought),
-                      acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                      acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(1L))),
                       acquisitionPrice = Some(AmountInPence(100L)),
                       rebasedAcquisitionPrice = None
                     ),
@@ -3026,7 +3026,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                  acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -3074,7 +3074,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = Some(AcquisitionDate(ukResidents.plusDays(1L))),
+                      acquisitionDate = Some(AcquisitionDate(allResidents.plusDays(1L))),
                       acquisitionPrice = Some(sample[AmountInPence]),
                       rebasedAcquisitionPrice = None
                     ),
@@ -3116,7 +3116,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = AcquisitionDate(ukResidents.minusDays(1L)),
+                      acquisitionDate = AcquisitionDate(allResidents.minusDays(1L)),
                       rebasedAcquisitionPrice = Some(sample[AmountInPence])
                     ),
                     AssetType.Residential,
@@ -3159,7 +3159,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = AcquisitionDate(ukResidents.plusDays(1L)),
+                      acquisitionDate = AcquisitionDate(allResidents.plusDays(1L)),
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -3201,7 +3201,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = AcquisitionDate(ukResidents),
+                      acquisitionDate = AcquisitionDate(allResidents),
                       rebasedAcquisitionPrice = Some(sample[AmountInPence]),
                       improvementCosts = AmountInPence.zero
                     ),
@@ -3237,7 +3237,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = AcquisitionDate(ukResidents),
+                      acquisitionDate = AcquisitionDate(allResidents),
                       rebasedAcquisitionPrice = Some(sample[AmountInPence]),
                       improvementCosts = AmountInPence(2L)
                     ),
@@ -3307,7 +3307,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = Some(AcquisitionDate(ukResidents.plusDays(1L))),
+                      acquisitionDate = Some(AcquisitionDate(allResidents.plusDays(1L))),
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -3337,7 +3337,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                      acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(1L))),
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -3705,7 +3705,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(2L))),
+                      acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(2L))),
                       shouldUseRebase = Some(true),
                       improvementCosts = Some(sample[AmountInPence])
                     ),
@@ -3794,7 +3794,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = AcquisitionDate(ukResidents.minusDays(1L)),
+                      acquisitionDate = AcquisitionDate(allResidents.minusDays(1L)),
                       shouldUseRebase = true
                     ),
                     AssetType.Residential,
@@ -4614,7 +4614,7 @@ class AcquisitionDetailsControllerSpec
                 testRedirectOnMissingData(
                   sessionWithState(
                     allQuestionsAnswered.copy(
-                      acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                      acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(1L))),
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -4862,7 +4862,7 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
                 sample[AcquisitionMethod],
-                AcquisitionDate(ukResidents.minusDays(2)),
+                AcquisitionDate(allResidents.minusDays(2)),
                 sample[AmountInPence],
                 Some(sample[AmountInPence]),
                 sample[AmountInPence],
@@ -4909,7 +4909,7 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
                 sample[AcquisitionMethod],
-                AcquisitionDate(ukResidents.plusDays(1)),
+                AcquisitionDate(allResidents.plusDays(1)),
                 sample[AmountInPence],
                 Some(sample[AmountInPence]),
                 sample[AmountInPence],

@@ -93,7 +93,7 @@
                   case Some(PersonalRepresentative)                => messages("nonUkAddress.companyDetails.personalRep.title")
                   case Some(PersonalRepresentativeInPeriodOfAdmin) => messages("nonUkAddress.companyDetails.personalRepInPeriodOfAdmin.title")
                   case Some(Capacitor)                             => messages("nonUkAddress.companyDetails.capacitor.title")
-                  case None =>
+                  case _ =>
                       if (c.isATrust)                                 messages("nonUkAddress.companyDetails.trust.title")
                       else if (request.userType.exists(_ === Agent))  messages("nonUkAddress.companyDetails.agent.title")
                       else                                            messages("nonUkAddress.companyDetails.title")

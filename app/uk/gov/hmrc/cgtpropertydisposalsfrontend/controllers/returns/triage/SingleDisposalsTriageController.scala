@@ -580,7 +580,7 @@ class SingleDisposalsTriageController @Inject() (
                             Redirect(
                               routes.SingleDisposalsTriageController.checkYourAnswers()
                             )
-                          case None                         =>
+                          case _                            =>
                             Redirect(
                               routes.CommonTriageQuestionsController.disposalDateTooEarly()
                             )
@@ -1212,7 +1212,7 @@ class SingleDisposalsTriageController @Inject() (
                             Redirect(
                               routes.SingleDisposalsTriageController.checkYourAnswers()
                             )
-                          case None                         =>
+                          case _                            =>
                             Redirect(
                               routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
                             )

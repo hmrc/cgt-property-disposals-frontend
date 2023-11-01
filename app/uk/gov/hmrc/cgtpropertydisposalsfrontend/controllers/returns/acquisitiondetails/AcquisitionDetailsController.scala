@@ -1397,19 +1397,16 @@ class AcquisitionDetailsController @Inject() (
     acquisitionDate: AcquisitionDate
   ): Boolean =
     if (
-      wasUkResident && RebasingCutoffDates.ukResidents.isAfter(
-        acquisitionDate.value
+      !wasUkResident && (
+        RebasingCutoffDates.nonUkResidentsResidentialProperty.isAfter(acquisitionDate.value) ||
+          RebasingCutoffDates.nonUkResidentsNonResidentialProperty.isAfter(acquisitionDate.value)
       )
     ) {
-      acquisitionDetailsAnswers
-        .fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
-        .isDefined
-    } else if (!wasUkResident) {
       acquisitionDetailsAnswers
         .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
         .isDefined
     } else {
-      true
+      acquisitionDetailsAnswers.fold(_.acquisitionMethod, c => Some(c.acquisitionMethod)).isDefined
     }
 }
 
