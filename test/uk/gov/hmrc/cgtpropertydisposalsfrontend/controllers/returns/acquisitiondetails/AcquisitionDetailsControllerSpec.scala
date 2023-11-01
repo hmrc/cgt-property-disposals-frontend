@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisition
 
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
+import org.scalatest.{Outcome, Retries}
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
@@ -36,6 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiond
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
@@ -60,7 +62,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
@@ -75,7 +76,17 @@ class AcquisitionDetailsControllerSpec
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
-    with StartingToAmendToFillingOutReturnSpecBehaviour {
+    with StartingToAmendToFillingOutReturnSpecBehaviour
+    with Retries {
+
+  override def withFixture(test: NoArgTest): Outcome =
+    if (isRetryable(test)) {
+      this.withRetry {
+        super.withFixture(test)
+      }
+    } else {
+      super.withFixture(test)
+    }
 
   private lazy val controller = instanceOf[AcquisitionDetailsController]
 
@@ -274,7 +285,7 @@ class AcquisitionDetailsControllerSpec
       ),
       acquisitionDetailsAnswers = answers,
       representeeAnswers = representeeAnswers,
-      disposalDetailsAnswers = None,
+      disposalDetailsAnswers = None
     )
 
     val journey = sample[FillingOutReturn].copy(
