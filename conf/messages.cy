@@ -2338,6 +2338,56 @@ shouldUseRebase.indirect.error.required=Dewiswch ‘Iawn’ os ydych yn defnyddi
 shouldUseRebase.cyaChange=a ydych yn defnyddio’r gwerth yn sgil yr ail-sylfaenu yn eich cyfrifiad
 acquisitionDetails.cya.title=Gwiriwch eich atebion
 
+acquisitionPrice.1.title=Faint y gwnaethoch ei dalu am eich cyfran chi o’r eiddo?
+acquisitionPrice.1.helpText=Byddwch yn gallu nodi unrhyw gostau prynu, megis ffioedd cyfreithiwr neu syrfëwr, yn ddiweddarach.
+acquisitionPrice.2.title=Beth oedd eich cyfran chi o werth marchnadol yr eiddo ar {acquisition date}?
+acquisitionPrice.2.helpText=Gallwch roi prisiad gan syrfëwr neu amcangyfrif realistig.
+acquisitionPrice.3.title=Beth oedd eich cyfran chi o werth marchnadol yr eiddo ar {rebase date}?
+acquisitionPrice.3.helpText=Gallwch roi prisiad gan syrfëwr neu amcangyfrif realistig.
+acquisitionPrice.4.title=Faint y gwnaeth y person ei dalu am ei gyfran o’r eiddo?
+acquisitionPrice.4.helpText=Byddwch yn gallu nodi unrhyw gostau prynu, megis ffioedd cyfreithiwr neu syrfëwr, yn ddiweddarach.
+acquisitionPrice.5.title=Beth oedd cyfran y person o werth marchnadol yr eiddo pan gafodd ei gaffael?
+acquisitionPrice.5.helpText=Gall y person roi prisiad gan syrfëwr neu amcangyfrif realistig
+acquisitionPrice.6.title=Beth oedd gwerth marchnadol cyfran yr ystâd o’r eiddo ar {acquisition date}?
+acquisitionPrice.6.helpText=Gallwch roi prisiad gan syrfëwr neu amcangyfrif realistig.
+acquisitionPrice.7.title=Faint y gwnaeth eich cleient ei dalu am ei gyfran o’r eiddo?
+acquisitionPrice.7.helpText=Byddwch yn gallu nodi unrhyw gostau prynu, megis ffioedd cyfreithiwr yn ddiweddarach.
+acquisitionPrice.8.title=Beth oedd cyfran eich cleient o werth marchnadol yr eiddo ar {date acquired property}?
+acquisitionPrice.8.helpText=Gallwch roi prisiad gan syrfëwr neu amcangyfrif realistig.
+acquisitionPrice.9.title=Beth oedd cyfran eich cleient o werth marchnadol yr eiddo ar {rebase date}?
+acquisitionPrice.9.helpText=Gallwch roi prisiad gan syrfëwr neu amcangyfrif realistig.
+acquisitionPrice.10.title=Faint y gwnaeth yr ymddiriedolaeth ei dalu am ei chyfran o’r eiddo?
+acquisitionPrice.10.helpText=Byddwch yn gallu nodi unrhyw gostau prynu, megis ffioedd cyfreithiwr neu syrfëwr, yn ddiweddarach.
+
+improvementCosts.1.title=A ydych am hawlio eich cyfran chi o unrhyw gostau gwella?
+improvementCosts.1.helpText=Gallwch ond hawlio costau a ychwanegodd werth at yr eiddo. Ni allwch hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+improvementCosts.2.title=A ydych am hawlio eich cyfran chi o unrhyw gostau gwella?
+improvementCosts.2.helpText=Gallwch ond hawlio costau a ychwanegodd werth at yr eiddo ar ôl Mawrth 1982 (y dyddiad y gwnaethoch ail-sylfaenu). Ni allwch hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+improvementCosts.3.title=A yw’r person am hawlio ei gyfran o unrhyw gostau gwella?
+improvementCosts.3.helpText=Gall y person ond hawlio costau a ychwanegodd werth at yr eiddo. Ni all hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+improvementCosts.4.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau gwella?
+improvementCosts.4.helpText=Gallwch ond hawlio unrhyw gostau a ychwanegodd werth at yr eiddo. Ni allwch hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+improvementCosts.5.title=A yw’ch cleient am hawlio ei gyfran o unrhyw gostau gwella?
+improvementCosts.5.helpText=Gall eich cleient ond hawlio ei gyfran o unrhyw gostau a ychwanegodd werth at yr eiddo. Ni all hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+improvementCosts.6.title=A yw’ch cleient am hawlio ei gyfran o unrhyw gostau gwella?
+improvementCosts.6.helpText=Gall eich cleient ond hawlio costau a ychwanegodd werth at yr eiddo ar ôl {rebase date} (y dyddiad y gwnaeth ail-sylfaenu). Ni all hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+improvementCosts.7.title=A yw’r ymddiriedolaeth am hawlio ei chyfran o unrhyw gostau gwella?
+improvementCosts.7.helpText=Gall yr ymddiriedolaeth ond hawlio ei chyfran o unrhyw gostau a ychwanegodd werth at yr eiddo. Ni all hawlio llog morgais, costau addurno na chostau cynnal a chadw.
+
+acquisitionFees.1.title=A ydych am hawlio’ch cyfran chi o unrhyw gostau ychwanegol y gwnaethoch eu talu pan gawsoch yr eiddo?
+acquisitionFees.1.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr.
+acquisitionFees.2.title=A ydych am hawlio’ch cyfran chi o unrhyw gostau ychwanegol y gwnaethoch eu talu pan wnaethoch ail-sylfaenu’r eiddo?
+acquisitionFees.2.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr. Ni allwch hawlio unrhyw gostau ychwanegol y gwnaethoch eu talu pan gawsoch yr eiddo.
+acquisitionFees.3.title=A yw’ch cleient am hawlio ei gyfran o unrhyw gostau caffael ychwanegol?
+acquisitionFees.3.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr.
+acquisitionFees.4.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau gwella?
+acquisitionFees.4.helpText=Er enghraifft, costau cyfreithiol wrth sicrhau’r hawliau i’r eiddo.
+acquisitionFees.5.title=A yw’ch cheient am hawlio ei gyfran o unrhyw gostau caffael ychwanegol?
+acquisitionFees.5.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr.
+acquisitionFees.6.title=A yw’ch cleient am hawlio ei gyfran o unrhyw gostau ail-sylfaenu ychwanegol?
+acquisitionFees.6.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr. Ni all eich cleient hawlio unrhyw gostau ychwanegol y gwnaeth eu talu pan afaelodd yr eiddo.
+acquisitionFees.7.title=A yw’r ymddiriedolaeth am hawlio ei chyfran o unrhyw gostau caffael ychwanegol?
+acquisitionFees.7.helpText=Os oedd yr ymddiriedolaeth yn rhannu’r costau hyn, gall ond hawlio ei chyfran hi ohonynt.
 
 #===================================================
 #  PURCHASE OR ACQUISITION DETAILS PAGES - END
