@@ -273,7 +273,8 @@ class AcquisitionDetailsControllerSpec
         individualUserType = Some(individualUserType)
       ),
       acquisitionDetailsAnswers = answers,
-      representeeAnswers = representeeAnswers
+      representeeAnswers = representeeAnswers,
+      disposalDetailsAnswers = None,
     )
 
     val journey = sample[FillingOutReturn].copy(
