@@ -84,7 +84,7 @@
 
 
 @titleWithHelpTextAndContext = @{
-  val rebaseDate = RebasingCutoffDates.ukResidents
+  val rebaseDate = RebasingCutoffDates.allResidents
   (isShare, acquisitionMethod, representativeType) match {
     case (true, _, None) if acquisitionDate.value.isBefore(rebaseDate) =>
       (messages("acquisitionPrice.3.title"), Html(messages("acquisitionPrice.3.helpText", rebaseDate)))
