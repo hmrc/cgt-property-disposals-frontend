@@ -1727,9 +1727,9 @@ disposalPrice.6.title=Am faint y gwnaethoch werthu’ch cyfran chi o’r eiddo?
 disposalPrice.6.helpText=Dyma’r swm cyfan y gwnaethoch werthu’ch cyfran chi o’r eiddo amdano. Peidiwch â thynnu unrhyw gostau na ffioedd. Byddwch yn gallu cynnwys costau prynu neu gaffael yn nes ymlaen.
 disposalPrice.5.title=Beth oedd eich cyfran chi o werth marchnadol yr eiddo pan wnaethoch ei roi i ffwrdd?
 disposalPrice.5.helpText=Byddwch yn gallu nodi unrhyw gostau ychwanegol yn nes ymlaen.
-disposalPrice.1.title=Byddwch yn gallu nodi unrhyw gostau ychwanegol yn nes ymlaen.
+disposalPrice.1.title=Beth oedd cyfran y person o’r swm gwaredu?
 disposalPrice.1.helpText=Dyma’r swm cyfan o gyfran y person o’r pris gwerthu. Peidiwch â thynnu costau na ffioedd. Byddwch yn gallu nodi costau ychwanegol yn nes ymlaen.
-disposalPrice.2.title=Beth oedd cyfran yr ystâd o elw'r gwarediad?
+disposalPrice.2.title=Beth oedd cyfran yr ystâd o elw’r gwarediad?
 disposalPrice.2.helpText=Dyma’r swm cyfan o gyfran yr ystâd o’r pris gwerthu. Peidiwch â thynnu costau na ffioedd. Byddwch yn gallu nodi costau ychwanegol yn nes ymlaen.
 disposalPrice.3.title=Beth oedd cyfran eich cleient o’r swm gwaredu?
 disposalPrice.3.helpText=Dyma’r swm cyfan o gyfran eich cleient o’r pris gwerthu. Peidiwch â thynnu unrhyw gostau na ffioedd. Byddwch yn gallu nodi unrhyw gostau ychwanegol yn nes ymlaen.
@@ -1744,8 +1744,8 @@ disposalFees.3.title=Beth oedd cyfran yr ystâd o unrhyw gostau gwaredu ychwaneg
 disposalFees.3.helpText=Er enghraifft, y swm a dalwyd gennych chi, neu’r ystâd, i asiant tai neu gyfreithiwr.
 disposalFees.4.title=Beth oedd cyfran eich cleient o unrhyw gostau gwaredu ychwanegol?
 disposalFees.4.helpText=Er enghraifft, y swm a dalwyd gan eich cleient i asiant tai neu gyfreithiwr.
-disposalFees.5.title=Beth oedd cyfran yr ystâd o unrhyw gostau gwaredu ychwanegol?
-disposalFees.5.helpText=Beth oedd cyfran yr ystâd o unrhyw gostau gwaredu ychwanegol?
+disposalFees.5.title=Beth oedd cyfran yr ymddiriedolaeth o unrhyw gostau gwaredu ychwanegol?
+disposalFees.5.helpText=Er enghraifft, y swm a dalwyd gan yr ymddiriedolaeth i asiant tai neu gyfreithiwr.
 
 #===================================================
 #  SALE OR DISPOSAL DETAILS PAGES - END
