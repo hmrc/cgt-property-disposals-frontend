@@ -87,9 +87,9 @@
   val rebaseDate = RebasingCutoffDates.allResidents
   (isShare, acquisitionMethod, representativeType) match {
     case (true, _, None) if acquisitionDate.value.isBefore(rebaseDate) =>
-      (messages("acquisitionPrice.3.title"), Html(messages("acquisitionPrice.3.helpText", rebaseDate)))
+      (messages("acquisitionPrice.3.title", rebaseDate), Html(messages("acquisitionPrice.3.helpText")))
     case (true, Inherited | Gifted, None) =>
-      (messages("acquisitionPrice.2.title"), Html(messages("acquisitionPrice.2.helpText", TimeUtils.govDisplayFormat(acquisitionDate.value))))
+      (messages("acquisitionPrice.2.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages("acquisitionPrice.2.helpText")))
     case (true, Bought, Some(Capacitor | PersonalRepresentative)) =>
       (messages("acquisitionPrice.4.title"), Html(messages("acquisitionPrice.4.helpText")))
     case (true, Gifted, Some(Capacitor | PersonalRepresentative)) =>
@@ -97,11 +97,11 @@
     case (true, _, Some(PersonalRepresentativeInPeriodOfAdmin)) =>
       (messages("acquisitionPrice.6.title"), Html(messages("acquisitionPrice.6.helpText")))
     case (true, _, _) if isAgent && acquisitionDate.value.isBefore(rebaseDate) =>
-      (messages("acquisitionPrice.9.title"), Html(messages("acquisitionPrice.9.helpText", rebaseDate)))
+      (messages("acquisitionPrice.9.title", rebaseDate), Html(messages("acquisitionPrice.9.helpText")))
     case (true, Bought, _) if isAgent =>
       (messages("acquisitionPrice.7.title"), Html(messages("acquisitionPrice.7.helpText")))
     case (true, Inherited | Gifted, _) if isAgent =>
-      (messages("acquisitionPrice.8.title"), Html(messages("acquisitionPrice.8.helpText", acquisitionDate)))
+      (messages("acquisitionPrice.8.title", acquisitionDate), Html(messages("acquisitionPrice.8.helpText")))
     case (true, Bought, _) if isATrust =>
       (messages("acquisitionPrice.10.title"), Html(messages("acquisitionPrice.10.helpText")))
     case (true, _, None) =>

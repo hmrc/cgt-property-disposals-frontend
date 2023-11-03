@@ -93,7 +93,7 @@
     case (true, _, None | Some(false)) if isAgent =>
       (messages("acquisitionFees.5.title"), messages("acquisitionFees.5.helpText"))
     case (true, _, Some(true)) if isAgent =>
-      (messages("acquisitionFees.6.title"), messages("acquisitionFees.6.helpText"))
+      (messages("acquisitionFees.6.title"), messages("acquisitionFees.6.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate)))
     case (true, _, _) if isATrust =>
       (messages("acquisitionFees.7.title"), messages("acquisitionFees.7.helpText"))
     case (true, None, None | Some(false)) =>
