@@ -28,10 +28,13 @@ object IndividualUserType {
 
   case object Self extends IndividualUserType
 
+  /** When helping someone do the return */
   case object Capacitor extends RepresentativeType
 
+  /** When disposing for someone before they died */
   case object PersonalRepresentative extends RepresentativeType
 
+  /** When disposing for someone after they died */
   case object PersonalRepresentativeInPeriodOfAdmin extends RepresentativeType
 
   implicit val individualUserTypeEq: Eq[IndividualUserType] = Eq.fromUniversalEquals

@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldet
 
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
+import org.scalatest.{Outcome, Retries}
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
@@ -72,9 +73,19 @@ class DisposalDetailsControllerSpec
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
-    with StartingToAmendToFillingOutReturnSpecBehaviour {
+    with StartingToAmendToFillingOutReturnSpecBehaviour
+    with Retries {
 
   import DisposalDetailsControllerSpec._
+
+  override def withFixture(test: NoArgTest): Outcome =
+    if (isRetryable(test)) {
+      this.withRetry {
+        super.withFixture(test)
+      }
+    } else {
+      super.withFixture(test)
+    }
 
   val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
@@ -333,73 +344,71 @@ class DisposalDetailsControllerSpec
           }
         }
 
-        "the user has answered the question before but has " +
-          "not completed the disposal detail section" in {
-            forAll(
-              acceptedUserTypeGen,
-              disposalMethodGen,
-              acceptedIndividualUserType
-            ) {
-              (
-                userType: UserType,
-                disposalMethod: DisposalMethod,
-                individualUserType: IndividualUserType
-              ) =>
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(
-                    sessionWithDisposalDetailsAnswers(
-                      IncompleteDisposalDetailsAnswers.empty.copy(
-                        shareOfProperty = Some(ShareOfProperty.Other(12.34))
-                      ),
-                      disposalMethod,
-                      userType,
-                      Some(individualUserType)
-                    )._1
-                  )
-                }
-                val userMsgKey = userMessageKey(individualUserType, userType)
-                checkPageIsDisplayed(
-                  performAction(),
-                  messageFromMessageKey(s"shareOfProperty$userMsgKey.title"),
-                  doc => doc.select("#percentageShare").attr("value") shouldBe "12.34"
+        "the user has answered the question before but has not completed the disposal detail section" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            acceptedIndividualUserType
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithDisposalDetailsAnswers(
+                    IncompleteDisposalDetailsAnswers.empty.copy(
+                      shareOfProperty = Some(ShareOfProperty.Other(12.34))
+                    ),
+                    disposalMethod,
+                    userType,
+                    Some(individualUserType)
+                  )._1
                 )
-            }
+              }
+              val userMsgKey = userMessageKey(individualUserType, userType)
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey(s"shareOfProperty$userMsgKey.title"),
+                doc => doc.select("#percentageShare").attr("value") shouldBe "12.34"
+              )
           }
+        }
 
-        "the user has answered the question before but has " +
-          "completed the disposal detail section" in {
-            forAll(
-              acceptedUserTypeGen,
-              disposalMethodGen,
-              acceptedIndividualUserType
-            ) {
-              (
-                userType: UserType,
-                disposalMethod: DisposalMethod,
-                individualUserType: IndividualUserType
-              ) =>
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(
-                    sessionWithDisposalDetailsAnswers(
-                      sample[CompleteDisposalDetailsAnswers].copy(
-                        shareOfProperty = ShareOfProperty.Other(12.34)
-                      ),
-                      disposalMethod,
-                      userType,
-                      Some(individualUserType)
-                    )._1
-                  )
-                }
-                val userMsgKey = userMessageKey(individualUserType, userType)
-                checkPageIsDisplayed(
-                  performAction(),
-                  messageFromMessageKey(s"shareOfProperty$userMsgKey.title"),
-                  doc => doc.select("#percentageShare").attr("value") shouldBe "12.34"
+        "the user has answered the question before but has completed the disposal detail section" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            acceptedIndividualUserType
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithDisposalDetailsAnswers(
+                    sample[CompleteDisposalDetailsAnswers].copy(
+                      shareOfProperty = ShareOfProperty.Other(12.34)
+                    ),
+                    disposalMethod,
+                    userType,
+                    Some(individualUserType)
+                  )._1
                 )
-            }
+              }
+              val userMsgKey = userMessageKey(individualUserType, userType)
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey(s"shareOfProperty$userMsgKey.title"),
+                doc => doc.select("#percentageShare").attr("value") shouldBe "12.34"
+              )
           }
+        }
 
       }
 
@@ -1031,52 +1040,29 @@ class DisposalDetailsControllerSpec
         userType: UserType
       ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
         val userMsgKey = userMessageKey(individualUserType, userType)
+        def row(disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty) = {
+          val expectedMessage = (disposalMethod, individualUserType, userType) match {
+            case (_, Capacitor | PersonalRepresentative, _)                             => "disposalPrice.1.title"
+            case (_, PersonalRepresentativeInPeriodOfAdmin, _)                          => "disposalPrice.2.title"
+            case (DisposalMethod.Sold, _, UserType.Individual)                          => "disposalPrice.6.title"
+            case (DisposalMethod.Other | DisposalMethod.Gifted, _, UserType.Individual) => "disposalPrice.5.title"
+            case (_, _, UserType.Organisation)                                          => "disposalPrice.4.title"
+            case (_, _, UserType.Agent)                                                 => "disposalPrice.3.title"
+            case _                                                                      => "disposalPrice.6.title"
+          }
+          (disposalMethod, shareOfProperty, expectedMessage)
+        }
+
         List(
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Full,
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Half,
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Other(1),
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Full,
-            s"disposalPrice$userMsgKey.Gifted.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Half,
-            s"disposalPrice$userMsgKey.Gifted.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Other(1),
-            s"disposalPrice$userMsgKey.Gifted.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Full,
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Half,
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Other(1),
-            s"disposalPrice$userMsgKey.SoldOther.title"
-          )
+          (DisposalMethod.Sold, ShareOfProperty.Full, s"disposalPrice$userMsgKey.SoldOther.title"),
+          (DisposalMethod.Gifted, ShareOfProperty.Full, s"disposalPrice$userMsgKey.Gifted.title"),
+          (DisposalMethod.Other, ShareOfProperty.Full, s"disposalPrice$userMsgKey.SoldOther.title"),
+          row(DisposalMethod.Sold, ShareOfProperty.Half),
+          row(DisposalMethod.Sold, ShareOfProperty.Other(1)),
+          row(DisposalMethod.Gifted, ShareOfProperty.Half),
+          row(DisposalMethod.Gifted, ShareOfProperty.Other(1)),
+          row(DisposalMethod.Other, ShareOfProperty.Half),
+          row(DisposalMethod.Other, ShareOfProperty.Other(1))
         )
       }
 
@@ -1123,97 +1109,95 @@ class DisposalDetailsControllerSpec
           }
         }
 
-        "the user has answered the question before but has " +
-          "not completed the disposal details section" in {
-            forAll(
-              acceptedUserTypeGen,
-              disposalMethodGen,
-              individualUserTypeGen
-            ) {
-              (
-                userType: UserType,
-                _: DisposalMethod,
-                individualUserType: IndividualUserType
-              ) =>
-                disposalPriceTitleScenarios(individualUserType, userType)
-                  .foreach { case (disposalMethod, share, expectedTitleKey) =>
-                    withClue(
-                      s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
-                        s"($disposalMethod $share, $expectedTitleKey): "
-                    ) {
-                      inSequence {
-                        mockAuthWithNoRetrievals()
-                        mockGetSession(
-                          sessionWithDisposalDetailsAnswers(
-                            requiredPreviousAnswers.copy(
-                              shareOfProperty = Some(share),
-                              disposalPrice = Some(AmountInPence.fromPounds(12.34))
-                            ),
-                            disposalMethod,
-                            userType,
-                            Some(individualUserType)
-                          )._1
-                        )
-                      }
-
-                      checkPageIsDisplayed(
-                        performAction(),
-                        messageFromMessageKey(expectedTitleKey),
-                        doc =>
-                          doc
-                            .select("#disposalPrice")
-                            .attr("value") shouldBe "12.34"
+        "the user has answered the question before but has not completed the disposal details section" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              _: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              disposalPriceTitleScenarios(individualUserType, userType)
+                .foreach { case (disposalMethod, share, expectedTitleKey) =>
+                  withClue(
+                    s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
+                      s"($disposalMethod $share, $expectedTitleKey): "
+                  ) {
+                    inSequence {
+                      mockAuthWithNoRetrievals()
+                      mockGetSession(
+                        sessionWithDisposalDetailsAnswers(
+                          requiredPreviousAnswers.copy(
+                            shareOfProperty = Some(share),
+                            disposalPrice = Some(AmountInPence.fromPounds(12.34))
+                          ),
+                          disposalMethod,
+                          userType,
+                          Some(individualUserType)
+                        )._1
                       )
                     }
+
+                    checkPageIsDisplayed(
+                      performAction(),
+                      messageFromMessageKey(expectedTitleKey),
+                      doc =>
+                        doc
+                          .select("#disposalPrice")
+                          .attr("value") shouldBe "12.34"
+                    )
                   }
-            }
+                }
           }
+        }
 
-        "the user has answered the question before but has " +
-          "completed the disposal details section" in {
-            forAll(
-              acceptedUserTypeGen,
-              disposalMethodGen,
-              individualUserTypeGen
-            ) {
-              (
-                userType: UserType,
-                _: DisposalMethod,
-                individualUserType: IndividualUserType
-              ) =>
-                disposalPriceTitleScenarios(individualUserType, userType)
-                  .foreach { case (disposalMethod, share, expectedTitleKey) =>
-                    withClue(
-                      s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
-                        s"($disposalMethod $share, $expectedTitleKey): "
-                    ) {
-                      inSequence {
-                        mockAuthWithNoRetrievals()
-                        mockGetSession(
-                          sessionWithDisposalDetailsAnswers(
-                            sample[CompleteDisposalDetailsAnswers].copy(
-                              shareOfProperty = share,
-                              disposalPrice = AmountInPence.fromPounds(12.34)
-                            ),
-                            disposalMethod,
-                            userType,
-                            Some(individualUserType)
-                          )._1
-                        )
-                      }
-
-                      checkPageIsDisplayed(
-                        performAction(),
-                        messageFromMessageKey(expectedTitleKey),
-                        doc =>
-                          doc
-                            .select("#disposalPrice")
-                            .attr("value") shouldBe "12.34"
+        "the user has answered the question before but has completed the disposal details section" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              _: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              disposalPriceTitleScenarios(individualUserType, userType)
+                .foreach { case (disposalMethod, share, expectedTitleKey) =>
+                  withClue(
+                    s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
+                      s"($disposalMethod $share, $expectedTitleKey): "
+                  ) {
+                    inSequence {
+                      mockAuthWithNoRetrievals()
+                      mockGetSession(
+                        sessionWithDisposalDetailsAnswers(
+                          sample[CompleteDisposalDetailsAnswers].copy(
+                            shareOfProperty = share,
+                            disposalPrice = AmountInPence.fromPounds(12.34)
+                          ),
+                          disposalMethod,
+                          userType,
+                          Some(individualUserType)
+                        )._1
                       )
                     }
+
+                    checkPageIsDisplayed(
+                      performAction(),
+                      messageFromMessageKey(expectedTitleKey),
+                      doc =>
+                        doc
+                          .select("#disposalPrice")
+                          .attr("value") shouldBe "12.34"
+                    )
                   }
-            }
+                }
           }
+        }
 
       }
     }
@@ -1714,21 +1698,9 @@ class DisposalDetailsControllerSpec
         val key        = "disposalPrice"
 
         List(
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Full,
-            s"$key$userMsgKey.indirect.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Full,
-            s"$key$userMsgKey.indirect.Gifted.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Full,
-            s"$key$userMsgKey.indirect.SoldOther.title"
-          )
+          (DisposalMethod.Sold, ShareOfProperty.Full, s"$key$userMsgKey.indirect.SoldOther.title"),
+          (DisposalMethod.Gifted, ShareOfProperty.Full, s"$key$userMsgKey.indirect.Gifted.title"),
+          (DisposalMethod.Other, ShareOfProperty.Full, s"$key$userMsgKey.indirect.SoldOther.title")
         )
       }
 
@@ -1775,97 +1747,95 @@ class DisposalDetailsControllerSpec
           }
         }
 
-        "the user has answered the question before but has " +
-          "not completed the disposal details section" in {
-            forAll(
-              acceptedUserTypeGen,
-              disposalMethodGen,
-              individualUserTypeGen
-            ) {
-              (
-                userType: UserType,
-                _: DisposalMethod,
-                individualUserType: IndividualUserType
-              ) =>
-                disposalPriceTitleScenarios(individualUserType, userType)
-                  .foreach { case (disposalMethod, share, expectedTitleKey) =>
-                    withClue(
-                      s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
-                        s"($disposalMethod $share, $expectedTitleKey): "
-                    ) {
-                      inSequence {
-                        mockAuthWithNoRetrievals()
-                        mockGetSession(
-                          sessionWithIndirectDisposalDetailsAnswers(
-                            requiredPreviousAnswers.copy(
-                              shareOfProperty = Some(share),
-                              disposalPrice = Some(AmountInPence.fromPounds(12.34))
-                            ),
-                            disposalMethod,
-                            userType,
-                            Some(individualUserType)
-                          )._1
-                        )
-                      }
-
-                      checkPageIsDisplayed(
-                        performAction(),
-                        messageFromMessageKey(expectedTitleKey),
-                        doc =>
-                          doc
-                            .select("#disposalPrice")
-                            .attr("value") shouldBe "12.34"
+        "the user has answered the question before but has not completed the disposal details section" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              _: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              disposalPriceTitleScenarios(individualUserType, userType)
+                .foreach { case (disposalMethod, share, expectedTitleKey) =>
+                  withClue(
+                    s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
+                      s"($disposalMethod $share, $expectedTitleKey): "
+                  ) {
+                    inSequence {
+                      mockAuthWithNoRetrievals()
+                      mockGetSession(
+                        sessionWithIndirectDisposalDetailsAnswers(
+                          requiredPreviousAnswers.copy(
+                            shareOfProperty = Some(share),
+                            disposalPrice = Some(AmountInPence.fromPounds(12.34))
+                          ),
+                          disposalMethod,
+                          userType,
+                          Some(individualUserType)
+                        )._1
                       )
                     }
+
+                    checkPageIsDisplayed(
+                      performAction(),
+                      messageFromMessageKey(expectedTitleKey),
+                      doc =>
+                        doc
+                          .select("#disposalPrice")
+                          .attr("value") shouldBe "12.34"
+                    )
                   }
-            }
+                }
           }
+        }
 
-        "the user has answered the question before but has " +
-          "completed the disposal details section" in {
-            forAll(
-              acceptedUserTypeGen,
-              disposalMethodGen,
-              individualUserTypeGen
-            ) {
-              (
-                userType: UserType,
-                _: DisposalMethod,
-                individualUserType: IndividualUserType
-              ) =>
-                disposalPriceTitleScenarios(individualUserType, userType)
-                  .foreach { case (disposalMethod, share, expectedTitleKey) =>
-                    withClue(
-                      s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
-                        s"($disposalMethod $share, $expectedTitleKey): "
-                    ) {
-                      inSequence {
-                        mockAuthWithNoRetrievals()
-                        mockGetSession(
-                          sessionWithIndirectDisposalDetailsAnswers(
-                            sample[CompleteDisposalDetailsAnswers].copy(
-                              shareOfProperty = share,
-                              disposalPrice = AmountInPence.fromPounds(12.34)
-                            ),
-                            disposalMethod,
-                            userType,
-                            Some(individualUserType)
-                          )._1
-                        )
-                      }
-
-                      checkPageIsDisplayed(
-                        performAction(),
-                        messageFromMessageKey(expectedTitleKey),
-                        doc =>
-                          doc
-                            .select("#disposalPrice")
-                            .attr("value") shouldBe "12.34"
+        "the user has answered the question before but has completed the disposal details section" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              _: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              disposalPriceTitleScenarios(individualUserType, userType)
+                .foreach { case (disposalMethod, share, expectedTitleKey) =>
+                  withClue(
+                    s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
+                      s"($disposalMethod $share, $expectedTitleKey): "
+                  ) {
+                    inSequence {
+                      mockAuthWithNoRetrievals()
+                      mockGetSession(
+                        sessionWithIndirectDisposalDetailsAnswers(
+                          sample[CompleteDisposalDetailsAnswers].copy(
+                            shareOfProperty = share,
+                            disposalPrice = AmountInPence.fromPounds(12.34)
+                          ),
+                          disposalMethod,
+                          userType,
+                          Some(individualUserType)
+                        )._1
                       )
                     }
+
+                    checkPageIsDisplayed(
+                      performAction(),
+                      messageFromMessageKey(expectedTitleKey),
+                      doc =>
+                        doc
+                          .select("#disposalPrice")
+                          .attr("value") shouldBe "12.34"
+                    )
                   }
-            }
+                }
           }
+        }
 
       }
 
@@ -2364,53 +2334,28 @@ class DisposalDetailsControllerSpec
         individualUserType: IndividualUserType,
         userType: UserType
       ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
+        def row(disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty) = {
+          val expectedMessage = (individualUserType, userType) match {
+            case (Capacitor | PersonalRepresentative, _)    => "disposalFees.2.title"
+            case (PersonalRepresentativeInPeriodOfAdmin, _) => "disposalFees.3.title"
+            case (_, UserType.Individual)                   => "disposalFees.1.title"
+            case (_, UserType.Organisation)                 => "disposalFees.5.title"
+            case (_, UserType.Agent)                        => "disposalFees.4.title"
+            case _                                          => "disposalFees.1.title"
+          }
+          (disposalMethod, shareOfProperty, expectedMessage)
+        }
         val userKey = userMessageKey(individualUserType, userType)
         List(
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Full,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Half,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Other(1),
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Full,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Half,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Other(1),
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Full,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Half,
-            s"disposalFees$userKey.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Other(1),
-            s"disposalFees$userKey.title"
-          )
+          (DisposalMethod.Sold, ShareOfProperty.Full, s"disposalFees$userKey.title"),
+          (DisposalMethod.Gifted, ShareOfProperty.Full, s"disposalFees$userKey.title"),
+          (DisposalMethod.Other, ShareOfProperty.Full, s"disposalFees$userKey.title"),
+          row(DisposalMethod.Sold, ShareOfProperty.Half),
+          row(DisposalMethod.Sold, ShareOfProperty.Other(1)),
+          row(DisposalMethod.Gifted, ShareOfProperty.Half),
+          row(DisposalMethod.Gifted, ShareOfProperty.Other(1)),
+          row(DisposalMethod.Other, ShareOfProperty.Half),
+          row(DisposalMethod.Other, ShareOfProperty.Other(1))
         )
       }
 
@@ -2493,89 +2438,87 @@ class DisposalDetailsControllerSpec
           }
         }
 
-        "the user has answered the question before but has " +
-          "not completed the disposal detail section" in {
-            forAll(acceptedUserTypeGen, individualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                disposalFeesTitleScenarios(individualUserType, userType).foreach {
-                  case (disposalMethod, share, expectedTitleKey) =>
-                    withClue(
-                      s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
-                        s"($disposalMethod $share, $expectedTitleKey): "
-                    ) {
-                      inSequence {
-                        mockAuthWithNoRetrievals()
-                        mockGetSession(
-                          sessionWithDisposalDetailsAnswers(
-                            requiredPreviousAnswers.copy(
-                              shareOfProperty = Some(share),
-                              disposalFees = Some(AmountInPence.fromPounds(12.34))
-                            ),
-                            disposalMethod,
-                            userType,
-                            Some(individualUserType)
-                          )._1
-                        )
-                      }
-
-                      checkPageIsDisplayed(
-                        performAction(),
-                        messageFromMessageKey(expectedTitleKey),
-                        doc =>
-                          doc
-                            .select("#disposalFees")
-                            .attr("value") shouldBe "12.34"
+        "the user has answered the question before but has not completed the disposal detail section" in {
+          forAll(acceptedUserTypeGen, individualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              disposalFeesTitleScenarios(individualUserType, userType).foreach {
+                case (disposalMethod, share, expectedTitleKey) =>
+                  withClue(
+                    s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
+                      s"($disposalMethod $share, $expectedTitleKey): "
+                  ) {
+                    inSequence {
+                      mockAuthWithNoRetrievals()
+                      mockGetSession(
+                        sessionWithDisposalDetailsAnswers(
+                          requiredPreviousAnswers.copy(
+                            shareOfProperty = Some(share),
+                            disposalFees = Some(AmountInPence.fromPounds(12.34))
+                          ),
+                          disposalMethod,
+                          userType,
+                          Some(individualUserType)
+                        )._1
                       )
                     }
-                }
-            }
+
+                    checkPageIsDisplayed(
+                      performAction(),
+                      messageFromMessageKey(expectedTitleKey),
+                      doc =>
+                        doc
+                          .select("#disposalFees")
+                          .attr("value") shouldBe "12.34"
+                    )
+                  }
+              }
           }
+        }
 
-        "the user has answered the question before but has " +
-          "completed the disposal detail section" in {
-            forAll(
-              acceptedUserTypeGen,
-              disposalMethodGen,
-              individualUserTypeGen
-            ) {
-              (
-                userType: UserType,
-                _: DisposalMethod,
-                individualUserType: IndividualUserType
-              ) =>
-                disposalFeesTitleScenarios(individualUserType, userType).foreach {
-                  case (disposalMethod, share, expectedTitleKey) =>
-                    withClue(
-                      s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
-                        s"($disposalMethod $share, $expectedTitleKey): "
-                    ) {
-                      inSequence {
-                        mockAuthWithNoRetrievals()
-                        mockGetSession(
-                          sessionWithDisposalDetailsAnswers(
-                            sample[CompleteDisposalDetailsAnswers].copy(
-                              shareOfProperty = share,
-                              disposalFees = AmountInPence.fromPounds(12.34)
-                            ),
-                            disposalMethod,
-                            userType,
-                            Some(individualUserType)
-                          )._1
-                        )
-                      }
-
-                      checkPageIsDisplayed(
-                        performAction(),
-                        messageFromMessageKey(expectedTitleKey),
-                        doc =>
-                          doc
-                            .select("#disposalFees")
-                            .attr("value") shouldBe "12.34"
+        "the user has answered the question before but has completed the disposal detail section" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              _: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              disposalFeesTitleScenarios(individualUserType, userType).foreach {
+                case (disposalMethod, share, expectedTitleKey) =>
+                  withClue(
+                    s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
+                      s"($disposalMethod $share, $expectedTitleKey): "
+                  ) {
+                    inSequence {
+                      mockAuthWithNoRetrievals()
+                      mockGetSession(
+                        sessionWithDisposalDetailsAnswers(
+                          sample[CompleteDisposalDetailsAnswers].copy(
+                            shareOfProperty = share,
+                            disposalFees = AmountInPence.fromPounds(12.34)
+                          ),
+                          disposalMethod,
+                          userType,
+                          Some(individualUserType)
+                        )._1
                       )
                     }
-                }
-            }
+
+                    checkPageIsDisplayed(
+                      performAction(),
+                      messageFromMessageKey(expectedTitleKey),
+                      doc =>
+                        doc
+                          .select("#disposalFees")
+                          .attr("value") shouldBe "12.34"
+                    )
+                  }
+              }
           }
+        }
 
       }
 
@@ -3583,52 +3526,32 @@ class DisposalDetailsControllerSpec
     "redirect to the what was your share page" when {
 
       "there is no property share" in {
-        List(Self, PersonalRepresentative, Capacitor).foreach { individualUserType =>
-          List(
-            DisposalMethod.Sold,
-            DisposalMethod.Gifted,
-            DisposalMethod.Other
-          ).foreach { disposalMethod =>
-            List[UserType](
-              UserType.Agent,
-              UserType.Individual,
-              UserType.Organisation
-            ).foreach { userType: UserType =>
-              val draftReturn = sample[DraftSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers],
-                disposalDetailsAnswers = Some(
-                  IncompleteDisposalDetailsAnswers(
-                    None,
-                    Some(sample[AmountInPence]),
-                    Some(sample[AmountInPence])
-                  )
-                )
+        for {
+          individualUserType <- List(Self, PersonalRepresentative, Capacitor)
+          disposalMethod     <- List(DisposalMethod.Sold, DisposalMethod.Gifted, DisposalMethod.Other)
+          userType           <- List(UserType.Agent, UserType.Individual, UserType.Organisation)
+        } yield {
+          val draftReturn = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers],
+            disposalDetailsAnswers = Some(
+              IncompleteDisposalDetailsAnswers(
+                None,
+                Some(sample[AmountInPence]),
+                Some(sample[AmountInPence])
               )
+            )
+          )
 
-              val sessionData = SessionData.empty.copy(journeyStatus =
-                Some(
-                  fillingOutReturn(
-                    disposalMethod,
-                    userType,
-                    Some(individualUserType),
-                    isAmend = false
-                  )._1.copy(
-                    draftReturn = draftReturn
-                  )
-                )
-              )
+          val (journey, _) =
+            fillingOutReturn(disposalMethod, userType, Some(individualUserType), isAmend = false)
+          val sessionData  = SessionData.empty.copy(journeyStatus = Some(journey.copy(draftReturn = draftReturn)))
 
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(sessionData)
-              }
-
-              checkIsRedirect(
-                performAction(),
-                routes.DisposalDetailsController.howMuchDidYouOwn()
-              )
-            }
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
           }
+
+          checkIsRedirect(performAction(), routes.DisposalDetailsController.howMuchDidYouOwn())
         }
       }
     }

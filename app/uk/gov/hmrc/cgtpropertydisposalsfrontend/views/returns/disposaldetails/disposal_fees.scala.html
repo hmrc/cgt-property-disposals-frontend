@@ -41,7 +41,8 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
-    isAmend: Boolean
+    isAmend: Boolean,
+    isShare: Boolean,
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @key = @{ "disposalFees" }
@@ -58,16 +59,34 @@
           else ""
   }
 }
-@helpTextMessage = @{
-    val helpTextUserKey = representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent => ".personalRepInPeriodOfAdmin.agent"
-        case _ => userKey
+@titleAndHelpText = @{
+    (isShare, representativeType) match {
+        case (true, Some(Capacitor | PersonalRepresentative)) =>
+            (messages("disposalFees.2.title"), messages("disposalFees.2.helpText"))
+        case (true, Some(PersonalRepresentativeInPeriodOfAdmin)) =>
+            (messages("disposalFees.3.title"), messages("disposalFees.3.helpText"))
+        case (true, None) if isAgent =>
+            (messages("disposalFees.4.title"), messages("disposalFees.4.helpText"))
+        case (true, None) if isATrust =>
+            (messages("disposalFees.5.title"), messages("disposalFees.5.helpText"))
+        case (true, None) =>
+            (messages("disposalFees.1.title"), messages("disposalFees.1.helpText"))
+        case _ =>
+            val helpTextUserKey = representativeType match {
+                case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent =>
+                    ".personalRepInPeriodOfAdmin.agent"
+                case _ => userKey
+            }
+            val helpText = messages(s"$key$helpTextUserKey$indirectKey.helpText")
+            val title = messages(s"$key$userKey$indirectKey.title")
+            (title, helpText)
     }
-    messages(s"$key$helpTextUserKey$indirectKey.helpText")
 }
 
+@title = @{titleAndHelpText._1}
+@helpText = @{titleAndHelpText._2}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@title = @{ messages(s"$key$userKey$indirectKey.title") }
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
@@ -91,7 +110,7 @@
           content = Text("£")
         )),
         hint = Some(Hint(
-          content = Text(helpTextMessage)
+          content = Text(helpText)
         )),
         errorMessage = form.error(key).map(e => ErrorMessage(
           content = Text(messages(s"$key$userKey$indirectKey.${e.message}")),
