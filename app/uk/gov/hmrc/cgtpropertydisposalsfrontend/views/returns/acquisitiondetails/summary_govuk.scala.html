@@ -41,7 +41,8 @@
     canRebase: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    assetType: AssetType
+    assetType: AssetType,
+    isShare: Boolean,
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
@@ -62,6 +63,7 @@
     case _ => ""
 }}
 
+@shareKey = @{if(isShare) ".share" else ""}
 @rebasingKey = @{if(canRebase && answers.shouldUseRebase) ".rebased" else ""}
 @acquisitionDate = @{TimeUtils.govDisplayFormat(answers.acquisitionDate.value)}
 @rebasingDate = @{TimeUtils.govDisplayFormat(cutoffDate)}
@@ -70,22 +72,22 @@
   answers.acquisitionMethod match {
     case AcquisitionMethod.Bought => (
       messages("returns.acquisitionMethod.Bought"),
-      messages(s"acquisitionPriceBought$userKey$assetTypeKey.title"),
+      messages(s"acquisitionPriceBought$userKey$assetTypeKey$shareKey.title"),
       messages("acquisitionPriceBought.cyaChange")
     )
     case AcquisitionMethod.Inherited => (
       messages("returns.acquisitionMethod.Inherited"),
-      messages(s"acquisitionPriceNotBought$userKey$assetTypeKey.title", acquisitionDate),
+      messages(s"acquisitionPriceNotBought$userKey$assetTypeKey$shareKey.title", acquisitionDate),
       messages("acquisitionPriceNotBought.cyaChange", acquisitionDate)
     )
     case AcquisitionMethod.Gifted => (
       messages("returns.acquisitionMethod.Gifted"),
-      messages(s"acquisitionPriceNotBought$userKey$assetTypeKey.title", acquisitionDate),
+      messages(s"acquisitionPriceNotBought$userKey$assetTypeKey$shareKey.title", acquisitionDate),
       messages("acquisitionPriceNotBought.cyaChange", acquisitionDate)
     )
     case AcquisitionMethod.Other(value) => (
       value,
-      messages(s"acquisitionPriceNotBought$userKey$assetTypeKey.title", acquisitionDate),
+      messages(s"acquisitionPriceNotBought$userKey$assetTypeKey$shareKey.title", acquisitionDate),
       messages("acquisitionPriceNotBought.cyaChange", acquisitionDate)
     )
   }
@@ -117,7 +119,7 @@
   @{
       if(isPeriodOfAdmin) {
           cyaRow(
-              messages(s"periodOfAdminMarketValue$assetTypeKey.title", acquisitionDate),
+              messages(s"periodOfAdminMarketValue$assetTypeKey$shareKey.title", acquisitionDate),
               Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
               Some(cyaChange(
                   messages("periodOfAdminMarketValue.cyaChange", acquisitionDate),
@@ -141,7 +143,7 @@
 @if(canRebase) {
   @answers.rebasedAcquisitionPrice.map{ rebasedValue =>
     @cyaRow(
-      messages(s"rebaseAcquisitionPrice$assetTypeKey.title", rebasingDate),
+      messages(s"rebaseAcquisitionPrice$assetTypeKey$shareKey.title", rebasingDate),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(rebasedValue.inPounds())),
       Some(cyaChange(
         messages("rebaseAcquisitionPrice.cyaChange", rebasingDate),
@@ -167,7 +169,7 @@
 @if(assetTypeKey.isEmpty || isUk || (!isUk && !canRebase)) {
   @if(answers.improvementCosts.value === 0L){
     @cyaRow(
-        messages(s"improvementCosts$userKey.title"),
+        messages(s"improvementCosts$userKey$shareKey.title"),
         Html(messages("generic.no")),
         Some(cyaChange(
           messages("improvementCosts.cyaChange"),
@@ -177,7 +179,7 @@
       )
     } else {
       @cyaRow(
-        messages(s"improvementCosts$userKey.title"),
+        messages(s"improvementCosts$userKey$shareKey.title"),
         Html(messages("generic.yes")),
         Some(cyaChange(
           messages("improvementCosts.cyaChange"),
@@ -198,7 +200,7 @@
 }
 @if(answers.acquisitionFees.value === 0L){
       @cyaRow(
-        messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey.title", rebasingDate),
+        messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey$shareKey.title", rebasingDate),
         Html(messages("generic.no")),
         Some(cyaChange(
           messages(s"acquisitionFees$rebasingKey.cyaChange"),
@@ -208,7 +210,7 @@
       )
     } else {
       @cyaRow(
-        messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey.title", rebasingDate),
+        messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey$shareKey.title", rebasingDate),
         Html(messages("generic.yes")),
         Some(cyaChange(
           messages(s"acquisitionFees$rebasingKey.cyaChange"),

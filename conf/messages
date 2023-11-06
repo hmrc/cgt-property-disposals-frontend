@@ -2325,6 +2325,18 @@ acquisitionPriceBought.trust.title=How much did the trust pay for the property?
 acquisitionPriceBought.capacitor.title=How much did the person pay for the property?
 acquisitionPriceBought.personalRep.title=How much did the person pay for the property?
 
+acquisitionPriceBought.share.title=How much did you pay for your share of the property?
+acquisitionPriceBought.agent.share.title=How much did your client pay for their share of the property?
+acquisitionPriceBought.trust.share.title=How much did the trust pay for its share of the property?
+acquisitionPriceBought.capacitor.share.title=How much did the person pay for their share of the property?
+acquisitionPriceBought.personalRep.share.title=How much did the person pay for their share of the property?
+
+acquisitionPriceBought.indirect.share.title=How much did you pay for the shares?
+acquisitionPriceBought.agent.indirect.share.title=What was the acquisition amount?
+acquisitionPriceBought.trust.indirect.share.title=What was the acquisition amount?
+acquisitionPriceBought.capacitor.indirect.share.title=How much did the person pay for the shares?
+acquisitionPriceBought.personalRep.indirect.share.title=How much did the person pay for the shares?
+
 acquisitionPriceBought.indirect.title=How much did you pay for the shares?
 acquisitionPriceBought.agent.indirect.title=What was the acquisition amount?
 acquisitionPriceBought.trust.indirect.title=What was the acquisition amount?
@@ -2409,11 +2421,23 @@ acquisitionPriceNotBought.trust.title=What was the market value of the property 
 acquisitionPriceNotBought.capacitor.title=What was the market value of the property when it was acquired?
 acquisitionPriceNotBought.personalRep.title=What was the market value of the property when it was acquired?
 
+acquisitionPriceNotBought.share.title=What was your share of the market value of the property on {0}?
+acquisitionPriceNotBought.agent.share.title=What was your client's share of the market value of the property on {0}?
+acquisitionPriceNotBought.trust.share.title=What was the market value of the property on {0}?
+acquisitionPriceNotBought.capacitor.share.title=What was the person's share of the market value of the property when it was acquired?
+acquisitionPriceNotBought.personalRep.share.title=What was the person's share of the market value of the property when it was acquired?
+
 acquisitionPriceNotBought.indirect.title=What was the market value of the shares when you bought or acquired them?
 acquisitionPriceNotBought.agent.indirect.title=What was the acquisition amount?
 acquisitionPriceNotBought.trust.indirect.title=What was the acquisition amount?
 acquisitionPriceNotBought.capacitor.indirect.title=What was the market value of the shares when the person bought or acquired them?
 acquisitionPriceNotBought.personalRep.indirect.title=What was the market value of the property when it was acquired?
+
+acquisitionPriceNotBought.indirect.share.title=What was the market value of the shares when you bought or acquired them?
+acquisitionPriceNotBought.agent.indirect.share.title=What was the acquisition amount?
+acquisitionPriceNotBought.trust.indirect.share.title=What was the acquisition amount?
+acquisitionPriceNotBought.capacitor.indirect.share.title=What was the market value of the shares when the person bought or acquired them?
+acquisitionPriceNotBought.personalRep.indirect.share.title=What was the market value of the property when it was acquired?
 
 acquisitionPriceNotBought.helpText=You can provide a valuation from a surveyor or a realistic estimate.
 acquisitionPriceNotBought.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate.
@@ -2498,6 +2522,14 @@ improvementCosts.personalRep.title=Were there any improvement costs?
 improvementCosts.personalRepInPeriodOfAdmin.title=Were there any improvement costs?
 improvementCosts.personalRepInPeriodOfAdmin.agent.title=Were there any improvement costs?
 
+improvementCosts.share.title=Do you want to claim your share of any improvement costs?
+improvementCosts.agent.share.title=Does your client want to claim their share of any improvement costs?
+improvementCosts.trust.share.title=Does the trust want to claim its share of any improvement costs?
+improvementCosts.capacitor.share.title=Does the person want to claim for their share of any improvement costs?
+improvementCosts.personalRep.share.title=Do you want to claim for the estate's share of any improvement costs?
+improvementCosts.personalRepInPeriodOfAdmin.share.title=Do you want to claim for the estate's share of any improvement costs?
+improvementCosts.personalRepInPeriodOfAdmin.agent.share.title=Does your client want to claim their share of any improvement costs?
+
 improvementCosts.helpText=You can only claim costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.agent.helpText=Your client can only claim for costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.trust.helpText=The trust can only claim for costs that added value to the property. It cannot claim for mortgage interest, decorating or maintenance.
@@ -2549,12 +2581,26 @@ acquisitionFees.capacitor.title=Does the person want to claim for any additional
 acquisitionFees.personalRep.title=Were there any additional acquisition costs?
 acquisitionFees.personalRepInPeriodOfAdmin.title=Were there any additional acquisition costs?
 
+acquisitionFees.share.title=Do you want to claim your share of any additional costs you paid when you got the property?
+acquisitionFees.agent.share.title=Does your client want to claim their share of any additional acquisition costs?
+acquisitionFees.trust.share.title=Does the trust want claim its share of any additional acquisition costs?
+acquisitionFees.capacitor.share.title=Does the person want to claim for their share of any additional acquisition costs?
+acquisitionFees.personalRep.share.title=Do you want to claim for the estate's share of any additional costs?
+acquisitionFees.personalRepInPeriodOfAdmin.share.title=Do you want to claim for the estate's share of any additional costs?
+
 acquisitionFees.indirect.title=Do you want to claim any additional costs you paid when you got the shares?
 acquisitionFees.agent.indirect.title=Were there any additional acquisition costs?
 acquisitionFees.trust.indirect.title=Were there any additional acquisition costs?
 acquisitionFees.capacitor.indirect.title=Does the person want to claim any additional costs they paid when they got the shares?
 acquisitionFees.personalRep.indirect.title=Were there any additional acquisition costs?
 acquisitionFees.personalRepInPeriodOfAdmin.indirect.title=Were there any additional acquisition costs?
+
+acquisitionFees.indirect.share.title=Do you want to claim any additional costs you paid when you got the shares?
+acquisitionFees.agent.indirect.share.title=Were there any additional acquisition costs?
+acquisitionFees.trust.indirect.share.title=Were there any additional acquisition costs?
+acquisitionFees.capacitor.indirect.share.title=Does the person want to claim any additional costs they paid when they got the shares?
+acquisitionFees.personalRep.indirect.share.title=Were there any additional acquisition costs?
+acquisitionFees.personalRepInPeriodOfAdmin.indirect.share.title=Were there any additional acquisition costs?
 
 acquisitionFees.helpText=For example, fees for surveyors or solicitors.
 acquisitionFees.agent.helpText=For example, fees for surveyors or solicitors.
@@ -2576,11 +2622,23 @@ acquisitionFees.trust.rebased.title=Were there any additional rebasing costs?
 acquisitionFees.capacitor.rebased.title=Does the person want to claim for any additional rebasing costs?
 acquisitionFees.personalRep.rebased.title=Does the person want to claim for any additional rebasing costs?
 
+acquisitionFees.rebased.share.title=Do you want to claim for your share of any additional costs you paid when you rebased the property?
+acquisitionFees.agent.rebased.share.title=Does your client want to claim their share of any acquisition costs?
+acquisitionFees.trust.rebased.share.title=Does the trust want claim its share of any additional acquisition costs?
+acquisitionFees.capacitor.rebased.share.title=Does the person want to claim for any additional rebasing costs?
+acquisitionFees.personalRep.rebased.share.title=Does the person want to claim for any additional rebasing costs?
+
 acquisitionFees.indirect.rebased.title=Do you want to claim any additional costs for working out the value of the shares on {0}?
 acquisitionFees.agent.indirect.rebased.title=Were there any additional costs paid to rebase the shares?
 acquisitionFees.trust.indirect.rebased.title=Were there any additional costs paid to rebase the shares?
 acquisitionFees.capacitor.indirect.rebased.title=Does the person want to claim any additional costs for working out the value of the shares on {0}?
 acquisitionFees.personalRep.indirect.rebased.title=Does the person want to claim any additional costs for working out the value of the shares on {0}?
+
+acquisitionFees.indirect.rebased.share.title=Do you want to claim any additional costs for working out the value of the shares on {0}?
+acquisitionFees.agent.indirect.rebased.share.title=Were there any additional costs paid to rebase the shares?
+acquisitionFees.trust.indirect.rebased.share.title=Were there any additional costs paid to rebase the shares?
+acquisitionFees.capacitor.indirect.rebased.share.title=Does the person want to claim any additional costs for working out the value of the shares on {0}?
+acquisitionFees.personalRep.indirect.rebased.share.title=Does the person want to claim any additional costs for working out the value of the shares on {0}?
 
 acquisitionFees.rebased.helpText=For example, fees for surveyors or solicitors. You cannot claim for any additional costs you paid for when you got the property.
 acquisitionFees.agent.rebased.helpText=For example, fees for surveyors or solicitors. Your client cannot claim for any additional costs they paid for when they acquired the property.
@@ -2651,7 +2709,9 @@ acquisitionFeesValue.error.tooManyDecimals=Additional costs must be an amount of
 acquisitionFeesValue.cyaChange=the amount of additional costs
 
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
+rebaseAcquisitionPrice.share.title=What was your share of the market value of the property on {0}?
 rebaseAcquisitionPrice.indirect.title=What was the market value of the shares on {0}?
+rebaseAcquisitionPrice.indirect.share.title=What was the market value of the shares on {0}?
 
 rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate.
 rebaseAcquisitionPrice.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate.
@@ -2702,8 +2762,10 @@ rebaseAcquisitionPrice.trust.dropdown.p5=It can take 3 months or more for HMRC t
 rebaseAcquisitionPrice.capacitor.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so the person can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 rebaseAcquisitionPrice.personalRep.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so you can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 
-periodOfAdminMarketValue.title=What was the market value of the property on {0}?
+periodOfAdminMarketValue.title=What was the the market value of the estate's share of the property on {0}?
+periodOfAdminMarketValue.share.title=What was the market value of the property on {0}?
 periodOfAdminMarketValue.indirect.title=What was the market value of the shares on {0}?
+periodOfAdminMarketValue.indirect.share.title=What was the market value of the shares on {0}?
 
 periodOfAdminMarketValue.helpText=You can provide a valuation from a surveyor or a realistic estimate.
 periodOfAdminMarketValue.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate.

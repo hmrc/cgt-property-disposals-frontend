@@ -30,6 +30,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, DisposalDate}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty
 
 @this(
         layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
@@ -77,6 +78,8 @@
 @title = @{ messages( if(fillingOutReturn.isAmendReturn) "checkAllAnswers.amend.title" else  "checkAllAnswers.title") }
 @isATrust = @{ subscribedDetails.isATrust }
 @isAnAgent = @{ request.userType.contains(UserType.Agent) }
+
+@isShare(share: ShareOfProperty) = @{share.percentageValue != BigDecimal(100)}
 
 @representeeSection(representeeAnswers: Option[CompleteRepresenteeAnswers]) = @{
     (representeeAnswers, representativeType) match {
@@ -154,7 +157,14 @@
      @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType)
 
      <h2 class="govuk-heading-m">@messages("task-list.disposals-details.link")</h2>
-     @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod, isATrust, representativeType, isIndirectDisposal)
+     @disposalDetailsSummary(
+         s.disposalDetails,
+         s.triageAnswers.disposalMethod,
+         isATrust,
+         representativeType,
+         isIndirectDisposal,
+         isShare(s.disposalDetails.shareOfProperty)
+     )
 
      <h2 class="govuk-heading-m">@messages("task-list.acquisition-details.link")</h2>
      @acquisitionDetailsSummary(s.acquisitionDetails,
@@ -163,7 +173,8 @@
         rebasingEligibilityUtil.isEligibleForRebase(s),
         isATrust,
         representativeType,
-        s.triageAnswers.assetType
+        s.triageAnswers.assetType,
+        isShare(s.disposalDetails.shareOfProperty)
       )
 
      <h2 class="govuk-heading-m">@messages("task-list.relief-details.link")</h2>
@@ -227,7 +238,14 @@
         @singleIndirectDisposalAddressSummary(s.companyAddress)
 
         <h2 class="govuk-heading-m">@messages("task-list.disposals-details.link")</h2>
-        @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod, isATrust, representativeType, isIndirectDisposal)
+        @disposalDetailsSummary(
+            s.disposalDetails,
+            s.triageAnswers.disposalMethod,
+            isATrust,
+            representativeType,
+            isIndirectDisposal,
+            isShare(s.disposalDetails.shareOfProperty)
+        )
 
         <h2 class="govuk-heading-m">@messages("task-list.acquisition-details.link")</h2>
         @acquisitionDetailsSummary(s.acquisitionDetails,
@@ -236,7 +254,8 @@
             rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate, representativeType),
             isATrust,
             representativeType,
-            s.triageAnswers.assetType
+            s.triageAnswers.assetType,
+            isShare(s.disposalDetails.shareOfProperty)
         )
 
         @s.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>

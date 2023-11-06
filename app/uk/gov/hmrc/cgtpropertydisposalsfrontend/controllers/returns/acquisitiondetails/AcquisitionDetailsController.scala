@@ -1183,7 +1183,8 @@ class AcquisitionDetailsController @Inject() (
                   ),
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
-                  assetType
+                  assetType,
+                  isShare(state)
                 )
               )
 
@@ -1393,7 +1394,8 @@ class AcquisitionDetailsController @Inject() (
               ),
             fillingOutReturn.subscribedDetails.isATrust,
             representativeType(state),
-            assetType
+            assetType,
+            isShare(state)
           )
         )
     )

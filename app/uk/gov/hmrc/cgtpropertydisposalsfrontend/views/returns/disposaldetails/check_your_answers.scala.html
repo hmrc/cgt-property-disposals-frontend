@@ -35,7 +35,8 @@
     disposalMethod: DisposalMethod,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isIndirectDisposal: Boolean
+    isIndirectDisposal: Boolean,
+    isShare: Boolean,
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{messages("returns.disposal-details.cya.title")}
@@ -45,7 +46,7 @@
   <span class="govuk-caption-xl">@messages("returns.disposal-details.caption")</span>
   <h1 class="govuk-heading-xl">@title</h1>
 
-    @summary(answers, disposalMethod, isATrust, representativeType, isIndirectDisposal)
+    @summary(answers, disposalMethod, isATrust, representativeType, isIndirectDisposal, isShare)
 
     @formHelper(returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
         @govukButton(Button(content = Text(messages("button.confirmAndContinue"))))
