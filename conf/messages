@@ -2653,11 +2653,11 @@ acquisitionFeesValue.cyaChange=the amount of additional costs
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
 rebaseAcquisitionPrice.indirect.title=What was the market value of the shares on {0}?
 
-rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
-rebaseAcquisitionPrice.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your client’s share.
-rebaseAcquisitionPrice.trust.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of the trust’s share.
-rebaseAcquisitionPrice.capacitor.helpText=The person can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of the person’s share.
-rebaseAcquisitionPrice.personalRep.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of the person’s share.
+rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+rebaseAcquisitionPrice.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+rebaseAcquisitionPrice.trust.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+rebaseAcquisitionPrice.capacitor.helpText=The person can provide a valuation from a surveyor or a realistic estimate.
+rebaseAcquisitionPrice.personalRep.helpText=You can provide a valuation from a surveyor or a realistic estimate.
 
 rebaseAcquisitionPrice.label=Property’s market value on {0}
 rebaseAcquisitionPrice.error.required=Enter the property’s market value on {0}
@@ -2705,9 +2705,9 @@ rebaseAcquisitionPrice.personalRep.dropdown.p5=It can take 3 months or more for 
 periodOfAdminMarketValue.title=What was the market value of the property on {0}?
 periodOfAdminMarketValue.indirect.title=What was the market value of the shares on {0}?
 
-periodOfAdminMarketValue.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
-periodOfAdminMarketValue.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
-periodOfAdminMarketValue.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
+periodOfAdminMarketValue.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+periodOfAdminMarketValue.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+periodOfAdminMarketValue.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate.
 
 periodOfAdminMarketValue.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
 periodOfAdminMarketValue.agent.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
