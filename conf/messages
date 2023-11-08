@@ -2763,7 +2763,7 @@ rebaseAcquisitionPrice.capacitor.dropdown.p5=It can take 3 months or more for HM
 rebaseAcquisitionPrice.personalRep.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so you can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 
 periodOfAdminMarketValue.title=What was the the market value of the estate's share of the property on {0}?
-periodOfAdminMarketValue.share.title=What was the market value of the property on {0}?
+periodOfAdminMarketValue.share.title=What was the the market value of the estate's share of the property on {0}?
 periodOfAdminMarketValue.indirect.title=What was the market value of the shares on {0}?
 periodOfAdminMarketValue.indirect.share.title=What was the market value of the shares on {0}?
 

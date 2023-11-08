@@ -2431,8 +2431,8 @@ acquisitionFees.share.title=A ydych am hawlio’ch cyfran chi o unrhyw gostau yc
 acquisitionFees.agent.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau caffael ychwanegol?
 acquisitionFees.trust.share.title=A yw’r ymddiriedolaeth am hawlio ei chyfran o unrhyw gostau caffael ychwanegol?
 acquisitionFees.capacitor.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau caffael ychwanegol?
-acquisitionFees.personalRep.share.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau gwella?
-acquisitionFees.personalRepInPeriodOfAdmin.share.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau gwella?
+acquisitionFees.personalRep.share.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau ychwanegol?
+acquisitionFees.personalRepInPeriodOfAdmin.share.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau ychwanegol?
 
 acquisitionFees.indirect.share.title=A ydych am hawlio unrhyw gostau ychwanegol y gwnaethoch eu talu pan gawsoch y cyfranddaliadau?
 acquisitionFees.agent.indirect.share.title=A oedd unrhyw gostau caffael ychwanegol?
