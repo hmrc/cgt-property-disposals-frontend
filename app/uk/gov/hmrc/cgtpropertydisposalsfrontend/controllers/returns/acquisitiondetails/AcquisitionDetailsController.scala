@@ -156,6 +156,13 @@ class AcquisitionDetailsController @Inject() (
     }
   }
 
+  private def isShare(draft: Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn]): Boolean =
+    (for {
+      disposal <- draft.fold(_.disposalDetailsAnswers, _.disposalDetailsAnswers)
+      share    <- disposal.fold(_.shareOfProperty, x => Some(x.shareOfProperty))
+    } yield share.percentageValue != BigDecimal(100))
+      .getOrElse(false) // Journey completed out of order
+
   private def withAssetTypeAndResidentialStatus(
     state: JourneyState
   )(f: (AssetType, Boolean) => Future[Result]): Future[Result] =
@@ -513,7 +520,8 @@ class AcquisitionDetailsController @Inject() (
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
                   assetType,
-                  fillingOutReturn.isAmendReturn
+                  fillingOutReturn.isAmendReturn,
+                  isShare(state)
                 )
               )(
                 requiredPreviousAnswer = _.fold(
@@ -549,7 +557,8 @@ class AcquisitionDetailsController @Inject() (
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
                   assetType,
-                  fillingOutReturn.isAmendReturn
+                  fillingOutReturn.isAmendReturn,
+                  isShare(state)
                 )
               )(
                 requiredPreviousAnswer = _.fold(
@@ -832,7 +841,8 @@ class AcquisitionDetailsController @Inject() (
                 rebasingEligibilityUtil
                   .getRebasingCutOffDate(assetType, wasUkResident),
                 representativeType(state),
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                isShare(state)
               )
             )(
               requiredPreviousAnswer = { a =>
@@ -887,7 +897,8 @@ class AcquisitionDetailsController @Inject() (
                 rebasingEligibilityUtil
                   .getRebasingCutOffDate(assetType, wasUkResident),
                 representativeType(state),
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                isShare(state)
               )
             )(
               requiredPreviousAnswer = { answers =>
@@ -1051,7 +1062,8 @@ class AcquisitionDetailsController @Inject() (
                 wasUkResident,
                 representativeType(state),
                 assetType,
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                isShare(state)
               )
             )(
               requiredPreviousAnswer = _.fold(
@@ -1093,7 +1105,8 @@ class AcquisitionDetailsController @Inject() (
                 wasUkResident,
                 representativeType(state),
                 assetType,
-                fillingOutReturn.isAmendReturn
+                fillingOutReturn.isAmendReturn,
+                isShare(state)
               )
             )(
               requiredPreviousAnswer = _.fold(

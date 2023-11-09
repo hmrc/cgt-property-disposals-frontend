@@ -49,7 +49,8 @@
   wasUkResident: Boolean,
   representativeType: Option[RepresentativeType],
   assetType: AssetType,
-  isAmend: Boolean
+  isAmend: Boolean,
+  isShare: Boolean,
 )(
   implicit request: RequestWithSessionData[_],
   messages:Messages,
@@ -81,7 +82,30 @@
 
 @rebasingKey = @{if(shouldUseRebase.contains(true)) ".rebased" else ""}
 
-@title = @{messages(s"$key$userKey$assetTypeKey$rebasingKey.title", TimeUtils.govDisplayFormat(rebaseCutOffDate))}
+@titleAndHelpText = @{
+  (isShare, representativeType, shouldUseRebase) match {
+    case (true, None, Some(true)) =>
+      (messages("acquisitionFees.2.title"), messages("acquisitionFees.2.helpText"))
+    case (true, Some(Capacitor | PersonalRepresentative), _) =>
+      (messages("acquisitionFees.3.title"), messages("acquisitionFees.3.helpText"))
+    case (true, Some(PersonalRepresentativeInPeriodOfAdmin), _) =>
+      (messages("acquisitionFees.4.title"), messages("acquisitionFees.4.helpText"))
+    case (true, _, None | Some(false)) if isAgent =>
+      (messages("acquisitionFees.5.title"), messages("acquisitionFees.5.helpText"))
+    case (true, _, Some(true)) if isAgent =>
+      (messages("acquisitionFees.6.title"), messages("acquisitionFees.6.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate)))
+    case (true, _, _) if isATrust =>
+      (messages("acquisitionFees.7.title"), messages("acquisitionFees.7.helpText"))
+    case (true, None, None | Some(false)) =>
+      (messages("acquisitionFees.1.title"), messages("acquisitionFees.1.helpText"))
+    case (false, _, _) =>
+      (messages(s"$key$userKey$assetTypeKey$rebasingKey.title", TimeUtils.govDisplayFormat(rebaseCutOffDate)),
+       messages(s"$key$userKey$assetTypeKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate)))
+  }
+}
+
+@title = @{titleAndHelpText._1}
+@helpText = @{titleAndHelpText._2}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -139,7 +163,7 @@
         ))
       )),
       hint = Some(Hint(
-        content = HtmlContent(messages(s"$key$userKey$assetTypeKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate))),
+        content = HtmlContent(helpText),
       )),
       name = key,
       idPrefix = Some(key),

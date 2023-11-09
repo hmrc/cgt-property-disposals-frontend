@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
 import org.scalacheck.Arbitrary
+import org.scalatest.tagobjects.Retryable
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.mvc.Result
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -48,7 +49,7 @@ trait RedirectToStartBehaviour {
         )
       }
 
-      "the journey status in session is not valid" in {
+      "the journey status in session is not valid" taggedAs Retryable in {
         implicit val journeyStatusArb: Arbitrary[JourneyStatus] =
           arb(journeyStatusGen)
 

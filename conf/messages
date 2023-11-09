@@ -1979,6 +1979,57 @@ disposalFees.4.helpText=For example, the amount your client paid to an estate ag
 disposalFees.5.title=What was the trust’s share of any additional disposal costs?
 disposalFees.5.helpText=For example, the amount the trust paid to an estate agent or solicitor.
 
+acquisitionPrice.1.title=How much did you pay for your share of the property?
+acquisitionPrice.1.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPrice.2.title=What was your share of the market value of the property on {0}?
+acquisitionPrice.2.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPrice.3.title=What was your share of the market value of the property on {0}?
+acquisitionPrice.3.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPrice.4.title=How much did the person pay for their share of the property?
+acquisitionPrice.4.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPrice.5.title=What was the person’s share of the market value of the property when it was acquired?
+acquisitionPrice.5.helpText=The person can provide a valuation from a surveyor or a realistic estimate
+acquisitionPrice.6.title=What was the the market value of the estate’s share of the property on {0}?
+acquisitionPrice.6.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPrice.7.title=How much did your client pay for their share of the property?
+acquisitionPrice.7.helpText=You’ll be able to enter any buying costs, like solicitor’s fees later.
+acquisitionPrice.8.title=What was your client’s share of the market value of the property on {0}?
+acquisitionPrice.8.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPrice.9.title=What was your client’s share of the market value of the property on {0}?
+acquisitionPrice.9.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPrice.10.title=How much did the trust pay for its share of the property?
+acquisitionPrice.10.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+
+improvementCosts.1.title=Do you want to claim your share of any improvement costs?
+improvementCosts.1.helpText=You can only claim costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.2.title=Do you want to claim for your share of any improvement costs?
+improvementCosts.2.helpText=You can only claim costs that added value to the property after March 1982 (date you rebased). You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.3.title=Does the person want to claim for their share of any improvement costs?
+improvementCosts.3.helpText=The person can only claim for costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.4.title=Do you want to claim for the estate’s share of any improvement costs?
+improvementCosts.4.helpText=You can only claim for any costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.5.title=Does your client want to claim their share of any improvement costs?
+improvementCosts.5.helpText=Your client can only claim for costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.6.title=Does your client want to claim their share of any improvement costs?
+improvementCosts.6.helpText=Your client can only claim costs that added value to the property after {0} (date they rebased). They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.7.title=Does the trust want to claim its share of any improvement costs?
+improvementCosts.7.helpText=The trust can only claim for costs that added value to the property. It cannot claim for mortgage interest, decorating or maintenance.
+
+acquisitionFees.1.title=Do you want to claim your share of any additional costs you paid when you got the property?
+acquisitionFees.1.helpText=For example, fees for surveyors or solicitors.
+acquisitionFees.2.title=Do you want to claim your share of any additional costs you paid when you rebased the property?
+acquisitionFees.2.helpText=For example, fees for surveyors or solicitors. You cannot claim for any additional costs you paid for when you got the property.
+acquisitionFees.3.title=Does the person want to claim for their share of any additional acquisition costs?
+acquisitionFees.3.helpText=For example, fees for surveyors or solicitors.
+acquisitionFees.4.title=Do you want to claim for the estate’s share of any additional costs?
+acquisitionFees.4.helpText=For example, legal costs in securing the rights to the property.
+acquisitionFees.5.title=Does your client want to claim their share of any additional acquisition costs?
+acquisitionFees.5.helpText=For example, fees for surveyors or solicitors.
+acquisitionFees.6.title=Does your client want to claim their share of any additional rebasing costs?
+acquisitionFees.6.helpText=For example, fees for surveyors or solicitors. Your client cannot claim for any additional costs they paid for when they acquired the property.
+acquisitionFees.7.title=Does the trust want claim its share of any additional acquisition costs?
+acquisitionFees.7.helpText=If the trust shared these costs, it can only claim its share.
+
 disposalFees.cyaChange=the amount of additional costs
 
 returns.disposal-details.cya.title=Check your answers
@@ -2280,17 +2331,17 @@ acquisitionPriceBought.trust.indirect.title=What was the acquisition amount?
 acquisitionPriceBought.capacitor.indirect.title=How much did the person pay for the shares?
 acquisitionPriceBought.personalRep.indirect.title=How much did the person pay for the shares?
 
-acquisitionPriceBought.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your share.
-acquisitionPriceBought.agent.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your client’s share.
-acquisitionPriceBought.trust.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the trust’s share.
-acquisitionPriceBought.capacitor.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the person’s share.
-acquisitionPriceBought.personalRep.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the person’s share.
+acquisitionPriceBought.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPriceBought.agent.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPriceBought.trust.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPriceBought.capacitor.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPriceBought.personalRep.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
 
-acquisitionPriceBought.indirect.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your share.
-acquisitionPriceBought.indirect.agent.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your client’s share.
-acquisitionPriceBought.indirect.trust.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the trust’s share.
-acquisitionPriceBought.indirect.capacitor.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the person’s share.
-acquisitionPriceBought.indirect.personalRep.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the person’s share.
+acquisitionPriceBought.indirect.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPriceBought.indirect.agent.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPriceBought.indirect.trust.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPriceBought.indirect.capacitor.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPriceBought.indirect.personalRep.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
 
 acquisitionPriceBought.error.required=Enter how much you paid for your share of the property
 acquisitionPriceBought.agent.error.required=Enter how much your client paid for the property
@@ -2364,11 +2415,11 @@ acquisitionPriceNotBought.trust.indirect.title=What was the acquisition amount?
 acquisitionPriceNotBought.capacitor.indirect.title=What was the market value of the shares when the person bought or acquired them?
 acquisitionPriceNotBought.personalRep.indirect.title=What was the market value of the property when it was acquired?
 
-acquisitionPriceNotBought.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your share.
-acquisitionPriceNotBought.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your client’s share.
-acquisitionPriceNotBought.trust.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the trust’s share.
-acquisitionPriceNotBought.capacitor.helpText=The person can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
-acquisitionPriceNotBought.personalRep.helpText=The person can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
+acquisitionPriceNotBought.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPriceNotBought.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPriceNotBought.trust.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPriceNotBought.capacitor.helpText=The person can provide a valuation from a surveyor or a realistic estimate.
+acquisitionPriceNotBought.personalRep.helpText=The person can provide a valuation from a surveyor or a realistic estimate.
 
 acquisitionPriceNotBought.indirect.helpText=You can provide a valuation or a realistic estimate
 acquisitionPriceNotBought.agent.indirect.helpText=You can provide a valuation or a realistic estimate
@@ -2447,19 +2498,19 @@ improvementCosts.personalRep.title=Were there any improvement costs?
 improvementCosts.personalRepInPeriodOfAdmin.title=Were there any improvement costs?
 improvementCosts.personalRepInPeriodOfAdmin.agent.title=Were there any improvement costs?
 
-improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance.
-improvementCosts.agent.helpText=Your client can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
-improvementCosts.trust.helpText=The trust can only claim for its share of any costs that added value to the property. It cannot claim for mortgage interest, decorating or maintenance.
-improvementCosts.capacitor.helpText=The person can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
-improvementCosts.personalRep.helpText=You can only include costs that added value to the property. If the person shared these costs, you can only include their share. You cannot include mortgage interest, decorating or maintenance.
-improvementCosts.personalRepInPeriodOfAdmin.helpText=You can only claim for the estate’s share of any costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
-improvementCosts.personalRepInPeriodOfAdmin.agent.helpText=Your client can only claim for the estate’s share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.helpText=You can only claim costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.agent.helpText=Your client can only claim for costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.trust.helpText=The trust can only claim for costs that added value to the property. It cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.capacitor.helpText=The person can only claim for costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.personalRep.helpText=You can only include costs that added value to the property. You cannot include mortgage interest, decorating or maintenance.
+improvementCosts.personalRepInPeriodOfAdmin.helpText=You can only claim for any costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.personalRepInPeriodOfAdmin.agent.helpText=Your client can only claim for costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
 
-improvementCosts.rebased.helpText=You can only claim costs that added value to the property after {0} (date you rebased). If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance.
-improvementCosts.agent.rebased.helpText=Your client can only claim for their share of any costs that added value to the property after {0} (date they rebased). They cannot claim for mortgage interest, decorating or maintenance.
-improvementCosts.trust.rebased.helpText=The trust can only claim for its share of any costs that added value to the property after {0} (date it rebased). It cannot claim for mortgage interest, decorating or maintenance.
-improvementCosts.capacitor.rebased.helpText=The person can only claim costs that added value to the property after {0} (date you rebased). If they shared these costs, they can only claim their share. They cannot claim for mortgage interest, decorating or maintenance.
-improvementCosts.personalRep.rebased.helpText=The person can only claim costs that added value to the property after {0} (date you rebased). If they shared these costs, you can only include their share. You cannot include mortgage interest, decorating or maintenance.
+improvementCosts.rebased.helpText=You can only claim costs that added value to the property after {0} (date you rebased). You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.agent.rebased.helpText=Your client can only claim costs that added value to the property after {0} (date they rebased). They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.trust.rebased.helpText=The trust can only claim for its costs that added value to the property after {0} (date it rebased). It cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.capacitor.rebased.helpText=The person can only claim costs that added value to the property after {0} (date you rebased).
+improvementCosts.personalRep.rebased.helpText=The person can only claim costs that added value to the property after {0} (date you rebased).
 
 improvementCosts.error.required=Select yes if you want to claim any improvement costs
 improvementCosts.agent.error.required=Select yes if there were improvement costs
@@ -2505,11 +2556,11 @@ acquisitionFees.capacitor.indirect.title=Does the person want to claim any addit
 acquisitionFees.personalRep.indirect.title=Were there any additional acquisition costs?
 acquisitionFees.personalRepInPeriodOfAdmin.indirect.title=Were there any additional acquisition costs?
 
-acquisitionFees.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
-acquisitionFees.agent.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share.
-acquisitionFees.trust.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share.
-acquisitionFees.capacitor.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, they can only claim their share.
-acquisitionFees.personalRep.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, you can only include their share.
+acquisitionFees.helpText=For example, fees for surveyors or solicitors.
+acquisitionFees.agent.helpText=For example, fees for surveyors or solicitors.
+acquisitionFees.trust.helpText=For example, fees for surveyors or solicitors.
+acquisitionFees.capacitor.helpText=For example, fees for surveyors or solicitors.
+acquisitionFees.personalRep.helpText=For example, fees for surveyors or solicitors.
 acquisitionFees.personalRepInPeriodOfAdmin.helpText=For example, legal costs in securing the rights to the property.
 
 acquisitionFees.indirect.helpText=Additional costs might include stock broker’s fees.
@@ -2531,11 +2582,11 @@ acquisitionFees.trust.indirect.rebased.title=Were there any additional costs pai
 acquisitionFees.capacitor.indirect.rebased.title=Does the person want to claim any additional costs for working out the value of the shares on {0}?
 acquisitionFees.personalRep.indirect.rebased.title=Does the person want to claim any additional costs for working out the value of the shares on {0}?
 
-acquisitionFees.rebased.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share. You cannot claim for any additional costs you paid for when you got the property.
-acquisitionFees.agent.rebased.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share. Your client cannot claim for any additional costs they paid for when they acquired the property.
-acquisitionFees.trust.rebased.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share. The trust cannot claim for any additional costs it paid for when it acquired the property.
-acquisitionFees.capacitor.rebased.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, they can only claim their share. The person cannot claim for any additional costs they paid for when they got the property.
-acquisitionFees.personalRep.rebased.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, you can only include their share. You cannot include any additional costs the person paid for when they got the property.
+acquisitionFees.rebased.helpText=For example, fees for surveyors or solicitors. You cannot claim for any additional costs you paid for when you got the property.
+acquisitionFees.agent.rebased.helpText=For example, fees for surveyors or solicitors. Your client cannot claim for any additional costs they paid for when they acquired the property.
+acquisitionFees.trust.rebased.helpText=For example, fees for surveyors or solicitors. The trust cannot claim for any additional costs it paid for when it acquired the property.
+acquisitionFees.capacitor.rebased.helpText=For example, fees for surveyors or solicitors. The person cannot claim for any additional costs they paid for when they got the property.
+acquisitionFees.personalRep.rebased.helpText=For example, fees for surveyors or solicitors. You cannot include any additional costs the person paid for when they got the property.
 
 acquisitionFees.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
 acquisitionFees.agent.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
@@ -2602,11 +2653,11 @@ acquisitionFeesValue.cyaChange=the amount of additional costs
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
 rebaseAcquisitionPrice.indirect.title=What was the market value of the shares on {0}?
 
-rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
-rebaseAcquisitionPrice.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your client’s share.
-rebaseAcquisitionPrice.trust.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of the trust’s share.
-rebaseAcquisitionPrice.capacitor.helpText=The person can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of the person’s share.
-rebaseAcquisitionPrice.personalRep.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of the person’s share.
+rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+rebaseAcquisitionPrice.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+rebaseAcquisitionPrice.trust.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+rebaseAcquisitionPrice.capacitor.helpText=The person can provide a valuation from a surveyor or a realistic estimate.
+rebaseAcquisitionPrice.personalRep.helpText=You can provide a valuation from a surveyor or a realistic estimate.
 
 rebaseAcquisitionPrice.label=Property’s market value on {0}
 rebaseAcquisitionPrice.error.required=Enter the property’s market value on {0}
@@ -2654,9 +2705,9 @@ rebaseAcquisitionPrice.personalRep.dropdown.p5=It can take 3 months or more for 
 periodOfAdminMarketValue.title=What was the market value of the property on {0}?
 periodOfAdminMarketValue.indirect.title=What was the market value of the shares on {0}?
 
-periodOfAdminMarketValue.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
-periodOfAdminMarketValue.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
-periodOfAdminMarketValue.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
+periodOfAdminMarketValue.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+periodOfAdminMarketValue.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate.
+periodOfAdminMarketValue.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate.
 
 periodOfAdminMarketValue.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
 periodOfAdminMarketValue.agent.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.

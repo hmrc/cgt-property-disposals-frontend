@@ -25,6 +25,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, RepresentativeType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod.{Bought, Inherited, Gifted}
 
 @this(
   layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
@@ -44,7 +46,8 @@
   isATrust: Boolean,
   representativeType: Option[RepresentativeType],
   assetType: AssetType,
-  isAmend: Boolean
+  isAmend: Boolean,
+  isShare: Boolean,
 )(
   implicit request: RequestWithSessionData[_],
   messages: Messages
@@ -52,18 +55,17 @@
 
 @key = @{ "acquisitionPrice" }
 
-@isAgent = @{ request.userType.contains(UserType.Agent) }
+@isAgent = @{request.userType.contains(UserType.Agent)}
 
 @userKey = @{
   representativeType match {
-    case Some(PersonalRepresentative) => ".personalRep"
-    case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+    case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
     case Some(Capacitor) => ".capacitor"
     case _ =>
       if (isAgent) ".agent"
       else if (isATrust) ".trust"
       else ""
-}
+  }
 }
 
 @assetTypeKey = @{assetType match {
@@ -71,13 +73,47 @@
   case _ => ""
 }}
 
-
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@titleWithHelpTextAndContext = @{acquisitionMethod match {
-  case AcquisitionMethod.Bought => (messages(s"${key}Bought$userKey$assetTypeKey.title"), Html(messages(s"${key}Bought$userKey.helpText")), s"acquisitionPriceBought$userKey$assetTypeKey")
-  case _ => (messages(s"${key}NotBought$userKey$assetTypeKey.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages(s"${key}NotBought$userKey.helpText")), s"acquisitionPriceNotBought$userKey$assetTypeKey")
-}}
+@context = @{
+  acquisitionMethod match {
+    case AcquisitionMethod.Bought => s"acquisitionPriceBought$userKey$assetTypeKey"
+    case _ => s"acquisitionPriceNotBought$userKey$assetTypeKey"
+  }
+}
+
+
+@titleWithHelpTextAndContext = @{
+  val rebaseDate = RebasingCutoffDates.allResidents
+  (isShare, acquisitionMethod, representativeType) match {
+    case (true, _, None) if acquisitionDate.value.isBefore(rebaseDate) =>
+      (messages("acquisitionPrice.3.title", rebaseDate), Html(messages("acquisitionPrice.3.helpText")))
+    case (true, Inherited | Gifted, None) =>
+      (messages("acquisitionPrice.2.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages("acquisitionPrice.2.helpText")))
+    case (true, Bought, Some(Capacitor | PersonalRepresentative)) =>
+      (messages("acquisitionPrice.4.title"), Html(messages("acquisitionPrice.4.helpText")))
+    case (true, Gifted, Some(Capacitor | PersonalRepresentative)) =>
+      (messages("acquisitionPrice.5.title"), Html(messages("acquisitionPrice.5.helpText")))
+    case (true, _, Some(PersonalRepresentativeInPeriodOfAdmin)) =>
+      (messages("acquisitionPrice.6.title"), Html(messages("acquisitionPrice.6.helpText")))
+    case (true, _, _) if isAgent && acquisitionDate.value.isBefore(rebaseDate) =>
+      (messages("acquisitionPrice.9.title", rebaseDate), Html(messages("acquisitionPrice.9.helpText")))
+    case (true, Bought, _) if isAgent =>
+      (messages("acquisitionPrice.7.title"), Html(messages("acquisitionPrice.7.helpText")))
+    case (true, Inherited | Gifted, _) if isAgent =>
+      (messages("acquisitionPrice.8.title", acquisitionDate), Html(messages("acquisitionPrice.8.helpText")))
+    case (true, Bought, _) if isATrust =>
+      (messages("acquisitionPrice.10.title"), Html(messages("acquisitionPrice.10.helpText")))
+    case (true, _, None) =>
+      (messages("acquisitionPrice.1.title"), Html(messages("acquisitionPrice.1.helpText")))
+    case (false, Bought, _) =>
+      (messages(s"${key}Bought$userKey$assetTypeKey.title"),
+       Html(messages(s"${key}Bought$userKey.helpText")))
+    case (false, _, _) =>
+      (messages(s"${key}NotBought$userKey$assetTypeKey.title", TimeUtils.govDisplayFormat(acquisitionDate.value)),
+       Html(messages(s"${key}NotBought$userKey.helpText")))
+  }
+}
 
 @layout(
   titleWithHelpTextAndContext._1,
@@ -85,7 +121,7 @@
   hasErrors = hasErrors
 ) {
   @if(hasErrors) {
-    @errorSummary(form, Some(titleWithHelpTextAndContext._3))
+    @errorSummary(form, Some(context))
   }
 
   @caption(messages("acquisitionDetails.caption"))

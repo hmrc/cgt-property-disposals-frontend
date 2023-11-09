@@ -45,7 +45,8 @@
   shouldUseRebase: Option[Boolean],
   rebaseCutOffDate: LocalDate,
   representativeType: Option[RepresentativeType],
-  isAmend: Boolean
+  isAmend: Boolean,
+  isShare: Boolean,
 )(
   implicit request: RequestWithSessionData[_],
   messages:Messages
@@ -69,19 +70,7 @@
   }
 }
 
-@helpTextUserKey = @{
-  representativeType match {
-    case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
-    case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent =>  ".personalRepInPeriodOfAdmin.agent"
-    case _ => userKey
-  }
-}
-
-@title = @{messages(s"$key$userKey.title")}
-
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
-@rebasingKey = @{if(shouldUseRebase.contains(true)) ".rebased" else ""}
 
 @yesContent = {
   @govukInput(Input(
@@ -108,6 +97,41 @@
   else None
 }
 
+@titleAndhelpText = @{
+  (isShare, representativeType, shouldUseRebase) match {
+    case (true, None, Some(true)) =>
+      (messages("improvementCosts.2.title"), messages("improvementCosts.2.helpText"))
+    case (true, Some(Capacitor | PersonalRepresentative), _) =>
+      (messages("improvementCosts.3.title"), messages("improvementCosts.3.helpText"))
+    case (true, Some(PersonalRepresentativeInPeriodOfAdmin), _) =>
+      (messages("improvementCosts.4.title"), messages("improvementCosts.4.helpText"))
+    case (true, _, None | Some(false)) if isAgent =>
+      (messages("improvementCosts.5.title"), messages("improvementCosts.5.helpText"))
+    case (true, _, Some(true)) if isAgent =>
+      (messages("improvementCosts.5.title"), messages("improvementCosts.5.helpText"))
+    case (true, _, _) if isATrust =>
+      (messages("improvementCosts.7.title"), messages("improvementCosts.7.helpText"))
+    case (true, None, None | Some(false)) =>
+      (messages("improvementCosts.1.title"), messages("improvementCosts.1.helpText"))
+    case (false, _, _) =>
+      val helpTextUserKey =
+        representativeType match {
+          case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent =>
+            ".personalRepInPeriodOfAdmin"
+          case Some(PersonalRepresentativeInPeriodOfAdmin) =>
+            ".personalRepInPeriodOfAdmin.agent"
+          case _ => userKey
+        }
+      val rebasingKey = if(shouldUseRebase.contains(true)) ".rebased" else ""
+      val title = messages(s"$key$userKey.title")
+      val helpText = messages(s"$key$helpTextUserKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate))
+      (title, helpText)
+  }
+}
+
+@title = @{titleAndhelpText._1}
+@helpText = @{titleAndhelpText._2}
+
 @layout(
   title,
   backLinkUrl = Some(backLink.url),
@@ -129,7 +153,7 @@
         ))
       )),
       hint = Some(Hint(
-        content = HtmlContent(messages(s"$key$helpTextUserKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate))),
+        content = HtmlContent(helpText),
       )),
       name = key,
       idPrefix = Some(key),
