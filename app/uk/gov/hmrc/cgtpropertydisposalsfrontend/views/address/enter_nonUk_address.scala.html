@@ -112,6 +112,7 @@
       content = Text(messages(s"$key.${journeyErrorKey.stripPrefix(".")}line1.label")),
       classes = "govuk-label--m"
     ),
+    value = form.data.get(line1Key),
     autocomplete = Some(AutoCompleteType.AddressLine1.value),
     errorMessage = form.error(line1Key).map(e => ErrorMessage(
       content = Text(messages(s"$line1Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
@@ -125,6 +126,7 @@
       content = Text(messages(s"$key.${journeyErrorKey.stripPrefix(".")}line2.label")),
       classes = "govuk-label--m"
     ),
+    value = form.data.get(line2Key),
     autocomplete = Some(AutoCompleteType.AddressLine1.value),
     errorMessage = form.error(line2Key).map(e => ErrorMessage(
       content = Text(messages(s"$line2Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
@@ -138,6 +140,7 @@
       content = Text(messages(s"$key.line3.label")),
       classes = "govuk-label--m"
     ),
+    value = form.data.get(line3Key),
     autocomplete = Some(AutoCompleteType.AddressLevel2.value),
     errorMessage = form.error(line3Key).map(e => ErrorMessage(
       content = Text(messages(s"$line3Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
@@ -152,6 +155,7 @@
       content = Text(messages(s"$key.line4.label")),
       classes = "govuk-label--m"
     ),
+    value = form.data.get(line4Key),
     autocomplete = Some(AutoCompleteType.AddressLevel1.value),
     errorMessage = form.error(line4Key).map(e => ErrorMessage(
       content = Text(messages(s"$line4Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
