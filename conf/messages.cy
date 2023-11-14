@@ -2364,6 +2364,8 @@ acquisitionPrice.9.helpText=Gallwch roi prisiad gan syrfëwr neu amcangyfrif rea
 acquisitionPrice.10.title=Faint y gwnaeth yr ymddiriedolaeth ei dalu am ei chyfran o’r eiddo?
 acquisitionPrice.10.helpText=Byddwch yn gallu nodi unrhyw gostau prynu, megis ffioedd cyfreithiwr neu syrfëwr, yn ddiweddarach.
 
+acquisitionPriceRebaseAgent.title=Beth oedd cyfran eich cleient o werth marchnadol yr eiddo ar {date acquired property}?
+
 improvementCosts.1.title=A ydych am hawlio eich cyfran chi o unrhyw gostau gwella?
 improvementCosts.1.helpText=Gallwch ond hawlio costau a ychwanegodd werth at yr eiddo. Ni allwch hawlio llog morgais, costau addurno na chostau cynnal a chadw.
 improvementCosts.2.title=A ydych am hawlio eich cyfran chi o unrhyw gostau gwella?

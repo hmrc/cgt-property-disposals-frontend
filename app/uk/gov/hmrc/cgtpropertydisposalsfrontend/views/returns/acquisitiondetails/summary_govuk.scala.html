@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, AssetType, RepresentativeType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 
 @import java.time.LocalDate
 
@@ -67,6 +68,13 @@
 @rebasingKey = @{if(canRebase && answers.shouldUseRebase) ".rebased" else ""}
 @acquisitionDate = @{TimeUtils.govDisplayFormat(answers.acquisitionDate.value)}
 @rebasingDate = @{TimeUtils.govDisplayFormat(cutoffDate)}
+@acquisitionPriceRebaseAgentKey = @{
+  if (isAgent) {
+    "acquisitionPriceRebaseAgent.title"
+  } else {
+    s"rebaseAcquisitionPrice$assetTypeKey$shareKey.title"
+  }
+}
 
 @acquisitionMethodAndPriceTitle = @{
   answers.acquisitionMethod match {
@@ -143,7 +151,7 @@
 @if(canRebase) {
   @answers.rebasedAcquisitionPrice.map{ rebasedValue =>
     @cyaRow(
-      messages(s"rebaseAcquisitionPrice$assetTypeKey$shareKey.title", rebasingDate),
+      messages(acquisitionPriceRebaseAgentKey, rebasingDate),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(rebasedValue.inPounds())),
       Some(cyaChange(
         messages("rebaseAcquisitionPrice.cyaChange", rebasingDate),

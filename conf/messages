@@ -2319,6 +2319,8 @@ acquisitionDate-day.personalRep.indirect.error.dayAndMonthRequired=The date the 
 
 acquisitionDate.cyaChange=the date the property was acquired
 
+acquisitionPriceRebaseAgent.title=What was your client’s share of the market value of the property on {0}?
+
 acquisitionPriceBought.title=How much did you pay for the property?
 acquisitionPriceBought.agent.title=How much did your client pay for the property?
 acquisitionPriceBought.trust.title=How much did the trust pay for the property?
