@@ -35,7 +35,8 @@
     disposalMethod: DisposalMethod,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isIndirectDisposal: Boolean
+    isIndirectDisposal: Boolean,
+    isShare: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 
@@ -62,8 +63,27 @@
 @formatPercentage(p: BigDecimal) = @{s"${p.toString.stripSuffix(".0")}%"}
 
 @shareOfPropertyTitle = @{messages(s"shareOfProperty$userKey.title")}
-@disposalPriceTitle   = @{messages(s"disposalPrice$userKey$indirectKey$disposalMethodKey.title")}
-@disposalFeesTitle    = @{messages(s"disposalFees$userKey$indirectKey.title")}
+
+@disposalTitles = @{
+    (isShare, disposalMethod, representativeType) match {
+        case (true, _, Some(Capacitor | PersonalRepresentative)) =>
+            (messages("disposalPrice.1.title"), messages("disposalFees.2.title"))
+        case (true, _, Some(PersonalRepresentativeInPeriodOfAdmin)) =>
+            (messages("disposalPrice.2.title"), messages("disposalFees.3.title"))
+        case (true, _, None) if isAgent =>
+            (messages("disposalPrice.3.title"), messages("disposalFees.4.title"))
+        case (true, _, None) if isATrust =>
+            (messages("disposalPrice.4.title"), messages("disposalFees.5.title"))
+        case (true, DisposalMethod.Gifted | DisposalMethod.Other, None) =>
+            (messages("disposalPrice.5.title"), messages("disposalFees.1.title"))
+        case (true, DisposalMethod.Sold, None) =>
+            (messages("disposalPrice.6.title"), messages("disposalFees.1.title"))
+        case _ =>
+            val disposalPrice = messages(s"disposalPrice$userKey$indirectKey$disposalMethodKey.title")
+            val disposalFees = messages(s"disposalFees$userKey$indirectKey.title")
+            (disposalPrice, disposalFees)
+    }
+}
 
 @cyaSection() {
   @if(!isIndirectDisposal){
@@ -75,13 +95,13 @@
     )
   } else { }
   @cyaRow(
-    disposalPriceTitle,
+    disposalTitles._1,
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
     Some(cyaChange(messages("disposalPrice.cyaChange"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url)),
       "disposalPrice"
   )
   @cyaRow(
-    disposalFeesTitle,
+      disposalTitles._2,
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalFees.inPounds())),
     Some(cyaChange(messages("disposalFees.cyaChange"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url)),
       "disposalFees"

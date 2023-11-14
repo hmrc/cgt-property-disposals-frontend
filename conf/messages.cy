@@ -2364,6 +2364,8 @@ acquisitionPrice.9.helpText=Gallwch roi prisiad gan syrfëwr neu amcangyfrif rea
 acquisitionPrice.10.title=Faint y gwnaeth yr ymddiriedolaeth ei dalu am ei chyfran o’r eiddo?
 acquisitionPrice.10.helpText=Byddwch yn gallu nodi unrhyw gostau prynu, megis ffioedd cyfreithiwr neu syrfëwr, yn ddiweddarach.
 
+acquisitionPriceRebaseAgent.title=Beth oedd cyfran eich cleient o werth marchnadol yr eiddo ar {0}?
+
 improvementCosts.1.title=A ydych am hawlio eich cyfran chi o unrhyw gostau gwella?
 improvementCosts.1.helpText=Gallwch ond hawlio costau a ychwanegodd werth at yr eiddo. Ni allwch hawlio llog morgais, costau addurno na chostau cynnal a chadw.
 improvementCosts.2.title=A ydych am hawlio eich cyfran chi o unrhyw gostau gwella?
@@ -2393,6 +2395,72 @@ acquisitionFees.6.title=A yw’ch cleient am hawlio ei gyfran o unrhyw gostau ai
 acquisitionFees.6.helpText=Er enghraifft, ffioedd ar gyfer syrfewyr neu gyfreithwyr. Ni all eich cleient hawlio unrhyw gostau ychwanegol y gwnaeth eu talu pan afaelodd yr eiddo.
 acquisitionFees.7.title=A yw’r ymddiriedolaeth am hawlio ei chyfran o unrhyw gostau caffael ychwanegol?
 acquisitionFees.7.helpText=Os oedd yr ymddiriedolaeth yn rhannu’r costau hyn, gall ond hawlio ei chyfran hi ohonynt.
+
+
+acquisitionPriceBought.share.title=Faint y gwnaethoch ei dalu am eich cyfran o’r eiddo?
+acquisitionPriceBought.agent.share.title=Faint y gwnaeth eich cleient ei dalu am ei gyfran o’r eiddo?
+acquisitionPriceBought.trust.share.title=Faint y gwnaeth yr ymddiriedolaeth ei dalu am ei chyfran o’r eiddo?
+acquisitionPriceBought.capacitor.share.title=Faint y gwnaeth y person ei dalu am ei gyfran o’r eiddo?
+acquisitionPriceBought.personalRep.share.title=Faint y gwnaeth y person ei dalu am ei gyfran o’r eiddo?
+
+acquisitionPriceBought.indirect.share.title=Faint y gwnaethoch ei dalu am y cyfranddaliadau?
+acquisitionPriceBought.agent.indirect.share.title=Beth oedd y swm caffael?
+acquisitionPriceBought.trust.indirect.share.title=Beth oedd y swm caffael?
+acquisitionPriceBought.capacitor.indirect.share.title=Faint y gwnaeth y person ei dalu am y cyfranddaliadau?
+acquisitionPriceBought.personalRep.indirect.share.title=Faint y gwnaeth y person ei dalu am y cyfranddaliadau?
+
+acquisitionPriceNotBought.share.title=Beth oedd eich cyfran chi o werth marchnadol yr eiddo ar {0}?
+acquisitionPriceNotBought.agent.share.title=Beth oedd cyfran eich cleient o werth marchnadol yr eiddo ar {0}?
+acquisitionPriceNotBought.trust.share.title=What was the market value of the property on {0}?
+acquisitionPriceNotBought.capacitor.share.title=Beth oedd cyfran y person o werth marchnadol yr eiddo pan gafodd ei gaffael?
+acquisitionPriceNotBought.personalRep.share.title=Beth oedd cyfran y person o werth marchnadol yr eiddo pan gafodd ei gaffael?
+
+acquisitionPriceNotBought.indirect.share.title=Beth oedd gwerth marchnadol y cyfranddaliadau pan wnaethoch eu prynu neu eu caffael?
+acquisitionPriceNotBought.agent.indirect.share.title=Beth oedd y swm caffael?
+acquisitionPriceNotBought.trust.indirect.share.title=Beth oedd y swm caffael?
+acquisitionPriceNotBought.capacitor.indirect.share.title=Beth oedd gwerth marchnadol y cyfranddaliadau pan wnaeth y person eu prynu neu eu caffael?
+acquisitionPriceNotBought.personalRep.indirect.share.title=Beth oedd gwerth marchnadol yr eiddo pan gafodd ei gaffael?
+
+improvementCosts.share.title=A ydych am hawlio eich cyfran chi o unrhyw gostau gwella?
+improvementCosts.agent.share.title=A yw’ch cleient am hawlio ei gyfran o unrhyw gostau gwella?
+improvementCosts.trust.share.title=A yw’r ymddiriedolaeth am hawlio ei chyfran o unrhyw gostau gwella?
+improvementCosts.capacitor.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau gwella?
+improvementCosts.personalRep.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau gwella?
+improvementCosts.personalRepInPeriodOfAdmin.share.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau gwella?
+improvementCosts.personalRepInPeriodOfAdmin.agent.share.title=A yw’ch cleient am hawlio ei gyfran o unrhyw gostau gwella?
+
+acquisitionFees.share.title=A ydych am hawlio’ch cyfran chi o unrhyw gostau ychwanegol y gwnaethoch eu talu pan gawsoch yr eiddo?
+acquisitionFees.agent.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau caffael ychwanegol?
+acquisitionFees.trust.share.title=A yw’r ymddiriedolaeth am hawlio ei chyfran o unrhyw gostau caffael ychwanegol?
+acquisitionFees.capacitor.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau caffael ychwanegol?
+acquisitionFees.personalRep.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau caffael ychwanegol?
+acquisitionFees.personalRepInPeriodOfAdmin.share.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau ychwanegol?
+
+acquisitionFees.indirect.share.title=A ydych am hawlio unrhyw gostau ychwanegol y gwnaethoch eu talu pan gawsoch y cyfranddaliadau?
+acquisitionFees.agent.indirect.share.title=A oedd unrhyw gostau caffael ychwanegol?
+acquisitionFees.trust.indirect.share.title=A oedd unrhyw gostau caffael ychwanegol?
+acquisitionFees.capacitor.indirect.share.title=A yw’r person am hawlio unrhyw gostau ychwanegol y gwnaeth eu talu pan gafodd y cyfranddaliadau?
+acquisitionFees.personalRep.indirect.share.title=A oedd unrhyw gostau caffael ychwanegol?
+acquisitionFees.personalRepInPeriodOfAdmin.indirect.share.title=A oedd unrhyw gostau caffael ychwanegol?
+
+acquisitionFees.rebased.share.title=A ydych am hawlio’ch cyfran chi o unrhyw gostau ychwanegol y gwnaethoch eu talu pan wnaethoch ail-sylfaenu’r eiddo?
+acquisitionFees.agent.rebased.share.title=A oedd unrhyw gostau ail-sylfaenu ychwanegol?
+acquisitionFees.trust.rebased.share.title=A yw’r ymddiriedolaeth am hawlio ei chyfran o unrhyw gostau caffael ychwanegol?
+acquisitionFees.capacitor.rebased.share.title=A yw’r person am hawlio unrhyw gostau ail-sylfaenu ychwanegol?
+acquisitionFees.personalRep.rebased.share.title=A yw’r person am hawlio unrhyw gostau ail-sylfaenu ychwanegol?
+
+acquisitionFees.indirect.rebased.share.title=A ydych am hawlio unrhyw gostau ychwanegol am gyfrifo gwerth y cyfranddaliadau ar {0}?
+acquisitionFees.agent.indirect.rebased.share.title=A dalwyd unrhyw gostau ychwanegol i ail-sylfaenu’r cyfranddaliadau?
+acquisitionFees.trust.indirect.rebased.share.title=A dalwyd unrhyw gostau ychwanegol i ail-sylfaenu’r cyfranddaliadau?
+acquisitionFees.capacitor.indirect.rebased.share.title=A yw’r person am hawlio unrhyw gostau ychwanegol am gyfrifo gwerth y cyfranddaliadau ar {0}?
+acquisitionFees.personalRep.indirect.rebased.share.title=A yw’r person am hawlio unrhyw gostau ychwanegol am gyfrifo gwerth y cyfranddaliadau ar {0}?
+
+rebaseAcquisitionPrice.share.title=Beth oedd eich cyfran chi o werth marchnadol yr eiddo ar {0}?
+rebaseAcquisitionPrice.indirect.share.title=What was the market value of the shares on {0}?
+
+periodOfAdminMarketValue.title=Beth oedd gwerth marchnadol cyfran yr ystâd o’r eiddo ar {0}?
+periodOfAdminMarketValue.share.title=Beth oedd gwerth marchnadol cyfran yr ystâd o’r eiddo ar {0}?
+periodOfAdminMarketValue.indirect.share.title=Beth oedd gwerth marchnadol y cyfranddaliadau ar {0}?
 
 #===================================================
 #  PURCHASE OR ACQUISITION DETAILS PAGES - END

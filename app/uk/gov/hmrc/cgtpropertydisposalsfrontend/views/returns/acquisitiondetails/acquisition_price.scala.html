@@ -101,7 +101,7 @@
     case (true, Bought, _) if isAgent =>
       (messages("acquisitionPrice.7.title"), Html(messages("acquisitionPrice.7.helpText")))
     case (true, Inherited | Gifted, _) if isAgent =>
-      (messages("acquisitionPrice.8.title", acquisitionDate), Html(messages("acquisitionPrice.8.helpText")))
+      (messages("acquisitionPrice.8.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages("acquisitionPrice.8.helpText")))
     case (true, Bought, _) if isATrust =>
       (messages("acquisitionPrice.10.title"), Html(messages("acquisitionPrice.10.helpText")))
     case (true, _, None) =>

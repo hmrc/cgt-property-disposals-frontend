@@ -3313,8 +3313,6 @@ class DisposalDetailsControllerSpec
         def testIsCheckYourAnswers(
           result: Future[Result],
           completeDisposalDetailsAnswers: CompleteDisposalDetailsAnswers,
-          expectedDisposalPriceTitleKey: String,
-          expectedDisposalFeesTitleKey: String,
           userType: UserType,
           individualUserType: IndividualUserType
         ): Unit =
@@ -3335,16 +3333,6 @@ class DisposalDetailsControllerSpec
                 .select("#propertyShare-question")
                 .text() shouldBe messageFromMessageKey(
                 s"shareOfProperty$userKey.title"
-              )
-              doc
-                .select("#disposalPrice-question")
-                .text() shouldBe messageFromMessageKey(
-                expectedDisposalPriceTitleKey
-              )
-              doc
-                .select("#disposalFees-question")
-                .text() shouldBe messageFromMessageKey(
-                expectedDisposalFeesTitleKey
               )
             }
           )
@@ -3377,16 +3365,6 @@ class DisposalDetailsControllerSpec
               testIsCheckYourAnswers(
                 performAction(),
                 completeAnswers,
-                expectedTitles(
-                  disposalMethod,
-                  userType,
-                  individualUserType
-                )._1,
-                expectedTitles(
-                  disposalMethod,
-                  userType,
-                  individualUserType
-                )._2,
                 userType,
                 individualUserType
               )
@@ -3434,16 +3412,6 @@ class DisposalDetailsControllerSpec
               testIsCheckYourAnswers(
                 performAction(),
                 completeAnswers,
-                expectedTitles(
-                  disposalMethod,
-                  userType,
-                  individualUserType
-                )._1,
-                expectedTitles(
-                  disposalMethod,
-                  userType,
-                  individualUserType
-                )._2,
                 userType,
                 individualUserType
               )

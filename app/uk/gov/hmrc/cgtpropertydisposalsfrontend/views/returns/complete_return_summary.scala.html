@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, DisposalDate, RepresentativeType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty
 
 @this(
         singleDisposalTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary_govuk,
@@ -54,6 +55,7 @@
 
 @key= @{ "viewReturn" }
 @showAnnualExemptAmount = @{ !(isFurtherOrAmendReturn.contains(true) && completeReturn.exemptionAndLossesAnswers.annualExemptAmount.isZero) }
+@isShare(share: ShareOfProperty) = @{share.percentageValue != BigDecimal(100)}
 
 <div id="returnSummary" @returnSummaryClass.map(c =>  Html(s"""class="$c""""))>
 
@@ -71,7 +73,8 @@
             s.triageAnswers.disposalMethod,
             subscribedDetails.isATrust,
             representativeType,
-            isIndirectDisposal
+            isIndirectDisposal,
+            isShare(s.disposalDetails.shareOfProperty)
         )
 
         <h2 class="govuk-heading-m">@messages("task-list.acquisition-details.link")</h2>
@@ -81,7 +84,8 @@
             rebasingEligibilityUtil.isEligibleForRebase(s),
             subscribedDetails.isATrust,
             representativeType,
-            s.triageAnswers.assetType
+            s.triageAnswers.assetType,
+            isShare(s.disposalDetails.shareOfProperty)
         )
 
         <h2 class="govuk-heading-m">@messages("task-list.relief-details.link")</h2>
@@ -183,7 +187,8 @@
             s.triageAnswers.disposalMethod,
             subscribedDetails.isATrust,
             representativeType,
-            isIndirectDisposal
+            isIndirectDisposal,
+            isShare(s.disposalDetails.shareOfProperty)
         )
 
         <h2 class="govuk-heading-m">@messages("task-list.acquisition-details.link")</h2>
@@ -193,7 +198,8 @@
             rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate, representativeType),
             subscribedDetails.isATrust,
             representativeType,
-            s.triageAnswers.assetType
+            s.triageAnswers.assetType,
+            isShare(s.disposalDetails.shareOfProperty)
         )
 
         <h2 class="govuk-heading-m">@messages("task-list.exemptions-and-losses.link")</h2>

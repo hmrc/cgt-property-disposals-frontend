@@ -38,7 +38,8 @@
     isRebasing: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    assetType: AssetType
+    assetType: AssetType,
+    isShare: Boolean,
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @title = @{messages("acquisitionDetails.cya.title")}
@@ -47,7 +48,7 @@
     <span class="govuk-caption-xl">@messages("acquisitionDetails.caption")</span>
     <h1 class="govuk-heading-xl">@title</h1>
 
-    @summary(answers, rebaseCutoffDate, isUk, isRebasing, isATrust, representativeType, assetType)
+    @summary(answers, rebaseCutoffDate, isUk, isRebasing, isATrust, representativeType, assetType, isShare)
 
     @formWrapper(routes.AcquisitionDetailsController.checkYourAnswersSubmit()) {
         @submitButton(messages("button.confirmAndContinue"))

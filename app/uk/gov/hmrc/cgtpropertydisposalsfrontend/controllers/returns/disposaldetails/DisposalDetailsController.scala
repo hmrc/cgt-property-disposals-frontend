@@ -553,7 +553,8 @@ class DisposalDetailsController @Inject() (
                       disposalMethod,
                       fillingOutReturn.subscribedDetails.isATrust,
                       representativeType(state),
-                      isIndirectDisposal(state)
+                      isIndirectDisposal(state),
+                      isShare(share)
                     )
                   )
               )
@@ -565,7 +566,8 @@ class DisposalDetailsController @Inject() (
                   disposalMethod,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
-                  isIndirectDisposal(state)
+                  isIndirectDisposal(state),
+                  isShare(answers.shareOfProperty)
                 )
               )
           }
