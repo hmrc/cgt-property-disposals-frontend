@@ -2425,7 +2425,7 @@ improvementCosts.share.title=A ydych am hawlio eich cyfran chi o unrhyw gostau g
 improvementCosts.agent.share.title=A yw’ch cleient am hawlio ei gyfran o unrhyw gostau gwella?
 improvementCosts.trust.share.title=A yw’r ymddiriedolaeth am hawlio ei chyfran o unrhyw gostau gwella?
 improvementCosts.capacitor.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau gwella?
-improvementCosts.personalRep.share.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau gwella?
+improvementCosts.personalRep.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau gwella?
 improvementCosts.personalRepInPeriodOfAdmin.share.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau gwella?
 improvementCosts.personalRepInPeriodOfAdmin.agent.share.title=A yw’ch cleient am hawlio ei gyfran o unrhyw gostau gwella?
 
@@ -2433,7 +2433,7 @@ acquisitionFees.share.title=A ydych am hawlio’ch cyfran chi o unrhyw gostau yc
 acquisitionFees.agent.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau caffael ychwanegol?
 acquisitionFees.trust.share.title=A yw’r ymddiriedolaeth am hawlio ei chyfran o unrhyw gostau caffael ychwanegol?
 acquisitionFees.capacitor.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau caffael ychwanegol?
-acquisitionFees.personalRep.share.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau ychwanegol?
+acquisitionFees.personalRep.share.title=A yw’r person am hawlio ei gyfran o unrhyw gostau caffael ychwanegol?
 acquisitionFees.personalRepInPeriodOfAdmin.share.title=A ydych am hawlio cyfran yr ystâd o unrhyw gostau ychwanegol?
 
 acquisitionFees.indirect.share.title=A ydych am hawlio unrhyw gostau ychwanegol y gwnaethoch eu talu pan gawsoch y cyfranddaliadau?

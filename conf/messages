@@ -2528,7 +2528,7 @@ improvementCosts.share.title=Do you want to claim your share of any improvement 
 improvementCosts.agent.share.title=Does your client want to claim their share of any improvement costs?
 improvementCosts.trust.share.title=Does the trust want to claim its share of any improvement costs?
 improvementCosts.capacitor.share.title=Does the person want to claim for their share of any improvement costs?
-improvementCosts.personalRep.share.title=Do you want to claim for the estate’s share of any improvement costs?
+improvementCosts.personalRep.share.title=Does the person want to claim for their share of any improvement costs?
 improvementCosts.personalRepInPeriodOfAdmin.share.title=Do you want to claim for the estate’s share of any improvement costs?
 improvementCosts.personalRepInPeriodOfAdmin.agent.share.title=Does your client want to claim their share of any improvement costs?
 
@@ -2587,7 +2587,7 @@ acquisitionFees.share.title=Do you want to claim your share of any additional co
 acquisitionFees.agent.share.title=Does your client want to claim their share of any additional acquisition costs?
 acquisitionFees.trust.share.title=Does the trust want claim its share of any additional acquisition costs?
 acquisitionFees.capacitor.share.title=Does the person want to claim for their share of any additional acquisition costs?
-acquisitionFees.personalRep.share.title=Do you want to claim for the estate’s share of any additional costs?
+acquisitionFees.personalRep.share.title=Does the person want to claim for their share of any additional acquisition costs?
 acquisitionFees.personalRepInPeriodOfAdmin.share.title=Do you want to claim for the estate’s share of any additional costs?
 
 acquisitionFees.indirect.title=Do you want to claim any additional costs you paid when you got the shares?
