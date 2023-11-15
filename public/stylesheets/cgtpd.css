@@ -63,68 +63,9 @@ body:not(.js-enabled) .js-visible {
     padding-top: 5px;
 }
 
-.account-menu {
-    display: flex;
-    justify-content: flex-start;
-    font-size: 16px;
-    background-color: #fff;
-    border-bottom: 1px solid #bfc1c3;
-    margin-bottom: 0;
+.hmrc-account-menu__main {
+    float: none;
 }
-
-.account-menu .as-link-home, .account-menu .as-link-active {
-    background-image: url(data:image/svg+xml;base64,PHN2ZyBkYXRhLW5hbWU9IkxheWVyIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWlkIj48dGl0bGU+aWNvbi1ob21lPC90aXRsZT48cGF0aCBkPSJNMTIgMkwxIDEyLjVoMy4xOXY5LjM4aDUuNDR2LTcuMTNoNC41djcuMTNoNS40NFYxMi41SDIzTDEyIDJ6Ii8+PC9zdmc+);
-    background-repeat: no-repeat;
-    background-position: left center;
-    background-size: 19px;
-    text-decoration: none;
-    color: #005ea5;
-    padding: 12px 18px 8px 22px;
-    border-bottom: 4px solid #005ea5;
-    font-family: GDS Transport, arial, sans-serif;
-}
-
-.account-menu .as-link-home:hover, .account-menu .as-link-active:hover {
-    border-bottom: 4px solid #dee0e2;
-    color: #2b8cc4;
-}
-
-.account-menu .as-link-active {
-    background: none;
-}
-
-.account-menu .as-link {
-    padding: 12px 16px 8px 16px;
-    color: #005ea5;
-    text-decoration: none;
-    border-bottom: 4px solid #fff;
-    font-family: GDS Transport, arial, sans-serif;
-}
-
-.account-menu .as-link:hover {
-    border-bottom: 4px solid #dee0e2;
-    color: #2b8cc4;
-}
-
-.account-menu .as-link:focus {
-    outline: 3px solid transparent;
-    color: #0b0c0c;
-    background-color: #fd0;
-    box-shadow: 0 -2px #fd0, 0 4px #0b0c0c;
-}
-
-.account-menu .as-link:first-child {
-    padding-left: 22px;
-    background-image: url(data:image/svg+xml;base64,PHN2ZyBkYXRhLW5hbWU9IkxheWVyIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWlkIj48dGl0bGU+aWNvbi1ob21lPC90aXRsZT48cGF0aCBkPSJNMTIgMkwxIDEyLjVoMy4xOXY5LjM4aDUuNDR2LTcuMTNoNC41djcuMTNoNS40NFYxMi41SDIzTDEyIDJ6Ii8+PC9zdmc+);
-    background-repeat: no-repeat;
-    background-position: left center;
-    background-size: 19px;
-}
-
-.account-menu__link {
-    color: rgb(29, 112, 184);
-}
-
 .account-icon {
     color: rgb(29, 112, 184);
 }

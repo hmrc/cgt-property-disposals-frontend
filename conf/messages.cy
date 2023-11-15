@@ -561,6 +561,7 @@ account.balance-updating=Balans yn cael ei ddiweddaru
 
 account.caption=Cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 account.menu.home=Hafan
+account.menu=Dewislen y cyfrif
 account.menu.manageYourDetails=Rheoli’r cyfrif
 account.menu.signOut=Allgofnodi
 account.menu.changeClient=Newid cleient

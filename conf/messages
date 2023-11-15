@@ -607,6 +607,7 @@ agentNoEnrolment.button.tryAgain=Try again
 account.caption=Capital Gains Tax on UK property account
 
 account.menu.home=Home
+account.menu=Account menu
 account.menu.manageYourDetails=Manage account
 account.menu.signOut=Sign out
 account.menu.changeClient=Change client
