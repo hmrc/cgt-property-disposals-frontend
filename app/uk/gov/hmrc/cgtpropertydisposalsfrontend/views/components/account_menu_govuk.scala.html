@@ -22,15 +22,25 @@
 
 @(activeLink: Option[AccountMenuItem])(implicit messages: Messages)
 
-<nav class="account-menu is-smaller" role="navigation">
-  <a href="@{accounts.homepage.routes.HomePageController.homepage().url}" class="govuk-link as-link@if(activeLink.exists(_.is[AccountMenuItem.Home])){-home }">
-    @messages("account.menu.home")
-  </a>
-  <a href="@{accounts.routes.AccountController.manageYourDetails().url}" class="govuk-link as-link@if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){-active }">
-    @messages("account.menu.manageYourDetails")
-  </a>
-  <a href="@routes.StartController.signOutAndRedirectToFeedback().url" class="govuk-link as-link">
-    @messages("account.menu.signOut")
-  </a>
+<!-- ACCOUNT MENU -->
+<nav id="secondary-nav" class="hmrc-account-menu" aria-label="Account" aria-current="page" data-module="hmrc-account-menu">
+    <a href="@{accounts.homepage.routes.HomePageController.homepage().url}" class="hmrc-account-menu__link hmrc-account-menu__link--home@{if(activeLink.exists(_.is[AccountMenuItem.Home])){ " hmrc-account-menu__link--active"}}">
+      <span class="hmrc-account-icon hmrc-account-icon--home">
+        @messages("account.menu.home") </span>
+    </a>
 
+    <a href="#" class="hmrc-account-menu__link hmrc-account-menu__link--menu js-hidden js-visible" tabindex="-1" aria-hidden="true" aria-expanded="false">
+        @messages("account.menu") </a>
+    <ul class="hmrc-account-menu__main js-hidden">
+
+        <li>
+            <a href="@{accounts.routes.AccountController.manageYourDetails().url}" class="hmrc-account-menu__link@{if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){ " hmrc-account-menu__link--active" }}">
+                @messages("account.menu.manageYourDetails") </a>
+        </li>
+
+        <li>
+            <a href="@routes.StartController.signOutAndRedirectToFeedback().url" class="hmrc-account-menu__link">
+                @messages("account.menu.signOut")</a>
+        </li>
+    </ul>
 </nav>
