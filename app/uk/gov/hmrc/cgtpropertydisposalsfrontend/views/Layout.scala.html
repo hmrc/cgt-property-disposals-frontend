@@ -59,8 +59,8 @@
     @hmrcTimeoutDialogHelper(signOutUrl, timeoutUrl = Some(viewConfig.ggTimedOutUrl))
     @autocompleteCss()
   }
-  <link rel="stylesheet" media="screen" href="@{routes.Assets.at("stylesheets/cgtpd.css")}" @{CSPNonce.attr} />
-  <link rel="stylesheet" media="print" href="@{routes.Assets.at("stylesheets/print.css")}" @{CSPNonce.attr} />
+  <link @{CSPNonce.attr} rel="stylesheet" media="screen" href="@{routes.Assets.at("stylesheets/cgtpd.css")}" />
+  <link @{CSPNonce.attr} rel="stylesheet" media="print" href="@{routes.Assets.at("stylesheets/print.css")}" />
 }
 
 @beforeContent = {
@@ -79,24 +79,7 @@
 
 @additionalScripts = {
   @autocompleteJavascript()
-  <script @CSPNonce.attr>
-    (function (document, window) {
-      if ('NodeList' in window && !NodeList.prototype.forEach) {
-        NodeList.prototype.forEach = function (callback, scope) {
-          for (let i = 0; i < this.length; i++) {
-            callback.call(scope || window, this[i], i, this)
-          }
-        }
-      }
-      document.querySelectorAll('a[href="#print-dialogue"]')
-        .forEach(function(link) {
-          link.addEventListener('click', function(event) {
-            event.preventDefault();
-            window.print();
-          })
-      })
-    })(document, window);
-  </script>
+  <script @CSPNonce.attr src="@{routes.Assets.at("javascript/cgtpd.js")}"></script>
 }
 
 @content = {
