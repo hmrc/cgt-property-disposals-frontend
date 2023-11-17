@@ -7,7 +7,7 @@ object AppDependencies {
   val silencerVersion  = "1.7.12"
 
   val compile: Seq[ModuleID] = Seq(
-    "uk.gov.hmrc"                %% "play-frontend-hmrc"               % s"7.7.0-$playVersion",
+    "uk.gov.hmrc"                %% "play-frontend-hmrc"               % s"7.27.0-$playVersion",
     "uk.gov.hmrc"                %% s"bootstrap-frontend-$playVersion" % bootstrapVersion,
     "uk.gov.hmrc.mongo"          %% s"hmrc-mongo-$playVersion"         % "0.70.0",
     "uk.gov.hmrc"                %% "domain"                           % s"8.3.0-$playVersion",

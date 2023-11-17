@@ -7,6 +7,22 @@ body:not(.js-enabled) .js-visible {
 .govuk-form-group--error .autocomplete__input {
     border-color: #d4351c;
 }
+
+.autocomplete__input.govuk-input--error {
+    border-color: #d4351c;
+}
+
+.autocomplete__dropdown-arrow-down {
+    z-index: 0;
+    pointer-events: none;
+}
+
+@media (min-width: 40.0625em){
+    .autocomplete__wrapper {
+        width: 75%!important;
+    }
+}
+
 .govuk-panel--confirmation * {
     color: #ffffff !important;
 }
