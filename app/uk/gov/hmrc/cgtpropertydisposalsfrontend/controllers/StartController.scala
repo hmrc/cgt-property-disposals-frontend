@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.{routes => ag
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{routes => addressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{IvBehaviour, routes => onboardingRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.{SubmittingReturn, SubscriptionMissingData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.{Individual, NonGovernmentGatewayRetrievedUser, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
@@ -216,7 +216,8 @@ class StartController @Inject() (
       case _: AgentStatus.AgentSupplyingClientDetails =>
         Redirect(agentsRoutes.AgentAccessController.enterClientsCgtRef())
 
-      case _: StartingNewDraftReturn | _: FillingOutReturn | _: ViewingReturn | _: SubmitReturnFailed =>
+      case _: StartingNewDraftReturn | _: FillingOutReturn | _: ViewingReturn | _: SubmitReturnFailed |
+          _: SubmittingReturn =>
         Redirect(accounts.homepage.routes.HomePageController.homepage())
 
       case _: JustSubmittedReturn =>
