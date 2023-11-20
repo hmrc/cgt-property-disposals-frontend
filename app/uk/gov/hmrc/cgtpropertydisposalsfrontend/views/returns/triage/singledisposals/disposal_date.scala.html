@@ -64,6 +64,7 @@
 @hasErrors = @{form.hasErrors}
 
 @title = @{messages(s"$key$userKey.title")}
+@errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", key).map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
@@ -79,7 +80,7 @@
    monthValue = form.data.get("disposalDate-month"),
    yearValue = form.data.get("disposalDate-year"),
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-   errorKey = form.error(key).map(e => s"${e.key}.${e.message}"),
+   errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )
 
