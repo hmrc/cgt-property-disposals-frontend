@@ -18,10 +18,10 @@
 
 @this()
 
-@(label: String, value: Html, changeButton: Option[Html], id: String)
+@(label: String, value: Html, changeButton: Option[Html], id: String, widthClass: Option[String] = None)
 
 <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key govuk-!-width-one-half" id="@id-question">
+    <dt class="govuk-summary-list__key @{widthClass.getOrElse("govuk-!-width-one-half")}" id="@id-question">
         @label
     </dt>
     <dd class="govuk-summary-list__value" id="@id-answer">
