@@ -69,7 +69,8 @@
       errorMessage = form.error("countryCode").map(e => ErrorMessage(
         content = Text(messages(s"countryCode.${e.message}"))
       )),
-      classes = "govuk-!-width-two-thirds"
+      classes = "govuk-!-width-two-thirds",
+      attributes = Map("autocomplete" -> "country")
   ).asAccessibleAutocomplete(Some(AccessibleAutocomplete(
         showAllValues = true,
         autoSelect = true,
