@@ -38,6 +38,7 @@
     content = HtmlContent(help)
   )),
   errorMessage = errorKey.map(e => ErrorMessage(
+    visuallyHiddenText = Some(messages("generic.error")),
     content = Text(messages(e))
   )),
   items = Seq(
