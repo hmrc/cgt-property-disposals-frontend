@@ -137,7 +137,7 @@
       content = Text(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line2.label")),
       classes = "govuk-label--m"
     ),
-    autocomplete = Some(AutoCompleteType.AddressLine1.value),
+    autocomplete = Some(AutoCompleteType.AddressLine2.value),
     errorMessage = form.error(line2Key).map(e => ErrorMessage(
       content = Text(messages(s"$line2Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
       visuallyHiddenText = Some(messages("generic.error"))
