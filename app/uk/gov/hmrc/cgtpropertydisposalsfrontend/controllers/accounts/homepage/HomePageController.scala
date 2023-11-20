@@ -27,6 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubmittingReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
@@ -321,6 +322,17 @@ class HomePageController @Inject() (
         }(f(s, _))
 
       case Some((s: SessionData, r: SubmitReturnFailed)) if withUplift =>
+        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) { case (r, draftReturns, sentReturns) =>
+          Subscribed(
+            r.subscribedDetails,
+            r.ggCredId,
+            r.agentReferenceNumber,
+            draftReturns,
+            sentReturns
+          )
+        }(f(s, _))
+
+      case Some((s: SessionData, r: SubmittingReturn)) if withUplift =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) { case (r, draftReturns, sentReturns) =>
           Subscribed(
             r.subscribedDetails,

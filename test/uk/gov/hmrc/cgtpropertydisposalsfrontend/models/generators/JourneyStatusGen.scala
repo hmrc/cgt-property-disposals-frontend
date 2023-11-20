@@ -20,6 +20,7 @@ import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubmittingReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
 
@@ -67,6 +68,9 @@ trait JourneyStatusLowerPriorityGen { this: GenUtils =>
 
   implicit val submitReturnFailedGen: Gen[SubmitReturnFailed] =
     gen[SubmitReturnFailed]
+
+  implicit val submittingReturn: Gen[SubmittingReturn] =
+    gen[SubmittingReturn]
 
   implicit val startingToAmendReturnGen: Gen[StartingToAmendReturn] =
     gen[StartingToAmendReturn]
