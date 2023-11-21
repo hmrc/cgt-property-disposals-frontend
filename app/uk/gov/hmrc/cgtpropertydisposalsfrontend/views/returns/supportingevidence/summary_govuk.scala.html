@@ -39,24 +39,27 @@
 
 @cyaSection(None, Some("cya-questions-short")) {
   @cyaRow(
-    messages(s"$key.do-you-want-to-upload-evidence"),
-    Html(hasSupportingDocs),
-    Some(cyaChange(
-      messages(s"$key.do-you-want-to-upload-evidence"),
-      routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence().url
+    label = messages(s"$key.do-you-want-to-upload-evidence"),
+    value = Html(hasSupportingDocs),
+    changeButton = Some(cyaChange(
+      hintText = messages(s"$key.do-you-want-to-upload-evidence"),
+      url = routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence().url
     )),
-    "do-you-want-to-upload-supporting-evidence-value"
+    id = "do-you-want-to-upload-supporting-evidence-value",
+    widthClass = Some("govuk-!-width-one-third")
   )
 
   @for((document, fileIndex) <- answers.evidences.zipWithIndex) {
     @cyaRow(
-      messages(s"$key.file-label", {fileIndex + 1}),
-      Html(document.fileName),
-      Some(cyaDelete(
-        messages("cya.remove"),
-        routes.SupportingEvidenceController.deleteSupportingEvidence(document.uploadReference, addNew = false).url
+      label = messages(s"$key.file-label", {fileIndex + 1}),
+      value = Html(document.fileName),
+      changeButton = Some(cyaDelete(
+        hintText = document.fileName,
+        url = routes.SupportingEvidenceController.deleteSupportingEvidence(document.uploadReference, addNew = false).url,
+        label = Some(messages("cya.remove"))
       )),
-      messages("supporting-evidence.check-your-answers.assistive", document.fileName)
+      id = s"document-${fileIndex + 1}",
+      widthClass = Some("govuk-!-width-one-third")
     )
   }
 }
