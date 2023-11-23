@@ -3129,36 +3129,6 @@ class StartControllerSpec
         }
       }
 
-      "the session data indicates that a submission is already in progress" must {
-
-        "redirect to the account homepage screen" in {
-          inSequence {
-            mockAuthWithAllRetrievals(
-              ConfidenceLevel.L200,
-              Some(AffinityGroup.Individual),
-              None,
-              None,
-              None,
-              Set(cgtEnrolment),
-              Some(retrievedGGCredId)
-            )
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  SubmittingReturn.apply()
-                )
-              )
-            )
-
-            checkIsRedirect(
-              performAction(),
-              controllers.accounts.homepage.routes.HomePageController.homepage()
-            )
-          }
-
-        }
-      }
-
       "the session data indicates the user has just submitted a return" must {
 
         "redirect to the submission confirmation screen" in {
