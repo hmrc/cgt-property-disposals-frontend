@@ -20,12 +20,9 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
     Test / testOptions += Tests.Argument(
       TestFrameworks.ScalaTest,
       "-oNCHPQR",
-      "-u",
-      "target/test-reports",
-      "-h",
-      "target/test-reports/html-report"
-    ),
+      "-u", "target/test-reports",
+      "-h", "target/test-reports/html-report"),
     scalacOptions ++= "-Wconf:src=routes/.*:s" :: "-Wconf:cat=unused-imports&src=html/.*:s"
-      :: "-Ymacro-annotations" :: "-Xlint:-byname-implicit" :: Nil
+                      :: "-Ymacro-annotations" :: "-Xlint:-byname-implicit" :: Nil,
   )
   .settings(CodeCoverageSettings.settings *)

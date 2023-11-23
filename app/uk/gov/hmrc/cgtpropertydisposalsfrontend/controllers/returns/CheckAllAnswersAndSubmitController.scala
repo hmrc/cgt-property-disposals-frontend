@@ -28,7 +28,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.SubmitReturnResult.{SubmitReturnError, SubmitReturnSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubmittingReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
@@ -134,11 +133,6 @@ class CheckAllAnswersAndSubmitController @Inject() (
 
             val result =
               for {
-                _               <- EitherT(
-                                     updateSession(sessionStore, request)(
-                                       _.copy(journeyStatus = Some(SubmittingReturn()))
-                                     )
-                                   )
                 response        <- EitherT.liftF(
                                      submitReturn(
                                        updatedCompleteReturn,
