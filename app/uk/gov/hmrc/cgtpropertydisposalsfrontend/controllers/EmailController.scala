@@ -26,6 +26,7 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.SubmitEmailDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
@@ -102,7 +103,13 @@ trait EmailController[T <: EmailJourneyType] {
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { case (sessionData, journey) =>
         val form = sessionData.emailToBeVerified.fold(
-          EmailController.submitEmailForm
+          request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+            case Some((_, subscribed: Subscribed)) =>
+              EmailController.submitEmailForm.fill(
+                SubmitEmailDetails(subscribed.subscribedDetails.emailAddress, resendVerificationEmail = false)
+              )
+            case _                                 => EmailController.submitEmailForm
+          }
         )(e =>
           EmailController.submitEmailForm.fill(
             SubmitEmailDetails(e.email, e.hasResentVerificationEmail)

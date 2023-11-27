@@ -128,7 +128,8 @@
     errorMessage = form.error(line1Key).map(e => ErrorMessage(
       content = Text(messages(s"$line1Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
       visuallyHiddenText = Some(messages("generic.error"))
-    ))
+    )),
+    value = form.data.get(line1Key)
   ))
   @govukInput(Input(
     id = line2Key,
@@ -141,7 +142,8 @@
     errorMessage = form.error(line2Key).map(e => ErrorMessage(
       content = Text(messages(s"$line2Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
       visuallyHiddenText = Some(messages("generic.error"))
-    ))
+    )),
+    value = form.data.get(line2Key)
   ))
   @govukInput(Input(
     id = line3Key,
@@ -155,7 +157,8 @@
       content = Text(messages(s"$line3Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
       visuallyHiddenText = Some(messages("generic.error"))
     )),
-    classes = "govuk-!-width-two-thirds"
+    classes = "govuk-!-width-two-thirds",
+    value = form.data.get(line3Key)
   ))
   @govukInput(Input(
     id = line4Key,
@@ -169,7 +172,8 @@
       content = Text(messages(s"$line4Key.${journeyErrorKey.stripPrefix(".")}${e.message}")),
       visuallyHiddenText = Some(messages("generic.error"))
     )),
-    classes = "govuk-!-width-two-thirds"
+    classes = "govuk-!-width-two-thirds",
+    value = form.data.get(line4Key)
   ))
   @govukInput(Input(
     id = postcodeKey,
@@ -183,7 +187,8 @@
       content = Text(messages(s"$postcodeKey.${journeyErrorKey.stripPrefix(".")}${e.message}")),
       visuallyHiddenText = Some(messages("generic.error"))
     )),
-    classes = "govuk-!-width-one-third"
+    classes = "govuk-!-width-one-third",
+    value = form.data.get(postcodeKey)
   ))
 }
 

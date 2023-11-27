@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.NonUkAddress
 
 @this(
 layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
@@ -44,12 +45,18 @@ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.acco
     routes.SubscribedWithoutIdChangeContactNameController.enterIndividualName().url
   }
 }
+@isUk = @{
+  details.address match {
+    case _: NonUkAddress => false
+    case _ => true
+  }
+}
 
 @changeAccountName = @{details.name.fold(_ => Html(""), _ => Html(messages(s"account.manageYourDetails.individual.p2", appConfig.tellHmrcChangeDetails)))}
 
 @layout(title, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
-<span class="govuk-caption-xl">@messages("account.caption")</span>
-<h1 class="govuk-heading-xl">@title</h1>
+  <span class="govuk-caption-xl">@messages("account.caption")</span>
+  <h1 class="govuk-heading-xl">@title</h1>
   @cyaSection(None, Some("cya-questions-long govuk-summary-list--no-border")) {
     @cyaRow(
       messages("account.manageYourDetails.subtitle"),
@@ -77,28 +84,38 @@ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.acco
   </div>
 
   @cyaSection() {
+    @cyaRow(
+      messages("subscription.cyaLabel.contactName"),
+      Html(details.contactName.value),
+      Some(cyaChange(messages("subscription.cyaChange.contactName"), changeContactNameRoute)),
+      id = "contactName",
+      widthClass = Some("govuk-!-width-one-third")
+    )
 
-  @cyaRow(
-    messages("subscription.cyaLabel.contactName"),
-    Html(details.contactName.value),
-    Some(cyaChange(messages("subscription.cyaChange.contactName"), changeContactNameRoute)),
-      "contactName"
-  )
+    @cyaRow(
+      messages("subscription.cyaLabel.email"),
+      Html(details.emailAddress.value),
+      Some(cyaChange(messages("subscription.cyaChange.email"), routes.SubscribedChangeEmailController.enterEmail().url)),
+      id = "email",
+      widthClass = Some("govuk-!-width-one-third")
+     )
 
-  @cyaRow(
-    messages("subscription.cyaLabel.email"),
-    Html(details.emailAddress.value),
-    Some(cyaChange(messages("subscription.cyaChange.email"), routes.SubscribedChangeEmailController.enterEmail().url)),
-      "email"
-   )
+    @cyaRow(
+      messages("subscription.isUk.title"),
+      Html(if(isUk) messages("generic.yes") else messages("generic.no")),
+      Some(cyaChange(messages("subscription.cyaChange.address"), routes.SubscribedChangeAddressController.isUk().url)),
+      id = "isUk",
+      widthClass = Some("govuk-!-width-one-third")
+    )
 
-  @cyaRow(
-   messages("subscription.cyaLabel.address"),
-   addressDisplay(details.address, Block),
-   Some(cyaChange(messages("subscription.cyaChange.address"), routes.SubscribedChangeAddressController.isUk().url)),
-      "address"
-  )
+    @cyaRow(
+      messages("subscription.cyaLabel.address"),
+      addressDisplay(details.address, Block),
+      Some(cyaChange(messages("subscription.cyaChange.address"), if(isUk) routes.SubscribedChangeAddressController.enterUkAddress().url else routes.SubscribedChangeAddressController.enterNonUkAddress().url)),
+      id = "address",
+      widthClass = Some("govuk-!-width-one-third")
+    )
 
- }
+   }
 
 }
