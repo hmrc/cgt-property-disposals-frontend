@@ -34,7 +34,7 @@ object SAUTR {
   val mapping: Mapping[SAUTR] = {
     val regexPredicate = "^[0-9]{10}$".r.pattern.asPredicate()
     nonEmptyText
-      .transform[SAUTR](s => SAUTR(s.trim()), _.value)
+      .transform[SAUTR](s => SAUTR(s.trim().replaceAll(" ", "")), _.value)
       .verifying("error.pattern", s => regexPredicate.test(s.value))
   }
 
