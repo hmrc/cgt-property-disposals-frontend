@@ -31,6 +31,7 @@
 @import java.time.LocalDate
 
 @this(
+        govukSummaryList : GovukSummaryList,
         layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
         accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu_govuk,
         sentReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.sent_returns_list,
@@ -105,15 +106,28 @@
 
 @accountHeader = {
   <h1 class="govuk-heading-xl govuk-!-margin-bottom-2">@title</h1>
-  <h2 class="govuk-heading-s govuk-!-font-weight-regular" id="account-details">
-   <span>
-   @messages("account.home.accountName", subscribed.subscribedDetails.makeAccountName())
-   </span>
-   <br>
-   <span>
-   @{messages("account.home.subtitle", subscribed.subscribedDetails.cgtReference.value)}
-   </span>
-  </h2>
+  @govukSummaryList(SummaryList(
+      rows = Seq(
+        SummaryListRow(
+          key = Key(
+            content = Text(messages("account.home.accountName"))
+          ),
+          value = Value(
+            content = Text(subscribed.subscribedDetails.makeAccountName())
+          )
+        ), 
+        SummaryListRow(
+          key = Key(
+            content = Text(messages("account.home.subtitle"))
+          ),
+          value = Value(
+            content = Text(subscribed.subscribedDetails.cgtReference.value)
+          )
+        )
+      )
+    ))
+
+
   @if(subscribed.draftReturns.nonEmpty || subscribed.totalLeftToPay() > AmountInPence.zero) {
    <p class="govuk-body">
     <a class="govuk-link" href="@{controllers.accounts.homepage.routes.HomePageController.startNewReturn().url}">
@@ -127,6 +141,7 @@
    ))
   }
 }
+
 @accountBalance = {
  @if(subscribed.sentReturns.nonEmpty) {
   @totalLeftHeading(subscribed.totalLeftToPay(), hasRecentlyAmendedReturn)
