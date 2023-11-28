@@ -111,7 +111,7 @@ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.acco
     @cyaRow(
       messages("subscription.cyaLabel.address"),
       addressDisplay(details.address, Block),
-      Some(cyaChange(messages("subscription.cyaChange.address"), if(isUk) routes.SubscribedChangeAddressController.enterUkAddress().url else routes.SubscribedChangeAddressController.enterNonUkAddress().url)),
+      Some(cyaChange(messages("subscription.cyaChange.address"), if(isUk) routes.SubscribedChangeAddressController.enterPostcode().url else routes.SubscribedChangeAddressController.enterNonUkAddress().url)),
       id = "address",
       widthClass = Some("govuk-!-width-one-third")
     )
