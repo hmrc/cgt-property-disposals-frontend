@@ -107,6 +107,7 @@
 @accountHeader = {
   <h1 class="govuk-heading-xl govuk-!-margin-bottom-2">@title</h1>
   @govukSummaryList(SummaryList(
+      attributes = Map("id" -> "account-details"),
       rows = Seq(
         SummaryListRow(
           key = Key(
