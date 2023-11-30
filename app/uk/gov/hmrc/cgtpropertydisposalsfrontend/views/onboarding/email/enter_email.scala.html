@@ -74,7 +74,7 @@
         content = Text(messages(s"${e.key}.${e.message}")),
         visuallyHiddenText = Some(messages("generic.error"))
       )),
-      value = form(key).value,
+      value = form.data.get(key),
       autocomplete = Some(AutoCompleteType.Email.value),
     ))
     <input type="hidden" name="resendVerificationEmail" value="false" />

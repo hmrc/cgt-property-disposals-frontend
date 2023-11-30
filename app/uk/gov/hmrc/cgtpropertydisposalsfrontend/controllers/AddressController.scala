@@ -24,6 +24,8 @@ import cats.syntax.eq._
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
@@ -102,6 +104,14 @@ trait AddressController[A <: AddressJourneyType] {
   def isUk: Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { case (sessionData, journey) =>
+        val form = request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+          case Some((_, subscribed: Subscribed)) =>
+            subscribed.subscribedDetails.address match {
+              case _: UkAddress => Address.isUkForm.fill(true)
+              case _            => Address.isUkForm.fill(false)
+            }
+          case _                                 => Address.isUkForm
+        }
         if (sessionData.addressLookupResult.nonEmpty) {
           updateSession(sessionStore, request)(
             _.copy(addressLookupResult = None)
@@ -112,7 +122,7 @@ trait AddressController[A <: AddressJourneyType] {
             case Right(_) =>
               Ok(
                 isUkPage(
-                  Address.isUkForm,
+                  form,
                   backLinkCall(journey),
                   isUkSubmitCall,
                   journey
@@ -122,7 +132,7 @@ trait AddressController[A <: AddressJourneyType] {
         } else {
           Ok(
             isUkPage(
-              Address.isUkForm,
+              form,
               backLinkCall(journey),
               isUkSubmitCall,
               journey
@@ -162,10 +172,18 @@ trait AddressController[A <: AddressJourneyType] {
 
   def enterUkAddress(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
+      val form = request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+        case Some((_, subscribed: Subscribed)) =>
+          subscribed.subscribedDetails.address match {
+            case a: UkAddress => Address.ukAddressForm.fill(UkAddress(a.line1, a.line2, a.town, a.county, a.postcode))
+            case _            => Address.ukAddressForm
+          }
+        case _                                 => Address.ukAddressForm
+      }
       withValidJourney(request) { case (_, journey) =>
         Ok(
           enterUkAddressPage(
-            Address.ukAddressForm,
+            form,
             enterUkAddressBackLinkCall(journey),
             enterUkAddressSubmitCall,
             enterPostcodeCall,
@@ -204,10 +222,19 @@ trait AddressController[A <: AddressJourneyType] {
 
   def enterNonUkAddress(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
+      val form = request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+        case Some((_, subscribed: Subscribed)) =>
+          subscribed.subscribedDetails.address match {
+            case a: NonUkAddress =>
+              Address.nonUkAddressForm.fill(NonUkAddress(a.line1, a.line2, a.line3, a.line4, a.postcode, a.country))
+            case _               => Address.nonUkAddressForm
+          }
+        case _                                 => Address.nonUkAddressForm
+      }
       withValidJourney(request) { case (_, journey) =>
         Ok(
           enterNonUkAddressPage(
-            Address.nonUkAddressForm,
+            form,
             isUkCall,
             enterNonUkAddressSubmitCall,
             journey,
