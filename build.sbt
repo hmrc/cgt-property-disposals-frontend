@@ -8,7 +8,7 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
   .settings(
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
     addCompilerPlugin(scalafixSemanticdb),
-    scalaVersion := "2.13.8",
+    scalaVersion := "2.13.12",
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     onLoadMessage := "",
@@ -26,3 +26,5 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
                       :: "-Ymacro-annotations" :: "-Xlint:-byname-implicit" :: Nil,
   )
   .settings(CodeCoverageSettings.settings *)
+
+libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
