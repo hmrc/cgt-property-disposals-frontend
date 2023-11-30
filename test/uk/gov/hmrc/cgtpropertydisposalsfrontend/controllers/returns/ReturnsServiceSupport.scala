@@ -33,7 +33,7 @@ import scala.concurrent.Future
 
 trait ReturnsServiceSupport { this: MockFactory =>
 
-  val mockReturnsService: ReturnsService = mock[ReturnsService]
+  protected val mockReturnsService: ReturnsService = mock[ReturnsService]
 
   protected def mockStoreDraftReturn(
     fillingOutReturn: FillingOutReturn
@@ -65,5 +65,4 @@ trait ReturnsServiceSupport { this: MockFactory =>
       ))
       .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](result))
-
 }

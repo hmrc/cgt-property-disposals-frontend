@@ -88,7 +88,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
   def ukAddress(i: Int): UkAddress                       =
     UkAddress(s"$i the Street", Some("The Town"), None, None, postcode)
 
-  val (addressHead, lastAddress, lastAddressIndex, addresses) = {
+  private val (_, lastAddress, lastAddressIndex, addresses) = {
     val head = ukAddress(1)
     val last = ukAddress(5)
     (head, last, 4, head :: ((2 to 4).map(ukAddress).toList ::: List(last)))

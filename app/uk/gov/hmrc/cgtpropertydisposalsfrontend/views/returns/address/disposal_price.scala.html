@@ -42,7 +42,8 @@
     backLink: Call,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
-    isAmend: Boolean
+    isAmend: Boolean,
+    addressCaption: String
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @key = @{ "multipleDisposalsDisposalPrice" }
@@ -70,7 +71,7 @@
         @errorSummary(form, Some(s"$key$userKey"))
     }
 
-    @caption(messages("returns.property-details.multipleDisposals.caption"))
+    @caption(addressCaption)
 
     @formWrapper(address.routes.PropertyDetailsController.disposalPriceSubmit()) {
       @govukInput(Input(
