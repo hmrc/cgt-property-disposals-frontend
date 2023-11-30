@@ -103,7 +103,7 @@ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.acco
     @cyaRow(
       messages("subscription.isUk.title"),
       Html(if(isUk) messages("generic.yes") else messages("generic.no")),
-      Some(cyaChange(messages("subscription.cyaChange.address"), routes.SubscribedChangeAddressController.isUk().url)),
+      Some(cyaChange(messages("subscription.isUk.title"), routes.SubscribedChangeAddressController.isUk().url)),
       id = "isUk",
       widthClass = Some("govuk-!-width-one-third")
     )
