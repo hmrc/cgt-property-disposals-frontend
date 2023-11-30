@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes =
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, StartController, agents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NewEnrolmentCreatedForMissingEnrolment, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, Subscribed, SubscriptionStatus, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NewEnrolmentCreatedForMissingEnrolment, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, SubmittingReturn, Subscribed, SubscriptionStatus, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource, Postcode}
@@ -3116,6 +3116,36 @@ class StartControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[SubmitReturnFailed]
+                )
+              )
+            )
+
+            checkIsRedirect(
+              performAction(),
+              controllers.accounts.homepage.routes.HomePageController.homepage()
+            )
+          }
+
+        }
+      }
+
+      "the session data indicates that a submission is already in progress" must {
+
+        "redirect to the account homepage screen" in {
+          inSequence {
+            mockAuthWithAllRetrievals(
+              ConfidenceLevel.L200,
+              Some(AffinityGroup.Individual),
+              None,
+              None,
+              None,
+              Set(cgtEnrolment),
+              Some(retrievedGGCredId)
+            )
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[SubmittingReturn]
                 )
               )
             )

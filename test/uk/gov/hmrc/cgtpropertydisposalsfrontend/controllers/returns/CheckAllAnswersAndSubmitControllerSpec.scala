@@ -43,6 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.Multi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec.{validateCalculatedYearToDateLiabilityPage, validateNonCalculatedYearToDateLiabilityPage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubmittingReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
@@ -1340,6 +1341,11 @@ class CheckAllAnswersAndSubmitControllerSpec
         submitReturnResponse,
         completeFillingOutReturnNoRepresentee.amendReturnData
       )
+      val submittingReturn    = SubmittingReturn(
+        completeFillingOutReturnNoRepresentee.subscribedDetails,
+        completeFillingOutReturnNoRepresentee.ggCredId,
+        completeFillingOutReturnNoRepresentee.agentReferenceNumber
+      )
 
       lazy val submitReturnRequest = {
         val cyaPge                                                     = instanceOf[views.html.returns.check_all_answers]
@@ -1434,6 +1440,9 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
+            mockStoreSession(sessionWithJourney(submittingReturn))(
+              Right()
+            )
             mockSubmitReturn(submitReturnRequest, lang)(Right(submitReturnResponse))
             mockStoreSession(sessionWithJourney(justSubmittedReturn))(
               Left(Error(""))
@@ -1447,6 +1456,9 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
+            mockStoreSession(sessionWithJourney(submittingReturn))(
+              Right()
+            )
             mockSubmitReturn(submitReturnRequest, lang)(Left(Error("")))
             mockStoreSession(
               sessionWithJourney(
@@ -1470,6 +1482,9 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
+            mockStoreSession(sessionWithJourney(submittingReturn))(
+              Right()
+            )
             mockSubmitReturn(submitReturnRequest, lang)(Right(submitReturnResponse))
             mockStoreSession(sessionWithJourney(justSubmittedReturn))(Right(()))
           }
@@ -1496,6 +1511,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnWithRepresenteeWithNoReference))
             mockCgtRegistrationService(Right(mockRepresenteeCgtReference), representeeAnswersNoReferenceId, lang)
+            mockStoreSession(sessionWithJourney(submittingReturn))(
+              Right()
+            )
             mockSubmitReturn(
               submitReturnRequestForOverriddenReferenceId(mockRepresenteeCgtReference, hideEstimatesQuestion = false),
               lang
@@ -1537,6 +1555,9 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
+            mockStoreSession(sessionWithJourney(submittingReturn))(
+              Right()
+            )
             mockSubmitReturn(submitReturnRequest, lang)(Left(Error("")))
             mockStoreSession(
               sessionWithJourney(

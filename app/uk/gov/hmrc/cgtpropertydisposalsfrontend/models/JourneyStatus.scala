@@ -181,6 +181,13 @@ object JourneyStatus {
     agentReferenceNumber: Option[AgentReferenceNumber]
   ) extends JourneyStatus
 
+  //in progress submission
+  final case class SubmittingReturn(
+    subscribedDetails: SubscribedDetails,
+    ggCredId: GGCredId,
+    agentReferenceNumber: Option[AgentReferenceNumber]
+  ) extends SubscriptionStatus
+
   final case class ViewingReturn(
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
