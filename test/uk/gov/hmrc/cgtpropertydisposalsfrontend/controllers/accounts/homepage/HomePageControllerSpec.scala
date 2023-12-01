@@ -1988,6 +1988,7 @@ class HomePageControllerSpec
           case _: JustSubmittedReturn    => true
           case _: ViewingReturn          => true
           case _: FillingOutReturn       => true
+          case _: SubmittingReturn       => true
           case _                         => false
         }
       )

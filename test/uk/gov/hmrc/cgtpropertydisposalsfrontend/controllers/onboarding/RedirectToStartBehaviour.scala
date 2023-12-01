@@ -52,7 +52,7 @@ trait RedirectToStartBehaviour {
           controllers.routes.StartController.start()
         )
       }
-      "the journey status in session is not valid" taggedAs Retryable in {
+      "the journey status in session is not valid" in {
         implicit val journeyStatusArb: Arbitrary[JourneyStatus] =
           arb(journeyStatusGen)
 
