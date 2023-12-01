@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldet
 
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
-import org.scalatest.{Outcome, Retries}
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
@@ -73,19 +72,9 @@ class DisposalDetailsControllerSpec
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
-    with StartingToAmendToFillingOutReturnSpecBehaviour
-    with Retries {
+    with StartingToAmendToFillingOutReturnSpecBehaviour {
 
   import DisposalDetailsControllerSpec._
-
-  override def withFixture(test: NoArgTest): Outcome =
-    if (isRetryable(test)) {
-      this.withRetry {
-        super.withFixture(test)
-      }
-    } else {
-      super.withFixture(test)
-    }
 
   val mockUUIDGenerator: UUIDGenerator = mock[UUIDGenerator]
 
