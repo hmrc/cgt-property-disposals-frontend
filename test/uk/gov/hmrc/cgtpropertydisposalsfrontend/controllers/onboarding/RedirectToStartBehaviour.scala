@@ -22,10 +22,14 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.mvc.Result
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.arb
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.journeyStatusGen
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 
+import java.util.UUID
 import scala.concurrent.Future
 
 trait RedirectToStartBehaviour {
@@ -48,15 +52,24 @@ trait RedirectToStartBehaviour {
           controllers.routes.StartController.start()
         )
       }
-      "the journey status in session is not valid" taggedAs Retryable in {
+      "the journey status in session is not valid" in {
         implicit val journeyStatusArb: Arbitrary[JourneyStatus] =
           arb(journeyStatusGen)
 
         forAll { j: JourneyStatus =>
-          whenever(!isValidJourneyStatus(j)) {
+          val fixture = j match {
+            case f: FillingOutReturn =>
+              f.copy(
+                draftReturn = DraftSingleDisposalReturn
+                  .newDraftReturn(UUID.randomUUID(), IncompleteSingleDisposalTriageAnswers.empty, None)
+              )
+            case x: JourneyStatus    => x
+          }
+
+          whenever(!isValidJourneyStatus(fixture)) {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(SessionData.empty.copy(journeyStatus = Some(j)))
+              mockGetSession(SessionData.empty.copy(journeyStatus = Some(fixture)))
             }
 
             checkIsRedirect(

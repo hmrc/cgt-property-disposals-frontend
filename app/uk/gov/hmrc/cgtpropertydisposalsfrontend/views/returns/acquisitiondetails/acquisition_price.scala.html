@@ -92,7 +92,7 @@
       (messages("acquisitionPrice.2.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages("acquisitionPrice.2.helpText")))
     case (true, Bought, Some(Capacitor | PersonalRepresentative)) =>
       (messages("acquisitionPrice.4.title"), Html(messages("acquisitionPrice.4.helpText")))
-    case (true, Gifted, Some(Capacitor | PersonalRepresentative)) =>
+    case (true, _, Some(Capacitor | PersonalRepresentative)) =>
       (messages("acquisitionPrice.5.title"), Html(messages("acquisitionPrice.5.helpText")))
     case (true, _, Some(PersonalRepresentativeInPeriodOfAdmin)) =>
       (messages("acquisitionPrice.6.title"), Html(messages("acquisitionPrice.6.helpText")))
