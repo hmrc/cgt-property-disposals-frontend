@@ -1544,6 +1544,9 @@ class SingleDisposalsTriageController @Inject() (
               displayReturnToSummaryLink,
               representeeAnswers
             )
+          case _ =>
+            logger.error("Unexpected state for SingleDisposalsTriageAnswers")
+            errorHandler.errorResult()
         }
       }
     }
