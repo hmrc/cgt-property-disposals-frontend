@@ -1529,6 +1529,9 @@ class MultipleDisposalsTriageController @Inject() (
                 representeeAnswers
               )
             )
+          case _                                         =>
+            logger.error("Unexpected state for MultipleDisposalsTriageAnswers")
+            errorHandler.errorResult()
         }
       }
     }
