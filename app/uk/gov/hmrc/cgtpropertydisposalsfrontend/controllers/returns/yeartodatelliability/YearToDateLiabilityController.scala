@@ -289,7 +289,6 @@ class YearToDateLiabilityController @Inject() (
 
           case None => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
-
     }
 
   private def withCompleteJourneys(draftReturn: DraftSingleDisposalReturn)(
@@ -903,7 +902,6 @@ class YearToDateLiabilityController @Inject() (
 
             case _ =>
               Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
           }
         }
       }
@@ -1153,7 +1151,6 @@ class YearToDateLiabilityController @Inject() (
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
         }
       }
     }
@@ -1257,7 +1254,6 @@ class YearToDateLiabilityController @Inject() (
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
         }
       }
     }
@@ -1441,7 +1437,6 @@ class YearToDateLiabilityController @Inject() (
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
         }
       }
     }
@@ -1918,7 +1913,6 @@ class YearToDateLiabilityController @Inject() (
           _ => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         )
       }
-
     }
 
   def mandatoryEvidenceExpired(): Action[AnyContent] =
@@ -2314,7 +2308,6 @@ class YearToDateLiabilityController @Inject() (
                             yearToDateLiability = Some(yearToDateLiability),
                             yearToDateLiabilityCalculation = calculation
                           )
-
                       updateDraftReturn(newAnswers, draftReturn)
                     }
                   }
@@ -2353,10 +2346,8 @@ class YearToDateLiabilityController @Inject() (
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
         }
       }
-
     }
 
   def repaymentSubmit(): Action[AnyContent] =
@@ -2456,7 +2447,6 @@ class YearToDateLiabilityController @Inject() (
             _.copy(pendingUpscanUpload = Some(upscanUpload)),
             _.copy(pendingUpscanUpload = Some(upscanUpload))
           )
-
       }
 
     val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
@@ -2516,10 +2506,8 @@ class YearToDateLiabilityController @Inject() (
               ) =>
             logger.warn("Found calculated year to date liability answers on a multiple indirect disposals draft return")
             errorHandler.errorResult()
-
         }
       }
-
     }
 
   private def checkYourAnswersHandleNonCalculated(
@@ -2646,7 +2634,7 @@ class YearToDateLiabilityController @Inject() (
           result.fold(
             { e =>
               logger
-                .warn("Cold not store complete year to date liability answers", e)
+                .warn("Could not store complete year to date liability answers", e)
               errorHandler.errorResult()
             },
             _ =>
@@ -2691,7 +2679,6 @@ class YearToDateLiabilityController @Inject() (
               wasUkResident
             )
           )
-
       }
     }
 
@@ -2719,7 +2706,6 @@ class YearToDateLiabilityController @Inject() (
 
       case _ =>
         true
-
     }
 
   private def isATrust(fillingOutReturn: FillingOutReturn): Boolean =
@@ -2857,6 +2843,9 @@ class YearToDateLiabilityController @Inject() (
           taxYear,
           wasUkResident
         )
+      case _ =>
+        logger.error("Unexpected state for CalculatedYTDAnswers")
+        errorHandler.errorResult()
     }
 
   private def fromIncompleteToCompleteCalculatedYTDAnswers(
@@ -2940,11 +2929,9 @@ class YearToDateLiabilityController @Inject() (
       f
     )
   }
-
 }
 
 object YearToDateLiabilityController {
-
   private val estimatedIncomeForm =
     Form(
       mapping(
@@ -3107,5 +3094,4 @@ object YearToDateLiabilityController {
         "repayment" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
-
 }
