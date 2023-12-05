@@ -75,8 +75,8 @@ class AuthenticatedActionWithRetrievedData @Inject() (
 
             case Some(ag) if ag == AffinityGroup.Individual || ag == AffinityGroup.Organisation =>
               val affinityGroup = ag match {
-                case AffinityGroup.Individual   => Right(AffinityGroup.Individual)
-                case AffinityGroup.Organisation => Left(AffinityGroup.Organisation)
+                case AffinityGroup.Individual => Right(AffinityGroup.Individual)
+                case _                        => Left(AffinityGroup.Organisation)
               }
               handleIndividualOrOrganisation(
                 affinityGroup,
@@ -131,7 +131,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
               )
             )
 
-          case (Right(AffinityGroup.Individual), cl, Some(nino)) =>
+          case (Right(AffinityGroup.Individual), _, Some(nino)) =>
             Right(
               AuthenticatedRequestWithRetrievedData(
                 RetrievedUserType.Individual(
@@ -144,9 +144,8 @@ class AuthenticatedActionWithRetrievedData @Inject() (
               )
             )
 
-          case (Left(AffinityGroup.Organisation), _, _) =>
+          case _ =>
             handleOrganisation(request, enrolments, maybeEmail, ggCredId)
-
         }
     }
 
@@ -269,5 +268,4 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     }
     id.map(id => AuthenticatedRequestWithRetrievedData(id, Some(Organisation), request))
   }
-
 }
