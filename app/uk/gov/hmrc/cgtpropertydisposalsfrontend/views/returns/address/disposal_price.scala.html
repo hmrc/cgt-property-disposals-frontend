@@ -62,8 +62,15 @@
   }
 }
 
-@title = @{messages(s"$key$userKey.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@title = @{
+    messages(s"$key$userKey.title")
+}
+@hasErrors = @{
+    form.hasErrors || form.hasGlobalErrors
+}
+@label = @{
+    messages(s"$key$userKey.label")
+}
 
 @layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
@@ -73,40 +80,40 @@
 
     @caption(addressCaption)
 
-    @formWrapper(address.routes.PropertyDetailsController.disposalPriceSubmit()) {
-      @govukInput(Input(
-        id = key,
-        name = key,
-        value = form.data.get(key),
-        label = Label(
-          content = Text(title),
-          isPageHeading = true,
-          classes = "govuk-label--xl"
-        ),
-        classes = "govuk-input--width-10",
-        hint = Some(Hint(
-          content = HtmlContent(messages(s"$key$userKey.helpText"))
-        )),
-        prefix = Some(PrefixOrSuffix(
-          content = Text("£")
-        )),
-        errorMessage = form.error(key).map(e => ErrorMessage(
-          content = Text(messages(s"$key$userKey.${e.message}")),
-          visuallyHiddenText = Some(messages("generic.error"))
-        )),
-        autocomplete = Some(AutoCompleteType.On.value)
-      ))
+    <h1 class="govuk-heading-xl">@title</h1>
 
-       @details(
+    <p class="govuk-body" id="multipleDisposalsDisposalPrice-hint">@messages(s"$key$userKey.helpText")</p>
+
+    @details(
         messages(s"$key.link"),
         Html(
-          s"""
+            s"""
           | <p class="govuk-body">${messages(s"$key.details.p1")}</p>
           |""".stripMargin
         )
-      )
+    )
 
-      @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+    @formWrapper(address.routes.PropertyDetailsController.disposalPriceSubmit()) {
+        @govukInput(Input(
+            label = Label(
+                content = Text(label),
+                classes = "govuk-label--m"
+            ),
+            id = key,
+            name = key,
+            value = form.data.get(key),
+            classes = "govuk-input--width-10",
+            prefix = Some(PrefixOrSuffix(
+                content = Text("£")
+            )),
+            errorMessage = form.error(key).map(e => ErrorMessage(
+                content = Text(messages(s"$key$userKey.${e.message}")),
+                visuallyHiddenText = Some(messages("generic.error"))
+            )),
+            autocomplete = Some(AutoCompleteType.On.value)
+        ))
+
+        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

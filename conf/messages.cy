@@ -4499,13 +4499,13 @@ viewReturn.changeReturn=Newid y Ffurflen Dreth
 # MULTIPLE DISPOSALS EXAMPLE PROPERTY PAGES - START
 #===================================================
 
-multipleDisposalsDisposalPrice.title=Beth oedd gwerth gwaredu’r eiddo?
-multipleDisposalsDisposalPrice.personalRep.title=Beth oedd gwerth gwaredu’r eiddo?
-multipleDisposalsDisposalPrice.capacitor.title=Beth oedd gwerth gwaredu’r eiddo?
-multipleDisposalsDisposalPrice.agent.title=Beth oedd gwerth gwaredu’r eiddo?
-multipleDisposalsDisposalPrice.trust.title=Beth oedd gwerth gwaredu’r eiddo?
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.title=Beth oedd elw’r gwarediad?
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.title=Beth oedd elw’r gwarediad?
+multipleDisposalsDisposalPrice.title=Gwerth gwaredu’r eiddo
+multipleDisposalsDisposalPrice.personalRep.title=Gwerth gwaredu’r eiddo
+multipleDisposalsDisposalPrice.capacitor.title=Gwerth gwaredu’r eiddo
+multipleDisposalsDisposalPrice.agent.title=Gwerth gwaredu’r eiddo
+multipleDisposalsDisposalPrice.trust.title=Gwerth gwaredu’r eiddo
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.title=Gwerth gwaredu’r eiddo
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.title=Gwerth gwaredu’r eiddo
 
 multipleDisposalsDisposalPrice.helpText=Dyma’r swm a gawsoch pan werthwyd yr eiddo neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech dynnu unrhyw gostau gwerthu neu waredu.
 multipleDisposalsDisposalPrice.agent.helpText=Dyma’r swm a gafodd eich cleient pan werthwyd yr eiddo neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech dynnu unrhyw gostau gwerthu neu waredu.
@@ -4517,6 +4517,14 @@ multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=Dyma’
 
 multipleDisposalsDisposalPrice.link=Beth yw costau waredu?
 multipleDisposalsDisposalPrice.details.p1=Mae costau gwaredu neu werthu yn cynnwys ffioedd gwerthwyr tai neu ffioedd cyfreithwyr.
+
+multipleDisposalsDisposalPrice.label=Beth oedd gwerth gwaredu’r eiddo?
+multipleDisposalsDisposalPrice.personalRep.label=Beth oedd gwerth gwaredu’r eiddo?
+multipleDisposalsDisposalPrice.capacitor.label=Beth oedd gwerth gwaredu’r eiddo?
+multipleDisposalsDisposalPrice.agent.label=Beth oedd gwerth gwaredu’r eiddo?
+multipleDisposalsDisposalPrice.trust.label=Beth oedd gwerth gwaredu’r eiddo?
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.label=Beth oedd elw’r gwarediad?
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.label=Beth oedd elw’r gwarediad?
 
 multipleDisposalsDisposalPrice.error.required=Nodwch werth gwaredu’r eiddo, er enghraifft, 20,520.86
 multipleDisposalsDisposalPrice.capacitor.error.required=Nodwch werth gwaredu’r eiddo, er enghraifft, 20,520.86
