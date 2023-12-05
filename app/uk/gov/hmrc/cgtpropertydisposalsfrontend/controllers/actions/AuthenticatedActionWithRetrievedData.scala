@@ -90,7 +90,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
               )
 
             case other =>
-              logger.warn(s"User has usupported affinity group type $other")
+              logger.warn(s"User has unsupported affinity group type $other")
               Future.successful(Left(errorHandler.errorResult(None)(request)))
           }
         }
