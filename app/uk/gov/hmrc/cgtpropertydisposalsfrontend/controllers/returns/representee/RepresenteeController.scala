@@ -311,7 +311,6 @@ class RepresenteeController @Inject() (
                 )
 
             case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
-
           }
         }
       }
@@ -338,7 +337,6 @@ class RepresenteeController @Inject() (
             journey.fold(_ => false, _.isAmendReturn)
           )
         )
-
       }
     }
 
@@ -384,7 +382,6 @@ class RepresenteeController @Inject() (
                 )
               }
           )
-
       }
     }
 
@@ -484,10 +481,8 @@ class RepresenteeController @Inject() (
                 )
             }
           }
-
         }
       }
-
     }
 
   def tooManyNameMatchAttempts(): Action[AnyContent] =
@@ -681,7 +676,6 @@ class RepresenteeController @Inject() (
                 )
               }
           )
-
       }
     }
 
@@ -818,7 +812,6 @@ class RepresenteeController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
         answers match {
-
           case IncompleteRepresenteeAnswers(_, _, _, _, _, _, None) =>
             Redirect(routes.RepresenteeController.isFirstReturn())
 
@@ -899,9 +892,10 @@ class RepresenteeController @Inject() (
                   .whoIsIndividualRepresenting()
               )
             )
-
+          case _                                           =>
+            logger.error("Unexpected state for RepresenteeAnswers")
+            errorHandler.errorResult()
         }
-
       }
     }
 
@@ -947,7 +941,6 @@ object RepresenteeController {
     final case class ValidationError(
       formWithErrors: Form[RepresenteeReferenceId]
     ) extends NameMatchError
-
   }
 
   private val nameForm =
@@ -1064,5 +1057,4 @@ object RepresenteeController {
       "representeeIsFirstReturn" -> of(BooleanFormatter.formatter)
     )(identity)(Some(_))
   )
-
 }
