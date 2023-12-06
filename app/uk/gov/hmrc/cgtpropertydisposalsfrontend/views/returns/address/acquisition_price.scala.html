@@ -42,7 +42,8 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     dateOfDeath: Option[DateOfDeath],
-    isAmend: Boolean
+    isAmend: Boolean,
+    addressCaption: String
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @key = @{ "multipleDisposalsAcquisitionPrice" }
@@ -82,7 +83,7 @@
         @errorSummary(form, customErrorKey = customErrorKey)
     }
 
-    @caption(messages("returns.property-details.multipleDisposals.caption"))
+    @caption(addressCaption)
 
     @formWrapper(address.routes.PropertyDetailsController.acquisitionPriceSubmit()) {
       @govukInput(Input(

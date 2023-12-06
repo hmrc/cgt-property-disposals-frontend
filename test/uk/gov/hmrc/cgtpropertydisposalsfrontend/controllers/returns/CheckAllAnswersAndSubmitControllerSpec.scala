@@ -43,8 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.Multi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec.{validateCalculatedYearToDateLiabilityPage, validateNonCalculatedYearToDateLiabilityPage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubmittingReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, SubmitReturnFailed, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, SubmitReturnFailed, SubmittingReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils, PaymentsJourney}
@@ -127,38 +126,38 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   private lazy val controller = instanceOf[CheckAllAnswersAndSubmitController]
 
-  implicit val messagesApi: MessagesApi = controller.messagesApi
+  private implicit val messagesApi: MessagesApi = controller.messagesApi
 
   private implicit val messages: MessagesImpl = MessagesImpl(lang, messagesApi)
 
-  val rebasingEligibilityUtil = new RebasingEligibilityUtil()
+  private val rebasingEligibilityUtil = new RebasingEligibilityUtil()
 
-  def setNameForUserType(
+  private def setNameForUserType(
     userType: UserType
-  ): Either[TrustName, IndividualName] =
+  ) =
     userType match {
       case UserType.Organisation => Left(sample[TrustName])
       case _                     => Right(sample[IndividualName])
     }
 
-  def setAgentReferenceNumber(
+  private def setAgentReferenceNumber(
     userType: UserType
-  ): Option[AgentReferenceNumber] =
+  ) =
     userType match {
       case UserType.Agent => Some(sample[AgentReferenceNumber])
       case _              => None
     }
 
-  def sessionWithJourney(
+  private def sessionWithJourney(
     journeyStatus: JourneyStatus,
     userType: UserType
-  ): SessionData =
+  ) =
     SessionData.empty.copy(
       journeyStatus = Some(journeyStatus),
       userType = Some(userType)
     )
 
-  def sessionWithJourney(journeyStatus: JourneyStatus): SessionData =
+  private def sessionWithJourney(journeyStatus: JourneyStatus) =
     SessionData.empty.copy(journeyStatus = Some(journeyStatus))
 
   private def mockSubmitReturn(
@@ -210,7 +209,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       .expects(completeRepresenteeAnswers, lang, *)
       .returning(EitherT.fromEither(response))
 
-  def userMessageKey(
+  private def userMessageKey(
     individualUserType: Option[IndividualUserType],
     userType: UserType
   ): String =
@@ -226,14 +225,11 @@ class CheckAllAnswersAndSubmitControllerSpec
     }
 
   "CheckAllAnswersAndSubmitController" when {
-
     "handling requests to display the check all answers page" when {
-
       def performAction(): Future[Result] =
         controller.checkAllAnswers()(FakeRequest())
 
       "the user is on a single disposal journey" must {
-
         val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true)
 
         val completeReturn = {
@@ -281,7 +277,6 @@ class CheckAllAnswersAndSubmitControllerSpec
         behave like incompleteSingleDisposalJourneyBehaviour(() => performAction(), completeDraftReturn)
 
         "display the page" when {
-
           def test(
             sessionData: SessionData,
             fillingOutReturn: FillingOutReturn,
@@ -528,13 +523,10 @@ class CheckAllAnswersAndSubmitControllerSpec
               furtherReturnCalculationEligibility = None
             )
           }
-
         }
 
         "redirect to the task list page" when {
-
           "the user has chosen a user type of capacitor or personal rep and" when {
-
             "there are no representee answers" in {
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -572,15 +564,11 @@ class CheckAllAnswersAndSubmitControllerSpec
 
               checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
-
           }
-
         }
-
       }
 
       "the user is on a multiple disposals journey" must {
-
         val completeReturn = {
           val complete = sample[CompleteMultipleDisposalsReturn]
             .copy(
@@ -625,7 +613,6 @@ class CheckAllAnswersAndSubmitControllerSpec
         behave like incompleteMultipleDisposalsJourneyBehaviour(() => performAction(), completeDraftReturn)
 
         "display the page" when {
-
           def test(
             sessionData: SessionData,
             expectedTitleKey: String,
@@ -703,13 +690,10 @@ class CheckAllAnswersAndSubmitControllerSpec
               showAnnualExemptAmount = true
             )
           }
-
         }
 
         "redirect to the task list page" when {
-
           "the user has chosen a user type of capacitor or personal rep and" when {
-
             "there are no representee answers" in {
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -747,15 +731,11 @@ class CheckAllAnswersAndSubmitControllerSpec
 
               checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
-
           }
-
         }
-
       }
 
       "the user is on a single indirect disposal journey" must {
-
         val completeReturn = {
           val complete = sample[CompleteSingleIndirectDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
@@ -799,7 +779,6 @@ class CheckAllAnswersAndSubmitControllerSpec
         behave like incompleteSingleIndirectDisposalJourneyBehaviour(() => performAction(), completeDraftReturn)
 
         "display the page" when {
-
           def test(
             sessionData: SessionData,
             expectedTitleKey: String,
@@ -884,13 +863,10 @@ class CheckAllAnswersAndSubmitControllerSpec
               showAnnualExemptAmount = true
             )
           }
-
         }
 
         "redirect to the task list page" when {
-
           "the user has chosen a user type of capacitor or personal rep and" when {
-
             "there are no representee answers" in {
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -928,15 +904,11 @@ class CheckAllAnswersAndSubmitControllerSpec
 
               checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
-
           }
-
         }
-
       }
 
       "the user is on a multiple indirect disposals journey" must {
-
         val completeReturn = {
           val complete = sample[CompleteMultipleIndirectDisposalReturn]
             .copy(
@@ -978,7 +950,6 @@ class CheckAllAnswersAndSubmitControllerSpec
         behave like incompleteMultipleIndirectDisposalsJourneyBehaviour(() => performAction(), completeDraftReturn)
 
         "display the page" when {
-
           def test(
             sessionData: SessionData,
             expectedTitleKey: String,
@@ -1059,9 +1030,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         }
 
         "redirect to the task list page" when {
-
           "the user has chosen a user type of capacitor or personal rep and" when {
-
             "there are no representee answers" in {
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1099,15 +1068,11 @@ class CheckAllAnswersAndSubmitControllerSpec
 
               checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
-
           }
-
         }
-
       }
 
       "the user is on a single mixed use disposals journey" must {
-
         val completeReturn = {
           val complete = sample[CompleteSingleMixedUseDisposalReturn]
             .copy(
@@ -1149,7 +1114,6 @@ class CheckAllAnswersAndSubmitControllerSpec
         behave like incompleteSingleMixedUseDisposalsJourneyBehaviour(() => performAction(), completeDraftReturn)
 
         "display the page" when {
-
           def test(
             sessionData: SessionData,
             expectedTitleKey: String,
@@ -1230,9 +1194,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         }
 
         "redirect to the task list page" when {
-
           "the user has chosen a user type of capacitor or personal rep and" when {
-
             "there are no representee answers" in {
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1270,17 +1232,12 @@ class CheckAllAnswersAndSubmitControllerSpec
 
               checkIsRedirect(performAction(), routes.TaskListController.taskList())
             }
-
           }
-
         }
-
       }
-
     }
 
     "handling submits on the check all answers page" must {
-
       def performAction(): Future[Result] =
         controller.checkAllAnswersSubmit()(FakeRequest())
 
@@ -1435,13 +1392,12 @@ class CheckAllAnswersAndSubmitControllerSpec
       behave like incompleteSingleDisposalJourneyBehaviour(() => performAction(), completeDraftReturnNoRepresentee)
 
       "show an error page" when {
-
         "there is an error updating the session after a successful submission" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
             mockStoreSession(sessionWithJourney(submittingReturn))(
-              Right()
+              Right(())
             )
             mockSubmitReturn(submitReturnRequest, lang)(Right(submitReturnResponse))
             mockStoreSession(sessionWithJourney(justSubmittedReturn))(
@@ -1457,7 +1413,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
             mockStoreSession(sessionWithJourney(submittingReturn))(
-              Right()
+              Right(())
             )
             mockSubmitReturn(submitReturnRequest, lang)(Left(Error("")))
             mockStoreSession(
@@ -1473,17 +1429,15 @@ class CheckAllAnswersAndSubmitControllerSpec
 
           checkIsTechnicalErrorPage(performAction())
         }
-
       }
 
       "redirect to the submission confirmation page" when {
-
         "the return has been submitted and the session has been updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
             mockStoreSession(sessionWithJourney(submittingReturn))(
-              Right()
+              Right(())
             )
             mockSubmitReturn(submitReturnRequest, lang)(Right(submitReturnResponse))
             mockStoreSession(sessionWithJourney(justSubmittedReturn))(Right(()))
@@ -1512,7 +1466,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockGetSession(sessionWithJourney(completeFillingOutReturnWithRepresenteeWithNoReference))
             mockCgtRegistrationService(Right(mockRepresenteeCgtReference), representeeAnswersNoReferenceId, lang)
             mockStoreSession(sessionWithJourney(submittingReturn))(
-              Right()
+              Right(())
             )
             mockSubmitReturn(
               submitReturnRequestForOverriddenReferenceId(mockRepresenteeCgtReference, hideEstimatesQuestion = false),
@@ -1550,13 +1504,12 @@ class CheckAllAnswersAndSubmitControllerSpec
       }
 
       "redirect to the submission error page" when {
-
         "there is an error submitting the return" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnNoRepresentee))
             mockStoreSession(sessionWithJourney(submittingReturn))(
-              Right()
+              Right(())
             )
             mockSubmitReturn(submitReturnRequest, lang)(Left(Error("")))
             mockStoreSession(
@@ -1573,11 +1526,9 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkIsRedirect(performAction(), routes.CheckAllAnswersAndSubmitController.submissionError())
         }
       }
-
     }
 
     "handling requests to display the return submit failed page" must {
-
       def performAction(): Future[Result] =
         controller.submissionError()(FakeRequest())
 
@@ -1590,7 +1541,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
       "display the page" when {
-
         def test(journey: JourneyStatus): Unit =
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1647,13 +1597,10 @@ class CheckAllAnswersAndSubmitControllerSpec
         "the user is in the subscribed state" in {
           test(sample[Subscribed])
         }
-
       }
-
     }
 
     "handling submits on the return submit failed page" must {
-
       def performAction(): Future[Result] =
         controller.submissionErrorSubmit()(FakeRequest())
 
@@ -1666,7 +1613,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
       "redirect to the home page" when {
-
         def test(journey: JourneyStatus): Unit =
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1686,13 +1632,10 @@ class CheckAllAnswersAndSubmitControllerSpec
         "the user is in the subscribed state" in {
           test(sample[Subscribed])
         }
-
       }
-
     }
 
     "handling requests to display the confirmation of submission page" must {
-
       def performAction(): Future[Result] =
         controller.confirmationOfSubmission()(FakeRequest())
 
@@ -1760,7 +1703,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
       "confirmation of submission is correct" in {
-
         sealed case class TestScenario(
           description: String,
           userType: UserType,
@@ -2046,7 +1988,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       }
 
       "confirmation of submission is correct for multiple indirect disposal" in {
-
         sealed case class TestScenario(
           description: String,
           userType: UserType,
@@ -2344,7 +2285,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
       }
 
-      "display the 30 days  late filing penalty warning for a trust if the completion date is before 27-OCT-2021" in {
+      "display the 30 days late filing penalty warning for a trust if the completion date is before 27-OCT-2021" in {
         val completionDate      = CompletionDate(LocalDate.of(2021, 9, 10))
         val justSubmittedReturn = sample[JustSubmittedReturn].copy(
           subscribedDetails = sample[SubscribedDetails].copy(
@@ -2522,7 +2463,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       }
 
       "not display the late filing penalty warning" when {
-
         "if the completion date is not more than 30 days before today" in {
           val completionDate      = CompletionDate(LocalDate.now().minusDays(30L))
           val justSubmittedReturn = sample[JustSubmittedReturn].copy(
@@ -2600,7 +2540,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       }
 
       "display the delta charge table instead of summary due date" when {
-
         "an amended return has a delta charge" in {
           val completionDate      = CompletionDate(LocalDate.now().minusDays(30L))
           val justSubmittedReturn = sample[JustSubmittedReturn].copy(
@@ -2644,13 +2583,10 @@ class CheckAllAnswersAndSubmitControllerSpec
             }
           )
         }
-
       }
-
     }
 
     "handling requests to pay a return" must {
-
       def performAction(): Future[Result] =
         controller.payReturn()(FakeRequest())
 
@@ -2673,7 +2609,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
       "redirect to the homepage" when {
-
         "there is no charge" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2684,11 +2619,9 @@ class CheckAllAnswersAndSubmitControllerSpec
 
           checkIsRedirect(performAction(), homepage.routes.HomePageController.homepage())
         }
-
       }
 
       "show an error page" when {
-
         "there is an error starting a payments journey" in {
           val charge              = sample[ReturnCharge]
           val justSubmittedReturn = justSubmittedReturnWithCharge(Some(charge))
@@ -2708,13 +2641,10 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             checkIsTechnicalErrorPage(performAction())
           }
-
         }
-
       }
 
       "redirect to the payment journey next url" when {
-
         "the payments journey has been successfully started" in {
           val paymentJourney      = PaymentsJourney("/next", "id")
           val charge              = sample[ReturnCharge]
@@ -2735,13 +2665,9 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             checkIsRedirect(performAction(), paymentJourney.nextUrl)
           }
-
         }
-
       }
-
     }
-
   }
 
   private def incompleteSingleDisposalJourneyBehaviour(
@@ -2765,7 +2691,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
     "redirect to the task list" when {
-
       "the return is not complete" in {
         makeIncompleteFunctions.foreach { makeIncomplete =>
           inSequence {
@@ -2782,14 +2707,11 @@ class CheckAllAnswersAndSubmitControllerSpec
 
           checkIsRedirect(performAction(), routes.TaskListController.taskList())
         }
-
       }
-
     }
-
   }
 
-  def incompleteMultipleDisposalsJourneyBehaviour(
+  private def incompleteMultipleDisposalsJourneyBehaviour(
     performAction: () => Future[Result],
     completeDraftReturn: DraftMultipleDisposalsReturn
   ): Unit = {
@@ -2805,7 +2727,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
     "redirect to the task list" when {
-
       "the return is not complete" in {
         makeIncompleteFunctions.foreach { makeIncomplete =>
           inSequence {
@@ -2822,11 +2743,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
           checkIsRedirect(performAction(), routes.TaskListController.taskList())
         }
-
       }
-
     }
-
   }
 
   private def incompleteSingleIndirectDisposalJourneyBehaviour(
@@ -2848,7 +2766,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
     "redirect to the task list" when {
-
       "the return is not complete" in {
         makeIncompleteFunctions.foreach { makeIncomplete =>
           inSequence {
@@ -2865,7 +2782,6 @@ class CheckAllAnswersAndSubmitControllerSpec
 
           checkIsRedirect(performAction(), routes.TaskListController.taskList())
         }
-
       }
 
       "the return contains calculated answers" in {
@@ -2885,12 +2801,10 @@ class CheckAllAnswersAndSubmitControllerSpec
         checkIsRedirect(performAction(), routes.TaskListController.taskList())
 
       }
-
     }
-
   }
 
-  def incompleteMultipleIndirectDisposalsJourneyBehaviour(
+  private def incompleteMultipleIndirectDisposalsJourneyBehaviour(
     performAction: () => Future[Result],
     completeDraftReturn: DraftMultipleIndirectDisposalsReturn
   ): Unit = {
@@ -2906,7 +2820,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
     "redirect to the task list" when {
-
       "the return is not complete" in {
         makeIncompleteFunctions.foreach { makeIncomplete =>
           inSequence {
@@ -2923,14 +2836,11 @@ class CheckAllAnswersAndSubmitControllerSpec
 
           checkIsRedirect(performAction(), routes.TaskListController.taskList())
         }
-
       }
-
     }
-
   }
 
-  def incompleteSingleMixedUseDisposalsJourneyBehaviour(
+  private def incompleteSingleMixedUseDisposalsJourneyBehaviour(
     performAction: () => Future[Result],
     completeDraftReturn: DraftSingleMixedUseDisposalReturn
   ): Unit = {
@@ -2946,7 +2856,6 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
     "redirect to the task list" when {
-
       "the return is not complete" in {
         makeIncompleteFunctions.foreach { makeIncomplete =>
           inSequence {
@@ -2963,17 +2872,12 @@ class CheckAllAnswersAndSubmitControllerSpec
 
           checkIsRedirect(performAction(), routes.TaskListController.taskList())
         }
-
       }
-
     }
-
   }
-
 }
 
 object CheckAllAnswersAndSubmitControllerSpec {
-
   def validateSingleDisposalCheckAllYourAnswersSections(
     doc: Document,
     completeReturn: CompleteSingleDisposalReturn,
@@ -3031,7 +2935,6 @@ object CheckAllAnswersAndSubmitControllerSpec {
           MoneyUtils.formatAmountOfMoneyWithPoundSign(initialGainOrLoss.inPounds().abs)
         )
       }
-
     }
 
     completeReturn.triageAnswers.individualUserType.foreach { individualUserType =>
@@ -3099,10 +3002,9 @@ object CheckAllAnswersAndSubmitControllerSpec {
         hideEstimatesQuestion
       )
     }
-
   }
 
-  def validateSingleIndirectDisposalCheckAllYourAnswersSections(
+  private def validateSingleIndirectDisposalCheckAllYourAnswersSections(
     doc: Document,
     completeReturn: CompleteSingleIndirectDisposalReturn,
     userType: Option[UserType],
@@ -3196,10 +3098,9 @@ object CheckAllAnswersAndSubmitControllerSpec {
         hideEstimatesQuestion
       )
     }
-
   }
 
-  def validateSingleMixedUseDisposalsCheckAllYourAnswersSections(
+  private def validateSingleMixedUseDisposalsCheckAllYourAnswersSections(
     doc: Document,
     completeReturn: CompleteSingleMixedUseDisposalReturn,
     userType: Option[UserType],
@@ -3236,7 +3137,5 @@ object CheckAllAnswersAndSubmitControllerSpec {
       isFurtherOrAmendReturn,
       hideEstimatesQuestion
     )
-
   }
-
 }
