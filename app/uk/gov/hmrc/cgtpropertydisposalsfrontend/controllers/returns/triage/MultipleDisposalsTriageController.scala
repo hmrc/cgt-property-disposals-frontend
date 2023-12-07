@@ -1514,7 +1514,7 @@ class MultipleDisposalsTriageController @Inject() (
                     _._1.subscribedDetails.isATrust
                   ),
                   representeeAnswers,
-                  hasCreatedReturn = true
+                  hasCreatedReturn = false
                 )
               )
             )
@@ -1529,7 +1529,7 @@ class MultipleDisposalsTriageController @Inject() (
                   _._1.subscribedDetails.isATrust
                 ),
                 representeeAnswers,
-                hasCreatedReturn = true
+                hasCreatedReturn = false
               )
             )
           case _                                         =>
