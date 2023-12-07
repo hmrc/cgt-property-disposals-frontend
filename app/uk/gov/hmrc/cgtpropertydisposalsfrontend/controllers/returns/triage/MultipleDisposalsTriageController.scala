@@ -1472,7 +1472,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(d)
               ) =>
             val completeAnswers =
-              CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, Some(taxYearExchanged), t, sa, d)
+              CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, Some(taxYearExchanged), t, sa, d, true)
             updateStateAndThen(
               updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = true),
               Ok(
@@ -1483,7 +1483,8 @@ class MultipleDisposalsTriageController @Inject() (
                     _.subscribedDetails.isATrust,
                     _._1.subscribedDetails.isATrust
                   ),
-                  representeeAnswers
+                  representeeAnswers,
+                  hasCreatedReturn = true
                 )
               )
             )
@@ -1501,7 +1502,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(d)
               ) =>
             val completeAnswers =
-              CompleteMultipleDisposalsTriageAnswers(i, n, c, a, Some(taxYearExchanged), t, sa, d)
+              CompleteMultipleDisposalsTriageAnswers(i, n, c, a, Some(taxYearExchanged), t, sa, d, true)
             updateStateAndThen(
               updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = false),
               Ok(
@@ -1512,7 +1513,8 @@ class MultipleDisposalsTriageController @Inject() (
                     _.subscribedDetails.isATrust,
                     _._1.subscribedDetails.isATrust
                   ),
-                  representeeAnswers
+                  representeeAnswers,
+                  hasCreatedReturn = true
                 )
               )
             )
@@ -1526,7 +1528,8 @@ class MultipleDisposalsTriageController @Inject() (
                   _.subscribedDetails.isATrust,
                   _._1.subscribedDetails.isATrust
                 ),
-                representeeAnswers
+                representeeAnswers,
+                hasCreatedReturn = true
               )
             )
           case _                                         =>

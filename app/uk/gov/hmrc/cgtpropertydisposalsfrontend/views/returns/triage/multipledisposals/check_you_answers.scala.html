@@ -34,7 +34,8 @@
    answers: CompleteMultipleDisposalsTriageAnswers,
    hasCreatedDraftReturn: Boolean,
    isATrust: Boolean,
-   representeeAnswers: Option[RepresenteeAnswers]
+   representeeAnswers: Option[RepresenteeAnswers],
+   hasCreatedReturn: Boolean
 )(implicit request:RequestWithSessionData[_], messages:Messages)
 
 @title = @{messages("multipleDisposals.triage.cya.title")}
@@ -43,7 +44,9 @@
 
  @caption(messages("triage.caption"))
   <h1 class="govuk-heading-xl">@title</h1>
-  <p class="govuk-body"><a class="govuk-link" href="@routes.MultipleDisposalsTriageController.guidance()" id="guidanceLink">@messages("multipleDisposals.triage.cya.guidanceLink")</a></p>
+    @(if (hasCreatedReturn){
+        <p class="govuk-body"><a class="govuk-link" href="@routes.MultipleDisposalsTriageController.guidance()" id="guidanceLink">@messages("multipleDisposals.triage.cya.guidanceLink")</a></p>
+    })
 
  @summary(answers, isATrust, representeeAnswers)
 
