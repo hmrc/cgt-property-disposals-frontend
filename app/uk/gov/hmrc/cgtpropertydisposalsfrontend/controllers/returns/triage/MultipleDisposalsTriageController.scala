@@ -1472,7 +1472,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(d)
               ) =>
             val completeAnswers =
-              CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, Some(taxYearExchanged), t, sa, d, Some(true))
+              CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, Some(taxYearExchanged), t, sa, d)
             updateStateAndThen(
               updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = true),
               Ok(
@@ -1502,7 +1502,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Some(d)
               ) =>
             val completeAnswers =
-              CompleteMultipleDisposalsTriageAnswers(i, n, c, a, Some(taxYearExchanged), t, sa, d, Some(true))
+              CompleteMultipleDisposalsTriageAnswers(i, n, c, a, Some(taxYearExchanged), t, sa, d)
             updateStateAndThen(
               updateState(state, completeAnswers, identity, forceDisplayGainOrLossAfterReliefsForAmends = false),
               Ok(
