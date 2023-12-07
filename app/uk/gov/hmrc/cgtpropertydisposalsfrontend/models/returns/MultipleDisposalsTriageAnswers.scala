@@ -87,7 +87,7 @@ object MultipleDisposalsTriageAnswers {
     taxYear: TaxYear,
     alreadySentSelfAssessment: Option[Boolean],
     completionDate: CompletionDate,
-    hasCreatedReturn: Boolean
+    hasCreatedReturn: Option[Boolean]
   ) extends MultipleDisposalsTriageAnswers
 
   implicit class MultipleDisposalsTriageAnswersOps(
