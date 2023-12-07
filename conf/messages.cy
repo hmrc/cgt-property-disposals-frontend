@@ -3490,6 +3490,13 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title=A wnaeth yr ystâd e
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.title=A wnaeth yr ystâd ennill neu golled gyffredinol wrth werthu neu waredu’r eiddo?
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.multiple.title=A wnaeth eich cleient ennill neu golled gyffredinol ar y gwarediadau yn y Ffurflen Dreth hon?
 
+taxableGainOrLoss.pageTitle=Ennill neu golled gyffredinol
+taxableGainOrLoss.leadLine=I gyfrifo cyfanswm yr ennill neu’r golled
+taxableGainOrLoss.item1=cyfrifwch gyfanswm yr ennill neu’r golled
+taxableGainOrLoss.item2=yna tynnwch unrhyw ryddhadau, colledion neu lwfansau eraill sy’n cael eu hawlio
+taxableGainOrLoss.findOut=Gallwch gael gwybod
+taxableGainOrLoss.findOutLink=sut i gyfrifo eich enillion (yn agor tab newydd)
+
 taxableGainOrLoss.helpText=I gyfrifo a wnaethoch ennill neu golled gyffredinol, bydd angen i chi gymryd eich ennill neu’ch colled gychwynnol a thynnu unrhyw ryddhad, colledion neu lwfansau eraill y mae gennych hawl iddynt.
 taxableGainOrLoss.agent.helpText=I gyfrifo a wnaeth eich cleient ennill neu golled gyffredinol, bydd angen i chi gymryd ennill neu golled gychwynnol eich cleient a thynnu unrhyw ryddhad, colledion neu lwfansau eraill y mae ganddo hawl iddynt.
 taxableGainOrLoss.trust.helpText=I gyfrifo a wnaeth yr ymddiriedolaeth ennill neu golled gyffredinol, bydd angen i chi gymryd ennill neu golled gychwynnol yr ymddiriedolaeth a thynnu unrhyw ryddhad, colledion neu lwfansau eraill y mae ganddi hawl iddynt.
