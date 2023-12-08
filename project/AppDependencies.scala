@@ -18,7 +18,7 @@ object AppDependencies {
   )
 
   def test(scope: String = "test"): Seq[ModuleID] = Seq(
-    "org.jsoup"                   % "jsoup"                         % "1.12.1"         % scope,
+    "org.jsoup"                   % "jsoup"                         % "1.15.4"         % scope,
     "org.scalamock"              %% "scalamock"                     % "5.2.0"          % scope,
     "org.scalatestplus"          %% "scalacheck-1-17"               % "3.2.16.0"       % scope,
     "uk.gov.hmrc.mongo"          %% s"hmrc-mongo-test-$playVersion" % "0.70.0"         % scope,
