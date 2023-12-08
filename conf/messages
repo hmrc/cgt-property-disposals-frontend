@@ -1,4 +1,3 @@
-application.title=Report and pay Capital Gains Tax on UK property
 service.name=Report and pay Capital Gains Tax on UK property
 
 #===================================================
@@ -215,7 +214,6 @@ accessibilityStatement.contact.heading=What to do if you have difficulty using t
 accessibilityStatement.contact.extra-support.part1='You can '
 accessibilityStatement.contact.extra-support.part2=contact HMRC for extra support
 accessibilityStatement.contact.extra-support.part3=' if you need help with filling in forms or getting a different format, like large print, audio recording or Braille.'
-
 
 accessibilityStatement.reportingProblems.title=Reporting accessibility problems with this service
 accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a class="govuk-link" href="{0}" target="_blank">accessibility problem (opens in a new tab)</a>.
@@ -780,7 +778,6 @@ previousReturnExistsWithSameCompletionDate.amend.p3=Tell HMRC you need to change
 previousReturnExistsWithSameCompletionDate.amend.li1=A previous return
 previousReturnExistsWithSameCompletionDate.amend.li2=the return that has the same disposal completion date as the one you entered on the previous page
 
-
 previousReturnExistsWithSameCompletionDate.title=You’ll need to change an existing return
 previousReturnExistsWithSameCompletionDate.p1=You already sent a return that had a disposal with a completion date of <strong class="bold">{0}</strong>. You’ll need to change that return instead of creating a new one.
 previousReturnExistsWithSameCompletionDate.p2=You’ll need to change the <strong class="bold">number of disposals you are including</strong> in that return
@@ -838,13 +835,6 @@ alreadySentSelfAssessment.capacitor.error.invalid=Select whether anyone has sent
 alreadySentSelfAssessment.personalRep.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
 alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.invalid=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
 
-alreadySentSelfAssessment.error.boolean=Select whether you have sent a Self Assessment tax return for 6 April {0} to 5 April {1}
-alreadySentSelfAssessment.agent.error.boolean=Select whether your client has sent a Self Assessment tax return for 6 April {0} to 5 April {1}
-alreadySentSelfAssessment.trust.error.boolean=Select whether the trust has sent a Self Assessment: Trust and Estate tax return for 6 April {0} to 5 April {1}
-alreadySentSelfAssessment.capacitor.error.boolean=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
-alreadySentSelfAssessment.personalRep.error.boolean=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
-alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.boolean=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
-
 alreadySentSelfAssessment.cyaChange=Have you sent a Self Assessment tax return
 
 selfAssessmentAlreadySubmitted.title=You cannot use this service
@@ -864,6 +854,7 @@ selfAssessmentAlreadySubmitted.trust.p2=You’ll need to <a class="govuk-link" h
 selfAssessmentAlreadySubmitted.capacitor.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">change the person’s Self Assessment tax return (opens in a new tab)</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 selfAssessmentAlreadySubmitted.personalRep.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">change the person’s Self Assessment tax return (opens in a new tab)</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
 selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=You’ll need to <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">change the person’s Self Assessment tax return (opens in a new tab)</a> by adding details of any UK property sales or disposals made during the tax year 6 April {1} to 5 April {2}.
+
 #===================================================
 #  Self-Assessment SA - END
 #===================================================
@@ -871,7 +862,6 @@ selfAssessmentAlreadySubmitted.personalRepInPeriodOfAdmin.p2=You’ll need to <a
 #===================================================
 # COMMON TRIAGE PAGES - END
 #===================================================
-
 
 #===================================================
 # SINGLE DISPOSAL TRIAGE PAGES - START
@@ -1152,7 +1142,6 @@ disposalDateTooEarly.non-uk.p3=You’ll need to complete a <a class="govuk-link"
 disposalDateTooEarly.uk.title=You cannot use this service
 disposalDateTooEarly.uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
 disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a class="govuk-link" href="{0}">UK property sales or disposals before 6 April 2020</a>.
-disposalDateTooEarly.uk.p2.link=
 
 triage.check-your-answers.title=Check your answers
 triage.cyaChange.countryOfResidence=your country of residence on the day you ‘exchanged’ contracts
@@ -1283,7 +1272,6 @@ multipleDisposalsAssetTypeForNonUkResidents.trust.title=What types of property o
 multipleDisposalsAssetTypeForNonUkResidents.capacitor.title=What types of property or assets did the person dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.personalRep.title=What types of property or assets did the person dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.personalRepInPeriodOfAdmin.title=What types of property or assets did you dispose of?
-
 
 multipleDisposalsAssetTypeForNonUkResidents.helpText=Select all that apply.
 multipleDisposalsAssetTypeForNonUkResidents.Residential=Residential
@@ -1639,7 +1627,6 @@ percentageShare.personalRep.label=Percentage the person owned
 percentageShare.personalRepInPeriodOfAdmin.label=Percentage the person owned
 percentageShare.capacitor.label=Percentage the person owned
 
-
 percentageShare.error.required=Enter how much of the property you owned as a percentage
 percentageShare.agent.error.required=Enter how much of the property your client owned as a percentage
 percentageShare.trust.error.required=Enter how much of the property the trust owned as a percentage
@@ -1674,7 +1661,6 @@ percentageShare.trust.error.tooManyDecimals=The percentage of the property the t
 percentageShare.personalRep.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
 percentageShare.personalRepInPeriodOfAdmin.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
 percentageShare.capacitor.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
-
 
 disposalPrice.Gifted.title=What was the market value of the property when you gave it away?
 disposalPrice.indirect.Gifted.title=What was the market value of the shares when you sold or disposed of them?
@@ -1740,7 +1726,6 @@ disposalPrice.personalRep.Gifted.error.tooSmall=The market value must be an amou
 disposalPrice.personalRep.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 0 and 50,000,000,000
 disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.tooSmall=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
 disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.tooSmall=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
-
 
 disposalPrice.Gifted.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
 disposalPrice.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 0 and 50,000,000,000
@@ -1859,7 +1844,6 @@ disposalPrice.capacitor.indirect.SoldOther.error.tooLarge=How much the person go
 disposalPrice.personalRepInPeriodOfAdmin.SoldOther.error.tooLarge=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
 disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.tooLarge=The proceeds of the disposal must be an amount of money between 0 and 50,000,000,000
 
-
 disposalPrice.SoldOther.error.tooManyDecimals=How much you sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.indirect.SoldOther.error.tooManyDecimals=How much you got when you sold or disposed of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.agent.SoldOther.error.tooManyDecimals=How much your client sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -1967,7 +1951,6 @@ disposalFees.personalRepInPeriodOfAdmin.error.tooManyDecimals=Additional costs m
 disposalFees.personalRepInPeriodOfAdmin.indirect.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.capacitor.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.capacitor.indirect.error.tooManyDecimals=The person’s additional costs when they sold or disposed of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-
 
 disposalFees.1.title=How much was your share of any additional costs when you sold or disposed of the property?
 disposalFees.1.helpText=For example, the amount you paid to an estate agent or solicitor.
@@ -2827,7 +2810,6 @@ initialGainOrLoss.trust.error.required=Select if the trust made a gain, loss, or
 initialGainOrLoss.capacitor.error.required=Select if the person made a gain, loss, or no gain or loss
 initialGainOrLoss.personalRep.error.required=Select if the person made a gain, loss, or no gain or loss
 
-
 initialGainOrLoss.error.invalid=Select if you made a gain, loss, or no gain or loss
 initialGainOrLoss.gain.label=Gain
 initialGainOrLoss.loss.label=Loss
@@ -3531,7 +3513,6 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.error.required=Select yes 
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.error.required=Select yes if the estate made an overall gain
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.multiple.error.required=Select yes if the estate made an overall gain
 
-
 taxableGainOrLoss.error.invalid=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.error.multiple.invalid=Select yes if you made an overall gain on the property sales or disposals in this return
 taxableGainOrLoss.agent.error.invalid=Select yes if your client made an overall gain on the property sale or disposal
@@ -3603,7 +3584,6 @@ taxableGainOrLoss.trust.calculatedHelpText.p2=If you do not agree with these wor
 taxableGainOrLoss.capacitor.calculatedHelpText.p2=If they do not agree with these workings you can enter a different amount.
 taxableGainOrLoss.personalRepInPeriodOfAdmin.calculatedHelpText.p2=If you do not agree with these workings you can enter a different amount.
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.calculatedHelpText.p2=If they do not agree with these workings you can enter a different amount.
-
 
 taxableGainOrLoss.furtherReturn.p1=You’ll need to work out if you made a net gain or loss on the UK property-related disposals you are paying tax on in the {0} to {1} tax year.
 taxableGainOrLoss.agent.furtherReturn.p1=You’ll need to work out if your client made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
@@ -3692,7 +3672,6 @@ taxableGainOrLossGuidance.capacitor.title=Steps to work out the person’s net g
 taxableGainOrLossGuidance.personalRep.title=Steps to work out the person’s net gain or loss for the year
 taxableGainOrLossGuidance.personalRepInPeriodOfAdmin.title=Steps to work out the estate’s net gain or loss for the year
 
-
 estimatedIncome.title=What do you expect your gross income will be in this tax year?
 estimatedIncome.agent.title=What does your client expect their gross income will be in this tax year?
 estimatedIncome.capacitor.title=What does the person expect their gross income will be in this tax year?
@@ -3701,15 +3680,19 @@ estimatedIncome.non-resident.title=What do you expect your gross income liable t
 estimatedIncome.agent.non-resident.title=What does your client expect their gross income liable to UK tax will be in this tax year?
 estimatedIncome.capacitor.non-resident.title=What does the person expect their gross income liable to UK tax will be in this tax year?
 estimatedIncome.personalRep.non-resident.title=What was the person’s gross income liable to UK tax for this tax year?
+
 estimatedIncome.helpText=The amount should be your total income liable to UK income tax for the tax year {0} to {1}. It’s your gross income before any deductions, like tax or National Insurance.
 estimatedIncome.agent.helpText=The amount should be their income liable to UK income tax for the tax year {0} to {1}. It’s their gross income before any deductions, like tax or National Insurance.
 estimatedIncome.capacitor.helpText=The amount should be their income liable to UK income tax for the tax year {0} to {1}. It’s their gross income before any deductions, like tax or National Insurance.
 estimatedIncome.personalRep.helpText=The amount should be their income liable to UK income tax for the tax year {0} to {1}. It’s their gross income before any deductions, like tax or National Insurance.
+
 estimatedIncome.details.summary=What should not be included
+
 estimatedIncome.details.p1=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
 estimatedIncome.agent.details.p1=Do not include the money they made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
 estimatedIncome.capacitor.details.p1=Do not include the money they made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
 estimatedIncome.personalRep.details.p1=Do not include the money they made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
+
 estimatedIncome.error.required=Enter your estimated income liable for UK tax in this tax year
 estimatedIncome.agent.error.required=Enter what your client expects their gross income will be in this tax year
 estimatedIncome.capacitor.error.required=Enter what the person expects their gross income will be in this tax year
@@ -3718,6 +3701,7 @@ estimatedIncome.non-resident.error.required=Enter estimated income liable to UK 
 estimatedIncome.agent.non-resident.error.required=Enter estimated income liable to UK tax
 estimatedIncome.capacitor.non-resident.error.required=Enter what the person expects their gross income liable to UK tax will be in this tax year
 estimatedIncome.personalRep.non-resident.error.required=Enter the person’s gross income liable to UK tax for this tax year
+
 estimatedIncome.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
 estimatedIncome.agent.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
 estimatedIncome.capacitor.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
@@ -3726,6 +3710,7 @@ estimatedIncome.non-resident.error.invalid=Estimated income must be an amount of
 estimatedIncome.agent.non-resident.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
 estimatedIncome.capacitor.non-resident.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
 estimatedIncome.personalRep.non-resident.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
+
 estimatedIncome.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.agent.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.capacitor.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
@@ -3734,6 +3719,7 @@ estimatedIncome.non-resident.error.tooSmall=Estimated income must be an amount o
 estimatedIncome.agent.non-resident.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.capacitor.non-resident.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.personalRep.non-resident.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
+
 estimatedIncome.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.agent.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.capacitor.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
@@ -3742,6 +3728,7 @@ estimatedIncome.non-resident.error.tooLarge=Estimated income must be an amount o
 estimatedIncome.agent.non-resident.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.capacitor.non-resident.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.personalRep.non-resident.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
+
 estimatedIncome.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 estimatedIncome.agent.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 estimatedIncome.capacitor.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -3758,6 +3745,7 @@ personalAllowance.title=What is your Personal Allowance for tax year {0} to {1}?
 personalAllowance.agent.title=What is your client’s Personal Allowance for tax year {0} to {1}?
 personalAllowance.capacitor.title=What is the person’s Personal Allowance for tax year {0} to {1}?
 personalAllowance.personalRep.title=What was the person’s Personal Allowance for tax year {0} to {1}?
+
 personalAllowance.helpText=We’ll use this amount to work out the rate of Capital Gains Tax you should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>Your Personal Allowance may be more than this if you receive Marriage Allowance or Blind Person’s Allowance. It will be less if your income is over {3}.
 personalAllowance.agent.helpText=We’ll use this amount to work out the rate of Capital Gains Tax your client should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>Your client’s Personal Allowance may be more than this if they receive Marriage Allowance or Blind Person’s Allowance. It will be less if their income is over {3}.
 personalAllowance.capacitor.helpText=We’ll use this amount to work out the rate of Capital Gains Tax the person should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>The person’s Personal Allowance may be more than this if they receive Marriage Allowance or Blind Person’s Allowance. It will be less if their income is over {3}.
@@ -3766,19 +3754,24 @@ personalAllowance.non-resident.helpText=We’ll use this amount to work out the 
 personalAllowance.agent.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax your client should pay.<br/><br/>You’ll need to check the double tax agreement for the country your client is resident in and the UK. This will tell you if they are entitled to a Personal Allowance.
 personalAllowance.capacitor.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax the person should pay.<br/><br/>The person will need to check the double tax agreement for the country the person is resident in and the UK. This will tell the person if they are entitled to a Personal Allowance.
 personalAllowance.personalRep.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax that should be paid.<br/><br/>You will need to check the double tax agreement for the country the person was resident in and the UK. This will tell you if the person was entitled to a Personal Allowance.
+
 personalAllowance.link=<a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Find out about Personal Allowances (opens in a new tab)</a>.
+
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.agent.error.required=Enter your client’s Personal Allowance for the tax year
 personalAllowance.capacitor.error.required=Enter the person’s Personal Allowance for the tax year
 personalAllowance.personalRep.error.required=Enter the person’s Personal Allowance for the tax year
+
 personalAllowance.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
 personalAllowance.agent.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
 personalAllowance.capacitor.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
 personalAllowance.personalRep.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
+
 personalAllowance.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.agent.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.capacitor.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.personalRep.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
+
 personalAllowance.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.agent.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.capacitor.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
@@ -3891,7 +3884,6 @@ yearToDateLiabilityGuidance.trust.title=Steps to work out the trust’s overall 
 yearToDateLiabilityGuidance.capacitor.title=Steps to work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
 yearToDateLiabilityGuidance.personalRep.title=Steps to work out the person’s overall Capital Gains Tax liability on their UK property-related disposals
 yearToDateLiabilityGuidance.personalRepInPeriodOfAdmin.title=Steps to work out the estate’s overall Capital Gains Tax liability on their UK property-related disposals
-
 
 taxDue.title=Tell us how much Capital Gains Tax is due for this return
 taxDue.h2=How much Capital Gains Tax is due for this return?
@@ -4039,7 +4031,6 @@ nonCalculatedTaxDue.amendReturn.enterTaxDue.trust.helpText.p1=To work out this a
 nonCalculatedTaxDue.amendReturn.enterTaxDue.trust.helpText.li1=Calculate the trust’s overall Capital Gains Tax liability to date on its UK property-related disposals for the tax year {0} to {1}.
 nonCalculatedTaxDue.amendReturn.enterTaxDue.trust.helpText.li2=Subtract the trust’s previous Capital Gains Tax liability on its UK property-related disposals for the tax year {0} to {1} from this amount. The trust’s previous liability is what its liability was before this return was updated.
 
-
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1=To work out this amount, you’ll need to:
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.li1=Start with your previous overall Capital Gains Tax liability on your UK property-related disposals for the tax year {0} to {1}. This is what your overall liability was before this return.
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.li2=Subtract this amount from your new overall Capital Gains Tax liability on your UK property-related disposals for the tax year {0} to {1}. This is what your new overall liability is and includes the disposal in this return.
@@ -4069,7 +4060,6 @@ nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpTex
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.li1=Start with the estate’s previous overall Capital Gains Tax liability on its UK property-related disposals for the tax year {0} to {1}. This is what its overall liability was before this return.
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.li2=Subtract this amount from its new overall Capital Gains Tax liability on its UK property-related disposals for the tax year {0} to {1}. This is what its new overall liability is and includes the disposal in this return.
 nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.li3=Enter the amount - if the amount is less than zero enter zero.
-
 
 nonCalculatedTaxDue.furtherReturn.title=Amount of Capital Gains Tax now due for this return
 nonCalculatedTaxDue.furtherReturn.cyaChange=Amount of Capital Gains Tax now due for this return
@@ -4309,7 +4299,6 @@ confirmationOfSubmission.personalRep.printPage=You should <a class="govuk-link" 
 confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your client’s Capital Gain Tax on UK property account.
 
-
 confirmationOfSubmission.whatNext=What you need to do next
 confirmationOfSubmission.agent.whatNext=What happens next
 confirmationOfSubmission.trust.whatNext=What happens next
@@ -4405,12 +4394,14 @@ viewReturn.amend.heading.taxOwed=Updated liability for this return
 viewReturn.heading.reference=Return reference number
 viewReturn.heading.payment.reference=Payment reference number
 viewReturn.printLink=Print or save this page for your records
+
 viewReturn.charges.heading=Payments
 viewReturn.charges.description=Description
 viewReturn.charges.payBy=Tax due date
 viewReturn.charges.amount=Amount
 viewReturn.charges.due=Due
 viewReturn.charges.status=Status
+
 viewReturn.chargeType.UkResidentReturn=Tax payment
 viewReturn.amend.chargeType.UkResidentReturn=Updated tax liability
 viewReturn.chargeType.NonUkResidentReturn=Tax payment
@@ -4432,8 +4423,10 @@ viewReturn.chargeType.TwelveMonthLatePaymentPenalty=Penalty - payment 12 months 
 viewReturn.amend.chargeType.TwelveMonthLatePaymentPenalty=Penalty - payment 12 months late
 viewReturn.chargeType.PenaltyInterest=Interest on penalties paid late
 viewReturn.amend.chargeType.PenaltyInterest=Interest on penalties paid late
+
 viewReturn.charge.status.paid=Paid
 viewReturn.charge.status.payNow=<a class="govuk-link" href="{0}">Pay now</a>
+
 viewReturn.charge.paymentMethod.BACS=Bacs payment received
 viewReturn.charge.paymentMethod.CHAPS=CHAPS payment received
 viewReturn.charge.paymentMethod.Cheque=cheque received
@@ -4459,6 +4452,7 @@ viewReturn.charge.paymentMethod.PaymentNotExpected=payment received
 viewReturn.charge.paymentMethod.Reallocation=payment received
 viewReturn.charge.paymentMethod.RepaymentInterestAllocated=payment received
 viewReturn.charge.paymentMethod.VoluntaryDirectPayments=payment received
+
 viewReturn.charge.clearingReason.IncomingPayment=payment received
 viewReturn.charge.clearingReason.OutgoingPayment=repaid
 viewReturn.charge.clearingReason.WriteOff=written off
@@ -4466,6 +4460,7 @@ viewReturn.charge.clearingReason.Reversal=reversed
 viewReturn.charge.clearingReason.MassWriteOff=written off
 viewReturn.charge.clearingReason.AutomaticClearing=You had already paid this money to HMRC. HMRC moved this money to this account
 viewReturn.charge.clearingReason.SomeOtherClearingReason=cleared by credit
+
 viewReturn.charge.display-error=There is a problem displaying your payment details.
 viewReturn.organisationNameLine=Trust: {0}
 viewReturn.agentNameLine=Client: {0}
@@ -4581,7 +4576,6 @@ multipleDisposalsAcquisitionPrice.personalRep.helpText=This is the amount the pe
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
 
-
 multipleDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
 multipleDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. You cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.agent.details.p1=Your client can include the cost of improvements that added value to the property. For example, if they built an extension or replaced a basic kitchen with a luxury one. They cannot claim for mortgage interest, decorating or maintenance.
@@ -4618,7 +4612,6 @@ multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.require
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-
 
 multipleDisposalsAcquisitionPrice.cyaChange=the acquisition value of the property
 
@@ -4787,7 +4780,6 @@ singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.t
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The market value of the property must be an amount of money between 0 and 50,000,000,000
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=The market value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
-
 #===================================================
 # SINGLE MIXED USE PROPERTY DETAILS PAGES - END
 #===================================================
@@ -4932,7 +4924,6 @@ representee.cyaChange.isFirstReturn=if this is the first return in this tax year
 # PERSON REPRESENTED PAGES - END
 #===================================================
 
-
 #===================================================
 #  GAIN OR LOSS AFTER RELIEFS PAGES - START
 #===================================================
@@ -5037,8 +5028,6 @@ gainOrLossAfterReliefs.assistive.gainOrLossAfterReliefs=for gain or loss after r
 #===================================================
 #  GAIN OR LOSS AFTER RELIEFS PAGES - END
 #===================================================
-
-
 
 #===================================================
 #  COUNTRIES - START
@@ -5392,14 +5381,12 @@ furtherReturnGuidance.trust.stage-a.step-a1.li5=Subtract any reliefs (but not An
 furtherReturnGuidance.personalRep.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this <strong>gain or loss</strong> to give the <strong class="bold">gain or loss after reliefs</strong>.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this <strong>gain or loss</strong> to give the estate’s <strong class="bold">gain or loss after reliefs</strong>.
 
-
 furtherReturnGuidance.stage-a.step-a2=Step A2 - Work out your net gain on UK property-related disposals
 furtherReturnGuidance.agent.stage-a.step-a2=Step A2 - Work out the net gain on UK property-related disposals
 furtherReturnGuidance.capacitor.stage-a.step-a2=Step A2 - Work out the net gain on UK property-related disposals
 furtherReturnGuidance.trust.stage-a.step-a2=Step A2 - Work out the net gain on UK property-related disposals
 furtherReturnGuidance.personalRep.stage-a.step-a2=Step A2 - Work out the net gain on UK property-related disposals
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2=Step A2 - Work out the net gain on UK property-related disposals
-
 
 furtherReturnGuidance.stage-a.step-a2.p1=Do this to work out your net gain on UK property-related disposals for the tax year so far.
 furtherReturnGuidance.agent.stage-a.step-a2.p1=Do this to work out the net gain on UK property-related disposals for the tax year so far.
@@ -5471,7 +5458,6 @@ furtherReturnGuidance.stage-a.step1.example1.table2.total.value=£33,630 gain
 furtherReturnGuidance.stage-a.step2.example1.headingText=Step A2 - Richard works out his net Capital Gains Tax gain for the tax year.
 furtherReturnGuidance.stage-a.step2.example1.p1=He adds together all the UK property related gains after reliefs
 
-
 furtherReturnGuidance.stage-a.step2.example1.table1.row1.key=He starts with property 1 gain after reliefs
 furtherReturnGuidance.stage-a.step2.example1.table1.row1.value=£46,070 gain
 furtherReturnGuidance.stage-a.step2.example1.table1.row2.key=He adds property 2 gain after reliefs
@@ -5541,7 +5527,6 @@ furtherReturnGuidance.stage-a.step2.example2.table1.row6.value={0}
 furtherReturnGuidance.stage-a.step2.example2.table1.total.key=Net gain on UK property related disposals
 furtherReturnGuidance.stage-a.step2.example2.table1.total.value=£89,700 gain
 
-
 furtherReturnGuidance.trust.stage-a.example3.p1=Bianca is a trustee of Square Trust, a trust resident in the UK. She sold 2 of Square Trust’s UK residential properties in May and June {0}.
 
 furtherReturnGuidance.trust.stage-a.step1.example3.headingText=Step A1 - Bianca works out the gain or loss after reliefs for each of the disposals made so far in tax year {0} to {1}.
@@ -5564,7 +5549,6 @@ furtherReturnGuidance.trust.stage-a.step1.example3.table1.row6.value=£9,480
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.total.key=Gain after reliefs for property 1
 furtherReturnGuidance.trust.stage-a.step1.example3.table1.total.value=£46,070 gain
 
-
 furtherReturnGuidance.trust.stage-a.step1.example3.property2=Property 2 - UK residential property disposal in June {0}
 
 furtherReturnGuidance.trust.stage-a.step1.example3.table2.row1.key=She starts with the proceeds of the property disposal
@@ -5581,7 +5565,6 @@ furtherReturnGuidance.trust.stage-a.step1.example3.table2.row6.key=She subtracts
 furtherReturnGuidance.trust.stage-a.step1.example3.table2.row6.value=£0
 furtherReturnGuidance.trust.stage-a.step1.example3.table2.total.key=Gain after reliefs for property 2
 furtherReturnGuidance.trust.stage-a.step1.example3.table2.total.value=£33,630 gain
-
 
 furtherReturnGuidance.trust.stage-a.step2.example3.headingText=Step A2 - Bianca works out the trust’s net gain for the year.
 furtherReturnGuidance.trust.stage-a.step2.example3.p1=She adds together all the gains or losses after reliefs
@@ -5600,7 +5583,6 @@ furtherReturnGuidance.trust.stage-a.step2.example3.table1.row6.key=She subtracts
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.row6.value={0}
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.total.key=Taxable gain on residential property
 furtherReturnGuidance.trust.stage-a.step2.example3.table1.total.value=£73,550 gain
-
 
 furtherReturnGuidance.stage-a.step1.example4.p1=Akash is a personal representative of Taylor family estate that is resident in the UK. He sold 2 UK residential properties in May and June {0} for the estate.
 furtherReturnGuidance.stage-a.step1.example4.headingText=Step A1 - Akash works out the gain or loss after reliefs for each disposal the estate has made so far in tax year {0} to {1}.
@@ -5658,7 +5640,6 @@ furtherReturnGuidance.stage-a.step2.example4.table1.row6.value={0}
 furtherReturnGuidance.stage-a.step2.example4.table1.total.key=Taxable gain on residential property
 furtherReturnGuidance.stage-a.step2.example4.table1.total.value=£67,400 gain
 
-
 ## Stage-B
 
 furtherReturnGuidance.stage-b.headingText=Work out the tax rates that will apply to the net gain
@@ -5679,7 +5660,6 @@ furtherReturnGuidance.capacitor.stage-b.step-b1.p1=Do this to help work out the 
 furtherReturnGuidance.personalRep.stage-b.step-b1.p1=Do this to help work out the person’s taxable income to find out how much of the net gain (if any) should be charged at the <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">basic rate (opens in a new tab)</a>.
 furtherReturnGuidance.trust.stage-b.step-b1.p1=Multiply the trust’s <strong>net gain</strong> for the year by the relevant <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">rate of tax for the tax year for the type of trust (opens in a new tab)</a> to work out the trust’s <strong class="bold">overall Capital Gains Tax liability on its UK property-related disposals</strong>.
 
-
 furtherReturnGuidance.stage-b.step-b1.li1=Start with your expected taxable <strong>gross annual income (excluding any capital gains)</strong>.
 furtherReturnGuidance.agent.stage-b.step-b1.li1=Start with your client’s expected taxable <strong>gross annual income (excluding any capital gains)</strong>.
 furtherReturnGuidance.capacitor.stage-b.step-b1.li1=Start with the person’s expected taxable <strong>gross annual income (excluding any capital gains)</strong>.
@@ -5689,7 +5669,6 @@ furtherReturnGuidance.stage-b.step-b1.li2=Subtract your income tax <strong>Perso
 furtherReturnGuidance.agent.stage-b.step-b1.li2=Subtract your client’s income tax <strong>Personal Allowance</strong>, to get their <strong>taxable income</strong>.
 furtherReturnGuidance.capacitor.stage-b.step-b1.li2=Subtract the person’s income tax <strong>Personal Allowance</strong>, to get their <strong>taxable income</strong>.
 furtherReturnGuidance.personalRep.stage-b.step-b1.li2=Subtract the person’s income tax <strong>Personal Allowance</strong>, to get their <strong>taxable income</strong>.
-
 
 furtherReturnGuidance.stage-b.step-b2=Step B2 - Work out what basic rate band can be used against the net gain
 
@@ -5732,7 +5711,6 @@ furtherReturnGuidance.agent.stage-b.step-b3.li3=Add these amounts together to ge
 furtherReturnGuidance.capacitor.stage-b.step-b3.li3=Add these amounts together to get the <strong>overall Capital Gains Tax liability on the person’s UK property-related disposals</strong>.
 furtherReturnGuidance.personalRep.stage-b.step-b3.li3=Add these amounts together to get the <strong>overall Capital Gains Tax liability on the person’s UK property-related disposals</strong>.
 
-
 furtherReturnGuidance.stage-b.example1.link=UK resident Richard sells 2 UK residential properties
 furtherReturnGuidance.stage-b.example2.link=UK resident Kavita uses losses from a disposal to reduce net gain
 furtherReturnGuidance.trust.stage-b.example3.link=Trustee Bianca sold 2 of Square Trust’s UK residential properties
@@ -5741,7 +5719,6 @@ furtherReturnGuidance.stage-b.step1.example1.p1=Richard sold 2 UK residential pr
 furtherReturnGuidance.stage-b.step1.example1.headingText=Step B1 - Work out taxable income
 furtherReturnGuidance.stage-b.step1.example1.p2=Richard has a gross annual income, before taxes and allowances, of {0}.
 
-
 furtherReturnGuidance.stage-b.step1.example1.table1.row1.key=He starts with his expected gross annual income
 furtherReturnGuidance.stage-b.step1.example1.table1.row1.value={0}
 furtherReturnGuidance.stage-b.step1.example1.table1.row2.key=He subtracts his Personal Allowance for the tax year
@@ -5749,10 +5726,8 @@ furtherReturnGuidance.stage-b.step1.example1.table1.row2.value={0}
 furtherReturnGuidance.stage-b.step1.example1.table1.total.key=Taxable income
 furtherReturnGuidance.stage-b.step1.example1.table1.total.value={0}
 
-
 furtherReturnGuidance.stage-b.step2.example1.headingText=Step B2 - Richard works out the rate of Capital Gains Tax he must pay
 furtherReturnGuidance.stage-b.step2.example1.p1=Amount to be charged at basic rate
-
 
 furtherReturnGuidance.stage-b.step2.example1.table1.row1.key=He starts with the basic band rate threshold for tax year {0} to {1}
 furtherReturnGuidance.stage-b.step2.example1.table1.row1.value={0}
@@ -5764,14 +5739,12 @@ furtherReturnGuidance.stage-b.step2.example1.table1.total.value={0}
 furtherReturnGuidance.stage-b.step2.example1.p2=Amount to be charged at higher rate
 furtherReturnGuidance.stage-b.step2.example1.p3=Richard’s net gain so far this year, worked out in Richard’s net gain example, was {0}
 
-
 furtherReturnGuidance.stage-b.step2.example1.table2.row1.key=He starts with his net gain
 furtherReturnGuidance.stage-b.step2.example1.table2.row1.value={0}
 furtherReturnGuidance.stage-b.step2.example1.table2.row2.key=He subtracts the amount of net gain to be charged at the basic rate
 furtherReturnGuidance.stage-b.step2.example1.table2.row2.value={0}
 furtherReturnGuidance.stage-b.step2.example1.table2.total.key=Amount of net gain to be taxed at the higher rate
 furtherReturnGuidance.stage-b.step2.example1.table2.total.value={0}
-
 
 furtherReturnGuidance.stage-b.step3.example1.headingText=Step B3 - Richard works out his overall Capital Gains Tax liability on his UK property-related disposals for the tax year so far
 
@@ -5797,7 +5770,6 @@ furtherReturnGuidance.stage-b.step3.example1.table3.row2.key=Amount of tax to pa
 furtherReturnGuidance.stage-b.step3.example1.table3.row2.value={0}
 furtherReturnGuidance.stage-b.step3.example1.table3.total.key=Richard’s new overall Capital Gains Tax liability on his UK property-related disposals for the tax year so far
 furtherReturnGuidance.stage-b.step3.example1.table3.total.value={0}
-
 
 furtherReturnGuidance.stage-b.step1.example2.p1=Kavita has already worked out her net gain for the tax year {0} to {1} to be {2}.
 furtherReturnGuidance.stage-b.step1.example2.headingText=Step B1 - Kavita works out her taxable income for the tax year {0} to {1}
@@ -5847,8 +5819,6 @@ furtherReturnGuidance.trust.stage-b.example3.table1.row2.value={0}
 furtherReturnGuidance.trust.stage-b.example3.table1.total.key=Square Trust’s new overall Capital Gains Tax liability for UK residential property
 furtherReturnGuidance.trust.stage-b.example3.table1.total.value={0}
 
-
-
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.p1=Multiply the estate’s net gain for the year by the relevant <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">rate of tax for the tax year for the estate (opens in a new tab)</a> to work out its overall Capital Gains Tax liability on its UK property-related disposals.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.link=Personal representative Akash sold 2 properties for Taylor family estate
 
@@ -5860,7 +5830,19 @@ furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row2.va
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.key=Taylor family estate’s new overall Capital Gains Tax liability for UK residential property
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.value={0}
 
-
 #===================================================
 #  FR Guidance - END
 #===================================================
+
+#Possibly unused (not present in messages.cy)
+
+alreadySentSelfAssessment.error.boolean=Select whether you have sent a Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.agent.error.boolean=Select whether your client has sent a Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.trust.error.boolean=Select whether the trust has sent a Self Assessment: Trust and Estate tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.capacitor.error.boolean=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.personalRep.error.boolean=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
+alreadySentSelfAssessment.personalRepInPeriodOfAdmin.error.boolean=Select whether anyone has sent the person’s Self Assessment tax return for 6 April {0} to 5 April {1}
+
+disposalDateTooEarly.uk.p2.link=
+
+application.title=Report and pay Capital Gains Tax on UK property
