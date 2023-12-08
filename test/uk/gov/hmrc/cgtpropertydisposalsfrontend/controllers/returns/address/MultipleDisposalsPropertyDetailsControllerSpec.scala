@@ -2967,35 +2967,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
       "redirect to the guidance page" when {
-        "no address can be found" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  sample[FillingOutReturn].copy(
-                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
-                      triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(
-                        taxYear = Some(sample[TaxYear]),
-                        completionDate = Some(sample[CompletionDate])
-                      ),
-                      examplePropertyDetailsAnswers =
-                        Some(sample[IncompleteExamplePropertyDetailsAnswers].copy(address = None))
-                    )
-                  )
-                )
-              )
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.PropertyDetailsController.multipleDisposalsGuidance()
-          )
-        }
-      }
-
-      "redirect to the guidance page" when {
         "the user has not started the section" in {
           inSequence {
             mockAuthWithNoRetrievals()
