@@ -4560,13 +4560,15 @@ multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDec
 
 multipleDisposalsDisposalPrice.cyaChange=the disposal value of the property
 
-multipleDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
-multipleDisposalsAcquisitionPrice.agent.title=What was the acquisition value of the property?
-multipleDisposalsAcquisitionPrice.trust.title=What was the acquisition value of the property?
-multipleDisposalsAcquisitionPrice.personalRep.title=What was the acquisition value of the property?
-multipleDisposalsAcquisitionPrice.capacitor.title=What was the acquisition value of the property?
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=What was the market value of the property on {0}?
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What was the market value of the property on {0}?
+multipleDisposalsAcquisitionPrice.title=Property acquisition value
+
+multipleDisposalsAcquisitionPrice.label=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.agent.label=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.trust.label=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.personalRep.label=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.capacitor.label=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.label=What was the market value of the property on {0}?
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.label=What was the market value of the property on {0}?
 
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.

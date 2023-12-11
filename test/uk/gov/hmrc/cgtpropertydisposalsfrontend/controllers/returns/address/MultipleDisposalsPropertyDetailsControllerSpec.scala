@@ -2374,8 +2374,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           val individualUserType = draftReturn.triageAnswers
             .fold(_.individualUserType, _.individualUserType)
-          val userKey            = userMessageKey(individualUserType, userType)
-          val arg                = TimeUtils.govDisplayFormat(dateOfDeath)
 
           val addressLine1 = draftReturn.examplePropertyDetailsAnswers
             .getOrElse(fail("Cannot find address"))
@@ -2390,7 +2388,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"multipleDisposalsAcquisitionPrice$userKey.title", arg),
+            messageFromMessageKey("multipleDisposalsAcquisitionPrice.title"),
             { doc =>
               doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
               doc
@@ -2808,7 +2806,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     )
                   ),
                   messageFromMessageKey(
-                    s"$key.personalRepInPeriodOfAdmin.title",
+                    s"$key.title",
                     TimeUtils.govDisplayFormat(dateOfDeath)
                   ),
                   messageFromMessageKey(scenario.expectedErrorMessageKey)
