@@ -3138,7 +3138,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         def testIsCheckYourAnswers(
           result: Future[Result],
           answers: CompleteExamplePropertyDetailsAnswers,
-          expectedTitleKey: String
+          expectedTitleKey: String,
+          hasGuidanceLink: Boolean,
         ): Unit =
           checkPageIsDisplayed(
             result,
@@ -3146,14 +3147,18 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             { doc =>
               val guidanceLink = doc.select("#guidanceLink")
 
-              guidanceLink.attr(
-                "href"
-              )                   shouldBe routes.PropertyDetailsController
-                .multipleDisposalsGuidance()
-                .url
-              guidanceLink.text() shouldBe messageFromMessageKey(
-                "returns.property-details.multiple-disposals.cya.guidanceLink"
-              )
+              if (hasGuidanceLink) {
+                guidanceLink.attr(
+                  "href"
+                ) shouldBe routes.PropertyDetailsController
+                  .multipleDisposalsGuidance()
+                  .url
+                guidanceLink.text() shouldBe messageFromMessageKey(
+                  "returns.property-details.multiple-disposals.cya.guidanceLink"
+                )
+              } else {
+                guidanceLink.isEmpty shouldBe true
+              }
 
               MultipleDisposalsPropertyDetailsControllerSpec
                 .validateExamplePropertyDetailsSummary(answers, doc)
@@ -3177,7 +3182,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeAnswers,
-            "returns.property-address.cya.title"
+            "returns.property-address.cya.title",
+            hasGuidanceLink = false,
           )
         }
 
@@ -3192,7 +3198,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeAnswers,
-            "returns.property-address.cya.title"
+            "returns.property-address.cya.title",
+            hasGuidanceLink = true,
           )
         }
       }
