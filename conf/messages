@@ -3490,6 +3490,12 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title=Did the estate make 
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.title=Did the estate make an overall gain or loss on the property sale or disposal?
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.multiple.title=Did your client make an overall gain or loss on the disposals in this return?
 
+taxableGainOrLoss.pageTitle=Overall gain or loss
+taxableGainOrLoss.leadLine=To work out the overall gain or loss
+taxableGainOrLoss.item1=calculate the total gain or loss
+taxableGainOrLoss.item2=then subtract any reliefs, losses or other allowances being claimed
+taxableGainOrLoss.findOut=Find out
+taxableGainOrLoss.findOutLink=how to work out your gain (opens in new tab)
 taxableGainOrLoss.helpText=To work out if you made an overall gain or loss, you’ll need to take your initial gain or loss and subtract any reliefs, losses, or other allowances you are entitled to.
 taxableGainOrLoss.agent.helpText=To work out if your client made an overall gain or loss, you’ll need to take your client’s initial gain or loss and subtract any reliefs, losses, or other allowances they are entitled to.
 taxableGainOrLoss.trust.helpText=To work out if the trust made an overall gain or loss, you’ll need to take the trust’s initial gain or loss and subtract any reliefs, losses, or other allowances it is entitled to.

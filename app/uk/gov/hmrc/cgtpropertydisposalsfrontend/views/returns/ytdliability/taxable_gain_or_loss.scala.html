@@ -65,7 +65,8 @@
   }
 }
 @multipleKey = @{if(isMultiple) ".multiple" else ""}
-@title = @{messages(s"$key$userKey$multipleKey.title")}
+@subtitle = @{messages(s"$key$userKey$multipleKey.title")}
+@title = @{messages("taxableGainOrLoss.pageTitle")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @customErrorKey = @{
   form.errors.headOption.map(e =>
@@ -122,17 +123,24 @@
     @caption(messages("ytdLiability.caption"))
 
     @formWrapper(routes.YearToDateLiabilityController.taxableGainOrLossSubmit()) {
+      <h1 class="govuk-heading-xl">@title</h1>
+      <p class="govuk-body">@{messages("taxableGainOrLoss.leadLine")}</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>@{messages("taxableGainOrLoss.item1")}</li>
+        <li>@{messages("taxableGainOrLoss.item2")}</li>
+      </ul>
+      <p class="govuk-body">@{messages("taxableGainOrLoss.findOut")} <a href="https://www.gov.uk/tax-sell-property/work-out-your-gain" target="_blank">@{messages("taxableGainOrLoss.findOutLink")}</a></p>
       @govukRadios(Radios(
         fieldset = Some(Fieldset(
           legend = Some(Legend(
-            content = Text(title),
-            classes = "govuk-fieldset__legend--xl",
-            isPageHeading = true
+            content = Text(subtitle),
+            classes = "govuk-fieldset__legend--m",
+            isPageHeading = false
           ))
         )),
         name = key,
         idPrefix = Some(key),
-        hint = Some(Hint(content = HtmlContent(messages(s"$key$userKey.helpText")))),
+        hint = None,
         items = Seq(
           RadioItem(
             content = Text(messages(s"$key$userKey.gain.label")),
