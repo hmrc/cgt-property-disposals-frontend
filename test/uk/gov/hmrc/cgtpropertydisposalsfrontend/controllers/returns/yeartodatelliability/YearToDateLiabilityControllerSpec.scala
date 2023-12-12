@@ -4680,7 +4680,7 @@ class YearToDateLiabilityControllerSpec
               wasUkResident = true
             )._1,
             returns.routes.TaskListController.taskList(),
-            "taxableGainOrLoss.multiple.title"
+            "taxableGainOrLoss.pageTitle"
           )
         }
 
@@ -4699,7 +4699,7 @@ class YearToDateLiabilityControllerSpec
                 )
               )._1,
               returns.routes.TaskListController.taskList(),
-              "taxableGainOrLoss.title"
+              "taxableGainOrLoss.pageTitle"
             )
           }
 
@@ -4714,7 +4714,7 @@ class YearToDateLiabilityControllerSpec
                 address = Some(sample[Address])
               )._1,
               returns.routes.TaskListController.taskList(),
-              "taxableGainOrLoss.title"
+              "taxableGainOrLoss.pageTitle"
             )
           }
 
@@ -4732,7 +4732,7 @@ class YearToDateLiabilityControllerSpec
               None
             )._1,
             returns.routes.TaskListController.taskList(),
-            "taxableGainOrLoss.multiple.title",
+            "taxableGainOrLoss.pageTitle",
             { doc =>
               doc
                 .select("#taxableGainOrLoss-2")
@@ -4752,7 +4752,7 @@ class YearToDateLiabilityControllerSpec
               wasUkResident = true
             )._1,
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "taxableGainOrLoss.title",
+            "taxableGainOrLoss.pageTitle",
             doc =>
               doc
                 .select("#taxableGainOrLoss-3")
@@ -4774,7 +4774,7 @@ class YearToDateLiabilityControllerSpec
               individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
             )._1,
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "taxableGainOrLoss.personalRepInPeriodOfAdmin.title",
+            "taxableGainOrLoss.pageTitle",
             doc =>
               doc
                 .select("#taxableGainOrLoss-3")
@@ -4794,7 +4794,7 @@ class YearToDateLiabilityControllerSpec
               individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
             )._1,
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title",
+            "taxableGainOrLoss.pageTitle",
             doc =>
               doc
                 .select("#taxableGainOrLoss-3")
@@ -5127,7 +5127,7 @@ class YearToDateLiabilityControllerSpec
           def test(data: (String, String)*)(expectedErrorKey: String): Unit =
             testFormError(data: _*)(
               expectedErrorKey
-            )("taxableGainOrLoss.multiple.title")(performAction, currentSession)
+            )("taxableGainOrLoss.pageTitle")(performAction, currentSession)
 
           "no option is selected" in {
             test()("taxableGainOrLoss.multiple.error.required")
