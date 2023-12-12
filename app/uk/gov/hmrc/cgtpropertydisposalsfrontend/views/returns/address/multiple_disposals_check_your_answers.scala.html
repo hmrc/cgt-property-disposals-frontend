@@ -35,6 +35,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.mul
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     dateOfDeath: Option[DateOfDeath],
+    firstTimeVisiting: Boolean,
     addressCaption: String
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
@@ -45,9 +46,11 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.mul
     <span class="govuk-caption-xl">@addressCaption</span>
     <h1 class="govuk-heading-xl">@title</h1>
 
-    <p class="govuk-body">
-        <a class="govuk-link" href="@routes.PropertyDetailsController.multipleDisposalsGuidance()" id="guidanceLink">@messages("returns.property-details.multiple-disposals.cya.guidanceLink")</a>
-    </p>
+    @if(!firstTimeVisiting) {
+        <p class="govuk-body">
+            <a class="govuk-link" href="@routes.PropertyDetailsController.multipleDisposalsGuidance()" id="guidanceLink">@messages("returns.property-details.multiple-disposals.cya.guidanceLink")</a>
+        </p>
+    }
 
     @summary(answers, shouldAskIfPostcodeExists, isATrust, representativeType, dateOfDeath)
 

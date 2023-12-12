@@ -1347,6 +1347,7 @@ multipleDisposalsCompletionDate.cyaChange=the completion date for all properties
 
 multipleDisposals.triage.cya.title=Check your answers
 multipleDisposals.triage.cya.guidanceLink=Help completing this section
+multipleDisposals.triage.cya.propertyCount=We will ask you to upload a document giving details of all {0} properties later in the next section.
 
 #===================================================
 #  MULTIPLE DISPOSALS TRIAGE PAGES - END

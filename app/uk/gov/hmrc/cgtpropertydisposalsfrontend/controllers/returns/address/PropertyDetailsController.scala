@@ -880,6 +880,7 @@ class PropertyDetailsController @Inject() (
                           r.journey.subscribedDetails.isATrust,
                           extractIndividualUserType(r),
                           extractDateOfDeath(r),
+                          firstTimeVisiting = true,
                           addressLine1
                         )
                       )
@@ -893,6 +894,7 @@ class PropertyDetailsController @Inject() (
                       r.journey.subscribedDetails.isATrust,
                       extractIndividualUserType(r),
                       extractDateOfDeath(r),
+                      firstTimeVisiting = false,
                       c.address.line1
                     )
                   )

@@ -34,7 +34,8 @@
    answers: CompleteMultipleDisposalsTriageAnswers,
    hasCreatedDraftReturn: Boolean,
    isATrust: Boolean,
-   representeeAnswers: Option[RepresenteeAnswers]
+   representeeAnswers: Option[RepresenteeAnswers],
+   firstTimeVisiting: Boolean,
 )(implicit request:RequestWithSessionData[_], messages:Messages)
 
 @title = @{messages("multipleDisposals.triage.cya.title")}
@@ -43,15 +44,23 @@
 
  @caption(messages("triage.caption"))
   <h1 class="govuk-heading-xl">@title</h1>
-  <p class="govuk-body"><a class="govuk-link" href="@routes.MultipleDisposalsTriageController.guidance()" id="guidanceLink">@messages("multipleDisposals.triage.cya.guidanceLink")</a></p>
+    @if(!firstTimeVisiting) {
+        <p class="govuk-body">
+          <a class="govuk-link" href="@routes.MultipleDisposalsTriageController.guidance()" id="guidanceLink">@messages("multipleDisposals.triage.cya.guidanceLink")</a>
+        </p>
+    }
 
  @summary(answers, isATrust, representeeAnswers)
 
  @formWrapper(routes.MultipleDisposalsTriageController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
- @govukButton(Button(
-    attributes = Map("id" -> "submitButton"),
-    content = Text(messages("button.confirmAndContinue"))))
-}
+   <p class="govuk-body">
+     @messages("multipleDisposals.triage.cya.propertyCount", answers.numberOfProperties)
+   </p>
+
+   @govukButton(Button(
+      attributes = Map("id" -> "submitButton"),
+      content = Text(messages("button.confirmAndContinue"))))
+  }
 
   @returnToSummaryLink(hasCreatedDraftReturn)
 }
