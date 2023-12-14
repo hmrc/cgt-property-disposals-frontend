@@ -35,7 +35,9 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.mul
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     dateOfDeath: Option[DateOfDeath],
-    addressCaption: String
+    firstTimeVisiting: Boolean,
+    addressCaption: String,
+    propertyCount: Int,
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
 
@@ -45,13 +47,19 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.mul
     <span class="govuk-caption-xl">@addressCaption</span>
     <h1 class="govuk-heading-xl">@title</h1>
 
-    <p class="govuk-body">
-        <a class="govuk-link" href="@routes.PropertyDetailsController.multipleDisposalsGuidance()" id="guidanceLink">@messages("returns.property-details.multiple-disposals.cya.guidanceLink")</a>
-    </p>
+    @if(!firstTimeVisiting) {
+        <p class="govuk-body">
+            <a class="govuk-link" href="@routes.PropertyDetailsController.multipleDisposalsGuidance()" id="guidanceLink">@messages("returns.property-details.multiple-disposals.cya.guidanceLink")</a>
+        </p>
+    }
 
     @summary(answers, shouldAskIfPostcodeExists, isATrust, representativeType, dateOfDeath)
 
-    @formWrapper(routes.PropertyDetailsController.checkYourAnswersSubmit()) {
+    <p class="govuk-body">
+      @messages("multipleDisposals.triage.cya.propertyCount", propertyCount)
+    </p>
+
+  @formWrapper(routes.PropertyDetailsController.checkYourAnswersSubmit()) {
         @submitButton(messages("button.confirmAndContinue"))
     }
 

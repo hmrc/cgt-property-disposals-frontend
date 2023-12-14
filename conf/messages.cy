@@ -1335,6 +1335,7 @@ multipleDisposalsCompletionDate.cyaChange=y dyddiad cwblhau ar gyfer yr holl eid
 
 multipleDisposals.triage.cya.title=Gwiriwch eich atebion
 multipleDisposals.triage.cya.guidanceLink=Help i lenwi’r adran hon
+multipleDisposals.triage.cya.propertyCount=Byddwn yn gofyn i chi uwchlwytho dogfen sy’n rhoi manylion o’r {0} eiddo yn ddiweddarach yn yr adran nesaf.
 
 #===================================================
 #  MULTIPLE DISPOSALS TRIAGE PAGES - END

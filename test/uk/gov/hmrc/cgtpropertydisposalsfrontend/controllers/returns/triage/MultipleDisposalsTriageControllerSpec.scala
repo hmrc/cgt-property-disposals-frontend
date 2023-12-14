@@ -4688,16 +4688,7 @@ class MultipleDisposalsTriageControllerSpec
               performAction(),
               messageFromMessageKey("multipleDisposals.triage.cya.title"),
               { doc =>
-                doc
-                  .select("#guidanceLink")
-                  .attr(
-                    "href"
-                  )                              shouldBe routes.MultipleDisposalsTriageController
-                  .guidance()
-                  .url
-                doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
-                  "multipleDisposals.triage.cya.guidanceLink"
-                )
+                doc.select("#guidanceLink").isEmpty shouldBe true
 
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
@@ -4725,17 +4716,7 @@ class MultipleDisposalsTriageControllerSpec
               performAction(),
               messageFromMessageKey("multipleDisposals.triage.cya.title"),
               { doc =>
-                doc
-                  .select("#guidanceLink")
-                  .attr(
-                    "href"
-                  )                              shouldBe routes.MultipleDisposalsTriageController
-                  .guidance()
-                  .url
-                doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
-                  "multipleDisposals.triage.cya.guidanceLink"
-                )
-
+                doc.select("#guidanceLink").isEmpty shouldBe true
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersNonUk,
@@ -4791,17 +4772,7 @@ class MultipleDisposalsTriageControllerSpec
             performAction(),
             messageFromMessageKey("multipleDisposals.triage.cya.title"),
             { doc =>
-              doc
-                .select("#guidanceLink")
-                .attr("href") shouldBe routes.MultipleDisposalsTriageController
-                .guidance()
-                .url
-              doc
-                .select("#completionDate-question")
-                .text         shouldBe messageFromMessageKey(
-                "sharesDisposalDate.title"
-              )
-
+              doc.select("#guidanceLink").isEmpty shouldBe true
               MultipleDisposalsTriageControllerSpec
                 .validateMultipleDisposalsTriageCheckYourAnswersPage(
                   completeAnswersNonUk
@@ -4875,17 +4846,7 @@ class MultipleDisposalsTriageControllerSpec
               performAction(),
               messageFromMessageKey("multipleDisposals.triage.cya.title"),
               { doc =>
-                doc
-                  .select("#guidanceLink")
-                  .attr(
-                    "href"
-                  )                              shouldBe routes.MultipleDisposalsTriageController
-                  .guidance()
-                  .url
-                doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
-                  "multipleDisposals.triage.cya.guidanceLink"
-                )
-
+                doc.select("#guidanceLink").isEmpty shouldBe true
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersNonUk,
