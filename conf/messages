@@ -4505,13 +4505,7 @@ viewReturn.changeReturn=Change return
 # MULTIPLE DISPOSALS EXAMPLE PROPERTY PAGES - START
 #===================================================
 
-multipleDisposalsDisposalPrice.title=What was the disposal value of the property?
-multipleDisposalsDisposalPrice.personalRep.title=What was the disposal value of the property?
-multipleDisposalsDisposalPrice.capacitor.title=What was the disposal value of the property?
-multipleDisposalsDisposalPrice.agent.title=What was the disposal value of the property?
-multipleDisposalsDisposalPrice.trust.title=What was the disposal value of the property?
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.title=What were the proceeds of the disposal?
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.title=What were the proceeds of the disposal?
+multipleDisposalsDisposalPrice.title=Property disposal value
 
 multipleDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.agent.helpText=This is the amount your client got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
@@ -4523,6 +4517,14 @@ multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=This is
 
 multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
+
+multipleDisposalsDisposalPrice.label=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.personalRep.label=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.capacitor.label=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.agent.label=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.trust.label=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.label=What were the proceeds of the disposal?
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.label=What were the proceeds of the disposal?
 
 multipleDisposalsDisposalPrice.error.required=Enter the disposal value of the property, for example, 20,520.86
 multipleDisposalsDisposalPrice.capacitor.error.required=Enter the disposal value of the property, for example, 20,520.86
