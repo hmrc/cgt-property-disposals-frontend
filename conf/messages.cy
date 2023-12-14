@@ -4569,13 +4569,15 @@ multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDec
 
 multipleDisposalsDisposalPrice.cyaChange=gwerth gwaredu’r eiddo
 
-multipleDisposalsAcquisitionPrice.title=Beth oedd gwerth caffael yr eiddo?
-multipleDisposalsAcquisitionPrice.agent.title=Beth oedd gwerth caffael yr eiddo?
-multipleDisposalsAcquisitionPrice.trust.title=Beth oedd gwerth caffael yr eiddo?
-multipleDisposalsAcquisitionPrice.personalRep.title=Beth oedd gwerth caffael yr eiddo?
-multipleDisposalsAcquisitionPrice.capacitor.title=Beth oedd gwerth caffael yr eiddo?
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=Beth oedd gwerth marchnadol yr eiddo ar {0}?
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=Beth oedd gwerth marchnadol yr eiddo ar {0}?
+multipleDisposalsAcquisitionPrice.title=Gwerth caffael yr eiddo
+
+multipleDisposalsAcquisitionPrice.label=Beth oedd gwerth caffael yr eiddo?
+multipleDisposalsAcquisitionPrice.agent.label=Beth oedd gwerth caffael yr eiddo?
+multipleDisposalsAcquisitionPrice.trust.label=Beth oedd gwerth caffael yr eiddo?
+multipleDisposalsAcquisitionPrice.personalRep.label=Beth oedd gwerth caffael yr eiddo?
+multipleDisposalsAcquisitionPrice.capacitor.label=Beth oedd gwerth caffael yr eiddo?
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.label=Beth oedd gwerth marchnadol yr eiddo ar {0}?
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.label=Beth oedd gwerth marchnadol yr eiddo ar {0}?
 
 multipleDisposalsAcquisitionPrice.helpText=Dyma’r swm y gwnaethoch ei dalu pan wnaethoch brynu’r eiddo neu ei werth marchnadol os gwnaethoch ei etifeddu neu ei gael fel rhodd. Dylech ychwanegu unrhyw gostau gwella neu gaffael.
 multipleDisposalsAcquisitionPrice.agent.helpText=Dyma’r swm y gwnaeth eich cleient ei dalu pan wnaeth brynu’r eiddo neu ei werth marchnadol os gwnaeth eich cleient ei etifeddu neu ei gael fel rhodd. Dylech ychwanegu unrhyw gostau gwella neu gaffael.

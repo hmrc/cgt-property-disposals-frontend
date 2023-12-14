@@ -68,7 +68,8 @@
     }
 }
 
-@title = @{messages(s"$key$userKey.title", titleArg)}
+@title = @{messages(s"$key.title", titleArg)}
+@label = @{messages(s"$key$userKey.label", titleArg)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @customErrorKey = @{ if(isPeriodOfAdmin) Some(s"$key$userKey") else None }
 @detailsContent = {
@@ -78,27 +79,28 @@
 }
 
 @layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
-
     @if(hasErrors) {
         @errorSummary(form, customErrorKey = customErrorKey)
     }
 
     @caption(addressCaption)
 
+    <h1 class="govuk-heading-l">@title</h1>
+
+    <p class="govuk-body" id="multipleDisposalsAcquisitionPrice-hint">@messages(s"$key$userKey.helpText")</p>
+
     @formWrapper(address.routes.PropertyDetailsController.acquisitionPriceSubmit()) {
-      @govukInput(Input(
+        @details(messages(s"$key.link"), detailsContent)
+
+        @govukInput(Input(
         id = key,
         name = key,
         value = form.data.get(key),
         label = Label(
-          content = Text(title),
-          isPageHeading = true,
-          classes = "govuk-label--xl"
+            content = Text(label),
+            classes = "govuk-label--m"
         ),
         classes = "govuk-input--width-10",
-        hint = Some(Hint(
-          content = HtmlContent(messages(s"$key$userKey.helpText"))
-        )),
         prefix = Some(PrefixOrSuffix(
           content = Text("£")
         )),
@@ -109,11 +111,8 @@
         autocomplete = Some(AutoCompleteType.On.value)
       ))
 
-      @details(messages(s"$key.link"), detailsContent)
-
       @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
-
 }

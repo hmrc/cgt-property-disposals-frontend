@@ -87,7 +87,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     )
 
     @cyaRow(
-        messages(s"multipleDisposalsAcquisitionPrice$userKey.title", formattedDateOfDeath),
+        messages(s"multipleDisposalsAcquisitionPrice$userKey.label", formattedDateOfDeath),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
         Some(cyaChange(messages("multipleDisposalsAcquisitionPrice.cyaChange"), returns.address.routes.PropertyDetailsController.acquisitionPrice().url)),
         "multipleDisposalsAcquisitionPrice"

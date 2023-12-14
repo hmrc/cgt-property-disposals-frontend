@@ -10,7 +10,7 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
     addCompilerPlugin(scalafixSemanticdb),
     scalaVersion := "2.13.12",
     majorVersion := 2,
-    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test(),
     onLoadMessage := "",
     PlayKeys.playDefaultPort := 7020,
     scalafmtOnCompile := true,
