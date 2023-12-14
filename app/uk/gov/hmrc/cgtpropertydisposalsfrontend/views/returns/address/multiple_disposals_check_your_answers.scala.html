@@ -36,7 +36,8 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.mul
     representativeType: Option[RepresentativeType],
     dateOfDeath: Option[DateOfDeath],
     firstTimeVisiting: Boolean,
-    addressCaption: String
+    addressCaption: String,
+    propertyCount: Int,
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
 
@@ -54,7 +55,11 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.mul
 
     @summary(answers, shouldAskIfPostcodeExists, isATrust, representativeType, dateOfDeath)
 
-    @formWrapper(routes.PropertyDetailsController.checkYourAnswersSubmit()) {
+    <p class="govuk-body">
+      @messages("multipleDisposals.triage.cya.propertyCount", propertyCount)
+    </p>
+
+  @formWrapper(routes.PropertyDetailsController.checkYourAnswersSubmit()) {
         @submitButton(messages("button.confirmAndContinue"))
     }
 

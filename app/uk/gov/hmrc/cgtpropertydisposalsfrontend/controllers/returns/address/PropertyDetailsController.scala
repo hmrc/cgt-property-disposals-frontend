@@ -873,31 +873,43 @@ class PropertyDetailsController @Inject() (
                       errorHandler.errorResult()
                     },
                     _ =>
+                      m.triageAnswers.fold(_.numberOfProperties, x => Some(x.numberOfProperties)) match {
+                        case None =>
+                          Redirect(returnsRoutes.TaskListController.taskList())
+                        case Some(propertyCount) =>
+                          Ok(
+                            multipleDisposalsCheckYourAnswersPage(
+                              completeAnswers,
+                              shouldAskIfPostcodeExists(assetTypes),
+                              r.journey.subscribedDetails.isATrust,
+                              extractIndividualUserType(r),
+                              extractDateOfDeath(r),
+                              firstTimeVisiting = true,
+                              addressLine1,
+                              propertyCount,
+                            )
+                          )
+                      }
+                  )
+
+                case c: CompleteExamplePropertyDetailsAnswers =>
+                  m.triageAnswers.fold(_.numberOfProperties, x => Some(x.numberOfProperties)) match {
+                    case None =>
+                      Redirect(returnsRoutes.TaskListController.taskList())
+                    case Some(propertyCount) =>
                       Ok(
                         multipleDisposalsCheckYourAnswersPage(
-                          completeAnswers,
+                          c,
                           shouldAskIfPostcodeExists(assetTypes),
                           r.journey.subscribedDetails.isATrust,
                           extractIndividualUserType(r),
                           extractDateOfDeath(r),
-                          firstTimeVisiting = true,
-                          addressLine1
+                          firstTimeVisiting = false,
+                          c.address.line1,
+                          propertyCount,
                         )
                       )
-                  )
-
-                case c: CompleteExamplePropertyDetailsAnswers =>
-                  Ok(
-                    multipleDisposalsCheckYourAnswersPage(
-                      c,
-                      shouldAskIfPostcodeExists(assetTypes),
-                      r.journey.subscribedDetails.isATrust,
-                      extractIndividualUserType(r),
-                      extractDateOfDeath(r),
-                      firstTimeVisiting = false,
-                      c.address.line1
-                    )
-                  )
+                  }
               }
 
             case Right(s: DraftSingleDisposalReturn) =>

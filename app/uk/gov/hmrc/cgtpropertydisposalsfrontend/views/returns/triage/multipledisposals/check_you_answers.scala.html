@@ -53,10 +53,6 @@
  @summary(answers, isATrust, representeeAnswers)
 
  @formWrapper(routes.MultipleDisposalsTriageController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
-   <p class="govuk-body">
-     @messages("multipleDisposals.triage.cya.propertyCount", answers.numberOfProperties)
-   </p>
-
    @govukButton(Button(
       attributes = Map("id" -> "submitButton"),
       content = Text(messages("button.confirmAndContinue"))))
