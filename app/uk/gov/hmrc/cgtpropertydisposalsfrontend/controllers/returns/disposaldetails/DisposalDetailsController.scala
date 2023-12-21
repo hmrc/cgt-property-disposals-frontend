@@ -594,7 +594,7 @@ object DisposalDetailsController {
         "shareOfProperty" -> "percentageShare"
 
       def validatePercentage(s: String): Either[FormError, ShareOfProperty] =
-        Try(BigDecimal(s)).toEither
+        Try(BigDecimal(s.replace("%", ""))).toEither
           .leftMap(_ => FormError(percentageKey, "error.invalid"))
           .flatMap { d =>
             if (d > 100) {
