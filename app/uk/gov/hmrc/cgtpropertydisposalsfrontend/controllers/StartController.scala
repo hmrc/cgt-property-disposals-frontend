@@ -389,19 +389,36 @@ class StartController @Inject() (
             .DeterminingIfOrganisationIsTrust(ggCredId, ggEmail, None, None)
       }
 
-    updateSession(sessionStore, request)(
-      _.copy(
+    val subscriptionStatus =
+      SubscriptionStatus
+        .TryingToGetIndividualsFootprint(None, None, ggEmail, ggCredId)
+
+    updateSession(sessionStore, request)(s =>
+      s.copy(
         userType = request.authenticatedRequest.userType,
-        journeyStatus = Some(newSessionData),
+        journeyStatus = Some(subscriptionStatus),
         needMoreDetailsDetails = Some(
           NeedMoreDetailsDetails(
-            onboardingRoutes.DeterminingIfOrganisationIsTrustController
-              .doYouWantToReportForATrust()
+            onboardingRoutes.InsufficientConfidenceLevelController
+              .doYouHaveNINO()
               .url,
-            NeedMoreDetailsDetails.AffinityGroup.Organisation
+            NeedMoreDetailsDetails.AffinityGroup.Individual
           )
         )
       )
+//        updateSession(sessionStore, request)(
+//      _.copy(
+//        userType = request.authenticatedRequest.userType,
+//        journeyStatus = Some(newSessionData),
+//        needMoreDetailsDetails = Some(
+//          NeedMoreDetailsDetails(
+//            onboardingRoutes.DeterminingIfOrganisationIsTrustController
+//              .doYouWantToReportForATrust()
+//              .url,
+//            NeedMoreDetailsDetails.AffinityGroup.Organisation
+//          )
+//        )
+//      )
     ).map {
       case Left(e) =>
         logger.warn("Could not update session", e)
