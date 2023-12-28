@@ -290,7 +290,7 @@ email.error.required=Nodwch gyfeiriad e-bost cyswllt
 
 confirmEmail.title=Mae gennych 30 munud i gadarnhau’ch cyfeiriad e-bost
 confirmEmail.sentEmail=Rydym wedi anfon e-bost i chi yn {0}.
-confirmEmail.changeAgain=Gallwch <a href="{0}">ddefnyddio cyfeiriad e-bost gwahanol</a>.
+confirmEmail.changeAgain=Gallwch <a class="govuk-link" href="{0}">ddefnyddio cyfeiriad e-bost gwahanol</a>.
 confirmEmail.whatYouCanDo=Yr hyn y mae angen i chi ei wneud
 confirmEmail.gotoEmail=Ewch i’r cyfrif e-bost hwnnw a dewiswch y cysylltiad yn yr e-bost a anfonwyd atoch.
 confirmEmail.ifNoEmail=Os na chyrhaeddodd yr e-bost
