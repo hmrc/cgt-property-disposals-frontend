@@ -5621,11 +5621,10 @@ class YearToDateLiabilityControllerSpec
       }
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
-          testPage: Document => Unit = _ => ()
+          expectedFormParagraph: String = ""
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -5644,7 +5643,7 @@ class YearToDateLiabilityControllerSpec
                 .attr("action")                                  shouldBe routes.YearToDateLiabilityController
                 .nonCalculatedEnterTaxDueSubmit()
                 .url
-              testPage(doc)
+              doc.select("#paragraph").text()                    shouldBe expectedFormParagraph
             }
           )
         }
@@ -5661,7 +5660,8 @@ class YearToDateLiabilityControllerSpec
               isFurtherReturn = false,
               None
             )._1,
-            routes.YearToDateLiabilityController.hasEstimatedDetails()
+            routes.YearToDateLiabilityController.hasEstimatedDetails(),
+            messages("nonCalculatedTaxDue.paragraph")
           )
         }
 

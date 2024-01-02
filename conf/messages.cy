@@ -3988,10 +3988,14 @@ calculator.total.ytdLiability=Rhwymedigaeth diweddaraf ar gyfer y flwyddyn hyd y
 calculator.total.taxOwed=Treth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 calculator.noTaxToPay=Does dim treth yn ddyledus ar gyfer y Ffurflen Dreth hon
 
-nonCalculatedTaxDue.title=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
+nonCalculatedTaxDue.title=Cyfrifo’r Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 nonCalculatedTaxDue.ukResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu
 nonCalculatedTaxDue.trust.link=Rhagor o wybodaeth am sut i gyfrifo Treth Enillion Cyfalaf ar gyfer ymddiriedolaeth
 nonCalculatedTaxDue.nonResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu neu ar gyfer gwarediadau anuniongyrchol
+
+nonCalculatedTaxDue.paragraph=Ar y dudalen nesaf, byddwn yn gofyn i chi uwchlwytho dogfen gyda manylion yr holl eiddo rydych chi’n ei adrodd yn y ffurflen hon. Dylai’r ddogfen hon hefyd ddangos sut y gwnaethoch gyfrifo faint o Dreth Enillion Cyfalaf sy’n ddyledus.
+
+nonCalculatedTaxDue.label=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 
 nonCalculatedTaxDue.helpText=Bydd angen i chi gyfrifo’r swm a’i nodi.
 nonCalculatedTaxDue.error.required=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon

@@ -1737,7 +1737,14 @@ class YearToDateLiabilityController @Inject() (
                           _,
                           fillingOutReturn.isAmendReturn,
                           fillingOutReturn.subscribedDetails.isATrust,
-                          wasUkResident
+                          wasUkResident,
+                          fillingOutReturn.draftReturn match {
+                            case _: DraftMultipleDisposalsReturn         => true
+                            case _: DraftSingleDisposalReturn            => false
+                            case _: DraftSingleIndirectDisposalReturn    => false
+                            case _: DraftMultipleIndirectDisposalsReturn => true
+                            case _: DraftSingleMixedUseDisposalReturn    => false
+                          }
                         )
                       }
                     )(
@@ -1809,7 +1816,14 @@ class YearToDateLiabilityController @Inject() (
                           _,
                           fillingOutReturn.isAmendReturn,
                           fillingOutReturn.subscribedDetails.isATrust,
-                          wasUkResident
+                          wasUkResident,
+                          fillingOutReturn.draftReturn match {
+                            case _: DraftMultipleDisposalsReturn         => true
+                            case _: DraftSingleDisposalReturn            => false
+                            case _: DraftSingleIndirectDisposalReturn    => false
+                            case _: DraftMultipleIndirectDisposalsReturn => true
+                            case _: DraftSingleMixedUseDisposalReturn    => false
+                          }
                         )
                       }
                     )(
