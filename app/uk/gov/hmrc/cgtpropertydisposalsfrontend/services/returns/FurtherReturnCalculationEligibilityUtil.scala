@@ -281,7 +281,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
                   })
               }
 
-            results.sequence[EitherT[Future, Error, *], Option[FurtherReturnCalculationData]].map { results =>
+            results.sequence.map { results =>
               val (ineligibleResults, eligibleResults) = results.partitionWith(Either.fromOption(_, ()))
 
               if (ineligibleResults.isEmpty) {

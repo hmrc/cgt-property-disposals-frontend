@@ -202,7 +202,7 @@ class ReturnsServiceImpl @Inject() (
     for {
       result              <- returnSummary
                                .map(r => updateCorrectTaxYearToSentReturn(r, cgtReference))
-                               .sequence[EitherT[Future, Error, *], (Boolean, ReturnSummary)]
+                               .sequence
       usentDraftReturnFlag = result.exists(_._1)
       updatedSentReturns   = result.map(_._2)
     } yield (usentDraftReturnFlag, updatedSentReturns)
