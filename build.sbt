@@ -7,7 +7,6 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
-    addCompilerPlugin(scalafixSemanticdb),
     scalaVersion := "2.13.12",
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test(),
