@@ -16,9 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
-import cats.data.OptionT
-import cats.instances.either._
-import cats.syntax.either._
+import cats.data.EitherT
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.mongo.cache.{DataKey, MongoCacheRepository}
@@ -36,27 +34,7 @@ trait Repo {
     id: String
   )(implicit ec: ExecutionContext): Future[Either[Error, Option[A]]] =
     preservingMdc {
-      cacheRepository
-        .findById(id)
-        .map { maybeCache =>
-          val response: OptionT[Either[Error, *], A] = for {
-            cache  <- OptionT.fromOption[Either[Error, *]](maybeCache)
-            data   <- OptionT.fromOption[Either[Error, *]](Some(cache.data))
-            result <- OptionT.liftF[Either[Error, *], A](
-                        (data \ sessionKey)
-                          .validate[A]
-                          .asEither
-                          .leftMap(e =>
-                            Error(
-                              s"Could not parse session data from mongo: ${e.mkString("; ")}"
-                            )
-                          )
-                      )
-          } yield result
-
-          response.value
-        }
-        .recover { case e => Left(Error(e)) }
+      EitherT.liftF(cacheRepository.get(id)(DataKey(sessionKey))).value
     }
 
   protected def store[A : Writes](id: String, a: A)(implicit ec: ExecutionContext): Future[Either[Error, Unit]] =
