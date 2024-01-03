@@ -874,7 +874,7 @@ class PropertyDetailsController @Inject() (
                     },
                     _ =>
                       m.triageAnswers.fold(_.numberOfProperties, x => Some(x.numberOfProperties)) match {
-                        case None =>
+                        case None                =>
                           Redirect(returnsRoutes.TaskListController.taskList())
                         case Some(propertyCount) =>
                           Ok(
@@ -886,7 +886,7 @@ class PropertyDetailsController @Inject() (
                               extractDateOfDeath(r),
                               firstTimeVisiting = true,
                               addressLine1,
-                              propertyCount,
+                              propertyCount
                             )
                           )
                       }
@@ -894,7 +894,7 @@ class PropertyDetailsController @Inject() (
 
                 case c: CompleteExamplePropertyDetailsAnswers =>
                   m.triageAnswers.fold(_.numberOfProperties, x => Some(x.numberOfProperties)) match {
-                    case None =>
+                    case None                =>
                       Redirect(returnsRoutes.TaskListController.taskList())
                     case Some(propertyCount) =>
                       Ok(
@@ -906,7 +906,7 @@ class PropertyDetailsController @Inject() (
                           extractDateOfDeath(r),
                           firstTimeVisiting = false,
                           c.address.line1,
-                          propertyCount,
+                          propertyCount
                         )
                       )
                   }

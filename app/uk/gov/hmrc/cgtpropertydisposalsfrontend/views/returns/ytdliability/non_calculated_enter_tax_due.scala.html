@@ -45,15 +45,23 @@
         isMultiple: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-@key = @{ "nonCalculatedTaxDue" }
-@title = @{messages(s"$key.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@link = @{
-  if(isATrust) ".trust" -> viewConfig.trustsAndCgtWorkoutUrl
-  else if(wasUkResident) ".ukResident" -> viewConfig.calculateCgt
-  else ".nonResident" -> viewConfig.calculateCgtNr
+@key = @{
+    "nonCalculatedTaxDue"
 }
-@label = @{messages(s"$key.label")}
+@title = @{
+    messages(s"$key.title")
+}
+@hasErrors = @{
+    form.hasErrors || form.hasGlobalErrors
+}
+@link = @{
+    if(isATrust) ".trust" -> viewConfig.trustsAndCgtWorkoutUrl
+    else if(wasUkResident) ".ukResident" -> viewConfig.calculateCgt
+    else ".nonResident" -> viewConfig.calculateCgtNr
+}
+@label = @{
+    messages(s"$key.label")
+}
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
     @if(hasErrors) {
@@ -71,33 +79,33 @@
     }
 
     <p class="govuk-body">
-        @hmrcNewTabLinkHelper(NewTabLinkHelper(
-            text = messages(s"$key${link._1}.link"),
-            href = Some(link._2)
-        ))
+    @hmrcNewTabLinkHelper(NewTabLinkHelper(
+        text = messages(s"$key${link._1}.link"),
+        href = Some(link._2)
+    ))
     </p>
 
     @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit()) {
-      @govukInput(Input(
-        id = key,
-        name = key,
-        value = form.data.get(key),
-        label = Label(
-            content = Text(label),
-            classes = "govuk-label--m"
-        ),
-        classes = "govuk-input--width-10",
-        prefix = Some(PrefixOrSuffix(
-          content = Text("£")
-        )),
-        errorMessage = form.error(key).map(e => ErrorMessage(
-          content = Text(messages(s"$key.${e.message}")),
-          visuallyHiddenText = Some(messages("generic.error"))
-        )),
-        autocomplete = Some(AutoCompleteType.On.value),
-      ))
+        @govukInput(Input(
+            id = key,
+            name = key,
+            value = form.data.get(key),
+            label = Label(
+                content = Text(label),
+                classes = "govuk-label--m"
+            ),
+            classes = "govuk-input--width-10",
+            prefix = Some(PrefixOrSuffix(
+                content = Text("£")
+            )),
+            errorMessage = form.error(key).map(e => ErrorMessage(
+                content = Text(messages(s"$key.${e.message}")),
+                visuallyHiddenText = Some(messages("generic.error"))
+            )),
+            autocomplete = Some(AutoCompleteType.On.value),
+        ))
 
-      @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
