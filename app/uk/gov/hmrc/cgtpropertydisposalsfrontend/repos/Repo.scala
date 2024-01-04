@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
-import cats.data.EitherT
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.mongo.cache.{DataKey, MongoCacheRepository}
@@ -34,7 +33,7 @@ trait Repo {
     id: String
   )(implicit ec: ExecutionContext): Future[Either[Error, Option[A]]] =
     preservingMdc {
-      EitherT.liftF(cacheRepository.get(id)(DataKey(sessionKey))).value
+      cacheRepository.get(id)(DataKey(sessionKey)).map(d => Right(d))
     }
 
   protected def store[A : Writes](id: String, a: A)(implicit ec: ExecutionContext): Future[Either[Error, Unit]] =
