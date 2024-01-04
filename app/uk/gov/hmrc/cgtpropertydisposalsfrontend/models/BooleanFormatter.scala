@@ -42,3 +42,25 @@ object BooleanFormatter {
       Map(key -> value.toString)
   }
 }
+
+object IntFormatter {
+  //don't want to use out-of-box boolean formatter - that one defaults null values to false
+  val formatter: Formatter[Int] = new Formatter[Int] {
+
+    override val format: Option[(String, Nil.type)] = Some(("format.boolean", Nil))
+
+    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Int] =
+      data
+        .get(key)
+        .toRight(Seq(FormError(key, "error.required")))
+        .flatMap {
+          case "1" => Right(1)
+          case "2" => Right(2)
+          case "3" => Right(3)
+          case _   => Left(Seq(FormError(key, "error.boolean", Nil)))
+        }
+
+    def unbind(key: String, value: Int): Map[String, String] =
+      Map(key -> value.toString)
+  }
+}

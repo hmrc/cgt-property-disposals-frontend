@@ -30,15 +30,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.Determini
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.DeterminingIfOrganisationIsTrust
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment, RegistrationStatus, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.WrongGGAccountEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, NameMatchServiceError, UnsuccessfulNameMatchAttempts}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, IntFormatter, JourneyStatus, NameMatchServiceError, UnsuccessfulNameMatchAttempts, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, NameMatchRetryService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -82,15 +82,12 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
   def doYouWantToReportForATrust(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidUser(request) { determiningIfOrganisationIsTrust =>
-        val form =
-          determiningIfOrganisationIsTrust.isReportingForTrust.fold(
-            doYouWantToReportForATrustForm
-          )(
-            doYouWantToReportForATrustForm.fill
-          )
         Ok(
           doYouWantToReportForATrustPage(
-            form,
+            determiningIfOrganisationIsTrust.isReportingForTrust match {
+              case None    => doYouWantToReportForATrustForm
+              case Some(x) => doYouWantToReportForATrustForm.fill(x)
+            },
             controllers.routes.StartController.weNeedMoreDetails()
           )
         )
@@ -122,23 +119,22 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                     )
                   )
                 )
-              ).map {
+              ).flatMap {
                 case Left(e) =>
                   logger.warn("Could not update session data with reporting for trust answer", e)
-                  errorHandler.errorResult()
+                  Future.successful(errorHandler.errorResult())
 
                 case Right(_) =>
-                  if (isReportingForTrust) {
-                    Redirect(
-                      routes.DeterminingIfOrganisationIsTrustController
-                        .doYouHaveATrn()
-                    )
+                  if (isReportingForTrust == 2) {
+                    Redirect(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn())
+                  } else if (isReportingForTrust == 1) {
+                    for {
+                      _ <- updateSession(sessionStore, request)(
+                        _.copy(journeyStatus = None, userType = Some(UserType.Individual)))
+                    } yield Redirect(controllers.routes.StartController.start())
                   } else {
                     metrics.nonTrustOrganisationCounter.inc()
-                    Redirect(
-                      routes.DeterminingIfOrganisationIsTrustController
-                        .reportWithCorporateTax()
-                    )
+                    Future.successful(Redirect(routes.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax()))
                   }
               }
           )
@@ -148,13 +144,8 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
   def reportWithCorporateTax(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidUser(request) { determiningIfOrganisationIsTrust =>
-        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(false)) {
-          Ok(
-            reportWithCorporateTaxPage(
-              routes.DeterminingIfOrganisationIsTrustController
-                .doYouWantToReportForATrust()
-            )
-          )
+        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(1)) {
+          Ok(reportWithCorporateTaxPage(routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()))
         } else {
           Redirect(controllers.routes.StartController.start())
         }
@@ -164,7 +155,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
   def doYouHaveATrn(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidUser(request) { determiningIfOrganisationIsTrust =>
-        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true)) {
+        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(2)) {
           val form =
             determiningIfOrganisationIsTrust.hasTrn.fold(doYouHaveATrnForm)(
               doYouHaveATrnForm.fill
@@ -185,7 +176,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
   def doYouHaveATrnSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidUser(request) { determiningIfOrganisationIsTrust =>
-        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true)) {
+        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(2)) {
           doYouHaveATrnForm
             .bindFromRequest()
             .fold(
@@ -460,7 +451,7 @@ object DeterminingIfOrganisationIsTrustController {
   private val doYouWantToReportForATrustForm =
     Form(
       mapping(
-        "isReportingForATrust" -> of(BooleanFormatter.formatter)
+        "isReportingForATrust" -> of(IntFormatter.formatter)
       )(identity)(Some(_))
     )
 

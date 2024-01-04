@@ -26,10 +26,11 @@
         layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
         viewHelpers: ViewHelpers,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
-        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk
+        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
+        govukRadios: GovukRadios,
 )
 
-@(form: Form[Boolean], backLink: Call)(implicit request:RequestWithSessionData[_], messages: Messages)
+@(form: Form[Int], backLink: Call)(implicit request:RequestWithSessionData[_], messages: Messages)
 
 @key = @{"isReportingForATrust"}
 @title = @{messages("isReportingForATrust.title")}
@@ -43,12 +44,32 @@
 
  <span class="govuk-caption-xl">@messages("subscription.caption")</span>
  @viewHelpers.form(routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrustSubmit()) {
-  @yesNo(
-   fieldId = key,
-   label = title,
-   errorKey = form.error(key).map(e => e.message),
-   selected = form.value
-  )
+  @govukRadios(Radios(
+   fieldset = Some(Fieldset(
+    legend = Some(Legend(
+     content = Text("Legend"),
+     classes = "govuk-fieldset__legend--xl",
+     isPageHeading = true
+    )),
+    describedBy = Some("described")
+   )),
+   name = key,
+   idPrefix = Some(key),
+   items = Seq(
+    RadioItem(
+     content = Text("Individual"),
+     value = Some("1")
+    ),
+    RadioItem(
+     content = Text("Trust"),
+     value = Some("2")
+    ),
+    RadioItem(
+     content = Text("Organisation"),
+     value = Some("3")
+    )
+   )
+  ))
   @viewHelpers.govukButton(Button(
    attributes = Map("id" -> "submitButton"),
    content = Text(messages("button.continue"))

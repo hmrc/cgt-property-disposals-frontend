@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
+import cats.data.{EitherT, OptionT}
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
@@ -78,17 +79,24 @@ class AuthenticatedActionWithRetrievedData @Inject() (
                 case AffinityGroup.Individual => Right(AffinityGroup.Individual)
                 case _                        => Left(AffinityGroup.Organisation)
               }
-              handleIndividualOrOrganisation(
-                affinityGroup,
-                cl,
-                maybeNino,
-                maybeSautr,
-                maybeEmail,
-                enrolments,
-                ggCredId,
-                request
-              )
-
+              for {
+                existingUserType <- (for {
+                  session <- EitherT(sessionStore.get()).toOption
+                  sessionData <- OptionT.fromOption[Future](session)
+                  existingUserType <- OptionT.fromOption[Future](sessionData.userType)
+                } yield existingUserType).value
+                result <- handleIndividualOrOrganisation(
+                  affinityGroup,
+                  cl,
+                  maybeNino,
+                  maybeSautr,
+                  maybeEmail,
+                  enrolments,
+                  existingUserType,
+                  ggCredId,
+                  request
+                )
+              } yield result
             case other =>
               logger.warn(s"User has unsupported affinity group type $other")
               Future.successful(Left(errorHandler.errorResult(None)(request)))
@@ -104,6 +112,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     maybeSautr: Option[String],
     maybeEmail: Option[String],
     enrolments: Enrolments,
+    existingUserType: Option[UserType],
     ggCredId: GGCredId,
     request: MessagesRequest[A]
   )(implicit
@@ -144,6 +153,18 @@ class AuthenticatedActionWithRetrievedData @Inject() (
               )
             )
 
+          case (Left(AffinityGroup.Organisation), _, Some(nino)) if existingUserType.contains(UserType.Individual) =>
+            Right(
+              AuthenticatedRequestWithRetrievedData(
+                RetrievedUserType.Individual(
+                  Right(NINO(nino)),
+                  maybeEmail.filter(_.nonEmpty).map(Email(_)),
+                  ggCredId
+                ),
+                Some(Individual),
+                request
+              )
+            )
           case _ =>
             handleOrganisation(request, enrolments, maybeEmail, ggCredId)
         }

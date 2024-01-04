@@ -13,7 +13,6 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test(),
     onLoadMessage := "",
     PlayKeys.playDefaultPort := 7020,
-    scalafmtOnCompile := true,
     Test / testOptions -= Tests.Argument("-o", "-u", "target/test-reports", "-h", "target/test-reports/html-report"),
     // Suppress successful events in Scalatest in standard output (-o)
     // Options described here: https://www.scalatest.org/user_guide/using_scalatest_with_sbt

@@ -44,7 +44,7 @@ object JourneyStatus {
     final case class DeterminingIfOrganisationIsTrust(
       ggCredId: GGCredId,
       ggEmail: Option[Email],
-      isReportingForTrust: Option[Boolean],
+      isReportingForTrust: Option[Int],
       hasTrn: Option[Boolean]
     ) extends SubscriptionStatus
 
