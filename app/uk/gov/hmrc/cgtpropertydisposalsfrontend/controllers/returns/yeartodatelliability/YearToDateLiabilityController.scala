@@ -1738,7 +1738,7 @@ class YearToDateLiabilityController @Inject() (
                           fillingOutReturn.isAmendReturn,
                           fillingOutReturn.subscribedDetails.isATrust,
                           wasUkResident,
-                          fillingOutReturn.draftReturn match {
+                          isMultiple = fillingOutReturn.draftReturn match {
                             case _: DraftMultipleDisposalsReturn         => true
                             case _: DraftSingleDisposalReturn            => false
                             case _: DraftSingleIndirectDisposalReturn    => false
@@ -1817,7 +1817,7 @@ class YearToDateLiabilityController @Inject() (
                           fillingOutReturn.isAmendReturn,
                           fillingOutReturn.subscribedDetails.isATrust,
                           wasUkResident,
-                          fillingOutReturn.draftReturn match {
+                          isMultiple = fillingOutReturn.draftReturn match {
                             case _: DraftMultipleDisposalsReturn         => true
                             case _: DraftSingleDisposalReturn            => false
                             case _: DraftSingleIndirectDisposalReturn    => false
