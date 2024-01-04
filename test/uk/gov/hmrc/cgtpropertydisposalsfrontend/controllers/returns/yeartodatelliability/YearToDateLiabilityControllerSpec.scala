@@ -124,7 +124,7 @@ class YearToDateLiabilityControllerSpec
 
   private def userMessageKey(
     userType: UserType,
-    individualUserType: Option[IndividualUserType] = None
+    individualUserType: Option[IndividualUserType]
   ) =
     individualUserType match {
       case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
@@ -273,7 +273,7 @@ class YearToDateLiabilityControllerSpec
 
   private def sessionWithSingleMixedUseDisposalState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
-    disposalDate: Option[DisposalDate] = Some(sample[DisposalDate]),
+    disposalDate: Option[DisposalDate],
     userType: UserType,
     wasUkResident: Boolean,
     individualUserType: Option[IndividualUserType] = Some(
