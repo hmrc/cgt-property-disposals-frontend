@@ -1913,11 +1913,14 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
 
-          "user has not answered the tax year exchanged section and selects before April 06th, 2020" ignore {
+          "user has not answered the tax year exchanged section and selects before April 06th, 2020" in {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockAvailableTaxYears()(Right(List()))
+              mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedBefore2020.year))(
+                Right(None)
+              )
               mockStoreSession(
                 session.copy(journeyStatus =
                   Some(
@@ -1940,7 +1943,7 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
 
-          "user has already answered were all properties residential section and re-selected different option" ignore {
+          "user has already answered were all properties residential section and re-selected different option" in {
             val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
               .copy(
                 individualUserType = Some(Self),
@@ -1962,6 +1965,9 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockAvailableTaxYears()(Right(List()))
+              mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedBefore2020.year))(
+                Right(None)
+              )
               mockStoreSession(
                 session.copy(journeyStatus =
                   Some(
@@ -2220,11 +2226,14 @@ class MultipleDisposalsTriageControllerSpec
         )
         val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
-        "there is an error updating the draft return" ignore {
+        "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockAvailableTaxYears()(Right(List()))
+            mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedBefore2020.year))(
+              Right(None)
+            )
             mockStoreDraftReturn(updatedJourney)(
               Left(Error(""))
             )
@@ -2233,11 +2242,14 @@ class MultipleDisposalsTriageControllerSpec
           checkIsTechnicalErrorPage(performAction(key -> "-2020"))
         }
 
-        "there is an error updating the session data" ignore {
+        "there is an error updating the session data" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockAvailableTaxYears()(Right(List()))
+            mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedBefore2020.year))(
+              Right(None)
+            )
             mockStoreDraftReturn(updatedJourney)(
               Right(())
             )
@@ -3508,7 +3520,7 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
-        "the date entered is invalid" ignore {
+        "the date entered is invalid" in {
           DateErrorScenarios
             .dateErrorScenarios(
               "multipleDisposalsCompletionDate",
@@ -3527,17 +3539,15 @@ class MultipleDisposalsTriageControllerSpec
             }
         }
 
-        "the date entered is later than today" ignore {
+        "the date entered is later than today" in {
           testFormError(formData(today.plusYears(2L).plusDays(1L)))(
             "multipleDisposalsCompletionDate.error.tooFarInFuture"
           )
         }
 
-        "the date entered is before 06-04-2020" ignore {
-          val date = LocalDate.of(2020, 1, 5)
-
-          testFormError(formData(date))(
-            "multipleDisposalsCompletionDate.error.dateOfDeathBeforeTaxYear"
+        "the date entered is before 06-04-2020" in {
+          testFormError(formData(LocalDate.of(2020, 1, 5)))(
+            "multipleDisposalsCompletionDate.error.tooFarInPast"
           )
         }
 
@@ -4432,7 +4442,7 @@ class MultipleDisposalsTriageControllerSpec
 
       "not redirect to the asset types not implemented page" when {
 
-        "the user selects a valid combination of asset types" ignore {
+        "the user selects a valid combination of asset types" in {
           val invalidAssetTypes = List(
             List(AssetType.IndirectDisposal, AssetType.MixedUse),
             List(AssetType.MixedUse, AssetType.IndirectDisposal)

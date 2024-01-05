@@ -1480,12 +1480,12 @@ class RepresenteeControllerSpec
           doc => {
             doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
             doc
-              .select("#name-question")
+              .select("#main-content .govuk-summary-list__key")
               .text                                            shouldBe messageFromMessageKey(
               "representeeConfirmPerson.summaryLine1"
             )
             doc
-              .select("#name-answer")
+              .select("#main-content .govuk-summary-list__value")
               .text                                            shouldBe s"${expectedName.firstName} ${expectedName.lastName}"
             if (isCgtRow) {
               doc
@@ -1502,7 +1502,7 @@ class RepresenteeControllerSpec
               .confirmPersonSubmit()
               .url
             doc
-              .select("#confirmed > legend > h2")
+              .select("#main-content form legend")
               .text()                                          shouldBe messageFromMessageKey(
               "representeeConfirmPerson.formTitle"
             )
@@ -1524,7 +1524,7 @@ class RepresenteeControllerSpec
               hasConfirmedContactDetails = false,
               None
             )
-          "show the summary" ignore {
+          "show the summary" in {
             test(
               sessionWithStartingNewDraftReturn(
                 requiredPreviousAnswers,
@@ -1623,7 +1623,7 @@ class RepresenteeControllerSpec
           Capacitor
         )._1
 
-        "nothing is selected" ignore {
+        "nothing is selected" in {
 
           testFormError(performAction, "representeeConfirmPerson.title", session)(
             List.empty,

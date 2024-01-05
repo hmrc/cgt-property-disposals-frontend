@@ -44,6 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -56,11 +57,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, FurtherReturnCalculationEligibilityUtilImpl}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class FurtherReturnCalculationEligibilityUtilSpec
@@ -100,16 +102,20 @@ class FurtherReturnCalculationEligibilityUtilSpec
     withCompleteTriageDetails: Boolean = true,
     withCompleteDisposalDetails: Boolean = true,
     address: Option[UkAddress] = Some(sample[UkAddress]),
-    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+    disposalDate: Option[DisposalDate] = None
   ): FillingOutReturn = {
+    val answers = if (withCompleteTriageDetails) {
+      val triageAnswers =
+        sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType, assetType = assetType)
+      disposalDate.fold(triageAnswers)(date => triageAnswers.copy(disposalDate = date))
+    } else {
+      sample[IncompleteSingleDisposalTriageAnswers]
+    }
+
     val draftReturn = sample[DraftSingleDisposalReturn]
       .copy(
-        triageAnswers = if (withCompleteTriageDetails) {
-          sample[CompleteSingleDisposalTriageAnswers]
-            .copy(individualUserType = individualUserType, assetType = assetType)
-        } else {
-          sample[IncompleteSingleDisposalTriageAnswers]
-        },
+        triageAnswers = answers,
         propertyAddress = address,
         disposalDetailsAnswers = Some(
           if (withCompleteDisposalDetails) {
@@ -125,7 +131,9 @@ class FurtherReturnCalculationEligibilityUtilSpec
             sample[CompleteAcquisitionDetailsAnswers].copy(
               acquisitionFees = AmountInPence(0),
               acquisitionPrice = AmountInPence(0),
-              improvementCosts = AmountInPence(0)
+              improvementCosts = AmountInPence(0),
+              rebasedAcquisitionPrice = None,
+              shouldUseRebase = false
             )
           } else {
             sample[IncompleteAcquisitionDetailsAnswers]
@@ -279,13 +287,23 @@ class FurtherReturnCalculationEligibilityUtilSpec
           test(eligibleFillingOutReturn(otherReliefs = Some(sample[OtherReliefs])), Ineligible(None))(service)
         }
 
-        "there are more than the configured maximum of previous returns" ignore new TestEnvironment() {
-          private val previousReturnData     = sample[PreviousReturnData].copy(
-            summaries = List.fill(maxPreviousReturns + 1)(sample[ReturnSummary]),
+        "there are more than the configured maximum of previous returns" in new TestEnvironment() {
+          val taxYear      = "1990"
+          val date         = LocalDate.of(taxYear.toInt, 1, 1)
+          val disposalDate = DisposalDate(date, sample[TaxYear].copy(startDateInclusive = date))
+
+          private val returns: List[ReturnSummary] =
+            List.fill(maxPreviousReturns + 1)(
+              sample[ReturnSummary].copy(taxYear = taxYear, lastUpdatedDate = Some(date))
+            )
+          private val previousReturnData           = sample[PreviousReturnData].copy(
+            summaries = returns,
             previousReturnsImplyEligibilityForCalculation = None,
             calculationData = None
           )
-          private val tooManyPreviousReturns = eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
+          private val tooManyPreviousReturns       =
+            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData), disposalDate = Some(disposalDate))
+
           test(tooManyPreviousReturns, Ineligible(None))(
             service
           )
@@ -315,13 +333,21 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "there is a previous return with an ineligible asset type" ignore new TestEnvironment() {
-          private val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+        "there is a previous return with an ineligible asset type" in new TestEnvironment() {
+          val taxYear      = "1990"
+          val date         = LocalDate.of(taxYear.toInt, 1, 1)
+          val disposalDate = DisposalDate(date, sample[TaxYear].copy(startDateInclusive = date))
+
+          private val returns: List[ReturnSummary] =
+            List.fill(maxPreviousReturns - 1)(
+              sample[ReturnSummary].copy(taxYear = taxYear, lastUpdatedDate = Some(date))
+            )
+
           private val previousReturnData =
             sample[PreviousReturnData]
               .copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None, calculationData = None)
           private val fillingOutReturn   =
-            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
+            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData), disposalDate = Some(disposalDate))
           private val sessionData        = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
 
           inSequence {
@@ -336,6 +362,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
                   fillingOutReturn.copy(
                     previousSentReturns = Some(
                       previousReturnData.copy(
+                        previousYearToDate = None,
                         previousReturnsImplyEligibilityForCalculation = Some(false),
                         calculationData = None
                       )
@@ -349,14 +376,21 @@ class FurtherReturnCalculationEligibilityUtilSpec
           testWithSession(fillingOutReturn, sessionData, Ineligible(Some(false)))(service)
         }
 
-        "there is previous returns which contains other reliefs" ignore new TestEnvironment() {
-          private val returns            = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
-          private val previousReturnData =
+        "there is previous returns which contains other reliefs" in new TestEnvironment() {
+          val taxYear      = "1990"
+          val date         = LocalDate.of(taxYear.toInt, 1, 1)
+          val disposalDate = DisposalDate(date, sample[TaxYear].copy(startDateInclusive = date))
+
+          private val returns: List[ReturnSummary] =
+            List.fill(maxPreviousReturns - 1)(
+              sample[ReturnSummary].copy(taxYear = taxYear, lastUpdatedDate = Some(date))
+            )
+          private val previousReturnData           =
             sample[PreviousReturnData]
               .copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None, calculationData = None)
-          private val fillingOutReturn   =
-            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
-          private val sessionData        = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+          private val fillingOutReturn             =
+            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData), disposalDate = Some(disposalDate))
+          private val sessionData                  = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
 
           inSequence {
             returns.map { r =>
@@ -375,6 +409,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
                   fillingOutReturn.copy(
                     previousSentReturns = Some(
                       previousReturnData.copy(
+                        previousYearToDate = None,
                         previousReturnsImplyEligibilityForCalculation = Some(false),
                         calculationData = None
                       )
@@ -391,62 +426,24 @@ class FurtherReturnCalculationEligibilityUtilSpec
 
       "return an eligible response" when {
 
-        "under limit and displays OK" ignore new TestEnvironment() {
-          private val currentReturnAddress         = sample[UkAddress]
-          val (address1, address2)                 = sample[UkAddress]     -> sample[UkAddress]
-          val (return1, return2)                   = sample[ReturnSummary] -> sample[ReturnSummary]
-          private val previousReturnData           =
+        "under limit and displays OK" in new TestEnvironment() {
+          private val currentReturnAddress = sample[UkAddress]
+          val (return1, return2)           = sample[ReturnSummary] -> sample[ReturnSummary]
+          private val previousReturnData   =
             sample[PreviousReturnData]
               .copy(
                 summaries = List(return1, return2),
                 previousReturnsImplyEligibilityForCalculation = None,
                 calculationData = None
               )
-          private val fillingOutReturn             =
+          private val fillingOutReturn     =
             eligibleFillingOutReturn(
               previousSentReturns = Some(previousReturnData),
               address = Some(currentReturnAddress)
             )
-          private val sessionData                  = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
-          private val furtherReturnCalculationData =
-            List(
-              FurtherReturnCalculationData(
-                address2,
-                AmountInPence(0L)
-              ),
-              FurtherReturnCalculationData(
-                address1,
-                AmountInPence(100L)
-              )
-            )
+          private val sessionData          = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
 
           inSequence {
-            mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, return1.submissionId)(
-              Right(genDisplayReturn(address = address1, gainOrLossAfterReliefs = Some(AmountInPence(100))))
-            )
-
-            mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, return2.submissionId)(
-              Right(
-                genDisplayReturn(
-                  address = address2,
-                  gainOrLossAfterReliefs = None,
-                  disposalDetailsAnswers = sample[CompleteDisposalDetailsAnswers].copy(
-                    disposalPrice = AmountInPence(1L),
-                    disposalFees = AmountInPence(3L)
-                  ),
-                  acquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers].copy(
-                    acquisitionPrice = AmountInPence(5L),
-                    improvementCosts = AmountInPence(7L),
-                    acquisitionFees = AmountInPence(11L)
-                  ),
-                  reliefsDetailsAnswers = sample[CompleteReliefDetailsAnswers].copy(
-                    privateResidentsRelief = AmountInPence(13L),
-                    lettingsRelief = AmountInPence(17L),
-                    otherReliefs = Some(NoOtherReliefs)
-                  )
-                )
-              )
-            )
 
             mockStoreSession(
               sessionData.copy(
@@ -454,8 +451,10 @@ class FurtherReturnCalculationEligibilityUtilSpec
                   fillingOutReturn.copy(
                     previousSentReturns = Some(
                       previousReturnData.copy(
-                        previousReturnsImplyEligibilityForCalculation = Some(true),
-                        calculationData = Some(furtherReturnCalculationData)
+                        summaries = List.empty[ReturnSummary],
+                        None,
+                        Some(true),
+                        Some(List.empty[FurtherReturnCalculationData])
                       )
                     )
                   )
@@ -479,24 +478,24 @@ class FurtherReturnCalculationEligibilityUtilSpec
                 false,
                 None
               ),
-              furtherReturnCalculationData,
+              List.empty[FurtherReturnCalculationData],
               currentReturnAddress
             )
           )(service)
         }
 
         "in an amend return journey the original return makes the user ineligible but the " +
-          "rest of the returns are eligible" ignore new TestEnvironment() {
-            val (currentReturnAddress, previousReturnAddress) = sample[UkAddress]     -> sample[UkAddress]
-            val (originalReturn, otherReturn)                 = sample[ReturnSummary] -> sample[ReturnSummary]
+          "rest of the returns are eligible" in new TestEnvironment() {
+            val (currentReturnAddress, _)     = sample[UkAddress]     -> sample[UkAddress]
+            val (originalReturn, otherReturn) = sample[ReturnSummary] -> sample[ReturnSummary]
 
-            private val previousReturnData           =
+            private val previousReturnData =
               sample[PreviousReturnData].copy(
                 summaries = List(originalReturn, otherReturn),
                 previousReturnsImplyEligibilityForCalculation = None,
                 calculationData = None
               )
-            private val fillingOutReturn             =
+            private val fillingOutReturn   =
               eligibleFillingOutReturn(
                 previousSentReturns = Some(previousReturnData),
                 amendReturnData = Some(
@@ -510,33 +509,20 @@ class FurtherReturnCalculationEligibilityUtilSpec
                 ),
                 address = Some(currentReturnAddress)
               )
-            private val sessionData                  = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
-            private val furtherReturnCalculationData =
-              List(
-                FurtherReturnCalculationData(
-                  previousReturnAddress,
-                  AmountInPence(99L)
-                )
-              )
+            private val sessionData        = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
 
             // display return API will not be called for the original return
             inSequence {
-              mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, otherReturn.submissionId)(
-                Right(
-                  genDisplayReturn(
-                    address = previousReturnAddress,
-                    gainOrLossAfterReliefs = Some(AmountInPence(99L))
-                  )
-                )
-              )
               mockStoreSession(
                 sessionData.copy(
                   journeyStatus = Some(
                     fillingOutReturn.copy(
                       previousSentReturns = Some(
                         previousReturnData.copy(
-                          previousReturnsImplyEligibilityForCalculation = Some(true),
-                          calculationData = Some(furtherReturnCalculationData)
+                          summaries = List.empty[ReturnSummary],
+                          None,
+                          Some(true),
+                          Some(List.empty[FurtherReturnCalculationData])
                         )
                       )
                     )
@@ -560,53 +546,43 @@ class FurtherReturnCalculationEligibilityUtilSpec
                   false,
                   None
                 ),
-                furtherReturnCalculationData,
+                List.empty[FurtherReturnCalculationData],
                 currentReturnAddress
               )
             )(service)
 
           }
 
-        "there is no individual user type and the user is a trust" ignore new TestEnvironment() {
-          private val currentReturnAddress                   = sample[UkAddress]
-          val (previousReturnAddress, previousReturnSummary) = sample[UkAddress] -> sample[ReturnSummary]
-          private val previousReturnData                     =
+        "there is no individual user type and the user is a trust" in new TestEnvironment() {
+          private val currentReturnAddress = sample[UkAddress]
+          val (_, previousReturnSummary)   = sample[UkAddress] -> sample[ReturnSummary]
+          private val previousReturnData   =
             sample[PreviousReturnData]
               .copy(
                 summaries = List(previousReturnSummary),
                 previousReturnsImplyEligibilityForCalculation = None,
                 calculationData = None
               )
-          private val fillingOutReturn                       =
+          private val fillingOutReturn     =
             eligibleFillingOutReturn(
               previousSentReturns = Some(previousReturnData),
               address = Some(currentReturnAddress),
               individualUserType = None,
               name = Left(sample[TrustName])
             )
-          private val sessionData                            = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
-          private val furtherReturnCalculationData           =
-            List(
-              FurtherReturnCalculationData(
-                previousReturnAddress,
-                AmountInPence(100L)
-              )
-            )
+          private val sessionData          = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
 
           inSequence {
-            mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, previousReturnSummary.submissionId)(
-              Right(
-                genDisplayReturn(address = previousReturnAddress, gainOrLossAfterReliefs = Some(AmountInPence(100)))
-              )
-            )
             mockStoreSession(
               sessionData.copy(
                 journeyStatus = Some(
                   fillingOutReturn.copy(
                     previousSentReturns = Some(
                       previousReturnData.copy(
-                        previousReturnsImplyEligibilityForCalculation = Some(true),
-                        calculationData = Some(furtherReturnCalculationData)
+                        summaries = List.empty[ReturnSummary],
+                        None,
+                        Some(true),
+                        Some(List.empty[FurtherReturnCalculationData])
                       )
                     )
                   )
@@ -630,7 +606,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
                 false,
                 None
               ),
-              furtherReturnCalculationData,
+              List.empty[FurtherReturnCalculationData],
               currentReturnAddress
             )
           )(service)
@@ -701,20 +677,17 @@ class FurtherReturnCalculationEligibilityUtilSpec
           )
         }
 
-        "there is no previous return data for an individual" ignore new TestEnvironment() {
-          testError(
-            eligibleFillingOutReturn(previousSentReturns = None),
-            service
-          )
-        }
+        "there is an error getting details of a previously sent return" in new TestEnvironment() {
+          val taxYear      = "1970"
+          val date         = LocalDate.of(taxYear.toInt, 1, 1)
+          val disposalDate = DisposalDate(date, sample[TaxYear].copy(startDateInclusive = date))
 
-        "there is an error getting details of a previously sent return" ignore new TestEnvironment() {
-          private val returns                                                          = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
+          private val returns                                                          = List(sample[ReturnSummary].copy(taxYear = taxYear))
           private val previousReturnData                                               =
             sample[PreviousReturnData]
               .copy(summaries = returns, previousReturnsImplyEligibilityForCalculation = None, calculationData = None)
           private val fillingOutReturn                                                 =
-            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData))
+            eligibleFillingOutReturn(previousSentReturns = Some(previousReturnData), disposalDate = Some(disposalDate))
           private val sessionData                                                      = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
           private implicit val request: RequestWithSessionData[AnyContentAsEmpty.type] =
             requestWithSessionData(sessionData)
@@ -731,7 +704,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           await(result.value) shouldBe a[Left[_, _]]
         }
 
-        "there is an error updating the session" ignore new TestEnvironment() {
+        "there is an error updating the session" in new TestEnvironment() {
           private val returns                                                          = List.fill(maxPreviousReturns - 1)(sample[ReturnSummary])
           private val previousReturnData                                               =
             sample[PreviousReturnData]
@@ -743,19 +716,16 @@ class FurtherReturnCalculationEligibilityUtilSpec
             requestWithSessionData(sessionData)
 
           inSequence {
-            returns.foreach { r =>
-              mockDisplayReturn(fillingOutReturn.subscribedDetails.cgtReference, r.submissionId)(
-                Right(genDisplayReturn(assetType = IndirectDisposal))
-              )
-            }
             mockStoreSession(
               sessionData.copy(
                 journeyStatus = Some(
                   fillingOutReturn.copy(
                     previousSentReturns = Some(
                       previousReturnData.copy(
-                        previousReturnsImplyEligibilityForCalculation = Some(false),
-                        calculationData = None
+                        summaries = List.empty[ReturnSummary],
+                        None,
+                        Some(true),
+                        Some(List.empty[FurtherReturnCalculationData])
                       )
                     )
                   )

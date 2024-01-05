@@ -1484,7 +1484,7 @@ class MultipleDisposalsTriageController @Inject() (
                     _._1.subscribedDetails.isATrust
                   ),
                   representeeAnswers,
-                  firstTimeVisiting = state.isLeft,
+                  firstTimeVisiting = state.isLeft
                 )
               )
             )
@@ -1514,7 +1514,7 @@ class MultipleDisposalsTriageController @Inject() (
                     _._1.subscribedDetails.isATrust
                   ),
                   representeeAnswers,
-                  firstTimeVisiting = state.isLeft,
+                  firstTimeVisiting = state.isLeft
                 )
               )
             )
@@ -1529,7 +1529,7 @@ class MultipleDisposalsTriageController @Inject() (
                   _._1.subscribedDetails.isATrust
                 ),
                 representeeAnswers,
-                firstTimeVisiting = state.isLeft,
+                firstTimeVisiting = state.isLeft
               )
             )
           case _                                         =>
