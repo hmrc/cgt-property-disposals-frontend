@@ -297,21 +297,21 @@ class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with Mock
             List(
               UkAddress(
                 "line1",
-                Some("line2"),
+                None,
+                Some("town"),
+                None,
+                Postcode("ZZ1Z 4AB")
+              ),
+              UkAddress(
+                "line1",
+                None,
                 Some("town"),
                 Some("county"),
                 Postcode("ZZ1Z 4AB")
               ),
               UkAddress(
                 "line1",
-                None,
-                Some("town"),
-                None,
-                Postcode("ZZ1Z 4AB")
-              ),
-              UkAddress(
-                "line1",
-                None,
+                Some("line2"),
                 Some("town"),
                 Some("county"),
                 Postcode("ZZ1Z 4AB")

@@ -38,6 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 @ImplementedBy(classOf[UKAddressLookupServiceImpl])
 trait UKAddressLookupService {
@@ -112,7 +113,19 @@ class UKAddressLookupServiceImpl @Inject() (
       }
     }
 
-    r.addresses
+    val rSorted: List[RawAddress] = r.addresses.sortWith { (a, b) =>
+      def sort(zipped: Seq[(Option[Int], Option[Int])]): Boolean = zipped match {
+        case (Some(nA), Some(nB)) :: tail =>
+          if (nA == nB) sort(tail) else nA < nB
+        case (Some(_), None) :: _         => true
+        case (None, Some(_)) :: _         => false
+        case _                            => mkString(a) < mkString(b)
+      }
+
+      sort(numbersIn(a).zipAll(numbersIn(b), None, None).toList)
+    }
+
+    rSorted
       .map(toAddress)
       .sequence
       .map(addresses =>
@@ -123,6 +136,14 @@ class UKAddressLookupServiceImpl @Inject() (
         )
       )
   }
+
+  def mkString(p: RawAddress) = p.lines.mkString(" ").toLowerCase()
+
+  // Find numbers in proposed address in order of significance, from rightmost to leftmost.
+  // Pad with None to ensure we never return an empty sequence
+  def numbersIn(p: RawAddress): Seq[Option[Int]] =
+    "([0-9]+)".r.findAllIn(mkString(p)).map(n => Try(n.toInt).toOption).toSeq.reverse :+ None
+
 }
 
 object UKAddressLookupServiceImpl {
@@ -153,4 +174,5 @@ object UKAddressLookupServiceImpl {
           .validate[List[InnerAddress]]
           .map(l => AddressLookupResponse(l.map(_.address)))
     }
+
 }
