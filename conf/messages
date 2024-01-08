@@ -3987,10 +3987,14 @@ calculator.total.ytdLiability=Latest year to date liability
 calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
-nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
+nonCalculatedTaxDue.title=Work out Capital Gains Tax due for this return
 nonCalculatedTaxDue.ukResident.link=Find out how to work out tax when property is sold
 nonCalculatedTaxDue.trust.link=Find out how to work out Capital Gains Tax for a trust
 nonCalculatedTaxDue.nonResident.link=Find out how to work out tax when property is sold or for indirect disposals
+
+nonCalculatedTaxDue.paragraph=On the next page you need to upload a document with details of all the properties you're reporting in this return. This document should also show how you calculated how much Capital Gains Tax is due.
+
+nonCalculatedTaxDue.label=Enter the amount of Capital Gains Tax due for this return
 
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
 nonCalculatedTaxDue.error.required=Enter the amount of Capital Gains Tax due for this return

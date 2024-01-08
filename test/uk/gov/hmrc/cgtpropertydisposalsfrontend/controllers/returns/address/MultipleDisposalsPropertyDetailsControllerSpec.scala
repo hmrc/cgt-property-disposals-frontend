@@ -3108,7 +3108,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           result: Future[Result],
           answers: CompleteExamplePropertyDetailsAnswers,
           expectedTitleKey: String,
-          hasGuidanceLink: Boolean,
+          hasGuidanceLink: Boolean
         ): Unit =
           checkPageIsDisplayed(
             result,
@@ -3119,7 +3119,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               if (hasGuidanceLink) {
                 guidanceLink.attr(
                   "href"
-                ) shouldBe routes.PropertyDetailsController
+                )                   shouldBe routes.PropertyDetailsController
                   .multipleDisposalsGuidance()
                   .url
                 guidanceLink.text() shouldBe messageFromMessageKey(
@@ -3152,7 +3152,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             performAction(),
             completeAnswers,
             "returns.property-address.cya.title",
-            hasGuidanceLink = false,
+            hasGuidanceLink = false
           )
         }
 
@@ -3168,7 +3168,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             performAction(),
             completeAnswers,
             "returns.property-address.cya.title",
-            hasGuidanceLink = true,
+            hasGuidanceLink = true
           )
         }
       }

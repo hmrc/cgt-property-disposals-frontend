@@ -45,7 +45,6 @@ trait UKAddressLookupService {
   def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, AddressLookupResult]
-
 }
 
 @Singleton
@@ -115,7 +114,7 @@ class UKAddressLookupServiceImpl @Inject() (
 
     r.addresses
       .map(toAddress)
-      .sequence[Either[String, *], UkAddress]
+      .sequence
       .map(addresses =>
         AddressLookupResult(
           postcode,
@@ -124,7 +123,6 @@ class UKAddressLookupServiceImpl @Inject() (
         )
       )
   }
-
 }
 
 object UKAddressLookupServiceImpl {
@@ -155,5 +153,4 @@ object UKAddressLookupServiceImpl {
           .validate[List[InnerAddress]]
           .map(l => AddressLookupResponse(l.map(_.address)))
     }
-
 }
