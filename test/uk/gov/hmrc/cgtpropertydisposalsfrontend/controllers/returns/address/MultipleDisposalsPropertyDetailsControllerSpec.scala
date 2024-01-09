@@ -1565,7 +1565,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           representeeAnswers: Option[RepresenteeAnswers] = None
         )(
           formData: List[(String, String)]
-        )(expectedErrorMessageKey: String, args: Seq[String] = Seq()): Unit = {
+        )(
+          expectedErrorMessageKey: String,
+          args: Seq[String] = Seq(),
+          messageRegexPrefix: String = "not_found_message"
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1604,7 +1608,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 expectedErrorMessageKey,
                 args: _*
               ),
-            BAD_REQUEST
+            BAD_REQUEST,
+            messageRegexPrefix
           )
         }
 
@@ -1634,12 +1639,13 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           )
         }
 
-        "the date entered is too far in past" ignore {
+        "the date entered is too far in past" in {
           val param1 = taxYear.startDateInclusive.getYear.toString
           val param2 = taxYear.endDateExclusive.getYear.toString
           testFormError()(formData(taxYear.startDateInclusive.minusYears(2L)))(
             s"$key.error.tooFarInPast",
-            Seq(param1, param2)
+            Seq(param1, param2),
+            "ignore_not_found_message"
           )
         }
 

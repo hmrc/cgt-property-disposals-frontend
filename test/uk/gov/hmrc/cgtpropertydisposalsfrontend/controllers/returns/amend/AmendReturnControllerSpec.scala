@@ -45,7 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.Co
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.CancelAmendReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, IndividualUserType, ReturnSummary}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -397,10 +397,11 @@ class AmendReturnControllerSpec
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
               individualUserType = Some(IndividualUserType.Self)
             )
-          )
+          ),
+          summary = sample[ReturnSummary].copy(taxYear = TaxYear.thisTaxYearStartDate().getYear.toString)
         )
 
-        "the user is not an agent" ignore {
+        "the user is not an agent" in {
           test(
             SessionData.empty.copy(
               journeyStatus = Some(
@@ -414,7 +415,7 @@ class AmendReturnControllerSpec
           )
         }
 
-        "the user is an agent" ignore {
+        "the user is an agent" in {
           test(
             SessionData.empty.copy(
               journeyStatus = Some(
