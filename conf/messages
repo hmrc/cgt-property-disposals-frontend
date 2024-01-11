@@ -1396,14 +1396,15 @@ returns.property-address.singleDisposal.caption=Property address
 returns.property-details.multipleDisposals.caption=Details of one property disposal
 returns.company-details.multipleIndirectDisposals.caption=Details of one company
 
-property-details.multiple-disposals.guidance.title=You’ll need to enter details for one of the property disposals
-property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
-property-details.multiple-disposals.guidance.agent.p1=You should enter the details of the property that gave your client the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
-property-details.multiple-disposals.guidance.trust.p1=You should enter the details of the property that gave the trust the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
-property-details.multiple-disposals.guidance.capacitor.p1=You should enter the details of the property that gave the person the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
-property-details.multiple-disposals.guidance.personalRep.p1=You should enter the details of the property that gave the person the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
-property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.p1=You should enter the details of the property that gave the estate the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
-property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.p1=You should enter the details of the property that gave the estate the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
+property-details.multiple-disposals.guidance.title=You’ll need to enter details for only one of the property disposals
+property-details.multiple-disposals.guidance.p0=Later in the service, you’ll need to upload a document with details of all the properties you’re including in this return.
+property-details.multiple-disposals.guidance.p1=In this section, only enter the details of the property that gave you the largest gain.
+property-details.multiple-disposals.guidance.agent.p1=In this section, only enter the details of the property that gave your client the largest gain.
+property-details.multiple-disposals.guidance.trust.p1=In this section, only enter the details of the property that gave the trust the largest gain.
+property-details.multiple-disposals.guidance.capacitor.p1=In this section, only enter the details of the property that gave the person the largest gain.
+property-details.multiple-disposals.guidance.personalRep.p1=In this section, only enter the details of the property that gave the person the largest gain.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.p1=In this section, only enter the details of the property that gave the estate the largest gain.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.p1=In this section, only enter the details of the property that gave the estate the largest gain.
 
 property-details.multiple-disposals.guidance.p2=For that one property, you’ll need to enter:
 property-details.multiple-disposals.guidance.li1=property’s UK address
@@ -1418,16 +1419,10 @@ property-details.multiple-disposals.guidance.capacitor.li4=Contract exchange usu
 property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.li4=market value plus acquisition costs for the whole property
 property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.li4=market value plus acquisition costs for the whole property
 
-property-details.multiple-disposals.guidance.p3=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
-property-details.multiple-disposals.guidance.agent.p3=Contract exchange usually happens when your client and the buyer or new owner swap contracts and the buyer pays a deposit.
-property-details.multiple-disposals.guidance.trust.p3=Contract exchange usually happens when the trust and the buyer or new owner swap contracts and the buyer pays a deposit.
-property-details.multiple-disposals.guidance.personalRep.p3=Contract exchange usually happens when the person and the buyer or new owner swap contracts and the buyer pays a deposit.
-property-details.multiple-disposals.guidance.capacitor.p3=Contract exchange usually happens when the person and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.p3=If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
 
 property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.p3=Contract exchange usually happens when a seller and a buyer or new owner swap contracts and the buyer pays a deposit.
 property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.p3=Contract exchange usually happens when a seller and a buyer or new owner swap contracts and the buyer pays a deposit.
-
-property-details.multiple-disposals.guidance.p4=You’ll also need to upload a document later providing details of the other properties you’re including in this return.
 
 enterPostcode.returns.singleDisposal.title=Find the address of the UK property you disposed of
 enterPostcode.returns.agent.singleDisposal.title=Find the address of the UK property your client disposed of
