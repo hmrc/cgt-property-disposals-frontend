@@ -4366,7 +4366,7 @@ confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
 
-confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Self Assessment tax return (opens in a new tab)</a>.
+confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Self Assessment tax return<span class="govuk-!-display-none-print"> (opens in a new tab)</span></a>.
 confirmationOfSubmission.agent.ifSa.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.trust.ifSa.p1=You’ll need to provide details from this return in the trust’s next Self Assessment tax return.
 confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment tax return, they will need to provide details from this return in their next Self Assessment tax return.
