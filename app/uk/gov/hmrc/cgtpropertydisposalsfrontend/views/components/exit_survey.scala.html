@@ -21,6 +21,6 @@
 
 @(exitSurveyUrl: String)(implicit messages: Messages, appConfig: ViewConfig)
 
-<p class="govuk-body">
+<p class="govuk-body govuk-!-display-none-print">
   <a class="govuk-link" href="@{appConfig.signOutUrl}?continue=@{exitSurveyUrl}">@messages("exitSurvey.linkText")</a>
 </p>

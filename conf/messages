@@ -4296,14 +4296,14 @@ confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong>
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
 confirmationOfSubmission.taxDue=Tax due date
 
-confirmationOfSubmission.printPage=<a class="govuk-link" href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.agent.printPage=<a class="govuk-link" href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.trust.printPage=<a class="govuk-link" href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.capacitor.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
-confirmationOfSubmission.capacitor.noId.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRep.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your client’s Capital Gain Tax on UK property account.
+confirmationOfSubmission.printPage=<a class="govuk-link" href="{0}">Print this page</a>
+confirmationOfSubmission.agent.printPage=<a class="govuk-link" href="{0}">Print this page</a>
+confirmationOfSubmission.trust.printPage=<a class="govuk-link" href="{0}">Print this page</a>
+confirmationOfSubmission.capacitor.printPage=You should <a class="govuk-link" href="{0}">print this page</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
+confirmationOfSubmission.capacitor.noId.printPage=You should <a class="govuk-link" href="{0}">print this page</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRep.printPage=You should <a class="govuk-link" href="{0}">print this page</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a class="govuk-link" href="{0}">print this page</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a class="govuk-link" href="{0}">print this page</a> for your records. The return details will not appear in your client’s Capital Gain Tax on UK property account.
 
 confirmationOfSubmission.whatNext=What you need to do next
 confirmationOfSubmission.agent.whatNext=What happens next
@@ -4366,7 +4366,7 @@ confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
 
-confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Self Assessment tax return (opens in a new tab)</a>.
+confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Self Assessment tax return<span class="govuk-!-display-none-print"> (opens in a new tab)</span></a>.
 confirmationOfSubmission.agent.ifSa.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.trust.ifSa.p1=You’ll need to provide details from this return in the trust’s next Self Assessment tax return.
 confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment tax return, they will need to provide details from this return in their next Self Assessment tax return.

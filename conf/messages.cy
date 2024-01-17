@@ -4297,14 +4297,14 @@ confirmationOfSubmission.emailSent=Rydym wedi anfon e-bost cadarnhau i <strong>{
 confirmationOfSubmission.sentToHmrc=Ffurflen Dreth wedi’i hanfon i CThEF
 confirmationOfSubmission.taxDue=Dyddiad cau ar gyfer talu treth
 
-confirmationOfSubmission.printPage=<a class="govuk-link" href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
-confirmationOfSubmission.agent.printPage=<a class="govuk-link" href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
-confirmationOfSubmission.trust.printPage=<a class="govuk-link" href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
-confirmationOfSubmission.capacitor.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer y person. Gall y person fwrw golwg dros y Ffurflen Dreth o’i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.capacitor.noId.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer y person. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.personalRep.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yng nghyfrif Treth Enillion Cyfalaf ar eiddo yn y DU eich cleient.
+confirmationOfSubmission.printPage=<a class="govuk-link" href="{0}">Argraffu’r dudalen hon</a>
+confirmationOfSubmission.agent.printPage=<a class="govuk-link" href="{0}">Argraffu’r dudalen hon</a>
+confirmationOfSubmission.trust.printPage=<a class="govuk-link" href="{0}">Argraffu’r dudalen hon</a>
+confirmationOfSubmission.capacitor.printPage=Dylech <a class="govuk-link" href="{0}">argraffu’r dudalen hon</a> ar gyfer y person. Gall y person fwrw golwg dros y Ffurflen Dreth o’i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.capacitor.noId.printPage=Dylech <a class="govuk-link" href="{0}">argraffu’r dudalen hon</a> ar gyfer y person. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.personalRep.printPage=Dylech <a class="govuk-link" href="{0}">argraffu’r dudalen hon</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=Dylech <a class="govuk-link" href="{0}">argraffu’r dudalen hon</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=Dylech <a class="govuk-link" href="{0}">argraffu’r dudalen hon</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yng nghyfrif Treth Enillion Cyfalaf ar eiddo yn y DU eich cleient.
 
 confirmationOfSubmission.whatNext=Yr hyn y mae angen i chi ei wneud nesaf
 confirmationOfSubmission.agent.whatNext=Yr hyn sy’n digwydd nesaf
@@ -4367,7 +4367,7 @@ confirmationOfSubmission.trust.ifSa=Os oes angen i’r ymddiriedolaeth anfon Ffu
 confirmationOfSubmission.capacitor.ifSa=Hunanasesiad
 confirmationOfSubmission.personalRep.ifSa=Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer y person
 
-confirmationOfSubmission.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn eich <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Ffurflen Dreth Hunanasesiad nesaf (yn agor tab newydd)</a>.
+confirmationOfSubmission.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn eich <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Ffurflen Dreth Hunanasesiad nesaf<span class="govuk-!-display-none-print"> (yn agor tab newydd)</span></a>.
 confirmationOfSubmission.agent.ifSa.p1=Os oes angen i’ch cleient anfon Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.
 confirmationOfSubmission.trust.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn Ffurflen Dreth Hunanasesiad nesaf yr ymddiriedolaeth.
 confirmationOfSubmission.capacitor.ifSa.p1=Os oes angen i’r person gyflwyno Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.

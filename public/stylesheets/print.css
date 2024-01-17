@@ -32,6 +32,11 @@ body {
     }
 }
 
+.govuk-link:not(.app-task-list__task-name) {
+    color: black !important;
+    text-decoration: none;
+}
+
 img {
     max-width: 100% !important; }
 
@@ -57,7 +62,6 @@ body footer,
 nav.hmrc-sign-out-nav,
 button,
 header > .hmrc-user-research-banner.hmrc-user-research-banner--show,
-.govuk-link:not(.app-task-list__task-name),
 .govuk-button {
     display: none !important;
 }
@@ -125,8 +129,7 @@ header > .hmrc-user-research-banner.hmrc-user-research-banner--show,
 }
 
 a.app-task-list__task-name:after,
-a[href^="http://"]:after,
-a[href^="https://"]:after {
+.govuk-link:after {
     content: "" ! important;
     font-size: 90%;
 }
