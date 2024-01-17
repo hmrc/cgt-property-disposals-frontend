@@ -4296,14 +4296,14 @@ confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong>
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
 confirmationOfSubmission.taxDue=Tax due date
 
-confirmationOfSubmission.printPage=<a class="govuk-link" href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.agent.printPage=<a class="govuk-link" href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.trust.printPage=<a class="govuk-link" href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.capacitor.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
-confirmationOfSubmission.capacitor.noId.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRep.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a class="govuk-link" href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your client’s Capital Gain Tax on UK property account.
+confirmationOfSubmission.printPage=<a class="govuk-link" href="{0}">Print this page</a>
+confirmationOfSubmission.agent.printPage=<a class="govuk-link" href="{0}">Print this page</a>
+confirmationOfSubmission.trust.printPage=<a class="govuk-link" href="{0}">Print this page</a>
+confirmationOfSubmission.capacitor.printPage=You should <a class="govuk-link" href="{0}">print this page</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
+confirmationOfSubmission.capacitor.noId.printPage=You should <a class="govuk-link" href="{0}">print this page</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRep.printPage=You should <a class="govuk-link" href="{0}">print this page</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a class="govuk-link" href="{0}">print this page</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a class="govuk-link" href="{0}">print this page</a> for your records. The return details will not appear in your client’s Capital Gain Tax on UK property account.
 
 confirmationOfSubmission.whatNext=What you need to do next
 confirmationOfSubmission.agent.whatNext=What happens next
