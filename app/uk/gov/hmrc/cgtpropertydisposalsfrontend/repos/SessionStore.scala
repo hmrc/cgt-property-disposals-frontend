@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import configs.syntax._
 import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -29,7 +28,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[SessionStoreImpl])
 trait SessionStore {
-
   def get()(implicit
     hc: HeaderCarrier
   ): Future[Either[Error, Option[SessionData]]]
@@ -37,7 +35,6 @@ trait SessionStore {
   def store(sessionData: SessionData)(implicit
     hc: HeaderCarrier
   ): Future[Either[Error, Unit]]
-
 }
 
 @Singleton
@@ -49,11 +46,9 @@ class SessionStoreImpl @Inject() (
   ec: ExecutionContext
 ) extends SessionStore
     with Repo {
-
   val cacheRepository: MongoCacheRepository[String] = {
-    val expireAfter: FiniteDuration = configuration.underlying
+    val expireAfter: FiniteDuration = configuration
       .get[FiniteDuration]("session-store.expiry-time")
-      .value
 
     new MongoCacheRepository[String](
       mongo,
@@ -89,5 +84,4 @@ class SessionStoreImpl @Inject() (
           )
         )
     }
-
 }

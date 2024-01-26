@@ -11,7 +11,6 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"          %% s"hmrc-mongo-$playVersion"         % "0.70.0",
     "uk.gov.hmrc"                %% "domain"                           % s"8.3.0-$playVersion",
     "org.typelevel"              %% "cats-core"                        % "2.9.0",
-    "com.github.kxbmap"          %% "configs"                          % "0.6.1",
     "org.julienrf"               %% "play-json-derived-codecs"         % "10.1.0",
     "com.github.julien-truffaut" %% "monocle-core"                     % "2.1.0",
     "com.github.julien-truffaut" %% "monocle-macro"                    % "2.1.0"

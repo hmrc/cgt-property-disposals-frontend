@@ -20,8 +20,6 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import configs.ConfigReader
-import configs.syntax._
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
@@ -78,12 +76,7 @@ class SupportingEvidenceController @Inject() (
     with SessionUpdates
     with StartingToAmendToFillingOutReturnBehaviour {
 
-  private def getUpscanInitiateConfig[A : ConfigReader](key: String): A =
-    configuration.underlying
-      .get[A](s"microservice.services.upscan-initiate.$key")
-      .value
-
-  private val maxUploads: Int = getUpscanInitiateConfig[Int]("max-uploads")
+  private val maxUploads = configuration.get[Int](s"microservice.services.upscan-initiate.max-uploads")
 
   private def withUploadSupportingEvidenceAnswers(
     f: (
@@ -95,7 +88,6 @@ class SupportingEvidenceController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((_, s: StartingToAmendReturn)) =>
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
-
       case Some(
             (
               s,
@@ -112,11 +104,10 @@ class SupportingEvidenceController @Inject() (
         maybeSupportingEvidenceAnswers.fold[Future[Result]](
           f(s, r, IncompleteSupportingEvidenceAnswers.empty)
         )(f(s, r, _))
-
-      case _ => Redirect(controllers.routes.StartController.start())
+      case _                                   => Redirect(controllers.routes.StartController.start())
     }
 
-  def isReplaymentDue(optionalAnswers: Option[YearToDateLiabilityAnswers]): Boolean =
+  private def isReplaymentDue(optionalAnswers: Option[YearToDateLiabilityAnswers]) =
     optionalAnswers.fold(ifEmpty = false) {
       case nonCalculatedYTDAnswers: NonCalculatedYTDAnswers =>
         nonCalculatedYTDAnswers
@@ -135,7 +126,7 @@ class SupportingEvidenceController @Inject() (
   )(
     requiredPreviousAnswer: SupportingEvidenceAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
-  ): Future[Result] =
+  ) =
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
       val backLink = currentAnswers.fold(
         _ => redirectToIfNoRequiredPreviousAnswer,
@@ -222,7 +213,6 @@ class SupportingEvidenceController @Inject() (
                          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourney)))
                        )
                 } yield ()
-
                 result.fold(
                   { e =>
                     logger.warn("Could not update session", e)
@@ -233,7 +223,6 @@ class SupportingEvidenceController @Inject() (
                       routes.SupportingEvidenceController.checkYourAnswers()
                     )
                 )
-
               } else {
                 val updatedAnswers: SupportingEvidenceAnswers = answers.fold(
                   _ =>
@@ -367,9 +356,7 @@ class SupportingEvidenceController @Inject() (
                 }
             )
         }
-
       }
-
     }
 
   def scanProgressSubmit(
@@ -390,7 +377,7 @@ class SupportingEvidenceController @Inject() (
   )(implicit
     request: RequestWithSessionData[_],
     hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit] = {
+  ) = {
     val newAnswers =
       upscanCallBack match {
         case success: UpscanSuccess =>
@@ -403,7 +390,6 @@ class SupportingEvidenceController @Inject() (
               success.fileName
             )
           answers.copy(evidences = supportingEvidence :: answers.evidences)
-
       }
 
     val newDraftReturn = fillingOutReturn.draftReturn.fold(
@@ -551,7 +537,7 @@ class SupportingEvidenceController @Inject() (
 
   private def checkYourAnswersHandler(
     answers: SupportingEvidenceAnswers
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[_]) =
     answers match {
       case IncompleteSupportingEvidenceAnswers(_, _, expiredEvidences) if expiredEvidences.nonEmpty =>
         Redirect(
@@ -663,7 +649,6 @@ class SupportingEvidenceController @Inject() (
         }
       }
     }
-
 }
 
 object SupportingEvidenceController {

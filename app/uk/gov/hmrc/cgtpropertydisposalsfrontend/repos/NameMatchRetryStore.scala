@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import configs.syntax._
 import play.api.Configuration
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
@@ -31,7 +30,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[NameMatchRetryStoreImpl])
 trait NameMatchRetryStore {
-
   def get[A <: NameMatchDetails : Reads](
     ggCredId: GGCredId
   ): Future[Either[Error, Option[UnsuccessfulNameMatchAttempts[A]]]]
@@ -40,7 +38,6 @@ trait NameMatchRetryStore {
     ggCredId: GGCredId,
     unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]
   ): Future[Either[Error, Unit]]
-
 }
 
 @Singleton
@@ -52,11 +49,9 @@ class NameMatchRetryStoreImpl @Inject() (
   ec: ExecutionContext
 ) extends NameMatchRetryStore
     with Repo {
-
   val cacheRepository: MongoCacheRepository[String] = {
-    val expireAfter: FiniteDuration = configuration.underlying
+    val expireAfter: FiniteDuration = configuration
       .get[FiniteDuration]("bpr-name-match.store.expiry-time")
-      .value
 
     new MongoCacheRepository[String](
       mongo,
@@ -79,5 +74,4 @@ class NameMatchRetryStoreImpl @Inject() (
     unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]
   ): Future[Either[Error, Unit]] =
     store(ggCredId.value, unsuccessfulAttempts)
-
 }
