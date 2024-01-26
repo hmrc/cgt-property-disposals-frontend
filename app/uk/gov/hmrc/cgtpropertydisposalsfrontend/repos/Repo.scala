@@ -24,7 +24,6 @@ import uk.gov.hmrc.play.http.logging.Mdc.preservingMdc
 import scala.concurrent.{ExecutionContext, Future}
 
 trait Repo {
-
   val cacheRepository: MongoCacheRepository[String]
 
   val sessionKey: String
@@ -37,10 +36,12 @@ trait Repo {
     }
 
   protected def store[A : Writes](id: String, a: A)(implicit ec: ExecutionContext): Future[Either[Error, Unit]] =
-    cacheRepository
-      .put(id)(DataKey(sessionKey), a)
-      .map(_ => Right(()))
-      .recover { case _: Exception =>
-        Left(Error("unknown error during inserting session data in mongo"))
-      }
+    preservingMdc {
+      cacheRepository
+        .put(id)(DataKey(sessionKey), a)
+        .map(_ => Right(()))
+        .recover { case _: Exception =>
+          Left(Error("unknown error during inserting session data in mongo"))
+        }
+    }
 }

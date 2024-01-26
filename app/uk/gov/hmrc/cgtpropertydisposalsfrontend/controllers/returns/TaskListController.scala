@@ -19,14 +19,13 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import cats.data.{EitherT, NonEmptyList}
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import configs.syntax._
 import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{IncompleteSupportingEvidenceAnswers, SupportingEvidence}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.IncompleteSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TimeUtils}
@@ -61,14 +60,8 @@ class TaskListController @Inject() (
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging {
-
-  private val s3UrlExpirySeconds: Long =
-    configuration.underlying
-      .get[FiniteDuration](
-        "microservice.services.upscan-initiate.s3-url-expiry-duration"
-      )
-      .value
-      .toSeconds
+  private val s3UrlExpirySeconds =
+    configuration.get[FiniteDuration]("microservice.services.upscan-initiate.s3-url-expiry-duration").toSeconds
 
   def taskList(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -87,12 +80,9 @@ class TaskListController @Inject() (
               sm => Ok(singleMixedUseDisposalTaskListPage(sm, f))
             )
           )
-
-        case _ =>
+        case _                                                      =>
           Redirect(baseRoutes.StartController.start())
-
       }
-
     }
 
   private def handleExpiredFiles(
@@ -101,7 +91,7 @@ class TaskListController @Inject() (
   )(implicit
     request: RequestWithSessionData[_],
     hc: HeaderCarrier
-  ): EitherT[Future, Error, DraftReturn] = {
+  ) = {
     val updatedUploadSupportingEvidenceAnswers =
       getExpiredSupportingEvidence(draftReturn).map { case (expired, answers) =>
         val incompleteAnswers =
@@ -191,12 +181,11 @@ class TaskListController @Inject() (
              )
       } yield updatedDraftReturn
     }
-
   }
 
   private def getExpiredSupportingEvidence(
     draftReturn: DraftReturn
-  ): Option[(NonEmptyList[SupportingEvidence], SupportingEvidenceAnswers)] =
+  ) =
     draftReturn
       .fold(
         _.supportingEvidenceAnswers,
@@ -215,7 +204,7 @@ class TaskListController @Inject() (
 
   private def getExpiredMandatoryEvidence(
     draftReturn: DraftReturn
-  ): Option[(MandatoryEvidence, YearToDateLiabilityAnswers)] =
+  ) =
     draftReturn
       .fold(
         _.yearToDateLiabilityAnswers,
@@ -237,7 +226,6 @@ class TaskListController @Inject() (
           .map(_ -> answers)
       }
 
-  private def fileHasExpired(createdOnTimestamp: LocalDateTime): Boolean =
+  private def fileHasExpired(createdOnTimestamp: LocalDateTime) =
     createdOnTimestamp.plusSeconds(s3UrlExpirySeconds).isBefore(TimeUtils.now())
-
 }

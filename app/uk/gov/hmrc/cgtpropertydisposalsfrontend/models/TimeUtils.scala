@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.Order
 import cats.syntax.either._
 import cats.syntax.order._
-import configs.ConfigReader
+import play.api.ConfigLoader
 import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.i18n.Messages
@@ -30,10 +30,8 @@ import java.time.{Clock, LocalDate, LocalDateTime}
 import scala.util.Try
 
 object TimeUtils {
-
-  implicit val configs: ConfigReader[LocalDate] = ConfigReader.fromTry { case (config, key) =>
+  implicit val configs: ConfigLoader[LocalDate] = (config, key) =>
     LocalDate.parse(config.getString(key), DateTimeFormatter.ISO_DATE)
-  }
 
   private val clock = Clock.systemUTC()
 
@@ -146,7 +144,6 @@ object TimeUtils {
           monthKey -> value.getMonthValue.toString,
           yearKey  -> value.getYear.toString
         )
-
     }
 
   private def isValidDate(
