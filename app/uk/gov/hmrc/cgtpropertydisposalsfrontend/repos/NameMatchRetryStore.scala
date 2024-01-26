@@ -74,4 +74,5 @@ class NameMatchRetryStoreImpl @Inject() (
     unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]
   ): Future[Either[Error, Unit]] =
     store(ggCredId.value, unsuccessfulAttempts)
+
 }
