@@ -36,7 +36,7 @@ landingPage.howTo.p4=You can also use this service to pay any tax you might owe 
 landingPage.howTo.p5=If you’re a non-resident, you must report all sales or disposals of UK property, even if you have no tax to pay or have made a loss.
 landingPage.startButton=Start
 landingPage.beforeYouStart.h2=Before you start
-landingPage.beforeYouStart.p1=To use this service, you’ll need a Government Gateway user ID and password. If you do not have a user ID, you can create one.
+landingPage.beforeYouStart.p1=To use this service, you’ll need to sign in with your HMRC online username and password. If you do not have sign in details you can create them when you first register.
 landingPage.beforeYouStart.p2=You can <a class="govuk-link" href="{0}">contact HMRC</a> if you need help accessing the service.
 landingPage.beforeYouStart.p3=Get the following information ready:
 landingPage.beforeYouStart.list1.bullet1=property address and postcode
@@ -406,7 +406,7 @@ subscribed.buttonText=Go to account
 registerTrust.title=You’ll need to register the trust
 registerTrust.p=To use this service, you’ll need to:
 registerTrust.bullet1=<a class="govuk-link" href="{0}" target="_blank">Register the trust (opens in new window)</a>.
-registerTrust.bullet2=Sign in to this service using the Government Gateway user ID and password you used to register the trust.
+registerTrust.bullet2=Sign into this service using the HMRC online username and password you used to register the trust.
 
 reportCorpTax.title=You’ve tried to sign in as an organisation
 reportCorpTax.p1=Trusts are the only organisations that can use this service to report Capital Gains Tax on UK property.
@@ -418,14 +418,14 @@ entityType.trust=Yes
 entityType.error.required=Select yes if you want to report a capital gain for a trust or estate
 entityType.invalid=Select yes if you want to report a capital gain for a trust or estate
 
-wrongAccountForTrusts.title=Sign in to Government Gateway as a trust
+wrongAccountForTrusts.title=Sign in as a trust
 wrongAccountForTrusts.p1=You’re trying to use this service to report Capital Gains Tax on UK property for a trust.
 wrongAccountForTrusts.whatWentWrong=What went wrong
-wrongAccountForTrusts.whatWentWrong.p1=You’ve signed into Government Gateway as an ‘individual’ person not an ‘organisation’.
+wrongAccountForTrusts.whatWentWrong.p1=You’ve signed into HMRC online as an ’individual’ person not an ’organisation’.
 wrongAccountForTrusts.whatNext=What you’ll need to do next
-wrongAccountForTrusts.whatNext.p1=You’ll need to sign in using the <a class="govuk-link" href="{0}">Government Gateway</a> user ID and password created for the trust. These are the same details you used to register the trust.
-wrongAccountForTrusts.createGGAccount=Create a trust’s Government Gateway account
-wrongAccountForTrusts.createGGAccount.p1=You can a <a class="govuk-link" href="{0}">create a Government Gateway account</a> for the trust. It will need to be for an ‘organisation’ and not an ‘individual’. The trust will need to be <a class="govuk-link" href="{1}">registered</a> before you can use this service.
+wrongAccountForTrusts.whatNext.p1=You’ll need to <a class="govuk-link" href="{0}">sign in</a> using the username and password created for the trust. These are the same details you used to register the trust.
+wrongAccountForTrusts.createGGAccount=Create HMRC sign in details for a trust
+wrongAccountForTrusts.createGGAccount.p1=You can <a class="govuk-link" href="{0}">create HMRC sign in details</a> for the trust. It will need to be for an ‘organisation’ and not an ‘individual’. The trust will need to be <a class="govuk-link" href="{1}">registered</a> before you can use this service.
 
 enterName.title=Enter your full name
 enterName.firstName.label=First name
@@ -497,7 +497,7 @@ iv.technicalIssue.p=You’ll need to try again later.
 
 # IV Precondition Failed
 iv.preconditionFailed.title=You’re not able to use this service
-iv.preconditionFailed.p1=We’ve checked the details in your Government Gateway account and you do not meet the criteria to use this service.
+iv.preconditionFailed.p1=We’ve checked your HMRC online details and you do not meet the criteria to use this service.
 
 isReportingForATrust.title=Do you want to report a capital gain for a trust or estate?
 isReportingForATrust.error.required=Select yes if you want to report the tax for a trust or estate
@@ -528,12 +528,12 @@ trustName.error.required=Enter the name of your trust
 trustName.error.tooLong=The name of your trust must be less than 105 characters
 trustName.error.pattern=The trust’s name must only include letters, numbers, spaces, ampersands, apostrophes and hyphens. Do not include colons.
 
-alreadySubscribedWithDifferentGGAccount.title=You need to sign in with a different Government Gateway account
-alreadySubscribedWithDifferentGGAccount.p=You’ll need to sign in with same Government Gateway user ID you used to create your Capital Gains Tax on UK property account.
-alreadySubscribedWithDifferentGGAccount.button=Sign in with correct user ID
+alreadySubscribedWithDifferentGGAccount.title=You need to sign in with different HMRC online details
+alreadySubscribedWithDifferentGGAccount.p=You’ll need to sign in with the same username and password you used to create your Capital Gains Tax on UK property account.
+alreadySubscribedWithDifferentGGAccount.button=Sign in with correct details
 
 changeGGAccount.title=If the details were not correct
-changeGGAccount.p=You can try again. You’ll need to sign in with the Government Gateway user ID you want to use to create your Capital Gains Tax on UK property account.
+changeGGAccount.p=You can try again. You’ll need to sign in with the same HMRC online details you used to create your Capital Gains Tax on UK property account.
 changeGGAccount.button=Try again
 
 weOnlySupportGG.title=Report and pay Capital Gains Tax on UK property
@@ -560,7 +560,7 @@ agent.enter-client-cgt-ref.label=What is your client’s Capital Gains Tax on UK
 agent.enter-client-cgt-ref.helpText=This is 15 characters. For example, XYCGTP123456789.
 agent.enter-client-cgt-ref.link=How to ‘Ask a client to authorise you’ online
 agent.enter-client-cgt-ref.details.li1=Go to your agent services account and select <strong class="bold">‘Ask a client to authorise you’</strong>. You need to do this with each of your clients before you can manage their Capital Gains Tax on UK property account. You must do this even if they have already completed a 64-8 form for Self Assessment. This process is called a digital handshake.
-agent.enter-client-cgt-ref.details.li2=When you send your client the authorisation link, tell them to use the same Government Gateway user ID and password they used to create their Capital Gains Tax on UK property account. They must not enter another user ID or create a new one.
+agent.enter-client-cgt-ref.details.li2=When you send your client to the authorisations link, tell them to use the same HMRC username and password they used to create their Capital Gains Tax on UK property account. They must not enter other HMRC sign in details or create new HMRC sign in details.
 
 cgtReference.error.required=Enter a Capital Gains Tax on UK property account number
 cgtReference.error.tooShort=Enter a Capital Gains Tax on UK property account number that is 15 characters

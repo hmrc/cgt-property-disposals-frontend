@@ -36,7 +36,7 @@ landingPage.howTo.p4=Gallwch hefyd ddefnyddio’r gwasanaeth hwn i dalu unrhyw d
 landingPage.howTo.p5=Os nad ydych yn breswylydd, mae’n rhaid i chi roi gwybod am bob gwerthiant neu warediad eiddo yn y DU, hyd yn oed os nad oes gennych dreth i’w thalu neu os ydych wedi gwneud colled.
 landingPage.startButton=Dechrau
 landingPage.beforeYouStart.h2=Cyn i chi ddechrau
-landingPage.beforeYouStart.p1=I ddefnyddio’r gwasanaeth hwn, bydd angen Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer Porth y Llywodraeth arnoch. Os nad oes gennych Ddynodydd Defnyddiwr, gallwch greu un.
+landingPage.beforeYouStart.p1=I ddefnyddio’r gwasanaeth hwn, bydd angen i chi fewngofnodi gan ddefnyddio’ch enw defnyddiwr a chyfrinair ar-lein CThEF. Os nad oes gennych chi’r manylion mewngofnodi, gallwch eu creu pan fyddwch chi’n cofrestru gyntaf.
 landingPage.beforeYouStart.p2=Gallwch <a href="{0}">gysylltu â CThEF</a> os oes angen help arnoch i gael at y gwasanaeth.
 landingPage.beforeYouStart.p3=Sicrhewch fod yr wybodaeth ganlynol wrth law:
 landingPage.beforeYouStart.list1.bullet1=cyfeiriad a chod post yr eiddo
@@ -406,7 +406,7 @@ subscribed.buttonText=Ewch i’r cyfrif
 registerTrust.title=Bydd angen i chi gofrestru’r ymddiriedolaeth
 registerTrust.p=I ddefnyddio’r gwasanaeth hwn, bydd angen i chi:
 registerTrust.bullet1=<a href="{0}" target="_blank">Cofrestru’r ymddiriedolaeth (yn agor tab newydd)</a>.
-registerTrust.bullet2=Mewngofnodi i’r gwasanaeth hwn gan ddefnyddio’r Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer Porth y Llywodraeth a ddefnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
+registerTrust.bullet2=Mewngofnodwch i’r gwasanaeth hwn gan ddefnyddio’r enw defnyddiwr a chyfrinair ar-lein a ddefnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
 
 reportCorpTax.title=Rydych wedi ceisio mewngofnodi fel sefydliad
 reportCorpTax.p1=Ymddiriedolaethau yw’r unig sefydliad sy’n gallu defnyddio’r gwasanaeth hwn i roi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y DU.
@@ -418,14 +418,14 @@ entityType.trust=Iawn
 entityType.error.required=Dewiswch ‘Iawn’ os ydych am roi gwybod am ennill cyfalaf ar gyfer ymddiriedolaeth neu ystâd
 entityType.invalid=Dewiswch ‘Iawn’ os ydych am roi gwybod am ennill cyfalaf ar gyfer ymddiriedolaeth neu ystâd
 
-wrongAccountForTrusts.title=Mewngofnodi i Borth y Llywodraeth fel ymddiriedolaeth
+wrongAccountForTrusts.title=Mewngofnodwch fel ymddiriedolaeth
 wrongAccountForTrusts.p1=Rydych yn ceisio defnyddio’r gwasanaeth hwn i roi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y Du ar gyfer ymddiriedolaeth.
 wrongAccountForTrusts.whatWentWrong=Yr hyn a aeth o’i le
-wrongAccountForTrusts.whatWentWrong.p1=Rydych wedi mewngofnodi i Borth y Llywodraeth fel ‘unigolyn’ ac nid fel ‘sefydliad’.
+wrongAccountForTrusts.whatWentWrong.p1=Rydych wedi mewngofnodi i CThEF ar-lein fel ‘unigolyn’ ac nid fel ‘sefydliad’.
 wrongAccountForTrusts.whatNext=Yr hyn y bydd angen i chi ei wneud nesaf
-wrongAccountForTrusts.whatNext.p1=Bydd angen i chi mewngofnodi drwy ddefnyddio’r Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer <a class="govuk-link" href="{0}">Porth y Llywodraeth</a> a grëwyd ar gyfer yr ymddiriedolaeth. Rhain yw’r un manylion a defnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
-wrongAccountForTrusts.createGGAccount=Creu cyfrif Porth y Llywodraeth ymddiriedolaeth
-wrongAccountForTrusts.createGGAccount.p1=Gallwch <a class="govuk-link" href="{0}">greu cyfrif Porth y Llywodraeth</a> ar gyfer yr ymddiriedolaeth. Bydd angen iddo fod ar gyfer ‘sefydliad’ ac nid ‘unigolyn’. Bydd angen i’r ymddiriedolaeth <a href="{1}">gofrestru</a> cyn y gallwch ddefnyddio’r gwasanaeth hwn.
+wrongAccountForTrusts.whatNext.p1=Bydd angen i chi <a class="govuk-link" href="{0}">fewngofnodi</a> gan ddefnyddio’r enw defnyddiwr a’r cyfrinair a grëwyd ar gyfer yr ymddiriedolaeth. Rhain yw’r un manylion a defnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
+wrongAccountForTrusts.createGGAccount=Creu manylion mewngofnodi CThEF ar gyfer ymddiriedolaeth
+wrongAccountForTrusts.createGGAccount.p1=Gallwch <a class="govuk-link" href="{0}">greu manylion mewngofnodi CThEFs</a> ar gyfer ymddiriedolaeth. Bydd angen iddo fod ar gyfer ‘sefydliad’ ac nid ‘unigolyn’. Bydd angen i’r ymddiriedolaeth <a class="govuk-link" href="{1}">gofrestru</a> cyn y gallwch ddefnyddio’r gwasanaeth hwn.
 
 enterName.title=Nodwch eich enw llawn
 enterName.firstName.label=Enw cyntaf
@@ -497,7 +497,7 @@ iv.technicalIssue.p=Bydd angen i chi roi cynnig arall arni nes ymlaen.
 
 # IV Precondition Failed
 iv.preconditionFailed.title=Ni allwch ddefnyddio’r gwasanaeth hwn
-iv.preconditionFailed.p1=Rydym wedi gwirio’r manylion yn eich cyfrif Porth y Llywodraeth ac nid ydych yn bodloni’r meini prawf er mwyn gallu defnyddio’r gwasanaeth hwn.
+iv.preconditionFailed.p1=Rydym wedi gwirio’ch manylion CThEF ar-lein ac nid ydych yn bodloni’r meini prawf er mwyn gallu defnyddio’r gwasanaeth hwn.
 
 isReportingForATrust.title=A ydych am roi gwybod am ennill cyfalaf ar gyfer ymddiriedolaeth neu ystâd?
 isReportingForATrust.error.required=Dewiswch ‘Iawn’ os ydych am roi gwybod am y dreth ar gyfer ymddiriedolaeth neu ystâd
@@ -528,12 +528,12 @@ trustName.error.required=Nodwch enw’ch ymddiriedolaeth
 trustName.error.tooLong=Mae’n rhaid i enw’ch ymddiriedolaeth fod yn llai na 105 o gymeriadau
 trustName.error.pattern=Mae’n rhaid i enw’r ymddiriedolaeth gynnwys llythrennau, rhifau, bylchau, ampersandau, collnodau a chysylltnodau yn unig. Peidiwch â chynnwys colonau
 
-alreadySubscribedWithDifferentGGAccount.title=Mae angen i chi fewngofnodi â chyfrif Porth y Llywodraeth gwahanol
-alreadySubscribedWithDifferentGGAccount.p=Bydd angen i chi mewngofnodi â’r un Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth a defnyddiwyd gennych i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-alreadySubscribedWithDifferentGGAccount.button=Mewngofnodi gyda’r Dynodydd Defnyddiwr (ID) cywir
+alreadySubscribedWithDifferentGGAccount.title=Mae’n rhaid i chi fewngofnodi gyda manylion CThEF ar-lein gwahanol
+alreadySubscribedWithDifferentGGAccount.p=Bydd angen i chi mewngofnodi â’r un enw defnyddiwr a chyfrinair a defnyddiwyd gennych i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+alreadySubscribedWithDifferentGGAccount.button=Mewngofnodi gyda’r manylion cywir
 
 changeGGAccount.title=Os nad oedd y manylion yn gywir
-changeGGAccount.p=Gallwch roi cynnig arall arni. Bydd angen i chi mewngofnodi â’r Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth rydych am ei ddefnyddio i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+changeGGAccount.p=Gallwch roi cynnig arall arni. Bydd angen i chi mewngofnodi â’r un manylion ar-lein CThEF a defnyddiwyd gennych i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
 changeGGAccount.button=Rhoi cynnig arall arni
 
 weOnlySupportGG.title=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
@@ -560,7 +560,7 @@ agent.enter-client-cgt-ref.label=Pa rif cyfrif Treth Enillion Cyfalaf ar eiddo y
 agent.enter-client-cgt-ref.helpText=Mae hwn yn 15 o gymeriadau. Er enghraifft, XYCGTP123456789.
 agent.enter-client-cgt-ref.link=Sut i ‘Gofyn i gleient eich awdurdodi’ ar-lein
 agent.enter-client-cgt-ref.details.li1=Ewch i’ch cyfrif gwasanaethau asiant a dewiswch <strong class="bold">‘Gofyn i gleient eich awdurdodi’</strong>. Mae angen i chi wneud hyn gyda phob un o’ch cleientiaid cyn y gallwch reoli eu Cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU. Mae’n rhaid i chi wneud hyn hyd yn oed os ydynt eisoes wedi llenwi ffurflen 64-8 ar gyfer Hunanasesiad. Gelwir y broses hon yn ysgwyd llaw digidol.
-agent.enter-client-cgt-ref.details.li2=Pan fyddwch yn anfon y cysylltiad awdurdodi at eich cleient, dywedwch wrtho am ddefnyddio’r un Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer Porth y Llywodraeth a ddefnyddiwyd ganddo i greu ei Gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU. Mae’n rhaid iddo beidio â nodi Dynodydd Defnyddiwr (ID) arall na chreu un newydd.
+agent.enter-client-cgt-ref.details.li2=Pan fyddwch yn anfon eich cleient i’r cysylltiad awdurdodi, rhowch wybod iddyn nhw am ddefnyddio’r un enw defnyddiwr a chyfrinair CThEF a ddefnyddiwyd ganddynt i greu eu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU. Mae’n rhaid iddynt beidio â nodi manylion mewngofnodi eraill CThEF na chreu manylion mewngofnodi newydd CThEF.
 
 cgtReference.error.required=Nodwch rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 cgtReference.error.tooShort=Nodwch rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sy''n 15 o gymeriadau
