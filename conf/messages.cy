@@ -3892,7 +3892,7 @@ taxDue.title=Rhowch wybod i ni faint o Dreth Enillion Cyfalaf sy’n ddyledus ar
 taxDue.h2=Faint o Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon?
 taxDue.p1=Gwnaethom ddefnyddio’r manylion a nodwyd yn y Ffurflen Dreth hon i gyfrifo swm y Dreth Enillion Cyfalaf sy’n ddyledus.
 taxDue.p2=Efallai y bydd angen i chi nodi’r ffigurau hyn pan fyddwch yn llenwi Ffurflenni Treth yn y dyfodol.
-taxDue.printLink=Argraffu neu gadw’r dudalen hon fel PDF
+taxDue.printLink=Argraffu’r dudalen hon
 taxDue.initialGainOrLoss=Ennill neu golled gychwynnol
 taxDue.assistive.initialGainOrLoss=ar gyfer ennill neu golled gychwynnol
 taxDue.gainOrLossAfterReliefs=Ennill neu golled ar ôl rhyddhad
@@ -4400,7 +4400,7 @@ viewReturn.heading.taxOwed=Treth sy’n ddyledus ar gyfer y Ffurflen Dreth
 viewReturn.amend.heading.taxOwed=Rhwymedigaeth ddiweddaredig ar gyfer y Ffurflen Dreth hon
 viewReturn.heading.reference=Cyfeirnod y Ffurflen Dreth
 viewReturn.heading.payment.reference=Cyfeirnod y taliad
-viewReturn.printLink=Ewch ati i argraffu neu gadw’r dudalen hon ar gyfer eich cofnodion
+viewReturn.printLink=Argraffu’r dudalen hon
 
 viewReturn.charges.heading=Taliadau
 viewReturn.charges.description=Disgrifiad
@@ -5310,7 +5310,7 @@ confirmCancelAmendReturn.error.boolean=Dewiswch ‘Iawn’ os ydych am ganslo
 amendCya.title=Newid eich Ffurflen Dreth
 amendCya.agent.title=Newid Ffurflen Dreth eich cleient
 amendCya.p1=Ar ôl ateb yr holl gwestiynau, byddwch yn gallu cyflwyno’ch Ffurflen Dreth.
-amendCya.printLink=Argraffu neu gadw’r dudalen hon fel PDF
+amendCya.printLink=Argraffu’r dudalen hon
 amendCya.insetText=Ni fyddwch yn gallu cadw a dod yn ôl yn nes ymlaen tra ydych yn newid eich Ffurflen Dreth.
 
 unmetDependency.x1.title=Yr hyn y bydd angen i chi ei wneud nesaf
