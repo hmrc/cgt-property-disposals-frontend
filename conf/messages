@@ -3891,7 +3891,7 @@ taxDue.title=Tell us how much Capital Gains Tax is due for this return
 taxDue.h2=How much Capital Gains Tax is due for this return?
 taxDue.p1=We used the details that were entered into this return to work out the amount of Capital Gains Tax due.
 taxDue.p2=You may need to enter these figures when you complete future returns.
-taxDue.printLink=Print or save this page as a PDF
+taxDue.printLink=Print this page
 taxDue.initialGainOrLoss=Initial gain or loss
 taxDue.assistive.initialGainOrLoss=for initial gain or loss
 taxDue.gainOrLossAfterReliefs=Gain or loss after reliefs
@@ -4399,7 +4399,7 @@ viewReturn.heading.taxOwed=Tax owed for return
 viewReturn.amend.heading.taxOwed=Updated liability for this return
 viewReturn.heading.reference=Return reference number
 viewReturn.heading.payment.reference=Payment reference number
-viewReturn.printLink=Print or save this page for your records
+viewReturn.printLink=Print this page
 
 viewReturn.charges.heading=Payments
 viewReturn.charges.description=Description
@@ -5309,7 +5309,7 @@ confirmCancelAmendReturn.error.boolean=Select yes if you want to cancel
 amendCya.title=Change your return
 amendCya.agent.title=Change your client’s return
 amendCya.p1=Once all questions have been answered you will be able to submit your return.
-amendCya.printLink=Print or save this page as a PDF
+amendCya.printLink=Print this page
 amendCya.insetText=You will not be able to save and come back later while you’re changing your return.
 
 unmetDependency.x1.title=What you’ll need to do next
