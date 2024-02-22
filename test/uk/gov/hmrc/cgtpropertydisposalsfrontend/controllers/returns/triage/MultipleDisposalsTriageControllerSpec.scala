@@ -268,23 +268,16 @@ class MultipleDisposalsTriageControllerSpec
       .expects()
       .returning(uuid)
 
-  private def getTaxYearExchanged(taxYear: Option[TaxYear]): Option[TaxYearExchanged] =
+  private def getTaxYearExchanged(taxYear: Option[TaxYear]): Option[TaxYearExchanged] = {
+    val currentTaxYear = TaxYear.thisTaxYearStartDate().getYear
+    val validYears     = TaxYearExchanged.cutoffYear to currentTaxYear
     taxYear match {
-      case Some(t) if t.startDateInclusive.getYear === 2020 => Some(TaxYearExchanged(2020))
-      case Some(t) if t.startDateInclusive.getYear === 2021 => Some(TaxYearExchanged(2021))
-      case Some(t) if t.startDateInclusive.getYear === 2022 => Some(TaxYearExchanged(2022))
-      case Some(t) if t.startDateInclusive.getYear === 2023 => Some(TaxYearExchanged(2023))
-      case _                                                => None
+      case Some(t) if validYears.contains(t.startDateInclusive.getYear) =>
+        Some(TaxYearExchanged(t.startDateInclusive.getYear))
+      case _                                                            =>
+        None
     }
-
-  private def getTaxYearExchanged(taxYear: TaxYear): TaxYearExchanged =
-    taxYear match {
-      case t if t.startDateInclusive.getYear === 2020 => TaxYearExchanged(2020)
-      case t if t.startDateInclusive.getYear === 2021 => TaxYearExchanged(2021)
-      case t if t.startDateInclusive.getYear === 2022 => TaxYearExchanged(2022)
-      case t if t.startDateInclusive.getYear === 2023 => TaxYearExchanged(2023)
-      case _                                          => TaxYearExchanged.taxYearExchangedBefore2020
-    }
+  }
 
   "MultipleDisposalsTriageController" when {
 
@@ -1129,7 +1122,7 @@ class MultipleDisposalsTriageControllerSpec
               forAll { c: CompleteMultipleDisposalsTriageAnswers =>
                 val answers                         = c.copy(
                   countryOfResidence = sample[Country],
-                  taxYearExchanged = Some(getTaxYearExchanged(taxYear)),
+                  taxYearExchanged = getTaxYearExchanged(Some(taxYear)),
                   taxYear = taxYear
                 )
                 val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
