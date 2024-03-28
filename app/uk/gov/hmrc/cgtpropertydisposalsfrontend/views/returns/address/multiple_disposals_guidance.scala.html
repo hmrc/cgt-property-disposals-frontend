@@ -60,6 +60,10 @@
   <h1 class="govuk-heading-xl">@title</h1>
 
     <p class="govuk-body">
+    @messages(s"$key.p0")
+    </p>
+
+    <p class="govuk-body">
       @messages(s"$key$userKey.p1")
     </p>
 
@@ -84,11 +88,7 @@
     </ul>
 
     <p class="govuk-body">
-      @messages(s"$key$userKey.p3")
-    </p>
-
-    <p class="govuk-body">
-      @messages(s"$key.p4")
+      @messages(s"$key.p3")
     </p>
 
     @formWrapper(routes.PropertyDetailsController.multipleDisposalsGuidanceSubmit()) {

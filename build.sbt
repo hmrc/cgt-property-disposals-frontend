@@ -1,19 +1,17 @@
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
-addCommandAlias("fix", "all compile:scalafix test:scalafix")
 
 lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
-    addCompilerPlugin(scalafixSemanticdb),
     scalaVersion := "2.13.12",
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test(),
     onLoadMessage := "",
     PlayKeys.playDefaultPort := 7020,
     scalafmtOnCompile := true,
+    // Disable default sbt Test options (might change with new versions of bootstrap)
     Test / testOptions -= Tests.Argument("-o", "-u", "target/test-reports", "-h", "target/test-reports/html-report"),
     // Suppress successful events in Scalatest in standard output (-o)
     // Options described here: https://www.scalatest.org/user_guide/using_scalatest_with_sbt

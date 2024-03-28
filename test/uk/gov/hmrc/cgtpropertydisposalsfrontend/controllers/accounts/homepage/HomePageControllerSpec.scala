@@ -132,6 +132,12 @@ class HomePageControllerSpec
       .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](response))
 
+  private def mockUpdateSAStatus(submissionDate: LocalDate, displayReturn: DisplayReturn) =
+    (mockReturnsService
+      .updateSAStatusToSentReturn(_: LocalDate, _: DisplayReturn))
+      .expects(submissionDate, displayReturn)
+      .returning(displayReturn)
+
   private def mockStartPaymentJourney(
     cgtReference: CgtReference,
     chargeReference: Option[String],
@@ -1625,26 +1631,6 @@ class HomePageControllerSpec
 
       "show an error page" when {
 
-        "there is an error while calling the display return API" ignore {
-          val returnSummary = sample[ReturnSummary].copy(
-            isRecentlyAmended = false,
-            taxYear = "2020"
-          )
-
-          val subscribed = sample[Subscribed].copy(
-            draftReturns = List.empty,
-            sentReturns = List(returnSummary)
-          )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithSubscribed(subscribed))
-            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, returnSummary.submissionId)(Left(Error("")))
-          }
-
-          checkIsTechnicalErrorPage(performAction())
-        }
-
         "there is an error updating the session" in {
           val subscribed = sample[Subscribed].copy(
             draftReturns = List.empty,
@@ -1820,7 +1806,7 @@ class HomePageControllerSpec
       behave like commonPreviousYearToDateBehaviour(
         () => performAction(),
         List.empty,
-        (previousYearToDate, subscribed) =>
+        (_, subscribed) =>
           StartingNewDraftReturn(
             subscribed.subscribedDetails,
             subscribed.ggCredId,
@@ -1830,7 +1816,7 @@ class HomePageControllerSpec
             Some(
               PreviousReturnData(
                 subscribed.sentReturns,
-                previousYearToDate,
+                None,
                 None,
                 None
               )
@@ -1953,13 +1939,13 @@ class HomePageControllerSpec
       behave like commonPreviousYearToDateBehaviour(
         () => performAction(draftReturn.id),
         List(draftReturn),
-        (previousYearToDate, subscribed) =>
+        (_, subscribed) =>
           FillingOutReturn(
             subscribed.subscribedDetails,
             subscribed.ggCredId,
             subscribed.agentReferenceNumber,
             draftReturn,
-            Some(PreviousReturnData(subscribed.sentReturns, previousYearToDate, None, None)),
+            Some(PreviousReturnData(subscribed.sentReturns, None, None, None)),
             None
           ),
         controllers.returns.routes.TaskListController.taskList()
@@ -2023,7 +2009,7 @@ class HomePageControllerSpec
           checkIsTechnicalErrorPage(performAction(returnSummary.submissionId))
         }
 
-        "there is an error getting the most latest return for the previous ytd figure" ignore {
+        "there is an error getting the most latest return for the previous ytd figure" in {
 
           val disposalDate = DisposalDate(
             LocalDate.of(2021, 1, 1),
@@ -2047,10 +2033,6 @@ class HomePageControllerSpec
               .map(_.toString)
               .getOrElse("2020")
 
-          val completeReturn = sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers = triageAnswers
-          )
-
           val returnSummary1 = sample[ReturnSummary].copy(
             taxYear = taxYearStartYear,
             submissionDate = LocalDate.of(taxYearStartYear.toInt, 5, 5),
@@ -2070,17 +2052,9 @@ class HomePageControllerSpec
 
           val sessionData = SessionData.empty.copy(journeyStatus = Some(subscribed))
 
-          val displayReturn = DisplayReturn(completeReturn, ReturnType.FurtherReturn)
-
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockDisplayReturn(
-              subscribed.subscribedDetails.cgtReference,
-              returnSummary1.submissionId
-            )(
-              Right(displayReturn)
-            )
             mockDisplayReturn(
               subscribed.subscribedDetails.cgtReference,
               returnSummary2.submissionId
@@ -2088,13 +2062,11 @@ class HomePageControllerSpec
               Left(Error(""))
             )
 
-            checkIsTechnicalErrorPage(performAction(returnSummary1.submissionId))
-
+            checkIsTechnicalErrorPage(performAction(returnSummary2.submissionId))
           }
-
         }
 
-        "there is an error updating the session" ignore {
+        "there is an error updating the session" in {
           val taxDue         = sample[AmountInPence]
           val completeReturn = sample[CompleteSingleDisposalReturn].copy(
             yearToDateLiabilityAnswers = Right(sample[CompleteCalculatedYTDAnswers].copy(taxDue = taxDue))
@@ -2110,6 +2082,7 @@ class HomePageControllerSpec
             )(
               Right(displayReturn)
             )
+            mockUpdateSAStatus(returnSummary.submissionDate, displayReturn)
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -2120,10 +2093,9 @@ class HomePageControllerSpec
                     completeReturn,
                     ReturnType.FurtherReturn,
                     returnSummary,
-                    Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue), None, None))
+                    Some(PreviousReturnData(subscribed.sentReturns, None, None, None))
                   )
-                ),
-                journeyType = Some(ReturnsJourneyType)
+                )
               )
             )(Left(Error("")))
           }
@@ -2134,7 +2106,7 @@ class HomePageControllerSpec
 
       "redirect to the view return screen" when {
 
-        "the return is successfully retrieved and the session is updated" ignore {
+        "the return is successfully retrieved and the session is updated" in {
           val taxDue         = sample[AmountInPence]
           val completeReturn = sample[CompleteSingleDisposalReturn].copy(
             yearToDateLiabilityAnswers = Right(sample[CompleteCalculatedYTDAnswers].copy(taxDue = taxDue))
@@ -2150,6 +2122,7 @@ class HomePageControllerSpec
             )(
               Right(displayReturn)
             )
+            mockUpdateSAStatus(returnSummary.submissionDate, displayReturn)
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -2160,7 +2133,7 @@ class HomePageControllerSpec
                     completeReturn,
                     ReturnType.FirstReturn,
                     returnSummary,
-                    Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue), None, None))
+                    Some(PreviousReturnData(subscribed.sentReturns, None, None, None))
                   )
                 )
               )
@@ -2259,7 +2232,7 @@ class HomePageControllerSpec
       endDateExclusive = LocalDate.of(2021, 4, 6)
     )
 
-    "populate the previous year to date value correctly" ignore {
+    "populate the previous year to date value correctly" in {
 
       val singleDisposalTriageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
         alreadySentSelfAssessment = Some(false),
@@ -2360,7 +2333,6 @@ class HomePageControllerSpec
         val taxYearStartYear = taxYearStartDate.getYear.toString
 
         withClue(s"For $description: ") {
-          val displayReturn       = DisplayReturn(completeReturn, ReturnType.FirstReturn)
           val latestReturnSummary = sample[ReturnSummary].copy(
             taxYear = taxYearStartYear,
             lastUpdatedDate = Some(taxYearStartDate),
@@ -2387,12 +2359,10 @@ class HomePageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionDataWithSubscribed(subscribed))
-            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, latestReturnSummary.submissionId)(
-              Right(displayReturn)
-            )
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(toJourneyStatus(Some(previousYearToDate), subscribed))
+                journeyStatus = Some(toJourneyStatus(Some(previousYearToDate), subscribed)),
+                journeyType = Some(ReturnsJourneyType)
               )
             )(Right(()))
           }

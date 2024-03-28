@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import configs.syntax._
 import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
@@ -28,9 +27,9 @@ import uk.gov.hmrc.mongo.{CurrentTimestampSupport, MongoComponent}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
+
 @ImplementedBy(classOf[AgentVerifierMatchRetryStoreImpl])
 trait AgentVerifierMatchRetryStore {
-
   def get(
     agentCredId: GGCredId,
     clientCgtReference: CgtReference
@@ -41,7 +40,6 @@ trait AgentVerifierMatchRetryStore {
     clientCgtReference: CgtReference,
     unsuccessfulAttempts: UnsuccessfulVerifierAttempts
   ): Future[Either[Error, Unit]]
-
 }
 
 @Singleton
@@ -52,11 +50,9 @@ class AgentVerifierMatchRetryStoreImpl @Inject() (
   ec: ExecutionContext
 ) extends AgentVerifierMatchRetryStore
     with Repo {
-
   val cacheRepository: MongoCacheRepository[String] = {
-    val expireAfter: FiniteDuration = configuration.underlying
+    val expireAfter: FiniteDuration = configuration
       .get[FiniteDuration]("agent-verifier-match.store.expiry-time")
-      .value
 
     new MongoCacheRepository[String](
       mongoComponent = mongo,
@@ -84,5 +80,4 @@ class AgentVerifierMatchRetryStoreImpl @Inject() (
     unsuccessfulAttempts: UnsuccessfulVerifierAttempts
   ): Future[Either[Error, Unit]] =
     store(toId(agentCredId, clientCgtReference), unsuccessfulAttempts)
-
 }

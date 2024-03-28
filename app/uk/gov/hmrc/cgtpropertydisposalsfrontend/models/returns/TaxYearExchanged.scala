@@ -23,6 +23,7 @@ import play.api.libs.json.OFormat
 final case class TaxYearExchanged(year: Int) extends Product with Serializable
 
 object TaxYearExchanged {
+  val cutoffYear: Int                              = 2020
   val taxYearExchangedBefore2020: TaxYearExchanged = TaxYearExchanged(-2020)
 
   val differentTaxYears: TaxYearExchanged = TaxYearExchanged(-1)

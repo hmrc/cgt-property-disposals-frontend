@@ -36,59 +36,77 @@
         hmrcNewTabLinkHelper: HmrcNewTabLinkHelper
 )
 
-@(form: Form[BigDecimal], backLink: Call, isAmend: Boolean, isATrust: Boolean, wasUkResident: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+        form: Form[BigDecimal],
+        backLink: Call,
+        isAmend: Boolean,
+        isATrust: Boolean,
+        wasUkResident: Boolean,
+        isMultiple: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-@key = @{ "nonCalculatedTaxDue" }
-@title = @{messages(s"$key.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@key = @{
+    "nonCalculatedTaxDue"
+}
+@title = @{
+    messages(s"$key.title")
+}
+@hasErrors = @{
+    form.hasErrors || form.hasGlobalErrors
+}
 @link = @{
-  if(isATrust) ".trust" -> viewConfig.trustsAndCgtWorkoutUrl
-  else if(wasUkResident) ".ukResident" -> viewConfig.calculateCgt
-  else ".nonResident" -> viewConfig.calculateCgtNr
+    if(isATrust) ".trust" -> viewConfig.trustsAndCgtWorkoutUrl
+    else if(wasUkResident) ".ukResident" -> viewConfig.calculateCgt
+    else ".nonResident" -> viewConfig.calculateCgtNr
+}
+@label = @{
+    messages("nonCalculatedTaxDue.label")
 }
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
-
     @if(hasErrors) {
         @errorSummary(form)
     }
 
     @caption(messages("ytdLiability.caption"))
 
+    <h1 class="govuk-heading-l">@title</h1>
+
+    <p class="govuk-body">@messages(s"$key.helpText")</p>
+
+    @if(isMultiple) {
+        <p class="govuk-body" id="paragraph">@messages(s"$key.paragraph")</p>
+    }
+
+    <p class="govuk-body">
+    @hmrcNewTabLinkHelper(NewTabLinkHelper(
+        text = messages(s"$key${link._1}.link"),
+        href = Some(link._2)
+    ))
+    </p>
+
     @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit()) {
-      @govukInput(Input(
-        id = key,
-        name = key,
-        value = form.data.get(key),
-        label = Label(
-          content = Text(title),
-          isPageHeading = true,
-          classes = "govuk-label--xl"
-        ),
-        classes = "govuk-input--width-10",
-        prefix = Some(PrefixOrSuffix(
-          content = Text("£")
-        )),
-        errorMessage = form.error(key).map(e => ErrorMessage(
-          content = Text(messages(s"$key.${e.message}")),
-          visuallyHiddenText = Some(messages("generic.error"))
-        )),
-        autocomplete = Some(AutoCompleteType.On.value),
-        hint = Some(Hint(
-          content = HtmlContent(messages(s"$key.helpText"))
+        @govukInput(Input(
+            id = key,
+            name = key,
+            value = form.data.get(key),
+            label = Label(
+                content = Text(label),
+                classes = "govuk-label--m"
+            ),
+            classes = "govuk-input--width-10",
+            prefix = Some(PrefixOrSuffix(
+                content = Text("£")
+            )),
+            errorMessage = form.error(key).map(e => ErrorMessage(
+                content = Text(messages(s"$key.${e.message}")),
+                visuallyHiddenText = Some(messages("generic.error"))
+            )),
+            autocomplete = Some(AutoCompleteType.On.value),
         ))
-      ))
 
-      <p class="govuk-body">
-        @hmrcNewTabLinkHelper(NewTabLinkHelper(
-          text = messages(s"$key${link._1}.link"),
-          href = Some(link._2)
-        ))
-      </p>
-
-      @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
+        @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
-
 }

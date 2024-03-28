@@ -172,7 +172,8 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
     result: Future[Result],
     expectedTitle: String,
     contentChecks: Document => Unit = _ => (),
-    expectedStatus: Int = OK
+    expectedStatus: Int = OK,
+    messageRegexPrefix: String = "not_found_message"
   ): Unit = {
     (status(result), redirectLocation(result)) shouldBe (expectedStatus -> None)
     status(result)                             shouldBe expectedStatus
@@ -181,7 +182,7 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
     doc.select("h1").text should include(expectedTitle)
 
     val bodyText = doc.select("body").text
-    val regex    = """not_found_message\((.*?)\)""".r
+    val regex    = raw"""$messageRegexPrefix\((.*?)\)""".r
 
     regex.findAllMatchIn(bodyText).toList match {
       case Nil         => contentChecks(doc)

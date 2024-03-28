@@ -36,7 +36,7 @@ landingPage.howTo.p4=Gallwch hefyd ddefnyddio’r gwasanaeth hwn i dalu unrhyw d
 landingPage.howTo.p5=Os nad ydych yn breswylydd, mae’n rhaid i chi roi gwybod am bob gwerthiant neu warediad eiddo yn y DU, hyd yn oed os nad oes gennych dreth i’w thalu neu os ydych wedi gwneud colled.
 landingPage.startButton=Dechrau
 landingPage.beforeYouStart.h2=Cyn i chi ddechrau
-landingPage.beforeYouStart.p1=I ddefnyddio’r gwasanaeth hwn, bydd angen Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer Porth y Llywodraeth arnoch. Os nad oes gennych Ddynodydd Defnyddiwr, gallwch greu un.
+landingPage.beforeYouStart.p1=I ddefnyddio’r gwasanaeth hwn, bydd angen i chi fewngofnodi gan ddefnyddio’ch enw defnyddiwr a chyfrinair ar-lein CThEF. Os nad oes gennych chi’r manylion mewngofnodi, gallwch eu creu pan fyddwch chi’n cofrestru gyntaf.
 landingPage.beforeYouStart.p2=Gallwch <a href="{0}">gysylltu â CThEF</a> os oes angen help arnoch i gael at y gwasanaeth.
 landingPage.beforeYouStart.p3=Sicrhewch fod yr wybodaeth ganlynol wrth law:
 landingPage.beforeYouStart.list1.bullet1=cyfeiriad a chod post yr eiddo
@@ -406,7 +406,7 @@ subscribed.buttonText=Ewch i’r cyfrif
 registerTrust.title=Bydd angen i chi gofrestru’r ymddiriedolaeth
 registerTrust.p=I ddefnyddio’r gwasanaeth hwn, bydd angen i chi:
 registerTrust.bullet1=<a href="{0}" target="_blank">Cofrestru’r ymddiriedolaeth (yn agor tab newydd)</a>.
-registerTrust.bullet2=Mewngofnodi i’r gwasanaeth hwn gan ddefnyddio’r Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer Porth y Llywodraeth a ddefnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
+registerTrust.bullet2=Mewngofnodwch i’r gwasanaeth hwn gan ddefnyddio’r enw defnyddiwr a chyfrinair ar-lein a ddefnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
 
 reportCorpTax.title=Rydych wedi ceisio mewngofnodi fel sefydliad
 reportCorpTax.p1=Ymddiriedolaethau yw’r unig sefydliad sy’n gallu defnyddio’r gwasanaeth hwn i roi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y DU.
@@ -418,14 +418,14 @@ entityType.trust=Iawn
 entityType.error.required=Dewiswch ‘Iawn’ os ydych am roi gwybod am ennill cyfalaf ar gyfer ymddiriedolaeth neu ystâd
 entityType.invalid=Dewiswch ‘Iawn’ os ydych am roi gwybod am ennill cyfalaf ar gyfer ymddiriedolaeth neu ystâd
 
-wrongAccountForTrusts.title=Mewngofnodi i Borth y Llywodraeth fel ymddiriedolaeth
+wrongAccountForTrusts.title=Mewngofnodwch fel ymddiriedolaeth
 wrongAccountForTrusts.p1=Rydych yn ceisio defnyddio’r gwasanaeth hwn i roi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y Du ar gyfer ymddiriedolaeth.
 wrongAccountForTrusts.whatWentWrong=Yr hyn a aeth o’i le
-wrongAccountForTrusts.whatWentWrong.p1=Rydych wedi mewngofnodi i Borth y Llywodraeth fel ‘unigolyn’ ac nid fel ‘sefydliad’.
+wrongAccountForTrusts.whatWentWrong.p1=Rydych wedi mewngofnodi i CThEF ar-lein fel ‘unigolyn’ ac nid fel ‘sefydliad’.
 wrongAccountForTrusts.whatNext=Yr hyn y bydd angen i chi ei wneud nesaf
-wrongAccountForTrusts.whatNext.p1=Bydd angen i chi mewngofnodi drwy ddefnyddio’r Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer <a class="govuk-link" href="{0}">Porth y Llywodraeth</a> a grëwyd ar gyfer yr ymddiriedolaeth. Rhain yw’r un manylion a defnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
-wrongAccountForTrusts.createGGAccount=Creu cyfrif Porth y Llywodraeth ymddiriedolaeth
-wrongAccountForTrusts.createGGAccount.p1=Gallwch <a class="govuk-link" href="{0}">greu cyfrif Porth y Llywodraeth</a> ar gyfer yr ymddiriedolaeth. Bydd angen iddo fod ar gyfer ‘sefydliad’ ac nid ‘unigolyn’. Bydd angen i’r ymddiriedolaeth <a href="{1}">gofrestru</a> cyn y gallwch ddefnyddio’r gwasanaeth hwn.
+wrongAccountForTrusts.whatNext.p1=Bydd angen i chi <a class="govuk-link" href="{0}">fewngofnodi</a> gan ddefnyddio’r enw defnyddiwr a’r cyfrinair a grëwyd ar gyfer yr ymddiriedolaeth. Rhain yw’r un manylion a defnyddiwyd gennych i gofrestru’r ymddiriedolaeth.
+wrongAccountForTrusts.createGGAccount=Creu manylion mewngofnodi CThEF ar gyfer ymddiriedolaeth
+wrongAccountForTrusts.createGGAccount.p1=Gallwch <a class="govuk-link" href="{0}">greu manylion mewngofnodi CThEFs</a> ar gyfer ymddiriedolaeth. Bydd angen iddo fod ar gyfer ‘sefydliad’ ac nid ‘unigolyn’. Bydd angen i’r ymddiriedolaeth <a class="govuk-link" href="{1}">gofrestru</a> cyn y gallwch ddefnyddio’r gwasanaeth hwn.
 
 enterName.title=Nodwch eich enw llawn
 enterName.firstName.label=Enw cyntaf
@@ -497,7 +497,7 @@ iv.technicalIssue.p=Bydd angen i chi roi cynnig arall arni nes ymlaen.
 
 # IV Precondition Failed
 iv.preconditionFailed.title=Ni allwch ddefnyddio’r gwasanaeth hwn
-iv.preconditionFailed.p1=Rydym wedi gwirio’r manylion yn eich cyfrif Porth y Llywodraeth ac nid ydych yn bodloni’r meini prawf er mwyn gallu defnyddio’r gwasanaeth hwn.
+iv.preconditionFailed.p1=Rydym wedi gwirio’ch manylion CThEF ar-lein ac nid ydych yn bodloni’r meini prawf er mwyn gallu defnyddio’r gwasanaeth hwn.
 
 isReportingForATrust.title=A ydych am roi gwybod am ennill cyfalaf ar gyfer ymddiriedolaeth neu ystâd?
 isReportingForATrust.error.required=Dewiswch ‘Iawn’ os ydych am roi gwybod am y dreth ar gyfer ymddiriedolaeth neu ystâd
@@ -528,12 +528,12 @@ trustName.error.required=Nodwch enw’ch ymddiriedolaeth
 trustName.error.tooLong=Mae’n rhaid i enw’ch ymddiriedolaeth fod yn llai na 105 o gymeriadau
 trustName.error.pattern=Mae’n rhaid i enw’r ymddiriedolaeth gynnwys llythrennau, rhifau, bylchau, ampersandau, collnodau a chysylltnodau yn unig. Peidiwch â chynnwys colonau
 
-alreadySubscribedWithDifferentGGAccount.title=Mae angen i chi fewngofnodi â chyfrif Porth y Llywodraeth gwahanol
-alreadySubscribedWithDifferentGGAccount.p=Bydd angen i chi mewngofnodi â’r un Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth a defnyddiwyd gennych i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-alreadySubscribedWithDifferentGGAccount.button=Mewngofnodi gyda’r Dynodydd Defnyddiwr (ID) cywir
+alreadySubscribedWithDifferentGGAccount.title=Mae’n rhaid i chi fewngofnodi gyda manylion CThEF ar-lein gwahanol
+alreadySubscribedWithDifferentGGAccount.p=Bydd angen i chi mewngofnodi â’r un enw defnyddiwr a chyfrinair a defnyddiwyd gennych i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+alreadySubscribedWithDifferentGGAccount.button=Mewngofnodi gyda’r manylion cywir
 
 changeGGAccount.title=Os nad oedd y manylion yn gywir
-changeGGAccount.p=Gallwch roi cynnig arall arni. Bydd angen i chi mewngofnodi â’r Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth rydych am ei ddefnyddio i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+changeGGAccount.p=Gallwch roi cynnig arall arni. Bydd angen i chi mewngofnodi â’r un manylion ar-lein CThEF a defnyddiwyd gennych i greu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
 changeGGAccount.button=Rhoi cynnig arall arni
 
 weOnlySupportGG.title=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
@@ -560,7 +560,7 @@ agent.enter-client-cgt-ref.label=Pa rif cyfrif Treth Enillion Cyfalaf ar eiddo y
 agent.enter-client-cgt-ref.helpText=Mae hwn yn 15 o gymeriadau. Er enghraifft, XYCGTP123456789.
 agent.enter-client-cgt-ref.link=Sut i ‘Gofyn i gleient eich awdurdodi’ ar-lein
 agent.enter-client-cgt-ref.details.li1=Ewch i’ch cyfrif gwasanaethau asiant a dewiswch <strong class="bold">‘Gofyn i gleient eich awdurdodi’</strong>. Mae angen i chi wneud hyn gyda phob un o’ch cleientiaid cyn y gallwch reoli eu Cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU. Mae’n rhaid i chi wneud hyn hyd yn oed os ydynt eisoes wedi llenwi ffurflen 64-8 ar gyfer Hunanasesiad. Gelwir y broses hon yn ysgwyd llaw digidol.
-agent.enter-client-cgt-ref.details.li2=Pan fyddwch yn anfon y cysylltiad awdurdodi at eich cleient, dywedwch wrtho am ddefnyddio’r un Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer Porth y Llywodraeth a ddefnyddiwyd ganddo i greu ei Gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU. Mae’n rhaid iddo beidio â nodi Dynodydd Defnyddiwr (ID) arall na chreu un newydd.
+agent.enter-client-cgt-ref.details.li2=Pan fyddwch yn anfon eich cleient i’r cysylltiad awdurdodi, rhowch wybod iddyn nhw am ddefnyddio’r un enw defnyddiwr a chyfrinair CThEF a ddefnyddiwyd ganddynt i greu eu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU. Mae’n rhaid iddynt beidio â nodi manylion mewngofnodi eraill CThEF na chreu manylion mewngofnodi newydd CThEF.
 
 cgtReference.error.required=Nodwch rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 cgtReference.error.tooShort=Nodwch rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sy''n 15 o gymeriadau
@@ -1396,14 +1396,15 @@ returns.property-address.singleDisposal.caption=Cyfeiriad yr eiddo
 returns.property-details.multipleDisposals.caption=Manylion un gwarediad eiddo
 returns.company-details.multipleIndirectDisposals.caption=Manylion un cwmni
 
-property-details.multiple-disposals.guidance.title=Bydd angen i chi nodi manylion ar gyfer un o’r gwarediadau eiddo
-property-details.multiple-disposals.guidance.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i chi. Os oedd yr eiddo’n un defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
-property-details.multiple-disposals.guidance.agent.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’ch cleient. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
-property-details.multiple-disposals.guidance.trust.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’r ymddiriedolaeth. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
-property-details.multiple-disposals.guidance.capacitor.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’r person. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
-property-details.multiple-disposals.guidance.personalRep.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’r person. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
-property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’r ystâd. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
-property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’r ystâd. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
+property-details.multiple-disposals.guidance.title=Bydd angen i chi nodi manylion ar gyfer un o’r gwarediadau eiddo yn unig
+property-details.multiple-disposals.guidance.p0=Yn nes ymlaen yn y gwasanaeth, bydd angen i chi uwchlwytho dogfen gyda manylion yr holl eiddo rydych chi’n eu cynnwys yn y ffurflen hon.
+property-details.multiple-disposals.guidance.p1=Yn yr adran hon, nodwch dim ond manylion yr eiddo a roddodd yr ennill mwyaf i chi.
+property-details.multiple-disposals.guidance.agent.p1=Yn yr adran hon, nodwch dim ond manylion yr eiddo a roddodd yr ennill mwyaf i’ch cleient.
+property-details.multiple-disposals.guidance.trust.p1=Yn yr adran hon, nodwch dim ond manylion yr eiddo a roddodd yr ennill mwyaf i’r ymddiriedolaeth.
+property-details.multiple-disposals.guidance.capacitor.p1=Yn yr adran hon, nodwch dim ond manylion yr eiddo a roddodd yr ennill mwyaf i’r person.
+property-details.multiple-disposals.guidance.personalRep.p1=Yn yr adran hon, nodwch dim ond manylion yr eiddo a roddodd yr ennill mwyaf i’r person.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.p1=Yn yr adran hon, nodwch dim ond manylion yr eiddo a roddodd yr ennill mwyaf i’r ystâd.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.p1=Yn yr adran hon, nodwch dim ond manylion yr eiddo a roddodd yr ennill mwyaf i’r ystâd.
 
 property-details.multiple-disposals.guidance.p2=Ar gyfer yr un eiddo hwnnw, bydd angen i chi nodi:
 property-details.multiple-disposals.guidance.li1=cyfeiriad yr eiddo yn y DU
@@ -1418,16 +1419,10 @@ property-details.multiple-disposals.guidance.capacitor.li4=Fel arfer, mae cyfnew
 property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.li4=gwerth marchnadol plws costau caffael ar gyfer yr holl eiddo
 property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.li4=gwerth marchnadol plws costau caffael ar gyfer yr holl eiddo
 
-property-details.multiple-disposals.guidance.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fyddwch chi a’r prynwr neu’r perchennog newydd yn rhoi contract i’ch gilydd ac mae’r prynwr yn talu blaendal.
-property-details.multiple-disposals.guidance.agent.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd eich cleient a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
-property-details.multiple-disposals.guidance.trust.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd yr ymddiriedolaeth a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
-property-details.multiple-disposals.guidance.personalRep.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd y person a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
-property-details.multiple-disposals.guidance.capacitor.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd y person a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.p3=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i chi. Os oedd yr eiddo’n un defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
 
 property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd y person sy’n gwerthu a phrynwr neu berchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
 property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd gwerthwr a phrynwr neu berchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
-
-property-details.multiple-disposals.guidance.p4=Hefyd, bydd angen i chi uwchlwytho dogfen yn ddiweddarach gan roi manylion yr eiddo eraill rydych yn eu cynnwys yn y datganiad hwn.
 
 enterPostcode.returns.singleDisposal.title=Dewch o hyd i gyfeiriad yr eiddo yn y DU y gwnaethoch ei waredu
 enterPostcode.returns.agent.singleDisposal.title=Dewch o hyd i gyfeiriad yr eiddo yn y DU y gwnaeth eich cleient ei waredu
@@ -3897,7 +3892,7 @@ taxDue.title=Rhowch wybod i ni faint o Dreth Enillion Cyfalaf sy’n ddyledus ar
 taxDue.h2=Faint o Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon?
 taxDue.p1=Gwnaethom ddefnyddio’r manylion a nodwyd yn y Ffurflen Dreth hon i gyfrifo swm y Dreth Enillion Cyfalaf sy’n ddyledus.
 taxDue.p2=Efallai y bydd angen i chi nodi’r ffigurau hyn pan fyddwch yn llenwi Ffurflenni Treth yn y dyfodol.
-taxDue.printLink=Argraffu neu gadw’r dudalen hon fel PDF
+taxDue.printLink=Argraffu’r dudalen hon
 taxDue.initialGainOrLoss=Ennill neu golled gychwynnol
 taxDue.assistive.initialGainOrLoss=ar gyfer ennill neu golled gychwynnol
 taxDue.gainOrLossAfterReliefs=Ennill neu golled ar ôl rhyddhad
@@ -3988,10 +3983,14 @@ calculator.total.ytdLiability=Rhwymedigaeth diweddaraf ar gyfer y flwyddyn hyd y
 calculator.total.taxOwed=Treth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 calculator.noTaxToPay=Does dim treth yn ddyledus ar gyfer y Ffurflen Dreth hon
 
-nonCalculatedTaxDue.title=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
+nonCalculatedTaxDue.title=Cyfrifo’r Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 nonCalculatedTaxDue.ukResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu
 nonCalculatedTaxDue.trust.link=Rhagor o wybodaeth am sut i gyfrifo Treth Enillion Cyfalaf ar gyfer ymddiriedolaeth
 nonCalculatedTaxDue.nonResident.link=Rhagor o wybodaeth am sut i gyfrifo treth pan gaiff eiddo ei werthu neu ar gyfer gwarediadau anuniongyrchol
+
+nonCalculatedTaxDue.paragraph=Ar y dudalen nesaf, byddwn yn gofyn i chi uwchlwytho dogfen gyda manylion yr holl eiddo rydych chi’n ei adrodd yn y ffurflen hon. Dylai’r ddogfen hon hefyd ddangos sut y gwnaethoch gyfrifo faint o Dreth Enillion Cyfalaf sy’n ddyledus.
+
+nonCalculatedTaxDue.label=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
 
 nonCalculatedTaxDue.helpText=Bydd angen i chi gyfrifo’r swm a’i nodi.
 nonCalculatedTaxDue.error.required=Nodwch swm y Dreth Enillion Cyfalaf sy’n ddyledus ar gyfer y Ffurflen Dreth hon
@@ -4298,14 +4297,14 @@ confirmationOfSubmission.emailSent=Rydym wedi anfon e-bost cadarnhau i <strong>{
 confirmationOfSubmission.sentToHmrc=Ffurflen Dreth wedi’i hanfon i CThEF
 confirmationOfSubmission.taxDue=Dyddiad cau ar gyfer talu treth
 
-confirmationOfSubmission.printPage=<a class="govuk-link" href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
-confirmationOfSubmission.agent.printPage=<a class="govuk-link" href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
-confirmationOfSubmission.trust.printPage=<a class="govuk-link" href="{0}">Argraffu neu gadw’r dudalen hon fel PDF</a>
-confirmationOfSubmission.capacitor.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer y person. Gall y person fwrw golwg dros y Ffurflen Dreth o’i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.capacitor.noId.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer y person. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.personalRep.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=Dylech <a class="govuk-link" href="{0}">argraffu neu gadw’r dudalen hon fel PDF</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yng nghyfrif Treth Enillion Cyfalaf ar eiddo yn y DU eich cleient.
+confirmationOfSubmission.printPage=<a class="govuk-link" href="{0}">Argraffu’r dudalen hon</a>
+confirmationOfSubmission.agent.printPage=<a class="govuk-link" href="{0}">Argraffu’r dudalen hon</a>
+confirmationOfSubmission.trust.printPage=<a class="govuk-link" href="{0}">Argraffu’r dudalen hon</a>
+confirmationOfSubmission.capacitor.printPage=Dylech <a class="govuk-link" href="{0}">argraffu’r dudalen hon</a> ar gyfer y person. Gall y person fwrw golwg dros y Ffurflen Dreth o’i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.capacitor.noId.printPage=Dylech <a class="govuk-link" href="{0}">argraffu’r dudalen hon</a> ar gyfer y person. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.personalRep.printPage=Dylech <a class="govuk-link" href="{0}">argraffu’r dudalen hon</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=Dylech <a class="govuk-link" href="{0}">argraffu’r dudalen hon</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yn eich cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=Dylech <a class="govuk-link" href="{0}">argraffu’r dudalen hon</a> ar gyfer eich cofnodion. Ni fydd manylion y Ffurflen Dreth yn ymddangos yng nghyfrif Treth Enillion Cyfalaf ar eiddo yn y DU eich cleient.
 
 confirmationOfSubmission.whatNext=Yr hyn y mae angen i chi ei wneud nesaf
 confirmationOfSubmission.agent.whatNext=Yr hyn sy’n digwydd nesaf
@@ -4368,7 +4367,7 @@ confirmationOfSubmission.trust.ifSa=Os oes angen i’r ymddiriedolaeth anfon Ffu
 confirmationOfSubmission.capacitor.ifSa=Hunanasesiad
 confirmationOfSubmission.personalRep.ifSa=Os oes angen i chi lenwi Ffurflen Dreth Hunanasesiad ar gyfer y person
 
-confirmationOfSubmission.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn eich <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Ffurflen Dreth Hunanasesiad nesaf (yn agor tab newydd)</a>.
+confirmationOfSubmission.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn eich <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">Ffurflen Dreth Hunanasesiad nesaf<span class="govuk-!-display-none-print"> (yn agor tab newydd)</span></a>.
 confirmationOfSubmission.agent.ifSa.p1=Os oes angen i’ch cleient anfon Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.
 confirmationOfSubmission.trust.ifSa.p1=Bydd angen i chi ddarparu manylion o’r Ffurflen Dreth hon yn Ffurflen Dreth Hunanasesiad nesaf yr ymddiriedolaeth.
 confirmationOfSubmission.capacitor.ifSa.p1=Os oes angen i’r person gyflwyno Ffurflen Dreth Hunanasesiad, bydd angen iddo ddarparu manylion o’r Ffurflen Dreth hon yn ei Ffurflen Dreth Hunanasesiad nesaf.
@@ -4401,7 +4400,7 @@ viewReturn.heading.taxOwed=Treth sy’n ddyledus ar gyfer y Ffurflen Dreth
 viewReturn.amend.heading.taxOwed=Rhwymedigaeth ddiweddaredig ar gyfer y Ffurflen Dreth hon
 viewReturn.heading.reference=Cyfeirnod y Ffurflen Dreth
 viewReturn.heading.payment.reference=Cyfeirnod y taliad
-viewReturn.printLink=Ewch ati i argraffu neu gadw’r dudalen hon ar gyfer eich cofnodion
+viewReturn.printLink=Argraffu’r dudalen hon
 
 viewReturn.charges.heading=Taliadau
 viewReturn.charges.description=Disgrifiad
@@ -5311,7 +5310,7 @@ confirmCancelAmendReturn.error.boolean=Dewiswch ‘Iawn’ os ydych am ganslo
 amendCya.title=Newid eich Ffurflen Dreth
 amendCya.agent.title=Newid Ffurflen Dreth eich cleient
 amendCya.p1=Ar ôl ateb yr holl gwestiynau, byddwch yn gallu cyflwyno’ch Ffurflen Dreth.
-amendCya.printLink=Argraffu neu gadw’r dudalen hon fel PDF
+amendCya.printLink=Argraffu’r dudalen hon
 amendCya.insetText=Ni fyddwch yn gallu cadw a dod yn ôl yn nes ymlaen tra ydych yn newid eich Ffurflen Dreth.
 
 unmetDependency.x1.title=Yr hyn y bydd angen i chi ei wneud nesaf

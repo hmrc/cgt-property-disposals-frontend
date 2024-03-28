@@ -31,6 +31,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec.{validateCalculatedYearToDateLiabilityPage, validateNonCalculatedYearToDateLiabilityPage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{FurtherReturnCalculationEligibilityUtilSupport, ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AmountOfMoneyErrorScenarios, AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
@@ -101,9 +102,6 @@ class YearToDateLiabilityControllerSpec
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour
     with FurtherReturnCalculationEligibilityUtilSupport {
-
-  import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
-
   private val mockCgtCalculationService = mock[CgtCalculationService]
 
   private val mockUpscanService = mock[UpscanService]
@@ -120,14 +118,14 @@ class YearToDateLiabilityControllerSpec
 
   private lazy val controller = instanceOf[YearToDateLiabilityController]
 
-  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+  private implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
+  private implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
-  def userMessageKey(
+  private def userMessageKey(
     userType: UserType,
-    individualUserType: Option[IndividualUserType] = None
-  ): String =
+    individualUserType: Option[IndividualUserType]
+  ) =
     individualUserType match {
       case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
       case Some(Capacitor)                                                      => ".capacitor"
@@ -140,29 +138,21 @@ class YearToDateLiabilityControllerSpec
         }
     }
 
-  def multipleMessageKey(isMultiple: Boolean): String =
-    if (isMultiple) ".multiple" else ""
-
-  def setAgentReferenceNumber(
+  private def setAgentReferenceNumber(
     userType: UserType
-  ): Option[AgentReferenceNumber] =
+  ) =
     userType match {
       case UserType.Agent => Some(sample[AgentReferenceNumber])
       case _              => None
     }
 
-  def setNameForUserType(
+  private def setNameForUserType(
     userType: UserType
-  ): Either[TrustName, IndividualName] =
+  ) =
     userType match {
       case UserType.Organisation => Left(sample[TrustName])
       case _                     => Right(sample[IndividualName])
     }
-
-  def setIndividualUserType(
-    representativeType: Option[RepresentativeType]
-  ): IndividualUserType =
-    representativeType.getOrElse(Self)
 
   private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
@@ -208,7 +198,7 @@ class YearToDateLiabilityControllerSpec
       case _                                                                    => None
     }
 
-  def sessionWithSingleIndirectDisposalState(
+  private def sessionWithSingleIndirectDisposalState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     userType: UserType,
     wasUkResident: Boolean,
@@ -218,7 +208,7 @@ class YearToDateLiabilityControllerSpec
       IndividualUserType.Self
     ),
     isFurtherReturn: Boolean = false
-  ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+  ) = {
     val triageAnswers = singleDisposalTriageAnswers(disposalDate, wasUkResident, individualUserType)
 
     val taxYearStartYear: String =
@@ -268,7 +258,7 @@ class YearToDateLiabilityControllerSpec
     )
   }
 
-  def sessionWithSingleIndirectDisposalState(
+  private def sessionWithSingleIndirectDisposalState(
     ytdLiabilityAnswers: YearToDateLiabilityAnswers,
     disposalDate: DisposalDate,
     userType: UserType,
@@ -281,16 +271,16 @@ class YearToDateLiabilityControllerSpec
       disposalDate = Some(disposalDate)
     )
 
-  def sessionWithSingleMixedUseDisposalState(
+  private def sessionWithSingleMixedUseDisposalState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
-    disposalDate: Option[DisposalDate] = Some(sample[DisposalDate]),
+    disposalDate: Option[DisposalDate],
     userType: UserType,
     wasUkResident: Boolean,
     individualUserType: Option[IndividualUserType] = Some(
       IndividualUserType.Self
     ),
     isFurtherReturn: Boolean = false
-  ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) = {
+  ) = {
     val triageAnswers = singleDisposalTriageAnswers(disposalDate, wasUkResident, individualUserType)
 
     val taxYearStartYear: String =
@@ -337,7 +327,7 @@ class YearToDateLiabilityControllerSpec
     )
   }
 
-  def sessionWithSingleMixedUseDisposalState(
+  private def sessionWithSingleMixedUseDisposalState(
     ytdLiabilityAnswers: YearToDateLiabilityAnswers,
     disposalDate: DisposalDate,
     userType: UserType,
@@ -350,7 +340,7 @@ class YearToDateLiabilityControllerSpec
       wasUkResident
     )
 
-  def sessionWithSingleDisposalState(
+  private def sessionWithSingleDisposalState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     disposalDate: Option[DisposalDate] = Some(sample[DisposalDate]),
     userType: UserType,
@@ -363,7 +353,7 @@ class YearToDateLiabilityControllerSpec
     ),
     isFurtherReturn: Boolean = false,
     amendReturnData: Option[AmendReturnData] = None
-  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+  ) = {
     val triageAnswers = singleDisposalTriageAnswers(
       disposalDate,
       wasUkResident,
@@ -417,7 +407,7 @@ class YearToDateLiabilityControllerSpec
     )
   }
 
-  def sessionWithSingleDisposalState(
+  private def sessionWithSingleDisposalState(
     ytdLiabilityAnswers: YearToDateLiabilityAnswers,
     disposalDate: DisposalDate,
     userType: UserType,
@@ -430,7 +420,7 @@ class YearToDateLiabilityControllerSpec
       wasUkResident
     )
 
-  def sessionWithMultipleDisposalsState(
+  private def sessionWithMultipleDisposalsState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     userType: UserType,
     wasUkResident: Boolean,
@@ -440,7 +430,7 @@ class YearToDateLiabilityControllerSpec
     amendReturnData: Option[AmendReturnData] = None,
     gainOrLossAfterReliefs: Option[AmountInPence] = Some(sample[AmountInPence]),
     exemptionsAndLossesAnswers: Option[ExemptionAndLossesAnswers] = Some(sample[CompleteExemptionAndLossesAnswers])
-  ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
+  ) = {
     val triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
       individualUserType = individualUserType,
       countryOfResidence = if (wasUkResident) Country.uk else sample[Country],
@@ -491,7 +481,7 @@ class YearToDateLiabilityControllerSpec
     )
   }
 
-  def sessionWithMultipleDisposalsState(
+  private def sessionWithMultipleDisposalsState(
     ytdLiabilityAnswers: YearToDateLiabilityAnswers,
     userType: UserType,
     wasUkResident: Boolean,
@@ -506,12 +496,12 @@ class YearToDateLiabilityControllerSpec
       amendReturnData = amendReturnData
     )
 
-  def singleDisposalDraftReturnWithCompleteJourneys(
+  private def singleDisposalDraftReturnWithCompleteJourneys(
     yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     disposalDate: DisposalDate,
     reliefDetailsAnswers: ReliefDetailsAnswers,
     individualUserType: Option[IndividualUserType] = None
-  ): DraftSingleDisposalReturn =
+  ) =
     DraftSingleDisposalReturn(
       UUID.randomUUID(),
       sample[CompleteSingleDisposalTriageAnswers].copy(
@@ -589,10 +579,10 @@ class YearToDateLiabilityControllerSpec
       .expects(uploadReference, *)
       .returning(EitherT.fromEither(result))
 
-  def setTaxDue(
+  private def setTaxDue(
     calculatedTaxDue: CalculatedTaxDue,
     taxDue: AmountInPence
-  ): CalculatedTaxDue =
+  ) =
     calculatedTaxDue match {
       case nonGain: CalculatedTaxDue.NonGainCalculatedTaxDue =>
         nonGain.copy(amountOfTaxDue = taxDue)
@@ -603,9 +593,7 @@ class YearToDateLiabilityControllerSpec
     sample[CompleteReliefDetailsAnswers].copy(otherReliefs = None)
 
   "YearToDateLiabilityController" when {
-
     "handling requests to display the estimated income page" must {
-
       def performAction(): Future[Result] =
         controller.estimatedIncome()(FakeRequest())
 
@@ -618,9 +606,7 @@ class YearToDateLiabilityControllerSpec
       behave like redirectToStartWhenFurtherReturnIneligibleForCalculation(() => performAction())
 
       "display the page" when {
-
         "an individual user has not answered the question before" in {
-
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -651,11 +637,9 @@ class YearToDateLiabilityControllerSpec
                 .url
             }
           )
-
         }
 
         "an agent user has not answered the question before" in {
-
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -686,11 +670,9 @@ class YearToDateLiabilityControllerSpec
                 .url
             }
           )
-
         }
 
         "a capacitor user has not answered the question before" in {
-
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -721,7 +703,6 @@ class YearToDateLiabilityControllerSpec
                 .url
             }
           )
-
         }
 
         "a personal representative user has not answered the question before" in {
@@ -756,7 +737,6 @@ class YearToDateLiabilityControllerSpec
                 .url
             }
           )
-
         }
 
         "an individual has answered the question before but has " +
@@ -815,11 +795,9 @@ class YearToDateLiabilityControllerSpec
               }
             )
           }
-
       }
 
       "redirect the page" when {
-
         "the user is a Trust" in {
           val (session, _, _) = sessionWithSingleDisposalState(
             None,
@@ -864,13 +842,10 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling submitted answers to the estimated income page" must {
-
       def performAction(data: (String, String)*): Future[Result] =
         controller.estimatedIncomeSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
@@ -893,7 +868,6 @@ class YearToDateLiabilityControllerSpec
       )
 
       "show a form error" when {
-
         "the amount of money is invalid" in {
           AmountOfMoneyErrorScenarios
             .amountOfMoneyErrorScenarios("estimatedIncome")
@@ -908,7 +882,6 @@ class YearToDateLiabilityControllerSpec
       }
 
       "redirect to the check your answers page" when {
-
         "the answers in this section had not been answered at all" in {
           testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
             performAction("estimatedIncome" -> "1"),
@@ -1000,7 +973,6 @@ class YearToDateLiabilityControllerSpec
             performAction("estimatedIncome" -> "1"),
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
-
         }
 
         "the user is on a amend return journey which is eligible for a calculation and" +
@@ -1059,13 +1031,10 @@ class YearToDateLiabilityControllerSpec
               performAction("estimatedIncome" -> "1"),
               routes.YearToDateLiabilityController.checkYourAnswers()
             )
-
           }
-
       }
 
       "not do any updates if the submitted answer is the same as one already stored in session and" when {
-
         "the section is incomplete" in {
           val answers = sample[IncompleteCalculatedYTDAnswers].copy(
             estimatedIncome = Some(AmountInPence(1L)),
@@ -1113,13 +1082,10 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling requests to display the personal allowance page" must {
-
       def performAction(): Future[Result] =
         controller.personalAllowance()(FakeRequest())
 
@@ -1134,7 +1100,6 @@ class YearToDateLiabilityControllerSpec
       behave like redirectToStartWhenFurtherReturnIneligibleForCalculation(() => performAction())
 
       "redirect to the check you answers page" when {
-
         "the estimated income is zero" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1155,6 +1120,7 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
+
         "the user is a Trust" in {
           val (session, _, _) = sessionWithSingleDisposalState(
             sample[CompleteCalculatedYTDAnswers].copy(
@@ -1201,9 +1167,7 @@ class YearToDateLiabilityControllerSpec
       }
 
       "display the page" when {
-
         "the estimated income is greater than zero and" when {
-
           "the section is incomplete" in {
             val taxYear2020 =
               sample[TaxYear].copy(
@@ -1286,15 +1250,11 @@ class YearToDateLiabilityControllerSpec
               }
             )
           }
-
         }
-
       }
-
     }
 
     "handling submitted answers to the personal allowance page" must {
-
       def performAction(data: (String, String)*): Future[Result] =
         controller.personalAllowanceSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
@@ -1327,7 +1287,6 @@ class YearToDateLiabilityControllerSpec
       }
 
       "redirect to the check you answers page" when {
-
         "the estimated income is zero" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1348,11 +1307,9 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
 
       "show a form error" when {
-
         "the amount of money is invalid" in {
           val personalAllowance    = AmountInPence(1270000L)
           val maxPersonalAllowance = AmountInPence(2000000L)
@@ -1408,7 +1365,6 @@ class YearToDateLiabilityControllerSpec
       }
 
       "redirect to the check your answers page" when {
-
         val disposalDate = sample[DisposalDate].copy(
           taxYear = sample[TaxYear].copy(
             personalAllowance = AmountInPence(1000L),
@@ -1516,7 +1472,6 @@ class YearToDateLiabilityControllerSpec
             performAction("personalAllowance" -> "1"),
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
-
         }
 
         "the user is on a amend return journey which is eligible for a calculation and" +
@@ -1577,13 +1532,10 @@ class YearToDateLiabilityControllerSpec
               performAction("personalAllowance" -> "1"),
               routes.YearToDateLiabilityController.checkYourAnswers()
             )
-
           }
-
       }
 
       "not do any updates if the submitted answer is the same as one already stored in session and" when {
-
         val disposalDate = sample[DisposalDate].copy(
           taxYear = sample[TaxYear].copy(
             personalAllowance = AmountInPence(1000L),
@@ -1638,13 +1590,10 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling requests to display the has estimated details page" when {
-
       def performAction(): Future[Result] =
         controller.hasEstimatedDetails()(FakeRequest())
 
@@ -1655,9 +1604,7 @@ class YearToDateLiabilityControllerSpec
       behave like noEstimatedIncomeBehaviour(() => performAction())
 
       "handling users on a calculated journey" must {
-
         "redirect to the personal allowance page" when {
-
           "the estimated income is more than zero and the user has not answered " +
             "the personal allowance question yet" in {
               inSequence {
@@ -1679,11 +1626,9 @@ class YearToDateLiabilityControllerSpec
                 routes.YearToDateLiabilityController.personalAllowance()
               )
             }
-
         }
 
         "display the page" when {
-
           def test(
             answers: YearToDateLiabilityAnswers,
             backLink: Call
@@ -1715,7 +1660,6 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the estimated income is greater than zero and" when {
-
             "the section is incomplete and the estimated income is zero" in {
               test(
                 sample[IncompleteCalculatedYTDAnswers].copy(
@@ -1754,16 +1698,12 @@ class YearToDateLiabilityControllerSpec
                 routes.YearToDateLiabilityController.checkYourAnswers()
               )
             }
-
           }
-
         }
       }
 
       "handling user on a non-calculated journey" must {
-
         "redirect to the taxable gain page" when {
-
           "that question has not been answered yet" in {
             val (session, _, _) =
               sessionWithMultipleDisposalsState(
@@ -1807,11 +1747,9 @@ class YearToDateLiabilityControllerSpec
                 routes.YearToDateLiabilityController.taxableGainOrLoss()
               )
             }
-
         }
 
         "redirect to the personal allowance page" when {
-
           "the user is on a further return journey that is eligible for a calculation and they haven't answered " +
             "the personal allowance question yet" in {
               val (session, fillingOutReturn, _) =
@@ -1836,11 +1774,9 @@ class YearToDateLiabilityControllerSpec
                 routes.YearToDateLiabilityController.personalAllowance()
               )
             }
-
         }
 
         "redirect to the estimated income page" when {
-
           "the user is on a further return journey that is eligible for a calculation and they haven't " +
             "answered the question yet" in {
               val (session, fillingOutReturn, _) =
@@ -1866,7 +1802,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "display the page" when {
-
           def test(
             sessionData: SessionData,
             fillingOutReturn: FillingOutReturn,
@@ -1954,15 +1889,11 @@ class YearToDateLiabilityControllerSpec
               )
             }
           }
-
         }
-
       }
 
       "handling a TRUST user on a non-calculated journey" must {
-
         "display the page" when {
-
           def testCompletedWithTrust(
             answers: YearToDateLiabilityAnswers,
             backLink: Call,
@@ -2028,13 +1959,10 @@ class YearToDateLiabilityControllerSpec
                   .hasAttr("checked")
             )
           }
-
         }
-
       }
 
       "redirect to the check your answers endpoint" when {
-
         "it is an amend journey and the original return did not contain any estimates" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2064,13 +1992,10 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling submitted answers to the has estimated details page" when {
-
       def performAction(data: (String, String)*): Future[Result] =
         controller.hasEstimatedDetailsSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
@@ -2097,7 +2022,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "redirect to the personal allowance page" when {
-
           "the estimated income is more than zero and the user has not answered " +
             "the personal allowance question yet" in {
               inSequence {
@@ -2119,7 +2043,6 @@ class YearToDateLiabilityControllerSpec
                 routes.YearToDateLiabilityController.personalAllowance()
               )
             }
-
         }
 
         "show a form error" when {
@@ -2149,13 +2072,10 @@ class YearToDateLiabilityControllerSpec
               "hasEstimatedDetails.error.boolean"
             )
           }
-
         }
 
         "redirect to the check your answers page" when {
-
           "all updates are successful and" when {
-
             "the journey was incomplete" in {
               val answers = IncompleteCalculatedYTDAnswers.empty.copy(
                 estimatedIncome = Some(AmountInPence(1L)),
@@ -2211,9 +2131,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "not do any updates if the submitted answer is the same as one already stored in session and" when {
-
           "the section is incomplete" in {
-
             val session = sessionWithSingleDisposalState(
               IncompleteCalculatedYTDAnswers.empty.copy(
                 estimatedIncome = Some(AmountInPence(1L)),
@@ -2261,12 +2179,10 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.checkYourAnswers()
             )
           }
-
         }
       }
 
       "handling users on a non-calculated journey" must {
-
         {
           val answers = IncompleteNonCalculatedYTDAnswers.empty.copy(
             taxableGainOrLoss = Some(AmountInPence.zero)
@@ -2317,13 +2233,10 @@ class YearToDateLiabilityControllerSpec
               "hasEstimatedDetails.error.boolean"
             )
           }
-
         }
 
         "redirect to the check your answers page" when {
-
           "all updates are successful and" when {
-
             "the user is on a multiple disposal journey" in {
               val answers =
                 IncompleteNonCalculatedYTDAnswers.empty.copy(
@@ -2405,14 +2318,11 @@ class YearToDateLiabilityControllerSpec
                 performAction("hasEstimatedDetails" -> "false"),
                 routes.YearToDateLiabilityController.checkYourAnswers()
               )
-
             }
-
           }
         }
 
         "not do any updates" when {
-
           "the answer in the session is the same as the one already stored" in {
             val answers =
               IncompleteNonCalculatedYTDAnswers.empty.copy(
@@ -2438,13 +2348,10 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.checkYourAnswers()
             )
           }
-
         }
-
       }
 
       "redirect to the check your answers endpoint" when {
-
         "it is an amend journey and the original return did not contain any estimates" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2474,13 +2381,10 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling requests to display the tax due page" must {
-
       def performAction(): Future[Result] = controller.taxDue()(FakeRequest())
 
       val disposalDate              = sample[DisposalDate]
@@ -2541,7 +2445,6 @@ class YearToDateLiabilityControllerSpec
       behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(() => performAction())
 
       "redirect to the check your answers page" when {
-
         "the estimated income is more than zero and the user has not answered " +
           "the personal allowance question yet" in {
             inSequence {
@@ -2595,11 +2498,9 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
 
       "show an error page" when {
-
         "there is an error getting the calculated tax due" in {
           val subscribedDetails =
             sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
@@ -2683,11 +2584,9 @@ class YearToDateLiabilityControllerSpec
 
           checkIsTechnicalErrorPage(performAction())
         }
-
       }
 
       "display the page" when {
-
         def test(
           answers: YearToDateLiabilityAnswers,
           subscribedDetails: SubscribedDetails,
@@ -2872,7 +2771,6 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.hasEstimatedDetails()
             )
           }
-
         }
 
         "the section is incomplete and a calculation has already been done" in {
@@ -2906,13 +2804,10 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling submitted answers to the tax due page for a calculated journey" must {
-
       def performAction(data: (String, String)*): Future[Result] =
         controller.taxDueSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
@@ -2962,7 +2857,6 @@ class YearToDateLiabilityControllerSpec
       }
 
       "redirect to the check you answers page" when {
-
         "the estimated income is more than zero and the user has not answered " +
           "the personal allowance question yet" in {
             inSequence {
@@ -3036,7 +2930,6 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
 
       "show a form error" when {
@@ -3077,16 +2970,12 @@ class YearToDateLiabilityControllerSpec
                   currentSession
                 )
               }
-
             }
         }
-
       }
 
       "redirect to the check your answers page" when {
-
         "all updates are successful and" when {
-
           "the journey was incomplete" in {
             val disposalDate     = sample[DisposalDate]
             val calculatedTaxDue = sample[CalculatedTaxDue]
@@ -3163,18 +3052,15 @@ class YearToDateLiabilityControllerSpec
           }
         }
       }
-
     }
 
     "handling requests to display the check you answers page" when {
-
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
 
       behave like markUnmetDependencyBehaviour(controller.checkYourAnswers())
 
       "the user is on a calculated journey" must {
-
         val completeAnswers = CompleteCalculatedYTDAnswers(
           AmountInPence(1L),
           Some(AmountInPence(2L)),
@@ -3266,14 +3152,12 @@ class YearToDateLiabilityControllerSpec
         )
 
         "redirect to the estimated income page" when {
-
           "that question has not been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(estimatedIncome = None),
               routes.YearToDateLiabilityController.estimatedIncome()
             )
           }
-
         }
 
         "do NOT redirect to the estimated income page" when {
@@ -3295,7 +3179,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "redirect to the personal allowance page" when {
-
           "that question has not been answered yet and the estimated income is non zero" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
@@ -3305,7 +3188,6 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.personalAllowance()
             )
           }
-
         }
 
         "do NOT redirect to the personal allowance page" when {
@@ -3327,7 +3209,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "redirect to the has estimated details  page" when {
-
           "that question has not been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
@@ -3338,11 +3219,9 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.hasEstimatedDetails()
             )
           }
-
         }
 
         "redirect to the tax due page" when {
-
           "that question has not been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
@@ -3360,11 +3239,9 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.taxDue()
             )
           }
-
         }
 
         "redirect to the upload mandatory evidence page" when {
-
           "that question hasn't been completed yet and the calculated tax due is not the same as the submitted tax due" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
@@ -3406,11 +3283,9 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.uploadMandatoryEvidence()
             )
           }
-
         }
 
         "redirect to the file expired page" when {
-
           "there is an expired file" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
@@ -3418,15 +3293,11 @@ class YearToDateLiabilityControllerSpec
               ),
               routes.YearToDateLiabilityController.mandatoryEvidenceExpired()
             )
-
           }
-
         }
 
         "show an error page" when {
-
           "there is pending evidence in session and" when {
-
             val (session, journey, draftReturn) =
               sessionWithSingleDisposalState(
                 allQuestionAnswered
@@ -3463,13 +3334,10 @@ class YearToDateLiabilityControllerSpec
 
               checkIsTechnicalErrorPage(performAction())
             }
-
           }
-
         }
 
         "show the page" when {
-
           "the section is complete" in {
             forAll { completeAnswers: CompleteCalculatedYTDAnswers =>
               inSequence {
@@ -3609,13 +3477,10 @@ class YearToDateLiabilityControllerSpec
               messageFromMessageKey("ytdLiability.cya.title")
             )
           }
-
         }
-
       }
 
       "the user is on a non-calculated journey" must {
-
         val completeAnswers = CompleteNonCalculatedYTDAnswers(
           AmountInPence(1L),
           hasEstimatedDetails = true,
@@ -3720,19 +3585,15 @@ class YearToDateLiabilityControllerSpec
         )
 
         "redirect to the taxable income page" when {
-
           "that question has not been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(taxableGainOrLoss = None),
               routes.YearToDateLiabilityController.taxableGainOrLoss()
             )
-
           }
-
         }
 
         "redirect to the estimated income page" when {
-
           "the user is eligible for a further return calculation and they are not a trust" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
@@ -3742,11 +3603,9 @@ class YearToDateLiabilityControllerSpec
               Some(sample[Eligible])
             )
           }
-
         }
 
         "redirect to the personal allowance page" when {
-
           "the user is eligible for a further return calculation and they are not a trust and their estimated income " +
             "is greater than zero" in {
               testRedirectWhenIncompleteAnswers(
@@ -3757,17 +3616,14 @@ class YearToDateLiabilityControllerSpec
                 Some(sample[Eligible])
               )
             }
-
         }
 
         "redirect to the has estimated details page" when {
-
           "that question has not been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(hasEstimatedDetails = None),
               routes.YearToDateLiabilityController.hasEstimatedDetails()
             )
-
           }
 
           "the user IS a trust" in {
@@ -3778,7 +3634,6 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the user is eligible for a further return calculation and " when {
-
             "they haven't answered the personal allowance but they " +
               "have an estimated income of zero" in {
                 testRedirectWhenIncompleteAnswers(
@@ -3803,31 +3658,24 @@ class YearToDateLiabilityControllerSpec
                 Some(sample[Eligible])
               )
             }
-
           }
-
         }
 
         "redirect to the non-calculated enter tax due page" when {
-
           "that question has not been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(taxDue = None),
               routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
             )
-
           }
-
         }
 
         "redirect to the mandatory evidence page" when {
-
           "that question has not been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(mandatoryEvidence = None),
               routes.YearToDateLiabilityController.uploadMandatoryEvidence()
             )
-
           }
 
           "there is a pending upscan upload in session and it is successfully removed" in {
@@ -3860,11 +3708,9 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.uploadMandatoryEvidence()
             )
           }
-
         }
 
         "redirect to the file expired page" when {
-
           "there is an expired file" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
@@ -3872,13 +3718,10 @@ class YearToDateLiabilityControllerSpec
               ),
               routes.YearToDateLiabilityController.mandatoryEvidenceExpired()
             )
-
           }
-
         }
 
         "redirect to the year to date liability page" when {
-
           "the return is a further return and that question hasn't been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
@@ -3887,13 +3730,10 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.yearToDateLiability(),
               furtherReturnCalculationEligibility = Some(sample[Ineligible])
             )
-
           }
-
         }
 
         "redirect to the repayment page" when {
-
           "the return is a further return and that question hasn't been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
@@ -3904,15 +3744,11 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.repayment(),
               furtherReturnCalculationEligibility = Some(sample[Eligible])
             )
-
           }
-
         }
 
         "show an error page" when {
-
           "there is pending evidence in session and" when {
-
             val (session, journey, draftReturn) =
               sessionWithMultipleDisposalsState(
                 allQuestionAnswered
@@ -3950,13 +3786,10 @@ class YearToDateLiabilityControllerSpec
 
               checkIsTechnicalErrorPage(performAction())
             }
-
           }
-
         }
 
         "display the page" when {
-
           "the user has just answered all the questions in the section and all updates are successful" in {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -4087,7 +3920,7 @@ class YearToDateLiabilityControllerSpec
                 AmountInPence.zero,
                 AmountInPence.zero,
                 AmountInPence.zero,
-                false,
+                shouldUseRebase = false,
                 None
               )
               val taxableGainOrLossCalculation   =
@@ -4175,15 +4008,11 @@ class YearToDateLiabilityControllerSpec
                 )
             )
           }
-
         }
-
       }
-
     }
 
     "handling requests to display the upload mandatory evidence page" must {
-
       def performAction(): Future[Result] =
         controller.uploadMandatoryEvidence()(FakeRequest())
 
@@ -4194,7 +4023,6 @@ class YearToDateLiabilityControllerSpec
       behave like commonUploadMandatoryEvidenceBehaviour(() => performAction())
 
       "show an error page" when {
-
         val answers = IncompleteNonCalculatedYTDAnswers(
           Some(sample[AmountInPence]),
           Some(sample[Boolean]),
@@ -4273,11 +4101,9 @@ class YearToDateLiabilityControllerSpec
 
           checkIsTechnicalErrorPage(performAction())
         }
-
       }
 
       "redirect to the cya endpoint" when {
-
         "the user is on a further return journey which is eligible for a calculation and the " +
           "user has agreed with all the calculated figures" in {
             val yearToDateLiability    = sample[AmountInPence]
@@ -4294,7 +4120,7 @@ class YearToDateLiabilityControllerSpec
               AmountInPence.zero,
               AmountInPence.zero,
               AmountInPence.zero,
-              false,
+              shouldUseRebase = false,
               None
             )
             val taxableGainOrLossCalculation   =
@@ -4331,11 +4157,9 @@ class YearToDateLiabilityControllerSpec
 
             checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
           }
-
       }
 
       "display the page" when {
-
         val key = "mandatoryEvidence"
 
         def test(
@@ -4433,7 +4257,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the user is on a calculated journey and" when {
-
           val calculatedTaxDue = sample[GainCalculatedTaxDue]
             .copy(amountOfTaxDue = AmountInPence(100L))
 
@@ -4467,7 +4290,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the user is on a non-calculated journey and" when {
-
           "the section is incomplete" in {
             test(
               IncompleteNonCalculatedYTDAnswers(
@@ -4517,15 +4339,11 @@ class YearToDateLiabilityControllerSpec
               None
             )
           }
-
         }
-
       }
-
     }
 
     "handling submits from the check you answers page" must {
-
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
@@ -4551,11 +4369,9 @@ class YearToDateLiabilityControllerSpec
           returns.routes.TaskListController.taskList()
         )
       }
-
     }
 
     "handling requests to display the taxable gain or net loss page" must {
-
       def performAction(): Future[Result] =
         controller.taxableGainOrLoss()(FakeRequest())
 
@@ -4566,7 +4382,6 @@ class YearToDateLiabilityControllerSpec
       behave like redirectWhenNotNonCalculatedJourneyBehaviour(() => performAction())
 
       "show an error page" when {
-
         "there are no gain or loss or reliefs when looking for eligibility for a further return calculation" in {
           val (session, _, _) =
             sessionWithMultipleDisposalsState(
@@ -4639,11 +4454,9 @@ class YearToDateLiabilityControllerSpec
 
           checkIsTechnicalErrorPage(performAction())
         }
-
       }
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
@@ -4758,7 +4571,6 @@ class YearToDateLiabilityControllerSpec
                 .select("#taxableGainOrLoss-3")
                 .hasAttr("checked")
           )
-
         }
 
         "the user is a personal rep in period of admin for a single disposal journey" in {
@@ -4803,7 +4615,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the user is on a further return journey and" when {
-
           def testFurtherReturnPage(
             session: SessionData,
             fillingOutReturn: FillingOutReturn,
@@ -5068,15 +4879,11 @@ class YearToDateLiabilityControllerSpec
               messageFromMessageKey("taxableGainOrLoss.furtherReturn.title")
             )
           }
-
         }
-
       }
-
     }
 
     "handling submits on the taxable gain or net loss page" must {
-
       def performAction(formData: (String, String)*): Future[Result] =
         controller.taxableGainOrLossSubmit()(
           FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
@@ -5115,9 +4922,7 @@ class YearToDateLiabilityControllerSpec
       }
 
       "show a form error" when {
-
         "it is a first return and" when {
-
           val currentSession = sessionWithMultipleDisposalsState(
             None,
             UserType.Individual,
@@ -5171,7 +4976,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "it is a further return and" when {
-
           def test(
             state: (SessionData, FillingOutReturn)
           )(data: (String, String)*)(expectedTitleKey: String, expectedErrorKey: String): Unit =
@@ -5287,15 +5091,11 @@ class YearToDateLiabilityControllerSpec
               }
             }
           }
-
         }
-
       }
 
       "redirect to the check your answers page" when {
-
         "all updates are successful and" when {
-
           "the section had not been started yet" in {
             val newAmount = AmountInPence(3000L)
 
@@ -5553,11 +5353,9 @@ class YearToDateLiabilityControllerSpec
             )
           }
         }
-
       }
 
       "not do any updates" when {
-
         "the answer supplied is the same as one already stored" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -5578,13 +5376,10 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling requests to display the non calculated enter tax due page" must {
-
       def performAction(): Future[Result] =
         controller.nonCalculatedEnterTaxDue()(FakeRequest())
 
@@ -5597,7 +5392,6 @@ class YearToDateLiabilityControllerSpec
       behave like noYearToDateLiabilityBehaviour(() => performAction())
 
       "redirect to the has estimated details page" when {
-
         "the question has not been answered yet" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -5617,15 +5411,13 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.hasEstimatedDetails()
           )
         }
-
       }
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
-          testPage: Document => Unit = _ => ()
+          expectedFormParagraph: String = ""
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -5644,7 +5436,7 @@ class YearToDateLiabilityControllerSpec
                 .attr("action")                                  shouldBe routes.YearToDateLiabilityController
                 .nonCalculatedEnterTaxDueSubmit()
                 .url
-              testPage(doc)
+              doc.select("#paragraph").text()                    shouldBe expectedFormParagraph
             }
           )
         }
@@ -5661,7 +5453,8 @@ class YearToDateLiabilityControllerSpec
               isFurtherReturn = false,
               None
             )._1,
-            routes.YearToDateLiabilityController.hasEstimatedDetails()
+            routes.YearToDateLiabilityController.hasEstimatedDetails(),
+            messages("nonCalculatedTaxDue.paragraph")
           )
         }
 
@@ -5705,7 +5498,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the return is a further return where the previous year to date is present" when {
-
           def testCheckTaxDuePage(
             yearToDateLiability: AmountInPence,
             previousYearToDateLiability: AmountInPence,
@@ -5800,7 +5592,6 @@ class YearToDateLiabilityControllerSpec
               UserType.Individual,
               "nonCalculatedTaxDue.furtherReturn.checkTaxDue.p1"
             )
-
           }
 
           "the user is an agent" in {
@@ -5822,11 +5613,9 @@ class YearToDateLiabilityControllerSpec
               "nonCalculatedTaxDue.furtherReturn.checkTaxDue.trust.p1"
             )
           }
-
         }
 
         "the return is a further return where the previous year to date is not present" when {
-
           def testEnterTaxDuePage(
             yearToDateLiability: AmountInPence,
             userType: UserType,
@@ -5947,11 +5736,9 @@ class YearToDateLiabilityControllerSpec
               "nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.p1"
             )
           }
-
         }
 
         "the return is a amend return where the previous year to date is present" when {
-
           def testCheckTaxDuePage(
             yearToDateLiability: AmountInPence,
             previousYearToDateLiability: AmountInPence,
@@ -6033,7 +5820,6 @@ class YearToDateLiabilityControllerSpec
               AmountInPence.zero,
               UserType.Individual
             )
-
           }
 
           "the user is an agent" in {
@@ -6053,11 +5839,9 @@ class YearToDateLiabilityControllerSpec
               UserType.Organisation
             )
           }
-
         }
 
         "the return is a amend return where the previous year to date is not present" when {
-
           def testEnterTaxDuePage(
             userType: UserType,
             individualUserType: IndividualUserType,
@@ -6196,15 +5980,11 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.yearToDateLiability()
             )
           }
-
         }
-
       }
-
     }
 
     "handling submits on the non calculated enter tax due page" must {
-
       def performAction(formData: (String, String)*): Future[Result] =
         controller.nonCalculatedEnterTaxDueSubmit()(
           FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
@@ -6250,7 +6030,6 @@ class YearToDateLiabilityControllerSpec
       }
 
       "show a form error" when {
-
         val currentSession = sessionWithMultipleDisposalsState(
           sample[CompleteNonCalculatedYTDAnswers],
           UserType.Individual,
@@ -6273,11 +6052,9 @@ class YearToDateLiabilityControllerSpec
               }
             }
         }
-
       }
 
       "redirect to the check your answers page" when {
-
         "the user is on a further return journey where a previous year to date value is available" in {
           val yearToDateLiability         = AmountInPence(10L)
           val previousYearToDateLiability = AmountInPence(9L)
@@ -6429,7 +6206,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "all updates are successful and" when {
-
           "the section had been started but not completed" in {
             val newAmount = AmountInPence(101L)
             val answers   = IncompleteNonCalculatedYTDAnswers.empty.copy(
@@ -6476,13 +6252,10 @@ class YearToDateLiabilityControllerSpec
               newAnswers
             )
           }
-
         }
-
       }
 
       "not do any updates" when {
-
         "the answer supplied is the same as one already stored" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -6503,13 +6276,10 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling requests to display the scanning mandatory evidence page" must {
-
       def performAction(): Future[Result] =
         controller.scanningMandatoryEvidence()(FakeRequest())
 
@@ -6520,7 +6290,6 @@ class YearToDateLiabilityControllerSpec
       behave like noPendingUploadBehaviour(() => performAction())
 
       "show an error page" when {
-
         val upscanUpload = sample[UpscanUpload].copy(
           upscanCallBack = None
         )
@@ -6596,11 +6365,9 @@ class YearToDateLiabilityControllerSpec
 
           checkIsTechnicalErrorPage(performAction())
         }
-
       }
 
       "show that the scan is still in progress" when {
-
         "there is no callback yet" in {
           val upscanUpload = sample[UpscanUpload].copy(upscanCallBack = None)
 
@@ -6642,11 +6409,9 @@ class YearToDateLiabilityControllerSpec
             }
           )
         }
-
       }
 
       "show that the scan has failed" when {
-
         def checkPage(result: Future[Result]): Unit =
           checkPageIsDisplayed(
             result,
@@ -6716,9 +6481,7 @@ class YearToDateLiabilityControllerSpec
           }
 
           checkPage(performAction())
-
         }
-
       }
 
       "redirect to the check your answers page" when {
@@ -6799,13 +6562,10 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling submits on the scanning mandatory evidence page" must {
-
       "redirect to the scanning mandatory evidence page" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -6820,7 +6580,6 @@ class YearToDateLiabilityControllerSpec
     }
 
     "handling requests to display the upload mandatory evidence failure page" must {
-
       def performAction(): Future[Result] =
         controller.uploadMandatoryEvidenceFailure()(FakeRequest())
 
@@ -6854,7 +6613,6 @@ class YearToDateLiabilityControllerSpec
           }
 
           checkIsTechnicalErrorPage(performAction())
-
         }
 
         "there is an error updating the session" in {
@@ -6869,13 +6627,10 @@ class YearToDateLiabilityControllerSpec
 
           checkIsTechnicalErrorPage(performAction())
         }
-
       }
 
       "display the upscan failed page" when {
-
         "all update are successful and" when {
-
           "the user is in on a single disposal journey" in {
             val answers = sample[IncompleteCalculatedYTDAnswers]
               .copy(pendingUpscanUpload = Some(sample[UpscanUpload]))
@@ -7005,17 +6760,12 @@ class YearToDateLiabilityControllerSpec
               performAction(),
               routes.YearToDateLiabilityController.documentDidNotUpload()
             )
-
           }
-
         }
-
       }
-
     }
 
     "handling requests to display the mandatory evidence expired page" must {
-
       def performAction(): Future[Result] =
         controller.mandatoryEvidenceExpired()(FakeRequest())
 
@@ -7024,7 +6774,6 @@ class YearToDateLiabilityControllerSpec
       behave like markUnmetDependencyBehaviour(controller.mandatoryEvidenceExpired())
 
       "redirect to the check your answers page" when {
-
         def test(answers: YearToDateLiabilityAnswers): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -7045,7 +6794,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "there is no expired evidence when the journey is incomplete and" when {
-
           "the user is on an calculated journey" in {
             test(
               sample[IncompleteCalculatedYTDAnswers]
@@ -7059,7 +6807,6 @@ class YearToDateLiabilityControllerSpec
                 .copy(expiredEvidence = None)
             )
           }
-
         }
 
         "the user has completed the section on a calculated journey" in {
@@ -7069,7 +6816,6 @@ class YearToDateLiabilityControllerSpec
         "the user has completed the section on a non-calculated journey" in {
           test(sample[CompleteNonCalculatedYTDAnswers])
         }
-
       }
 
       "display the page" when {
@@ -7137,13 +6883,10 @@ class YearToDateLiabilityControllerSpec
 
           checkPage(performAction())
         }
-
       }
-
     }
 
     "handling requests to display the year to date liability page" must {
-
       def performAction(): Future[Result] = controller.yearToDateLiability()(FakeRequest())
 
       val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers(
@@ -7166,7 +6909,6 @@ class YearToDateLiabilityControllerSpec
       behave like markUnmetDependencyBehaviour(controller.yearToDateLiability())
 
       "redirect to the check your answers page" when {
-
         "the return is not a first return" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -7183,7 +6925,6 @@ class YearToDateLiabilityControllerSpec
 
           checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
         }
-
       }
 
       "redirect to the estimates page if the user has not answered that question yet" in {
@@ -7249,7 +6990,6 @@ class YearToDateLiabilityControllerSpec
         }
 
       "display the page" when {
-
         def testFurtherReturnPage(
           session: SessionData,
           fillingOutReturn: FillingOutReturn,
@@ -7293,7 +7033,6 @@ class YearToDateLiabilityControllerSpec
                 case Some(checks) =>
                   checks(doc)
               }
-
             }
           )
         }
@@ -7805,11 +7544,9 @@ class YearToDateLiabilityControllerSpec
             )
           }
         }
-
       }
 
       "show an error page" when {
-
         def state(
           triageAnswers: SingleDisposalTriageAnswers,
           taxableGain: Option[AmountInPence],
@@ -7885,7 +7622,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the user is eligible for a further return calculation and" when {
-
           "no value for estimated income can be found" in {
             val (session, fillingOutReturn) = state(
               sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
@@ -8011,13 +7747,10 @@ class YearToDateLiabilityControllerSpec
             checkIsTechnicalErrorPage(performAction())
           }
         }
-
       }
-
     }
 
     "handling submits on the year to date liability page" must {
-
       def performAction(formData: (String, String)*): Future[Result] =
         controller.yearToDateLiabilitySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST"))
 
@@ -8026,7 +7759,6 @@ class YearToDateLiabilityControllerSpec
       behave like markUnmetDependencyBehaviour(controller.yearToDateLiabilitySubmit())
 
       "show an error page" when {
-
         val answers = IncompleteNonCalculatedYTDAnswers.empty.copy(
           taxableGainOrLoss = Some(AmountInPence(101L)),
           hasEstimatedDetails = Some(false)
@@ -8050,7 +7782,6 @@ class YearToDateLiabilityControllerSpec
         val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
         "there is an error updating the draft return" in {
-
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
@@ -8062,7 +7793,6 @@ class YearToDateLiabilityControllerSpec
         }
 
         "there is an error updating the session data" in {
-
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
@@ -8073,11 +7803,9 @@ class YearToDateLiabilityControllerSpec
 
           checkIsTechnicalErrorPage(performAction("yearToDateLiability" -> "1000"))
         }
-
       }
 
       "redirect to the check your answers page" when {
-
         "the return is not a further return" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -8094,11 +7822,9 @@ class YearToDateLiabilityControllerSpec
 
           checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
         }
-
       }
 
       "show a form error" when {
-
         def test(sessionData: SessionData, fillingOutReturn: FillingOutReturn)(
           data: (String, String)*
         )(
@@ -8179,11 +7905,9 @@ class YearToDateLiabilityControllerSpec
               }
           }
         }
-
       }
 
       "redirect to the cya endpoint" when {
-
         "all updates are successful" in {
           val submittedAnswer = "100"
           val answers         = sample[CompleteNonCalculatedYTDAnswers].copy(
@@ -8223,7 +7947,6 @@ class YearToDateLiabilityControllerSpec
             performAction("yearToDateLiability" -> submittedAnswer),
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
-
         }
 
         "the user is eligible for a further return calculation" in {
@@ -8318,11 +8041,9 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
 
       "not do any updates" when {
-
         "the answer submitted is the same as the one held in session" in {
           val submittedAnswer = "0"
           val answers         = sample[CompleteNonCalculatedYTDAnswers].copy(
@@ -8341,7 +8062,6 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockFurtherReturnCalculationEligibilityCheck(journey)(Right(sample[Ineligible]))
-
           }
 
           checkIsRedirect(
@@ -8349,13 +8069,10 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling requests to display the repayment page" must {
-
       def performAction(): Future[Result] = controller.repayment()(FakeRequest())
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -8363,7 +8080,6 @@ class YearToDateLiabilityControllerSpec
       behave like markUnmetDependencyBehaviour(controller.repayment())
 
       "redirect to the check your answers page" when {
-
         "the return is not a first return" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -8380,11 +8096,9 @@ class YearToDateLiabilityControllerSpec
 
           checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
         }
-
       }
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
@@ -8563,13 +8277,10 @@ class YearToDateLiabilityControllerSpec
             "repayment.personalRepInPeriodOfAdmin.agent.helpText"
           )
         }
-
       }
-
     }
 
     "handling submits on the repayment page" must {
-
       def performAction(formData: (String, String)*): Future[Result] =
         controller.repaymentSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST"))
 
@@ -8605,7 +8316,6 @@ class YearToDateLiabilityControllerSpec
       }
 
       "redirect to the check your answers page" must {
-
         "the return is not a first return" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -8622,11 +8332,9 @@ class YearToDateLiabilityControllerSpec
 
           checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
         }
-
       }
 
       "show a form error" when {
-
         def test(
           sessionData: SessionData
         )(
@@ -8684,11 +8392,9 @@ class YearToDateLiabilityControllerSpec
             }
           }
         }
-
       }
 
       "redirect to the cya endpoint" when {
-
         "all updates are successful" in {
           val answers    = sample[CompleteNonCalculatedYTDAnswers].copy(
             checkForRepayment = Some(false)
@@ -8718,13 +8424,10 @@ class YearToDateLiabilityControllerSpec
             performAction("repayment" -> "true"),
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
-
         }
-
       }
 
       "not do any updates" when {
-
         "the answer submitted is the same as the one held in session" in {
           val answers = sample[CompleteNonCalculatedYTDAnswers].copy(
             checkForRepayment = Some(false)
@@ -8747,16 +8450,12 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
       }
-
     }
-
   }
 
-  def noPendingUploadBehaviour(performAction: () => Future[Result]): Unit =
+  private def noPendingUploadBehaviour(performAction: () => Future[Result]): Unit =
     "redirect to the check your answers page" when {
-
       def test(answers: YearToDateLiabilityAnswers): Unit = {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -8777,7 +8476,6 @@ class YearToDateLiabilityControllerSpec
       }
 
       "there is no pending upscan upload when the journey is incomplete and" when {
-
         "the user is on an calculated journey" in {
           test(
             sample[IncompleteCalculatedYTDAnswers]
@@ -8791,7 +8489,6 @@ class YearToDateLiabilityControllerSpec
               .copy(pendingUpscanUpload = None)
           )
         }
-
       }
 
       "the user has completed the section on a calculated journey" in {
@@ -8800,15 +8497,12 @@ class YearToDateLiabilityControllerSpec
 
       "the user has completed the section on a non-calculated journey" in {
         test(sample[CompleteNonCalculatedYTDAnswers])
-
       }
-
     }
 
-  def noDisposalDateBehaviour(performAction: () => Future[Result]): Unit =
+  private def noDisposalDateBehaviour(performAction: () => Future[Result]): Unit =
     "redirect to the task list page" when {
       "no disposal date can be found" in {
-
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
@@ -8828,7 +8522,7 @@ class YearToDateLiabilityControllerSpec
       }
     }
 
-  def noEstimatedIncomeBehaviour(performAction: () => Future[Result]): Unit =
+  private def noEstimatedIncomeBehaviour(performAction: () => Future[Result]): Unit =
     "redirect to the check your answers page" when {
       "no estimated income can be found" in {
         inSequence {
@@ -8852,10 +8546,9 @@ class YearToDateLiabilityControllerSpec
           routes.YearToDateLiabilityController.checkYourAnswers()
         )
       }
-
     }
 
-  def noYearToDateLiabilityBehaviour(performAction: () => Future[Result]): Unit =
+  private def noYearToDateLiabilityBehaviour(performAction: () => Future[Result]): Unit =
     "redirect to the check your answers page" when {
       "no year to date liability can be found for a further return" in {
         inSequence {
@@ -8880,10 +8573,9 @@ class YearToDateLiabilityControllerSpec
           routes.YearToDateLiabilityController.checkYourAnswers()
         )
       }
-
     }
 
-  def incompleteOtherJourneysBehaviour(
+  private def incompleteOtherJourneysBehaviour(
     performAction: () => Future[Result]
   ): Unit = {
     val draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
@@ -8896,7 +8588,6 @@ class YearToDateLiabilityControllerSpec
     )
 
     "redirect to the task list page" when {
-
       def test(draftReturn: DraftSingleDisposalReturn): Unit = {
         val session = SessionData.empty.copy(
           journeyStatus = Some(
@@ -8969,16 +8660,13 @@ class YearToDateLiabilityControllerSpec
             .copy(exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers]))
         )
       }
-
     }
-
   }
 
-  def redirectWhenNotNonCalculatedJourneyBehaviour(
+  private def redirectWhenNotNonCalculatedJourneyBehaviour(
     performAction: () => Future[Result]
   ): Unit =
     "redirect to the check your answers endpoint" when {
-
       "the user has already started a calculated year to date liability journey" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -9021,14 +8709,12 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
-
     }
 
-  def redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(
+  private def redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(
     performAction: () => Future[Result]
   ): Unit =
     "redirect to the check your answers endpoint" when {
-
       "the user has started this section and is on a single disposal non calculated journey" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -9128,10 +8814,9 @@ class YearToDateLiabilityControllerSpec
           routes.YearToDateLiabilityController.checkYourAnswers()
         )
       }
-
     }
 
-  def unsuccessfulUpdateBehaviourForSingleDisposal(
+  private def unsuccessfulUpdateBehaviourForSingleDisposal(
     currentAnswers: YearToDateLiabilityAnswers,
     updatedAnswers: YearToDateLiabilityAnswers,
     result: () => Future[Result]
@@ -9152,7 +8837,7 @@ class YearToDateLiabilityControllerSpec
     )
   }
 
-  def unsuccessfulUpdateBehaviour(
+  private def unsuccessfulUpdateBehaviour(
     currentJourney: FillingOutReturn,
     updatedJourney: FillingOutReturn,
     result: () => Future[Result]
@@ -9161,9 +8846,7 @@ class YearToDateLiabilityControllerSpec
     val updatedSession = SessionData.empty.copy(journeyStatus = Some(updatedJourney))
 
     "show an error page" when {
-
       "there is an error updating the draft return" in {
-
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
@@ -9174,7 +8857,6 @@ class YearToDateLiabilityControllerSpec
       }
 
       "there is an error updating the session data" in {
-
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
@@ -9184,12 +8866,10 @@ class YearToDateLiabilityControllerSpec
 
         checkIsTechnicalErrorPage(result())
       }
-
     }
-
   }
 
-  def testFormError(
+  private def testFormError(
     data: (String, String)*
   )(
     expectedErrorMessageKey: String,
@@ -9225,7 +8905,7 @@ class YearToDateLiabilityControllerSpec
     )
   }
 
-  def testSuccessfulUpdatesAfterSubmit(
+  private def testSuccessfulUpdatesAfterSubmit(
     result: => Future[Result],
     oldDraftReturn: DraftReturn,
     newDraftReturn: DraftReturn,
@@ -9246,7 +8926,7 @@ class YearToDateLiabilityControllerSpec
     )
   }
 
-  def testSuccessfulUpdatesAfterSubmit(
+  private def testSuccessfulUpdatesAfterSubmit(
     result: => Future[Result],
     journey: FillingOutReturn,
     updatedJourney: FillingOutReturn
@@ -9271,7 +8951,7 @@ class YearToDateLiabilityControllerSpec
     )
   }
 
-  def testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
+  private def testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
     result: => Future[Result],
     oldAnswers: Option[YearToDateLiabilityAnswers],
     newAnswers: YearToDateLiabilityAnswers,
@@ -9301,7 +8981,7 @@ class YearToDateLiabilityControllerSpec
     testSuccessfulUpdatesAfterSubmit(result, fillingOutReturn, fillingOutReturn.copy(draftReturn = newDraftReturn))
   }
 
-  def testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
+  private def testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
     result: => Future[Result],
     oldAnswers: Option[YearToDateLiabilityAnswers],
     newAnswers: YearToDateLiabilityAnswers,
@@ -9324,7 +9004,7 @@ class YearToDateLiabilityControllerSpec
     testSuccessfulUpdatesAfterSubmit(result, fillingOutReturn, fillingOutReturn.copy(draftReturn = newDraftReturn))
   }
 
-  def testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
+  private def testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
     result: => Future[Result],
     oldAnswers: YearToDateLiabilityAnswers,
     newAnswers: YearToDateLiabilityAnswers,
@@ -9343,7 +9023,7 @@ class YearToDateLiabilityControllerSpec
     testSuccessfulUpdatesAfterSubmit(result, draftReturn, newDraftReturn, amendReturnData)
   }
 
-  def testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
+  private def testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
     result: => Future[Result],
     oldAnswers: YearToDateLiabilityAnswers,
     newAnswers: YearToDateLiabilityAnswers,
@@ -9362,11 +9042,10 @@ class YearToDateLiabilityControllerSpec
       previousReturnData
     )
 
-  def commonUploadMandatoryEvidenceBehaviour(
+  private def commonUploadMandatoryEvidenceBehaviour(
     performAction: () => Future[Result]
   ): Unit =
     "redirect to the check your answers page" when {
-
       val calculatedTaxDue =
         sample[GainCalculatedTaxDue].copy(amountOfTaxDue = AmountInPence(100L))
 
@@ -9394,6 +9073,7 @@ class YearToDateLiabilityControllerSpec
           routes.YearToDateLiabilityController.checkYourAnswers()
         )
       }
+
       "there is no answer to the tax due but it is equal to the calculated tax due" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -9431,10 +9111,9 @@ class YearToDateLiabilityControllerSpec
           routes.YearToDateLiabilityController.checkYourAnswers()
         )
       }
-
     }
 
-  def redirectToStartWhenFurtherReturnIneligibleForCalculation(performAction: () => Future[Result]): Unit = {
+  private def redirectToStartWhenFurtherReturnIneligibleForCalculation(performAction: () => Future[Result]): Unit = {
     val (session, fillingOutReturn, _) =
       sessionWithSingleDisposalState(
         None,
@@ -9446,7 +9125,6 @@ class YearToDateLiabilityControllerSpec
       )
 
     "redirect to the cya endpoint" when {
-
       "the user is on a further return journey where they are ineligible for a calculation" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -9456,11 +9134,9 @@ class YearToDateLiabilityControllerSpec
 
         checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
       }
-
     }
 
     "show an error page" when {
-
       "there is an error checking eligibility for a calculation for a further return" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -9470,15 +9146,11 @@ class YearToDateLiabilityControllerSpec
 
         checkIsTechnicalErrorPage(performAction())
       }
-
     }
-
   }
-
 }
 
 object YearToDateLiabilityControllerSpec extends Matchers {
-
   def validateCalculatedYearToDateLiabilityPage(
     completeYearToDateLiabilityAnswers: CompleteCalculatedYTDAnswers,
     isATrust: Boolean,
@@ -9592,7 +9264,6 @@ object YearToDateLiabilityControllerSpec extends Matchers {
       answers.checkForRepayment.foreach { checkForRepayment =>
         doc.select("#repayment-answer").text() shouldBe (if (checkForRepayment) "Yes" else "No")
       }
-
     }
 
     doc
@@ -9601,5 +9272,4 @@ object YearToDateLiabilityControllerSpec extends Matchers {
       answers.taxDue.inPounds()
     )
   }
-
 }

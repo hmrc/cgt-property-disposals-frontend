@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import com.google.inject.Inject
-import configs.syntax._
 import play.api.Configuration
 import play.api.i18n.Lang
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -28,16 +27,14 @@ class CustomLanguageController @Inject() (
   languageUtils: LanguageUtils,
   cc: MessagesControllerComponents
 ) extends LanguageController(languageUtils, cc) {
+  private val english = Lang("en")
+  private val welsh   = Lang("cy")
 
-  private val english: Lang = Lang("en")
-  private val welsh: Lang   = Lang("cy")
+  override protected def fallbackURL: String = configuration.get[String]("self.url")
 
-  override def fallbackURL: String = configuration.underlying.get[String]("self.url").value
-
-  override def languageMap: Map[String, Lang] = Map("en" -> english, "cy" -> welsh)
+  override protected def languageMap: Map[String, Lang] = Map("en" -> english, "cy" -> welsh)
 
   def switchToEnglish: Action[AnyContent] = switchToLanguage("en")
 
   def switchToWelsh: Action[AnyContent] = switchToLanguage("cy")
-
 }

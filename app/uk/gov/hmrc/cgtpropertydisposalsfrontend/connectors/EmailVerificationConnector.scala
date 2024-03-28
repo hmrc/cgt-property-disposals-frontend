@@ -18,16 +18,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import configs.ConfigReader
-import configs.syntax._
-import play.api.Configuration
 import play.api.libs.json.{Format, JsValue, Json}
 import play.api.mvc.Call
+import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnectorImpl.EmailVerificationRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
@@ -37,11 +35,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
-
   def verifyEmail(email: Email, name: ContactName, continueCall: Call, language: AcceptLanguage)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
-
 }
 
 @Singleton
@@ -50,20 +46,17 @@ class EmailVerificationConnectorImpl @Inject() (
   config: Configuration
 )(implicit ec: ExecutionContext)
     extends EmailVerificationConnector {
+  private def getEmailVerificationConfig[A : ConfigLoader](key: String) =
+    config.get[A](s"microservice.services.email-verification.$key")
 
-  private def getEmailVerificationConfig[A : ConfigReader](key: String) =
-    config.underlying
-      .get[A](s"microservice.services.email-verification.$key")
-      .value
-
-  val url: String = {
+  private val url = {
     val protocol = getEmailVerificationConfig[String]("protocol")
     val host     = getEmailVerificationConfig[String]("host")
     val port     = getEmailVerificationConfig[String]("port")
     s"$protocol://$host:$port/email-verification/verification-requests"
   }
 
-  val templateId: String = getEmailVerificationConfig[String]("template-id")
+  private val templateId = getEmailVerificationConfig[String]("template-id")
 
   private val linkExpiryTime = {
     val minutes =
@@ -71,7 +64,7 @@ class EmailVerificationConnectorImpl @Inject() (
     java.time.Duration.ofMinutes(minutes).toString
   }
 
-  val selfBaseUrl: String = config.underlying.get[String]("self.url").value
+  private val selfBaseUrl = config.get[String]("self.url")
 
   def verifyEmail(email: Email, name: ContactName, continueCall: Call, language: AcceptLanguage)(implicit
     hc: HeaderCarrier
@@ -92,11 +85,9 @@ class EmailVerificationConnectorImpl @Inject() (
         .recover { case e => Left(Error(e)) }
     )
   }
-
 }
 
 object EmailVerificationConnectorImpl {
-
   final case class EmailVerificationRequest(
     email: String,
     templateId: String,
@@ -113,5 +104,4 @@ object EmailVerificationConnectorImpl {
       case AcceptLanguage.EN => baseTemplateName
       case AcceptLanguage.CY => baseTemplateName + "_" + AcceptLanguage.CY.toString.toLowerCase(Locale.UK)
     }
-
 }

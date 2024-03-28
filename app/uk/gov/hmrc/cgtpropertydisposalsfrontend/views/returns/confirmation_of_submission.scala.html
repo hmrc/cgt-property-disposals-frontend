@@ -170,7 +170,7 @@
 
   @htmlParagraph(messages(s"$key.emailSent", justSubmittedReturn.subscribedDetails.emailAddress.value))
 
-  <p class="govuk-body" id="printPage" class="js-visible">
+  <p id="printPage" class="govuk-body js-visible govuk-!-display-none-print">
     @Html(messages(printLinkMessageKey, "#print-dialogue"))
   </p>
 
@@ -334,20 +334,24 @@
     </div>
   }
 
-  @{if(isAgent)
-      linkParagraph(accountRoutes.HomePageController.homepage().url,messages("button.clients.accountHome"),"account-home-link")
-    else if(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
-      linkParagraph(accountRoutes.HomePageController.homepage().url,messages("button.accountHome"),"account-home-link")
-    else
-      justSubmittedReturn.submissionResponse.charge.fold(
-        govukButton(Button(
-          href = Some(accountRoutes.HomePageController.homepage().url),
-          content = Text(messages("button.accountHome"))
-        ))
-      )( _ =>
-        htmlParagraph(messages(s"""$key.${if(isATrust) "trust." else ""}returnToAccountHome""", accountRoutes.HomePageController.homepage().url))
-      )
-  }
+  <div class="govuk-!-display-none-print">
+    @{
+      if(isAgent)
+        linkParagraph(accountRoutes.HomePageController.homepage().url,messages("button.clients.accountHome"),"account-home-link")
+      else if(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
+        linkParagraph(accountRoutes.HomePageController.homepage().url,messages("button.accountHome"),"account-home-link")
+      else
+        justSubmittedReturn.submissionResponse.charge.fold(
+          govukButton(Button(
+            href = Some(accountRoutes.HomePageController.homepage().url),
+            content = Text(messages("button.accountHome"))
+          ))
+        )( _ =>
+          htmlParagraph(messages(s"""$key.${if(isATrust) "trust." else ""}returnToAccountHome""", accountRoutes.HomePageController.homepage().url))
+        )
+      }
+  </div>
+
 
   @exitSurveyLink(if(isAmend) viewConfig.amendsExitSurveyUrl else viewConfig.returnsExitSurveyUrl)
 
