@@ -87,6 +87,10 @@
  @caption(messages(addressJourneyType.captionMessageKey()))
   <h1 class="govuk-heading-xl">@title</h1>
 
+    <p class="govuk-body">
+        <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
+    </p>
+
  @formWrapper(submit) {
    @govukInput(Input(
      id = postcodeFilterKey,
@@ -124,10 +128,6 @@
      )),
      autocomplete = Some(AutoCompleteType.Postcode.value)
    ))
-
-    <p class="govuk-body">
-        <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
-    </p>
 
    @submitButton(messages("button.findAddress"))
  }
