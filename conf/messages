@@ -312,7 +312,7 @@ address.postcode.helpText=For example, AB2 9WQ
 postcode.invalid=Postcode must only include letters, numbers and spaces
 address.postcodeFilter.label=Property name or number (optional)
 address.postcodeFilter.helpText=For example, 44 or The Mill
-address.manual.linkText=Enter the address another way
+address.manual.linkText=Enter the address manually	
 address.lookup.linkText=Find address using UK postcode
 
 address.uk.title=Enter your UK contact address
