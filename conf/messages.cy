@@ -312,7 +312,7 @@ address.postcode.helpText=Er enghraifft, AB2 9WQ
 postcode.invalid=Mae’n rhaid i’r cod post gynnwys llythrennau, rhifau a bylchau yn unig
 address.postcodeFilter.label=Enw neu rif yr eiddo (dewisol)
 address.postcodeFilter.helpText=Er enghraifft, 44 neu Y Felin
-address.manual.linkText=Nodwch y cyfeiriad mewn ffordd arall
+address.manual.linkText=Nodwch y cyfeiriad â llaw
 address.lookup.linkText=Dod o hyd i gyfeiriad gan ddefnyddio cod post yn y DU
 
 address.uk.title=Nodwch eich cyfeiriad cyswllt yn y DU

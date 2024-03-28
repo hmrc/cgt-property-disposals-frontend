@@ -91,6 +91,10 @@
     @errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}"))
  }
  <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
+
+    <p class="govuk-body">
+        <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
+    </p>
  @formWrapper(submit) {
    @govukRadios(Radios(
      fieldset = Some(Fieldset(
@@ -115,9 +119,6 @@
      )
    ))
 
-   <p class="govuk-body">
-    <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
-   </p>
 
    @govukButton(Button(
      attributes = Map("id" -> "submitButton"),
