@@ -92,9 +92,6 @@
  }
  <span class="govuk-caption-xl">@messages(addressJourneyType.captionMessageKey())</span>
 
-    <p class="govuk-body">
-        <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
-    </p>
  @formWrapper(submit) {
    @govukRadios(Radios(
      fieldset = Some(Fieldset(
@@ -104,20 +101,27 @@
          isPageHeading = true
        ))
      )),
-     name = key,
-     items = addresses.zipWithIndex.map { case (option, index) =>
-       RadioItem(
-         content = HtmlContent(addressDisplay(option, Line)),
-         value = Some(index.toString),
-         checked = form.value.map(addresses.indexOf(_)).contains(index)
-       )
-     },
-     errorMessage = form.error(key).map(e =>
-       ErrorMessage(
-         content = Text(messages(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}.${e.message}"))
-       )
-     )
    ))
+
+     <p class="govuk-body">
+         <a class="govuk-link" href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
+     </p>
+
+     @govukRadios(Radios(
+         name = key,
+         items = addresses.zipWithIndex.map { case (option, index) =>
+             RadioItem(
+                 content = HtmlContent(addressDisplay(option, Line)),
+                 value = Some(index.toString),
+                 checked = form.value.map(addresses.indexOf(_)).contains(index)
+             )
+         },
+         errorMessage = form.error(key).map(e =>
+             ErrorMessage(
+                 content = Text(messages(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}.${e.message}"))
+             )
+         )
+     ))
 
 
    @govukButton(Button(
