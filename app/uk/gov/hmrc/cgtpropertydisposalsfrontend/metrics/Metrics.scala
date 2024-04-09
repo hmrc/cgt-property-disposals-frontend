@@ -20,13 +20,13 @@ import com.codahale.metrics.{Counter, Timer}
 import com.google.inject.{Inject, Singleton}
 
 @Singleton
-class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
+class Metrics @Inject() (metrics: com.codahale.metrics.MetricRegistry) {
 
   protected def timer(name: String): Timer =
-    metrics.defaultRegistry.timer(s"frontend.$name")
+    metrics.timer(s"frontend.$name")
 
   protected def counter(name: String): Counter =
-    metrics.defaultRegistry.counter(s"frontend.$name")
+    metrics.counter(s"frontend.$name")
 
   val postcodeLookupTimer: Timer = timer("postcode-lookup.time")
 

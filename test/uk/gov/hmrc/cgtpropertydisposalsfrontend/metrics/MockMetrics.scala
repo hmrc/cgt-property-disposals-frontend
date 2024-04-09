@@ -16,16 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics
 
-import com.codahale.metrics.{Counter, Timer}
-import com.kenshoo.play.metrics.{Metrics => PlayMetrics}
 import org.scalamock.scalatest.MockFactory
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
-object MockMetrics extends MockFactory {
-
-  val metrics: Metrics = new Metrics(stub[PlayMetrics]) {
-    override def timer(name: String): Timer = new Timer()
-
-    override def counter(name: String): Counter = new Counter()
-  }
-
+object MockMetrics extends MockFactory with GuiceOneServerPerSuite {
+  val metrics: Metrics = app.injector.instanceOf[Metrics]
 }

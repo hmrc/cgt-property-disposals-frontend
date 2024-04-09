@@ -8,5 +8,3 @@
 ->         /capital-gains-tax-uk-property        amend.Routes
 
 ->         /                                     health.Routes
-
-GET        /admin/metrics                        com.kenshoo.play.metrics.MetricsController.metrics

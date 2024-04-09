@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.ConfigFactory
 import org.jsoup.Jsoup
