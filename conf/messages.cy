@@ -1247,6 +1247,7 @@ multipleDisposalsCountryOfResidence.personalRep.helpText=Fel arfer, dyma’r diw
 multipleDisposalsTaxYear.title=Pryd y cyfnewidiwyd contractau ar yr holl eiddo?
 multipleDisposalsTaxYear.link=Beth sy’n digwydd ar y dyddiad cyfnewid?
 
+multipleDisposalsTaxYear.taxyear.2024= Y cyfan rhwng 6 Ebrill 2024 a 5 Ebrill 2025
 multipleDisposalsTaxYear.taxyear.2023= Y cyfan rhwng 6 Ebrill 2023 a 5 Ebrill 2024
 multipleDisposalsTaxYear.taxyear.2022= Y cyfan rhwng 6 Ebrill 2022 a 5 Ebrill 2023
 multipleDisposalsTaxYear.taxyear.2021= Y cyfan rhwng 6 Ebrill 2021 a 5 Ebrill 2022
