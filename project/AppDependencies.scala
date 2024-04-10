@@ -24,6 +24,5 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"          %% s"hmrc-mongo-test-$playVersion" % mongoVersion     % scope,
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.16"     % "1.3.1"          % scope,
     "uk.gov.hmrc"                %% s"bootstrap-test-$playVersion"  % bootstrapVersion % scope,
-    "com.vladsch.flexmark"        % "flexmark-all"                  % "0.64.6"         % scope
   )
 }
