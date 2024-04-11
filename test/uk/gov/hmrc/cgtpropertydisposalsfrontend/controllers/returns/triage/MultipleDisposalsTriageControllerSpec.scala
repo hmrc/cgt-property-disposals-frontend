@@ -79,7 +79,6 @@ class MultipleDisposalsTriageControllerSpec
     with RedirectToStartBehaviour
     with ReturnsServiceSupport
     with StartingToAmendToFillingOutReturnSpecBehaviour {
-
   private val mockTaxYearService = mock[TaxYearService]
 
   private val mockUUIDGenerator = mock[UUIDGenerator]
@@ -141,7 +140,7 @@ class MultipleDisposalsTriageControllerSpec
       .expects(*)
       .returning(EitherT.fromEither[Future](response))
 
-  def isValidJourney(journeyStatus: JourneyStatus): Boolean =
+  private def isValidJourney(journeyStatus: JourneyStatus): Boolean =
     journeyStatus match {
       case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft             => true
       case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn, _, _)         => true
@@ -150,12 +149,12 @@ class MultipleDisposalsTriageControllerSpec
       case _                                                                        => false
     }
 
-  def setIndividualUserType(
+  private def setIndividualUserType(
     displayType: UserTypeDisplay
   ): IndividualUserType =
     displayType.representativeType.getOrElse(Self)
 
-  def sessionDataWithStartingNewDraftReturn(
+  private def sessionDataWithStartingNewDraftReturn(
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
@@ -231,7 +230,7 @@ class MultipleDisposalsTriageControllerSpec
     (session, journey, draftReturn)
   }
 
-  def testFormError(
+  private def testFormError(
     data: (String, String)*
   )(
     expectedErrorMessageKey: String,
@@ -263,7 +262,7 @@ class MultipleDisposalsTriageControllerSpec
     )
   }
 
-  def mockGenerateUUID(uuid: UUID): Unit =
+  private def mockGenerateUUID(uuid: UUID): Unit =
     (mockUUIDGenerator.nextId _)
       .expects()
       .returning(uuid)
@@ -280,9 +279,7 @@ class MultipleDisposalsTriageControllerSpec
   }
 
   "MultipleDisposalsTriageController" when {
-
     "handling requests to display the guidance page" must {
-
       def performAction(): Future[Result] =
         controller.guidance()(FakeRequest())
 
@@ -294,7 +291,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
@@ -313,7 +309,6 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user has not started a draft return yet and" when {
           "the section is incomplete" in {
-
             test(
               sessionDataWithStartingNewDraftReturn(
                 IncompleteMultipleDisposalsTriageAnswers.empty,
@@ -357,9 +352,7 @@ class MultipleDisposalsTriageControllerSpec
           }
         }
         "the user has started a draft return yet and" when {
-
           "the section is incomplete" in {
-
             test(
               sessionDataWithFillingOutReturn(
                 IncompleteMultipleDisposalsTriageAnswers.empty
@@ -403,7 +396,6 @@ class MultipleDisposalsTriageControllerSpec
     }
 
     "handling submits on the guidance page" must {
-
       def performAction(): Future[Result] =
         controller.guidanceSubmit()(FakeRequest())
 
@@ -415,7 +407,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "redirect to how many disposals page" when {
-
         "the user has not completed the section" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -430,11 +421,9 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.howManyDisposals())
         }
-
       }
 
       "redirect to check your answers page" when {
-
         "the user has completed the section" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -451,11 +440,9 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
       }
-
     }
 
     "handling requests to display the how many disposals page" must {
-
       def performAction(): Future[Result] =
         controller.howManyDisposals()(FakeRequest())
 
@@ -467,7 +454,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
@@ -485,7 +471,6 @@ class MultipleDisposalsTriageControllerSpec
           )
 
         "the user has not started a new draft return and" when {
-
           "the journey is incomplete" in {
             test(
               sessionDataWithStartingNewDraftReturn(
@@ -512,11 +497,9 @@ class MultipleDisposalsTriageControllerSpec
               expectReturnToSummaryLink = false
             )
           }
-
         }
 
         "the user has started a new draft return and" when {
-
           "the journey is incomplete" in {
             test(
               sessionDataWithFillingOutReturn(
@@ -544,13 +527,10 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
         }
-
       }
-
     }
 
     "handling submits on the how many disposals page" must {
-
       def performAction(data: (String, String)*): Future[Result] =
         controller.howManyDisposalsSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
@@ -564,7 +544,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "redirect to single disposal cya page" when {
-
         "user enters number of properties as one" in {
           val (session, journey) = sessionDataWithStartingNewDraftReturn(
             IncompleteMultipleDisposalsTriageAnswers.empty
@@ -595,14 +574,11 @@ class MultipleDisposalsTriageControllerSpec
             performAction(key -> "1"),
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
-
         }
       }
 
       "redirect to cya page" when {
-
         "the user has not started a draft return and" when {
-
           "they have not answered how many disposals section and " +
             "enters number of properties more than one" in {
               val answers            = IncompleteMultipleDisposalsTriageAnswers.empty
@@ -663,11 +639,9 @@ class MultipleDisposalsTriageControllerSpec
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
-
         }
 
         "the user has started a draft return and" when {
-
           "they have not completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
               val amendReturnData                 = sample[AmendReturnData]
@@ -711,13 +685,10 @@ class MultipleDisposalsTriageControllerSpec
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
-
         }
-
       }
 
       "not update the session" when {
-
         "user has already answered how many disposals section and " +
           "re-enters same number of properties value for more than one" in {
             val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
@@ -743,7 +714,6 @@ class MultipleDisposalsTriageControllerSpec
       }
 
       "display form error" when {
-
         def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
           testFormError(data: _*)(expectedErrorMessageKey)(s"$key.title")(
             performAction
@@ -769,7 +739,6 @@ class MultipleDisposalsTriageControllerSpec
 
         "display form error when user enters numberOfProperties value <= 0" in {
           test(key -> "-5")(s"$key.error.tooSmall")
-
         }
 
         "display form error when user enters numberOfProperties value > 999" in {
@@ -779,11 +748,9 @@ class MultipleDisposalsTriageControllerSpec
         "display form error when user enters invalid data" in {
           test(key -> "!@£!")(s"$key.error.invalid")
         }
-
       }
 
       "show a technical error page" when {
-
         val answers                         = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = None
@@ -826,15 +793,11 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsTechnicalErrorPage(performAction(key -> "5"))
-
         }
-
       }
-
     }
 
     "handling requests to display the were uk resident page" must {
-
       def performAction(): Future[Result] =
         controller.wereYouAUKResident()(FakeRequest())
 
@@ -846,7 +809,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
@@ -874,7 +836,6 @@ class MultipleDisposalsTriageControllerSpec
           )
 
         "the user has not started a new draft return and" when {
-
           "the journey is incomplete" in {
             List(
               trustDisplay,
@@ -903,6 +864,7 @@ class MultipleDisposalsTriageControllerSpec
               }
             }
           }
+
           "the journey is complete" in {
             List(
               trustDisplay,
@@ -931,11 +893,9 @@ class MultipleDisposalsTriageControllerSpec
               }
             }
           }
-
         }
 
         "the user has started a new draft return and" when {
-
           "the journey is incomplete" in {
             test(
               sessionDataWithFillingOutReturn(
@@ -977,13 +937,10 @@ class MultipleDisposalsTriageControllerSpec
             }
           }
         }
-
       }
-
     }
 
     "handling submits on the were uk resident page" must {
-
       def performAction(data: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
@@ -1013,7 +970,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "redirect to cya page" when {
-
         val taxYear = sample[TaxYear].copy(
           startDateInclusive = LocalDate.of(2020, 4, 6),
           endDateExclusive = LocalDate.of(2021, 4, 6)
@@ -1027,12 +983,10 @@ class MultipleDisposalsTriageControllerSpec
         )
 
         "the user has not started a draft return and" when {
-
           val (session, journey) =
             sessionDataWithStartingNewDraftReturn(answers)
 
           "they have not answered the were uk resident question and selects true" in {
-
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
@@ -1054,7 +1008,6 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           "they have not answered the were uk resident question and selects false" in {
-
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
@@ -1112,11 +1065,9 @@ class MultipleDisposalsTriageControllerSpec
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
-
         }
 
         "the user has started a draft return and" when {
-
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
               forAll { c: CompleteMultipleDisposalsTriageAnswers =>
@@ -1161,13 +1112,10 @@ class MultipleDisposalsTriageControllerSpec
                 )
               }
             }
-
         }
-
       }
 
       "show a form error" when {
-
         "the user submits nothing" in {
           List(
             trustDisplay,
@@ -1213,7 +1161,6 @@ class MultipleDisposalsTriageControllerSpec
       }
 
       "show an error page" when {
-
         val answers                         = sample[CompleteMultipleDisposalsTriageAnswers]
           .copy(countryOfResidence = sample[Country])
         val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
@@ -1259,13 +1206,10 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsTechnicalErrorPage(performAction(key -> "true"))
         }
-
       }
-
     }
 
     "handling requests to display the were all properties residential page" must {
-
       def performAction(): Future[Result] =
         controller.wereAllPropertiesResidential()(FakeRequest())
 
@@ -1277,7 +1221,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
@@ -1296,7 +1239,6 @@ class MultipleDisposalsTriageControllerSpec
           )
 
         "the user has not started a new draft return and" when {
-
           "the journey is incomplete" in {
             test(
               sessionDataWithStartingNewDraftReturn(
@@ -1320,11 +1262,9 @@ class MultipleDisposalsTriageControllerSpec
               expectReturnToSummaryLink = false
             )
           }
-
         }
 
         "the user has started a new draft return and" when {
-
           "the journey is incomplete" in {
             test(
               sessionDataWithFillingOutReturn(
@@ -1349,13 +1289,10 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
         }
-
       }
-
     }
 
     "handling submits on the were all properties residential page" must {
-
       def performAction(data: (String, String)*): Future[Result] =
         controller.wereAllPropertiesResidentialSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
@@ -1369,7 +1306,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "redirect to cya page" when {
-
         val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = Some(2),
@@ -1378,12 +1314,10 @@ class MultipleDisposalsTriageControllerSpec
         )
 
         "the user has not started a draft return and" when {
-
           val (session, journey) =
             sessionDataWithStartingNewDraftReturn(answers)
 
           "user has not answered the were all properties residential section and selects true" in {
-
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
@@ -1410,7 +1344,6 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           "user has not answered the were all properties residential section and selects false" in {
-
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
@@ -1473,7 +1406,6 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "the user has started a draft return and" when {
-
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
               val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
@@ -1550,13 +1482,10 @@ class MultipleDisposalsTriageControllerSpec
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
-
         }
-
       }
 
       "not update the session" when {
-
         "user has already answered were all properties residential section and re-selected same option" in {
           val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
             .copy(
@@ -1576,11 +1505,9 @@ class MultipleDisposalsTriageControllerSpec
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
-
       }
 
       "show a form error" when {
-
         "the user submits nothing" in {
           val answers      = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
@@ -1607,11 +1534,9 @@ class MultipleDisposalsTriageControllerSpec
             BAD_REQUEST
           )
         }
-
       }
 
       "show a error page" when {
-
         val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           countryOfResidence = Country.uk,
           assetTypes = List(AssetType.Residential)
@@ -1661,13 +1586,10 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsTechnicalErrorPage(performAction(key -> "false"))
         }
-
       }
-
     }
 
     "handling requests to display the tax year exchanged page" must {
-
       def performAction(): Future[Result] =
         controller.whenWereContractsExchanged()(FakeRequest())
 
@@ -1679,7 +1601,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "redirect to the check your answers endpoint" when {
-
         "the user is on an indirect disposal journey" in {
           val incompleteAnswers =
             IncompleteMultipleDisposalsTriageAnswers.empty.copy(
@@ -1697,11 +1618,9 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.checkYourAnswers())
         }
-
       }
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
@@ -1729,7 +1648,6 @@ class MultipleDisposalsTriageControllerSpec
         )
 
         "the user has not started a new draft return and" when {
-
           "the journey is incomplete" in {
             test(
               sessionDataWithStartingNewDraftReturn(incompleteAnswers)._1,
@@ -1753,11 +1671,9 @@ class MultipleDisposalsTriageControllerSpec
               expectReturnToSummaryLink = false
             )
           }
-
         }
 
         "the user has started a new draft return and" when {
-
           "the journey is incomplete" in {
             test(
               sessionDataWithFillingOutReturn(incompleteAnswers)._1,
@@ -1782,12 +1698,10 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
         }
-
       }
     }
 
     "handling submits on the tax year exchanged page" must {
-
       def performAction(data: (String, String)*): Future[Result] =
         controller.whenWereContractsExchangedSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
@@ -1795,6 +1709,9 @@ class MultipleDisposalsTriageControllerSpec
 
       val todayTaxYear2020 = LocalDate.of(2020, 4, 6)
       val todayTaxYear2021 = LocalDate.of(2021, 4, 6)
+      val todayTaxYear2022 = LocalDate.of(2022, 4, 6)
+      val todayTaxYear2023 = LocalDate.of(2023, 4, 6)
+      val todayTaxYear2024 = LocalDate.of(2024, 4, 6)
 
       val key = "multipleDisposalsTaxYear"
 
@@ -1804,7 +1721,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "redirect to cya page" when {
-
         val taxYear = sample[TaxYear].copy(
           startDateInclusive = LocalDate.of(2020, 4, 6),
           endDateExclusive = LocalDate.of(2021, 4, 6)
@@ -1840,11 +1756,108 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "the user has not started a draft return and" when {
-
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-          "user has not answered the tax year exchanged section and selects after April 06th, 2021" in {
+          "user has not answered the tax year exchanged section and selects after April 06th, 2024" in {
+            val taxYear = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(2024, 4, 6),
+              endDateExclusive = LocalDate.of(2025, 4, 6)
+            )
 
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockAvailableTaxYears()(Right(List(2024)))
+              mockGetTaxYear(todayTaxYear2024)(Right(Some(taxYear)))
+              mockStoreSession(
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          taxYearExchanged = getTaxYearExchanged(Some(taxYear)),
+                          taxYear = Some(taxYear)
+                        )
+                      )
+                    )
+                  )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "2024"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "user has not answered the tax year exchanged section and selects after April 06th, 2023" in {
+            val taxYear = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(2023, 4, 6),
+              endDateExclusive = LocalDate.of(2024, 4, 6)
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockAvailableTaxYears()(Right(List(2023)))
+              mockGetTaxYear(todayTaxYear2023)(Right(Some(taxYear)))
+              mockStoreSession(
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          taxYearExchanged = getTaxYearExchanged(Some(taxYear)),
+                          taxYear = Some(taxYear)
+                        )
+                      )
+                    )
+                  )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "2023"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "user has not answered the tax year exchanged section and selects after April 06th, 2022" in {
+            val taxYear = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(2022, 4, 6),
+              endDateExclusive = LocalDate.of(2023, 4, 6)
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockAvailableTaxYears()(Right(List(2022)))
+              mockGetTaxYear(todayTaxYear2022)(Right(Some(taxYear)))
+              mockStoreSession(
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          taxYearExchanged = getTaxYearExchanged(Some(taxYear)),
+                          taxYear = Some(taxYear)
+                        )
+                      )
+                    )
+                  )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "2022"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "user has not answered the tax year exchanged section and selects after April 06th, 2021" in {
             val taxYear = sample[TaxYear].copy(
               startDateInclusive = LocalDate.of(2021, 4, 6),
               endDateExclusive = LocalDate.of(2022, 4, 6)
@@ -1878,7 +1891,6 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           "user has not answered the tax year exchanged section and selects after April 06th, 2020" in {
-
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
@@ -1987,7 +1999,6 @@ class MultipleDisposalsTriageControllerSpec
 
           "personalRepAdmin user has not answered the tax year exchanged section, date of death is 1-1-2018 " +
             "and selects tax year exchanged as 2021/22" in {
-
               val taxYear = sample[TaxYear].copy(
                 startDateInclusive = LocalDate.of(2021, 4, 6),
                 endDateExclusive = LocalDate.of(2022, 4, 6)
@@ -2039,11 +2050,9 @@ class MultipleDisposalsTriageControllerSpec
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
-
         }
 
         "the user has started a draft return and" when {
-
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
               val taxYear2020 = sample[TaxYear].copy(
@@ -2112,13 +2121,10 @@ class MultipleDisposalsTriageControllerSpec
                 )
               }
             }
-
         }
-
       }
 
       "not update the session" when {
-
         "user has already answered the tax year exchanged section and re-selected same option" in {
           val taxYear = sample[TaxYear].copy(
             startDateInclusive = LocalDate.of(2020, 4, 6),
@@ -2149,11 +2155,9 @@ class MultipleDisposalsTriageControllerSpec
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
-
       }
 
       "show a form error" when {
-
         "the user submits nothing" in {
           val answers      = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
@@ -2184,11 +2188,9 @@ class MultipleDisposalsTriageControllerSpec
             BAD_REQUEST
           )
         }
-
       }
 
       "show an error page" when {
-
         val taxYear = sample[TaxYear].copy(
           startDateInclusive = LocalDate.of(2020, 4, 6),
           endDateExclusive = LocalDate.of(2021, 4, 6)
@@ -2283,13 +2285,10 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsTechnicalErrorPage(performAction(key -> "2020"))
         }
-
       }
-
     }
 
     "handling requests to display the country of residence page" must {
-
       def performAction(): Future[Result] =
         controller.countryOfResidence()(FakeRequest())
 
@@ -2301,7 +2300,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
@@ -2362,8 +2360,8 @@ class MultipleDisposalsTriageControllerSpec
             numberOfProperties = Some(2),
             wasAUKResident = Some(false)
           )
-        "the user has not started a new draft return and" when {
 
+        "the user has not started a new draft return and" when {
           "the journey is incomplete" in {
             List(
               trustDisplay,
@@ -2431,11 +2429,9 @@ class MultipleDisposalsTriageControllerSpec
               }
             }
           }
-
         }
 
         "the user has started a new draft return and" when {
-
           "the journey is incomplete" in {
             test(
               sessionDataWithFillingOutReturn(incompleteAnswers)._1,
@@ -2463,7 +2459,6 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
         }
-
       }
 
       "redirect to the cya page" in {
@@ -2483,11 +2478,9 @@ class MultipleDisposalsTriageControllerSpec
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
-
     }
 
     "handling submits on the country of residence page" must {
-
       def performAction(data: (String, String)*): Future[Result] =
         controller.countryOfResidenceSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
@@ -2511,7 +2504,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "redirect to cya page" when {
-
         val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = Some(2),
@@ -2520,13 +2512,11 @@ class MultipleDisposalsTriageControllerSpec
         )
 
         "the user has not started a draft return and" when {
-
           val (session, journey) =
             sessionDataWithStartingNewDraftReturn(answers)
 
           "user has not answered the country of residence section and " +
             "enters valid country" in {
-
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -2589,11 +2579,9 @@ class MultipleDisposalsTriageControllerSpec
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
-
         }
 
         "the user has started a draft return and" when {
-
           "have completed the section and they enter a country which is " +
             "different than one they have already entered" in {
               forAll { c: CompleteMultipleDisposalsTriageAnswers =>
@@ -2624,7 +2612,6 @@ class MultipleDisposalsTriageControllerSpec
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
               }
-
             }
 
           "the user is on an amend journey where the estimates answer should be preserved" in {
@@ -2669,15 +2656,11 @@ class MultipleDisposalsTriageControllerSpec
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
-
           }
-
         }
-
       }
 
       "not update the session" when {
-
         "user has already answered country of residence section and" +
           "re-selected same option" in {
             val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
@@ -2699,11 +2682,9 @@ class MultipleDisposalsTriageControllerSpec
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
-
       }
 
       "show a form error" when {
-
         "the user submits nothing" in {
           val answers      = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
@@ -2762,11 +2743,9 @@ class MultipleDisposalsTriageControllerSpec
             BAD_REQUEST
           )
         }
-
       }
 
       "show an error page" when {
-
         val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           countryOfResidence = sample[Country]
         )
@@ -2803,13 +2782,10 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsTechnicalErrorPage(performAction(key -> country.code))
         }
-
       }
-
     }
 
     "handling requests to display the asset type for non-uk residents page" must {
-
       def performAction(): Future[Result] =
         controller.assetTypeForNonUkResidents()(FakeRequest())
 
@@ -2821,7 +2797,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
@@ -2859,7 +2834,6 @@ class MultipleDisposalsTriageControllerSpec
           )
 
         "the user has not started a new draft return and" when {
-
           "the journey is incomplete" in {
             List(
               trustDisplay,
@@ -2917,11 +2891,9 @@ class MultipleDisposalsTriageControllerSpec
               }
             }
           }
-
         }
 
         "the user has started a new draft return and" when {
-
           "the journey is incomplete" in {
             test(
               sessionDataWithFillingOutReturn(
@@ -2950,13 +2922,10 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
         }
-
       }
-
     }
 
     "handling submits on the asset type for non-uk residents page" must {
-
       def performAction(data: (String, String)*): Future[Result] =
         controller.assetTypeForNonUkResidentsSubmit()(
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
@@ -2991,9 +2960,7 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "redirect to cya page" when {
-
         "the user has not started a draft return and" when {
-
           val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
             numberOfProperties = Some(2),
@@ -3006,7 +2973,6 @@ class MultipleDisposalsTriageControllerSpec
 
           "user has not answered the asset type for non-uk residents section and " +
             "selects residential checkbox" in {
-
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -3033,7 +2999,6 @@ class MultipleDisposalsTriageControllerSpec
 
           "user has not answered the asset type for non-uk residents section and " +
             "selects mixed use checkbox" in {
-
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -3060,7 +3025,6 @@ class MultipleDisposalsTriageControllerSpec
 
           "user has not answered the asset type for non-uk residents section and " +
             "selects more than one asset type checkboxes" in {
-
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -3123,11 +3087,9 @@ class MultipleDisposalsTriageControllerSpec
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
-
         }
 
         "the user has started a draft return and" when {
-
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
               forAll { c: CompleteMultipleDisposalsTriageAnswers =>
@@ -3180,13 +3142,10 @@ class MultipleDisposalsTriageControllerSpec
                 )
               }
             }
-
         }
-
       }
 
       "not update the session" when {
-
         "user has already answered the asset type for non-uk residents section and " +
           "re-selected same asset type" in {
             val answers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(
@@ -3208,11 +3167,9 @@ class MultipleDisposalsTriageControllerSpec
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
-
       }
 
       "show a form error" when {
-
         "the user submits nothing" in {
           List(
             trustDisplay,
@@ -3261,11 +3218,9 @@ class MultipleDisposalsTriageControllerSpec
             }
           }
         }
-
       }
 
       "show an error page" when {
-
         val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           countryOfResidence = sample[Country],
           assetTypes = List(AssetType.Residential)
@@ -3315,13 +3270,10 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsTechnicalErrorPage(performAction(s"$key[]" -> "1"))
         }
-
       }
-
     }
 
     "handling requests to display the completion date page" must {
-
       def performAction(): Future[Result] =
         controller.completionDate()(FakeRequest())
 
@@ -3333,7 +3285,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "display the page" when {
-
         def test(
           session: SessionData,
           expectedBackLink: Call,
@@ -3351,7 +3302,6 @@ class MultipleDisposalsTriageControllerSpec
           )
 
         "the user has not started a new draft return and" when {
-
           "the journey is incomplete with alreadySentSelfAssessment = false" in {
             test(
               sessionDataWithStartingNewDraftReturn(
@@ -3389,11 +3339,9 @@ class MultipleDisposalsTriageControllerSpec
               expectReturnToSummaryLink = false
             )
           }
-
         }
 
         "the user has started a new draft return and" when {
-
           "the journey is incomplete with alreadySentSelfAssessment = false" in {
             test(
               sessionDataWithFillingOutReturn(
@@ -3430,13 +3378,10 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
         }
-
       }
-
     }
 
     "handling submitted completion dates" must {
-
       def performAction(formData: (String, String)*): Future[Result] =
         controller.completionDateSubmit()(
           FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
@@ -3475,7 +3420,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "show a form error" when {
-
         val taxYear = sample[TaxYear].copy(
           startDateInclusive = LocalDate.of(2020, 4, 6),
           endDateExclusive = LocalDate.of(2021, 4, 6)
@@ -3543,11 +3487,9 @@ class MultipleDisposalsTriageControllerSpec
             "multipleDisposalsCompletionDate.error.tooFarInPast"
           )
         }
-
       }
 
       "show an error page" when {
-
         "there is an error updating the draft return" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
           val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
@@ -3624,7 +3566,6 @@ class MultipleDisposalsTriageControllerSpec
             performAction(formData(newCompletionDate.value): _*)
           )
         }
-
       }
 
       "redirect to the check your answers page" when {
@@ -3657,9 +3598,7 @@ class MultipleDisposalsTriageControllerSpec
         )
 
         "the user has not started a draft return and" when {
-
           "the user has not answered the question before" in {
-
             val answers            = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(IndividualUserType.Self),
               taxYearExchanged = Some(taxYearExchangedAdjusted),
@@ -3731,7 +3670,6 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "the user has started a draft return and" when {
-
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
 
@@ -3775,13 +3713,10 @@ class MultipleDisposalsTriageControllerSpec
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
-
         }
-
       }
 
       "not perform any updates" when {
-
         "the date submitted is the same as one that already exists in session" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
           val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
@@ -3807,13 +3742,10 @@ class MultipleDisposalsTriageControllerSpec
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling requests to display the share disposal page for non uk residents page" must {
-
       val requiredPreviousAnswers =
         IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(Self),
@@ -3863,13 +3795,10 @@ class MultipleDisposalsTriageControllerSpec
               .url
           }
         )
-
       }
-
     }
 
     "handling submitted disposal of shares date" must {
-
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateOfSharesSubmit()(
           FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
@@ -3910,7 +3839,6 @@ class MultipleDisposalsTriageControllerSpec
         )
 
       "show a form error" when {
-
         def testFormError(
           individualUserType: Option[IndividualUserType] = Some(Self),
           representeeAnswers: Option[RepresenteeAnswers] = None
@@ -3991,11 +3919,9 @@ class MultipleDisposalsTriageControllerSpec
             "sharesDisposalDate.error.periodOfAdminDeathNotAfterDate"
           )
         }
-
       }
 
       "show an error page" when {
-
         "there is an error updating the session" in {
           val taxYear            = sample[TaxYear].copy(
             startDateInclusive = LocalDate.of(2020, 4, 6),
@@ -4034,11 +3960,9 @@ class MultipleDisposalsTriageControllerSpec
             performAction(formData(newCompletionDate.value): _*)
           )
         }
-
       }
 
       "redirect to the check your answers page" when {
-
         val taxYearStartDate = TimeUtils.taxYearStart(today)
         val taxYear          = sample[TaxYear].copy(
           startDateInclusive = LocalDate.of(taxYearStartDate.getYear, 4, 6),
@@ -4138,11 +4062,9 @@ class MultipleDisposalsTriageControllerSpec
             Some(taxYear)
           )
         }
-
       }
 
       "redirect to the amend return disposaldate different taxyear page" when {
-
         val taxYearStartDate = TimeUtils.taxYearStart(today)
         val taxYear          = sample[TaxYear].copy(
           startDateInclusive = LocalDate.of(taxYearStartDate.getYear, 4, 6),
@@ -4237,11 +4159,9 @@ class MultipleDisposalsTriageControllerSpec
             Some(taxYear)
           )
         }
-
       }
 
       "not perform any updates" when {
-
         "the date submitted is the same as one that already exists in session" in {
           val answers      =
             sample[CompleteMultipleDisposalsTriageAnswers]
@@ -4262,13 +4182,10 @@ class MultipleDisposalsTriageControllerSpec
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
-
       }
-
     }
 
     "handling requests to display the check your answers page" must {
-
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
 
@@ -4345,7 +4262,6 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(performAction(), expectedRedirect)
-
       }
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
@@ -4364,7 +4280,6 @@ class MultipleDisposalsTriageControllerSpec
         }
 
       "redirect to the enter represented person's name page" when {
-
         "an individual user type of capacitor is found" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk
@@ -4378,7 +4293,6 @@ class MultipleDisposalsTriageControllerSpec
             allQuestionsAnsweredUk.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
             representee.routes.RepresenteeController.checkYourAnswers()
           )
-
         }
 
         "an individual user type of personal representative in period admin is found" in {
@@ -4387,9 +4301,7 @@ class MultipleDisposalsTriageControllerSpec
               .copy(individualUserType = Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)),
             representee.routes.RepresenteeController.checkYourAnswers()
           )
-
         }
-
       }
 
       "redirect to the multiple disposals guidance page when no answer for the number of properties can be found" in {
@@ -4400,29 +4312,24 @@ class MultipleDisposalsTriageControllerSpec
       }
 
       "redirect the were you a uk resident page" when {
-
         "the user has not answered that question" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(wasAUKResident = None),
             routes.MultipleDisposalsTriageController.wereYouAUKResident()
           )
         }
-
       }
 
       "redirect to the country of residence page" when {
-
         "the user was not a non uk resident and they have not selected a country yet" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredNonUk.copy(countryOfResidence = None),
             routes.MultipleDisposalsTriageController.countryOfResidence()
           )
         }
-
       }
 
       "redirect to the asset type for non uk residents page" when {
-
         "the user was not a non uk resident and they have not selected asset types yet" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredNonUk.copy(assetTypes = None),
@@ -4430,11 +4337,9 @@ class MultipleDisposalsTriageControllerSpec
               .assetTypeForNonUkResidents()
           )
         }
-
       }
 
       "not redirect to the asset types not implemented page" when {
-
         "the user selects a valid combination of asset types" in {
           val invalidAssetTypes = List(
             List(AssetType.IndirectDisposal, AssetType.MixedUse),
@@ -4471,11 +4376,9 @@ class MultipleDisposalsTriageControllerSpec
             }
           }
         }
-
       }
 
       "redirect to the were all properties residential page" when {
-
         "the user was a uk resident and they have not answered the question yet" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(wereAllPropertiesResidential = None),
@@ -4486,7 +4389,6 @@ class MultipleDisposalsTriageControllerSpec
       }
 
       "redirect to uk residents can only dispose of residential properties page" when {
-
         "the user was a uk resident and they said not all properties were residential" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk
@@ -4495,11 +4397,9 @@ class MultipleDisposalsTriageControllerSpec
               .ukResidentCanOnlyDisposeResidential()
           )
         }
-
       }
 
       "redirect to the tax year page" when {
-
         "the question has not been answered yet" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk
@@ -4508,11 +4408,9 @@ class MultipleDisposalsTriageControllerSpec
               .whenWereContractsExchanged()
           )
         }
-
       }
 
       "redirect to the tax year too early page" when {
-
         "the user indicated that the tax year was before 6th April 2020" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020)),
@@ -4530,11 +4428,9 @@ class MultipleDisposalsTriageControllerSpec
             routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
           )
         }
-
       }
 
       "show an error page" when {
-
         "no tax year can be found when one is expected" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -4568,28 +4464,23 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsTechnicalErrorPage(performAction())
         }
-
       }
 
       "redirect to the completion date page" when {
-
         "the question has not been answered yet" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(completionDate = None),
             routes.MultipleDisposalsTriageController.completionDate()
           )
         }
-
       }
 
       "redirect to the previousReturnExistsWithSameCompletionDate exit page" when {
-
         val previousSentReturns = List(
           sample[ReturnSummary].copy(completionDate = completeAnswersUk.completionDate.value)
         )
 
         "a completion date is submitted which already exists in a previously sent return" when {
-
           "the user is a trust" in {
             testRedirectWhenIncomplete(
               allQuestionsAnsweredUk.copy(
@@ -4613,13 +4504,10 @@ class MultipleDisposalsTriageControllerSpec
               Some(previousSentReturns)
             )
           }
-
         }
-
       }
 
       "show an error page" when {
-
         "there is an error updating the session when converting from incomplete answers to " +
           "complete answers" in {
             val (session, journey) =
@@ -4636,15 +4524,11 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsTechnicalErrorPage(performAction())
-
           }
-
       }
 
       "show the page" when {
-
         "the user has already completed the section and " when {
-
           "they were a uk resident" in {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -4676,7 +4560,6 @@ class MultipleDisposalsTriageControllerSpec
                   )
               }
             )
-
           }
 
           "they were a not a uk resident" in {
@@ -4701,7 +4584,6 @@ class MultipleDisposalsTriageControllerSpec
                   )
               }
             )
-
           }
 
           "they user is an agent" in {
@@ -4728,7 +4610,6 @@ class MultipleDisposalsTriageControllerSpec
                   )
               }
             )
-
           }
 
           "the user is on an amend journey where the completion date hasn't changed" in {
@@ -4757,7 +4638,6 @@ class MultipleDisposalsTriageControllerSpec
               messageFromMessageKey("multipleDisposals.triage.cya.title")
             )
           }
-
         }
 
         "non uk resident selects indirect disposal" in {
@@ -4788,7 +4668,6 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "the user has just answered all the question in the section and" when {
-
           "all updated are successful when the user was a uk resident" in {
             val (session, journey, draftReturn) =
               sessionDataWithFillingOutReturn(allQuestionsAnsweredUk)
@@ -4828,7 +4707,6 @@ class MultipleDisposalsTriageControllerSpec
                   )
               }
             )
-
           }
 
           "all updated are successful when the user was a not uk resident" in {
@@ -4858,12 +4736,10 @@ class MultipleDisposalsTriageControllerSpec
                   )
               }
             )
-
           }
         }
 
         "the user has a completion date which already exists in a previous return and" when {
-
           def test(representativeType: RepresentativeType): Unit = {
             val triageAnswers = completeAnswersUk.copy(individualUserType = Some(representativeType))
             inSequence {
@@ -4898,12 +4774,10 @@ class MultipleDisposalsTriageControllerSpec
             test(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
           }
         }
-
       }
     }
 
     "handling submits on the check your answers page" when {
-
       def performAction(): Future[Result] =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
@@ -4915,7 +4789,6 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "the user has not started a new draft return yet" must {
-
         val completeAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           countryOfResidence = Country.uk,
           assetTypes = List(AssetType.Residential)
@@ -4941,7 +4814,6 @@ class MultipleDisposalsTriageControllerSpec
         )
 
         "show an error page" when {
-
           "there is an error storing the new draft return" in {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -4966,11 +4838,9 @@ class MultipleDisposalsTriageControllerSpec
 
             checkIsTechnicalErrorPage(performAction())
           }
-
         }
 
         "redirect to the task list page" when {
-
           "a new draft return is created and saved" in {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -4987,13 +4857,10 @@ class MultipleDisposalsTriageControllerSpec
               controllers.returns.routes.TaskListController.taskList()
             )
           }
-
         }
-
       }
 
       "the user has already started a new draft return" must {
-
         "redirect to the task list page" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -5009,14 +4876,11 @@ class MultipleDisposalsTriageControllerSpec
             controllers.returns.routes.TaskListController.taskList()
           )
         }
-
       }
-
     }
-
   }
 
-  def testPageIsDisplayed(
+  private def testPageIsDisplayed(
     performAction: () => Future[Result],
     session: SessionData,
     expectedPageTitleMessageKey: String,
@@ -5058,7 +4922,7 @@ class MultipleDisposalsTriageControllerSpec
     )
   }
 
-  def testTaxYearExchangedPageIsDisplayed(
+  private def testTaxYearExchangedPageIsDisplayed(
     performAction: () => Future[Result],
     session: SessionData,
     expectedPageTitleMessageKey: String,
@@ -5101,9 +4965,8 @@ class MultipleDisposalsTriageControllerSpec
     )
   }
 
-  def noDateOfDeathForPersonalRepBehaviour(performAction: () => Future[Result]): Unit =
+  private def noDateOfDeathForPersonalRepBehaviour(performAction: () => Future[Result]): Unit =
     "show an error page" when {
-
       def sessionWithNoDateOfDeath(individualUserType: IndividualUserType): SessionData =
         sessionDataWithStartingNewDraftReturn(
           IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType = Some(individualUserType)),
@@ -5128,7 +4991,6 @@ class MultipleDisposalsTriageControllerSpec
         checkIsTechnicalErrorPage(performAction())
       }
     }
-
 }
 
 object MultipleDisposalsTriageControllerSpec extends Matchers {
@@ -5224,5 +5086,4 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
     doc.select("#completionDate-answer").text() shouldBe TimeUtils
       .govDisplayFormat(answers.completionDate.value)
   }
-
 }
