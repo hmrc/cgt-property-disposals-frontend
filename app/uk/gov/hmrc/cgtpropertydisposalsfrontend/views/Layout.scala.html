@@ -109,7 +109,6 @@
   HmrcStandardPageParams(
     serviceURLs = ServiceURLs(
       signOutUrl = if (withSignOutLink) Some(signOutUrl) else None,
-      accessibilityStatementUrl = Some(controllerRoutes.AccessibilityStatementController.accessibilityStatement().url)
     ),
     templateOverrides = TemplateOverrides(
       additionalHeadBlock = Some(additionalHeadBlock),
