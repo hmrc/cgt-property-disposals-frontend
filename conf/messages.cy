@@ -184,9 +184,9 @@ timed-out.p1=Roedd hyn oherwydd eich bod wedi bod yn segur am rhy hir.
 timed-out.p2=Bydd yn rhaid i chi fewngofnodi er mwyn cael mynediad at eich cyfrif Enillion Cyfalaf ar eiddo yn y DU.
 timed-out.button=Mewngofnodi
 
-recruitment-banner.message=Helpwch i wella GOV.UK
-recruitment-banner.dismiss=Dim diolch
-recruitment-banner.link=<a target="_blank" rel="noreferrer noopener" href="{0}">Byddwch yn rhan o wneud gwasanaethau’r llywodraeth yn well (yn agor tab newydd)</a>
+research-banner.message=Helpwch i wella GOV.UK
+research-banner.dismiss=Dim diolch
+research-banner.link=<a target="_blank" rel="noreferrer noopener" href="{0}">Byddwch yn rhan o wneud gwasanaethau’r llywodraeth yn well (yn agor tab newydd)</a>
 
 accessibilityStatement.caption=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
 accessibilityStatement.title=Datganiad hygyrchedd ar gyfer y gwasanaeth Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU

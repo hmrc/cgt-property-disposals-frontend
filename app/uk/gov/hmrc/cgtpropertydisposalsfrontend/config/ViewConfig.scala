@@ -171,8 +171,8 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
     "telephone-numbers.agent-dedicated-line"
   )
 
-  val userRecruitmentBannerEnabled: Boolean = servicesConfig.getBoolean("user-recruitment-banner.enabled")
-  val userRecruitmentUrl: String            = getString("user-recruitment-banner.url")
+  val userResearchBannerEnabled: Boolean = servicesConfig.getBoolean("user-research-banner.enabled")
+  val userResearchUrl: String            = getString("user-research-banner.url")
 
   val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enable-language-switching")
 
