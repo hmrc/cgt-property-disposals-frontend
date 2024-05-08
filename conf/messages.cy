@@ -188,45 +188,6 @@ recruitment-banner.message=Helpwch i wella GOV.UK
 recruitment-banner.dismiss=Dim diolch
 recruitment-banner.link=<a target="_blank" rel="noreferrer noopener" href="{0}">Byddwch yn rhan o wneud gwasanaethau’r llywodraeth yn well (yn agor tab newydd)</a>
 
-accessibilityStatement.caption=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
-accessibilityStatement.title=Datganiad hygyrchedd ar gyfer y gwasanaeth Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
-accessibilityStatement.p1=Mae’r datganiad hygyrchedd hwn yn esbonio pa mor hygyrch yw’r gwasanaeth hwn, beth i’w wneud os ydych yn cael anhawster wrth ei ddefnyddio, a sut i roi gwybod am broblemau hygyrchedd gyda’r gwasanaeth.
-accessibilityStatement.p2=Mae’r gwasanaeth hwn yn rhan o wefan ehangach GOV.UK. Mae <a class="govuk-link" href="{0}">datganiad hygyrchedd ar wahân ar gyfer prif wefan GOV.UK</a>.
-accessibilityStatement.p3=Mae’r dudalen hon dim ond yn cynnwys gwybodaeth am y gwasanaeth Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU, sydd ar gael yn {0}.
-accessibilityStatement.usingThisService.title=Defnyddio’r gwasanaeth hwn
-accessibilityStatement.usingThisService.p1=Gallwch ddefnyddio’r gwasanaeth hwn i roi gwybod am warediad o dir neu eiddo preswyl yn y DU (a wnaed o 6 Ebrill 2020 ymlaen). Gallwch hefyd fwrw golwg dros eich Ffurflenni Treth blaenorol a’r rhai cyfredol.
-accessibilityStatement.usingThisService.p2=Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EF (CThEF).
-accessibilityStatement.usingThisService.p3=Rydym am i gymaint o bobl â phosibl allu defnyddio’r gwasanaeth hwn. Mae hyn yn golygu y dylech allu:
-accessibilityStatement.usingThisService.li1=newid lliwiau, lefelau cyferbyniad a ffontiau
-accessibilityStatement.usingThisService.li2=chwyddo’r sgrin hyd at 300% heb i’r testun ddisgyn oddi ar y sgrin
-accessibilityStatement.usingThisService.li3=mynd o ddechrau’r gwasanaeth i’r diwedd gan ddefnyddio bysellfwrdd yn unig
-accessibilityStatement.usingThisService.li4=mynd o ddechrau’r gwasanaeth i’r diwedd gan ddefnyddio meddalwedd adnabod lleferydd
-accessibilityStatement.usingThisService.li5=gwrando ar y gwasanaeth drwy ddefnyddio darllenydd sgrin (gan gynnwys y fersiynau diweddaraf o JAWS, NVDA a VoiceOver)
-accessibilityStatement.usingThisService.p4=Rydym hefyd wedi sicrhau bod y testun a ddefnyddir yn y gwasanaeth mor syml â phosibl i’w ddeall.
-accessibilityStatement.usingThisService.making-device-easier.part1=Mae gan AbilityNet gyngor
-accessibilityStatement.usingThisService.making-device-easier.part2=' ar wneud eich dyfais yn haws i’w defnyddio os oes gennych anabledd.'
-accessibilityStatement.howAccessible.title=Pa mor hygyrch yw’r gwasanaeth hwn
-accessibilityStatement.howAccessible.p1=Mae CThEF wedi ymrwymo i wneud y gwasanaeth hwn yn hygyrch, yn unol â Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018.
-accessibilityStatement.howAccessible.p2=Cafodd y gwasanaeth hwn ei brofi ar 15 Mai 2020 gan y Ganolfan Hygyrchedd Digidol. Canfuwyd ei fod yn cydymffurfio â <a class="govuk-link" href="{0}">safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1</a>. Ers hynny, mae’r gwasanaeth wedi’i ehangu. Ni allwn fod yn sicr ei fod yn cydymffurfio’n llawn. Bydd y gwasanaeth yn trefnu archwiliad hygyrchedd llawn erbyn 31 Rhagfyr 2023
-
-## Contact
-accessibilityStatement.contact.heading=Yr hyn i’w wneud os ydych yn cael anhawster wrth ddefnyddio’r gwasanaeth hwn
-accessibilityStatement.contact.extra-support.part1='Gallwch '
-accessibilityStatement.contact.extra-support.part2=gysylltu â CThEF os oes angen cymorth ychwanegol
-accessibilityStatement.contact.extra-support.part3=' arnoch i lenwi ffurflenni, neu i gael fformat gwahanol, megis print bras, recordiad sain neu Braille.'
-
-accessibilityStatement.reportingProblems.title=Rhoi gwybod am broblemau hygyrchedd gyda’r gwasanaeth hwn
-accessibilityStatement.reportingProblems.p1=Rydym bob amser yn ceisio gwella hygyrchedd y gwasanaeth hwn. Os byddwch yn dod o hyd i unrhyw broblemau nad ydynt wedi’u rhestru ar y dudalen hon, neu os ydych o’r farn nad ydym yn bodloni gofynion hygyrchedd, rhowch wybod am y <a class="govuk-link" href="{0}" target="_blank">broblem hygyrchedd (yn agor ffenestr neu dab newydd)</a>.
-accessibilityStatement.notHappy.title=Os ydych yn anfodlon ar ein hymateb
-accessibilityStatement.notHappy.p1=Mae’r Comisiwn Cydraddoldeb a Hawliau Dynol (EHRC) yn gyfrifol am orfodi Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018 (y ‘rheoliadau hygyrchedd’). Os nad ydych yn fodlon ar sut rydym yn ateb eich cwyn, <a class="govuk-link" href="{0}">cysylltwch â’r Gwasanaeth Cynghori a Chymorth Cydraddoldeb (EASS)</a>, neu’r <a class="govuk-link" href="{1}">Equality Commission for Northern Ireland (ECNI)</a> os ydych yn byw yng Ngogledd Iwerddon.
-accessibilityStatement.contactingUs.title=Cysylltu â ni dros y ffôn neu gael ymweliad personol gennym
-accessibilityStatement.contactingUs.p1=Rydym yn cynnig gwasanaeth text relay os ydych yn fyddar, â nam ar eich clyw neu os oes gennych nam ar eich lleferydd.
-accessibilityStatement.contactingUs.p2=Gallwn ddarparu dehonglydd Iaith Arwyddion Prydain (BSL), neu gallwch drefnu ymweliad gan ymgynghorydd CThEF i’ch helpu i gwblhau’r gwasanaeth.
-accessibilityStatement.contactingUs.p3=Dysgwch <a class="govuk-link" href="{0}">sut i gael cymorth ychwanegol oddi wrth CThEF</a>.
-accessibilityStatement.howWeTested.title=Sut gwnaethom brofi’r gwasanaeth hwn
-accessibilityStatement.howWeTested.p1=Cafodd y gwasanaeth ei brofi ar 15 Mai 2020 a gwiriwyd ei fod yn cydymffurfio â safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Cafodd ei adeiladu gan ddefnyddio rhannau a brofwyd gan y <a class="govuk-link" href="{0}">Ganolfan Hygyrchedd Digidol</a>.
-accessibilityStatement.howWeTested.p2=Paratowyd y dudalen hon ar 6 Ebrill 2020. Cafodd ei diweddaru ddiwethaf ar 3 Awst 2023.
-
 #===================================================
 # SERVICE WIDE AND GENERIC - END
 #===================================================
