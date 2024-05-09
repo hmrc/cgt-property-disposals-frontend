@@ -1877,7 +1877,8 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
       val cgtReference     = sample[CgtReference]
       val today: LocalDate = LocalDate.now()
-      val fromDate         = LocalDate.parse("2020-04-06")
+      val currentTaxYear   = TaxYear.thisTaxYearStartDate().getYear
+      val fromDate         = TimeUtils.getTaxYearStartDate(currentTaxYear - 4)
       val toDate           = TimeUtils.getTaxYearEndDateInclusive(today)
 
       "return an error " when {
