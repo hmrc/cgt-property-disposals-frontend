@@ -184,9 +184,9 @@ timed-out.p1=This was because you were inactive for too long.
 timed-out.p2=To access your Capital Gains on UK property account, you’ll need to sign in.
 timed-out.button=Sign in
 
-recruitment-banner.message=Help improve HMRC services on GOV.UK
-recruitment-banner.dismiss=No thanks
-recruitment-banner.link=Help make this service better by <a target="_blank" rel="noreferrer noopener" href="{0}">joining the HMRC user research panel (opens in a new tab)</a>. This usually involves being interviewed for your feedback and suggestions. Research participants are normally compensated for their time.
+research-banner.message=Help improve HMRC services on GOV.UK
+research-banner.dismiss=No thanks
+research-banner.link=Help make this service better by <a target="_blank" rel="noreferrer noopener" href="{0}">joining the HMRC user research panel (opens in a new tab)</a>. This usually involves being interviewed for your feedback and suggestions. Research participants are normally compensated for their time.
 
 #===================================================
 # SERVICE WIDE AND GENERIC - END

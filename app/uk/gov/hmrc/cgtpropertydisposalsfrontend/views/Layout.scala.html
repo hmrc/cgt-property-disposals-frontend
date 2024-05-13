@@ -117,8 +117,8 @@
       additionalScriptsBlock = Some(additionalScripts)
     ),
     banners = Banners(
-      userResearchBanner = if(viewConfig.userRecruitmentBannerEnabled) Some(UserResearchBanner(
-        url = viewConfig.userRecruitmentUrl
+      userResearchBanner = if(viewConfig.userResearchBannerEnabled) Some(UserResearchBanner(
+        url = viewConfig.userResearchUrl
       )) else None
     ),
     serviceName = Some(messages("service.title")),

@@ -7021,7 +7021,7 @@ class YearToDateLiabilityControllerSpec
 
               expectedCalculationChecks match {
                 case None =>
-                  doc.select("a.govuk-link").get(3).text()                    shouldBe messageFromMessageKey(expectedLinkKey)
+                  doc.select("a.govuk-link").get(2).text()                    shouldBe messageFromMessageKey(expectedLinkKey)
                   doc.select("#yearToDateLiability-extra-content > p").html() shouldBe expectedP1Message
 
                   doc
