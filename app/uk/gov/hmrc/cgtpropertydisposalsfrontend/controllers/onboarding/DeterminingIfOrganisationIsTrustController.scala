@@ -288,6 +288,9 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
               .fold(
                 {
                   case ValidationError(formWithErrors) =>
+                    logger.error(
+                      s"[DeterminingIfOrganisationIsTrustController][enterTrnSubmit] formWithErrors ${formWithErrors.errorsAsJson}"
+                    )
                     BadRequest(
                       enterTrnAndNamePage(
                         formWithErrors,
@@ -296,6 +299,9 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                       )
                     )
                   case ServiceError(e)                 =>
+                    logger.error(
+                      s"[DeterminingIfOrganisationIsTrustController][enterTrnSubmit] ServiceError $e"
+                    )
                     handleNameMatchServiceError(e)
                 },
                 {
