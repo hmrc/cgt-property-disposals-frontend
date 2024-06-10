@@ -621,14 +621,14 @@ class ReturnsServiceImpl @Inject() (
   def listReturns(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, List[ReturnSummary]] = {
-    val today    = LocalDate.now()
+    val today          = LocalDate.now()
     // fromDate must be current tax year minus 4 years
     val currentTaxYear = TaxYear.thisTaxYearStartDate().getYear
-    val fromDate = TimeUtils.getTaxYearStartDate(currentTaxYear - 4)
+    val fromDate       = TimeUtils.getTaxYearStartDate(currentTaxYear - 4)
     // ETMP build queries from our date range in tax year batches, they have logic to reject an
     // end date that is before the end of the tax year that the toDate falls within, so we need to
     // satisfy this logic by using the end of the current tax year as our toDate
-    val toDate   = TimeUtils.getTaxYearEndDateInclusive(today)
+    val toDate         = TimeUtils.getTaxYearEndDateInclusive(today)
     connector.listReturns(cgtReference, fromDate, toDate).subflatMap { response =>
       if (response.status === OK) {
         response

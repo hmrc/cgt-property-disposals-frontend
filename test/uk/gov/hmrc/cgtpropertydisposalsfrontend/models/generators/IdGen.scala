@@ -17,26 +17,25 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference
 
 object IdGen extends GenUtils {
 
-  implicit val cgtReferenceArb: Gen[CgtReference] = gen[CgtReference]
+  implicit val cgtReferenceArb: Gen[CgtReference] = Generators.stringGen.map(CgtReference(_))
 
-  implicit val ggCredIdGen: Gen[GGCredId] = gen[GGCredId]
+  implicit val ggCredIdGen: Gen[GGCredId] = Generators.stringGen.map(GGCredId(_))
 
-  implicit val ninoGen: Gen[NINO] = gen[NINO]
+  implicit val ninoGen: Gen[NINO] = Generators.stringGen.map(NINO(_))
 
-  implicit val sautrGen: Gen[SAUTR] = gen[SAUTR]
+  implicit val sautrGen: Gen[SAUTR] = Generators.stringGen.map(SAUTR(_))
 
-  implicit val sapNumberGen: Gen[SapNumber] = gen[SapNumber]
+  implicit val sapNumberGen: Gen[SapNumber] = Generators.stringGen.map(SapNumber(_))
 
-  implicit val arnGen: Gen[AgentReferenceNumber] = gen[AgentReferenceNumber]
+  implicit val arnGen: Gen[AgentReferenceNumber] = Generators.stringGen.map(AgentReferenceNumber(_))
 
-  implicit val draftReturnIdGen: Gen[DraftReturnId] = gen[DraftReturnId]
+  implicit val draftReturnIdGen: Gen[DraftReturnId] = Generators.stringGen.map(DraftReturnId(_))
 
-  implicit val uploadReferenceGen: Gen[UploadReference] = gen[UploadReference]
+  implicit val uploadReferenceGen: Gen[UploadReference] = Generators.stringGen.map(UploadReference(_))
 
 }
