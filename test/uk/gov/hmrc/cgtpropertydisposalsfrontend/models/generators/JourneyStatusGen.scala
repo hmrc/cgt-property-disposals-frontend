@@ -18,17 +18,46 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, IndividualWantsToRegisterTrust, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubmittingReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NewEnrolmentCreatedForMissingEnrolment, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, SubmittingReturn, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
 
 object JourneyStatusGen extends JourneyStatusLowerPriorityGen with GenUtils {
-  implicit val subscriptionReadyGen: Gen[SubscriptionReady] =
-    gen[SubscriptionReady]
+  implicit val subscriptionReadyGen: Gen[SubscriptionReady] = for {
+    subscriptionDetails <- OnboardingDetailsGen.subscriptionDetailsArb
+    ggCredId            <- IdGen.ggCredIdGen
+  } yield SubscriptionReady(subscriptionDetails, ggCredId)
 
-  implicit val journeyStatusGen: Gen[JourneyStatus] = gen[JourneyStatus]
+  private val registrationStatusGen = Gen.oneOf(
+    gen[IndividualWantsToRegisterTrust],
+    gen[IndividualSupplyingInformation],
+    gen[IndividualMissingEmail],
+    gen[RegistrationReady]
+  )
+
+  implicit val journeyStatusGen: Gen[JourneyStatus] = Gen.oneOf(
+    subscriptionReadyGen,
+    individualSupplyingInformationGen,
+    subscribedGen,
+    individualMissingEmailGen,
+    registrationReadyGen,
+    startingNewDraftReturnGen,
+    fillingOutReturnGen,
+    justSubmittedReturnGen,
+    viewingReturnGen,
+    submitReturnFailedGen,
+    submittingReturn,
+    startingToAmendReturnGen,
+    gen[NewEnrolmentCreatedForMissingEnrolment],
+    gen[AlreadySubscribedWithDifferentGGAccount],
+    gen[RegistrationStatus],
+    Gen.const(NonGovernmentGatewayJourney),
+    Gen.const(AgentWithoutAgentEnrolment),
+    registrationStatusGen
+  )
 
 }
 
