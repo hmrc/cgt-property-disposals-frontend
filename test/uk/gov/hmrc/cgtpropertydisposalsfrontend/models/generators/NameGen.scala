@@ -17,15 +17,18 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 
 object NameGen extends GenUtils {
 
-  implicit val contactNameGen: Gen[ContactName] = gen[ContactName]
+  implicit val contactNameGen: Gen[ContactName] = Generators.stringGen.map(ContactName(_))
 
-  implicit val individualNameGen: Gen[IndividualName] = gen[IndividualName]
+  implicit val individualNameGen: Gen[IndividualName] =
+    for {
+      firstName <- Generators.stringGen
+      lastName  <- Generators.stringGen
+    } yield IndividualName(firstName, lastName)
 
-  implicit val trustNameGen: Gen[TrustName] = gen[TrustName]
+  implicit val trustNameGen: Gen[TrustName] = Generators.stringGen.map(TrustName(_))
 
 }
