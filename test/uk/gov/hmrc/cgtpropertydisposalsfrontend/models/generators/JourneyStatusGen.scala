@@ -64,8 +64,6 @@ object JourneyStatusGen extends JourneyStatusLowerPriorityGen with GenUtils {
 trait JourneyStatusLowerPriorityGen extends GenUtils {
 
   private val agentReferenceNumberGen = gen[AgentReferenceNumber]
-  private val returnSummaryGen        = gen[ReturnSummary]
-  private val completeReturnGen       = gen[CompleteReturn]
 
   implicit val subscriptionSuccessfulGen: Gen[SubscriptionSuccessful] =
     gen[SubscriptionSuccessful]
@@ -85,7 +83,7 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
       ggCredId             <- IdGen.ggCredIdGen
       agentReferenceNumber <- Gen.option(agentReferenceNumberGen)
       draftReturns         <- Gen.listOf(DraftReturnGen.draftReturnGen)
-      sentReturns          <- Gen.listOf(returnSummaryGen)
+      sentReturns          <- Gen.listOf(ReturnGen.returnSummaryGen)
     } yield Subscribed(subscribedDetails, ggCredId, agentReferenceNumber, draftReturns, sentReturns)
   }
 
@@ -137,7 +135,7 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
       subscribedDetails    <- SubscribedDetailsGen.subscribedDetailsGen
       ggCredId             <- IdGen.ggCredIdGen
       agentReferenceNumber <- Gen.option(agentReferenceNumberGen)
-      completeReturn       <- completeReturnGen
+      completeReturn       <- ReturnGen.completeReturnGen
       submissionResponse   <- gen[SubmitReturnResponse]
       amendReturnData      <- Gen.option(ReturnGen.amendReturnDataGen)
     } yield JustSubmittedReturn(
@@ -156,9 +154,9 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
       subscribedDetails    <- SubscribedDetailsGen.subscribedDetailsGen
       ggCredId             <- IdGen.ggCredIdGen
       agentReferenceNumber <- Gen.option(agentReferenceNumberGen)
-      completeReturn       <- completeReturnGen
+      completeReturn       <- ReturnGen.completeReturnGen
       returnType           <- ReturnGen.returnTypeGen
-      returnSummary        <- returnSummaryGen
+      returnSummary        <- ReturnGen.returnSummaryGen
       previousSentReturns  <- Gen.option(previousReturnDataGen)
     } yield ViewingReturn(
       subscribedDetails,

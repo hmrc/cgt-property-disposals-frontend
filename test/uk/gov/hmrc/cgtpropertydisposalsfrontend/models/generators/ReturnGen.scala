@@ -20,7 +20,8 @@ import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.CompleteReturnWithSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.PreviousReturnData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, ReturnSummary, ReturnType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, CompleteReturn, ReturnSummary, ReturnType}
+
 
 object ReturnGen extends GenUtils {
 
@@ -34,4 +35,5 @@ object ReturnGen extends GenUtils {
 
   implicit val returnTypeGen: Gen[ReturnType] = gen[ReturnType]
 
+  implicit val completeReturnGen: Gen[CompleteReturn] = gen[CompleteReturn]
 }
