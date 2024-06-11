@@ -37,17 +37,7 @@ object CompleteReturnGen extends LowerPriorityCompleteReturnGen with GenUtils {
 
 }
 
-trait LowerPriorityCompleteReturnGen { this: GenUtils =>
-
-  private val completeMultipleDisposalsTriageAnswers = gen[CompleteMultipleDisposalsTriageAnswers]
-  private val completeSingleDisposalTriageAnswers    = gen[CompleteSingleDisposalTriageAnswers]
-  private val examplePropertyDetailsAnswers          = gen[CompleteExamplePropertyDetailsAnswers]
-  private val exemptionAndLossesAnswers              = gen[CompleteExemptionAndLossesAnswers]
-  private val yearToDateLiabilityAnswers             = gen[CompleteNonCalculatedYTDAnswers]
-  private val supportingDocumentAnswers              = gen[CompleteSupportingEvidenceAnswers]
-  private val representeeAnswers                     = gen[CompleteRepresenteeAnswers]
-  private val disposalDetails                        = gen[CompleteDisposalDetailsAnswers]
-  private val acquisitionDetails                     = gen[CompleteAcquisitionDetailsAnswers]
+trait LowerPriorityCompleteReturnGen extends Common {
 
   implicit val completeMultipleDisposalsReturnGen: Gen[CompleteMultipleDisposalsReturn] = for {
     triageAnswers                 <- completeMultipleDisposalsTriageAnswers
