@@ -32,13 +32,6 @@ object JourneyStatusGen extends JourneyStatusLowerPriorityGen with GenUtils {
 
 }
 
-trait JourneyStatusHigherPriorityGen extends JourneyStatusLowerPriorityGen { this: GenUtils =>
-  implicit val journeyStatusGen: Gen[JourneyStatus] = gen[JourneyStatus]
-
-  implicit val subscriptionReadyGen: Gen[SubscriptionReady] =
-    gen[SubscriptionReady]
-}
-
 trait JourneyStatusLowerPriorityGen { this: GenUtils =>
 
   implicit val subscriptionSuccessfulGen: Gen[SubscriptionSuccessful] =
