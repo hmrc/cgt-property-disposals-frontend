@@ -18,22 +18,42 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.CompleteExamplePropertyDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.CompleteMixedUsePropertyDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 
-object CompleteReturnGen extends LowerPriorityCompleteReturnGen with GenUtils {
+object CompleteReturnGen extends LowerPriorityCompleteReturnGen {
 
-  implicit val completeSingleDisposalReturnGen: Gen[CompleteSingleDisposalReturn] = gen[CompleteSingleDisposalReturn]
+  implicit val completeSingleDisposalReturnGen: Gen[CompleteSingleDisposalReturn] =
+    for {
+      triageAnswers              <- completeSingleDisposalTriageAnswers
+      propertyAddress            <- AddressGen.ukAddressGen
+      disposalDetails            <- disposalDetails
+      acquisitionDetails         <- acquisitionDetails
+      reliefDetails              <- ReliefDetailsGen.completeReliefDetailsAnswersGen
+      exemptionsAndLossesDetails <- ExemptionsAndLossesAnswersGen.completeExemptionAndLossesAnswersGen
+      yearToDateLiabilityAnswers <- gen[Either[CompleteNonCalculatedYTDAnswers, CompleteCalculatedYTDAnswers]]
+      supportingDocumentAnswers  <- supportingDocumentAnswers
+      initialGainOrLoss          <- Gen.option(MoneyGen.amountInPenceGen)
+      representeeAnswers         <- Gen.option(RepresenteeAnswersGen.completeRepresenteeAnswersGen)
+      gainOrLossAfterReliefs     <- Gen.option(MoneyGen.amountInPenceGen)
+      hasAttachments             <- Generators.booleanGen
+    } yield CompleteSingleDisposalReturn(
+      triageAnswers,
+      propertyAddress,
+      disposalDetails,
+      acquisitionDetails,
+      reliefDetails,
+      exemptionsAndLossesDetails,
+      yearToDateLiabilityAnswers,
+      supportingDocumentAnswers,
+      initialGainOrLoss,
+      representeeAnswers,
+      gainOrLossAfterReliefs,
+      hasAttachments
+    )
 
 }
 
