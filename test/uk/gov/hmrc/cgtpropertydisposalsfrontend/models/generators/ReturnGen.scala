@@ -22,7 +22,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.CompleteReturnWithSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.PreviousReturnData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, CompleteReturn, ReturnSummary, ReturnType}
 
-
 object ReturnGen extends GenUtils {
 
   implicit val completeReturnGen: Gen[CompleteReturn] =
