@@ -25,15 +25,29 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData,
 
 object ReturnGen extends GenUtils {
 
+  implicit val completeReturnGen: Gen[CompleteReturn] =
+    Gen.oneOf(
+      CompleteReturnGen.completeSingleDisposalReturnGen,
+      CompleteReturnGen.completeSingleIndirectDisposalReturnGen,
+      CompleteReturnGen.completeSingleMixedUseDisposalReturnGen,
+      CompleteReturnGen.completeMultipleDisposalsReturnGen,
+      CompleteReturnGen.completeMultipleIndirectDisposalReturnGen
+    )
+
   implicit val returnSummaryGen: Gen[ReturnSummary] = gen[ReturnSummary]
 
   implicit val previousReturnDataGen: Gen[PreviousReturnData] = gen[PreviousReturnData]
 
-  implicit val completeReturnWithSummaryGen: Gen[CompleteReturnWithSummary] = gen[CompleteReturnWithSummary]
-
-  implicit val amendReturnDataGen: Gen[AmendReturnData] = gen[AmendReturnData]
-
   implicit val returnTypeGen: Gen[ReturnType] = gen[ReturnType]
 
-  implicit val completeReturnGen: Gen[CompleteReturn] = gen[CompleteReturn]
+  implicit val completeReturnWithSummaryGen: Gen[CompleteReturnWithSummary] = for {
+    completeReturn <- completeReturnGen
+    summary        <- returnSummaryGen
+    returnType     <- returnTypeGen
+  } yield CompleteReturnWithSummary(completeReturn, summary, returnType)
+
+  implicit val amendReturnDataGen: Gen[AmendReturnData] = for {
+    originalReturn                      <- completeReturnWithSummaryGen
+    shouldDisplayGainOrLossAfterReliefs <- Generators.booleanGen
+  } yield AmendReturnData(originalReturn, shouldDisplayGainOrLossAfterReliefs)
 }
