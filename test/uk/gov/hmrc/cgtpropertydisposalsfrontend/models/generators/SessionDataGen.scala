@@ -27,7 +27,7 @@ object SessionDataGen extends GenUtils {
 
   private val emailToBeVerifiedGen: Gen[EmailToBeVerified] = for {
     email                      <- EmailGen.emailGen
-    id                          = UUID.randomUUID()
+    id                         <- Gen.uuid
     verified                   <- Generators.booleanGen
     hasResentVerificationEmail <- Generators.booleanGen
   } yield EmailToBeVerified(email, id, verified, hasResentVerificationEmail)
