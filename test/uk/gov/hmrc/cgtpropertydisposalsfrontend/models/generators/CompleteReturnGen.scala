@@ -17,12 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.CompleteMixedUsePropertyDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 
 object CompleteReturnGen extends LowerPriorityCompleteReturnGen {
 
@@ -34,7 +29,8 @@ object CompleteReturnGen extends LowerPriorityCompleteReturnGen {
       acquisitionDetails         <- acquisitionDetails
       reliefDetails              <- ReliefDetailsGen.completeReliefDetailsAnswersGen
       exemptionsAndLossesDetails <- ExemptionsAndLossesAnswersGen.completeExemptionAndLossesAnswersGen
-      yearToDateLiabilityAnswers <- gen[Either[CompleteNonCalculatedYTDAnswers, CompleteCalculatedYTDAnswers]]
+      yearToDateLiabilityAnswers <-
+        Gen.either(yearToDateLiabilityAnswers, YearToDateLiabilityAnswersGen.completeCalculatedYTDLiabilityAnswersGen)
       supportingDocumentAnswers  <- supportingDocumentAnswers
       initialGainOrLoss          <- Gen.option(MoneyGen.amountInPenceGen)
       representeeAnswers         <- Gen.option(RepresenteeAnswersGen.completeRepresenteeAnswersGen)
@@ -107,7 +103,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
 
   implicit val completeMultipleIndirectDisposalReturnGen: Gen[CompleteMultipleIndirectDisposalReturn] = for {
     triageAnswers                <- completeMultipleDisposalsTriageAnswers
-    exampleCompanyDetailsAnswers <- gen[CompleteExampleCompanyDetailsAnswers]
+    exampleCompanyDetailsAnswers <- ExampleCompanyDetailsAnswersGen.completeExampleCompanyDetailsAnswersGen
     exemptionsAndLossesDetails   <- exemptionAndLossesAnswers
     yearToDateLiabilityAnswers   <- yearToDateLiabilityAnswers
     supportingDocumentAnswers    <- supportingDocumentAnswers
@@ -128,7 +124,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
   implicit val completeSingleMixedUseDisposalReturnGen: Gen[CompleteSingleMixedUseDisposalReturn] = {
     for {
       triageAnswers              <- completeSingleDisposalTriageAnswers
-      propertyDetailsAnswers     <- gen[CompleteMixedUsePropertyDetailsAnswers]
+      propertyDetailsAnswers     <- SingleMixedUseDetailsAnswersGen.completeMixedUsePropertyDetailsAnswers
       exemptionsAndLossesDetails <- exemptionAndLossesAnswers
       yearToDateLiabilityAnswers <- yearToDateLiabilityAnswers
       supportingDocumentAnswers  <- supportingDocumentAnswers
