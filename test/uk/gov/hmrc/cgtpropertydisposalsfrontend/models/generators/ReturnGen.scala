@@ -20,18 +20,33 @@ import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.CompleteReturnWithSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.PreviousReturnData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, ReturnSummary, ReturnType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, CompleteReturn, ReturnSummary, ReturnType}
 
 object ReturnGen extends GenUtils {
+
+  implicit val completeReturnGen: Gen[CompleteReturn] =
+    Gen.oneOf(
+      CompleteReturnGen.completeSingleDisposalReturnGen,
+      CompleteReturnGen.completeSingleIndirectDisposalReturnGen,
+      CompleteReturnGen.completeSingleMixedUseDisposalReturnGen,
+      CompleteReturnGen.completeMultipleDisposalsReturnGen,
+      CompleteReturnGen.completeMultipleIndirectDisposalReturnGen
+    )
 
   implicit val returnSummaryGen: Gen[ReturnSummary] = gen[ReturnSummary]
 
   implicit val previousReturnDataGen: Gen[PreviousReturnData] = gen[PreviousReturnData]
 
-  implicit val completeReturnWithSummaryGen: Gen[CompleteReturnWithSummary] = gen[CompleteReturnWithSummary]
-
-  implicit val amendReturnDataGen: Gen[AmendReturnData] = gen[AmendReturnData]
-
   implicit val returnTypeGen: Gen[ReturnType] = gen[ReturnType]
 
+  implicit val completeReturnWithSummaryGen: Gen[CompleteReturnWithSummary] = for {
+    completeReturn <- completeReturnGen
+    summary        <- returnSummaryGen
+    returnType     <- returnTypeGen
+  } yield CompleteReturnWithSummary(completeReturn, summary, returnType)
+
+  implicit val amendReturnDataGen: Gen[AmendReturnData] = for {
+    originalReturn                      <- completeReturnWithSummaryGen
+    shouldDisplayGainOrLossAfterReliefs <- Generators.booleanGen
+  } yield AmendReturnData(originalReturn, shouldDisplayGainOrLossAfterReliefs)
 }

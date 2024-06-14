@@ -17,11 +17,58 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupResult
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailToBeVerified
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.NeedMoreDetailsDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.NeedMoreDetailsDetails.AffinityGroup
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 
 object SessionDataGen extends GenUtils {
 
-  implicit val sessionDataGen: Gen[SessionData] = gen[SessionData]
+  private val emailToBeVerifiedGen: Gen[EmailToBeVerified] = for {
+    email                      <- EmailGen.emailGen
+    id                         <- Gen.uuid
+    verified                   <- Generators.booleanGen
+    hasResentVerificationEmail <- Generators.booleanGen
+  } yield EmailToBeVerified(email, id, verified, hasResentVerificationEmail)
+
+  private val addressLookupResultGen: Gen[AddressLookupResult] = for {
+    postcode  <- AddressGen.postcodeGen
+    filter    <- Gen.option(Generators.stringGen)
+    addresses <- Gen.listOf(AddressGen.addressGen)
+  } yield AddressLookupResult(postcode, filter, addresses)
+
+  private val needMoreDetailsDetailsGen: Gen[NeedMoreDetailsDetails] = for {
+    continueUrl   <- Generators.stringGen
+    affinityGroup <- Gen.oneOf(AffinityGroup.Individual, AffinityGroup.Organisation)
+  } yield NeedMoreDetailsDetails(continueUrl, affinityGroup)
+
+  private val userTypeGen: Gen[UserType] =
+    Gen.oneOf(
+      UserType.Individual,
+      UserType.Organisation,
+      UserType.NonGovernmentGatewayUser,
+      UserType.Agent
+    )
+
+  private val journeyTypeGen: Gen[JourneyType] =
+    Gen.oneOf(OnBoarding, Returns, Amend)
+
+  implicit val sessionDataGen: Gen[SessionData] =
+    for {
+      journeyStatus          <- Gen.option(JourneyStatusGen.journeyStatusGen)
+      emailToBeVerified      <- Gen.option(emailToBeVerifiedGen)
+      addressLookupResult    <- Gen.option(addressLookupResultGen)
+      needMoreDetailsDetails <- Gen.option(needMoreDetailsDetailsGen)
+      userType               <- Gen.option(userTypeGen)
+      journeyType            <- Gen.option(journeyTypeGen)
+    } yield SessionData(
+      journeyStatus,
+      emailToBeVerified,
+      addressLookupResult,
+      needMoreDetailsDetails,
+      userType,
+      journeyType
+    )
 
 }

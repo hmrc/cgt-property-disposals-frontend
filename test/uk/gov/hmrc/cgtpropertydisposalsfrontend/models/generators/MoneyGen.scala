@@ -16,25 +16,109 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge, Payment, PaymentsJourney}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AmountInPenceWithSource
+import org.scalacheck.{Arbitrary, Gen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmountInPenceWithSource, Source}
+
+import java.time.LocalDate
 
 object MoneyGen extends GenUtils {
 
   implicit val amountInPenceGen: Gen[AmountInPence] = longArb.arbitrary.map(AmountInPence(_))
 
-  implicit val chargeGen: Gen[Charge] = gen[Charge]
+  implicit val returnCharge: Gen[ReturnCharge] = for {
+    chargeReference <- Generators.stringGen
+    amount          <- amountInPenceGen
+    dueDate         <- Arbitrary.arbitrary[LocalDate]
+  } yield ReturnCharge(chargeReference, amount, dueDate)
 
-  implicit val returnCharge: Gen[ReturnCharge] = gen[ReturnCharge]
+  implicit val paymentGen: Gen[Payment] = for {
+    amount         <- amountInPenceGen
+    method         <-
+      Gen.oneOf(
+        None,
+        Some(PaymentMethod.BACS),
+        Some(PaymentMethod.CHAPS),
+        Some(PaymentMethod.Cheque),
+        Some(PaymentMethod.DebitCardByTelephone),
+        Some(PaymentMethod.CreditCardByTelephone),
+        Some(PaymentMethod.PTAOnlineWorldpayDebitCardPayment),
+        Some(PaymentMethod.PTAOnlineWorldpayCreditCardPayment),
+        Some(PaymentMethod.GIROReceipts),
+        Some(PaymentMethod.GIROCredits),
+        Some(PaymentMethod.ChequeReceipts),
+        Some(PaymentMethod.DirectDebit),
+        Some(PaymentMethod.FasterPayment),
+        Some(PaymentMethod.GiroBankReceipts),
+        Some(PaymentMethod.GiroBankPostOffice),
+        Some(PaymentMethod.Paymaster),
+        Some(PaymentMethod.BankLodgement),
+        Some(PaymentMethod.Incentive),
+        Some(PaymentMethod.LocalOfficePayment),
+        Some(PaymentMethod.NilDeclarations),
+        Some(PaymentMethod.OverpaymentsToDuty),
+        Some(PaymentMethod.ReallocationFromOASToDuty),
+        Some(PaymentMethod.PaymentNotExpected),
+        Some(PaymentMethod.Reallocation),
+        Some(PaymentMethod.RepaymentInterestAllocated),
+        Some(PaymentMethod.VoluntaryDirectPayments)
+      )
+    clearingDate   <- Arbitrary.arbitrary[LocalDate]
+    clearingReason <- Gen.oneOf(
+                        None,
+                        Some(ClearingReason.IncomingPayment),
+                        Some(ClearingReason.OutgoingPayment),
+                        Some(ClearingReason.WriteOff),
+                        Some(ClearingReason.Reversal),
+                        Some(ClearingReason.MassWriteOff),
+                        Some(ClearingReason.AutomaticClearing),
+                        Some(ClearingReason.SomeOtherClearingReason)
+                      )
+  } yield Payment(amount, method, clearingDate, clearingReason)
 
-  implicit val paymentGen: Gen[Payment] = gen[Payment]
+  private val chargeType = Gen.oneOf(
+    ChargeType.UkResidentReturn,
+    ChargeType.NonUkResidentReturn,
+    ChargeType.DeltaCharge,
+    ChargeType.Interest,
+    ChargeType.LateFilingPenalty,
+    ChargeType.SixMonthLateFilingPenalty,
+    ChargeType.TwelveMonthLateFilingPenalty,
+    ChargeType.LatePaymentPenalty,
+    ChargeType.SixMonthLatePaymentPenalty,
+    ChargeType.TwelveMonthLatePaymentPenalty,
+    ChargeType.PenaltyInterest
+  )
 
-  implicit val paymentsJourneyGen: Gen[PaymentsJourney] = gen[PaymentsJourney]
+  implicit val chargeGen: Gen[Charge] = for {
+    chargeType      <- chargeType
+    chargeReference <- Generators.stringGen
+    amount          <- amountInPenceGen
+    dueDate         <- Arbitrary.arbitrary[LocalDate]
+    payment         <- paymentGen
+    payments        <- Gen.oneOf(List(), List(payment))
+  } yield Charge(chargeType, chargeReference, amount, dueDate, payments)
 
-  implicit val amountInPenceWithSourceGen: Gen[AmountInPenceWithSource] =
-    gen[AmountInPenceWithSource]
+  for {
+    chargeType      <- chargeType
+    chargeReference <- Generators.stringGen
+    amount          <- amountInPenceGen
+    dueDate         <- Arbitrary.arbitrary[LocalDate]
+    payment         <- paymentGen
+    payments        <- Gen.oneOf(List(), List(payment))
+  } yield Charge(chargeType, chargeReference, amount, dueDate, payments)
+
+  implicit val paymentsJourneyGen: Gen[PaymentsJourney] = for {
+    fst <- Generators.stringGen
+    snd <- Generators.stringGen
+  } yield PaymentsJourney(fst, snd)
+
+  implicit val amountInPenceWithSourceGen: Gen[AmountInPenceWithSource] = {
+    for {
+      amount <- amountInPenceGen
+      source <- Gen.oneOf(Source.Calculated, Source.UserSupplied)
+    } yield AmountInPenceWithSource(amount, source)
+  }
 
 }
