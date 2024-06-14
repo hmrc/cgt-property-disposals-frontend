@@ -25,17 +25,26 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 object TriageQuestionsGen extends HigherPriorityTriageQuestionsGen with GenUtils
 
 trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen { this: GenUtils =>
-  implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] =
-    gen[SingleDisposalTriageAnswers]
 
   implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] =
     gen[CompleteSingleDisposalTriageAnswers]
+
+  implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] = Gen.oneOf(
+    completeSingleDisposalTriageAnswersGen,
+    incompleteSingleDisposalTriageAnswersGen
+  )
+
+  val singleDisposalTraiageAnswersGen: Gen[SingleDisposalTriageAnswers] =
+    Gen.oneOf(completeSingleDisposalTriageAnswersGen, incompleteSingleDisposalTriageAnswersGen)
 
   implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsTriageAnswers] =
     gen[CompleteMultipleDisposalsTriageAnswers]
 
   implicit val incompleteMultipleDisposalsTriageAnswersGen: Gen[IncompleteMultipleDisposalsTriageAnswers] =
     gen[IncompleteMultipleDisposalsTriageAnswers]
+
+  val multipleDisposalsTriageAnswersGen: Gen[MultipleDisposalsTriageAnswers] =
+    Gen.oneOf(completeMultipleDisposalsTriageAnswersGen, incompleteMultipleDisposalsTriageAnswersGen)
 
   implicit val individualUserTypeGen: Gen[IndividualUserType] =
     gen[IndividualUserType]
@@ -48,7 +57,6 @@ trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
   implicit val completionDateGen: Gen[CompletionDate] = gen[CompletionDate]
 
   implicit val assetTypeGen: Gen[AssetType] = gen[AssetType]
-
 }
 
 trait LowerPriorityTriageQuestionsGen { this: GenUtils =>

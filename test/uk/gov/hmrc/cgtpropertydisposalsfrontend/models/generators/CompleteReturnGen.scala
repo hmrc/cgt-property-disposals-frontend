@@ -23,7 +23,7 @@ object CompleteReturnGen extends LowerPriorityCompleteReturnGen {
 
   implicit val completeSingleDisposalReturnGen: Gen[CompleteSingleDisposalReturn] =
     for {
-      triageAnswers              <- completeSingleDisposalTriageAnswers
+      triageAnswers              <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
       propertyAddress            <- AddressGen.ukAddressGen
       disposalDetails            <- disposalDetails
       acquisitionDetails         <- acquisitionDetails
@@ -56,8 +56,8 @@ object CompleteReturnGen extends LowerPriorityCompleteReturnGen {
 trait LowerPriorityCompleteReturnGen extends Common {
 
   implicit val completeMultipleDisposalsReturnGen: Gen[CompleteMultipleDisposalsReturn] = for {
-    triageAnswers                 <- completeMultipleDisposalsTriageAnswers
-    examplePropertyDetailsAnswers <- examplePropertyDetailsAnswers
+    triageAnswers                 <- TriageQuestionsGen.completeMultipleDisposalsTriageAnswersGen
+    examplePropertyDetailsAnswers <- ExamplePropertyDetailsAnswersGen.completeExamplePropertyDetailsAnswersGen
     exemptionAndLossesAnswers     <- exemptionAndLossesAnswers
     yearToDateLiabilityAnswers    <- yearToDateLiabilityAnswers
     supportingDocumentAnswers     <- supportingDocumentAnswers
@@ -77,7 +77,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
 
   implicit val completeSingleIndirectDisposalReturnGen: Gen[CompleteSingleIndirectDisposalReturn] = {
     for {
-      triageAnswers              <- completeSingleDisposalTriageAnswers
+      triageAnswers              <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
       companyAddress             <- AddressGen.addressGen
       disposalDetails            <- disposalDetails
       acquisitionDetails         <- acquisitionDetails
@@ -102,7 +102,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
   }
 
   implicit val completeMultipleIndirectDisposalReturnGen: Gen[CompleteMultipleIndirectDisposalReturn] = for {
-    triageAnswers                <- completeMultipleDisposalsTriageAnswers
+    triageAnswers                <- TriageQuestionsGen.completeMultipleDisposalsTriageAnswersGen
     exampleCompanyDetailsAnswers <- ExampleCompanyDetailsAnswersGen.completeExampleCompanyDetailsAnswersGen
     exemptionsAndLossesDetails   <- exemptionAndLossesAnswers
     yearToDateLiabilityAnswers   <- yearToDateLiabilityAnswers
@@ -123,7 +123,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
 
   implicit val completeSingleMixedUseDisposalReturnGen: Gen[CompleteSingleMixedUseDisposalReturn] = {
     for {
-      triageAnswers              <- completeSingleDisposalTriageAnswers
+      triageAnswers              <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
       propertyDetailsAnswers     <- SingleMixedUseDetailsAnswersGen.completeMixedUsePropertyDetailsAnswers
       exemptionsAndLossesDetails <- exemptionAndLossesAnswers
       yearToDateLiabilityAnswers <- yearToDateLiabilityAnswers

@@ -51,7 +51,7 @@ object ReturnAPIGen extends Common {
 
   implicit val calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] =
     for {
-      triageAnswers      <- completeSingleDisposalTriageAnswers
+      triageAnswers      <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
       address            <- AddressGen.ukAddressGen
       disposalDetails    <- disposalDetails
       acquisitionDetails <- acquisitionDetails

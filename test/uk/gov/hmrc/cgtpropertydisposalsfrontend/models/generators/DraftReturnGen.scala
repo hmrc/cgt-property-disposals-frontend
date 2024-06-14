@@ -37,7 +37,6 @@ trait HigherPriorityDraftReturnGen extends LowerPriorityDraftReturnGen {
 
 trait LowerPriorityDraftReturnGen extends GenUtils {
 
-  val triageAnswersGen: Gen[SingleDisposalTriageAnswers]             = gen[SingleDisposalTriageAnswers]
   private val supportingEvidenceGen: Gen[SupportingEvidenceAnswers]  = gen[SupportingEvidenceAnswers]
   private val exemptionsAndLossesAnswersGen                          = Gen.oneOf(
     ExemptionsAndLossesAnswersGen.completeExemptionAndLossesAnswersGen,
@@ -53,7 +52,7 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
   val singleDisposalDraftReturnGen2: Gen[DraftSingleDisposalReturn] =
     for {
       id                         <- Gen.uuid
-      triageAnswers              <- triageAnswersGen
+      triageAnswers              <- TriageQuestionsGen.singleDisposalTraiageAnswersGen
       propertyAddress            <- Gen.option(AddressGen.ukAddressGen)
       disposalDetailsAnswers     <- Gen.option(disposalDetailsAnswersGen)
       acquisitionDetailsAnswers  <- Gen.option(acquisitionDetailsAnswersGen)
@@ -81,12 +80,10 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       lastUpdatedDate
     )
 
-  val multipleTriageGen = gen[MultipleDisposalsTriageAnswers]
-
   implicit val multipleDisposalDraftReturnGen: Gen[DraftMultipleDisposalsReturn] = {
     for {
       id                            <- Gen.uuid
-      triageAnswers                 <- multipleTriageGen
+      triageAnswers                 <- TriageQuestionsGen.multipleDisposalsTriageAnswersGen
       examplePropertyDetailsAnswers <- Gen.option(gen[ExamplePropertyDetailsAnswers])
       exemptionAndLossesAnswers     <- Gen.option(exemptionsAndLossesAnswersGen)
       yearToDateLiabilityAnswers    <- Gen.option(YearToDateLiabilityAnswersGen.ytdLiabilityAnswersGen)
@@ -110,7 +107,7 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
   implicit val multipleIndirectDisposalDraftReturnGen: Gen[DraftMultipleIndirectDisposalsReturn] = {
     for {
       id                           <- Gen.uuid
-      triageAnswers                <- multipleTriageGen
+      triageAnswers                <- TriageQuestionsGen.multipleDisposalsTriageAnswersGen
       exampleCompanyDetailsAnswers <- Gen.option(gen[ExampleCompanyDetailsAnswers])
       exemptionAndLossesAnswers    <- Gen.option(exemptionsAndLossesAnswersGen)
       yearToDateLiabilityAnswers   <- Gen.option(YearToDateLiabilityAnswersGen.ytdLiabilityAnswersGen)
@@ -134,7 +131,7 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
   implicit val singleIndirectDisposalDraftReturnGen: Gen[DraftSingleIndirectDisposalReturn] =
     for {
       id                         <- Gen.uuid
-      triageAnswers              <- triageAnswersGen
+      triageAnswers              <- TriageQuestionsGen.singleDisposalTraiageAnswersGen
       companyAddress             <- Gen.option(AddressGen.addressGen)
       disposalDetailsAnswers     <- Gen.option(disposalDetailsAnswersGen)
       acquisitionDetailsAnswers  <- Gen.option(acquisitionDetailsAnswersGen)
@@ -161,7 +158,7 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
   implicit val singleMixedUseDraftReturnGen: Gen[DraftSingleMixedUseDisposalReturn] =
     for {
       id                             <- Gen.uuid
-      triageAnswers                  <- triageAnswersGen
+      triageAnswers                  <- TriageQuestionsGen.singleDisposalTraiageAnswersGen
       mixedUsePropertyDetailsAnswers <- Gen.option(gen[MixedUsePropertyDetailsAnswers])
       exemptionAndLossesAnswers      <- Gen.option(exemptionsAndLossesAnswersGen)
       yearToDateLiabilityAnswers     <- Gen.option(YearToDateLiabilityAnswersGen.ytdLiabilityAnswersGen)

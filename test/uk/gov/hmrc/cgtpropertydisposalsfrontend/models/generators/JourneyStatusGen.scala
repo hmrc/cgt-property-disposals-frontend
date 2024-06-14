@@ -20,9 +20,8 @@ import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, IndividualWantsToRegisterTrust, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NewEnrolmentCreatedForMissingEnrolment, NonGovernmentGatewayJourney, PreviousReturnData, RegistrationStatus, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, SubmittingReturn, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NewEnrolmentCreatedForMissingEnrolment, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, SubmittingReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 
 object JourneyStatusGen extends JourneyStatusLowerPriorityGen with GenUtils {
   implicit val subscriptionReadyGen: Gen[SubscriptionReady] = for {
@@ -98,7 +97,10 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
       subscribedDetails      <- SubscribedDetailsGen.subscribedDetailsGen
       ggCredId               <- IdGen.ggCredIdGen
       agentReferenceNumber   <- Gen.option(IdGen.arnGen)
-      newReturnTriageAnswers <- Gen.either(gen[MultipleDisposalsTriageAnswers], gen[SingleDisposalTriageAnswers])
+      newReturnTriageAnswers <- Gen.either(
+                                  TriageQuestionsGen.multipleDisposalsTriageAnswersGen,
+                                  TriageQuestionsGen.singleDisposalTraiageAnswersGen
+                                )
       representeeAnswers     <- Gen.option(RepresenteeAnswersGen.representeeAnswersGen)
       previousSentReturns    <- Gen.option(ReturnGen.previousReturnDataGen)
     } yield StartingNewDraftReturn(
