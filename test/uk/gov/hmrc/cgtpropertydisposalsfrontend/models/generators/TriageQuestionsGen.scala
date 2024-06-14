@@ -26,8 +26,25 @@ object TriageQuestionsGen extends HigherPriorityTriageQuestionsGen with GenUtils
 
 trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen { this: GenUtils =>
 
-  implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] =
-    gen[CompleteSingleDisposalTriageAnswers]
+  implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] = {
+    for {
+      individualUserType        <- Gen.option(individualUserTypeGen)
+      disposalMethod            <- DisposalMethodGen.disposalMethodGen
+      countryOfResidence        <- AddressGen.countryGen
+      assetType                 <- assetTypeGen
+      disposalDate              <- disposalDateGen
+      alreadySentSelfAssessment <- Gen.option(Generators.booleanGen)
+      completionDate            <- completionDateGen
+    } yield CompleteSingleDisposalTriageAnswers(
+      individualUserType,
+      disposalMethod,
+      countryOfResidence,
+      assetType,
+      disposalDate,
+      alreadySentSelfAssessment,
+      completionDate
+    )
+  }
 
   implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] = Gen.oneOf(
     completeSingleDisposalTriageAnswersGen,
@@ -37,31 +54,110 @@ trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
   val singleDisposalTraiageAnswersGen: Gen[SingleDisposalTriageAnswers] =
     Gen.oneOf(completeSingleDisposalTriageAnswersGen, incompleteSingleDisposalTriageAnswersGen)
 
-  implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsTriageAnswers] =
-    gen[CompleteMultipleDisposalsTriageAnswers]
+  private val taxYearExchangedGen = gen[TaxYearExchanged]
 
-  implicit val incompleteMultipleDisposalsTriageAnswersGen: Gen[IncompleteMultipleDisposalsTriageAnswers] =
-    gen[IncompleteMultipleDisposalsTriageAnswers]
+  implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsTriageAnswers] = {
+    for {
+      individualUserType        <- Gen.option(individualUserTypeGen)
+      numberOfProperties        <- Gen.size
+      countryOfResidence        <- AddressGen.countryGen
+      assetTypes                <- Gen.listOf(assetTypeGen)
+      taxYearExchanged          <- Gen.option(taxYearExchangedGen)
+      taxYear                   <- TaxYearGen.taxYearGen
+      alreadySentSelfAssessment <- Gen.option(Generators.booleanGen)
+      completionDate            <- completionDateGen
+    } yield CompleteMultipleDisposalsTriageAnswers(
+      individualUserType,
+      numberOfProperties,
+      countryOfResidence,
+      assetTypes,
+      taxYearExchanged,
+      taxYear,
+      alreadySentSelfAssessment,
+      completionDate
+    )
+  }
+
+  implicit val incompleteMultipleDisposalsTriageAnswersGen: Gen[IncompleteMultipleDisposalsTriageAnswers] = {
+    for {
+      individualUserType           <- Gen.option(individualUserTypeGen)
+      numberOfProperties           <- Gen.option(Gen.size)
+      wasAUKResident               <- Gen.option(Generators.booleanGen)
+      countryOfResidence           <- Gen.option(AddressGen.countryGen)
+      wereAllPropertiesResidential <- Gen.option(Generators.booleanGen)
+      assetTypes                   <- Gen.option(Gen.listOf(assetTypeGen))
+      taxYearExchanged             <- Gen.option(taxYearExchangedGen)
+      taxYear                      <- Gen.option(TaxYearGen.taxYearGen)
+      alreadySentSelfAssessment    <- Gen.option(Generators.booleanGen)
+      completionDate               <- Gen.option(completionDateGen)
+    } yield IncompleteMultipleDisposalsTriageAnswers(
+      individualUserType,
+      numberOfProperties,
+      wasAUKResident,
+      countryOfResidence,
+      wereAllPropertiesResidential,
+      assetTypes,
+      taxYearExchanged,
+      taxYear,
+      alreadySentSelfAssessment,
+      completionDate
+    )
+  }
 
   val multipleDisposalsTriageAnswersGen: Gen[MultipleDisposalsTriageAnswers] =
     Gen.oneOf(completeMultipleDisposalsTriageAnswersGen, incompleteMultipleDisposalsTriageAnswersGen)
 
-  implicit val individualUserTypeGen: Gen[IndividualUserType] =
-    gen[IndividualUserType]
-
   implicit val numberOfPropertiesGen: Gen[NumberOfProperties] =
-    gen[NumberOfProperties]
-
-  implicit val disposalDateGen: Gen[DisposalDate] = gen[DisposalDate]
-
-  implicit val completionDateGen: Gen[CompletionDate] = gen[CompletionDate]
-
-  implicit val assetTypeGen: Gen[AssetType] = gen[AssetType]
+    Gen.oneOf(NumberOfProperties.One, NumberOfProperties.MoreThanOne)
 }
 
 trait LowerPriorityTriageQuestionsGen { this: GenUtils =>
 
+  implicit val individualUserTypeGen: Gen[IndividualUserType] =
+    Gen.oneOf(
+      IndividualUserType.Self,
+      IndividualUserType.Capacitor,
+      IndividualUserType.PersonalRepresentative,
+      IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
+    )
+
+  implicit val assetTypeGen: Gen[AssetType] = Gen.oneOf(
+    AssetType.Residential,
+    AssetType.NonResidential,
+    AssetType.IndirectDisposal,
+    AssetType.MixedUse
+  )
+
+  implicit val disposalDateGen: Gen[DisposalDate] = for {
+    value   <- Generators.dateGen
+    taxYear <- TaxYearGen.taxYearGen
+  } yield DisposalDate(value, taxYear)
+
+  implicit val completionDateGen: Gen[CompletionDate] = Generators.dateGen.map(CompletionDate(_))
+
   implicit val incompleteSingleDisposalTriageAnswersGen: Gen[IncompleteSingleDisposalTriageAnswers] =
-    gen[IncompleteSingleDisposalTriageAnswers]
+    for {
+      individualUserType         <- Gen.option(individualUserTypeGen)
+      hasConfirmedSingleDisposal <- Generators.booleanGen
+      disposalMethod             <- Gen.option(DisposalMethodGen.disposalMethodGen)
+      wasAUKResident             <- Gen.option(Generators.booleanGen)
+      countryOfResidence         <- Gen.option(AddressGen.countryGen)
+      assetType                  <- Gen.option(assetTypeGen)
+      disposalDate               <- Gen.option(disposalDateGen)
+      alreadySentSelfAssessment  <- Gen.option(Generators.booleanGen)
+      completionDate             <- Gen.option(completionDateGen)
+      tooEarlyDisposalDate       <- Gen.option(Generators.dateGen)
+    } yield IncompleteSingleDisposalTriageAnswers(
+      individualUserType,
+      hasConfirmedSingleDisposal,
+      disposalMethod,
+      wasAUKResident,
+      countryOfResidence,
+      assetType,
+      disposalDate,
+      alreadySentSelfAssessment,
+      completionDate,
+      tooEarlyDisposalDate
+    )
 
 }
