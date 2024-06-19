@@ -17,15 +17,23 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 
 object ExemptionsAndLossesAnswersGen extends GenUtils {
 
-  implicit val completeExemptionAndLossesAnswersGen: Gen[CompleteExemptionAndLossesAnswers] =
-    gen[CompleteExemptionAndLossesAnswers]
+  implicit val completeExemptionAndLossesAnswersGen: Gen[CompleteExemptionAndLossesAnswers] = {
+    for {
+      inYearLosses        <- MoneyGen.amountInPenceGen
+      previousYearsLosses <- MoneyGen.amountInPenceGen
+      annualExemptAmount  <- MoneyGen.amountInPenceGen
+    } yield CompleteExemptionAndLossesAnswers(inYearLosses, previousYearsLosses, annualExemptAmount)
+  }
 
   implicit val incompleteExemptionAndLossesAnswersGen: Gen[IncompleteExemptionAndLossesAnswers] =
-    gen[IncompleteExemptionAndLossesAnswers]
+    for {
+      inYearLosses        <- Gen.option(MoneyGen.amountInPenceGen)
+      previousYearsLosses <- Gen.option(MoneyGen.amountInPenceGen)
+      annualExemptAmount  <- Gen.option(MoneyGen.amountInPenceGen)
+    } yield IncompleteExemptionAndLossesAnswers(inYearLosses, previousYearsLosses, annualExemptAmount)
 
 }

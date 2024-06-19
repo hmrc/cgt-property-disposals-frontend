@@ -17,11 +17,10 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 object UserTypeGen extends GenUtils {
 
-  implicit val userTypeGen: Gen[UserType] = gen[UserType]
-
+  implicit val userTypeGen: Gen[UserType] =
+    Gen.oneOf(UserType.Individual, UserType.Organisation, UserType.NonGovernmentGatewayUser, UserType.Agent)
 }

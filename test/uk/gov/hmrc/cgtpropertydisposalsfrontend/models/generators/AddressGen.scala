@@ -17,27 +17,34 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 
-object AddressGen extends AddressHigherPriorityGen with GenUtils
+trait AddressHigherPriorityGen {
+  implicit val postcodeGen: Gen[Postcode] = Generators.stringGen.map(Postcode(_))
 
-trait AddressHigherPriorityGen extends AddressLowerPriorityGen { this: GenUtils =>
-
-  implicit val addressGen: Gen[Address] = gen[Address]
-
-  implicit val nonUkAddressGen: Gen[NonUkAddress] = gen[NonUkAddress]
-
-  implicit val postcodeGen: Gen[Postcode] = gen[Postcode]
-
-  implicit val countryGen: Gen[Country] =
-    Gen.oneOf(Country.countryCodes.map(Country(_)))
-
+  implicit val ukAddressGen: Gen[UkAddress] =
+    for {
+      line1    <- Generators.stringGen
+      line2    <- Gen.option(Generators.stringGen)
+      town     <- Gen.option(Generators.stringGen)
+      county   <- Gen.option(Generators.stringGen)
+      postcode <- postcodeGen
+    } yield UkAddress(line1, line2, town, county, postcode)
 }
 
-trait AddressLowerPriorityGen { this: GenUtils =>
+object AddressGen extends AddressHigherPriorityGen {
 
-  implicit val ukAddressGen: Gen[UkAddress] = gen[UkAddress]
+  implicit val countryGen: Gen[Country] = Gen.oneOf(Country.countryCodes.map(Country(_)))
 
+  implicit val nonUkAddressGen: Gen[NonUkAddress] = for {
+    line1    <- Generators.stringGen
+    line2    <- Gen.option(Generators.stringGen)
+    line3    <- Gen.option(Generators.stringGen)
+    line4    <- Gen.option(Generators.stringGen)
+    postcode <- Gen.option(Generators.stringGen)
+    country  <- countryGen
+  } yield NonUkAddress(line1, line2, line3, line4, postcode, country)
+
+  implicit val addressGen: Gen[Address] = Gen.oneOf(ukAddressGen, nonUkAddressGen)
 }

@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
+import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.CompleteReturnWithSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.PreviousReturnData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, CompleteReturn, ReturnSummary, ReturnType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+
+import java.time.LocalDate
 
 object ReturnGen extends GenUtils {
 
@@ -33,11 +34,55 @@ object ReturnGen extends GenUtils {
       CompleteReturnGen.completeMultipleIndirectDisposalReturnGen
     )
 
-  implicit val returnSummaryGen: Gen[ReturnSummary] = gen[ReturnSummary]
+  implicit val returnSummaryGen: Gen[ReturnSummary] = {
+    for {
+      submissionId              <- Generators.stringGen
+      submissionDate            <- Arbitrary.arbitrary[LocalDate]
+      completionDate            <- Arbitrary.arbitrary[LocalDate]
+      lastUpdatedDate           <- Gen.option(Arbitrary.arbitrary[LocalDate])
+      taxYear                   <- Generators.stringGen
+      mainReturnChargeAmount    <- MoneyGen.amountInPenceGen
+      mainReturnChargeReference <- Gen.option(Generators.stringGen)
+      propertyAddress           <- AddressGen.addressGen
+      charges                   <- Gen.listOf(MoneyGen.chargeGen)
+      isRecentlyAmended         <- Generators.booleanGen
+      expired                   <- Generators.booleanGen
+    } yield ReturnSummary(
+      submissionId,
+      submissionDate,
+      completionDate,
+      lastUpdatedDate,
+      taxYear,
+      mainReturnChargeAmount,
+      mainReturnChargeReference,
+      propertyAddress,
+      charges,
+      isRecentlyAmended,
+      expired
+    )
+  }
 
-  implicit val previousReturnDataGen: Gen[PreviousReturnData] = gen[PreviousReturnData]
+  private val furtherReturnCalculationData = for {
+    address                <- AddressGen.ukAddressGen
+    gainOrLossAfterReliefs <- MoneyGen.amountInPenceGen
+  } yield FurtherReturnCalculationData(address, gainOrLossAfterReliefs)
 
-  implicit val returnTypeGen: Gen[ReturnType] = gen[ReturnType]
+  implicit val previousReturnDataGen: Gen[PreviousReturnData] = {
+    for {
+      summaries                                     <- Gen.listOf(returnSummaryGen)
+      previousYearToDate                            <- Gen.option(MoneyGen.amountInPenceGen)
+      previousReturnsImplyEligibilityForCalculation <- Gen.option(Generators.booleanGen)
+      calculationData                               <- Gen.option(Gen.listOf(furtherReturnCalculationData))
+    } yield PreviousReturnData(
+      summaries,
+      previousYearToDate,
+      previousReturnsImplyEligibilityForCalculation,
+      calculationData
+    )
+  }
+
+  implicit val returnTypeGen: Gen[ReturnType] =
+    Gen.oneOf(ReturnType.FirstReturn, ReturnType.FurtherReturn, ReturnType.AmendedReturn)
 
   implicit val completeReturnWithSummaryGen: Gen[CompleteReturnWithSummary] = for {
     completeReturn <- completeReturnGen

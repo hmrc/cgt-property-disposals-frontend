@@ -17,12 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
 
-object DisposalMethodGen extends GenUtils {
-
+object DisposalMethodGen {
   implicit val disposalMethodGen: Gen[DisposalMethod] =
-    gen[DisposalMethod]
-
+    Gen.oneOf(DisposalMethod.Sold, DisposalMethod.Gifted, DisposalMethod.Other)
 }

@@ -29,32 +29,71 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculatedTaxDue
 object YearToDateLiabilityAnswersGen extends HigherPriorityYearToDateLiabilityAnswersGen with GenUtils
 
 trait HigherPriorityYearToDateLiabilityAnswersGen extends LowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
-  implicit val ytdLiabilityAnswersGen: Gen[YearToDateLiabilityAnswers] =
-    gen[YearToDateLiabilityAnswers]
+  private val completeCalculatedYTDLiabilityAnswersRaw: Gen[CompleteCalculatedYTDAnswers] = for {
+    estimatedIncome     <- MoneyGen.amountInPenceGen
+    personalAllowance   <- Gen.option(MoneyGen.amountInPenceGen)
+    hasEstimatedDetails <- Generators.booleanGen
+    calculatedTaxDue    <- calculatedTaxDueGen
+    taxDue              <- MoneyGen.amountInPenceGen
+    mandatoryEvidence   <- Gen.option(mandatoryEvidenceGen)
+  } yield CompleteCalculatedYTDAnswers(
+    estimatedIncome,
+    personalAllowance,
+    hasEstimatedDetails,
+    calculatedTaxDue,
+    taxDue,
+    mandatoryEvidence
+  )
 
   implicit val completeCalculatedYTDLiabilityAnswersGen: Gen[CompleteCalculatedYTDAnswers] =
-    gen[CompleteCalculatedYTDAnswers].map {
+    completeCalculatedYTDLiabilityAnswersRaw.map {
       case a: CompleteCalculatedYTDAnswers if a.estimatedIncome > AmountInPence.zero && a.personalAllowance.isEmpty =>
         a.copy(personalAllowance = Some(AmountInPence.zero))
       case other                                                                                                    => other
     }
 
-  implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] =
-    gen[CalculatedTaxDue]
+  implicit val calculatedTaxDue: Gen[CalculatedTaxDue] = calculatedTaxDueGen
 
   implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] =
     gen[GainCalculatedTaxDue]
 
-  implicit val mandatoryEvidenceGen: Gen[MandatoryEvidence] =
-    gen[MandatoryEvidence]
+  implicit val ytdLiabilityAnswersGen: Gen[YearToDateLiabilityAnswers] =
+    Gen.oneOf(
+      completeCalculatedYTDLiabilityAnswersGen,
+      incompleteCalculatedYTDLiabilityAnswersGen,
+      incompleteNonCalculatedYTDLiabilityAnswersGen
+    )
 
 }
 
 trait LowerPriorityYearToDateLiabilityAnswersGen extends EvenLowerPriorityYearToDateLiabilityAnswersGen {
   this: GenUtils =>
 
+  val calculatedTaxDueGen: Gen[CalculatedTaxDue] =
+    gen[CalculatedTaxDue]
+
+  private val incompleteCalculatedYTDLiabilityAnswersRaw = for {
+    estimatedIncome     <- Gen.option(MoneyGen.amountInPenceGen)
+    personalAllowance   <- Gen.option(MoneyGen.amountInPenceGen)
+    hasEstimatedDetails <- Gen.option(Generators.booleanGen)
+    calculatedTaxDue    <- Gen.option(calculatedTaxDueGen)
+    taxDue              <- Gen.option(MoneyGen.amountInPenceGen)
+    mandatoryEvidence   <- Gen.option(mandatoryEvidenceGen)
+    expiredEvidence     <- Gen.option(mandatoryEvidenceGen)
+    pendingUpscanUpload <- Gen.option(FileUploadGen.upscanUploadGen)
+  } yield IncompleteCalculatedYTDAnswers(
+    estimatedIncome,
+    personalAllowance,
+    hasEstimatedDetails,
+    calculatedTaxDue,
+    taxDue,
+    mandatoryEvidence,
+    expiredEvidence,
+    pendingUpscanUpload
+  )
+
   implicit val incompleteCalculatedYTDLiabilityAnswersGen: Gen[IncompleteCalculatedYTDAnswers] =
-    gen[IncompleteCalculatedYTDAnswers].map {
+    incompleteCalculatedYTDLiabilityAnswersRaw.map {
       case a: IncompleteCalculatedYTDAnswers
           if a.estimatedIncome.exists(
             _ > AmountInPence.zero
@@ -63,14 +102,67 @@ trait LowerPriorityYearToDateLiabilityAnswersGen extends EvenLowerPriorityYearTo
       case other => other
     }
 
-  implicit val completeNonCalculatedYTDLiabilityAnswersGen: Gen[CompleteNonCalculatedYTDAnswers] =
-    gen[CompleteNonCalculatedYTDAnswers]
+  implicit val completeNonCalculatedYTDLiabilityAnswersGen: Gen[CompleteNonCalculatedYTDAnswers] = {
+    for {
+      taxableGainOrLoss              <- MoneyGen.amountInPenceGen
+      hasEstimatedDetails            <- Generators.booleanGen
+      taxDue                         <- MoneyGen.amountInPenceGen
+      mandatoryEvidence              <- Gen.option(mandatoryEvidenceGen)
+      yearToDateLiability            <- Gen.option(MoneyGen.amountInPenceGen)
+      checkForRepayment              <- Gen.option(Generators.booleanGen)
+      estimatedIncome                <- Gen.option(MoneyGen.amountInPenceGen)
+      personalAllowance              <- Gen.option(MoneyGen.amountInPenceGen)
+      taxableGainOrLossCalculation   <- Gen.option(FurtherReturnCalculationGen.taxableGainOrLossCalculationGen)
+      yearToDateLiabilityCalculation <- Gen.option(FurtherReturnCalculationGen.yearToDateLiabilityCalculationGen)
+    } yield CompleteNonCalculatedYTDAnswers(
+      taxableGainOrLoss,
+      hasEstimatedDetails,
+      taxDue,
+      mandatoryEvidence,
+      yearToDateLiability,
+      checkForRepayment,
+      estimatedIncome,
+      personalAllowance,
+      taxableGainOrLossCalculation,
+      yearToDateLiabilityCalculation
+    )
+  }
 
 }
 
 trait EvenLowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
 
-  implicit val incompleteNonCalculatedYTDLiabilityAnswersGen: Gen[IncompleteNonCalculatedYTDAnswers] =
-    gen[IncompleteNonCalculatedYTDAnswers]
+  implicit val mandatoryEvidenceGen: Gen[MandatoryEvidence] =
+    gen[MandatoryEvidence]
+
+  implicit val incompleteNonCalculatedYTDLiabilityAnswersGen: Gen[IncompleteNonCalculatedYTDAnswers] = {
+    for {
+      taxableGainOrLoss              <- Gen.option(MoneyGen.amountInPenceGen)
+      hasEstimatedDetails            <- Gen.option(Generators.booleanGen)
+      taxDue                         <- Gen.option(MoneyGen.amountInPenceGen)
+      mandatoryEvidence              <- Gen.option(mandatoryEvidenceGen)
+      expiredEvidence                <- Gen.option(mandatoryEvidenceGen)
+      pendingUpscanUpload            <- Gen.option(FileUploadGen.upscanUploadGen)
+      yearToDateLiability            <- Gen.option(MoneyGen.amountInPenceGen)
+      checkForRepayment              <- Gen.option(Generators.booleanGen)
+      estimatedIncome                <- Gen.option(MoneyGen.amountInPenceGen)
+      personalAllowance              <- Gen.option(MoneyGen.amountInPenceGen)
+      taxableGainOrLossCalculation   <- Gen.option(FurtherReturnCalculationGen.taxableGainOrLossCalculationGen)
+      yearToDateLiabilityCalculation <- Gen.option(FurtherReturnCalculationGen.yearToDateLiabilityCalculationGen)
+    } yield IncompleteNonCalculatedYTDAnswers(
+      taxableGainOrLoss,
+      hasEstimatedDetails,
+      taxDue,
+      mandatoryEvidence,
+      expiredEvidence,
+      pendingUpscanUpload,
+      yearToDateLiability,
+      checkForRepayment,
+      estimatedIncome,
+      personalAllowance,
+      taxableGainOrLossCalculation,
+      yearToDateLiabilityCalculation
+    )
+  }
 
 }

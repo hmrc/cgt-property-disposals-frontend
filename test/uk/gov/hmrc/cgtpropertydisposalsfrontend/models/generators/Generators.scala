@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.{Arbitrary, Gen}
 
+import java.time.LocalDate
 import scala.language.implicitConversions
 
 object Generators {
@@ -35,5 +36,7 @@ object Generators {
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
 
   implicit def arb[A](implicit g: Gen[A]): Arbitrary[A] = Arbitrary(g)
+
+  val dateGen: Gen[LocalDate] = Arbitrary.arbitrary[LocalDate]
 
 }
