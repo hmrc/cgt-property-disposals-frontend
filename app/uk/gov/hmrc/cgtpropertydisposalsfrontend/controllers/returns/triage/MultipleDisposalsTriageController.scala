@@ -1818,19 +1818,6 @@ object MultipleDisposalsTriageController {
 
     // Taxyear 2021/22
     val conditionExpr3 = !(deathYear === 2022 || deathYear === 2021)
-    val conditionExpr4 = conditionB(2021)
-
-    // Taxyear 2022/23
-    val conditionExpr5 = !(deathYear === 2022)
-    val conditionExpr6 = conditionB(2022)
-
-    // Taxyear 2023/24
-    val conditionExpr7 = !(deathYear === 2023)
-    val conditionExpr8 = conditionB(2023)
-
-    // Taxyear 2024/25
-    val conditionExpr9 = !(deathYear === 2024)
-    val conditionExpr10 = conditionB(2024)
 
     val taxYearExchangedFormFormatter: Formatter[TaxYearExchanged] =
       new Formatter[TaxYearExchanged] {
@@ -1841,25 +1828,25 @@ object MultipleDisposalsTriageController {
           readValue(key, data, identity)
             .flatMap {
               case "2024"  =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr9) {
+                if (representativeType.contains(PersonalRepresentative) && deathYear != 2024) {
                   Left(FormError(key, "error.before.invalid"))
-                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr10) {
+                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(2024)) {
                   Left(FormError(key, "error.after.invalid"))
                 } else {
                   Right(TaxYearExchanged(2024))
                 }
               case "2023"  =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr7) {
+                if (representativeType.contains(PersonalRepresentative) && deathYear != 2023) {
                   Left(FormError(key, "error.before.invalid"))
-                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr8) {
+                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(2023)) {
                   Left(FormError(key, "error.after.invalid"))
                 } else {
                   Right(TaxYearExchanged(2023))
                 }
               case "2022"  =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr5) {
+                if (representativeType.contains(PersonalRepresentative) && deathYear != 2022) {
                   Left(FormError(key, "error.before.invalid"))
-                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr6) {
+                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(2022)) {
                   Left(FormError(key, "error.after.invalid"))
                 } else {
                   Right(TaxYearExchanged(2022))
@@ -1867,7 +1854,7 @@ object MultipleDisposalsTriageController {
               case "2021"  =>
                 if (representativeType.contains(PersonalRepresentative) && conditionExpr3) {
                   Left(FormError(key, "error.before.invalid"))
-                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr4) {
+                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(2021)) {
                   Left(FormError(key, "error.after.invalid"))
                 } else {
                   Right(TaxYearExchanged(2021))
