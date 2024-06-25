@@ -1808,48 +1808,19 @@ object MultipleDisposalsTriageController {
   private def taxYearExchangedForm(
     taxYearOfDateOfDeath: TaxYearExchanged,
     representativeType: Option[RepresentativeType]
-  ) = {
-    val deathYear = taxYearOfDateOfDeath.year
-    def conditionB(taxYear: Int) = !(2020 to taxYear contains deathYear) && deathYear != -2020
-
-    val taxYearExchangedFormFormatter: Formatter[TaxYearExchanged] =
-      new Formatter[TaxYearExchanged] {
-        override def bind(
-          key: String,
-          data: Map[String, String]
-        ): Either[Seq[FormError], TaxYearExchanged] = {
-          (for {
-            taxYearStr <- readValue(key, data, identity)
-            taxYear <- taxYearStr.toIntOption.toRight(FormError(key, "error.required"))
-            result <-
-              taxYear match {
-                case taxYear if 2020 to 2024 contains taxYear =>
-                  if (representativeType.contains(PersonalRepresentative) && deathYear != taxYear) {
-                    Left(FormError(key, "error.before.invalid"))
-                  } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(taxYear)) {
-                    Left(FormError(key, "error.before.invalid"))
-                  } else {
-                    Right(TaxYearExchanged(taxYear))
-                  }
-                case -2020 => Right(TaxYearExchanged.taxYearExchangedBefore2020)
-                case -1 => Right(TaxYearExchanged.differentTaxYears)
-                case _ => Left(FormError(key, "error.required"))
-              }
-          } yield result).leftMap(Seq(_))
-        }
-
-        override def unbind(
-          key: String,
-          value: TaxYearExchanged
-        ): Map[String, String] =
-          Map(key -> value.toString)
-      }
+  ): Form[TaxYearExchanged] = {
+    def validate(taxYear: Int) = {
+      val deathYear               = taxYearOfDateOfDeath.year
+      lazy val isDeathYearInvalid = !(deathYear >= 2020 && deathYear <= taxYear) && deathYear != -2020
+      taxYear == -2020 || taxYear == -1 || (taxYear >= 2020
+        && !(representativeType.contains(PersonalRepresentative) && deathYear != taxYear)
+        && !(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && isDeathYearInvalid))
+    }
 
     Form(
       mapping(
-        "multipleDisposalsTaxYear" -> Forms
-          .of(taxYearExchangedFormFormatter)
-      )(identity)(Some(_))
+        "multipleDisposalsTaxYear" -> Forms.number.verifying("error.before.invalid", validate(_))
+      )(TaxYearExchanged.apply)(TaxYearExchanged.unapply)
     )
   }
 
