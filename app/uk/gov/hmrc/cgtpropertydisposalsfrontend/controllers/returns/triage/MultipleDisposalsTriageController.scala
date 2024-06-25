@@ -1810,37 +1810,38 @@ object MultipleDisposalsTriageController {
     representativeType: Option[RepresentativeType]
   ) = {
 
+    val deathYear = taxYearOfDateOfDeath.year
     // Taxyear 2020/21
-    val conditionExpr1 = !(taxYearOfDateOfDeath.year === 2020 || taxYearOfDateOfDeath.year === -2020)
+    val conditionExpr1 = !(deathYear === 2020 || deathYear === -2020)
 
     val conditionExpr2 =
-      !(taxYearOfDateOfDeath.year === 2022 || taxYearOfDateOfDeath.year === 2021 || taxYearOfDateOfDeath.year === 2020)
+      !(deathYear === 2022 || deathYear === 2021 || deathYear === 2020)
 
     // Taxyear 2021/22
-    val conditionExpr3 = !(taxYearOfDateOfDeath.year === 2022 || taxYearOfDateOfDeath.year === 2021)
+    val conditionExpr3 = !(deathYear === 2022 || deathYear === 2021)
 
     val conditionExpr4 =
-      !(taxYearOfDateOfDeath.year === 2021 || taxYearOfDateOfDeath.year === 2020 || taxYearOfDateOfDeath.year === -2020)
+      !(deathYear === 2021 || deathYear === 2020 || deathYear === -2020)
 
     // Taxyear 2022/23
-    val conditionExpr5 = !(taxYearOfDateOfDeath.year === 2022)
+    val conditionExpr5 = !(deathYear === 2022)
 
-    val conditionExpr6 = !(taxYearOfDateOfDeath.year === 2022 || taxYearOfDateOfDeath.year === 2021 ||
-      taxYearOfDateOfDeath.year === 2020 || taxYearOfDateOfDeath.year === 2020)
+    val conditionExpr6 = !(deathYear === 2022 || deathYear === 2021 ||
+      deathYear === 2020 || deathYear === 2020)
 
     // Taxyear 2023/24
-    val conditionExpr7 = !(taxYearOfDateOfDeath.year === 2023)
+    val conditionExpr7 = !(deathYear === 2023)
 
     val conditionExpr8 =
-      !(taxYearOfDateOfDeath.year === 2023 || taxYearOfDateOfDeath.year === 2022 || taxYearOfDateOfDeath.year === 2021 ||
-        taxYearOfDateOfDeath.year === 2020 || taxYearOfDateOfDeath.year === 2020)
+      !(deathYear === 2023 || deathYear === 2022 || deathYear === 2021 ||
+        deathYear === 2020 || deathYear === 2020)
 
     // Taxyear 2024/25
-    val conditionExpr9 = !(taxYearOfDateOfDeath.year === 2024)
+    val conditionExpr9 = !(deathYear === 2024)
 
     val conditionExpr10 =
-      !(taxYearOfDateOfDeath.year === 2024 || taxYearOfDateOfDeath.year === 2023 || taxYearOfDateOfDeath.year === 2022 || taxYearOfDateOfDeath.year === 2021 ||
-        taxYearOfDateOfDeath.year === 2020 || taxYearOfDateOfDeath.year === 2020)
+      !(deathYear === 2024 || deathYear === 2023 || deathYear === 2022 || deathYear === 2021 ||
+        deathYear === 2020 || deathYear === 2020)
 
     val taxYearExchangedFormFormatter: Formatter[TaxYearExchanged] =
       new Formatter[TaxYearExchanged] {
