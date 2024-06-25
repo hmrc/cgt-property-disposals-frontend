@@ -1813,35 +1813,23 @@ object MultipleDisposalsTriageController {
     val deathYear = taxYearOfDateOfDeath.year
     // Taxyear 2020/21
     val conditionExpr1 = !(deathYear === 2020 || deathYear === -2020)
-
-    val conditionExpr2 =
-      !(deathYear === 2022 || deathYear === 2021 || deathYear === 2020)
+    val conditionExpr2 = !((2021 to 2022 contains deathYear) || deathYear === 2020)
 
     // Taxyear 2021/22
     val conditionExpr3 = !(deathYear === 2022 || deathYear === 2021)
-
-    val conditionExpr4 =
-      !(deathYear === 2021 || deathYear === 2020 || deathYear === -2020)
+    val conditionExpr4 = !((2020 to 2021 contains deathYear) || deathYear === -2020)
 
     // Taxyear 2022/23
     val conditionExpr5 = !(deathYear === 2022)
-
-    val conditionExpr6 = !(deathYear === 2022 || deathYear === 2021 ||
-      deathYear === 2020 || deathYear === 2020)
+    val conditionExpr6 = !(2020 to 2022 contains deathYear)
 
     // Taxyear 2023/24
     val conditionExpr7 = !(deathYear === 2023)
-
-    val conditionExpr8 =
-      !(deathYear === 2023 || deathYear === 2022 || deathYear === 2021 ||
-        deathYear === 2020 || deathYear === 2020)
+    val conditionExpr8 = !(2020 to 2023 contains deathYear)
 
     // Taxyear 2024/25
     val conditionExpr9 = !(deathYear === 2024)
-
-    val conditionExpr10 =
-      !(deathYear === 2024 || deathYear === 2023 || deathYear === 2022 || deathYear === 2021 ||
-        deathYear === 2020 || deathYear === 2020)
+    val conditionExpr10 = !(2020 to 2024 contains deathYear)
 
     val taxYearExchangedFormFormatter: Formatter[TaxYearExchanged] =
       new Formatter[TaxYearExchanged] {
