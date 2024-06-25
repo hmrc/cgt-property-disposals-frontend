@@ -1824,54 +1824,42 @@ object MultipleDisposalsTriageController {
         override def bind(
           key: String,
           data: Map[String, String]
-        ): Either[Seq[FormError], TaxYearExchanged] =
-          readValue(key, data, identity)
-            .flatMap {
-              case "2024"  =>
-                if (representativeType.contains(PersonalRepresentative) && deathYear != 2024) {
-                  Left(FormError(key, "error.before.invalid"))
-                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(2024)) {
-                  Left(FormError(key, "error.after.invalid"))
-                } else {
-                  Right(TaxYearExchanged(2024))
-                }
-              case "2023"  =>
-                if (representativeType.contains(PersonalRepresentative) && deathYear != 2023) {
-                  Left(FormError(key, "error.before.invalid"))
-                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(2023)) {
-                  Left(FormError(key, "error.after.invalid"))
-                } else {
-                  Right(TaxYearExchanged(2023))
-                }
-              case "2022"  =>
-                if (representativeType.contains(PersonalRepresentative) && deathYear != 2022) {
-                  Left(FormError(key, "error.before.invalid"))
-                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(2022)) {
-                  Left(FormError(key, "error.after.invalid"))
-                } else {
-                  Right(TaxYearExchanged(2022))
-                }
-              case "2021"  =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr3) {
-                  Left(FormError(key, "error.before.invalid"))
-                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(2021)) {
-                  Left(FormError(key, "error.after.invalid"))
-                } else {
-                  Right(TaxYearExchanged(2021))
-                }
-              case "2020"  =>
-                if (representativeType.contains(PersonalRepresentative) && conditionExpr2) {
-                  Left(FormError(key, "error.before.invalid"))
-                } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr1) {
-                  Left(FormError(key, "error.after.invalid"))
-                } else {
-                  Right(TaxYearExchanged(2020))
-                }
-              case "-2020" => Right(TaxYearExchanged.taxYearExchangedBefore2020)
-              case "-1"    => Right(TaxYearExchanged.differentTaxYears)
-              case _       => Left(FormError(key, "error.required"))
-            }
-            .leftMap(Seq(_))
+        ): Either[Seq[FormError], TaxYearExchanged] = {
+          (for {
+            taxYearStr <- readValue(key, data, identity)
+            taxYear <- taxYearStr.toIntOption.toRight(FormError(key, "error.required"))
+            result <-
+              taxYear match {
+                case taxYear if 2022 to 2024 contains taxYear =>
+                  if (representativeType.contains(PersonalRepresentative) && deathYear != taxYear) {
+                    Left(FormError(key, "error.before.invalid"))
+                  } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(taxYear)) {
+                    Left(FormError(key, "error.before.invalid"))
+                  } else {
+                    Right(TaxYearExchanged(taxYear))
+                  }
+                case 2021 =>
+                  if (representativeType.contains(PersonalRepresentative) && conditionExpr3) {
+                    Left(FormError(key, "error.before.invalid"))
+                  } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionB(2021)) {
+                    Left(FormError(key, "error.after.invalid"))
+                  } else {
+                    Right(TaxYearExchanged(2021))
+                  }
+                case 2020 =>
+                  if (representativeType.contains(PersonalRepresentative) && conditionExpr2) {
+                    Left(FormError(key, "error.before.invalid"))
+                  } else if (representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && conditionExpr1) {
+                    Left(FormError(key, "error.after.invalid"))
+                  } else {
+                    Right(TaxYearExchanged(2020))
+                  }
+                case -2020 => Right(TaxYearExchanged.taxYearExchangedBefore2020)
+                case -1 => Right(TaxYearExchanged.differentTaxYears)
+                case _ => Left(FormError(key, "error.required"))
+              }
+          } yield result).leftMap(Seq(_))
+        }
 
         override def unbind(
           key: String,
