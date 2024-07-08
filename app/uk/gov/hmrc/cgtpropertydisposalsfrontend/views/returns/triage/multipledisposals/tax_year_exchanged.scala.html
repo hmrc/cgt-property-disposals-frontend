@@ -73,7 +73,7 @@
 
     val availableOptions = availableTaxYears.map{year =>
         RadioItem(
-            content = Text(messages(s"$key.taxyear.$year")),
+            content = Text(messages(s"$key.taxyear.allBetween", year, year + 1)),
             value = Option(s"$year"),
             id = Option(s"${key}-TaxYear$year"),
         )
