@@ -31,10 +31,6 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   private val signOutUri: String            = getString("sign-out.uri")
   private val contactFormServiceIdentifier  = "CGTPD"
 
-  val reportAProblemPartialUrl: String                =
-    s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  val reportAProblemNonJSUrl: String                  =
-    s"/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   val govUkUrl: String                                = getString("external-url.gov-uk")
   val signOutUrl: String                              = s"$basGatewayFrontendUrl$signOutUri"
   val trustRegistrationUrl: String                    = getString(
@@ -43,13 +39,11 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val callChargesUrl: String                          = getString("external-url.gov-call-charges")
   val additionalNeedsUrl: String                      = getString("external-url.additional-needs")
   val taxSellHomeUrl: String                          = getString("external-url.tax-sell-home")
-  val taxSellPropertyUrl: String                      = getString("external-url.tax-sell-property")
   val cgtUrl: String                                  = getString("external-url.capital-gains-tax")
   val cgtLegacyUrl: String                            = getString("external-url.capital-gains-tax-legacy")
   val legacyCgtNonResidentUrl: String                 = getString(
     "external-url.legacy-cgt-non-resident"
   )
-  val agentsSignInUrl: String                         = getString("external-url.sign-in-to-agents")
   val agentsStartPageUrl: String                      = getString("external-url.agents-start-page")
   val createAgentsAccountUrl: String                  = getString(
     "external-url.create-agents-account"
@@ -68,9 +62,6 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val workOurYouResidenceStatusUrl: String            = getString(
     "external-url.work-out-your-residence-status"
   )
-  val residentialPropertyDefinitionUrl: String        = getString(
-    "external-url.residential-property-definition"
-  )
   val tranferringOwnershipHelp: String                = getString(
     "external-url.transferring-ownership-help"
   )
@@ -87,9 +78,6 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   )
   val selfAssessmentUrl: String                       = getString(
     "external-url.sign-in-to-self-assessment"
-  )
-  val reportingCgtBefore6April2020: String            = getString(
-    "external-url.reporting-cgt-before-6-april-2020"
   )
   val nrcgtReturn: String                             = getString("external-url.nrcgtReturn")
   val reliefsInfo: String                             = getString("external-url.reliefs-info")
@@ -136,14 +124,10 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   val payYourTax: String                   = getString("external-url.pay-your-tax")
   val payTheirTaxBill: String              = getString("external-url.pay-their-tax-bill")
-  val returnsForSomeoneWhoHasDied: String  = getString(
-    "external-url.returns-for-someone-who-has-died"
-  )
   val powerOfAttorney: String              = getString("external-url.power-of-attorney")
   val cgtRatesUrl: String                  = getString("external-url.cgt-rates")
   val trustsAndCgtUrl: String              = getString("external-url.trusts-and-cgt")
   val trustsAndCgtWorkoutUrl: String       = getString("external-url.trusts-and-cgt-workout")
-  val agentGetAuthorisationUrl: String     = getString("external-url.agent-get-authorisation")
   val agentAskClientToAuthoriseUrl: String = getString("external-url.agent-ask-client-to-authorise")
 
   private val feedbackFeUrl: String   = getString("microservice.services.feedback-frontend.url")
@@ -157,30 +141,19 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
       "accountType=individual&" +
       "continueUrl=%2Fcapital-gains-tax-uk-property%2Fstart&" +
       "origin=capital-gains-tax-uk-property-frontend"
-  val ggKeepAliveUrl: String     = "/capital-gains-tax-uk-property" + routes.StartController.keepAlive().url
 
   val ggTimedOutUrl: String = "/capital-gains-tax-uk-property" + routes.StartController
     .timedOut()
     .url
 
-  val hmrcTelephone: String      = getString("telephone-numbers.hmrc-helpline")
-  val outsideUkPhone: String     = getString("telephone-numbers.outside-uk")
-  val agentDedicatedLine: String = getString(
-    "telephone-numbers.agent-dedicated-line"
-  )
-
   val userResearchBannerEnabled: Boolean = servicesConfig.getBoolean("user-research-banner.enabled")
   val userResearchUrl: String            = getString("user-research-banner.url")
-
-  val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enable-language-switching")
 
   val futureDatesEnabled: Boolean = servicesConfig.getBoolean("futureDates.enabled")
 
   val maxYearForDisposalsAndCompletion: Int = servicesConfig.getInt("futureDates.maxTaxYearAllowed")
 
   val selfAssessmentTaxReturnsCorrections: String = getString("external-url.sa-tax-returns-corrections")
-
-  val numberOfTaxYearsForReturns: Long = servicesConfig.getInt("returns-number-of-tax-years").toLong
 
   val draftReturnNewDueDateStartYear: Int  = servicesConfig.getInt("draft-return.new-due-date.start-year")
   val draftReturnNewDueDateStartMonth: Int = servicesConfig.getInt("draft-return.new-due-date.start-month")
