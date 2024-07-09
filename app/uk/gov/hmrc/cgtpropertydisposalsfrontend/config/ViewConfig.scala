@@ -33,91 +33,49 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   val govUkUrl: String                                = getString("external-url.gov-uk")
   val signOutUrl: String                              = s"$basGatewayFrontendUrl$signOutUri"
-  val trustRegistrationUrl: String                    = getString(
-    "external-url.trust-registration"
-  )
+  val trustRegistrationUrl: String                    = getString("external-url.trust-registration")
   val callChargesUrl: String                          = getString("external-url.gov-call-charges")
   val additionalNeedsUrl: String                      = getString("external-url.additional-needs")
   val taxSellHomeUrl: String                          = getString("external-url.tax-sell-home")
   val cgtUrl: String                                  = getString("external-url.capital-gains-tax")
   val cgtLegacyUrl: String                            = getString("external-url.capital-gains-tax-legacy")
-  val legacyCgtNonResidentUrl: String                 = getString(
-    "external-url.legacy-cgt-non-resident"
-  )
+  val legacyCgtNonResidentUrl: String                 = getString("external-url.legacy-cgt-non-resident")
   val agentsStartPageUrl: String                      = getString("external-url.agents-start-page")
-  val createAgentsAccountUrl: String                  = getString(
-    "external-url.create-agents-account"
-  )
+  val createAgentsAccountUrl: String                  = getString("external-url.create-agents-account")
   val lostUtrUrl: String                              = getString("external-url.lost-utr")
-  val trusteeResponsibilitiesUrl: String              = getString(
-    "external-url.trustee-responsibilities"
-  )
-  val fileCorporationTaxUrl: String                   = getString(
-    "external-url.file-corporation-tax"
-  )
+  val trusteeResponsibilitiesUrl: String              = getString("external-url.trustee-responsibilities")
+  val fileCorporationTaxUrl: String                   = getString("external-url.file-corporation-tax")
   val trustHelpUrl: String                            = getString("external-url.trust-help")
-  val tellHmrcChangeDetails: String                   = getString(
-    "external-url.tell-hmrc-change-details"
-  )
-  val workOurYouResidenceStatusUrl: String            = getString(
-    "external-url.work-out-your-residence-status"
-  )
-  val tranferringOwnershipHelp: String                = getString(
-    "external-url.transferring-ownership-help"
-  )
+  val tellHmrcChangeDetails: String                   = getString("external-url.tell-hmrc-change-details")
+  val workOurYouResidenceStatusUrl: String            = getString("external-url.work-out-your-residence-status")
+  val tranferringOwnershipHelp: String                = getString("external-url.transferring-ownership-help")
   val cgtLossesUrl: String                            = getString("external-url.cgt-losses")
   val cgtLossesUrlNonUk: String                       = getString("external-url.cgt-losses-non-uk")
-  val annualExemptAmountUrl: String                   = getString(
-    "external-url.annual-exempt-amount"
-  )
-  val taxFreeAllowanceUrl: String                     = getString(
-    "external-url.tax-free-allowance"
-  )
-  val personalAllowanceUrl: String                    = getString(
-    "external-url.personal-allowance"
-  )
-  val selfAssessmentUrl: String                       = getString(
-    "external-url.sign-in-to-self-assessment"
-  )
+  val annualExemptAmountUrl: String                   = getString("external-url.annual-exempt-amount")
+  val taxFreeAllowanceUrl: String                     = getString("external-url.tax-free-allowance")
+  val personalAllowanceUrl: String                    = getString("external-url.personal-allowance")
+  val selfAssessmentUrl: String                       = getString("external-url.sign-in-to-self-assessment")
   val nrcgtReturn: String                             = getString("external-url.nrcgtReturn")
   val reliefsInfo: String                             = getString("external-url.reliefs-info")
   val lettingReliefInfo: String                       = getString("external-url.letting-relief-info")
   val marketValue: String                             = getString("external-url.market-value")
-  val trustsTaxFreeAllowance: String                  = getString(
-    "external-url.trusts-tax-free-allowance"
-  )
-  val trustsForVulnerable: String                     = getString(
-    "external-url.trusts-for-vulnerable"
-  )
-  val trustsAllowableCostsUrl: String                 = getString(
-    "external-url.trusts-allowable-costs"
-  )
-  val nonResidentsRebasingUrl: String                 = getString(
-    "external-url.non-resident-rebasing"
-  )
-  val govUkAccessibilityStatementUrl: String          = getString(
-    "external-url.gov-uk-accessibility-statement"
-  )
+  val trustsTaxFreeAllowance: String                  = getString("external-url.trusts-tax-free-allowance")
+  val trustsForVulnerable: String                     = getString("external-url.trusts-for-vulnerable")
+  val trustsAllowableCostsUrl: String                 = getString("external-url.trusts-allowable-costs")
+  val nonResidentsRebasingUrl: String                 = getString("external-url.non-resident-rebasing")
+  val govUkAccessibilityStatementUrl: String          = getString("external-url.gov-uk-accessibility-statement")
   val abilityNetUrl: String                           = getString("external-url.ability-net")
   val webContentAccessibilityGuidelinesV21Url: String = getString(
     "external-url.web-content-accessibility-guidelines-v2-1"
   )
-  val equalityAndAdvisoryServiceUrl: String           = getString(
-    "external-url.equality-advisory-and-support-service"
-  )
-  val equalityCommissionForNorthenIrelandUrl: String  = getString(
-    "external-url.equality-commission-for-northen-ireland"
-  )
-  val digitalAccessibilityCentretUrl: String          = getString(
-    "external-url.digital-accessibility-centre"
-  )
+  val equalityAndAdvisoryServiceUrl: String           = getString("external-url.equality-advisory-and-support-service")
+  val equalityCommissionForNorthenIrelandUrl: String  = getString("external-url.equality-commission-for-northen-ireland")
+  val digitalAccessibilityCentretUrl: String          = getString("external-url.digital-accessibility-centre")
   val reportAccessibilityProblemUrl: String           =
     s"${getString("external-url.report-accessibility-problem")}?service=cgtpd"
   val contactHmrc: String                             = getString("external-url.contact-hmrc")
 
-  val personalRepresentativeUrl: String = getString(
-    "external-url.personal-representative"
-  )
+  val personalRepresentativeUrl: String = getString("external-url.personal-representative")
 
   val calculateCgt: String   = getString("external-url.calculate-cgt")
   val calculateCgtNr: String = getString("external-url.calculate-cgt-non-resident")
