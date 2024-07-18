@@ -4,6 +4,7 @@ addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck"
 lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
+  .settings(javaOptions += "-Xmx2G")
   .settings(
     scalaVersion := "2.13.12",
     majorVersion := 2,
