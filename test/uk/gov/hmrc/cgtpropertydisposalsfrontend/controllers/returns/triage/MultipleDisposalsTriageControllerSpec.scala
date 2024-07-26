@@ -70,6 +70,7 @@ import java.time.LocalDate
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.jdk.CollectionConverters._
 
 class MultipleDisposalsTriageControllerSpec
     extends ControllerSpec
@@ -4945,13 +4946,14 @@ class MultipleDisposalsTriageControllerSpec
       messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs: _*),
       { doc =>
         doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+        val selector = doc.body().select(".govuk-label.govuk-radios__label").asScala.map(_.text()).toList
         doc
           .select("#content > article > form, #main-content form")
-          .attr("action")                                  shouldBe expectedSubmit.url
-        doc.select("#submitButton").text()                 shouldBe messageFromMessageKey(
+          .attr("action")                         shouldBe expectedSubmit.url
+        doc.select("#submitButton").text()        shouldBe messageFromMessageKey(
           expectedButtonMessageKey
         )
-        doc.select("#returnToSummaryLink").text()          shouldBe (
+        doc.select("#returnToSummaryLink").text() shouldBe (
           if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link") else ""
         )
         expectedAdditionalIdKeyValues.map(a => doc.select(a.selector).html() should be(a.value))
@@ -4960,6 +4962,12 @@ class MultipleDisposalsTriageControllerSpec
             .select(v.tagName)
             .attr(v.attributeName, v.attributeValue)
             .text() shouldBe v.value
+        )
+        // Test dynamic content
+        selector                                  shouldBe List(
+          "All between 6 April 2020 and 5 April 2021",
+          "All before 6 April 2020",
+          "The properties were exchanged in different tax years"
         )
       }
     )
