@@ -153,27 +153,7 @@ class ReturnsServiceImpl @Inject() (
     sentReturns: List[ReturnSummary]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
     for {
-
-      httpResponse <- connector
-                        .getDraftReturns(cgtReference)
-                        .subflatMap(r =>
-                          if (r.status === OK) {
-                            Right(r)
-                          } else {
-                            Left(
-                              Error(
-                                s"Call to get draft returns came back with status ${r.status}}"
-                              )
-                            )
-                          }
-                        )
-      draftReturns <- EitherT.fromEither(
-                        httpResponse
-                          .parseJSON[GetDraftReturnResponse]()
-                          .leftMap(Error(_))
-                          .map(_.draftReturns)
-                      )
-
+      draftReturns <- connector.getDraftReturns(cgtReference).map(_.draftReturns)
       (validDraftReturns, invalidDraftReturns) = draftReturns.partition(isValid(_, cgtReference))
       (sentDraftReturns, unsentDraftReturns)   = validDraftReturns.partition(hasBeenSent(sentReturns))
       unsentDraftReturnsTaxYearExchanged       = unsentDraftReturns.map { draftReturn =>

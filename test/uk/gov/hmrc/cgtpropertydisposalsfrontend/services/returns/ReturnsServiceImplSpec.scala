@@ -88,7 +88,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
   private def mockGetDraftReturns(
     cgtReference: CgtReference
-  )(response: Either[Error, HttpResponse]) =
+  )(response: Either[Error, GetDraftReturnResponse]) =
     (mockConnector
       .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
@@ -205,17 +205,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
       "return an error" when {
 
         "the http response does not come back with status 200" in {
-          mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
-          )
-
-          await(
-            service.getDraftReturns(cgtReference, sentReturns).value
-          ).isLeft shouldBe true
-        }
-
-        "the http response comes back with status 200 but the body cannot be parsed" in {
-          mockGetDraftReturns(cgtReference)(Left(Error(emptyJsonBody)))
+          mockGetDraftReturns(cgtReference)(Left(Error("Internal server error")))
 
           await(
             service.getDraftReturns(cgtReference, sentReturns).value
@@ -236,9 +226,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
               )
             )
 
-          mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty))
-          )
+          mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
 
           await(
             service.getDraftReturns(cgtReference, sentReturns).value
@@ -272,11 +260,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
             "the draft returns are successfully deleted" in {
               inSequence {
-                mockGetDraftReturns(cgtReference)(
-                  Right(
-                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                  )
-                )
+                mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
                 mockDeleteDraftReturns(List(draftReturnId))(
                   Right(HttpResponse(OK, emptyJsonBody))
                 )
@@ -289,11 +273,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
             "the draft returns cannot be deleted" in {
               inSequence {
-                mockGetDraftReturns(cgtReference)(
-                  Right(
-                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                  )
-                )
+                mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
                 mockDeleteDraftReturns(List(draftReturnId))(Left(Error("")))
               }
 
@@ -313,11 +293,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
 
             inSequence {
-              mockGetDraftReturns(cgtReference)(
-                Right(
-                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                )
-              )
+              mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
               mockDeleteDraftReturns(List(draftReturn.id))(
                 Right(HttpResponse(OK, emptyJsonBody))
               )
@@ -454,11 +430,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             val cgtReference         = sample[CgtReference]
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
             inSequence {
-              mockGetDraftReturns(cgtReference)(
-                Right(
-                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                )
-              )
+              mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
             }
 
             await(
@@ -580,17 +552,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
       "return an error" when {
 
         "the http response does not come back with status 200" in {
-          mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
-          )
-
-          await(
-            service.getDraftReturns(cgtReference, sentReturns).value
-          ).isLeft shouldBe true
-        }
-
-        "the http response comes back with status 200 but the body cannot be parsed" in {
-          mockGetDraftReturns(cgtReference)(Left(Error(emptyJsonBody)))
+          mockGetDraftReturns(cgtReference)(Left(Error("Internal server error")))
 
           await(
             service.getDraftReturns(cgtReference, sentReturns).value
@@ -613,9 +575,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
               )
             )
 
-          mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty))
-          )
+          mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
 
           await(
             service.getDraftReturns(cgtReference, sentReturns).value
@@ -652,11 +612,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
             "the draft returns are successfully deleted" in {
               inSequence {
-                mockGetDraftReturns(cgtReference)(
-                  Right(
-                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                  )
-                )
+                mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
                 mockDeleteDraftReturns(List(draftReturnId))(
                   Right(HttpResponse(OK, emptyJsonBody))
                 )
@@ -669,11 +625,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
             "the draft returns cannot be deleted" in {
               inSequence {
-                mockGetDraftReturns(cgtReference)(
-                  Right(
-                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                  )
-                )
+                mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
                 mockDeleteDraftReturns(List(draftReturnId))(Left(Error("")))
               }
 
@@ -693,11 +645,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
 
             inSequence {
-              mockGetDraftReturns(cgtReference)(
-                Right(
-                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                )
-              )
+              mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
               mockDeleteDraftReturns(List(draftReturn.id))(
                 Right(HttpResponse(OK, emptyJsonBody))
               )
@@ -768,11 +716,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             val cgtReference         = sample[CgtReference]
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
             inSequence {
-              mockGetDraftReturns(cgtReference)(
-                Right(
-                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                )
-              )
+              mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
             }
 
             await(
@@ -859,16 +803,6 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
       "return an error" when {
 
-        "the http response does not come back with status 200" in {
-          mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
-          )
-
-          await(
-            service.getDraftReturns(cgtReference, sentReturns).value
-          ).isLeft shouldBe true
-        }
-
         "the http response comes back with status 200 but the body cannot be parsed" in {
           mockGetDraftReturns(cgtReference)(Left(Error(emptyJsonBody)))
 
@@ -893,9 +827,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
               )
             )
 
-          mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty))
-          )
+          mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
 
           await(
             service.getDraftReturns(cgtReference, sentReturns).value
@@ -937,9 +869,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             "the draft returns are successfully deleted" in {
               inSequence {
                 mockGetDraftReturns(cgtReference)(
-                  Right(
-                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                  )
+                  Right(draftReturnsResponse)
                 )
                 mockDeleteDraftReturns(List(draftReturnId))(
                   Right(HttpResponse(OK, emptyJsonBody))
@@ -953,11 +883,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
             "the draft returns cannot be deleted" in {
               inSequence {
-                mockGetDraftReturns(cgtReference)(
-                  Right(
-                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                  )
-                )
+                mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
                 mockDeleteDraftReturns(List(draftReturnId))(Left(Error("")))
               }
 
@@ -977,11 +903,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
 
             inSequence {
-              mockGetDraftReturns(cgtReference)(
-                Right(
-                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                )
-              )
+              mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
               mockDeleteDraftReturns(List(draftReturn.id))(
                 Right(HttpResponse(OK, emptyJsonBody))
               )
@@ -1052,11 +974,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             val cgtReference         = sample[CgtReference]
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
             inSequence {
-              mockGetDraftReturns(cgtReference)(
-                Right(
-                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                )
-              )
+              mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
             }
 
             await(
@@ -1143,16 +1061,6 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
       "return an error" when {
 
-        "the http response does not come back with status 200" in {
-          mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
-          )
-
-          await(
-            service.getDraftReturns(cgtReference, sentReturns).value
-          ).isLeft shouldBe true
-        }
-
         "the http response comes back with status 200 but the body cannot be parsed" in {
           mockGetDraftReturns(cgtReference)(Left(Error(emptyJsonBody)))
 
@@ -1175,9 +1083,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
               )
             )
 
-          mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty))
-          )
+          mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
 
           await(
             service.getDraftReturns(cgtReference, sentReturns).value
@@ -1215,11 +1121,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
             "the draft returns are successfully deleted" in {
               inSequence {
-                mockGetDraftReturns(cgtReference)(
-                  Right(
-                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                  )
-                )
+                mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
                 mockDeleteDraftReturns(List(draftReturnId))(
                   Right(HttpResponse(OK, emptyJsonBody))
                 )
@@ -1232,11 +1134,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
             "the draft returns cannot be deleted" in {
               inSequence {
-                mockGetDraftReturns(cgtReference)(
-                  Right(
-                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                  )
-                )
+                mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
                 mockDeleteDraftReturns(List(draftReturnId))(Left(Error("")))
               }
 
@@ -1256,11 +1154,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
 
             inSequence {
-              mockGetDraftReturns(cgtReference)(
-                Right(
-                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                )
-              )
+              mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
               mockDeleteDraftReturns(List(draftReturn.id))(
                 Right(HttpResponse(OK, emptyJsonBody))
               )
@@ -1362,13 +1256,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
           def testDraftReturnIsNotDeleted(draftReturn: DraftReturn): Unit = {
             val cgtReference         = sample[CgtReference]
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
-            inSequence {
-              mockGetDraftReturns(cgtReference)(
-                Right(
-                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                )
-              )
-            }
+            mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
 
             await(
               service.getDraftReturns(cgtReference, List.empty).value
@@ -1489,16 +1377,6 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
       "return an error" when {
 
-        "the http response does not come back with status 200" in {
-          mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
-          )
-
-          await(
-            service.getDraftReturns(cgtReference, sentReturns).value
-          ).isLeft shouldBe true
-        }
-
         "the http response comes back with status 200 but the body cannot be parsed" in {
           mockGetDraftReturns(cgtReference)(Left(Error(emptyJsonBody)))
 
@@ -1523,9 +1401,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
               )
             )
 
-          mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty))
-          )
+          mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
 
           await(
             service.getDraftReturns(cgtReference, sentReturns).value
@@ -1566,11 +1442,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
             "the draft returns are successfully deleted" in {
               inSequence {
-                mockGetDraftReturns(cgtReference)(
-                  Right(
-                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                  )
-                )
+                mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
                 mockDeleteDraftReturns(List(draftReturnId))(
                   Right(HttpResponse(OK, emptyJsonBody))
                 )
@@ -1583,11 +1455,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
 
             "the draft returns cannot be deleted" in {
               inSequence {
-                mockGetDraftReturns(cgtReference)(
-                  Right(
-                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                  )
-                )
+                mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
                 mockDeleteDraftReturns(List(draftReturnId))(Left(Error("")))
               }
 
@@ -1607,11 +1475,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
 
             inSequence {
-              mockGetDraftReturns(cgtReference)(
-                Right(
-                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                )
-              )
+              mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
               mockDeleteDraftReturns(List(draftReturn.id))(
                 Right(HttpResponse(OK, emptyJsonBody))
               )
@@ -1682,11 +1546,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
             val cgtReference         = sample[CgtReference]
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
             inSequence {
-              mockGetDraftReturns(cgtReference)(
-                Right(
-                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
-                )
-              )
+              mockGetDraftReturns(cgtReference)(Right(draftReturnsResponse))
             }
 
             await(

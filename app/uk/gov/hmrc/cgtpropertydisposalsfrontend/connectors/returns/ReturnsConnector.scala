@@ -25,6 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -33,6 +34,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.chaining.scalaUtilChainingOps
 import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[ReturnsConnectorImpl])
@@ -44,7 +46,7 @@ trait ReturnsConnector {
 
   def getDraftReturns(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
+  ): EitherT[Future, Error, GetDraftReturnResponse]
 
   def deleteDraftReturns(draftReturnIds: List[UUID])(implicit
     hc: HeaderCarrier
@@ -128,15 +130,12 @@ class ReturnsConnectorImpl @Inject() (
 
   override def getDraftReturns(
     cgtReference: CgtReference
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    EitherT[Future, Error, HttpResponse](
-      http
-        .GET[HttpResponse](getDraftReturnsUrl(cgtReference))
-        .map(Right(_))
-        .recover { case NonFatal(e) =>
-          Left(Error(e))
-        }
-    )
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, GetDraftReturnResponse] =
+    http
+      .GET[GetDraftReturnResponse](getDraftReturnsUrl(cgtReference))
+      .map(Right(_))
+      .recover { case NonFatal(e) => Left(Error(e)) }
+      .pipe(EitherT(_))
 
   def deleteDraftReturns(
     draftReturnIds: List[UUID]

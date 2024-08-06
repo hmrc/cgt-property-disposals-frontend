@@ -12,7 +12,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
 class WireMockSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach {
@@ -42,7 +42,7 @@ class WireMockSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach {
   "getDraftReturns" should {
     val url = "/draft-returns/CGT1234589"
     "return some parsed JSON on success" in {
-      val expected = Seq[DraftReturn]()
+      val expected = GetDraftReturnResponse(List())
       stubFor(
         get(urlMatching(".*")).willReturn(
           aResponse()
@@ -57,9 +57,7 @@ class WireMockSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach {
       verify(getRequestedFor(urlEqualTo(url)))
 
       response.isRight              shouldBe true
-      response.toOption.get.status  shouldBe 200
-      response.toOption.get.body    shouldBe Json.toJson(expected).toString()
-      response.toOption.get.headers should contain ("Content-Type" -> Seq("application/json"))
+      response.toOption.get shouldBe expected
     }
   }
 }

@@ -88,17 +88,6 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactor
       )
     }
 
-    "handling requests to get a draft returns" must {
-
-      val cgtReference = sample[CgtReference]
-      val expectedUrl  = s"https://host:123/draft-returns/${cgtReference.value}"
-
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.getDraftReturns(cgtReference)
-      )
-    }
-
     "handling request to submit a return" must {
       val submitReturnRequest = sample[SubmitReturnRequest]
       val expectedUrl         = s"https://host:123/return"
