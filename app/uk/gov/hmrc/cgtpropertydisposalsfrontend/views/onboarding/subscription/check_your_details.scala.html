@@ -91,8 +91,9 @@
     )
   )))
 
-  @viewHelpers.form(routes.SubscriptionController.checkYourDetailsSubmit()) {
+  @viewHelpers.form(routes.SubscriptionController.checkYourDetailsSubmit(), Symbol("data-prevent-multiple-submit") -> "true") {
    @viewHelpers.govukButton(Button(
+    preventDoubleClick = Some(true),
     attributes = Map("id" -> "submitButton"),
     content = Text(messages("button.createAccount"))
    ))

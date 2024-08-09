@@ -80,6 +80,7 @@
 @additionalScripts = {
   @autocompleteJavascript()
   <script @CSPNonce.attr src="@{routes.Assets.at("javascript/cgtpd.js")}"></script>
+  <script @CSPNonce.attr src="@{routes.Assets.at("javascripts/prevent-multiple-submission.js")}"></script>
 }
 
 @content = {
