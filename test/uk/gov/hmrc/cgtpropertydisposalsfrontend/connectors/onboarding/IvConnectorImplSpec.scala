@@ -26,6 +26,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.Application
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
+import play.api.libs.json.JsObject
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -73,10 +74,13 @@ class IvConnectorImplSpec
       val journeyId = UUID.randomUUID()
       val url       = s"/mdtp/journey/journeyId/${journeyId.toString}"
 
-      stubFor(get(urlMatching(".*")).willReturn(aResponse().withStatus(200)))
-      val response = await(con.getFailedJourneyStatus(journeyId).value)
+      stubFor(get(urlMatching(".*")).willReturn(aResponse().withStatus(200).withBody("{}")))
+      val result = await(con.getFailedJourneyStatus(journeyId).value)
 
-      response shouldBe Right(HttpResponse(200, "{}"))
+      result.isRight shouldBe true
+      val response = result.toOption.get
+      response.status shouldBe 200
+      response.json shouldBe JsObject.empty
       verify(
         getRequestedFor(urlEqualTo(url))
       )
