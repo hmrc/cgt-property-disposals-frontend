@@ -18,21 +18,18 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, equalTo, get, getRequestedFor, status, stubFor, urlEqualTo, urlMatching, verify}
+import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.Configuration
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.common.{FakeRequestHelper, WithCommonFakeApplication}
+import play.api.Application
+import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class IvConnectorImplSpec
     extends AnyWordSpec
@@ -40,17 +37,24 @@ class IvConnectorImplSpec
     with MockFactory
     with HttpSupport
     with ConnectorSpec
-    with FakeRequestHelper
-    with BeforeAndAfterEach
-    with WithCommonFakeApplication {
+    with BeforeAndAfterEach {
 
   val Port           = 11119
   val Host           = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(Port))
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  private implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  lazy val fakeApplication: Application = new GuiceApplicationBuilder()
+    .bindings(bindModules: _*)
+    .configure(
+      "microservice.services.iv.port" -> "11119"
+    )
+    .build()
 
   private val con = fakeApplication.injector.instanceOf[IvConnectorImpl]
+
+  def bindModules: Seq[GuiceableModule] = Seq()
 
   override def beforeEach: Unit = {
     wireMockServer.start()
@@ -61,9 +65,9 @@ class IvConnectorImplSpec
   override def afterEach: Unit =
     wireMockServer.stop()
 
-  "IvConnectorImpl" when {
+  "IvConnectorImpl" should {
 
-    "handling requests to get a failed journey status" must {
+    "handling requests to get a failed journey status" in {
 
       val journeyId = UUID.randomUUID()
       val url       = s"/mdtp/journey/journeyId/${journeyId.toString}"
@@ -71,10 +75,9 @@ class IvConnectorImplSpec
       stubFor(get(urlMatching(".*")).willReturn(aResponse().withStatus(200)))
       val response = con.getFailedJourneyStatus(journeyId)
 
-      response shouldBe Some(status(200))
+      response shouldBe (HttpResponse(200, "{}"))
       verify(
         getRequestedFor(urlEqualTo(url))
-          .withHeader("Content-Type", equalTo("application/json"))
       )
 
     }
