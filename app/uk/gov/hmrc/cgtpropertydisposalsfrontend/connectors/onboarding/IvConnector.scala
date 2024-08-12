@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -30,7 +31,7 @@ trait IvConnector {
 
   def getFailedJourneyStatus(journeyId: UUID)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
+  ): EitherT[Future, Error, IvStatusResponse]
 
 }
 
@@ -49,10 +50,10 @@ class IvConnectorImpl @Inject() (
 
   override def getFailedJourneyStatus(
     journeyId: UUID
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    EitherT[Future, Error, HttpResponse](
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, IvStatusResponse] =
+    EitherT[Future, Error, IvStatusResponse](
       http
-        .GET[HttpResponse](url(journeyId))
+        .GET[IvStatusResponse](url(journeyId))
         .map(Right(_))
         .recover { case e =>
           Left(Error(e))

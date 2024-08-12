@@ -29,6 +29,7 @@ import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.libs.json.JsObject
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import java.util.UUID
@@ -79,8 +80,9 @@ class IvConnectorImplSpec
 
       result.isRight shouldBe true
       val response = result.toOption.get
+      //result shouldBe Right(IvStatusResponse)
       response.status shouldBe 200
-      response.json shouldBe JsObject.empty
+      response.json   shouldBe JsObject.empty
       verify(
         getRequestedFor(urlEqualTo(url))
       )
