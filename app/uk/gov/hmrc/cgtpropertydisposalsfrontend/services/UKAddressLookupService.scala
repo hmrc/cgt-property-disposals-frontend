@@ -19,13 +19,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 import cats.data.EitherT
 import cats.instances.either._
 import cats.instances.future._
-import cats.instances.int._
 import cats.instances.list._
-import cats.syntax.either._
-import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.http.Status.OK
 import play.api.libs.json._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
@@ -34,11 +30,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode.postcodeRegexPredicate
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.{AddressLookupResponse, RawAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
+import scala.util.chaining.scalaUtilChainingOps
 
 @ImplementedBy(classOf[UKAddressLookupServiceImpl])
 trait UKAddressLookupService {
@@ -61,26 +57,11 @@ class UKAddressLookupServiceImpl @Inject() (
     filter: Option[String]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] = {
     val timer = metrics.postcodeLookupTimer.time()
-
-    connector.lookupAddress(postcode, filter).subflatMap { response =>
-      timer.close()
-      if (response.status === OK) {
-        response
-          .parseJSON[AddressLookupResponse]()
-          .flatMap(toAddressLookupResult(_, postcode, filter))
-          .leftMap { e =>
-            metrics.postcodeLookupErrorCounter.inc()
-            Error(e)
-          }
-      } else {
-        metrics.postcodeLookupErrorCounter.inc()
-        Left(
-          Error(
-            s"Response to address lookup came back with status ${response.status}"
-          )
-        )
-      }
-    }
+    connector
+      .lookupAddress(postcode, filter)
+      .map(_.tap(_ => timer.close()))
+      .subflatMap(x => toAddressLookupResult(x, postcode, filter).left.map(Error(_)))
+      .leftMap(_.tap(_ => metrics.postcodeLookupErrorCounter.inc()))
   }
 
   private def toAddressLookupResult(
