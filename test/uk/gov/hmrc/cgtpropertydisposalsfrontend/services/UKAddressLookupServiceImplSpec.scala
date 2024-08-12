@@ -21,17 +21,18 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{AddressLookupResult, Postcode}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.{AddressLookupResponse, RawAddress}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.chaining.scalaUtilChainingOps
 
 class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
@@ -41,17 +42,16 @@ class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with Mock
     expectedPostcode: Postcode,
     filter: Option[String] = None
   )(
-    result: Either[Error, HttpResponse]
+    result: Either[Error, AddressLookupResponse]
   ) =
     (mockConnector
       .lookupAddress(_: Postcode, _: Option[String])(_: HeaderCarrier))
       .expects(expectedPostcode, filter, *)
       .returning(EitherT.fromEither[Future](result))
 
-  val service =
-    new UKAddressLookupServiceImpl(mockConnector, MockMetrics.metrics)
+  val service = new UKAddressLookupServiceImpl(mockConnector, MockMetrics.metrics)
 
-  private val emptyJsonBody = "{}"
+  private def response(addresses: List[RawAddress]) = Right(AddressLookupResponse(addresses))
 
   "AddressLookupServiceImpl" when {
 
@@ -62,156 +62,69 @@ class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with Mock
 
       "return an error" when {
 
-        "the http response does not come back with status 200" in {
-          mockLookupAddress(postcode)(Right(HttpResponse(500, emptyJsonBody)))
+        "the http response fails for any reason" in {
+          mockLookupAddress(postcode)(Left(Error("Connector failed with status 500")))
 
-          await(
-            service.lookupAddress(postcode, None).value
-          ).isLeft shouldBe true
-        }
-
-        "when the call to the connector fails" in {
-          mockLookupAddress(postcode)(Left(Error("uh oh!")))
-
-          await(
-            service.lookupAddress(postcode, None).value
-          ).isLeft shouldBe true
-        }
-
-        "there is no JSON in the body of the response" in {
-          mockLookupAddress(postcode)(Right(HttpResponse(200, emptyJsonBody)))
-
-          await(
-            service.lookupAddress(postcode, None).value
-          ).isLeft shouldBe true
-        }
-
-        "the JSON in the body of the response cannot be parsed" in {
-          mockLookupAddress(postcode)(
-            Right(HttpResponse(200, JsNumber(1), Map[String, Seq[String]]().empty))
-          )
-
-          await(
-            service.lookupAddress(postcode, None).value
-          ).isLeft shouldBe true
+          await(service.lookupAddress(postcode, None).value) shouldBe Left(Error("Connector failed with status 500"))
         }
 
         "there are no lines of address found in the response" in {
-          val json = Json.parse(
-            """
-              |[
-              |  {
-              |    "address": {
-              |      "lines": [ ],
-              |      "town": "",
-              |      "postcode": "SO51 7UR",
-              |      "country": {
-              |        "code": "GB",
-              |        "name": "United Kingdom"
-              |      }
-              |    }
-              |  }
-              |]
-              |""".stripMargin
-          )
+          RawAddress(
+            lines = List.empty,
+            town = "",
+            county = None,
+            postcode = "S051 7UR"
+          ) pipe (List(_)) pipe response pipe mockLookupAddress(postcode)
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
-
-          await(
-            service.lookupAddress(postcode, None).value
-          ).isLeft shouldBe true
+          await(service.lookupAddress(postcode, None).value).isLeft shouldBe true
         }
-
       }
 
       "filter out invalid addresses" when {
 
         "address line1 is more than 35 characters" in {
-          val json = Json.parse(
-            """
-              |[
-              |  {
-              |    "address": {
-              |      "lines": [ "address line1 is more than 35 characters" ],
-              |      "town": "town",
-              |      "county" : "county",
-              |      "postcode": "ZZ1Z 4AB"
-              |    }
-              |  }
-              |]
-              |""".stripMargin
-          )
+          RawAddress(
+            lines = List("address line1 is more than 35 characters"),
+            town = "town",
+            county = Some("county"),
+            postcode = "ZZ1Z 4AB"
+          ) pipe (List(_)) pipe response pipe mockLookupAddress(postcode)
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
-
-          await(
-            service.lookupAddress(postcode, None).value
-          ) shouldBe Right(AddressLookupResult(postcode, None, List.empty))
+          await(service.lookupAddress(postcode, None).value) shouldBe
+            Right(AddressLookupResult(postcode, None, List.empty))
         }
 
         "address line2 is more than 35 characters" in {
-          val json = Json.parse(
-            """
-              |[
-              |  {
-              |    "address": {
-              |      "lines": [ "line1", "address line2 is more than 35 characters" ],
-              |      "town": "town",
-              |      "county" : "county",
-              |      "postcode": "ZZ1Z 4AB"
-              |    }
-              |  }
-              |]
-              |""".stripMargin
-          )
+          RawAddress(
+            lines = List("line1", "address line2 is more than 35 characters"),
+            town = "town",
+            county = Some("county"),
+            postcode = "ZZ1Z 4AB"
+          ) pipe (List(_)) pipe response pipe mockLookupAddress(postcode)
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
-
-          await(
-            service.lookupAddress(postcode, None).value
-          ) shouldBe Right(AddressLookupResult(postcode, None, List.empty))
+          await(service.lookupAddress(postcode, None).value) shouldBe
+            Right(AddressLookupResult(postcode, None, List.empty))
         }
 
         "town is more than 35 characters" in {
-          val json = Json.parse(
-            """
-              |[
-              |  {
-              |    "address": {
-              |      "lines": [ "line1", "line2" ],
-              |      "town": "town field length is more than 35 characters",
-              |      "county" : "county",
-              |      "postcode": "ZZ1Z 4AB"
-              |    }
-              |  }
-              |]
-              |""".stripMargin
-          )
+          RawAddress(
+            lines = List("line1", "line2"),
+            town = "town field length is more than 35 characters",
+            county = Some("county"),
+            postcode = "ZZ1Z 4AB"
+          ) pipe (List(_)) pipe response pipe mockLookupAddress(postcode)
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
-
-          await(
-            service.lookupAddress(postcode, None).value
-          ) shouldBe Right(AddressLookupResult(postcode, None, List.empty))
+          await(service.lookupAddress(postcode, None).value) shouldBe
+            Right(AddressLookupResult(postcode, None, List.empty))
         }
 
         "county is more than 35 characters" in {
-          val json = Json.parse(
-            """
-              |[
-              |  {
-              |    "address": {
-              |      "lines": [ "line1", "line2" ],
-              |      "town": "town",
-              |      "county" : "county field length is more than 35 characters",
-              |      "postcode": "ZZ1Z 4AB"
-              |    }
-              |  }
-              |]
-              |""".stripMargin
-          )
-
-          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
+          RawAddress(
+            lines = List("line1", "line2"),
+            town = "town",
+            county = Some("county field length is more than 35 characters"),
+            postcode = "ZZ1Z 4AB"
+          ) pipe (List(_)) pipe response pipe mockLookupAddress(postcode)
 
           await(
             service.lookupAddress(postcode, None).value
@@ -219,76 +132,52 @@ class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with Mock
         }
 
         "postcode is not valid" in {
-          val json = Json.parse(
-            """
-              |[
-              |  {
-              |    "address": {
-              |      "lines": [ "line1", "line2" ],
-              |      "town": "town",
-              |      "county" : "county",
-              |      "postcode": "AB 123"
-              |    }
-              |  }
-              |]
-              |""".stripMargin
-          )
+          RawAddress(
+            lines = List("line1", "line2"),
+            town = "town",
+            county = Some("county field length is more than 35 characters"),
+            postcode = "AB 123"
+          ) pipe (List(_)) pipe response pipe mockLookupAddress(postcode)
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
-
-          await(
-            service.lookupAddress(postcode, None).value
-          ) shouldBe Right(AddressLookupResult(postcode, None, List.empty))
+          await(service.lookupAddress(postcode, None).value) shouldBe
+            Right(AddressLookupResult(postcode, None, List.empty))
         }
 
       }
 
       "return a successful response when a 200 status is returned and the JSON can be parsed" in {
-        val json = Json.parse(
-          """
-            |[
-            |  {
-            |    "address": {
-            |      "lines": [ "line1", "line2" ],
-            |      "town": "town",
-            |      "county" :"county",
-            |      "postcode": "ZZ1Z 4AB"
-            |    }
-            |  },
-            |  {
-            |    "address": {
-            |      "lines": [ "line1" ],
-            |      "town": "town",
-            |      "postcode": "ZZ1Z 4AB"
-            |    }
-            |  },
-            |  {
-            |    "address": {
-            |      "lines": [ "line1" ],
-            |      "town": "town",
-            |      "county" : "county",
-            |      "postcode": "ZZ1Z 4AB"
-            |    }
-            |  },
-            |  {
-            |    "address": {
-            |      "lines": [ "line1", "line2" ],
-            |      "town": "town",
-            |      "postcode": "ZZ1Z 4AB"
-            |    }
-            |  },
-            |  {
-            |    "address": {
-            |      "lines": [ "line1", "line2", "line3" ],
-            |      "town": "town",
-            |      "postcode": "ZZ1Z 4AB"
-            |    }
-            |  }
-            |]
-            |""".stripMargin
-        )
-
-        mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
+        List(
+          RawAddress(
+            lines = List("line1", "line2"),
+            town = "town",
+            county = Some("county"),
+            postcode = "ZZ1Z 4AB"
+          ),
+          RawAddress(
+            lines = List("line1"),
+            town = "town",
+            county = None,
+            postcode = "ZZ1Z 4AB"
+          ),
+          RawAddress(
+            lines = List("line1"),
+            town = "town",
+            county = Some("county"),
+            postcode = "ZZ1Z 4AB"
+          ),
+          RawAddress(
+            lines = List("line1", "line2"),
+            town = "town",
+            county = None,
+            postcode = "ZZ1Z 4AB"
+          ),
+          RawAddress(
+            lines = List("line1", "line2", "line3"),
+            town = "town",
+            county = None,
+            postcode = "ZZ1Z 4AB"
+          )
+        ) pipe response pipe mockLookupAddress(postcode)
 
         await(service.lookupAddress(postcode, None).value) shouldBe Right(
           AddressLookupResult(
@@ -334,9 +223,6 @@ class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with Mock
           )
         )
       }
-
     }
-
   }
-
 }
