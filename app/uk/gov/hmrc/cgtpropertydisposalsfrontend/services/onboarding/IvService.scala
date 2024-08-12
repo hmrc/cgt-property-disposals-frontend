@@ -18,18 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.int._
-import cats.syntax.either._
-import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, Reads}
-import play.mvc.Http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.IvConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.iv.IvErrorStatus
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.util.UUID
@@ -55,27 +49,9 @@ class IvServiceImpl @Inject() (connector: IvConnector, metrics: Metrics)(implici
     val timer = metrics.ivGetFailedJourneyStatusTimer.time()
     connector
       .getFailedJourneyStatus(journeyId)
-      .subflatMap[Error, IvErrorStatus] { response =>
-        timer.close()
-        if (response.status === OK) {
-          response
-            .parseJSON[IvStatusResponse]()
-            .bimap(
-              { e =>
-                metrics.ivGetFailedJourneyStatusErrorCounter.inc()
-                Error(e)
-              },
-              r => IvErrorStatus.fromString(r.result)
-            )
-        } else {
-          metrics.ivGetFailedJourneyStatusErrorCounter.inc()
-          Left(
-            Error(
-              s"Call to check status of failed IV journey came back with status ${response.status}"
-            )
-          )
-        }
-      }
+      .leftMap{error => metrics.ivGetFailedJourneyStatusErrorCounter.inc()
+                    error   }
+      .map(r => IvErrorStatus.fromString(r.result))
   }
 
 }

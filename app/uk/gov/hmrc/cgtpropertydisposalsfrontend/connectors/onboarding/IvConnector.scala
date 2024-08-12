@@ -21,7 +21,8 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.HttpReadsInstances.readFromJson
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.util.UUID
@@ -51,12 +52,5 @@ class IvConnectorImpl @Inject() (
   override def getFailedJourneyStatus(
     journeyId: UUID
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, IvStatusResponse] =
-    EitherT[Future, Error, IvStatusResponse](
-      http
-        .GET[IvStatusResponse](url(journeyId))
-        .map(Right(_))
-        .recover { case e =>
-          Left(Error(e))
-        }
-    )
+    EitherT(http.GET[Either[UpstreamErrorResponse, IvStatusResponse]](url(journeyId))).leftMap(error => Error(error.message))
 }
