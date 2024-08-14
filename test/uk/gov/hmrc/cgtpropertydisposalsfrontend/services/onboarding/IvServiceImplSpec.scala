@@ -27,6 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.IvConnecto
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.iv.IvErrorStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import java.util.UUID
@@ -39,11 +40,9 @@ class IvServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
   val service = new IvServiceImpl(mockConnector, MockMetrics.metrics)
 
-  private val emptyJsonBody = "{}"
-
   private def mockIvGetFailedJourneyStatus(
     journeyId: UUID
-  )(result: Either[Error, HttpResponse]) =
+  )(result: Either[Error, IvStatusResponse]) =
     (mockConnector
       .getFailedJourneyStatus(_: UUID)(_: HeaderCarrier))
       .expects(journeyId, *)
@@ -59,39 +58,11 @@ class IvServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
       "return an error" when {
 
         "there is an error calling the IV service" in {
-          mockIvGetFailedJourneyStatus(journeyId)(Left(Error("")))
+          mockIvGetFailedJourneyStatus(journeyId)(Left(Error("some error")))
 
-          await(
-            service.getFailedJourneyStatus(journeyId).value
-          ).isLeft shouldBe true
-        }
+          val result = await(service.getFailedJourneyStatus(journeyId).value)
 
-        "there is no JSON body in the response" in {
-          mockIvGetFailedJourneyStatus(journeyId)(Right(HttpResponse(200, emptyJsonBody)))
-
-          await(
-            service.getFailedJourneyStatus(journeyId).value
-          ).isLeft shouldBe true
-        }
-
-        "the JSON in the response cannot be parsed" in {
-          mockIvGetFailedJourneyStatus(journeyId)(
-            Right(HttpResponse(200, JsString(emptyJsonBody), Map[String, Seq[String]]().empty))
-          )
-
-          await(
-            service.getFailedJourneyStatus(journeyId).value
-          ).isLeft shouldBe true
-
-        }
-
-        "the response comes back with a status other than 200" in {
-          mockIvGetFailedJourneyStatus(journeyId)(Right(HttpResponse(500, emptyJsonBody)))
-
-          await(
-            service.getFailedJourneyStatus(journeyId).value
-          ).isLeft shouldBe true
-
+          result shouldBe Left(Error("some error"))
         }
       }
 
@@ -110,22 +81,14 @@ class IvServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
             "PreconditionFailed"   -> PreconditionFailed,
             "???"                  -> Unknown("???")
           ).foreach { case (statusString, status) =>
-            mockIvGetFailedJourneyStatus(journeyId)(
-              Right(
-                HttpResponse(200, JsObject(Seq("result" -> JsString(statusString))), Map[String, Seq[String]]().empty)
-              )
-            )
-            await(
-              service.getFailedJourneyStatus(journeyId).value
-            ) shouldBe Right(status)
+            mockIvGetFailedJourneyStatus(journeyId)(Right(IvStatusResponse(statusString)))
+
+            val result = await(service.getFailedJourneyStatus(journeyId).value)
+
+            result shouldBe Right(status)
           }
-
         }
-
       }
-
     }
-
   }
-
 }
