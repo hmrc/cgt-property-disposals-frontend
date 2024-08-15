@@ -22,20 +22,23 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.AddressLookupResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.net.URLEncoder
 import java.util.Locale
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.chaining.scalaUtilChainingOps
 
 @ImplementedBy(classOf[AddressLookupConnectorImpl])
 trait AddressLookupConnector {
 
   def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
+  ): EitherT[Future, Error, AddressLookupResponse]
 
 }
 
@@ -45,33 +48,31 @@ class AddressLookupConnectorImpl @Inject() (
   servicesConfig: ServicesConfig
 )(implicit
   ec: ExecutionContext
-) extends AddressLookupConnector {
+) extends AddressLookupConnector
+    with Logging {
 
-  val url: String =
-    servicesConfig.baseUrl("address-lookup") + "/lookup"
+  val url: String = servicesConfig.baseUrl("address-lookup") + "/lookup"
 
   val headers: Seq[(String, String)] = {
-    val userAgent = servicesConfig.getString(
-      "microservice.services.address-lookup.user-agent"
-    )
+    val userAgent = servicesConfig.getString("microservice.services.address-lookup.user-agent")
     Seq("User-Agent" -> userAgent)
   }
 
   override def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse] = {
-
-    val lookupAddressByPostcode = LookupAddressByPostcode(
+  ): EitherT[Future, Error, AddressLookupResponse] = {
+    val body = LookupAddressByPostcode(
       postcode.value.replace(" ", "").toUpperCase(Locale.UK),
       filter.map(f => URLEncoder.encode(f, "UTF-8"))
     )
-
-    EitherT[Future, Error, HttpResponse](
-      http
-        .POST[LookupAddressByPostcode, HttpResponse](url, lookupAddressByPostcode, headers)
-        .map(Right(_))
-        .recover { case e => Left(Error(e)) }
-    )
+    http
+      .POST[LookupAddressByPostcode, Either[UpstreamErrorResponse, AddressLookupResponse]](url, body, headers)
+      .map(_.left.map { error =>
+        logger.error(s"POST to $url failed", error)
+        Error(s"Response to address lookup came back with status ${error.statusCode}")
+      })
+      .recover(e => Left(Error(e.getMessage)))
+      .pipe(EitherT(_))
   }
 }
 
