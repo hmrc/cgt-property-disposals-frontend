@@ -16,48 +16,23 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector.LookupAddressByPostcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.{AddressLookupResponse, RawAddress}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ConnectorSupport
 
 import scala.util.chaining.scalaUtilChainingOps
 
-class LookupConnectorSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach {
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
-  val Port                               = 11119
-  val Host                               = "localhost"
-  val wireMockServer                     = new WireMockServer(WireMockConfiguration.wireMockConfig().port(Port))
-
-  lazy val fakeApplication: Application = new GuiceApplicationBuilder()
-    .bindings()
-    .configure(
-      "microservice.services.address-lookup.port" -> "11119"
-    )
-    .build()
+class AddressLookupConnectorSpec extends AnyWordSpec with Matchers with ConnectorSupport {
+  override lazy val serviceId = "address-lookup"
 
   private val con = fakeApplication.injector.instanceOf[AddressLookupConnector]
-
-  override def beforeEach(): Unit = {
-    wireMockServer.start()
-    wireMockServer.resetAll()
-    WireMock.configureFor(Host, Port)
-  }
-
-  override def afterEach(): Unit =
-    wireMockServer.stop()
 
   "getDraftReturns" should {
     val correctBody =
@@ -75,11 +50,7 @@ class LookupConnectorSpec extends AnyWordSpec with Matchers with BeforeAndAfterE
         |""".stripMargin
     val url         = "/lookup"
     "call the correct endpoint" in {
-      stubFor(
-        post(urlPathMatching(".*")).willReturn(
-          aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(correctBody)
-        )
-      )
+      stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, correctBody)))
 
       await(con.lookupAddress(Postcode("ABC 123"), Some("filter")).value)
 
@@ -88,11 +59,7 @@ class LookupConnectorSpec extends AnyWordSpec with Matchers with BeforeAndAfterE
     }
 
     "return some parsed JSON on success" in {
-      stubFor(
-        post(urlPathMatching(".*")).willReturn(
-          aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(correctBody)
-        )
-      )
+      stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, correctBody)))
 
       val response = await(con.lookupAddress(Postcode("ABC 123"), Some("filter")).value)
 
@@ -118,25 +85,17 @@ class LookupConnectorSpec extends AnyWordSpec with Matchers with BeforeAndAfterE
           |  }
           |]
           |""".stripMargin
-      stubFor(
-        post(urlPathMatching(".*")).willReturn(
-          aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(invalidBody)
-        )
-      )
+      stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, invalidBody)))
 
       val response = await(con.lookupAddress(Postcode("ABC 123"), Some("filter")).value)
       response.isLeft shouldBe true
     }
 
     "Return error if malformed JSON is returned" in {
-      val invalidBody = "definitely not json"
-      stubFor(
-        post(urlPathMatching(".*")).willReturn(
-          aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(invalidBody)
-        )
-      )
+      stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "definitely not json")))
 
       val response = await(con.lookupAddress(Postcode("ABC 123"), Some("filter")).value)
+
       response.isLeft shouldBe true
     }
 

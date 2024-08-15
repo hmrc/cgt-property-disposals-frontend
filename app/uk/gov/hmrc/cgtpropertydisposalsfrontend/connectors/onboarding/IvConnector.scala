@@ -19,19 +19,19 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.chaining.scalaUtilChainingOps
+
 @ImplementedBy(classOf[IvConnectorImpl])
 trait IvConnector {
-
-  def getFailedJourneyStatus(journeyId: UUID)(implicit
-    hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
-
+  def getFailedJourneyStatus(journeyId: UUID)(implicit hc: HeaderCarrier): EitherT[Future, Error, IvStatusResponse]
 }
 
 @Singleton
@@ -40,22 +40,21 @@ class IvConnectorImpl @Inject() (
   servicesConfig: ServicesConfig
 )(implicit
   ec: ExecutionContext
-) extends IvConnector {
+) extends IvConnector with Logging {
 
   val baseUrl: String = servicesConfig.baseUrl("iv")
 
-  def url(journeyId: UUID): String =
-    s"$baseUrl/mdtp/journey/journeyId/${journeyId.toString}"
+  def url(journeyId: UUID): String = s"$baseUrl/mdtp/journey/journeyId/${journeyId.toString}"
 
   override def getFailedJourneyStatus(
     journeyId: UUID
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    EitherT[Future, Error, HttpResponse](
-      http
-        .GET[HttpResponse](url(journeyId))
-        .map(Right(_))
-        .recover { case e =>
-          Left(Error(e))
-        }
-    )
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, IvStatusResponse] =
+    http
+      .GET[Either[UpstreamErrorResponse, IvStatusResponse]](url(journeyId))
+      .map(_.left.map { error =>
+        logger.error(s"GET to ${url(journeyId)} failed", error)
+        Error(s"Response to address lookup came back with status ${error.statusCode}")
+      })
+      .recover(e => Left(Error(e.getMessage)))
+      .pipe(EitherT(_))
 }
