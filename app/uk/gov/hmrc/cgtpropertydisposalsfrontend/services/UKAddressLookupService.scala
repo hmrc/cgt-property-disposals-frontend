@@ -57,9 +57,10 @@ class UKAddressLookupServiceImpl @Inject() (
     filter: Option[String]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] = {
     val timer = metrics.postcodeLookupTimer.time()
+    def stopTimer[T](x: T) = x.tap(_ => timer.stop())
     connector
       .lookupAddress(postcode, filter)
-      .map(_.tap(_ => timer.close()))
+      .bimap(stopTimer, stopTimer)
       .subflatMap(x => toAddressLookupResult(x, postcode, filter).left.map(Error(_)))
       .leftMap(_.tap(_ => metrics.postcodeLookupErrorCounter.inc()))
   }
