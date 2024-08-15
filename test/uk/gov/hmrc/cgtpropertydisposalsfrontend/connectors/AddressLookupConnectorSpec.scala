@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ConnectorSupport
 
 import scala.util.chaining.scalaUtilChainingOps
 
-class LookupConnectorSpec extends AnyWordSpec with Matchers with ConnectorSupport {
+class AddressLookupConnectorSpec extends AnyWordSpec with Matchers with ConnectorSupport {
   override lazy val serviceId = "address-lookup"
 
   private val con = fakeApplication.injector.instanceOf[AddressLookupConnector]
