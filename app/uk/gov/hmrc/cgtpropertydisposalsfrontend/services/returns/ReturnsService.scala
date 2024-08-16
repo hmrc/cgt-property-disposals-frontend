@@ -133,20 +133,8 @@ class ReturnsServiceImpl @Inject() (
         }
     }
 
-  def deleteDraftReturns(
-    draftReturnIds: List[UUID]
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
-    connector.deleteDraftReturns(draftReturnIds).subflatMap { httpResponse =>
-      if (httpResponse.status === OK) {
-        Right(())
-      } else {
-        Left(
-          Error(
-            s"Call to delete draft returns came back with status ${httpResponse.status}"
-          )
-        )
-      }
-    }
+  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
+    connector.deleteDraftReturns(draftReturnIds)
 
   def getDraftReturns(
     cgtReference: CgtReference,

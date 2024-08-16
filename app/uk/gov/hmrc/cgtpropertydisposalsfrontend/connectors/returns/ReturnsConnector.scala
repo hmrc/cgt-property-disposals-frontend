@@ -25,7 +25,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -50,9 +49,7 @@ trait ReturnsConnector {
     hc: HeaderCarrier
   ): EitherT[Future, Error, GetDraftReturnResponse]
 
-  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit
-    hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
+  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit]
 
   def submitReturn(submitReturnRequest: SubmitReturnRequest, lang: Lang)(implicit
     hc: HeaderCarrier
@@ -139,17 +136,18 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
       .recover { case NonFatal(e) => Left(Error(e.getMessage)) }
       .pipe(EitherT(_))
 
-  def deleteDraftReturns(
-    draftReturnIds: List[UUID]
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    EitherT[Future, Error, HttpResponse](
-      http
-        .POST[DeleteDraftReturnsRequest, HttpResponse](deleteDraftReturnsUrl, DeleteDraftReturnsRequest(draftReturnIds))
-        .map(Right(_))
-        .recover { case NonFatal(e) =>
-          Left(Error(e))
-        }
-    )
+  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
+    http
+      .POST[DeleteDraftReturnsRequest, Either[UpstreamErrorResponse, Unit]](
+        deleteDraftReturnsUrl,
+        DeleteDraftReturnsRequest(draftReturnIds)
+      )
+      .map(_.left.map { error =>
+        logger.error(s"POST to $deleteDraftReturnsUrl failed", error)
+        Error(s"Call to delete draft returns came back with status ${error.statusCode}")
+      })
+      .recover { case NonFatal(e) => Left(Error(e.getMessage)) }
+      .pipe(EitherT(_))
 
   def submitReturn(
     submitReturnRequest: SubmitReturnRequest,
