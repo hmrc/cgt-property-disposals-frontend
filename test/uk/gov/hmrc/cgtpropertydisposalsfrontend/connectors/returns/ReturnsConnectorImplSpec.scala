@@ -16,178 +16,105 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
-import com.typesafe.config.ConfigFactory
+import com.github.tomakehurst.wiremock.client.WireMock._
+import org.scalacheck.Gen
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.Tables.Table
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.Configuration
-import play.api.i18n.Lang
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
+import play.api.libs.json.Json
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.HttpSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ConnectorSupport
+import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.LocalDate
-import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
+class ReturnsConnectorImplSpec
+    extends AnyWordSpec
+    with Matchers
+    with MockFactory
+    with HttpSupport
+    with ConnectorSupport {
 
-class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
-
-  private val config = Configuration(
-    ConfigFactory.parseString(
-      """
-        |microservice {
-        |  services {
-        |    cgt-property-disposals {
-        |      protocol = https
-        |      host     = host
-        |      port     = 123
-        |    }
-        |  }
-        |}
-        |""".stripMargin
-    )
-  )
-
-  val connector = new ReturnsConnectorImpl(
-    mockHttp,
-    new ServicesConfig(config)
-  )
+  override lazy val serviceId = "cgt-property-disposals"
+  private val con             = fakeApplication.injector.instanceOf[ReturnsConnector]
 
   "ReturnsConnectorImpl" when {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     "handling requests to store a draft return" must {
+      "call the right endpoint with draft return body" in {
+        val draftReturn = sample[DraftReturn]
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "")))
 
-      val draftReturn  = sample[DraftReturn]
-      val cgtReference = sample[CgtReference]
-      val expectedUrl  = s"https://host:123/draft-return/${cgtReference.value}"
+        await(con.storeDraftReturn(draftReturn, CgtReference("CGT12345678")).value)
 
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, Seq.empty, draftReturn),
-        () => connector.storeDraftReturn(draftReturn, cgtReference)
-      )
+        val url = "/draft-return/CGT12345678"
+        verify(postRequestedFor(urlEqualTo(url)).withRequestBody(equalTo(Json.toJson(draftReturn).toString())))
+      }
+
+      "return Unit on success" in {
+        val draftReturn = sample[DraftReturn]
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "")))
+
+        val result = await(con.storeDraftReturn(draftReturn, CgtReference("CGT12345678")).value)
+
+        result shouldBe Right(())
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          val draftReturn = sample[DraftReturn]
+          stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(status, "{}")))
+
+          val result = await(con.storeDraftReturn(draftReturn, CgtReference("CGT12345678")).value)
+
+          result shouldBe
+            Left(Error(s"POST to http://localhost:11119/draft-return/CGT12345678 came back with with status $status"))
+        }
+      }
     }
 
-    "handling requests to delete a draft returns" must {
+    "handling requests to get a draft return" must {
+      implicit val gen: Gen[GetDraftReturnResponse] = Gen.listOf(draftReturnGen).map(GetDraftReturnResponse(_))
+      "call the right endpoint with draft return body" in {
+        val response = sample[GetDraftReturnResponse]
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
 
-      val ids         = List.fill(3)(UUID.randomUUID())
-      val expectedUrl = s"https://host:123/draft-returns/delete"
+        await(con.getDraftReturns(CgtReference("CGT12345678")).value)
 
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, Seq.empty, DeleteDraftReturnsRequest(ids)),
-        () => connector.deleteDraftReturns(ids)
-      )
+        val url = "/draft-returns/CGT12345678"
+        verify(getRequestedFor(urlEqualTo(url)))
+      }
+
+      "return Unit on success" in {
+        val response = sample[GetDraftReturnResponse]
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+
+        val result = await(con.getDraftReturns(CgtReference("CGT12345678")).value)
+
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          val response = sample[GetDraftReturnResponse]
+          stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(status, Json.toJson(response).toString())))
+
+          val result = await(con.getDraftReturns(CgtReference("CGT12345678")).value)
+
+          result shouldBe
+            Left(Error(s"GET to http://localhost:11119/draft-returns/CGT12345678 came back with with status $status"))
+        }
+      }
     }
-
-    "handling requests to get a draft returns" must {
-
-      val cgtReference = sample[CgtReference]
-      val expectedUrl  = s"https://host:123/draft-returns/${cgtReference.value}"
-
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.getDraftReturns(cgtReference)
-      )
-    }
-
-    "handling request to submit a return" must {
-      val submitReturnRequest = sample[SubmitReturnRequest]
-      val expectedUrl         = s"https://host:123/return"
-      val language            = Seq("Accept-Language" -> "en")
-
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, language, submitReturnRequest),
-        () => connector.submitReturn(submitReturnRequest, Lang("en"))
-      )
-
-    }
-
-    "handling requests to list returns" must {
-
-      val cgtReference       = sample[CgtReference]
-      val (fromDate, toDate) =
-        LocalDate.of(2020, 1, 2) -> LocalDate.of(2020, 3, 4)
-      val expectedUrl =
-        s"https://host:123/returns/${cgtReference.value}/2020-01-02/2020-03-04"
-
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.listReturns(cgtReference, fromDate, toDate)
-      )
-    }
-
-    "handling requests to display a return" must {
-
-      val cgtReference = sample[CgtReference]
-      val submissionId = "id"
-      val expectedUrl  = s"https://host:123/return/${cgtReference.value}/id"
-
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.displayReturn(cgtReference, submissionId)
-      )
-    }
-
-    "handling requests to calculate cgt tax due" must {
-
-      val request     = sample[CalculateCgtTaxDueRequest]
-      val expectedUrl = s"https://host:123/calculate-tax-due"
-
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, Seq.empty, request),
-        () => connector.calculateTaxDue(request)
-      )
-    }
-
-    "handling requests to calculate taxable gain or loss" must {
-
-      val request     = sample[TaxableGainOrLossCalculationRequest]
-      val expectedUrl = s"https://host:123/calculate-taxable-gain-or-loss"
-
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, Seq.empty, request),
-        () => connector.calculateTaxableGainOrLoss(request)
-      )
-    }
-
-    "handling requests to calculate year to date liability" must {
-
-      val request     = sample[YearToDateLiabilityCalculationRequest]
-      val expectedUrl = s"https://host:123/calculate-year-to-date-liability"
-
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, Seq.empty, request),
-        () => connector.calculateYearToDateLiability(request)
-      )
-    }
-
-    "handling requests to get tax years" must {
-      val date        = LocalDate.of(2020, 1, 31)
-      val expectedUrl = s"https://host:123/tax-year/2020-01-31"
-
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.taxYear(date)
-      )
-    }
-
-    "handling requests to get available tax years" must {
-      val expectedUrl = s"https://host:123/available-tax-years"
-
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.availableTaxYears()
-      )
-    }
-
   }
 }
