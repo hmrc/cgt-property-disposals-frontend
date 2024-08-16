@@ -44,7 +44,7 @@ trait ReturnsConnector {
 
   def storeDraftReturn(draftReturn: DraftReturn, cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
+  ): EitherT[Future, Error, Unit]
 
   def getDraftReturns(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
@@ -102,6 +102,14 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
 
   private val calculateYearToDateLiabilityUrl: String = s"$baseUrl/calculate-year-to-date-liability"
 
+  private def checkAndIgnoreBody(callName: String)(f: Future[HttpResponse]): EitherT[Future, Error, Unit] =
+    f.map { response =>
+      response.status match {
+        case 200   => Right(())
+        case other => Left(Error(s"$callName came back with with status $other"))
+      }
+    }.pipe(EitherT(_))
+
   private def handleErrors[T](
     callName: String
   )(f: Future[Either[UpstreamErrorResponse, T]]): EitherT[Future, Error, T] =
@@ -112,21 +120,11 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     }).recover { case NonFatal(e) => Left(Error(e.getMessage)) }
       .pipe(EitherT(_))
 
-  override def storeDraftReturn(
-    draftReturn: DraftReturn,
-    cgtReference: CgtReference
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
-    val storeDraftReturnUrl: String =
-      s"$baseUrl/draft-return/${cgtReference.value}"
-
-    EitherT[Future, Error, HttpResponse](
-      http
-        .POST[DraftReturn, HttpResponse](storeDraftReturnUrl, draftReturn)
-        .map(Right(_))
-        .recover { case NonFatal(e) =>
-          Left(Error(e))
-        }
-    )
+  override def storeDraftReturn(draftReturn: DraftReturn, cgtReference: CgtReference)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit] = {
+    val url = s"$baseUrl/draft-return/${cgtReference.value}"
+    http.POST[DraftReturn, HttpResponse](url, draftReturn) pipe checkAndIgnoreBody(s"POST to $url")
   }
 
   override def getDraftReturns(

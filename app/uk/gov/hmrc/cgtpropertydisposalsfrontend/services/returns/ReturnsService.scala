@@ -18,12 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.int._
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.order._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.http.Status.OK
 import play.api.i18n.Lang
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
@@ -107,28 +105,17 @@ class ReturnsServiceImpl @Inject() (
     if (fillingOutReturn.isAmendReturn) {
       EitherT.pure(())
     } else {
-      connector
-        .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.subscribedDetails.cgtReference)
-        .subflatMap { httpResponse =>
-          if (httpResponse.status === OK) {
-            auditService.sendEvent(
-              "draftReturnUpdated",
-              DraftReturnUpdated(
-                fillingOutReturn.draftReturn,
-                fillingOutReturn.subscribedDetails.cgtReference.value,
-                fillingOutReturn.agentReferenceNumber.map(_.value)
-              ),
-              "draft-return-updated"
-            )
-            Right(())
-          } else {
-            Left(
-              Error(
-                s"Call to store draft return came back with status ${httpResponse.status}}"
-              )
-            )
-          }
-        }
+      for {
+        _ <- connector.storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.subscribedDetails.cgtReference)
+      } yield auditService.sendEvent(
+        "draftReturnUpdated",
+        DraftReturnUpdated(
+          fillingOutReturn.draftReturn,
+          fillingOutReturn.subscribedDetails.cgtReference.value,
+          fillingOutReturn.agentReferenceNumber.map(_.value)
+        ),
+        "draft-return-updated"
+      )
     }
 
   def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
