@@ -50,5 +50,5 @@ trait ConnectorSupport extends BeforeAndAfterEach {
     wireMockServer.stop()
 
   def jsonResponse(status: Int, body: String): ResponseDefinitionBuilder =
-    aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(body)
+    aResponse().withStatus(status).withHeader("Content-Type", "application/json").withBody(body)
 }
