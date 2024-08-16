@@ -69,7 +69,7 @@ trait ReturnsConnector {
 
   def calculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, TaxableGainOrLossCalculation]
 
   def calculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest
@@ -176,15 +176,11 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
 
   def calculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    EitherT[Future, Error, HttpResponse](
-      http
-        .POST[TaxableGainOrLossCalculationRequest, HttpResponse](calculateTaxableGainOrLossUrl, request)
-        .map(Right(_))
-        .recover { case NonFatal(e) =>
-          Left(Error(e))
-        }
-    )
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, TaxableGainOrLossCalculation] =
+    http.POST[TaxableGainOrLossCalculationRequest, Either[UpstreamErrorResponse, TaxableGainOrLossCalculation]](
+      calculateTaxableGainOrLossUrl,
+      request
+    ) pipe handleErrors(s"POST to $calculateCgtTaxDueUrl")
 
   def calculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest

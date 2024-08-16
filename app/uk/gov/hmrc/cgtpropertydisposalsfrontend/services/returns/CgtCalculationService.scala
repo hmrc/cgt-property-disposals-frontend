@@ -60,19 +60,7 @@ class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector)(implicit
   def calculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, TaxableGainOrLossCalculation] =
-    connector.calculateTaxableGainOrLoss(request).subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[TaxableGainOrLossCalculation]()
-          .leftMap(Error(_))
-      } else {
-        Left(
-          Error(
-            s"Call to calculate taxable gain or loss came back with status ${response.status}"
-          )
-        )
-      }
-    }
+    connector.calculateTaxableGainOrLoss(request)
 
   def calculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest
