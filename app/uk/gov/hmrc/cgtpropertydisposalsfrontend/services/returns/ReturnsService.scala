@@ -36,11 +36,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.CountryCo
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -153,27 +153,7 @@ class ReturnsServiceImpl @Inject() (
     sentReturns: List[ReturnSummary]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
     for {
-
-      httpResponse <- connector
-                        .getDraftReturns(cgtReference)
-                        .subflatMap(r =>
-                          if (r.status === OK) {
-                            Right(r)
-                          } else {
-                            Left(
-                              Error(
-                                s"Call to get draft returns came back with status ${r.status}}"
-                              )
-                            )
-                          }
-                        )
-      draftReturns <- EitherT.fromEither(
-                        httpResponse
-                          .parseJSON[GetDraftReturnResponse]()
-                          .leftMap(Error(_))
-                          .map(_.draftReturns)
-                      )
-
+      draftReturns                            <- connector.getDraftReturns(cgtReference).map(_.draftReturns)
       (validDraftReturns, invalidDraftReturns) = draftReturns.partition(isValid(_, cgtReference))
       (sentDraftReturns, unsentDraftReturns)   = validDraftReturns.partition(hasBeenSent(sentReturns))
       unsentDraftReturnsTaxYearExchanged       = unsentDraftReturns.map { draftReturn =>
