@@ -40,8 +40,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.http.HeaderCarrier
@@ -588,18 +586,7 @@ class ReturnsServiceImpl @Inject() (
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, DisplayReturn] =
-    connector.displayReturn(cgtReference, submissionId).subflatMap { response =>
-      if (response.status === OK) {
-        response.parseJSON[DisplayReturn]().leftMap(Error(_))
-      } else {
-        Left(
-          Error(
-            s"call to list returns came back with status ${response.status}"
-          )
-        )
-      }
-    }
+  ): EitherT[Future, Error, DisplayReturn] = connector.displayReturn(cgtReference, submissionId)
 }
 
 object ReturnsServiceImpl {

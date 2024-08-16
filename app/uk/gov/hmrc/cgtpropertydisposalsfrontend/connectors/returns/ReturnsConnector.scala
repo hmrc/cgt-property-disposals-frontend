@@ -61,7 +61,7 @@ trait ReturnsConnector {
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
+  ): EitherT[Future, Error, DisplayReturn]
 
   def calculateTaxDue(
     request: CalculateCgtTaxDueRequest
@@ -162,15 +162,9 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse] = {
-    val url: String = s"$baseUrl/return/${cgtReference.value}/$submissionId"
-
-    EitherT[Future, Error, HttpResponse](
-      http
-        .GET[HttpResponse](url)
-        .map(Right(_))
-        .recover { case e => Left(Error(e)) }
-    )
+  ): EitherT[Future, Error, DisplayReturn] = {
+    val url = s"$baseUrl/return/${cgtReference.value}/$submissionId"
+    http.GET[Either[UpstreamErrorResponse, DisplayReturn]](url) pipe handleErrors(s"GET to $url")
   }
 
   def calculateTaxDue(
