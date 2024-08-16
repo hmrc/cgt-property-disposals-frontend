@@ -134,10 +134,10 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
       handleErrors(s"GET to ${getDraftReturnsUrl(cgtReference)}")
 
   def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
-    http.POST[DeleteDraftReturnsRequest, Either[UpstreamErrorResponse, Unit]](
+    http.POST[DeleteDraftReturnsRequest, HttpResponse](
       deleteDraftReturnsUrl,
       DeleteDraftReturnsRequest(draftReturnIds)
-    ) pipe handleErrors(s"POST to $deleteDraftReturnsUrl")
+    ) pipe checkAndIgnoreBody(s"POST to $deleteDraftReturnsUrl")
 
   def submitReturn(
     submitReturnRequest: SubmitReturnRequest,
