@@ -48,7 +48,7 @@ class CgtCalculationServiceImplSpec
 
   private def mockCalculateTaxDue(
     request: CalculateCgtTaxDueRequest
-  )(response: Either[Error, HttpResponse]) =
+  )(response: Either[Error, CalculatedTaxDue]) =
     (mockReturnsConnector
       .calculateTaxDue(_: CalculateCgtTaxDueRequest)(_: HeaderCarrier))
       .expects(request, *)
@@ -56,7 +56,7 @@ class CgtCalculationServiceImplSpec
 
   private def mockCalculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
-  )(response: Either[Error, HttpResponse]) =
+  )(response: Either[Error, TaxableGainOrLossCalculation]) =
     (mockReturnsConnector
       .calculateTaxableGainOrLoss(_: TaxableGainOrLossCalculationRequest)(_: HeaderCarrier))
       .expects(request, *)
@@ -64,7 +64,7 @@ class CgtCalculationServiceImplSpec
 
   private def mockCalculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest
-  )(response: Either[Error, HttpResponse]) =
+  )(response: Either[Error, YearToDateLiabilityCalculation]) =
     (mockReturnsConnector
       .calculateYearToDateLiability(_: YearToDateLiabilityCalculationRequest)(_: HeaderCarrier))
       .expects(request, *)
@@ -81,44 +81,24 @@ class CgtCalculationServiceImplSpec
       val request = sample[CalculateCgtTaxDueRequest]
 
       "return an error" when {
+        "the connector fails for any reason" in {
+          mockCalculateTaxDue(request)(Left(Error("some error")))
 
-        "there is an error making the http call" in {
-          mockCalculateTaxDue(request)(Left(Error("")))
+          val response = await(service.calculateTaxDue(request).value)
 
-          await(service.calculateTaxDue(request).value).isLeft shouldBe true
-        }
-
-        "the http call comes back with a status other than 200" in {
-          mockCalculateTaxDue(request)(Right(HttpResponse(500, emptyJsonBody)))
-
-          await(service.calculateTaxDue(request).value).isLeft shouldBe true
-        }
-
-        "the http call comes back with status 200 but the body cannot be parsed" in {
-          mockCalculateTaxDue(request)(
-            Right(HttpResponse(200, JsString("hello"), Map[String, Seq[String]]().empty))
-          )
-
-          await(service.calculateTaxDue(request).value).isLeft shouldBe true
+          response shouldBe Left(Error("some error"))
         }
       }
 
       "return the calculation" when {
-
         "the call is successful and the response body can be parsed" in {
           val calculatedTaxDue = sample[CalculatedTaxDue]
 
-          mockCalculateTaxDue(request)(
-            Right(HttpResponse(200, Json.toJson(calculatedTaxDue), Map[String, Seq[String]]().empty))
-          )
+          mockCalculateTaxDue(request)(Right(calculatedTaxDue))
 
-          await(service.calculateTaxDue(request).value) shouldBe Right(
-            calculatedTaxDue
-          )
+          await(service.calculateTaxDue(request).value) shouldBe Right(calculatedTaxDue)
         }
-
       }
-
     }
 
     "handling requests to calculate taxable gain or loss" must {
@@ -128,44 +108,24 @@ class CgtCalculationServiceImplSpec
       val request = sample[TaxableGainOrLossCalculationRequest]
 
       "return an error" when {
+        "the connector fails for any reason" in {
+          mockCalculateTaxableGainOrLoss(request)(Left(Error("some error")))
 
-        "there is an error making the http call" in {
-          mockCalculateTaxableGainOrLoss(request)(Left(Error("")))
+          val result = await(service.calculateTaxableGainOrLoss(request).value)
 
-          await(service.calculateTaxableGainOrLoss(request).value).isLeft shouldBe true
-        }
-
-        "the http call comes back with a status other than 200" in {
-          mockCalculateTaxableGainOrLoss(request)(Right(HttpResponse(500, emptyJsonBody)))
-
-          await(service.calculateTaxableGainOrLoss(request).value).isLeft shouldBe true
-        }
-
-        "the http call comes back with status 200 but the body cannot be parsed" in {
-          mockCalculateTaxableGainOrLoss(request)(
-            Right(HttpResponse(200, JsString("hello"), Map[String, Seq[String]]().empty))
-          )
-
-          await(service.calculateTaxableGainOrLoss(request).value).isLeft shouldBe true
+          result shouldBe Left(Error("some error"))
         }
       }
 
       "return the calculation" when {
-
         "the call is successful and the response body can be parsed" in {
           val calculation = sample[TaxableGainOrLossCalculation]
 
-          mockCalculateTaxableGainOrLoss(request)(
-            Right(HttpResponse(200, Json.toJson(calculation), Map[String, Seq[String]]().empty))
-          )
+          mockCalculateTaxableGainOrLoss(request)(Right(calculation))
 
-          await(service.calculateTaxableGainOrLoss(request).value) shouldBe Right(
-            calculation
-          )
+          await(service.calculateTaxableGainOrLoss(request).value) shouldBe Right(calculation)
         }
-
       }
-
     }
 
     "handling requests to calculate year to date liability" must {
@@ -175,46 +135,24 @@ class CgtCalculationServiceImplSpec
       val request = sample[YearToDateLiabilityCalculationRequest]
 
       "return an error" when {
+        "the connector fails for any reason" in {
+          mockCalculateYearToDateLiability(request)(Left(Error("some error")))
 
-        "there is an error making the http call" in {
-          mockCalculateYearToDateLiability(request)(Left(Error("")))
+          val result = await(service.calculateYearToDateLiability(request).value)
 
-          await(service.calculateYearToDateLiability(request).value).isLeft shouldBe true
-        }
-
-        "the http call comes back with a status other than 200" in {
-          mockCalculateYearToDateLiability(request)(Right(HttpResponse(500, emptyJsonBody)))
-
-          await(service.calculateYearToDateLiability(request).value).isLeft shouldBe true
-        }
-
-        "the http call comes back with status 200 but the body cannot be parsed" in {
-          mockCalculateYearToDateLiability(request)(
-            Right(HttpResponse(200, JsString("hello"), Map[String, Seq[String]]().empty))
-          )
-
-          await(service.calculateYearToDateLiability(request).value).isLeft shouldBe true
+          result shouldBe Left(Error("some error"))
         }
       }
 
       "return the calculation" when {
-
         "the call is successful and the response body can be parsed" in {
           val calculation = sample[YearToDateLiabilityCalculation]
 
-          mockCalculateYearToDateLiability(request)(
-            Right(HttpResponse(200, Json.toJson(calculation), Map[String, Seq[String]]().empty))
-          )
+          mockCalculateYearToDateLiability(request)(Right(calculation))
 
-          await(service.calculateYearToDateLiability(request).value) shouldBe Right(
-            calculation
-          )
+          await(service.calculateYearToDateLiability(request).value) shouldBe Right(calculation)
         }
-
       }
-
     }
-
   }
-
 }
