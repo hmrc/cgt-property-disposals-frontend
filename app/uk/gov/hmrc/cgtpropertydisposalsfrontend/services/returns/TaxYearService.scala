@@ -18,16 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.int._
-import cats.syntax.either._
-import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.http.Status.OK
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.AvailableTaxYearsResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
