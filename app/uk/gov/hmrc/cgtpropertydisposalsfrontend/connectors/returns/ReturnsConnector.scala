@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceI
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.{AvailableTaxYearsResponse, TaxYearResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.LocalDate
@@ -134,10 +134,10 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
       handleErrors(s"GET to ${getDraftReturnsUrl(cgtReference)}")
 
   def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
-    http.POST[DeleteDraftReturnsRequest, Either[UpstreamErrorResponse, Unit]](
+    http.POST[DeleteDraftReturnsRequest, HttpResponse](
       deleteDraftReturnsUrl,
       DeleteDraftReturnsRequest(draftReturnIds)
-    ) pipe handleErrors(s"POST to $deleteDraftReturnsUrl")
+    ) pipe checkAndIgnoreBody(s"POST to $deleteDraftReturnsUrl")
 
   def submitReturn(
     submitReturnRequest: SubmitReturnRequest,
