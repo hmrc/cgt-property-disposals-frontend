@@ -583,19 +583,7 @@ class ReturnsServiceImpl @Inject() (
     // end date that is before the end of the tax year that the toDate falls within, so we need to
     // satisfy this logic by using the end of the current tax year as our toDate
     val toDate         = TimeUtils.getTaxYearEndDateInclusive(today)
-    connector.listReturns(cgtReference, fromDate, toDate).subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[ListReturnsResponse]()
-          .bimap(Error(_), _.returns)
-      } else {
-        Left(
-          Error(
-            s"call to list returns came back with status ${response.status}"
-          )
-        )
-      }
-    }
+    connector.listReturns(cgtReference, fromDate, toDate).map(_.returns)
   }
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit

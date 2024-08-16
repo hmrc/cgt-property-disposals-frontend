@@ -25,7 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
@@ -55,13 +55,9 @@ trait ReturnsConnector {
     hc: HeaderCarrier
   ): EitherT[Future, Error, SubmitReturnResponse]
 
-  def listReturns(
-    cgtReference: CgtReference,
-    fromDate: LocalDate,
-    toDate: LocalDate
-  )(implicit
+  def listReturns(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
+  ): EitherT[Future, Error, ListReturnsResponse]
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
     hc: HeaderCarrier
@@ -144,7 +140,7 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     http.POST[DeleteDraftReturnsRequest, Either[UpstreamErrorResponse, Unit]](
       deleteDraftReturnsUrl,
       DeleteDraftReturnsRequest(draftReturnIds)
-    ) pipe handleErrors(s"POST to ${deleteDraftReturnsUrl}")
+    ) pipe handleErrors(s"POST to $deleteDraftReturnsUrl")
 
   def submitReturn(
     submitReturnRequest: SubmitReturnRequest,
@@ -154,24 +150,14 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
       submitReturnUrl,
       submitReturnRequest,
       Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language)
-    ) pipe handleErrors(s"POST to ${submitReturnUrl}")
+    ) pipe handleErrors(s"POST to $submitReturnUrl")
 
-  def listReturns(
-    cgtReference: CgtReference,
-    fromDate: LocalDate,
-    toDate: LocalDate
-  )(implicit
+  def listReturns(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse] = {
+  ): EitherT[Future, Error, ListReturnsResponse] = {
     val url: String =
       s"$baseUrl/returns/${cgtReference.value}/${fromDate.format(dateFormatter)}/${toDate.format(dateFormatter)}"
-
-    EitherT[Future, Error, HttpResponse](
-      http
-        .GET[HttpResponse](url)
-        .map(Right(_))
-        .recover { case e => Left(Error(e)) }
-    )
+    http.GET[Either[UpstreamErrorResponse, ListReturnsResponse]](url) pipe handleErrors(s"GET to $url")
   }
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
