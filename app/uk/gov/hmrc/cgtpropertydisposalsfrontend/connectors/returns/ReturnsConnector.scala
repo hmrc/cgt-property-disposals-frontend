@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceI
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.{AvailableTaxYearsResponse, TaxYearResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.LocalDate
@@ -44,7 +44,7 @@ trait ReturnsConnector {
 
   def storeDraftReturn(draftReturn: DraftReturn, cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
+  ): EitherT[Future, Error, Unit]
 
   def getDraftReturns(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
@@ -112,21 +112,14 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     }).recover { case NonFatal(e) => Left(Error(e.getMessage)) }
       .pipe(EitherT(_))
 
-  override def storeDraftReturn(
-    draftReturn: DraftReturn,
-    cgtReference: CgtReference
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
-    val storeDraftReturnUrl: String =
-      s"$baseUrl/draft-return/${cgtReference.value}"
-
-    EitherT[Future, Error, HttpResponse](
-      http
-        .POST[DraftReturn, HttpResponse](storeDraftReturnUrl, draftReturn)
-        .map(Right(_))
-        .recover { case NonFatal(e) =>
-          Left(Error(e))
-        }
-    )
+  override def storeDraftReturn(draftReturn: DraftReturn, cgtReference: CgtReference)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit] = {
+    val url = s"$baseUrl/draft-return/${cgtReference.value}"
+    http
+      .POST[DraftReturn, Unit](url, draftReturn)
+      .map(Right(_))
+      .pipe(handleErrors(s"POST to $url"))
   }
 
   override def getDraftReturns(
