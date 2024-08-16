@@ -568,23 +568,9 @@ class ReturnsServiceImpl @Inject() (
     countryOrPostcode.bimap(format, p => Postcode(format(p.value)))
   }
 
-  def submitReturn(
-    submitReturnRequest: SubmitReturnRequest,
-    lang: Lang
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubmitReturnResponse] =
-    connector.submitReturn(submitReturnRequest, lang).subflatMap { httpResponse =>
-      if (httpResponse.status === OK) {
-        httpResponse
-          .parseJSON[SubmitReturnResponse]()
-          .leftMap(Error(_))
-      } else {
-        Left(
-          Error(
-            s"Call to get submit return came back with status ${httpResponse.status}}"
-          )
-        )
-      }
-    }
+  def submitReturn(submitReturnRequest: SubmitReturnRequest, lang: Lang)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, SubmitReturnResponse] = connector.submitReturn(submitReturnRequest, lang)
 
   def listReturns(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier

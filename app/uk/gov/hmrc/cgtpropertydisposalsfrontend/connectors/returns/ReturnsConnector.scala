@@ -53,7 +53,7 @@ trait ReturnsConnector {
 
   def submitReturn(submitReturnRequest: SubmitReturnRequest, lang: Lang)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
+  ): EitherT[Future, Error, SubmitReturnResponse]
 
   def listReturns(
     cgtReference: CgtReference,
@@ -107,6 +107,16 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
 
   private val calculateYearToDateLiabilityUrl: String = s"$baseUrl/calculate-year-to-date-liability"
 
+  private def handleErrors[T](
+    callName: String
+  )(f: Future[Either[UpstreamErrorResponse, T]]): EitherT[Future, Error, T] =
+    f.map(_.left.map { error =>
+      val errorMessage = s"$callName came back with with status ${error.statusCode}"
+      logger.error(errorMessage, error)
+      Error(errorMessage)
+    }).recover { case NonFatal(e) => Left(Error(e.getMessage)) }
+      .pipe(EitherT(_))
+
   override def storeDraftReturn(
     draftReturn: DraftReturn,
     cgtReference: CgtReference
@@ -127,44 +137,24 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
   override def getDraftReturns(
     cgtReference: CgtReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, GetDraftReturnResponse] =
-    http
-      .GET[Either[UpstreamErrorResponse, GetDraftReturnResponse]](getDraftReturnsUrl(cgtReference))
-      .map(_.left.map { error =>
-        logger.error(s"GET to ${getDraftReturnsUrl(cgtReference)} failed", error)
-        Error(s"Call to get draft returns came back with status ${error.statusCode}}")
-      })
-      .recover { case NonFatal(e) => Left(Error(e.getMessage)) }
-      .pipe(EitherT(_))
+    http.GET[Either[UpstreamErrorResponse, GetDraftReturnResponse]](getDraftReturnsUrl(cgtReference)) pipe
+      handleErrors(s"GET to ${getDraftReturnsUrl(cgtReference)}")
 
   def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
-    http
-      .POST[DeleteDraftReturnsRequest, Either[UpstreamErrorResponse, Unit]](
-        deleteDraftReturnsUrl,
-        DeleteDraftReturnsRequest(draftReturnIds)
-      )
-      .map(_.left.map { error =>
-        logger.error(s"POST to $deleteDraftReturnsUrl failed", error)
-        Error(s"Call to delete draft returns came back with status ${error.statusCode}")
-      })
-      .recover { case NonFatal(e) => Left(Error(e.getMessage)) }
-      .pipe(EitherT(_))
+    http.POST[DeleteDraftReturnsRequest, Either[UpstreamErrorResponse, Unit]](
+      deleteDraftReturnsUrl,
+      DeleteDraftReturnsRequest(draftReturnIds)
+    ) pipe handleErrors(s"POST to ${deleteDraftReturnsUrl}")
 
   def submitReturn(
     submitReturnRequest: SubmitReturnRequest,
     lang: Lang
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    EitherT[Future, Error, HttpResponse](
-      http
-        .POST[SubmitReturnRequest, HttpResponse](
-          submitReturnUrl,
-          submitReturnRequest,
-          Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language)
-        )
-        .map(Right(_))
-        .recover { case NonFatal(e) =>
-          Left(Error(e))
-        }
-    )
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubmitReturnResponse] =
+    http.POST[SubmitReturnRequest, Either[UpstreamErrorResponse, SubmitReturnResponse]](
+      submitReturnUrl,
+      submitReturnRequest,
+      Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language)
+    ) pipe handleErrors(s"POST to ${submitReturnUrl}")
 
   def listReturns(
     cgtReference: CgtReference,
