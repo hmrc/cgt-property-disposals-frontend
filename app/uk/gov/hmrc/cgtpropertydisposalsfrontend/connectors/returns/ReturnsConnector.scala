@@ -73,7 +73,7 @@ trait ReturnsConnector {
 
   def calculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, YearToDateLiabilityCalculation]
 
   def taxYear(date: LocalDate)(implicit
     hc: HeaderCarrier
@@ -184,15 +184,11 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
 
   def calculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    EitherT[Future, Error, HttpResponse](
-      http
-        .POST[YearToDateLiabilityCalculationRequest, HttpResponse](calculateYearToDateLiabilityUrl, request)
-        .map(Right(_))
-        .recover { case NonFatal(e) =>
-          Left(Error(e))
-        }
-    )
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, YearToDateLiabilityCalculation] =
+    http.POST[YearToDateLiabilityCalculationRequest, Either[UpstreamErrorResponse, YearToDateLiabilityCalculation]](
+      calculateYearToDateLiabilityUrl,
+      request
+    ) pipe handleErrors(s"POST to $calculateYearToDateLiabilityUrl")
 
   def taxYear(
     date: LocalDate
