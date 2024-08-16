@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.TaxYearResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.{AvailableTaxYearsResponse, TaxYearResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
@@ -78,7 +78,7 @@ trait ReturnsConnector {
 
   def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, TaxYearResponse]
 
-  def availableTaxYears()(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  def availableTaxYears()(implicit hc: HeaderCarrier): EitherT[Future, Error, AvailableTaxYearsResponse]
 
 }
 
@@ -194,13 +194,10 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     http.GET[Either[UpstreamErrorResponse, TaxYearResponse]](url) pipe handleErrors(s"GET to $url")
   }
 
-  def availableTaxYears()(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    EitherT[Future, Error, HttpResponse](
-      http
-        .GET[HttpResponse](s"$baseUrl/available-tax-years")
-        .map(Right(_))
-        .recover { case e => Left(Error(e)) }
-    )
+  def availableTaxYears()(implicit hc: HeaderCarrier): EitherT[Future, Error, AvailableTaxYearsResponse] = {
+    val url = s"$baseUrl/available-tax-years"
+    http.GET[Either[UpstreamErrorResponse, AvailableTaxYearsResponse]](url) pipe handleErrors(s"GET to $url")
+  }
 
   private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
 

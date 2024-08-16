@@ -56,19 +56,7 @@ class TaxYearServiceImpl @Inject() (connector: ReturnsConnector)(implicit
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[TaxYear]] = connector.taxYear(date).map(_.value)
 
   override def availableTaxYears()(implicit hc: HeaderCarrier): EitherT[Future, Error, List[Int]] =
-    connector.availableTaxYears().subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[AvailableTaxYearsResponse]()
-          .bimap(Error(_), _.value)
-      } else {
-        Left(
-          Error(
-            s"Call to get tax year came back with unexpected status ${response.status}"
-          )
-        )
-      }
-    }
+    connector.availableTaxYears().map(_.value)
 }
 
 object TaxYearServiceImpl {
