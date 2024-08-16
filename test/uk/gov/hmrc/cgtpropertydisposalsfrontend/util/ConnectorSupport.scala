@@ -15,9 +15,9 @@ trait ConnectorSupport extends BeforeAndAfterEach {
   lazy val serviceId: String = throw new Exception("You must override `serviceId` in your test class")
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  val Port                               = 11119
-  val Host                               = "localhost"
-  val wireMockServer                     = new WireMockServer(WireMockConfiguration.wireMockConfig().port(Port))
+  val Port                       = 11119
+  val Host                       = "localhost"
+  val wireMockServer             = new WireMockServer(WireMockConfiguration.wireMockConfig().port(Port))
 
   lazy val fakeApplication: Application = new GuiceApplicationBuilder()
     .bindings()

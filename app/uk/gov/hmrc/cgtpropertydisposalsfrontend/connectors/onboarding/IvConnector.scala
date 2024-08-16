@@ -40,7 +40,8 @@ class IvConnectorImpl @Inject() (
   servicesConfig: ServicesConfig
 )(implicit
   ec: ExecutionContext
-) extends IvConnector with Logging {
+) extends IvConnector
+    with Logging {
 
   val baseUrl: String = servicesConfig.baseUrl("iv")
 
