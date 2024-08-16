@@ -55,20 +55,7 @@ class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector)(implicit
 
   def calculateTaxDue(
     request: CalculateCgtTaxDueRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue] =
-    connector.calculateTaxDue(request).subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[CalculatedTaxDue]()
-          .leftMap(Error(_))
-      } else {
-        Left(
-          Error(
-            s"Call to calculate cgt tax due came back with status ${response.status}"
-          )
-        )
-      }
-    }
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue] = connector.calculateTaxDue(request)
 
   def calculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest

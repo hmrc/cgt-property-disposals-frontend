@@ -65,7 +65,7 @@ trait ReturnsConnector {
 
   def calculateTaxDue(
     request: CalculateCgtTaxDueRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue]
 
   def calculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
@@ -169,15 +169,10 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
 
   def calculateTaxDue(
     request: CalculateCgtTaxDueRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    EitherT[Future, Error, HttpResponse](
-      http
-        .POST[CalculateCgtTaxDueRequest, HttpResponse](calculateCgtTaxDueUrl, request)
-        .map(Right(_))
-        .recover { case NonFatal(e) =>
-          Left(Error(e))
-        }
-    )
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue] =
+    http
+      .POST[CalculateCgtTaxDueRequest, Either[UpstreamErrorResponse, CalculatedTaxDue]](calculateCgtTaxDueUrl, request)
+      .pipe(handleErrors(s"POST to $calculateCgtTaxDueUrl"))
 
   def calculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
