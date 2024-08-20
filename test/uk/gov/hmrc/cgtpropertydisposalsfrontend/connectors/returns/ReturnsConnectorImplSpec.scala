@@ -25,6 +25,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.HttpSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
@@ -33,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ConnectorSupport
 import uk.gov.hmrc.http.HeaderCarrier
+import java.util.UUID
 
 class ReturnsConnectorImplSpec
     extends AnyWordSpec
@@ -113,6 +115,42 @@ class ReturnsConnectorImplSpec
 
           result shouldBe
             Left(Error(s"GET to http://localhost:11119/draft-returns/CGT12345678 came back with with status $status"))
+        }
+      }
+    }
+
+    "handling requests to delete a draft return" must {
+      "call the right endpoint with draft return body" in {
+        val uuidList = List(UUID.randomUUID(), UUID.randomUUID())
+
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "")))
+
+        await(con.deleteDraftReturns(uuidList).value)
+
+        val url = "/draft-returns/delete"
+        val expectedRequest = DeleteDraftReturnsRequest(uuidList)
+        verify(postRequestedFor(urlEqualTo(url)).withRequestBody(equalTo(Json.toJson(expectedRequest).toString())))
+      }
+
+      "return Unit on success" in {
+        val uuidList = List(UUID.randomUUID(), UUID.randomUUID())
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "")))
+
+        val result =  await(con.deleteDraftReturns(uuidList).value)
+
+        result shouldBe Right(())
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          val uuidList = List(UUID.randomUUID(), UUID.randomUUID())
+          stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(status, "")))
+
+          val result = await(con.deleteDraftReturns(uuidList).value)
+
+          result shouldBe
+            Left(Error(s"POST to http://localhost:11119/draft-returns/delete came back with with status $status"))
         }
       }
     }
