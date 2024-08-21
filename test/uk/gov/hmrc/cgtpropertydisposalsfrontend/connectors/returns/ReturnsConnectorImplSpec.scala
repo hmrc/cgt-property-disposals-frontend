@@ -17,11 +17,14 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.Tables.Table
 import org.scalatest.wordspec.AnyWordSpec
+import play.api.i18n.Lang
 import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.HttpSupport
@@ -29,12 +32,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen.{listReturnsResponseGen, submitReturnRequestGen, submitReturnResponseGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ConnectorSupport
 import uk.gov.hmrc.http.HeaderCarrier
-import java.util.UUID
+
+import java.time.LocalDate
+import java.util.{Locale, UUID}
 
 class ReturnsConnectorImplSpec
     extends AnyWordSpec
@@ -151,6 +157,87 @@ class ReturnsConnectorImplSpec
 
           result shouldBe
             Left(Error(s"POST to http://localhost:11119/draft-returns/delete came back with with status $status"))
+        }
+      }
+    }
+
+
+    "handling requests to submit a return" must {
+      "call the right endpoint with submit return body" in {
+        val submitReturnRequest = sample[SubmitReturnRequest]
+        val lang : Lang = new Lang(Locale.UK)
+
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "")))
+
+        await(con.submitReturn(submitReturnRequest,lang).value)
+
+        val url = "/return"
+        verify(postRequestedFor(urlEqualTo(url)).withRequestBody(equalTo(Json.toJson(submitReturnRequest).toString())))
+      }
+
+      "return Unit on success" in {
+        val submitReturnRequest = sample[SubmitReturnRequest]
+        val response = sample[SubmitReturnResponse]
+        val lang : Lang = new Lang(Locale.UK)
+
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+
+        val result =  await(con.submitReturn(submitReturnRequest,lang).value)
+
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          val uuidList = List(UUID.randomUUID(), UUID.randomUUID())
+          stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(status, "")))
+
+          val result = await(con.deleteDraftReturns(uuidList).value)
+
+          result shouldBe
+            Left(Error(s"POST to http://localhost:11119/draft-returns/delete came back with with status $status"))
+        }
+      }
+    }
+
+    "handling requests to list return" must {
+      "call the right endpoint with list return body" in {
+        val startDate = LocalDate.now()
+        val response =  sample[ListReturnsResponse]
+
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+
+        await(con.listReturns(CgtReference("CGT12345678"),startDate,startDate).value)
+
+        val url = "/returns/CGT12345678/2024-08-21/2024-08-21"
+
+       verify(getRequestedFor(urlEqualTo(url)))
+
+      }
+
+
+      "return Unit on success" in {
+        val startDate = LocalDate.now()
+        val response =  sample[ListReturnsResponse]
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+
+        val result =  await(con.listReturns(CgtReference("CGT12345678"),startDate,startDate).value)
+
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val startDate = LocalDate.now()
+        val response =  sample[ListReturnsResponse]
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(status, Json.toJson(response).toString())))
+
+          val result = await(con.listReturns(CgtReference("CGT12345678"),startDate,startDate).value)
+
+          result shouldBe
+            Left(Error(s"GET to http://localhost:11119/returns/CGT12345678/2024-08-21/2024-08-21 came back with with status $status"))
         }
       }
     }
