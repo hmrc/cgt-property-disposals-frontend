@@ -184,7 +184,7 @@ class ReturnsConnectorImplSpec
 
         val result =  await(con.submitReturn(submitReturnRequest,lang).value)
 
-        result shouldBe Right((response))
+        result shouldBe Right(response)
       }
 
       "return Left on error" in {
@@ -224,7 +224,7 @@ class ReturnsConnectorImplSpec
 
         val result =  await(con.listReturns(CgtReference("CGT12345678"),startDate,startDate).value)
 
-        result shouldBe Right((response))
+        result shouldBe Right(response)
       }
 
       "return Left on error" in {
