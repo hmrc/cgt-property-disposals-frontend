@@ -177,7 +177,7 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     http.POST[TaxableGainOrLossCalculationRequest, Either[UpstreamErrorResponse, TaxableGainOrLossCalculation]](
       calculateTaxableGainOrLossUrl,
       request
-    ) pipe handleErrors(s"POST to $calculateCgtTaxDueUrl")
+    ) pipe handleErrors(s"POST to $calculateTaxableGainOrLossUrl")
 
   def calculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest
