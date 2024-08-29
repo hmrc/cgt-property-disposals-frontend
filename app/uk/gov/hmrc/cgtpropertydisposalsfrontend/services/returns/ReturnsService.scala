@@ -18,12 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.int._
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.order._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.http.Status.OK
 import play.api.i18n.Lang
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
@@ -36,12 +34,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.CountryCo
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.http.HeaderCarrier
@@ -109,71 +105,28 @@ class ReturnsServiceImpl @Inject() (
     if (fillingOutReturn.isAmendReturn) {
       EitherT.pure(())
     } else {
-      connector
-        .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.subscribedDetails.cgtReference)
-        .subflatMap { httpResponse =>
-          if (httpResponse.status === OK) {
-            auditService.sendEvent(
-              "draftReturnUpdated",
-              DraftReturnUpdated(
-                fillingOutReturn.draftReturn,
-                fillingOutReturn.subscribedDetails.cgtReference.value,
-                fillingOutReturn.agentReferenceNumber.map(_.value)
-              ),
-              "draft-return-updated"
-            )
-            Right(())
-          } else {
-            Left(
-              Error(
-                s"Call to store draft return came back with status ${httpResponse.status}}"
-              )
-            )
-          }
-        }
+      for {
+        _ <- connector.storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.subscribedDetails.cgtReference)
+      } yield auditService.sendEvent(
+        "draftReturnUpdated",
+        DraftReturnUpdated(
+          fillingOutReturn.draftReturn,
+          fillingOutReturn.subscribedDetails.cgtReference.value,
+          fillingOutReturn.agentReferenceNumber.map(_.value)
+        ),
+        "draft-return-updated"
+      )
     }
 
-  def deleteDraftReturns(
-    draftReturnIds: List[UUID]
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
-    connector.deleteDraftReturns(draftReturnIds).subflatMap { httpResponse =>
-      if (httpResponse.status === OK) {
-        Right(())
-      } else {
-        Left(
-          Error(
-            s"Call to delete draft returns came back with status ${httpResponse.status}"
-          )
-        )
-      }
-    }
+  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
+    connector.deleteDraftReturns(draftReturnIds)
 
   def getDraftReturns(
     cgtReference: CgtReference,
     sentReturns: List[ReturnSummary]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
     for {
-
-      httpResponse <- connector
-                        .getDraftReturns(cgtReference)
-                        .subflatMap(r =>
-                          if (r.status === OK) {
-                            Right(r)
-                          } else {
-                            Left(
-                              Error(
-                                s"Call to get draft returns came back with status ${r.status}}"
-                              )
-                            )
-                          }
-                        )
-      draftReturns <- EitherT.fromEither(
-                        httpResponse
-                          .parseJSON[GetDraftReturnResponse]()
-                          .leftMap(Error(_))
-                          .map(_.draftReturns)
-                      )
-
+      draftReturns                            <- connector.getDraftReturns(cgtReference).map(_.draftReturns)
       (validDraftReturns, invalidDraftReturns) = draftReturns.partition(isValid(_, cgtReference))
       (sentDraftReturns, unsentDraftReturns)   = validDraftReturns.partition(hasBeenSent(sentReturns))
       unsentDraftReturnsTaxYearExchanged       = unsentDraftReturns.map { draftReturn =>
@@ -600,23 +553,9 @@ class ReturnsServiceImpl @Inject() (
     countryOrPostcode.bimap(format, p => Postcode(format(p.value)))
   }
 
-  def submitReturn(
-    submitReturnRequest: SubmitReturnRequest,
-    lang: Lang
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubmitReturnResponse] =
-    connector.submitReturn(submitReturnRequest, lang).subflatMap { httpResponse =>
-      if (httpResponse.status === OK) {
-        httpResponse
-          .parseJSON[SubmitReturnResponse]()
-          .leftMap(Error(_))
-      } else {
-        Left(
-          Error(
-            s"Call to get submit return came back with status ${httpResponse.status}}"
-          )
-        )
-      }
-    }
+  def submitReturn(submitReturnRequest: SubmitReturnRequest, lang: Lang)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, SubmitReturnResponse] = connector.submitReturn(submitReturnRequest, lang)
 
   def listReturns(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
@@ -629,35 +568,12 @@ class ReturnsServiceImpl @Inject() (
     // end date that is before the end of the tax year that the toDate falls within, so we need to
     // satisfy this logic by using the end of the current tax year as our toDate
     val toDate         = TimeUtils.getTaxYearEndDateInclusive(today)
-    connector.listReturns(cgtReference, fromDate, toDate).subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[ListReturnsResponse]()
-          .bimap(Error(_), _.returns)
-      } else {
-        Left(
-          Error(
-            s"call to list returns came back with status ${response.status}"
-          )
-        )
-      }
-    }
+    connector.listReturns(cgtReference, fromDate, toDate).map(_.returns)
   }
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, DisplayReturn] =
-    connector.displayReturn(cgtReference, submissionId).subflatMap { response =>
-      if (response.status === OK) {
-        response.parseJSON[DisplayReturn]().leftMap(Error(_))
-      } else {
-        Left(
-          Error(
-            s"call to list returns came back with status ${response.status}"
-          )
-        )
-      }
-    }
+  ): EitherT[Future, Error, DisplayReturn] = connector.displayReturn(cgtReference, submissionId)
 }
 
 object ReturnsServiceImpl {

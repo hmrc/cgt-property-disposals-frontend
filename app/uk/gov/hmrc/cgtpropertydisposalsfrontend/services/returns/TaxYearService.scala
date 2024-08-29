@@ -18,16 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.int._
-import cats.syntax.either._
-import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.http.Status.OK
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.{AvailableTaxYearsResponse, TaxYearResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -53,35 +47,10 @@ class TaxYearServiceImpl @Inject() (connector: ReturnsConnector)(implicit
 
   override def taxYear(
     date: LocalDate
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[TaxYear]] =
-    connector.taxYear(date).subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[TaxYearResponse]()
-          .bimap(Error(_), _.value)
-      } else {
-        Left(
-          Error(
-            s"Call to get tax year came back with unexpected status ${response.status}"
-          )
-        )
-      }
-    }
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[TaxYear]] = connector.taxYear(date).map(_.value)
 
   override def availableTaxYears()(implicit hc: HeaderCarrier): EitherT[Future, Error, List[Int]] =
-    connector.availableTaxYears().subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[AvailableTaxYearsResponse]()
-          .bimap(Error(_), _.value)
-      } else {
-        Left(
-          Error(
-            s"Call to get tax year came back with unexpected status ${response.status}"
-          )
-        )
-      }
-    }
+    connector.availableTaxYears().map(_.value)
 }
 
 object TaxYearServiceImpl {

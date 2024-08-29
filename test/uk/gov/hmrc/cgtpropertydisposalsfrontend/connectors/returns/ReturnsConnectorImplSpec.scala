@@ -16,177 +16,426 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
-import com.typesafe.config.ConfigFactory
+import com.github.tomakehurst.wiremock.client.WireMock._
+import org.scalacheck.Gen
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.Tables.Table
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.Configuration
 import play.api.i18n.Lang
+import play.api.libs.json.Json
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.HttpSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen.{calculateCgtTaxDueRequestGen, listReturnsResponseGen, submitReturnRequestGen, submitReturnResponseGen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.calculatedTaxDueGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.{AvailableTaxYearsResponse, TaxYearResponse, taxYearResponseFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ConnectorSupport
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
-import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
+import java.time.format.DateTimeFormatter
+import java.util.{Locale, UUID}
 
-class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
+class ReturnsConnectorImplSpec
+    extends AnyWordSpec
+    with Matchers
+    with MockFactory
+    with HttpSupport
+    with ConnectorSupport {
 
-  private val config = Configuration(
-    ConfigFactory.parseString(
-      """
-        |microservice {
-        |  services {
-        |    cgt-property-disposals {
-        |      protocol = https
-        |      host     = host
-        |      port     = 123
-        |    }
-        |  }
-        |}
-        |""".stripMargin
-    )
-  )
-
-  val connector = new ReturnsConnectorImpl(
-    mockHttp,
-    new ServicesConfig(config)
-  )
+  override lazy val serviceId                  = "cgt-property-disposals"
+  private val con                              = fakeApplication.injector.instanceOf[ReturnsConnector]
+  private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
 
   "ReturnsConnectorImpl" when {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     "handling requests to store a draft return" must {
+      "call the right endpoint with draft return body" in {
+        val draftReturn = sample[DraftReturn]
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "")))
 
-      val draftReturn  = sample[DraftReturn]
-      val cgtReference = sample[CgtReference]
-      val expectedUrl  = s"https://host:123/draft-return/${cgtReference.value}"
+        await(con.storeDraftReturn(draftReturn, CgtReference("CGT12345678")).value)
 
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, Seq.empty, draftReturn),
-        () => connector.storeDraftReturn(draftReturn, cgtReference)
-      )
+        val url = "/draft-return/CGT12345678"
+        verify(postRequestedFor(urlEqualTo(url)).withRequestBody(equalTo(Json.toJson(draftReturn).toString())))
+      }
+
+      "return Unit on success" in {
+        val draftReturn = sample[DraftReturn]
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "")))
+
+        val result = await(con.storeDraftReturn(draftReturn, CgtReference("CGT12345678")).value)
+
+        result shouldBe Right(())
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          val draftReturn = sample[DraftReturn]
+          stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(status, "{}")))
+
+          val result = await(con.storeDraftReturn(draftReturn, CgtReference("CGT12345678")).value)
+
+          result shouldBe
+            Left(Error(s"POST to http://localhost:11119/draft-return/CGT12345678 came back with with status $status"))
+        }
+      }
     }
 
-    "handling requests to delete a draft returns" must {
+    "handling requests to get a draft return" must {
+      implicit val gen: Gen[GetDraftReturnResponse] = Gen.listOf(draftReturnGen).map(GetDraftReturnResponse(_))
+      "call the right endpoint with draft return body" in {
+        val response = sample[GetDraftReturnResponse]
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
 
-      val ids         = List.fill(3)(UUID.randomUUID())
-      val expectedUrl = s"https://host:123/draft-returns/delete"
+        await(con.getDraftReturns(CgtReference("CGT12345678")).value)
 
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, Seq.empty, DeleteDraftReturnsRequest(ids)),
-        () => connector.deleteDraftReturns(ids)
-      )
+        val url = "/draft-returns/CGT12345678"
+        verify(getRequestedFor(urlEqualTo(url)))
+      }
+
+      "return Unit on success" in {
+        val response = sample[GetDraftReturnResponse]
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+
+        val result = await(con.getDraftReturns(CgtReference("CGT12345678")).value)
+
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          val response = sample[GetDraftReturnResponse]
+          stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(status, Json.toJson(response).toString())))
+
+          val result = await(con.getDraftReturns(CgtReference("CGT12345678")).value)
+
+          result shouldBe
+            Left(Error(s"GET to http://localhost:11119/draft-returns/CGT12345678 came back with with status $status"))
+        }
+      }
     }
 
-    "handling requests to get a draft returns" must {
+    "handling requests to delete a draft return" must {
+      val uuidList = List(UUID.randomUUID(), UUID.randomUUID())
+      "call the right endpoint with delete draft return body" in {
 
-      val cgtReference = sample[CgtReference]
-      val expectedUrl  = s"https://host:123/draft-returns/${cgtReference.value}"
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "")))
 
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.getDraftReturns(cgtReference)
-      )
+        await(con.deleteDraftReturns(uuidList).value)
+
+        val url             = "/draft-returns/delete"
+        val expectedRequest = DeleteDraftReturnsRequest(uuidList)
+        verify(postRequestedFor(urlEqualTo(url)).withRequestBody(equalTo(Json.toJson(expectedRequest).toString())))
+      }
+
+      "return Unit on success" in {
+
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "")))
+
+        val result = await(con.deleteDraftReturns(uuidList).value)
+
+        result shouldBe Right(())
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(status, "")))
+
+          val result = await(con.deleteDraftReturns(uuidList).value)
+
+          result shouldBe
+            Left(Error(s"POST to http://localhost:11119/draft-returns/delete came back with with status $status"))
+        }
+      }
     }
 
-    "handling request to submit a return" must {
+    "handling requests to submit a return" must {
       val submitReturnRequest = sample[SubmitReturnRequest]
-      val expectedUrl         = s"https://host:123/return"
-      val language            = Seq("Accept-Language" -> "en")
+      val response            = sample[SubmitReturnResponse]
+      val lang: Lang          = new Lang(Locale.UK)
+      "call the right endpoint with submit return body" in {
 
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, language, submitReturnRequest),
-        () => connector.submitReturn(submitReturnRequest, Lang("en"))
-      )
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, "")))
 
+        await(con.submitReturn(submitReturnRequest, lang).value)
+
+        val url = "/return"
+        verify(postRequestedFor(urlEqualTo(url)).withRequestBody(equalTo(Json.toJson(submitReturnRequest).toString())))
+      }
+
+      "return Unit on success" in {
+
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+
+        val result = await(con.submitReturn(submitReturnRequest, lang).value)
+
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+
+          stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(status, "")))
+
+          val result = await(con.submitReturn(submitReturnRequest, lang).value)
+
+          result shouldBe
+            Left(Error(s"POST to http://localhost:11119/return came back with with status $status"))
+        }
+      }
     }
 
-    "handling requests to list returns" must {
+    "handling requests to list return" must {
+      val date     = LocalDate.now()
+      val response = sample[ListReturnsResponse]
+      "call the right endpoint with list return body" in {
 
-      val cgtReference       = sample[CgtReference]
-      val (fromDate, toDate) =
-        LocalDate.of(2020, 1, 2) -> LocalDate.of(2020, 3, 4)
-      val expectedUrl =
-        s"https://host:123/returns/${cgtReference.value}/2020-01-02/2020-03-04"
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
 
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.listReturns(cgtReference, fromDate, toDate)
-      )
+        await(con.listReturns(CgtReference("CGT12345678"), date, date).value)
+
+        val url = s"/returns/CGT12345678/${date.format(dateFormatter)}/${date.format(dateFormatter)}"
+
+        verify(getRequestedFor(urlEqualTo(url)))
+
+      }
+
+      "return Unit on success" in {
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+
+        val result = await(con.listReturns(CgtReference("CGT12345678"), date, date).value)
+
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(status, Json.toJson(response).toString())))
+
+          val result = await(con.listReturns(CgtReference("CGT12345678"), date, date).value)
+
+          result shouldBe
+            Left(Error(s"GET to http://localhost:11119/returns/CGT12345678/${date.format(dateFormatter)}/${date
+              .format(dateFormatter)} came back with with status $status"))
+        }
+      }
     }
 
-    "handling requests to display a return" must {
+    "handling requests to display return" must {
+      implicit val displayReturnGen: Gen[DisplayReturn] = for {
+        completeReturn <- completeReturnGen
+        returnType     <- returnTypeGen
+      } yield DisplayReturn(completeReturn, returnType)
+      val response                                      = sample[DisplayReturn]
+      "call the right endpoint with display return body" in {
 
-      val cgtReference = sample[CgtReference]
-      val submissionId = "id"
-      val expectedUrl  = s"https://host:123/return/${cgtReference.value}/id"
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
 
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.displayReturn(cgtReference, submissionId)
-      )
+        await(con.displayReturn(CgtReference("CGT12345678"), "1234").value)
+
+        val url = "/return/CGT12345678/1234"
+
+        verify(getRequestedFor(urlEqualTo(url)))
+
+      }
+      "return Unit on success" in {
+
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+
+        val result = await(con.displayReturn(CgtReference("CGT12345678"), "1234").value)
+
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(status, Json.toJson(response).toString())))
+          val result = await(con.displayReturn(CgtReference("CGT12345678"), "1234").value)
+          result shouldBe
+            Left(Error(s"GET to http://localhost:11119/return/CGT12345678/1234 came back with with status $status"))
+        }
+      }
     }
 
-    "handling requests to calculate cgt tax due" must {
+    "handling requests to calculate tax due" must {
+      val response                  = sample(calculatedTaxDueGen)
+      val calculateCgtTaxDueRequest = sample(calculateCgtTaxDueRequestGen)
+      "call the right endpoint with calculate tax due body" in {
 
-      val request     = sample[CalculateCgtTaxDueRequest]
-      val expectedUrl = s"https://host:123/calculate-tax-due"
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+        await(con.calculateTaxDue(calculateCgtTaxDueRequest).value)
+        val url = "/calculate-tax-due"
+        verify(postRequestedFor(urlEqualTo(url)))
+      }
 
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, Seq.empty, request),
-        () => connector.calculateTaxDue(request)
-      )
+      "return Unit on success" in {
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+        val result = await(con.calculateTaxDue(calculateCgtTaxDueRequest).value)
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(status, "")))
+          val result = await(con.calculateTaxDue(calculateCgtTaxDueRequest).value)
+          result shouldBe
+            Left(Error(s"POST to http://localhost:11119/calculate-tax-due came back with with status $status"))
+        }
+      }
     }
 
     "handling requests to calculate taxable gain or loss" must {
+      val response                            = sample(taxableGainOrLossCalculationGen)
+      val taxableGainOrLossCalculationRequest = sample(taxableGainOrLossCalculationRequestGen)
+      "call the right endpoint with calculate taxable gain or loss body" in {
 
-      val request     = sample[TaxableGainOrLossCalculationRequest]
-      val expectedUrl = s"https://host:123/calculate-taxable-gain-or-loss"
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
 
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, Seq.empty, request),
-        () => connector.calculateTaxableGainOrLoss(request)
-      )
+        await(con.calculateTaxableGainOrLoss(taxableGainOrLossCalculationRequest).value)
+
+        val url = "/calculate-taxable-gain-or-loss"
+
+        verify(postRequestedFor(urlEqualTo(url)))
+
+      }
+
+      "return Unit on success" in {
+
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+
+        val result = await(con.calculateTaxableGainOrLoss(taxableGainOrLossCalculationRequest).value)
+
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(status, "")))
+          val result = await(con.calculateTaxableGainOrLoss(taxableGainOrLossCalculationRequest).value)
+          result shouldBe
+            Left(
+              Error(s"POST to http://localhost:11119/calculate-taxable-gain-or-loss came back with with status $status")
+            )
+        }
+      }
     }
 
     "handling requests to calculate year to date liability" must {
+      val response                              = sample(yearToDateLiabilityCalculationGen)
+      val yearToDateLiabilityCalculationRequest = sample(yearToDateLiabilityCalculationRequestGen)
+      "call the right endpoint with calculate year to date liability body" in {
 
-      val request     = sample[YearToDateLiabilityCalculationRequest]
-      val expectedUrl = s"https://host:123/calculate-year-to-date-liability"
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
 
-      behave like connectorBehaviour(
-        mockPost(expectedUrl, Seq.empty, request),
-        () => connector.calculateYearToDateLiability(request)
-      )
+        await(con.calculateYearToDateLiability(yearToDateLiabilityCalculationRequest).value)
+
+        val url = "/calculate-year-to-date-liability"
+
+        verify(postRequestedFor(urlEqualTo(url)))
+
+      }
+
+      "return Unit on success" in {
+
+        stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+
+        val result = await(con.calculateYearToDateLiability(yearToDateLiabilityCalculationRequest).value)
+
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(status, "")))
+          val result = await(con.calculateYearToDateLiability(yearToDateLiabilityCalculationRequest).value)
+          result shouldBe
+            Left(
+              Error(
+                s"POST to http://localhost:11119/calculate-year-to-date-liability came back with with status $status"
+              )
+            )
+        }
+      }
     }
 
-    "handling requests to get tax years" must {
-      val date        = LocalDate.of(2020, 1, 31)
-      val expectedUrl = s"https://host:123/tax-year/2020-01-31"
+    "handling requests to get taxYear" must {
+      val response = TaxYearResponse(Option(sample(taxYearGen)))
+      val date     = LocalDate.now()
+      "call the right endpoint with tax Year body" in {
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+        await(con.taxYear(date).value)
+        val url = s"/tax-year/${date.format(dateFormatter)}"
+        verify(getRequestedFor(urlEqualTo(url)))
+      }
 
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.taxYear(date)
-      )
+      "return Unit on success" in {
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+        val result = await(con.taxYear(date).value)
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(status, "")))
+          val result = await(con.taxYear(date).value)
+          result shouldBe
+            Left(
+              Error(
+                s"GET to http://localhost:11119/tax-year/${date.format(dateFormatter)} came back with with status $status"
+              )
+            )
+        }
+      }
     }
 
-    "handling requests to get available tax years" must {
-      val expectedUrl = s"https://host:123/available-tax-years"
+    "handling requests to get available tax year" must {
+      val taxYears = List(2023, 2024)
+      val response = AvailableTaxYearsResponse(taxYears)
+      "call the right endpoint with available tax year body" in {
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+        await(con.availableTaxYears().value)
+        val url = "/available-tax-years"
+        verify(getRequestedFor(urlEqualTo(url)))
+      }
 
-      behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.availableTaxYears()
-      )
+      "return Unit on success" in {
+        stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
+        val result = await(con.availableTaxYears().value)
+        result shouldBe Right(response)
+      }
+
+      "return Left on error" in {
+        val table = Table("status", 403, 404, 500)
+        for (status <- table) {
+          stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(status, "")))
+          val result = await(con.availableTaxYears().value)
+          result shouldBe
+            Left(Error(s"GET to http://localhost:11119/available-tax-years came back with with status $status"))
+        }
+      }
     }
 
   }

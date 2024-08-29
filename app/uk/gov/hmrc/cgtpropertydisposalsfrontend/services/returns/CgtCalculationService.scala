@@ -17,19 +17,13 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import cats.data.EitherT
-import cats.instances.future._
-import cats.instances.int._
-import cats.syntax.either._
-import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @ImplementedBy(classOf[CgtCalculationServiceImpl])
 trait CgtCalculationService {
@@ -49,58 +43,19 @@ trait CgtCalculationService {
 }
 
 @Singleton
-class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector)(implicit
-  ec: ExecutionContext
-) extends CgtCalculationService {
+class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector) extends CgtCalculationService {
 
   def calculateTaxDue(
     request: CalculateCgtTaxDueRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue] =
-    connector.calculateTaxDue(request).subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[CalculatedTaxDue]()
-          .leftMap(Error(_))
-      } else {
-        Left(
-          Error(
-            s"Call to calculate cgt tax due came back with status ${response.status}"
-          )
-        )
-      }
-    }
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue] = connector.calculateTaxDue(request)
 
   def calculateTaxableGainOrLoss(
     request: TaxableGainOrLossCalculationRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, TaxableGainOrLossCalculation] =
-    connector.calculateTaxableGainOrLoss(request).subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[TaxableGainOrLossCalculation]()
-          .leftMap(Error(_))
-      } else {
-        Left(
-          Error(
-            s"Call to calculate taxable gain or loss came back with status ${response.status}"
-          )
-        )
-      }
-    }
+    connector.calculateTaxableGainOrLoss(request)
 
   def calculateYearToDateLiability(
     request: YearToDateLiabilityCalculationRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, YearToDateLiabilityCalculation] =
-    connector.calculateYearToDateLiability(request).subflatMap { response =>
-      if (response.status === OK) {
-        response
-          .parseJSON[YearToDateLiabilityCalculation]()
-          .leftMap(Error(_))
-      } else {
-        Left(
-          Error(
-            s"Call to calculate year to date liability came back with status ${response.status}"
-          )
-        )
-      }
-    }
+    connector.calculateYearToDateLiability(request)
 }

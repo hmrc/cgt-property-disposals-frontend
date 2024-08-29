@@ -56,7 +56,7 @@ class UKAddressLookupServiceImpl @Inject() (
     postcode: Postcode,
     filter: Option[String]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] = {
-    val timer = metrics.postcodeLookupTimer.time()
+    val timer              = metrics.postcodeLookupTimer.time()
     def stopTimer[T](x: T) = x.tap(_ => timer.stop())
     connector
       .lookupAddress(postcode, filter)
