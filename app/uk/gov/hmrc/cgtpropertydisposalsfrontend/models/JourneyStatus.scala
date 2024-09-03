@@ -255,6 +255,8 @@ object JourneyStatus {
 
   }
 
+  final case object Registering extends JourneyStatus
+
   object AgentStatus {
 
     final case class AgentSupplyingClientDetails(

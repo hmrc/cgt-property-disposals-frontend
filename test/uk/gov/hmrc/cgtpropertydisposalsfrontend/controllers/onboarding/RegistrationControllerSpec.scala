@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
-import cats.Eq
 import cats.data.EitherT
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, MessagesApi}
@@ -26,19 +25,19 @@ import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import shapeless.{Lens, lens}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{routes => addressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.{routes => nameRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{onboarding => _, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, onboarding => _, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Registering, RegistrationStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.EmailGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
@@ -48,7 +47,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
@@ -74,16 +72,10 @@ class RegistrationControllerSpec
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  implicit val subscriptionStatusEq: Eq[SubscriptionStatus] =
-    Eq.fromUniversalEquals
-
   private val ggCredId = sample[GGCredId]
 
   private val individualWithInsufficientCLSubscriptionStatus =
     TryingToGetIndividualsFootprint(Some(false), Some(false), None, ggCredId)
-
-  val journeyStatusLens: Lens[SessionData, Option[JourneyStatus]] =
-    lens[SessionData].journeyStatus
 
   private def mockRegisterWithoutId(
     registrationDetails: RegistrationDetails
@@ -410,9 +402,10 @@ class RegistrationControllerSpec
       redirectToStartWhenInvalidJourney(
         () => performAction(),
         {
-          case _: RegistrationStatus.RegistrationReady | _: RegistrationStatus.IndividualSupplyingInformation =>
+          case _: RegistrationStatus.RegistrationReady | _: RegistrationStatus.IndividualSupplyingInformation |
+              Registering =>
             true
-          case _                                                                                              => false
+          case _ => false
         }
       )
 
@@ -697,12 +690,16 @@ class RegistrationControllerSpec
           registeredWithId = false
         )
 
+      val sessionWithJourneyStatusRegistering =
+        SessionData.empty.copy(journeyStatus = Some(Registering))
+
       "show an error page" when {
 
         "the call to register without id fails" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
+            mockStoreSession(sessionWithJourneyStatusRegistering)(Right(()))
             mockRegisterWithoutId(registrationReady.registrationDetails)(
               Left(Error(""))
             )
@@ -715,6 +712,7 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
+            mockStoreSession(sessionWithJourneyStatusRegistering)(Right(()))
             mockRegisterWithoutId(registrationReady.registrationDetails)(
               Right(RegisteredWithoutId(sapNumber))
             )
@@ -728,6 +726,7 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
+            mockStoreSession(sessionWithJourneyStatusRegistering)(Right(()))
             mockRegisterWithoutId(registrationReady.registrationDetails)(
               Right(RegisteredWithoutId(sapNumber))
             )
@@ -762,6 +761,7 @@ class RegistrationControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData)
+              mockStoreSession(sessionWithJourneyStatusRegistering)(Right(()))
               mockRegisterWithoutId(registrationReady.registrationDetails)(
                 Right(RegisteredWithoutId(sapNumber))
               )
@@ -808,6 +808,7 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
+            mockStoreSession(sessionWithJourneyStatusRegistering)(Right(()))
             mockRegisterWithoutId(registrationReady.registrationDetails)(
               Right(RegisteredWithoutId(sapNumber))
             )
