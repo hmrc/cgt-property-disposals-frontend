@@ -30,13 +30,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Registering, RegistrationStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{RegistrationRequestEvent, SubscriptionRequestEvent, WrongGGAccountEvent}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
@@ -283,6 +283,13 @@ class RegistrationController @Inject() (
                 .RegistrationReady(registrationDetails, ggCredId)
             ) =>
           val result = for {
+            _                    <- EitherT(
+                                      updateSession(sessionStore, request)(
+                                        _.copy(
+                                          journeyStatus = Some(Registering)
+                                        )
+                                      )
+                                    )
             registrationResponse <- {
               auditService.sendEvent(
                 "registrationRequest",

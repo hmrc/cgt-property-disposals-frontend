@@ -31,6 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{ro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{IvBehaviour, routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubmittingReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Registering
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.{Individual, NonGovernmentGatewayRetrievedUser, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
@@ -174,7 +175,7 @@ class StartController @Inject() (
     request: RequestWithSessionDataAndRetrievedData[AnyContent]
   ): Future[Result] =
     journeyStatus match {
-      case _: Subscribed =>
+      case _: Subscribed | Registering =>
         Redirect(
           controllers.accounts.homepage.routes.HomePageController.homepage()
         )
