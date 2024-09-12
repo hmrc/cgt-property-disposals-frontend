@@ -30,7 +30,7 @@ final case class Postcode(value: String) extends AnyVal
 object Postcode {
 
   val postcodeRegexPredicate: Predicate[String] =
-    "^([A-Z]{2}[\\d]{1,2}[A-Z]?)[\\s]+([\\d][A-Z]{2})$".r.pattern
+    "^([A-Z]{1,2}[\\d]{1,2}[A-Z]?)[\\s]+([\\d][A-Z]{2})$".r.pattern
       .asPredicate()
 
   implicit val format: Format[Postcode] =
@@ -38,15 +38,12 @@ object Postcode {
 
   val mapping: Mapping[Postcode] = {
 
-    def validatePostcode(p: Postcode): ValidationResult = {
-      val postcodeWithoutSpaces =
-        p.value.toUpperCase(Locale.UK).trim
-      if (!postcodeRegexPredicate.test(postcodeWithoutSpaces)) {
+    def validatePostcode(p: Postcode): ValidationResult =
+      if (!postcodeRegexPredicate.test(p.value.toUpperCase(Locale.UK))) {
         Invalid("error.pattern")
       } else {
         Valid
       }
-    }
 
     nonEmptyText
       .transform[Postcode](p => Postcode(p.trim), _.value)
