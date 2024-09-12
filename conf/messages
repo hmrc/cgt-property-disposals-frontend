@@ -291,10 +291,8 @@ address-line2.error.pattern=Building or street line 2 must only include letters,
 address-town.error.pattern=Town or city must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
 address-county.error.pattern=County must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
 
-postcode.error.tooLong=Postcode must be 8 characters or fewer
-postcode.error.required=Enter a postcode
-postcode.error.invalidCharacters=Postcode must only include letters, numbers and spaces
-postcode.error.pattern=Enter a real postcode
+postcode.error.required=Enter a postcode. Postcode must only include letters, numbers and spaces
+postcode.error.pattern=Enter a valid postcode. For example: todo
 postcode.error.noResults=Address not found, you’ll need to follow the link to enter it manually
 filter.error.noResults=Address not found, you’ll need to follow the link to enter it manually
 
