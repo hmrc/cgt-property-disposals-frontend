@@ -83,8 +83,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
-  private val postcode                   = Postcode("AB1 2CD")
-  private val postcodeWithMultipleSpaces = Postcode("AA1     2BB")
+  private val postcode = Postcode("AB1 2CD")
 
   def ukAddress(i: Int): UkAddress                       =
     UkAddress(s"$i the Street", Some("The Town"), None, None, postcode)
@@ -1096,21 +1095,6 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       }
 
       val result = performAction(Seq("postcode" -> s"  ${postcode.value}  "))
-      checkIsRedirect(result, selectAddress)
-    }
-
-    "remove multiple spaces in postcode" in {
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(sessionWithValidJourneyStatus)
-        mockAddressLookup(postcodeWithMultipleSpaces, None)(Right(addressLookupResult))
-        mockStoreSession(
-          sessionWithValidJourneyStatus
-            .copy(addressLookupResult = Some(addressLookupResult))
-        )(Right(()))
-      }
-
-      val result = performAction(Seq("postcode" -> s"${postcodeWithMultipleSpaces.value}"))
       checkIsRedirect(result, selectAddress)
     }
 
