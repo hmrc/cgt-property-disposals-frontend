@@ -30,7 +30,7 @@ final case class Postcode(value: String) extends AnyVal
 object Postcode {
 
   val postcodeRegexPredicate: Predicate[String] =
-    "^([A-Z]{1,2}[\\d]{1,2}[A-Z]?)[\\s]+([\\d][A-Z]{2})$".r.pattern
+    "^([A-Z]{1,2}[\\d]{1,2}[A-Z]?)\\s*([\\d][A-Z]{2})$|BFPO[\\d]{0,3}\\s*([\\d]{1,3})$".r.pattern
       .asPredicate()
 
   implicit val format: Format[Postcode] =
