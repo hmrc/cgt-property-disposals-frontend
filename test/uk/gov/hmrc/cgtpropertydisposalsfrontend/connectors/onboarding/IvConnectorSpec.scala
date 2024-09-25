@@ -30,7 +30,7 @@ import java.util.UUID
 class IvConnectorSpec extends AnyWordSpec with Matchers with ConnectorSupport {
   override lazy val serviceId = "iv"
 
-  private val con = fakeApplication.injector.instanceOf[IvConnector]
+  private val con = app.injector.instanceOf[IvConnector]
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

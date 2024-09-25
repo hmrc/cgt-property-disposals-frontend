@@ -36,13 +36,18 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext
 
-class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with MockFactory
-  with WireMockSupport with WireMockMethods with GuiceOneAppPerSuite with EitherValues {
-
-  val protocol = "http"
-  val templateId             = "id"
-  val linkExpiryTimeMinutes  = 30
-  val selfUrl                = "self"
+class EmailVerificationConnectorImplSpec
+    extends AnyWordSpec
+    with Matchers
+    with MockFactory
+    with WireMockSupport
+    with WireMockMethods
+    with GuiceOneAppPerSuite
+    with EitherValues {
+  val protocol              = "http"
+  val templateId            = "id"
+  val linkExpiryTimeMinutes = 30
+  val selfUrl               = "self"
 
   private val config = Configuration(
     ConfigFactory.parseString(
@@ -62,14 +67,12 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(config).build()
 
   val connector: EmailVerificationConnector = app.injector.instanceOf[EmailVerificationConnector]
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  implicit lazy val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
-  private val emptyJsonBody = "{}"
+  implicit val hc: HeaderCarrier            = HeaderCarrier()
+  implicit lazy val ec: ExecutionContext    = app.injector.instanceOf[ExecutionContext]
+  private val emptyJsonBody                 = "{}"
 
   "EmailVerificationConnectorImpl" when {
-
     "handling requests to verify emails in English" must {
-
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val expectedUrl                = "/email-verification/verification-requests"
       val email                      = Email("email@test.com")
@@ -92,7 +95,6 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
 
       "send a request to the email verification service with the correct details " +
         "and return the response" when {
-
           "handling individuals" in {
             List(
               HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty),
@@ -103,14 +105,14 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
                 method = POST,
                 uri = expectedUrl,
                 body = Some(body(name).toString())
-              ).thenReturn(response.status,response.body)
+              ).thenReturn(response.status, response.body)
 
               val result = await(
                 connector.verifyEmail(email, name, continueCall, AcceptLanguage.EN).value
               ).value
 
               result.status shouldBe response.status
-              result.body shouldBe response.body
+              result.body   shouldBe response.body
 
             }
           }
@@ -121,16 +123,14 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
               method = POST,
               uri = expectedUrl,
               body = Some(body(trustName).toString())
-            ).thenReturn(response.status,response.body)
-
+            ).thenReturn(response.status, response.body)
 
             val result = await(
               connector.verifyEmail(email, trustName, continueCall, AcceptLanguage.EN).value
             ).value
 
             result.status shouldBe response.status
-            result.body shouldBe response.body
-
+            result.body   shouldBe response.body
           }
         }
 
@@ -145,12 +145,10 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
 
           wireMockServer.start()
         }
-
       }
-
     }
-    "handling requests to verify emails in Welsh" must {
 
+    "handling requests to verify emails in Welsh" must {
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val expectedUrl                = "/email-verification/verification-requests"
       val email                      = Email("email@test.com")
@@ -173,7 +171,6 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
 
       "send a request to the email verification service with the correct details " +
         "and return the response" when {
-
           "handling individuals" in {
             List(
               HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty),
@@ -184,15 +181,14 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
                 method = POST,
                 uri = expectedUrl,
                 body = Some(body(name).toString())
-              ).thenReturn(response.status,response.body)
+              ).thenReturn(response.status, response.body)
 
               val result = await(
                 connector.verifyEmail(email, name, continueCall, AcceptLanguage.CY).value
               ).value
 
-
               result.status shouldBe response.status
-              result.body shouldBe response.body
+              result.body   shouldBe response.body
             }
           }
 
@@ -203,18 +199,16 @@ class EmailVerificationConnectorImplSpec extends AnyWordSpec with Matchers with 
               method = POST,
               uri = expectedUrl,
               body = Some(body(trustName).toString())
-            ).thenReturn(response.status,response.body)
+            ).thenReturn(response.status, response.body)
 
             val result = await(
               connector.verifyEmail(email, trustName, continueCall, AcceptLanguage.CY).value
             ).value
 
             result.status shouldBe response.status
-            result.body shouldBe response.body
-
+            result.body   shouldBe response.body
           }
         }
     }
   }
-
 }

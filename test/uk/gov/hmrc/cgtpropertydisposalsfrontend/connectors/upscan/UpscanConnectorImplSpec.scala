@@ -48,7 +48,6 @@ class UpscanConnectorImplSpec
     with WireMockMethods
     with EitherValues
     with HttpSupport {
-
   private val config = Configuration(
     ConfigFactory.parseString(
       s"""
@@ -81,7 +80,6 @@ class UpscanConnectorImplSpec
   private val emptyJsonBody = "{}"
 
   "UpscanConnectorImplSpec" when {
-
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val reference                  = sample[UploadReference]
     val upload                     = sample[UpscanUpload]
@@ -119,7 +117,6 @@ class UpscanConnectorImplSpec
         () => connector.saveUpscanUpload(upload)
       )
     }
-
   }
 
   private def upscanConnectorBehaviour(
@@ -151,12 +148,12 @@ class UpscanConnectorImplSpec
           }
         }
       }
+
       "the future fails" in {
         wireMockServer.stop()
         await(performCall().value).isLeft shouldBe true
         wireMockServer.start()
       }
-
     }
   }
 }

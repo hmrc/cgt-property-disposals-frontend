@@ -46,7 +46,7 @@ import java.util.{Locale, UUID}
 
 class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorSupport {
   override lazy val serviceId                  = "cgt-property-disposals"
-  private val con                              = fakeApplication.injector.instanceOf[ReturnsConnector]
+  private val con                              = app.injector.instanceOf[ReturnsConnector]
   private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
 
   implicit val hc: HeaderCarrier = HeaderCarrier()

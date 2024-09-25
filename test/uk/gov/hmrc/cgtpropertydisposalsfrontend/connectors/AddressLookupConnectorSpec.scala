@@ -33,7 +33,7 @@ import scala.util.chaining.scalaUtilChainingOps
 class AddressLookupConnectorSpec extends AnyWordSpec with Matchers with ConnectorSupport {
   override lazy val serviceId = "address-lookup"
 
-  private val con = fakeApplication.injector.instanceOf[AddressLookupConnector]
+  private val con = app.injector.instanceOf[AddressLookupConnector]
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
