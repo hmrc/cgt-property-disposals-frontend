@@ -16,14 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
-import com.typesafe.config.ConfigFactory
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.EitherValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application, Configuration}
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -32,50 +27,21 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.WireMockMethods
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
-import uk.gov.hmrc.http.test.WireMockSupport
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{ConnectorSupport, WireMockMethods}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import java.time.LocalDate
-import scala.concurrent.ExecutionContext
 
 class PaymentsConnectorImplSpec
     extends AnyWordSpec
     with Matchers
-    with MockFactory
-    with GuiceOneAppPerSuite
-    with WireMockSupport
+    with ConnectorSupport
     with WireMockMethods
     with EitherValues {
+  override lazy val serviceId = "payments"
 
-  val selfUrl = "https://self:999"
+  private val connector = app.injector.instanceOf[PaymentsConnector]
 
-  private val config = Configuration(
-    ConfigFactory.parseString(
-      s"""
-        |microservice {
-        |  services {
-        |    payments {
-        |      protocol = http
-        |      host     = $wireMockHost
-        |      port     = $wireMockPort
-        |    }
-        |  }
-        |}
-        |
-        |self.url = "$selfUrl"
-        |""".stripMargin
-    )
-  )
-
-  override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(config).build()
-  val mockHttp: HttpClient                    = app.injector.instanceOf[HttpClient]
-  implicit lazy val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
-  val connector = new PaymentsConnectorImpl(
-    mockHttp,
-    new ServicesConfig(config)
-  )
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   "PaymentsConnectorImpl" when {
@@ -87,6 +53,7 @@ class PaymentsConnectorImplSpec
       val returnCall      = controllers.routes.StartController.start()
       val backCall        = controllers.returns.routes.TaskListController.taskList()
       val expectedUrl     = "/pay-api/capital-gains-tax/journey/start"
+
       "do a get http call and return the result" in {
         List(
           HttpResponse(200, "{}"),
@@ -155,13 +122,7 @@ class PaymentsConnectorImplSpec
 
           await(
             connector
-              .startPaymentJourney(
-                cgtReference,
-                Some(chargeReference),
-                amount,
-                Some(dueDate),
-                returnCall,
-                backCall)
+              .startPaymentJourney(cgtReference, Some(chargeReference), amount, Some(dueDate), returnCall, backCall)
               .value
           ).isLeft shouldBe true
           wireMockServer.start()

@@ -26,6 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.{AddressLookupResponse, RawAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ConnectorSupport
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.util.chaining.scalaUtilChainingOps
 
@@ -33,6 +34,8 @@ class AddressLookupConnectorSpec extends AnyWordSpec with Matchers with Connecto
   override lazy val serviceId = "address-lookup"
 
   private val con = fakeApplication.injector.instanceOf[AddressLookupConnector]
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   "getDraftReturns" should {
     val correctBody =

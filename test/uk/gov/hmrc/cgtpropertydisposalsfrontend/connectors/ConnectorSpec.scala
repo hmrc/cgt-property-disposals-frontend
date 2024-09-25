@@ -27,7 +27,6 @@ import uk.gov.hmrc.http.HttpResponse
 import scala.concurrent.Future
 
 trait ConnectorSpec { this: Matchers with AnyWordSpec =>
-
   protected def connectorBehaviour(
     mockResponse: Option[HttpResponse] => Unit,
     performCall: () => EitherT[Future, Error, HttpResponse]
@@ -47,14 +46,11 @@ trait ConnectorSpec { this: Matchers with AnyWordSpec =>
     }
 
     "return an error" when {
-
       "the future fails" in {
         mockResponse(None)
 
         await(performCall().value).isLeft shouldBe true
       }
-
     }
   }
-
 }

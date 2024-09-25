@@ -72,11 +72,9 @@ class CGTPropertyDisposalsConnectorImplSpec
     )
 
   "CGTPropertyDisposalsConnectorImpl" when {
-
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     "handling request to update to the subscription details" must {
-
       val subscriptionStatusUrl =
         "https://host:123/cgt-property-disposals/subscription"
 
