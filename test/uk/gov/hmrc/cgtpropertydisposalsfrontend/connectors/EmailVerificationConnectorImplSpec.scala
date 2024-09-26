@@ -17,11 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import com.typesafe.config.ConfigFactory
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.EitherValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsString, JsValue, Json}
 import play.api.mvc.Call
@@ -30,31 +28,24 @@ import play.api.{Application, Configuration}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.WireMockMethods
-import uk.gov.hmrc.http.test.WireMockSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{ConnectorSupport, WireMockMethods}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-
-import scala.concurrent.ExecutionContext
 
 class EmailVerificationConnectorImplSpec
     extends AnyWordSpec
     with Matchers
-    with MockFactory
-    with WireMockSupport
+    with ConnectorSupport
     with WireMockMethods
-    with GuiceOneAppPerSuite
     with EitherValues {
-  val protocol              = "http"
+  override def serviceId: String = "email-verification"
+
   val templateId            = "id"
   val linkExpiryTimeMinutes = 30
-  val selfUrl               = "self"
 
   private val config = Configuration(
     ConfigFactory.parseString(
       s"""
         |microservice.services.email-verification{
-        |  protocol    = "$protocol"
-        |  host        = "$wireMockHost"
         |  port        = "$wireMockPort"
         |  template-id = "$templateId"
         |  link-expiry-time = "$linkExpiryTimeMinutes minutes"
@@ -67,8 +58,6 @@ class EmailVerificationConnectorImplSpec
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(config).build()
 
   val connector: EmailVerificationConnector = app.injector.instanceOf[EmailVerificationConnector]
-  implicit val hc: HeaderCarrier            = HeaderCarrier()
-  implicit lazy val ec: ExecutionContext    = app.injector.instanceOf[ExecutionContext]
   private val emptyJsonBody                 = "{}"
 
   "EmailVerificationConnectorImpl" when {
@@ -113,7 +102,6 @@ class EmailVerificationConnectorImplSpec
 
               result.status shouldBe response.status
               result.body   shouldBe response.body
-
             }
           }
 

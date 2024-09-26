@@ -98,7 +98,6 @@ class PaymentsConnectorImplSpec
 
       "return an error" when {
         "the future fails" in {
-          wireMockServer.stop()
           when(
             POST,
             expectedUrl,
@@ -118,14 +117,13 @@ class PaymentsConnectorImplSpec
                 )
                 .toString()
             )
-          )
+          ).thenFail
 
           await(
             connector
               .startPaymentJourney(cgtReference, Some(chargeReference), amount, Some(dueDate), returnCall, backCall)
               .value
           ).isLeft shouldBe true
-          wireMockServer.start()
         }
       }
     }

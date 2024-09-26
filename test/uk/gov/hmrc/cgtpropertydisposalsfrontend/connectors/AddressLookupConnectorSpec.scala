@@ -52,6 +52,7 @@ class AddressLookupConnectorSpec extends AnyWordSpec with Matchers with Connecto
         |]
         |""".stripMargin
     val url         = "/lookup"
+
     "call the correct endpoint" in {
       stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, correctBody)))
 
