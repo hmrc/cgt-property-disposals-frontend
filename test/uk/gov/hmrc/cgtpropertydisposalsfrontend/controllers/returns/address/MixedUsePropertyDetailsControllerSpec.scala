@@ -607,7 +607,7 @@ class MixedUsePropertyDetailsControllerSpec
             "address-line1" -> "1 the Street",
             "postcode"      -> "W1A,2HV"
           )(
-            "postcode.error.invalidCharacters",
+            "postcode.error.pattern",
             "address.uk.returns.singleDisposal.title"
           )
         }

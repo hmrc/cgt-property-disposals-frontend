@@ -50,7 +50,7 @@ trait PostcodeFormValidationTests { this: ControllerSpec =>
             val result = performAction(Seq("postcode" -> invalidPostcode))
             status(result)        shouldBe BAD_REQUEST
             contentAsString(result) should include(
-              messageFromMessageKey("postcode.error.tooLong")
+              messageFromMessageKey("postcode.error.pattern")
             )
           }
         }
@@ -60,7 +60,7 @@ trait PostcodeFormValidationTests { this: ControllerSpec =>
         List(
           "A00A"     -> "postcode.error.pattern",
           "AA0A0AAA" -> "postcode.error.pattern",
-          "AA0.0AA"  -> "postcode.error.invalidCharacters",
+          "AA0.0AA"  -> "postcode.error.pattern",
           "AAA123"   -> "postcode.error.pattern",
           "A11AAA"   -> "postcode.error.pattern"
         ).foreach { case (invalidPostcode, errorMessageKey) =>

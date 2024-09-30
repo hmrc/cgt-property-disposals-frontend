@@ -937,7 +937,7 @@ class CompanyDetailsControllerSpec
             "address-line1" -> "1 the Street",
             "postcode"      -> "W1A,2HV"
           )(
-            "postcode.companyDetails.error.invalidCharacters",
+            "postcode.companyDetails.error.pattern",
             "address.uk.companyDetails.title"
           )
         }
@@ -1179,7 +1179,7 @@ class CompanyDetailsControllerSpec
               "address-line1" -> "1 the Street",
               "postcode"      -> "W1A,2HV"
             )(
-              "postcode.companyDetails.error.invalidCharacters",
+              "postcode.companyDetails.error.pattern",
               s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
