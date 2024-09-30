@@ -23,18 +23,22 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ConnectorSupport
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.util.UUID
 
 class IvConnectorSpec extends AnyWordSpec with Matchers with ConnectorSupport {
   override lazy val serviceId = "iv"
 
-  private val con = fakeApplication.injector.instanceOf[IvConnector]
+  private val con = app.injector.instanceOf[IvConnector]
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   "getDraftReturns" should {
     val correctBody = """{ "result": "foobar" }"""
     val uuid        = UUID.randomUUID()
     val url         = s"/mdtp/journey/journeyId/$uuid"
+
     "call the correct endpoint" in {
       stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, correctBody)))
 

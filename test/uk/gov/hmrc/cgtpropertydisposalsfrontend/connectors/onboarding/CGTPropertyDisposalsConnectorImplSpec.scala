@@ -16,18 +16,17 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 
-import com.typesafe.config.ConfigFactory
-import org.scalamock.scalatest.MockFactory
+import org.scalatest.EitherValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.Configuration
-import play.api.http.HeaderNames
 import play.api.i18n.Lang
-import play.api.libs.json.Json
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{CGTPropertyDisposalsConnectorImpl, ConnectorSpec, HttpSupport}
+import play.api.libs.json.{JsString, Json}
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TelephoneNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
@@ -35,51 +34,24 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.OnboardingDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{ConnectorSupport, WireMockMethods}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 class CGTPropertyDisposalsConnectorImplSpec
     extends AnyWordSpec
     with Matchers
-    with MockFactory
-    with HttpSupport
-    with ConnectorSpec {
+    with ConnectorSupport
+    with WireMockMethods
+    with EitherValues {
+  override lazy val serviceId = "cgt-property-disposals"
 
-  private val config = Configuration(
-    ConfigFactory.parseString(
-      """
-      |microservice {
-      |  services {
-      |    cgt-property-disposals {
-      |      protocol = https
-      |      host     = host
-      |      port     = 123
-      |    }
-      |  }
-      |}
-      |""".stripMargin
-    )
-  )
-
-  val connector =
-    new CGTPropertyDisposalsConnectorImpl(
-      mockHttp,
-      new ServicesConfig(config)
-    )
+  private val connector = app.injector.instanceOf[CGTPropertyDisposalsConnector]
 
   "CGTPropertyDisposalsConnectorImpl" when {
-
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     "handling request to update to the subscription details" must {
-
-      val subscriptionStatusUrl =
-        "https://host:123/cgt-property-disposals/subscription"
-
       val newSubscribedDetails = SubscribedDetails(
         Right(IndividualName("Stephen", "Wood")),
         Email("stephen@abc.co.uk"),
@@ -115,35 +87,109 @@ class CGTPropertyDisposalsConnectorImplSpec
       val subscribedUpdateDetails =
         SubscribedUpdateDetails(newSubscribedDetails, previousSubscribedDetails)
 
-      behave like connectorBehaviour(
-        mockPut(subscriptionStatusUrl, subscribedUpdateDetails)(_),
-        () => connector.updateSubscribedDetails(subscribedUpdateDetails)
-      )
+      "do a get http call and return the result" in {
+        List(
+          HttpResponse(200, "{}"),
+          HttpResponse(200, JsString("hi"), Map.empty[String, Seq[String]]),
+          HttpResponse(500, "{}")
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            when(
+              PUT,
+              "/cgt-property-disposals/subscription",
+              body = Some(Json.toJson(subscribedUpdateDetails).toString())
+            )
+              .thenReturn(httpResponse.status, httpResponse.body)
+
+            val result = await(connector.updateSubscribedDetails(subscribedUpdateDetails).value).value
+            result.status shouldBe httpResponse.status
+            result.body   shouldBe httpResponse.body
+          }
+        }
+      }
+
+      "return an error" when {
+        "the future fails" in {
+          when(
+            PUT,
+            "/cgt-property-disposals/subscription",
+            body = Some(Json.toJson(subscribedUpdateDetails).toString())
+          ).thenFail
+
+          await(connector.updateSubscribedDetails(subscribedUpdateDetails).value).isLeft shouldBe true
+        }
+      }
     }
 
     "handling request to get the subscription status" must {
+      "do a get http call and return the result" in {
+        List(
+          HttpResponse(200, "{}"),
+          HttpResponse(200, JsString("hi"), Map.empty[String, Seq[String]]),
+          HttpResponse(500, "{}")
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            when(
+              GET,
+              "/cgt-property-disposals/check-subscription-status"
+            )
+              .thenReturn(httpResponse.status, httpResponse.body)
 
-      val subscriptionStatusUrl =
-        "https://host:123/cgt-property-disposals/check-subscription-status"
+            val result = await(connector.getSubscriptionStatus().value).value
+            result.status shouldBe httpResponse.status
+            result.body   shouldBe httpResponse.body
+          }
+        }
+      }
 
-      behave like connectorBehaviour(
-        mockGet(subscriptionStatusUrl)(_),
-        () => connector.getSubscriptionStatus()
-      )
+      "return an error" when {
+        "the future fails" in {
+          when(
+            GET,
+            "/cgt-property-disposals/check-subscription-status"
+          ).thenFail
+
+          await(connector.getSubscriptionStatus().value).isLeft shouldBe true
+        }
+      }
     }
 
     "handling request to get the business partner record" must {
-
-      val bprUrl     =
-        "https://host:123/cgt-property-disposals/business-partner-record"
       val bprRequest = sample[BusinessPartnerRecordRequest]
       val lang       = Lang.defaultLang
 
-      behave like connectorBehaviour(
-        mockPost(bprUrl, Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language), Json.toJson(bprRequest))(_),
-        () => connector.getBusinessPartnerRecord(bprRequest, lang)
-      )
+      "do a get http call and return the result" in {
+        List(
+          HttpResponse(200, "{}"),
+          HttpResponse(200, JsString("hi"), Map.empty[String, Seq[String]]),
+          HttpResponse(500, "{}")
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            when(
+              POST,
+              "/cgt-property-disposals/business-partner-record",
+              body = Some(Json.toJson(bprRequest).toString())
+            )
+              .thenReturn(httpResponse.status, httpResponse.body)
 
+            val result = await(connector.getBusinessPartnerRecord(bprRequest, lang).value).value
+            result.status shouldBe httpResponse.status
+            result.body   shouldBe httpResponse.body
+          }
+        }
+      }
+
+      "return an error" when {
+        "the future fails" in {
+          when(
+            POST,
+            "/cgt-property-disposals/business-partner-record",
+            body = Some(Json.toJson(bprRequest).toString())
+          ).thenFail
+
+          await(connector.getBusinessPartnerRecord(bprRequest, lang).value).isLeft shouldBe true
+        }
+      }
     }
 
     "handling request to subscribe" must {
@@ -151,41 +197,110 @@ class CGTPropertyDisposalsConnectorImplSpec
 
       val lang = Lang("CY")
 
-      behave like connectorBehaviour(
-        mockPost(
-          "https://host:123/cgt-property-disposals/subscription",
-          Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language),
-          Json.toJson(subscriptionDetails)
-        )(_),
-        () => connector.subscribe(subscriptionDetails, lang)
-      )
+      "do a get http call and return the result" in {
+        List(
+          HttpResponse(200, "{}"),
+          HttpResponse(200, JsString("hi"), Map.empty[String, Seq[String]]),
+          HttpResponse(500, "{}")
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            when(
+              POST,
+              "/cgt-property-disposals/subscription",
+              body = Some(Json.toJson(subscriptionDetails).toString())
+            )
+              .thenReturn(httpResponse.status, httpResponse.body)
+
+            val result = await(connector.subscribe(subscriptionDetails, lang).value).value
+            result.status shouldBe httpResponse.status
+            result.body   shouldBe httpResponse.body
+          }
+        }
+      }
+
+      "return an error" when {
+        "the future fails" in {
+          when(
+            POST,
+            "/cgt-property-disposals/subscription",
+            body = Some(Json.toJson(subscriptionDetails).toString())
+          ).thenFail
+
+          await(connector.subscribe(subscriptionDetails, lang).value).isLeft shouldBe true
+        }
+      }
     }
 
     "handling request to register without id" must {
       val registrationDetails = sample[RegistrationDetails]
 
-      behave like connectorBehaviour(
-        mockPost(
-          "https://host:123/cgt-property-disposals/register-without-id",
-          Seq.empty,
-          Json.toJson(registrationDetails)
-        )(_),
-        () => connector.registerWithoutId(registrationDetails)
-      )
+      "do a get http call and return the result" in {
+        List(
+          HttpResponse(200, "{}"),
+          HttpResponse(200, JsString("hi"), Map.empty[String, Seq[String]]),
+          HttpResponse(500, "{}")
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            when(
+              POST,
+              "/cgt-property-disposals/register-without-id",
+              body = Some(Json.toJson(registrationDetails).toString())
+            )
+              .thenReturn(httpResponse.status, httpResponse.body)
 
+            val result = await(connector.registerWithoutId(registrationDetails).value).value
+            result.status shouldBe httpResponse.status
+            result.body   shouldBe httpResponse.body
+          }
+        }
+      }
+
+      "return an error" when {
+        "the future fails" in {
+          when(
+            POST,
+            "/cgt-property-disposals/register-without-id",
+            body = Some(Json.toJson(registrationDetails).toString())
+          ).thenFail
+
+          await(connector.registerWithoutId(registrationDetails).value).isLeft shouldBe true
+        }
+      }
     }
 
     "handling request to get subscribed details" must {
       val cgtReference = sample[CgtReference]
 
-      behave like connectorBehaviour(
-        mockGet(
-          s"https://host:123/cgt-property-disposals/subscription/${cgtReference.value}"
-        )(_),
-        () => connector.getSubscribedDetails(cgtReference)
-      )
+      "do a get http call and return the result" in {
+        List(
+          HttpResponse(200, "{}"),
+          HttpResponse(200, JsString("hi"), Map.empty[String, Seq[String]]),
+          HttpResponse(500, "{}")
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            when(
+              GET,
+              s"/cgt-property-disposals/subscription/${cgtReference.value}"
+            )
+              .thenReturn(httpResponse.status, httpResponse.body)
 
+            val result = await(connector.getSubscribedDetails(cgtReference).value).value
+            result.status shouldBe httpResponse.status
+            result.body   shouldBe httpResponse.body
+          }
+        }
+      }
+
+      "return an error" when {
+        "the future fails" in {
+          when(
+            GET,
+            s"/cgt-property-disposals/subscription/${cgtReference.value}"
+          ).thenFail
+
+          await(connector.getSubscribedDetails(cgtReference).value).isLeft shouldBe true
+        }
+      }
     }
   }
-
 }

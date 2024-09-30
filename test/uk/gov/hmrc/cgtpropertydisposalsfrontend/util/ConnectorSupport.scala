@@ -16,38 +16,24 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
-import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.{ResponseDefinitionBuilder, WireMock}
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import org.scalatest.{BeforeAndAfterEach, Suite}
+import org.scalatest.{Suite, TestSuite}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.test.WireMockSupport
 
-trait ConnectorSupport extends BeforeAndAfterEach {
-  this: Suite =>
+trait ConnectorSupport extends WireMockSupport with GuiceOneAppPerSuite {
+  this: Suite with TestSuite =>
+  def serviceId: String
 
-  lazy val serviceId: String = throw new Exception("You must override `serviceId` in your test class")
+  val selfUrl = "https://self:999"
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  val Port                       = 11119
-  val Host                       = "localhost"
-  val wireMockServer             = new WireMockServer(WireMockConfiguration.wireMockConfig().port(Port))
-
-  lazy val fakeApplication: Application = new GuiceApplicationBuilder()
-    .bindings()
-    .configure(s"microservice.services.$serviceId.port" -> "11119")
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .configure(s"microservice.services.$serviceId.port" -> s"$wireMockPort")
+    .configure("self.url" -> s"$selfUrl")
     .build()
-
-  override def beforeEach(): Unit = {
-    wireMockServer.start()
-    wireMockServer.resetAll()
-    WireMock.configureFor(Host, Port)
-  }
-
-  override def afterEach(): Unit =
-    wireMockServer.stop()
 
   def jsonResponse(status: Int, body: String): ResponseDefinitionBuilder =
     aResponse().withStatus(status).withHeader("Content-Type", "application/json").withBody(body)

@@ -18,17 +18,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan
 
 import cats.data.EitherT
 import com.typesafe.config.ConfigFactory
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.EitherValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application, Configuration}
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Call
 import play.api.test.Helpers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.HttpSupport
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
@@ -37,18 +35,16 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.WireMockMethods
 import uk.gov.hmrc.http.test.WireMockSupport
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+
 import scala.concurrent.Future
 
 class UpscanConnectorImplSpec
     extends AnyWordSpec
     with Matchers
-    with MockFactory
     with GuiceOneAppPerSuite
     with WireMockSupport
     with WireMockMethods
-    with EitherValues
-    with HttpSupport {
-
+    with EitherValues {
   private val config = Configuration(
     ConfigFactory.parseString(
       s"""
@@ -58,15 +54,11 @@ class UpscanConnectorImplSpec
         |  microservice {
         |    services {
         |      upscan-initiate {
-        |        protocol = http
-        |        host     = $wireMockHost
         |        port     = $wireMockPort
         |        user-agent = agent
         |        max-file-size = 1234
         |      },
         |      cgt-property-disposals {
-        |        protocol = http
-        |        host     = $wireMockHost
         |        port     = $wireMockPort
         |      }
         |   }
@@ -81,7 +73,6 @@ class UpscanConnectorImplSpec
   private val emptyJsonBody = "{}"
 
   "UpscanConnectorImplSpec" when {
-
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val reference                  = sample[UploadReference]
     val upload                     = sample[UpscanUpload]
@@ -102,7 +93,6 @@ class UpscanConnectorImplSpec
         when(POST, expectedUrl, body = Some(Json.toJson(payload).toString())),
         () => connector.initiate(mockFailure, mockSuccess, reference)
       )
-
     }
 
     "getting the upscan upload" must {
@@ -119,7 +109,6 @@ class UpscanConnectorImplSpec
         () => connector.saveUpscanUpload(upload)
       )
     }
-
   }
 
   private def upscanConnectorBehaviour(
@@ -151,12 +140,12 @@ class UpscanConnectorImplSpec
           }
         }
       }
+
       "the future fails" in {
         wireMockServer.stop()
         await(performCall().value).isLeft shouldBe true
         wireMockServer.start()
       }
-
     }
   }
 }

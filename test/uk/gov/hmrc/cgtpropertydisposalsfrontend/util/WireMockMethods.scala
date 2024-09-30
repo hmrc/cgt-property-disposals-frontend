@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Writes
@@ -66,6 +67,8 @@ trait WireMockMethods {
     def thenReturn(status: Int, headers: Map[String, String] = Map.empty): StubMapping =
       thenReturnInternal(status, headers, None)
 
+    def thenFail: StubMapping = thenFailInternal
+
     private def thenReturnInternal(status: Int, headers: Map[String, String], body: Option[String]): StubMapping = {
       val response = {
         val statusResponse      = aResponse().withStatus(status)
@@ -80,6 +83,9 @@ trait WireMockMethods {
 
       stubFor(mapping.willReturn(response))
     }
+
+    private def thenFailInternal: StubMapping =
+      stubFor(mapping.willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE)))
   }
 
   sealed trait HTTPMethod {
