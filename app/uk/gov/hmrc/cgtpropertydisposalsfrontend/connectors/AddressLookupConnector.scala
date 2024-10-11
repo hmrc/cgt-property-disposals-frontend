@@ -25,7 +25,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.AddressLookupResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.net.URLEncoder
@@ -35,30 +36,27 @@ import scala.util.chaining.scalaUtilChainingOps
 
 @ImplementedBy(classOf[AddressLookupConnectorImpl])
 trait AddressLookupConnector {
-
   def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, AddressLookupResponse]
-
 }
 
 @Singleton
 class AddressLookupConnectorImpl @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   servicesConfig: ServicesConfig
 )(implicit
   ec: ExecutionContext
 ) extends AddressLookupConnector
     with Logging {
+  private val url = servicesConfig.baseUrl("address-lookup") + "/lookup"
 
-  val url: String = servicesConfig.baseUrl("address-lookup") + "/lookup"
-
-  val headers: Seq[(String, String)] = {
+  private val headers = {
     val userAgent = servicesConfig.getString("microservice.services.address-lookup.user-agent")
     Seq("User-Agent" -> userAgent)
   }
 
-  override def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
+  def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, AddressLookupResponse] = {
     val body = LookupAddressByPostcode(
@@ -66,7 +64,10 @@ class AddressLookupConnectorImpl @Inject() (
       filter.map(f => URLEncoder.encode(f, "UTF-8"))
     )
     http
-      .POST[LookupAddressByPostcode, Either[UpstreamErrorResponse, AddressLookupResponse]](url, body, headers)
+      .post(url"$url")
+      .withBody(Json.toJson(body))
+      .setHeader(headers: _*)
+      .execute[Either[UpstreamErrorResponse, AddressLookupResponse]]
       .map(_.left.map { error =>
         logger.error(s"POST to $url failed", error)
         Error(s"Response to address lookup came back with status ${error.statusCode}")
@@ -77,11 +78,9 @@ class AddressLookupConnectorImpl @Inject() (
 }
 
 object AddressLookupConnector {
-
   final case class LookupAddressByPostcode(postcode: String, filter: Option[String])
 
   object LookupAddressByPostcode {
     implicit val writes: OFormat[LookupAddressByPostcode] = Json.format[LookupAddressByPostcode]
   }
-
 }

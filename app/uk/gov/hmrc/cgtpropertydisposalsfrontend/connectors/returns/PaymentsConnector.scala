@@ -18,14 +18,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.PaymentsConnectorImpl.StartPaymentJourneyRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.LocalDate
@@ -34,7 +35,6 @@ import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[PaymentsConnectorImpl])
 trait PaymentsConnector {
-
   def startPaymentJourney(
     cgtReference: CgtReference,
     chargeReference: Option[String],
@@ -43,46 +43,43 @@ trait PaymentsConnector {
     returnUrl: Call,
     backUrl: Call
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, Error, HttpResponse]
-
 }
 
 @Singleton
 class PaymentsConnectorImpl @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   servicesConfig: ServicesConfig
 )(implicit ec: ExecutionContext)
     extends PaymentsConnector {
+  private val paymentsBaseUrl = servicesConfig.baseUrl("payments")
 
-  private val paymentsBaseUrl: String = servicesConfig.baseUrl("payments")
+  private val selfBaseUrl = servicesConfig.getString("self.url")
 
-  val selfBaseUrl: String = servicesConfig.getString("self.url")
-
-  private val startPaymentJourneyUrl: String =
+  private val startPaymentJourneyUrl =
     s"$paymentsBaseUrl/pay-api/capital-gains-tax/journey/start"
 
-  override def startPaymentJourney(
+  def startPaymentJourney(
     cgtReference: CgtReference,
     chargeReference: Option[String],
     amount: AmountInPence,
     dueDate: Option[LocalDate],
     returnUrl: Call,
     backUrl: Call
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
+    val body = StartPaymentJourneyRequest(
+      cgtReference.value,
+      chargeReference,
+      amount.value,
+      dueDate,
+      s"$selfBaseUrl${returnUrl.url}",
+      s"$selfBaseUrl${backUrl.url}"
+    )
+
     EitherT(
       http
-        .POST[JsValue, HttpResponse](
-          startPaymentJourneyUrl,
-          Json.toJson(
-            StartPaymentJourneyRequest(
-              cgtReference.value,
-              chargeReference,
-              amount.value,
-              dueDate,
-              s"$selfBaseUrl${returnUrl.url}",
-              s"$selfBaseUrl${backUrl.url}"
-            )
-          )
-        )
+        .post(url"$startPaymentJourneyUrl")
+        .withBody(Json.toJson(body))
+        .execute[HttpResponse]
         .map(
           Right(_)
         )
@@ -90,11 +87,10 @@ class PaymentsConnectorImpl @Inject() (
           Left(Error(e))
         }
     )
-
+  }
 }
 
 object PaymentsConnectorImpl {
-
   final case class StartPaymentJourneyRequest(
     cgtReference: String,
     chargeReference: Option[String],
@@ -107,5 +103,4 @@ object PaymentsConnectorImpl {
   object StartPaymentJourneyRequest {
     implicit val format: Writes[StartPaymentJourneyRequest] = Json.writes
   }
-
 }

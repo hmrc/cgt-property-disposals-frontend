@@ -22,7 +22,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.util.UUID
@@ -36,22 +37,22 @@ trait IvConnector {
 
 @Singleton
 class IvConnectorImpl @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   servicesConfig: ServicesConfig
 )(implicit
   ec: ExecutionContext
 ) extends IvConnector
     with Logging {
+  private val baseUrl = servicesConfig.baseUrl("iv")
 
-  val baseUrl: String = servicesConfig.baseUrl("iv")
+  private def url(journeyId: UUID) = s"$baseUrl/mdtp/journey/journeyId/${journeyId.toString}"
 
-  def url(journeyId: UUID): String = s"$baseUrl/mdtp/journey/journeyId/${journeyId.toString}"
-
-  override def getFailedJourneyStatus(
+  def getFailedJourneyStatus(
     journeyId: UUID
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, IvStatusResponse] =
     http
-      .GET[Either[UpstreamErrorResponse, IvStatusResponse]](url(journeyId))
+      .get(url"${url(journeyId)}")
+      .execute[Either[UpstreamErrorResponse, IvStatusResponse]]
       .map(_.left.map { error =>
         logger.error(s"GET to ${url(journeyId)} failed", error)
         Error(s"Response to address lookup came back with status ${error.statusCode}")

@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.{Format, JsValue, Json}
+import play.api.libs.json.{Format, Json}
 import play.api.mvc.Call
 import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnectorImpl.EmailVerificationRequest
@@ -27,7 +27,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
 import java.util.Locale
 import scala.concurrent.duration.FiniteDuration
@@ -42,7 +43,7 @@ trait EmailVerificationConnector {
 
 @Singleton
 class EmailVerificationConnectorImpl @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   config: Configuration
 )(implicit ec: ExecutionContext)
     extends EmailVerificationConnector {
@@ -80,7 +81,9 @@ class EmailVerificationConnectorImpl @Inject() (
 
     EitherT[Future, Error, HttpResponse](
       http
-        .POST[JsValue, HttpResponse](url, Json.toJson(body))
+        .post(url"$url")
+        .withBody(Json.toJson(body))
+        .execute[HttpResponse]
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
