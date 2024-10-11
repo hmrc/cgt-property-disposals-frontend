@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results.InternalServerError
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{Request, RequestHeader, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
@@ -26,23 +26,24 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ErrorHandler @Inject() (
   val messagesApi: MessagesApi,
   error_template: views.html.error_template
 )(implicit
-  val appConfig: ViewConfig
+  val appConfig: ViewConfig,
+  val ec: ExecutionContext
 ) extends FrontendErrorHandler {
-
   override def standardErrorTemplate(
     pageTitle: String,
     heading: String,
     message: String
   )(implicit
-    request: Request[_]
-  ): Html =
-    error_template(None, pageTitle, heading, message)
+    request: RequestHeader
+  ): Future[Html] =
+    Future.successful(error_template(None, pageTitle, heading, message))
 
   def errorResult[R <: Request[_]](
     userType: Option[UserType]
@@ -58,5 +59,4 @@ class ErrorHandler @Inject() (
 
   def errorResult()(implicit request: RequestWithSessionData[_]): Result =
     errorResult(request.userType)
-
 }
