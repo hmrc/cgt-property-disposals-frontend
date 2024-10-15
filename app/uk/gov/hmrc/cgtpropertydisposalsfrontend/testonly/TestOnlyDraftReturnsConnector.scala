@@ -19,7 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,23 +28,20 @@ import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[TestOnlyDraftReturnsConnectorImpl])
 trait TestOnlyDraftReturnsConnector {
-
   def deleteDraftReturn(cgtReference: String): EitherT[Future, Error, HttpResponse]
-
 }
 
 @Singleton
 class TestOnlyDraftReturnsConnectorImpl @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   servicesConfig: ServicesConfig
 )(implicit
   ec: ExecutionContext
 ) extends TestOnlyDraftReturnsConnector {
-
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  val baseUrl: String            = servicesConfig.baseUrl("cgt-property-disposals")
+  private val baseUrl            = servicesConfig.baseUrl("cgt-property-disposals")
 
-  def deleteDraftReturnsUrl(cgtReference: String): String =
+  def deleteDraftReturnsUrl(cgtReference: String) =
     s"$baseUrl/test-only/cgt-property-disposals/draftReturn/$cgtReference"
 
   def deleteDraftReturn(
@@ -51,11 +49,11 @@ class TestOnlyDraftReturnsConnectorImpl @Inject() (
   ): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .doDelete(deleteDraftReturnsUrl(cgtReference))
+        .delete(url"${deleteDraftReturnsUrl(cgtReference)}")
+        .execute[HttpResponse]
         .map(Right(_))
         .recover { case NonFatal(e) =>
           Left(Error(e))
         }
     )
-
 }

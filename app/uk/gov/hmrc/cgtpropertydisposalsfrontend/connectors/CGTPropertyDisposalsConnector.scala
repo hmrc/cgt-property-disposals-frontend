@@ -20,20 +20,20 @@ import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.HeaderNames
 import play.api.i18n.Lang
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[CGTPropertyDisposalsConnectorImpl])
 trait CGTPropertyDisposalsConnector {
-
   def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
@@ -67,83 +67,85 @@ trait CGTPropertyDisposalsConnector {
 
 @Singleton
 class CGTPropertyDisposalsConnectorImpl @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   servicesConfig: ServicesConfig
 )(implicit
   ec: ExecutionContext
 ) extends CGTPropertyDisposalsConnector {
-
-  val baseUrl: String =
+  private val baseUrl =
     servicesConfig.baseUrl("cgt-property-disposals") + "/cgt-property-disposals"
 
-  val bprUrl: String = s"$baseUrl/business-partner-record"
+  private val bprUrl = s"$baseUrl/business-partner-record"
 
   private val subscribeUrl = s"$baseUrl/subscription"
 
   private val registerWithoutIdAndSubscribeUrl = s"$baseUrl/register-without-id"
 
-  val subscriptionStatusUrl: String = s"$baseUrl/check-subscription-status"
+  private val subscriptionStatusUrl: String = s"$baseUrl/check-subscription-status"
 
   private val subscriptionUpdateUrl = s"$baseUrl/subscription"
 
   private def getSubscribedDetailsUrl(cgtReference: CgtReference) =
     s"$baseUrl/subscription/${cgtReference.value}"
 
-  override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(implicit
+  def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest, lang: Lang)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(
-      _.POST[JsValue, HttpResponse](bprUrl, Json.toJson(request), Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language))
+      _.post(url"$bprUrl")
+        .withBody(Json.toJson(request))
+        .setHeader((HeaderNames.ACCEPT_LANGUAGE, lang.language))
+        .execute[HttpResponse]
     )
 
-  override def subscribe(
+  def subscribe(
     subscriptionDetails: SubscriptionDetails,
     lang: Lang
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     makeCall(
-      _.POST[JsValue, HttpResponse](
-        subscribeUrl,
-        Json.toJson(subscriptionDetails),
-        Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.language)
-      )
+      _.post(url"$subscribeUrl")
+        .withBody(Json.toJson(subscriptionDetails))
+        .setHeader((HeaderNames.ACCEPT_LANGUAGE, lang.language))
+        .execute[HttpResponse]
     )
 
-  override def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
+  def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(
-      _.POST[JsValue, HttpResponse](registerWithoutIdAndSubscribeUrl, Json.toJson(registrationDetails))
+      _.post(url"$registerWithoutIdAndSubscribeUrl").withBody(Json.toJson(registrationDetails)).execute[HttpResponse]
     )
 
-  override def getSubscriptionStatus()(implicit
+  def getSubscriptionStatus()(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.GET[HttpResponse](subscriptionStatusUrl))
+    makeCall(_.get(url"$subscriptionStatusUrl").execute[HttpResponse])
 
-  override def getSubscribedDetails(cgtReference: CgtReference)(implicit
+  def getSubscribedDetails(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.GET[HttpResponse](getSubscribedDetailsUrl(cgtReference)))
+    makeCall(_.get(url"${getSubscribedDetailsUrl(cgtReference)}").execute[HttpResponse])
 
-  override def updateSubscribedDetails(
+  def updateSubscribedDetails(
     subscribedUpdateDetails: SubscribedUpdateDetails
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.PUT[SubscribedUpdateDetails, HttpResponse](subscriptionUpdateUrl, subscribedUpdateDetails))
+    makeCall(
+      _.put(url"$subscriptionUpdateUrl").withBody(Json.toJson(subscribedUpdateDetails)).execute[HttpResponse]
+    )
 
-  override def testSubmitToDms(
+  def testSubmitToDms(
     cgtReference: CgtReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.GET[HttpResponse](baseUrl + "/dms-test"))
+    makeCall(_.get(url"$baseUrl/dms-test").execute[HttpResponse])
 
   private def makeCall(
-    call: HttpClient => Future[HttpResponse]
-  ): EitherT[Future, Error, HttpResponse] =
+    call: HttpClientV2 => Future[HttpResponse]
+  ) =
     EitherT[Future, Error, HttpResponse](
       call(http)
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
-
 }

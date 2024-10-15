@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.libs.json.Json
 import play.api.mvc.Call
 import play.api.{ConfigLoader, Configuration}
 import play.mvc.Http.Status
@@ -25,7 +26,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{upscan => _, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -53,18 +55,17 @@ trait UpscanConnector {
 
 @Singleton
 class UpscanConnectorImpl @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   config: Configuration,
   servicesConfig: ServicesConfig
 )(implicit
   ec: ExecutionContext
 ) extends UpscanConnector
     with Logging {
-
-  private def getUpscanInitiateConfig[A : ConfigLoader](key: String): A =
+  private def getUpscanInitiateConfig[A : ConfigLoader](key: String) =
     config.get[A](s"microservice.services.upscan-initiate.$key")
 
-  private val upscanInitiateUrl: String = {
+  private val upscanInitiateUrl = {
     val protocol = getUpscanInitiateConfig[String]("protocol")
     val host     = getUpscanInitiateConfig[String]("host")
     val port     = getUpscanInitiateConfig[String]("port")
@@ -77,7 +78,7 @@ class UpscanConnectorImpl @Inject() (
 
   private val maxFileSize = getUpscanInitiateConfig[Long]("max-file-size")
 
-  override def initiate(
+  def initiate(
     errorRedirect: Call,
     successRedirect: Call,
     uploadReference: UploadReference
@@ -101,10 +102,9 @@ class UpscanConnectorImpl @Inject() (
 
     EitherT[Future, Error, HttpResponse](
       http
-        .POST[UpscanInitiateRequest, HttpResponse](
-          upscanInitiateUrl,
-          payload
-        )
+        .post(url"$upscanInitiateUrl")
+        .withBody(Json.toJson(payload))
+        .execute[HttpResponse]
         .map[Either[Error, HttpResponse]] { response =>
           if (response.status != Status.OK) {
             logger.warn(
@@ -120,7 +120,7 @@ class UpscanConnectorImpl @Inject() (
     )
   }
 
-  override def getUpscanUpload(
+  def getUpscanUpload(
     uploadReference: UploadReference
   )(implicit
     hc: HeaderCarrier
@@ -130,7 +130,8 @@ class UpscanConnectorImpl @Inject() (
 
     EitherT[Future, Error, HttpResponse](
       http
-        .GET[HttpResponse](url)
+        .get(url"$url")
+        .execute[HttpResponse]
         .map[Either[Error, HttpResponse]] { response =>
           if (response.status != Status.OK) {
             logger.warn(
@@ -146,14 +147,16 @@ class UpscanConnectorImpl @Inject() (
     )
   }
 
-  override def saveUpscanUpload(
+  def saveUpscanUpload(
     upscanUpload: UpscanUpload
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
     val url = backEndBaseUrl + s"/cgt-property-disposals/upscan"
 
     EitherT[Future, Error, HttpResponse](
       http
-        .POST[UpscanUpload, HttpResponse](url, upscanUpload)
+        .post(url"$url")
+        .withBody(Json.toJson(upscanUpload))
+        .execute[HttpResponse]
         .map { response =>
           response.status match {
             case Status.OK                                         => Right(response)
