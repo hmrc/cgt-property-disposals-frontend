@@ -291,9 +291,7 @@ address-line2.error.pattern=Mae’n rhaid i linell 2 yr adeilad neu’r stryd gy
 address-town.error.pattern=Mae’n rhaid i’r dref neu’r ddinas gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
 address-county.error.pattern=Mae’n rhaid i’r sir gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
 
-postcode.error.tooLong=Mae’n rhaid i’r cod post fod yn 8 o gymeriadau neu lai
-postcode.error.required=Nodwch god post
-postcode.error.invalidCharacters=Mae’n rhaid i’r cod post gynnwys llythrennau, rhifau a bylchau yn unig
+postcode.error.required=Nodwch god post. Mae’n rhaid i’r cod post gynnwys y llythrennau a i z, y rhifau 0 i 9 a bylchau yn unig
 postcode.error.pattern=Nodwch god post go iawn
 postcode.error.noResults=Heb ddod o hyd i’r cyfeiriad, bydd rhaid i chi ddilyn y cysylltiad er mwn ei nodi â llaw
 filter.error.noResults=Heb ddod o hyd i’r cyfeiriad, bydd rhaid i chi ddilyn y cysylltiad er mwn ei nodi â llaw
@@ -1457,8 +1455,7 @@ address-town.companyDetails.error.pattern=Mae’n rhaid i’r dref neu’r ddina
 address-county.companyDetails.error.tooLong=Mae’n rhaid i’r sir gynnwys 35 o gymeriadau neu lai
 address-county.companyDetails.error.pattern=Mae’n rhaid i’r sir gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
 postcode.companyDetails.error.tooLong=Mae’n rhaid i’r cod post fod yn 8 o gymeriadau neu lai
-postcode.companyDetails.error.required=Nodwch god post
-postcode.companyDetails.error.invalidCharacters=Mae’n rhaid i’r cod post gynnwys llythrennau, rhifau a bylchau yn unig
+postcode.companyDetails.error.required=Nodwch god post. Mae’n rhaid i’r cod post gynnwys y llythrennau a i z, y rhifau 0 i 9 a bylchau yn unig
 postcode.companyDetails.error.pattern=Nodwch god post go iawn
 
 nonUkAddress.companyDetails.title=Nodwch enw a chyfeiriad y cwmni yr oedd gennych gyfranddaliadau ynddo

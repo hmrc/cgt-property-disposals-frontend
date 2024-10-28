@@ -492,7 +492,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         )
         status(result) shouldBe BAD_REQUEST
         contentAsString(result) should include(
-          messageFromMessageKey("postcode.error.invalidCharacters")
+          messageFromMessageKey("postcode.error.pattern")
         )
       }
 
