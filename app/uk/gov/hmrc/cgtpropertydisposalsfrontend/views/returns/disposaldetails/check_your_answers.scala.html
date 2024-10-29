@@ -49,7 +49,9 @@
     @summary(answers, disposalMethod, isATrust, representativeType, isIndirectDisposal, isShare)
 
     @formHelper(returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
-        @govukButton(Button(content = Text(messages("button.confirmAndContinue"))))
+        @govukButton(Button(
+            attributes=Map("data-prevent-double-click"->"true"),
+            content = Text(messages("button.confirmAndContinue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

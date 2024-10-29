@@ -339,7 +339,7 @@
           @submitButton(messages("button.acceptAndSend"))
           @if(fillingOutReturn.isAmendReturn) {
             @govukButton(Button(
-              attributes = Map("id" -> "cancelButton"),
+              attributes = Map("id" -> "cancelButton" ,"data-prevent-double-click" -> "true"),
               href = Some(controllers.returns.amend.routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.checkAnswersAcceptSend).url),
               content = Text(messages("button.cancel")),
               classes = "govuk-button--secondary"

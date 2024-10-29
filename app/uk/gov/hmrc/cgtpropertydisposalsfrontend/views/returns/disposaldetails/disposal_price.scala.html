@@ -122,7 +122,9 @@
       autocomplete = Some(AutoCompleteType.On.value)
     ))
 
-    @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
+    @govukButton(Button(
+        attributes=Map("data-prevent-double-click"->"true"),
+        content = Text(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))))
   }
 
   @returnToSummaryLink(displayReturnToSummaryLink = true)

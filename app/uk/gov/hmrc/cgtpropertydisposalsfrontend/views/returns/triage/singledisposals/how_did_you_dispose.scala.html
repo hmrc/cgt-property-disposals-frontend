@@ -119,7 +119,7 @@
       ))
 
       @govukButton(Button(
-        attributes = Map("id" -> "submitButton"),
+        attributes = Map("id" -> "submitButton","data-prevent-double-click"->"true"),
         content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
       ))
     }

@@ -37,7 +37,8 @@
   <p class="govuk-body">@messages(s"$key.p1")</p>
 
   @govukButton(Button(
-  href = Some(routes.HomePageController.homepage().url),
-  content = Text(messages("button.continue"))
+    href = Some(routes.HomePageController.homepage().url),
+    attributes = Map("data-prevent-double-click" -> "true"),
+    content = Text(messages("button.continue"))
   ))
  }

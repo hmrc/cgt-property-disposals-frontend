@@ -78,7 +78,10 @@
     }
 
     @formWrapper(routes.RepresenteeController.checkContactDetailsSubmit(), Symbol("novalidate") -> "novalidate") {
-        @govukButton(Button(content = Text(messages("button.continue"))))
+        @govukButton(Button(
+            attributes=Map("data-prevent-double-click"->"true"),
+            content = Text(messages("button.continue")))
+        )
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

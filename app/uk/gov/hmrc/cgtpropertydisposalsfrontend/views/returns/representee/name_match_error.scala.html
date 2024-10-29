@@ -52,7 +52,7 @@
 
   @formWrapper(routes.RepresenteeController.nameMatchErrorSubmit(), Symbol("novalidate") -> "novalidate") {
     @govukButton(Button(
-      attributes = Map("id" -> "submitButton"),
+      attributes = Map("id" -> "submitButton","data-prevent-double-click" -> "true"),
       content = Text(messages("button.tryAgain"))
     ))
   }

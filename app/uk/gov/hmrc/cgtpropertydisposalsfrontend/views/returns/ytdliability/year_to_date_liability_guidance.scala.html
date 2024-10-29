@@ -60,7 +60,8 @@
     @guidanceStageBWrapper(userKey, taxYear)
 
     @govukButton(Button(
-      href = Some(backLink.url),
-      content = Text(messages("button.back"))
+        href = Some(backLink.url),
+        attributes = Map("data-prevent-double-click" -> "true"),
+        content = Text(messages("button.back"))
     ))
 }

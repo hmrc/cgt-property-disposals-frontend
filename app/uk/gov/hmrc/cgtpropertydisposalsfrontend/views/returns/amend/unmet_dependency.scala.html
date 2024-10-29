@@ -49,10 +49,11 @@
 
     @formWrapper(routes.AmendReturnController.unmetDependencySubmit(), Symbol("novalidate") -> "novalidate") {
         @govukButton(Button(
+        attributes = Map("data-prevent-double-click" -> "true"),
         content = Text(messages("button.continue"))
         ))
         @govukButton(Button(
-        attributes = Map("id" -> "cancelButton"),
+        attributes = Map("id" -> "cancelButton","data-prevent-double-click" -> "true"),
         href = Some(routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.unmetDependency).url),
         content = Text(messages("button.cancel")),
         classes = "govuk-button--secondary"
