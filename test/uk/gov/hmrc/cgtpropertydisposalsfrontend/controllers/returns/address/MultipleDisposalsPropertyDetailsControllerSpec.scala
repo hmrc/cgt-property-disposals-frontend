@@ -865,7 +865,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             "enterUPRN-line1" -> "1",
             "postcode"        -> "12$3"
           )(
-            "postcode.error.invalidCharacters"
+            "postcode.error.pattern"
           )
         }
 
@@ -874,7 +874,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             "enterUPRN-line1" -> "1",
             "postcode"        -> ("a" * 20)
           )(
-            "postcode.error.tooLong"
+            "postcode.error.pattern"
           )
         }
 

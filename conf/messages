@@ -291,9 +291,7 @@ address-line2.error.pattern=Building or street line 2 must only include letters,
 address-town.error.pattern=Town or city must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
 address-county.error.pattern=County must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
 
-postcode.error.tooLong=Postcode must be 8 characters or fewer
-postcode.error.required=Enter a postcode
-postcode.error.invalidCharacters=Postcode must only include letters, numbers and spaces
+postcode.error.required=Enter a postcode. Postcode must only include letters a to z, numbers 0 to 9 and spaces
 postcode.error.pattern=Enter a real postcode
 postcode.error.noResults=Address not found, you’ll need to follow the link to enter it manually
 filter.error.noResults=Address not found, you’ll need to follow the link to enter it manually
@@ -1456,9 +1454,7 @@ address-town.companyDetails.error.tooLong=Town or city must be 35 characters or 
 address-town.companyDetails.error.pattern=Town or city must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
 address-county.companyDetails.error.tooLong=County must be 35 characters or fewer
 address-county.companyDetails.error.pattern=County must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
-postcode.companyDetails.error.tooLong=Postcode must be 8 characters or fewer
-postcode.companyDetails.error.required=Enter a postcode
-postcode.companyDetails.error.invalidCharacters=Postcode must only include letters, numbers and spaces
+postcode.companyDetails.error.required=Enter a postcode. Postcode must only include letters a to z, numbers 0 to 9 and spaces
 postcode.companyDetails.error.pattern=Enter a real postcode
 
 nonUkAddress.companyDetails.title=Enter the name and address of the company you held shares in
