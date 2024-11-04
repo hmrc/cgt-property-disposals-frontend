@@ -67,6 +67,7 @@
   </p>
     @govukButton(Button(
     href = Some(continueCall.url),
+    attributes = Map("data-prevent-double-click" -> "true"),
     content = Text(messages("button.continue"))
     ))
 }

@@ -44,6 +44,7 @@
  </ol>
  @govukButton(Button(
  href = Some(details.continueUrl),
+ attributes = Map("data-prevent-double-click" -> "true"),
  content = Text(messages("button.continue"))
  ))
 }

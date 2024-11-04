@@ -64,7 +64,9 @@
         selected = form.value,
         helpText = Some(Html(messages(s"$key.helpText")))
       )
-      @govukButton(Button(content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
+      @govukButton(Button(
+        attributes=Map("data-prevent-double-click"->"true"),
+        content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

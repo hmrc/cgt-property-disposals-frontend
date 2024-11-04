@@ -22,7 +22,7 @@
 @(label: String, otherHtml: Option[Html] = None)
 
 @govukButton(Button(
-  attributes = Map("id" -> "submitButton", "type" -> "submit"),
+  attributes = Map("id" -> "submitButton", "type" -> "submit", "data-prevent-double-click" -> "true"),
   content = Text(label)
 ))
 

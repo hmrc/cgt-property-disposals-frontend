@@ -344,6 +344,7 @@
         justSubmittedReturn.submissionResponse.charge.fold(
           govukButton(Button(
             href = Some(accountRoutes.HomePageController.homepage().url),
+            attributes = Map("data-prevent-double-click" -> "true"),
             content = Text(messages("button.accountHome"))
           ))
         )( _ =>

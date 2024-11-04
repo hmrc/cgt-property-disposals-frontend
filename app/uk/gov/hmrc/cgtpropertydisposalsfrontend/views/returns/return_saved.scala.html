@@ -58,7 +58,7 @@ govukWarningText: GovukWarningText
     @messages("draftReturnSaved.p2")
   </p>
     @govukButton(Button(
-    attributes = Map("id" -> "button"),
+    attributes = Map("id" -> "button","data-prevent-double-click" -> "true"),
     href = Some(controllers.accounts.homepage.routes.HomePageController.homepage().url),
     content = Text(messages("button.accountHome"))
     ))

@@ -61,6 +61,7 @@
 
     @govukButton(Button(
     href = Some(backLink.url),
+    attributes = Map("data-prevent-double-click" -> "true"),
     content = Text(messages("button.back"))
     ))
 

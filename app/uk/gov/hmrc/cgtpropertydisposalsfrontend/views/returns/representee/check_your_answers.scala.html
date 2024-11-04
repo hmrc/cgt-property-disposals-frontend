@@ -51,7 +51,9 @@
     @summary(answers, representativeType)
 
     @formWrapper(routes.RepresenteeController.checkYourAnswersSubmit()) {
-        @govukButton(Button(content = Text(messages("button.confirmAndContinue"))))
+        @govukButton(Button(
+            content = Text(messages("button.confirmAndContinue")),
+            attributes=Map("data-prevent-double-click"->"true")))
     }
 
 }

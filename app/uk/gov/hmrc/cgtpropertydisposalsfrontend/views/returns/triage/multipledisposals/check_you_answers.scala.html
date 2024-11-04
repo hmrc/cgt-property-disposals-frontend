@@ -54,7 +54,7 @@
 
  @formWrapper(routes.MultipleDisposalsTriageController.checkYourAnswersSubmit(), Symbol("novalidate") -> "novalidate") {
    @govukButton(Button(
-      attributes = Map("id" -> "submitButton"),
+      attributes = Map("id" -> "submitButton","data-prevent-double-click"->"true"),
       content = Text(messages("button.confirmAndContinue"))))
   }
 

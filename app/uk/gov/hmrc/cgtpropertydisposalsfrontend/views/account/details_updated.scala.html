@@ -38,6 +38,7 @@
 
     @govukButton(Button(
     href = Some(routes.AccountController.manageYourDetails().url),
+    attributes = Map("data-prevent-double-click" -> "true"),
     content = Text(messages("button.manageAccount"))
     ))
 }

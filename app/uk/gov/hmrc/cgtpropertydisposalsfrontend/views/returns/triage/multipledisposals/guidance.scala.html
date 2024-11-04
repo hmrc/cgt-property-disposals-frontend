@@ -93,7 +93,7 @@ govukButton: GovukButton
 
     @formWrapper(triage.routes.MultipleDisposalsTriageController.guidanceSubmit()) {
         @govukButton(Button(
-        attributes = Map("id" -> "submitButton"),
+        attributes = Map("id" -> "submitButton","data-prevent-double-click"->"true"),
         content = Text(messages("button.continue"))
         ))
     }

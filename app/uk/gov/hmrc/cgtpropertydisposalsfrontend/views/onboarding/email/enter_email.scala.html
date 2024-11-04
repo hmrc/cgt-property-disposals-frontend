@@ -79,7 +79,7 @@
     ))
     <input type="hidden" name="resendVerificationEmail" value="false" />
     @viewHelpers.govukButton(Button(
-      attributes = Map("id" -> "submitButton"),
+      attributes = Map("id" -> "submitButton","data-prevent-double-click" -> "true"),
       content = Text(messages("button.continue"))
     ))
   }

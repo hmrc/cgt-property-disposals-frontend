@@ -40,8 +40,8 @@
 
   @formWrapper(routes.IvController.retry()) {
     @viewHelpers.govukButton(Button(
-      attributes = Map("id" -> "submitButton"),
-      content = Text(messages("button.tryAgain"))
+        attributes = Map("id" -> "submitButton","data-prevent-double-click" -> "true"),
+        content = Text(messages("button.tryAgain"))
     ))
   }
 
