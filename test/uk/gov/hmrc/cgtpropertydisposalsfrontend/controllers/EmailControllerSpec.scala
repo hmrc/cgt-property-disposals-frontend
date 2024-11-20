@@ -167,6 +167,10 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
         testEmailError("local@")
       }
 
+      "the email has space" in {
+        testEmailError("test @email .com")
+      }
+
       "the email has characters before and after the '@' character but " +
         "there are more than 132 characters in it" in {
           val longString = List.fill(100)("a").mkString("")
@@ -283,34 +287,6 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
         )
         checkIsRedirect(result, checkYourInboxCall)
       }
-
-    "strip out spaces in emails" in {
-      val emailWithSpaces    = " a @ b  "
-      val emailWithoutSpaces = "a@b"
-      val emailToBeVerified  =
-        EmailToBeVerified(Email(emailWithoutSpaces), id, verified = false, hasResentVerificationEmail = true)
-
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(
-          sessionDataWithValidJourneyStatus
-            .copy(emailToBeVerified = Some(emailToBeVerified))
-        )
-        mockEmailVerification(
-          Email(emailWithoutSpaces),
-          expectedName,
-          verifyEmailCall(id),
-          AcceptLanguage.EN
-        )(
-          Right(EmailVerificationRequested)
-        )
-      }
-
-      val result: Future[Result] = performAction(
-        Seq("email" -> emailWithSpaces, "resendVerificationEmail" -> "true")
-      )
-      checkIsRedirect(result, checkYourInboxCall)
-    }
   }
 
   protected def checkYourInboxPage(

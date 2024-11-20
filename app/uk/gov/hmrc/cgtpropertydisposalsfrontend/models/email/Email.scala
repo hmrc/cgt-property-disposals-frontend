@@ -30,7 +30,8 @@ final case class Email(value: String) extends AnyVal
 
 object Email {
 
-  val emailRegex: Predicate[String] = "^(?=.{3,132}$)[^@]+@[^@]+$".r.pattern.asPredicate()
+  val emailRegex: Predicate[String] =
+    "^(?=[^\\s]{3,132}$)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$".r.pattern.asPredicate()
 
   implicit val format: Format[Email] =
     implicitly[Format[String]].inmap(Email(_), _.value)
@@ -39,7 +40,7 @@ object Email {
 
   val mapping: Mapping[Email] =
     nonEmptyText
-      .transform[Email](s => Email(s.replace(" ", "")), _.value)
+      .transform[Email](s => Email(s), _.value)
       .verifying("invalid", e => emailRegex.test(e.value))
 
 }
