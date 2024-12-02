@@ -30,8 +30,8 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NameMatchServiceError.TooManyUnsuccessfulAttempts

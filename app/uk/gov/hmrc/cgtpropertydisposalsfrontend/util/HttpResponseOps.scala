@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
+import cats.syntax.either._
 import play.api.libs.json.{JsDefined, JsError, Reads}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.JsErrorOps._
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.util.Try
-import cats.syntax.either._
 
 object HttpResponseOps {
 

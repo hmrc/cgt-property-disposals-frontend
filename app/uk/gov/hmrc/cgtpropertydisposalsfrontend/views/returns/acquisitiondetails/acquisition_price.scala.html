@@ -18,15 +18,15 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod.{Bought, Gifted, Inherited}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, RepresentativeType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod.{Bought, Inherited, Gifted}
 
 @this(
   layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,

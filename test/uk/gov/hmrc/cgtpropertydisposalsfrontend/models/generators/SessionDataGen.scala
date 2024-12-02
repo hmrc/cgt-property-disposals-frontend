@@ -17,11 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupResult
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailToBeVerified
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.NeedMoreDetailsDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.NeedMoreDetailsDetails.AffinityGroup
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 
 object SessionDataGen extends GenUtils {
 

@@ -16,22 +16,22 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import org.apache.pekko.stream.Materializer
 import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.ConfigFactory
+import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import play.api._
 import play.api.http.HttpConfiguration
 import play.api.i18n._
 import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.mvc.{Call, Result}
 import play.api.test.Helpers._
-import play.api._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.{Metrics, MockMetrics}
 

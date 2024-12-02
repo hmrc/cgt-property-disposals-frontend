@@ -18,8 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
 import cats.implicits.catsSyntaxEq
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.RegistrationDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.RegistrationDetails
 
 final case class RegistrationRequestEvent(
   prePopulatedUserData: RegistrationPrePopulatedUserData,

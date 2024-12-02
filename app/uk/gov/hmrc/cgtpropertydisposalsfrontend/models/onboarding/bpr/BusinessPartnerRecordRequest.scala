@@ -25,7 +25,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 sealed trait BusinessPartnerRecordRequest extends Product with Serializable
 
 object BusinessPartnerRecordRequest {
-
   final case class IndividualBusinessPartnerRecordRequest(
     id: Either[SAUTR, NINO],
     nameMatch: Option[IndividualName],
@@ -40,7 +39,5 @@ object BusinessPartnerRecordRequest {
     createNewEnrolmentIfMissing: Boolean
   ) extends BusinessPartnerRecordRequest
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[BusinessPartnerRecordRequest] = derived.oformat()
-
 }
