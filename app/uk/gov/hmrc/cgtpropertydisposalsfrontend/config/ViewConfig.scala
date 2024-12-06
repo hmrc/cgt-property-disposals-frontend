@@ -117,4 +117,5 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val draftReturnNewDueDateStartMonth: Int = servicesConfig.getInt("draft-return.new-due-date.start-month")
   val draftReturnNewDueDateStartDay: Int   = servicesConfig.getInt("draft-return.new-due-date.start-day")
 
+  val selfUrl: String = servicesConfig.getString("self.url")
 }

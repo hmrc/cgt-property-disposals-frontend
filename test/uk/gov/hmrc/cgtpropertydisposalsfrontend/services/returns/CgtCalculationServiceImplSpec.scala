@@ -22,7 +22,6 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
@@ -31,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sam
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,7 +40,6 @@ class CgtCalculationServiceImplSpec
     with Matchers
     with ScalaCheckDrivenPropertyChecks
     with MockFactory {
-
   private val mockReturnsConnector = mock[ReturnsConnector]
 
   val service = new CgtCalculationServiceImpl(mockReturnsConnector)
@@ -70,12 +68,8 @@ class CgtCalculationServiceImplSpec
       .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 
-  private val emptyJsonBody = "{}"
-
   "CgtCalculationServiceImpl" when {
-
     "handling requests to calculate tax due" must {
-
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
       val request = sample[CalculateCgtTaxDueRequest]
@@ -102,7 +96,6 @@ class CgtCalculationServiceImplSpec
     }
 
     "handling requests to calculate taxable gain or loss" must {
-
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
       val request = sample[TaxableGainOrLossCalculationRequest]
@@ -129,7 +122,6 @@ class CgtCalculationServiceImplSpec
     }
 
     "handling requests to calculate year to date liability" must {
-
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
       val request = sample[YearToDateLiabilityCalculationRequest]

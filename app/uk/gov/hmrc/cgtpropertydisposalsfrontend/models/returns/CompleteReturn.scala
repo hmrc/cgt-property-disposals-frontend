@@ -112,7 +112,6 @@ object CompleteReturn {
   }
 
   object CompleteSingleDisposalReturn {
-
     def fromDraftReturn(
       draftReturn: DraftSingleDisposalReturn
     ): Option[CompleteSingleDisposalReturn] =

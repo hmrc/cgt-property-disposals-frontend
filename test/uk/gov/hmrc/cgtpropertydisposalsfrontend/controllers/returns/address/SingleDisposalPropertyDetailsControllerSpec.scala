@@ -52,8 +52,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, User
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 
-import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
+import scala.jdk.CollectionConverters._
 
 class SingleDisposalPropertyDetailsControllerSpec
     extends AddressControllerSpec[FillingOutReturnAddressJourney]

@@ -21,13 +21,12 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
-@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.ViewHelpers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountLayout
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.{AccountLayout, AccountMenuItem}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+
 @import java.time.LocalDate
 
 @this(

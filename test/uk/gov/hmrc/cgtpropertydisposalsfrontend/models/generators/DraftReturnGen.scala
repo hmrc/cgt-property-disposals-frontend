@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+
 import java.time.LocalDate
 
 object DraftReturnGen extends HigherPriorityDraftReturnGen with GenUtils

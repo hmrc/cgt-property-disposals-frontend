@@ -30,12 +30,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{IvBehaviour, routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubmittingReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Registering
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{Registering, SubmittingReturn, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.{Individual, NonGovernmentGatewayRetrievedUser, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.NeedMoreDetailsDetails.AffinityGroup
@@ -43,7 +42,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOffTIvEvent, WrongGGAccountEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService

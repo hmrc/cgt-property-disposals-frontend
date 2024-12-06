@@ -25,10 +25,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SessionDataGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

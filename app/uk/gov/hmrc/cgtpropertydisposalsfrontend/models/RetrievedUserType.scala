@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 
 sealed trait RetrievedUserType extends Product with Serializable
 
