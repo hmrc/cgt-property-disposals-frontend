@@ -4156,7 +4156,9 @@ supporting-evidence.upload.title=Upload supporting evidence
 supporting-evidence.upload.caption=Supporting evidence
 supporting-evidence.upload.error.required=Upload a file containing your supporting evidence
 supporting-evidence.upload.label=Upload a file containing your supporting evidence
-supporting-evidence.upload.help-text=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG. Any files you upload to a draft return will be saved for 5 days.
+supporting-evidence.upload.help-text=We will save uploaded files for 5 days.<br>You can only upload .txt and .csv files. Files can be up to 3MB.
+supporting-evidence.upload.error.pattern1=The file name must include an extension. For example, document-name.txt or document-name.csv.
+supporting-evidence.upload.error.pattern2=The file name extension must be in lowercase. For example, document-name.txt or document-name.csv.
 supporting-evidence.upload.amendReturn.help-text=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG.
 
 supporting-evidence.upload.heading1=Supporting evidence

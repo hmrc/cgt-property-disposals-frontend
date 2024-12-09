@@ -99,7 +99,8 @@
       ),
       hint = Some(Hint(
         content = HtmlContent(helpText)
-      ))
+      )),
+      attributes = Map("accept" -> ".csv, .txt", "required" -> "true")
     ))
 
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
