@@ -15,7 +15,7 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{accounts, routes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
 
 @this()
@@ -36,11 +36,6 @@
         <li>
             <a href="@{accounts.routes.AccountController.manageYourDetails().url}" class="hmrc-account-menu__link@{if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){ " hmrc-account-menu__link--active" }}">
                 @messages("account.menu.manageYourDetails") </a>
-        </li>
-
-        <li>
-            <a href="@routes.StartController.signOutAndRedirectToFeedback().url" class="hmrc-account-menu__link">
-                @messages("account.menu.signOut")</a>
         </li>
     </ul>
 </nav>
