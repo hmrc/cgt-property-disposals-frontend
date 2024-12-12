@@ -84,7 +84,7 @@
   } else {
     @noRepaymentGuidance
   }
-  <form action="@href" method="post" enctype="multipart/form-data">
+  <form id="upload" action="@href" method="post" enctype="multipart/form-data">
 
     @for((k,v) <- meta){
         <input type="hidden" id="@k" name="@k" value="@v">
@@ -102,10 +102,24 @@
       )),
       attributes = Map("accept" -> ".csv, .txt", "required" -> "true")
     ))
-
+      <input type="text" id="dummy">
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
   </form>
 
  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }
+
+<script nonce>
+    document.getElementById('upload').onsubmit = function(event) {
+    event.preventDefault();
+    document.getElementById('dummy').value = "testing here!!";
+    const allowedExtensions = /(\.txt|\.csv)$/i;
+    const filePath =  document.getElementById('@field').value;
+    document.getElementById('dummy').value = filePath;
+    if (!allowedExtensions.exec(filePath)) {
+        document.getElementById('dummy').value = 'Invalid file type!';
+        this.value = '';
+    }
+    }
+</script>

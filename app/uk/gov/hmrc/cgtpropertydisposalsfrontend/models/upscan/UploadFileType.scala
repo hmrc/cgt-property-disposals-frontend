@@ -21,16 +21,10 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 
-import java.util.Locale
-import java.util.function.Predicate
-
 final case class UploadFileType(value: String) extends AnyVal
 object UploadFileType {
 
-  val allowedExtensions: Seq[String] = Seq(".csv", ".txt")
-
-  //if allowed ext contains value.last index of value .substring()
-  //case sensitive
+  private val allowedExtensions: Seq[String] = Seq(".csv", ".txt")
 
   implicit val format: Format[UploadFileType] =
     implicitly[Format[String]].inmap(UploadFileType(_), _.value)
