@@ -566,7 +566,6 @@ account.caption=Capital Gains Tax on UK property account
 account.menu.home=Home
 account.menu=Account menu
 account.menu.manageYourDetails=Manage account
-account.menu.signOut=Sign out
 account.menu.changeClient=Change client
 account.agent.prefix=Client:
 account.trust.prefix=Trust:

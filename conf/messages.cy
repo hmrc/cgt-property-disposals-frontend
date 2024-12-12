@@ -566,7 +566,6 @@ account.caption=Cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 account.menu.home=Hafan
 account.menu=Dewislen y cyfrif
 account.menu.manageYourDetails=Rheoli’r cyfrif
-account.menu.signOut=Allgofnodi
 account.menu.changeClient=Newid cleient
 account.agent.prefix=Cleient:
 account.trust.prefix=Ymddiriedolaeth:
