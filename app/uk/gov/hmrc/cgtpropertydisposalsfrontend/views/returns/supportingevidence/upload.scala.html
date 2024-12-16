@@ -25,7 +25,8 @@
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-    govukFileUpload : GovukFileUpload
+    govukFileUpload : GovukFileUpload,
+    govukErrorSummary: GovukErrorSummary
 )
 
 @(
@@ -38,6 +39,7 @@
 @key = @{"supporting-evidence.upload"}
 @field = @{"file"}
 @title = @{messages(s"$key.title")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @meta = @{upscanUpload.upscanUploadMeta.uploadRequest.fields}
 @href = @{upscanUpload.upscanUploadMeta.uploadRequest.href}
 
@@ -76,7 +78,12 @@
   </ul>
 }
 
-@layout(title, backLinkUrl = Some(backLink.url)) {
+@templateScripts = {
+<script src="@{routes.Assets.at("javascript/file-upload-type-validation.js")}"></script>
+}
+
+
+@layout(title,hasErrors = hasErrors,backLinkUrl = Some(backLink.url), additionalScripts = Some(templateScripts)) {
   @caption(messages(s"$key.caption"))
   <h1 class="govuk-heading-xl">@title</h1>
   @if(isReplaymentDue) {
@@ -84,7 +91,7 @@
   } else {
     @noRepaymentGuidance
   }
-  <form id="upload" action="@href" method="post" enctype="multipart/form-data">
+  <form id="uploadForm" action="@href" method="post" enctype="multipart/form-data">
 
     @for((k,v) <- meta){
         <input type="hidden" id="@k" name="@k" value="@v">
@@ -102,7 +109,6 @@
       )),
       attributes = Map("accept" -> ".csv, .txt", "required" -> "true")
     ))
-      <input type="text" id="dummy">
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
   </form>
 
@@ -110,16 +116,20 @@
 
 }
 
-<script nonce>
-    document.getElementById('upload').onsubmit = function(event) {
-    event.preventDefault();
-    document.getElementById('dummy').value = "testing here!!";
-    const allowedExtensions = /(\.txt|\.csv)$/i;
-    const filePath =  document.getElementById('@field').value;
-    document.getElementById('dummy').value = filePath;
-    if (!allowedExtensions.exec(filePath)) {
-        document.getElementById('dummy').value = 'Invalid file type!';
-        this.value = '';
-    }
-    }
-</script>
+<template id="empty-file-error-summary">
+    @govukErrorSummary(ErrorSummary(
+    title = Text(messages("generic.errorSummaryHeader")),
+    errorList = Seq(ErrorLink(
+    href = Some("#file"),
+    content = Text(messages("supporting-evidence.upload.error.pattern1"))
+    )),
+    attributes = Map("id" -> "error-summary-display", "tabindex" -> "-1")
+    ))
+</template>
+
+<template id="empty-file-error-message">
+    <div class="govuk-error-message" id="file-upload-error">
+        <span class="govuk-visually-hidden">@messages("generic.errorPrefix"): </span>
+        @messages("supporting-evidence.upload.error.pattern1")
+    </div>
+</template>
