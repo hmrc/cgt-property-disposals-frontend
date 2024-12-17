@@ -41,10 +41,12 @@
     isAmend: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages)
 
-@key = @{"enterUPRN"}
-@line1Key = @{s"$key-line1"}
+@key = @{"noUPRN"}
+@line1Key = @{"address-line1"}
+@line2Key = @{"address-line2"}
+@line3Key = @{"address-town"}
 @postcodeKey = @{"postcode"}
-@submit = @{ if(isSingleDisposal) routes.PropertyDetailsController.singleDisposalEnterLandUprnSubmit() else routes.PropertyDetailsController.multipleDisposalsEnterLandUprnSubmit() }
+@submit = @{ if(isSingleDisposal) routes.PropertyDetailsController.noUPRNEnterAddressSubmit() else routes.PropertyDetailsController.noUPRNEnterAddressSubmit() }
 
 @title = @{messages(s"$key.title")}
 
@@ -65,13 +67,37 @@
     ),
     autocomplete= Some(AutoCompleteType.AddressLine1.value),
     classes = "govuk-!-width-two-thirds",
-    hint = Some(Hint(
-      content = HtmlContent(messages(s"$key.line1.helpText"))
-    )),
     value = form.data.get(line1Key),
     errorMessage = form.error(line1Key).map(e => ErrorMessage(content =Text(messages(s"$line1Key.${e.message}")))),
   ))
 
+  @govukInput(Input(
+    id = line2Key,
+    name = line2Key,
+    label = Label(
+      isPageHeading = false,
+      classes = "govuk-label--s",
+      content = Text(messages(s"$key.line2.label"))
+    ),
+    autocomplete= Some(AutoCompleteType.AddressLine2.value),
+    classes = "govuk-!-width-two-thirds",
+    value = form.data.get(line2Key),
+    errorMessage = form.error(line2Key).map(e => ErrorMessage(content =Text(messages(s"$line2Key.${e.message}")))),
+  ))
+
+  @govukInput(Input(
+    id = line3Key,
+    name = line3Key,
+    label = Label(
+      isPageHeading = false,
+      classes = "govuk-label--s",
+      content = Text(messages(s"$key.line3.label"))
+    ),
+    autocomplete= Some(AutoCompleteType.AddressLine2.value),
+    classes = "govuk-!-width-two-thirds",
+    value = form.data.get(line3Key),
+    errorMessage = form.error(line3Key).map(e => ErrorMessage(content =Text(messages(s"$line3Key.${e.message}")))),
+  ))
   @govukInput(Input(
     id = postcodeKey,
     name = postcodeKey,

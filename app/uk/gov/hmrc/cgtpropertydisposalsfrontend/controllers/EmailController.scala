@@ -20,7 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.uuid._
 import cats.syntax.eq._
-import play.api.data.Form
+import play.api.data.{Form, Forms}
 import play.api.data.Forms.{mapping, of}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -43,6 +43,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import java.util.UUID
+import scala.compat.Platform
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EmailController[T <: EmailJourneyType] {

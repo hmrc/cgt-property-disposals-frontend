@@ -4,11 +4,17 @@ POST        /property-address/does-property-have-uk-postcode                    
 GET         /details-one-disposal/does-property-have-uk-postcode                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsHasUkPostcode()
 POST        /details-one-disposal/does-property-have-uk-postcode                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsHasUkPostcodeSubmit()
 
+GET         /does-property-have-uprn                                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkUPRN()
+POST        /does-property-have-uprn                                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkUPRNSubmit()
+
 GET         /property-address/enter-unique-property-reference-number            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.singleDisposalEnterLandUprn()
 POST        /property-address/enter-unique-property-reference-number            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.singleDisposalEnterLandUprnSubmit()
 
 GET         /details-one-disposal/enter-unique-property-reference-number        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsEnterLandUprn()
 POST        /details-one-disposal/enter-unique-property-reference-number        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsEnterLandUprnSubmit()
+
+GET         /property-address/no-uprn-enter-address                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.noUPRNEnterAddress()
+POST        /property-address/no-uprn-enter-address                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.noUPRNEnterAddressSubmit()
 
 GET         /details-one-disposal/help                                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsGuidance()
 POST        /details-one-disposal/help                                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsGuidanceSubmit()

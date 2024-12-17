@@ -604,7 +604,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
     "handling submits on the has a uk postcode page" must {
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.singleDisposalHasUkPostcodeSubmit()(
+        controller.multipleDisposalsHasUkPostcodeSubmit()(
           FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
         )
 
@@ -684,7 +684,69 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkIsRedirect(
             performAction("hasValidPostcode" -> "false"),
+            routes.PropertyDetailsController.checkUPRN()
+          )
+        }
+      }
+    }
+
+    "handling requests to check if user has UPRN page" must {
+
+      val nonResidentialPropertyDraftReturn =
+        sample[DraftMultipleDisposalsReturn].copy(
+          triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+            assetTypes = List(AssetType.NonResidential)
+          )
+        )
+
+      val nonResidentialFillingOutReturn = sample[FillingOutReturn].copy(
+        draftReturn = nonResidentialPropertyDraftReturn
+      )
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.checkUPRNSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+        )
+
+      behave like amendReturnToFillingOutReturnSpecBehaviour(
+        controller.checkUPRN(),
+        mockUUIDGenerator
+      )
+
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
+
+      behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(() => performAction())
+
+      val sessionData = SessionData.empty.copy(
+        journeyStatus = Some(nonResidentialFillingOutReturn)
+      )
+
+      "redirect to enter UPRN details page" when {
+
+        "the user selects yes" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkIsRedirect(
+            performAction("doesPropertyHaveUPRN" -> "true"),
             routes.PropertyDetailsController.multipleDisposalsEnterLandUprn()
+          )
+        }
+      }
+
+      "redirect to enter address details page" when {
+
+        "the user selects no" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkIsRedirect(
+            performAction("doesPropertyHaveUPRN" -> "false"),
+            routes.PropertyDetailsController.noUPRNEnterAddress()
           )
         }
       }
@@ -723,7 +785,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("enterUPRN.multipleDisposals.title"),
+            messageFromMessageKey("enterUPRN.title"),
             { doc =>
               doc.select(".govuk-back-link").attr("href") shouldBe expectedBackLink.url
               doc
@@ -743,7 +805,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               ),
               examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+            routes.PropertyDetailsController.checkUPRN()
           )
         }
 
@@ -755,7 +817,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               ),
               examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
             ),
-            routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+            routes.PropertyDetailsController.checkUPRN()
           )
         }
       }
@@ -770,9 +832,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       def formData(ukAddress: UkAddress): List[(String, String)] =
         List(
           "enterUPRN-line1" -> Some(ukAddress.line1),
-          "address-line2"   -> ukAddress.line2,
-          "address-town"    -> ukAddress.town,
-          "address-county"  -> ukAddress.county,
           "postcode"        -> Some(ukAddress.postcode.value)
         ).collect { case (key, Some(value)) => key -> value }
 
@@ -816,7 +875,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(formData: _*),
-            messageFromMessageKey("enterUPRN.multipleDisposals.title"),
+            messageFromMessageKey("enterUPRN.title"),
             { doc =>
               val errors = doc.select("[data-spec='errorSummaryDisplay'] ul").first()
               errors.children
@@ -877,42 +936,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             "postcode.error.pattern"
           )
         }
-
-        "the address lines are too long" in {
-          val tooLong = "a" * 36
-          test(
-            "enterUPRN-line1" -> "1",
-            "postcode"        -> "ZZ00ZZ",
-            "address-line2"   -> tooLong,
-            "address-town"    -> tooLong,
-            "address-county"  -> tooLong
-          )(
-            "address-line2.error.tooLong",
-            "address-town.error.tooLong",
-            "address-county.error.tooLong"
-          )
-        }
-
-        "the address lines contain invalid characters" in {
-          val invalidCharacters = "^%***"
-          test(
-            "enterUPRN-line1" -> "1",
-            "postcode"        -> "ZZ00ZZ",
-            "address-line2"   -> invalidCharacters,
-            "address-town"    -> invalidCharacters,
-            "address-county"  -> invalidCharacters
-          )(
-            "address-line2.error.pattern",
-            "address-town.error.pattern",
-            "address-county.error.pattern"
-          )
-        }
       }
 
       "redirect to the check your emptyAnswers page" when {
         "the address submitted is valid and all updates are successful" in {
-          val newAddress     =
-            UkAddress("1", Some("a"), Some("b"), Some("c"), Postcode("ZZ00ZZ"))
+          val newAddress     = UkAddress("1", None, None, None, Postcode("ZZ00ZZ"))
           val newDraftReturn = nonResidentialPropertyDraftReturn.copy(
             examplePropertyDetailsAnswers = Some(
               emptyAnswers.copy(
