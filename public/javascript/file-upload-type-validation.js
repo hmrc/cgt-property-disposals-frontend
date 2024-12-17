@@ -44,14 +44,15 @@
             const files = uploadInput.files
             if(files.length === 0) {
                 event.preventDefault()
-                const error = 'select a file';
+                const error = 'Select a file';
+                renderFormError(uploadInput)
                 //render the error.pattern1
             }
             else{
                 var ext = getFileExtension(filePath);
                 if (ext !='') {
                     event.preventDefault();
-                    const error = 'must include file type';
+                    const error = 'Must include file type';
                     //render the error.pattern2
                 }
                 else if(!isLowerCase(ext)){

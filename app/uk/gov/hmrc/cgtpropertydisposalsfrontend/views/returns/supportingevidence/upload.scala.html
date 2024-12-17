@@ -39,7 +39,6 @@
 @key = @{"supporting-evidence.upload"}
 @field = @{"file"}
 @title = @{messages(s"$key.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @meta = @{upscanUpload.upscanUploadMeta.uploadRequest.fields}
 @href = @{upscanUpload.upscanUploadMeta.uploadRequest.href}
 
@@ -78,14 +77,13 @@
   </ul>
 }
 
-@templateScripts = {
-<script src="@{routes.Assets.at("javascript/file-upload-type-validation.js")}"></script>
-}
 
 
-@layout(title,hasErrors = hasErrors,backLinkUrl = Some(backLink.url), additionalScripts = Some(templateScripts)) {
+@headContent = {}
+@layout(title, backLinkUrl = Some(backLink.url)) {
   @caption(messages(s"$key.caption"))
   <h1 class="govuk-heading-xl">@title</h1>
+   <script src="@{routes.Assets.at("javascript/file-upload-type-validation.js")}"></script>
   @if(isReplaymentDue) {
     @repaymentGuidance
   } else {
@@ -107,7 +105,7 @@
       hint = Some(Hint(
         content = HtmlContent(helpText)
       )),
-      attributes = Map("accept" -> ".csv, .txt", "required" -> "true")
+      attributes = Map("accept" -> ".csv, .txt")
     ))
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
   </form>
@@ -120,8 +118,8 @@
     @govukErrorSummary(ErrorSummary(
     title = Text(messages("generic.errorSummaryHeader")),
     errorList = Seq(ErrorLink(
-    href = Some("#file"),
-    content = Text(messages("supporting-evidence.upload.error.pattern1"))
+        href = Some("#file"),
+        content = Text(messages("supporting-evidence.upload.error.pattern1"))
     )),
     attributes = Map("id" -> "error-summary-display", "tabindex" -> "-1")
     ))
