@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUpload
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.html.helper.CSPNonce
 
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
@@ -26,7 +27,7 @@
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
     govukFileUpload : GovukFileUpload,
-    govukErrorSummary: GovukErrorSummary
+    errorSummary: GovukErrorSummary
 )
 
 @(
@@ -76,14 +77,14 @@
     <li>@messages(s"$key.li4")</li>
   </ul>
 }
+@templateScripts = {
+    <script @CSPNonce.attr src="@{routes.Assets.at("javascript/file-upload-type-validation.js")}"></script>
+}
 
-
-
-@headContent = {}
-@layout(title, backLinkUrl = Some(backLink.url)) {
-  @caption(messages(s"$key.caption"))
+@layout(title, backLinkUrl = Some(backLink.url), additionalScripts = Some(templateScripts)) {
+     @caption(messages(s"$key.caption"))
   <h1 class="govuk-heading-xl">@title</h1>
-   <script src="@{routes.Assets.at("javascript/file-upload-type-validation.js")}"></script>
+
   @if(isReplaymentDue) {
     @repaymentGuidance
   } else {
@@ -109,13 +110,8 @@
     ))
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
   </form>
-
- @returnToSummaryLink(displayReturnToSummaryLink = true)
-
-}
-
 <template id="empty-file-error-summary">
-    @govukErrorSummary(ErrorSummary(
+    @errorSummary(ErrorSummary(
     title = Text(messages("generic.errorSummaryHeader")),
     errorList = Seq(ErrorLink(
         href = Some("#file"),
@@ -131,3 +127,7 @@
         @messages("supporting-evidence.upload.error.pattern1")
     </div>
 </template>
+ @returnToSummaryLink(displayReturnToSummaryLink = true)
+
+}
+
