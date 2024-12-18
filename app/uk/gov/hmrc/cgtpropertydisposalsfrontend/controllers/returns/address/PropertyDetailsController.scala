@@ -21,7 +21,7 @@ import cats.instances.future._
 import cats.syntax.order._
 import com.google.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.data.Forms.{default, mapping, of, optional, text}
+import play.api.data.Forms.{mapping, of, optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
