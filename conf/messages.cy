@@ -4629,19 +4629,48 @@ hasValidPostcode.multipleDisposals.title=Oes gan unrhyw un o’r eiddo god post 
 hasValidPostcode.multipleDisposals.error.boolean=Dewiswch p’un a oes gan unrhyw un o’r eiddo god post yn y DU
 hasValidPostcode.multipleDisposals.error.required=Dewiswch p’un a oes gan unrhyw un o’r eiddo god post yn y DU
 
-enterUPRN.singleDisposal.title=Nodwch Gyfeirnod Unigryw Eiddo (UPRN) ar gyfer yr eiddo yn y DU
-enterUPRN.multipleDisposals.title=Nodwch Gyfeirnod Unigryw Eiddo (UPRN) ar gyfer un o’r gwarediadau eiddo yn y DU
+doesPropertyHaveUPRN.singleDisposal.caption=Cyfeiriad yr eiddo
+doesPropertyHaveUPRN.multipleDisposals.caption=Manylion un gwarediad eiddo
+doesPropertyHaveUPRN.title=A ydych yn gwybod beth yw Cyfeirnod Unigryw yr Eiddo (UPRN) ar gyfer yr eiddo yn y DU?
+doesPropertyHaveUPRN.helpText=Mae UPRN yn gyfeirnod sy’n cael ei ddefnyddio i ddynodi pob darn o dir ac eiddo ym Mhrydain Fawr.
+doesPropertyHaveUPRN.error.required=Dewiswch ‘Iawn’ os ydych yn gwybod Cyfeirnod Unigryw yr Eiddo
+
+enterUPRN.title=Eiddo yn y DU sydd â Chyfeirnod Unigryw yr Eiddo (UPRN)
 enterUPRN.p1=Mae UPRN yn gyfeirnod sy’n cael ei ddefnyddio i ddynodi pob darn o dir ac eiddo ym Mhrydain Fawr.
-enterUPRN.line1.label=UPRN neu linell gyntaf y cyfeiriad
+enterUPRN.singleDisposal.caption=Cyfeiriad yr eiddo
+enterUPRN.multipleDisposals.caption=Manylion un gwarediad eiddo
+enterUPRN.line1.label=Nodwch yr UPRN
 enterUPRN.line1.helpText=Mae UPRN yn 12 rhif neu lai.
-enterUPRN.line2.label=Ardal (dewisol)
-enterUPRN.line3.label=Tref neu ddinas (dewisol)
-enterUPRN.line4.label=Sir (dewisol)
-enterUPRN.postcode.label=Cod post
-enterUPRN.postcode.helpText=Os nad oes gan yr eiddo god post, nodwch god post yr eiddo agosaf. Er enghraifft, AB2 9WQ.
 enterUPRN-line1.error.required=Nodwch UPRN
 enterUPRN-line1.error.tooLong=Mae’n rhaid i UPRN fod yn 12 rhif neu lai
 enterUPRN-line1.error.invalid=Mae’n rhaid i UPRN gynnwys rhifau yn unig
+enterUPRN.postcode.label=Beth yw cod post yr eiddo agosaf?
+enterUPRN.postcode.helpText=Gwnaethoch roi gwybod i ni nid oes gan yr eiddo god post. Nodwch god post yr eiddo agosaf. Er enghraifft, AB2 9WQ.
+enterUPRN.postcode.error.required=Nodwch y cod post agosaf
+enterUPRN.postcode.error.notReal=Nodwch god post cyflawn yn y DU
+enterUPRN.postcode.error.tooLong=Rhaid i'r cod post fod yn 8 nod neu lai
+enterUPRN.postcode.error.invalid=Mae’n rhaid i’r cod post gynnwys llythrennau, rhifau a bylchau yn unig
+
+noUPRN.title=Cyfeiriad yr eiddo yn y DU
+noUPRN.singleDisposal.caption=Cyfeiriad yr eiddo
+noUPRN.multipleDisposals.caption=Manylion un gwarediad eiddo
+noUPRN.p1=Beth yw cyfeiriad yr eiddo yn y DU?
+noUPRN.line1.label=Cyfeiriad - llinell 1
+noUPRN.line2.label=Cyfeiriad - llinell 2 (dewisol)
+noUPRN.line3.label=Tref neu ddinas (dewisol)
+noUPRN.postcode.label=Beth yw cod post yr eiddo agosaf?
+noUPRN.postcode.helpText=Gwnaethoch roi gwybod i ni nid oes gan yr eiddo god post. Nodwch god post yr eiddo agosaf. Er enghraifft, AB2 9WQ.
+noUPRN.line1.error.required=Nodwch gyfeiriad - llinell 1
+noUPRN.line1.error.tooLong=Mae’n rhaid i linell 1 y cyfeiriad fod yn 35 o gymeriadau neu lai
+noUPRN.line1.error.invalid=Mae’n rhaid i linell 1 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
+noUPRN.line2.error.tooLong=Mae’n rhaid i linell 2 y cyfeiriad fod yn 35 o gymeriadau neu lai
+noUPRN.line2.error.invalid=Mae’n rhaid i linell 2 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
+noUPRN.line3.error.tooLong=Mae’n rhaid i’r dref neu’r ddinas fod yn 35 o gymeriadau neu lai
+noUPRN.line3.error.invalid=Mae’n rhaid i’r dref neu’r ddinas gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
+noUPRN.postcode.error.required=Nodwch y cod post agosaf
+noUPRN.postcode.error.notReal=Nodwch god post cyflawn yn y DU
+noUPRN.postcode.error.tooLong=Rhaid i'r cod post fod yn 8 nod neu lai
+noUPRN.postcode.error.invalid=Mae’n rhaid i’r cod post gynnwys llythrennau, rhifau a bylchau yn unig
 
 #===================================================
 # MULTIPLE DISPOSALS EXAMPLE PROPERTY PAGES - END

@@ -92,6 +92,9 @@ sm2 --start CGTPD_ALL
 sm2 --stop CGTPD_FRONTEND
 ```   
 
+For details on accessing the service on both local and higher up environments, please refer to 
+[CGT Development](https://confluence.tools.tax.service.gov.uk/display/DDCWLS/CGT%3A+Development) confluence page.
+
 ### License
 
 This code is open source software licensed under
