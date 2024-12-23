@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{rou
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{StartingToAmendToFillingOutReturnBehaviour, routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress, addressLineMapping}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress, addressLineMapping, ukAddressForm}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
@@ -74,7 +74,9 @@ class PropertyDetailsController @Inject() (
   singleDisposalCheckYourAnswersPage: views.html.returns.address.single_disposal_check_your_answers,
   multipleDisposalsCheckYourAnswersPage: views.html.returns.address.multiple_disposals_check_your_answers,
   hasValidPostcodePage: views.html.returns.address.has_valid_postcode,
-  enterUPRNPage: views.html.returns.address.enter_uprn
+  enterUPRNPage: views.html.returns.address.enter_uprn,
+  enterPropertyAddressPage: views.html.returns.address.enter_property_address,
+  hasUPRNPage: views.html.returns.address.does_property_have_uprn
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -314,17 +316,127 @@ class PropertyDetailsController @Inject() (
                 Redirect(
                   if (hasValidPostcode) {
                     routes.PropertyDetailsController.enterPostcode()
-                  } else if (isSingleDisposal) {
-                    routes.PropertyDetailsController
-                      .singleDisposalEnterLandUprn()
                   } else {
-                    routes.PropertyDetailsController
-                      .multipleDisposalsEnterLandUprn()
+                    routes.PropertyDetailsController.checkUPRN()
                   }
                 )
             )
         } else {
           Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        }
+      }
+    }
+
+  def checkUPRN(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn) { assetTypes =>
+          if (shouldAskIfPostcodeExists(assetTypes)) {
+            val isSingleDisposal =
+              fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+            Ok(
+              hasUPRNPage(
+                hasUPRNForm,
+                hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
+                isSingleDisposal
+              )
+            )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          }
+        }
+      }
+    }
+
+  def checkUPRNSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn) { assetTypes =>
+          if (shouldAskIfPostcodeExists(assetTypes)) {
+            val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+
+            hasUPRNForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    hasUPRNPage(
+                      formWithErrors,
+                      hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
+                      isSingleDisposal
+                    )
+                  ),
+                hasUPRN =>
+                  Redirect(
+                    if (hasUPRN) {
+                      if (isSingleDisposal) {
+                        routes.PropertyDetailsController.singleDisposalEnterLandUprn()
+                      } else {
+                        routes.PropertyDetailsController.multipleDisposalsEnterLandUprn()
+                      }
+                    } else {
+                      routes.PropertyDetailsController.noUPRNEnterAddress()
+                    }
+                  )
+              )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          }
+        }
+      }
+    }
+
+  def noUPRNEnterAddress(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn) { assetTypes =>
+          if (shouldAskIfPostcodeExists(assetTypes)) {
+            val isSingleDisposal =
+              fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+            Ok(
+              enterPropertyAddressPage(
+                ukAddressForm,
+                routes.PropertyDetailsController.checkUPRN(),
+                isSingleDisposal,
+                fillingOutReturn.journey.isAmendReturn
+              )
+            )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          }
+        }
+      }
+    }
+
+  def noUPRNEnterAddressSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn) { assetTypes =>
+          if (shouldAskIfPostcodeExists(assetTypes)) {
+            val isSingleDisposal =
+              fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+
+            ukAddressForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    enterPropertyAddressPage(
+                      formWithErrors,
+                      routes.PropertyDetailsController.checkUPRN(),
+                      isSingleDisposal,
+                      fillingOutReturn.journey.isAmendReturn
+                    )
+                  ),
+                storeAddress(
+                  routes.PropertyDetailsController.checkYourAnswers(),
+                  fillingOutReturn,
+                  isManuallyEnteredAddress = true
+                )
+              )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          }
         }
       }
     }
@@ -346,7 +458,7 @@ class PropertyDetailsController @Inject() (
           Ok(
             enterUPRNPage(
               enterUPRNForm,
-              routes.PropertyDetailsController.singleDisposalHasUkPostcode(),
+              routes.PropertyDetailsController.checkUPRN(),
               isSingleDisposal,
               fillingOutReturn.journey.isAmendReturn
             )
@@ -379,8 +491,7 @@ class PropertyDetailsController @Inject() (
                 BadRequest(
                   enterUPRNPage(
                     formWithErrors,
-                    routes.PropertyDetailsController
-                      .singleDisposalHasUkPostcode(),
+                    routes.PropertyDetailsController.checkUPRN(),
                     isSingleDisposal,
                     fillingOutReturn.journey.isAmendReturn
                   )
@@ -436,8 +547,7 @@ class PropertyDetailsController @Inject() (
                   .fold(
                     _ =>
                       if (shouldAskIfPostcodeExists(assetTypes)) {
-                        routes.PropertyDetailsController
-                          .singleDisposalHasUkPostcode()
+                        routes.PropertyDetailsController.singleDisposalHasUkPostcode()
                       } else {
                         routes.PropertyDetailsController.enterPostcode()
                       },
@@ -1036,6 +1146,13 @@ object PropertyDetailsController {
     Form(
       mapping(
         "hasValidPostcode" -> of(BooleanFormatter.formatter)
+      )(identity)(Some(_))
+    )
+
+  private val hasUPRNForm =
+    Form(
+      mapping(
+        "doesPropertyHaveUPRN" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
