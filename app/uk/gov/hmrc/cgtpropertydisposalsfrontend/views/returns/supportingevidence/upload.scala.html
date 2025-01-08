@@ -19,13 +19,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUpload
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.html.helper.CSPNonce
 
 @this(
     layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
-    govukFileUpload : GovukFileUpload
+    govukFileUpload : GovukFileUpload,
+    errorSummary: GovukErrorSummary
 )
 
 @(
@@ -76,15 +78,20 @@
   </ul>
 }
 
-@layout(title, backLinkUrl = Some(backLink.url)) {
-  @caption(messages(s"$key.caption"))
+@additionalScripts = {
+    <script @CSPNonce.attr src="@{routes.Assets.at("javascript/file-upload-type-validation.js")}"></script>
+}
+
+@layout(title, backLinkUrl = Some(backLink.url), additionalScripts = Some(additionalScripts)) {
+     @caption(messages(s"$key.caption"))
   <h1 class="govuk-heading-xl">@title</h1>
+
   @if(isReplaymentDue) {
     @repaymentGuidance
   } else {
     @noRepaymentGuidance
   }
-  <form action="@href" method="post" enctype="multipart/form-data">
+  <form id="uploadForm" action="@href" method="post" enctype="multipart/form-data">
 
     @for((k,v) <- meta){
         <input type="hidden" id="@k" name="@k" value="@v">
@@ -99,12 +106,102 @@
       ),
       hint = Some(Hint(
         content = HtmlContent(helpText)
-      ))
+      )),
+      attributes = Map("accept" -> ".csv, .txt")
     ))
-
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
   </form>
 
+<template id="empty-file-error-summary">
+    @errorSummary(ErrorSummary(
+    title = Text(messages("generic.errorSummaryHeader")),
+    errorList = Seq(ErrorLink(
+        href = Some("#file"),
+        content = Text(messages("supporting-evidence.upload.error.empty-file"))
+    )),
+    attributes = Map("id" -> "error-summary-display", "tabindex" -> "-1")
+    ))
+</template>
+
+<template id="empty-file-error-message">
+    <div class="govuk-error-message" id="general-file-upload-error">
+        <span class="govuk-visually-hidden">@messages("generic.errorPrefix") </span>
+        @messages("supporting-evidence.upload.error.empty-file")
+    </div>
+</template>
+
+<template id="no-extension-error-summary">
+    @errorSummary(ErrorSummary(
+    title = Text(messages("generic.errorSummaryHeader")),
+    errorList = Seq(ErrorLink(
+    href = Some("#file"),
+    content = Text(messages("supporting-evidence.upload.error.no-extension"))
+    )),
+    attributes = Map("id" -> "error-summary-display", "tabindex" -> "-1")
+    ))
+</template>
+
+<template id="no-extension-error-message">
+    <div class="govuk-error-message" id="no-extension-file-upload-error">
+        <span class="govuk-visually-hidden">@messages("generic.errorPrefix") </span>
+        @messages("supporting-evidence.upload.error.no-extension")
+    </div>
+</template>
+
+<template id="uppercase-extension-error-summary">
+    @errorSummary(ErrorSummary(
+    title = Text(messages("generic.errorSummaryHeader")),
+    errorList = Seq(ErrorLink(
+    href = Some("#file"),
+    content = Text(messages("supporting-evidence.upload.error.uppercase-extension"))
+    )),
+    attributes = Map("id" -> "error-summary-display", "tabindex" -> "-1")
+    ))
+</template>
+
+<template id="uppercase-extension-error-message">
+    <div class="govuk-error-message" id="uppercase-extension-file-upload-error">
+        <span class="govuk-visually-hidden">@messages("generic.errorPrefix") </span>
+        @messages("supporting-evidence.upload.error.uppercase-extension")
+    </div>
+</template>
+
+<template id="wrong-extension-error-summary">
+    @errorSummary(ErrorSummary(
+    title = Text(messages("generic.errorSummaryHeader")),
+    errorList = Seq(ErrorLink(
+    href = Some("#file"),
+    content = Text(messages("supporting-evidence.upload.error.wrong-extension"))
+    )),
+    attributes = Map("id" -> "error-summary-display", "tabindex" -> "-1")
+    ))
+</template>
+
+<template id="wrong-extension-error-message">
+    <div class="govuk-error-message" id="wrong-extension-file-upload-error">
+        <span class="govuk-visually-hidden">@messages("generic.errorPrefix") </span>
+        @messages("supporting-evidence.upload.error.wrong-extension")
+    </div>
+</template>
+
+<template id="large-file-error-summary">
+    @errorSummary(ErrorSummary(
+    title = Text(messages("generic.errorSummaryHeader")),
+    errorList = Seq(ErrorLink(
+    href = Some("#file"),
+    content = Text(messages("supporting-evidence.upload.error.large-file"))
+    )),
+    attributes = Map("id" -> "error-summary-display", "tabindex" -> "-1")
+    ))
+</template>
+
+<template id="large-file-error-message">
+    <div class="govuk-error-message" id="large-file-upload-error">
+        <span class="govuk-visually-hidden">@messages("generic.errorPrefix") </span>
+        @messages("supporting-evidence.upload.error.large-file")
+    </div>
+</template>
  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }
+

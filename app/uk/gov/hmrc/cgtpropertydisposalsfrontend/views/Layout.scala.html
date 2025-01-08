@@ -49,7 +49,9 @@
         hasErrors: Boolean = false,
         sidebar: Option[Html] = None,
         accountMenu: Option[HtmlFormat.Appendable] = None,
-        accountLayout: Option[AccountLayout] = None
+        accountLayout: Option[AccountLayout] = None,
+        additionalScripts: Option[Html] = None,
+        additionalHeadForTemplate: Option[Html] = None
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @signOutUrl = @{controllerRoutes.StartController.signOutAndRedirectToFeedback().url}
@@ -77,8 +79,9 @@
   </div>
 }
 
-@additionalScripts = {
+@scripts = {
   @autocompleteJavascript()
+  @additionalScripts
   <script @CSPNonce.attr src="@{routes.Assets.at("javascript/cgtpd.js")}"></script>
 }
 
@@ -114,7 +117,7 @@
       additionalHeadBlock = Some(additionalHeadBlock),
       mainContentLayout = layoutOption,
       beforeContentBlock = Some(beforeContent),
-      additionalScriptsBlock = Some(additionalScripts)
+      additionalScriptsBlock = Some(scripts)
     ),
     banners = Banners(
       userResearchBanner = if(viewConfig.userResearchBannerEnabled) Some(UserResearchBanner(
