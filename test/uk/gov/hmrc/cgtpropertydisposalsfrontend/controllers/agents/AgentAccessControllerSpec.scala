@@ -985,7 +985,7 @@ class AgentAccessControllerSpec
           content should include(
             messageFromMessageKey("agent.enter-client-country.title")
           )
-          content should include(s""""$nonUkCountryCode" selected""")
+          content should include regex s""""$nonUkCountryCode"[\\n\\r\\s]+selected"""
         }
       }
     }
