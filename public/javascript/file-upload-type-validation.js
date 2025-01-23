@@ -67,10 +67,10 @@
                     renderFormError(uploadInput,"wrong-extension")
                 }
             }
-            else if(files[0] && (files[0].size / (1024 * 1024)) > 3) {
+           /* else if(files[0] && (files[0].size / (1024 * 1024)) > 3) {
                 event.preventDefault()
                 renderFormError(uploadInput,"large-file")
-            }
+            }*/
             else if (ext =='') {
                     event.preventDefault();
                     renderFormError(uploadInput,"no-extension")

@@ -34,7 +34,8 @@
     upscanUpload : UpscanUpload,
     backLink: Call,
     isAmend: Boolean,
-    isReplaymentDue: Boolean
+    isReplaymentDue: Boolean,
+    form:Form[_]
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @key = @{"supporting-evidence.upload"}
@@ -42,6 +43,8 @@
 @title = @{messages(s"$key.title")}
 @meta = @{upscanUpload.upscanUploadMeta.uploadRequest.fields}
 @href = @{upscanUpload.upscanUploadMeta.uploadRequest.href}
+
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @helpText = @{ if(isAmend) messages(s"$key.amendReturn.help-text") else messages(s"$key.help-text")}
 @repaymentGuidance = {
@@ -91,7 +94,7 @@
   } else {
     @noRepaymentGuidance
   }
-  <form id="uploadForm" action="@href" method="post" enctype="multipart/form-data">
+  <form id="uploadForm" action="/supporting-evidence/upload-supporting-evidence" method="post" enctype="multipart/form-data">
 
     @for((k,v) <- meta){
         <input type="hidden" id="@k" name="@k" value="@v">
@@ -107,11 +110,11 @@
       hint = Some(Hint(
         content = HtmlContent(helpText)
       )),
-      attributes = Map("accept" -> ".csv, .txt")
+      attributes = Map("accept" -> "text/csv, text/plain","data-max-file-size"-> "3145728" )
     ))
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
   </form>
-
+<!--
 <template id="empty-file-error-summary">
     @errorSummary(ErrorSummary(
     title = Text(messages("generic.errorSummaryHeader")),
@@ -200,7 +203,7 @@
         <span class="govuk-visually-hidden">@messages("generic.errorPrefix") </span>
         @messages("supporting-evidence.upload.error.large-file")
     </div>
-</template>
+</template>-->
  @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

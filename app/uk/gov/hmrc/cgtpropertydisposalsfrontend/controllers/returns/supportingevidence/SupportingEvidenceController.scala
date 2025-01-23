@@ -24,7 +24,10 @@ import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
+import play.api.libs.Files
+import play.api.libs.Files.TemporaryFile
 import play.api.mvc._
+import play.mvc.Http
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
@@ -38,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadForm, UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -273,6 +276,7 @@ class SupportingEvidenceController @Inject() (
 
   def uploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
+      val formProvider = UploadForm.fileUploadForm
       withUploadSupportingEvidenceAnswers { (_, f, answers) =>
         if (answers.fold(_.evidences, _.evidences).length >= maxUploads) {
           Redirect(routes.SupportingEvidenceController.checkYourAnswers())
@@ -294,12 +298,65 @@ class SupportingEvidenceController @Inject() (
                     uploadUpscan,
                     routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
                     f.isAmendReturn,
-                    isReplaymentDue(f.draftReturn.yearToDateLiabilityAnswers)
+                    isReplaymentDue(f.draftReturn.yearToDateLiabilityAnswers),
+                    formProvider
                   )
                 )
             )
         }
       }
+    }
+
+//nest of actions
+
+  def onSubmitUploadEvidence(): Action[MultipartFormData[TemporaryFile]] =
+    Action(parse.multipartFormData).andThen(authenticatedAction).andThen(sessionDataAction).async { implicit request =>
+      val formProvider = UploadForm.fileUploadForm
+      formProvider.bindFromRequest.fold(
+        formWithErrors => {
+          println("onsubmit test with form errors")
+          //BadRequest(s"Form errors: ${formWithErrors.errors.map(_.message).mkString(", ")}")
+          withUploadSupportingEvidenceAnswers { (_, f, answers) =>
+            if (answers.fold(_.evidences, _.evidences).length >= maxUploads) {
+              Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+            } else {
+              upscanService
+                .initiate(
+                  routes.SupportingEvidenceController
+                    .handleUpscanErrorRedirect(),
+                  routes.SupportingEvidenceController.scanProgress
+                )
+                .fold(
+                  { e =>
+                    logger.warn("could not start upload supporting evidence", e)
+                    errorHandler.errorResult()
+                  },
+                  uploadUpscan =>
+                    BadRequest(
+                      uploadPage(
+                        uploadUpscan,
+                        routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
+                        f.isAmendReturn,
+                        isReplaymentDue(f.draftReturn.yearToDateLiabilityAnswers),
+                        formWithErrors
+                      )
+                    )
+                )
+            }
+          }
+          //stay on upload page and display the error.
+        },
+        fileData =>
+          request.body.file("file") match {
+            case Some(file) =>
+              println("onsubmit test - ok")
+              Ok(s"File uploaded successfully: $file")
+            //upload the file to upscan AND redirect to next
+            case None       =>
+              println("onsubmit test - non ok")
+              BadRequest("No file uploaded.")
+          }
+      )
     }
 
   def handleUpscanErrorRedirect(): Action[AnyContent] =

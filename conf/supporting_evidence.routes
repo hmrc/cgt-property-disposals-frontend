@@ -2,6 +2,7 @@ GET         /supporting-evidence/supporting-evidence                   uk.gov.hm
 POST        /supporting-evidence/supporting-evidence                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.doYouWantToUploadSupportingEvidenceSubmit()
 
 GET         /supporting-evidence/upload-supporting-evidence            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.uploadSupportingEvidence()
+POST        /supporting-evidence/upload-supporting-evidence            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.onSubmitUploadEvidence()
 
 GET         /supporting-evidence/scan-progress/:id                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.scanProgress(id : uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference)
 POST        /supporting-evidence/scan-progress                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.scanProgressSubmit(id : String)
