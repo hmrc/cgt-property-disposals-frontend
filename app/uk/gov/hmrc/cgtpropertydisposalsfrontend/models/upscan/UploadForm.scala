@@ -64,16 +64,16 @@ object UploadForm {
       "fileName" -> nonEmptyText
     )(FileUploadData1.apply)(FileUploadData1.unapply)
   )
-
-  //implicit val binder: Formatter[MultipartFormData.FilePart[File]]
   implicit val format: OFormat[MultipartFormData.FilePart[File]] = derived.oformat()
-/*
+  implicit val binder: Formatter[MultipartFormData.FilePart[File]]
+
+
   = new Formatter[MultipartFormData.FilePart[File]] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], MultipartFormData.FilePart[File]] = ???
 //validation here
     override def unbind(key: String, value: MultipartFormData.FilePart[File]): Map[String, String] =
       Map(key->value.filename)
-  }*/
+  }
 
 // reference to be shared
 
