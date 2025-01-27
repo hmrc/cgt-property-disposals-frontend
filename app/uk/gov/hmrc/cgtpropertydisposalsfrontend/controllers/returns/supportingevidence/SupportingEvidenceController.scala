@@ -314,7 +314,7 @@ class SupportingEvidenceController @Inject() (
       val formProvider = UploadForm.fileUploadForm
       formProvider.bindFromRequest.fold(
         formWithErrors => {
-          println("onsubmit test with form errors")
+          //println("onsubmit test with form errors")
           //BadRequest(s"Form errors: ${formWithErrors.errors.map(_.message).mkString(", ")}")
           withUploadSupportingEvidenceAnswers { (_, f, answers) =>
             if (answers.fold(_.evidences, _.evidences).length >= maxUploads) {
@@ -349,11 +349,11 @@ class SupportingEvidenceController @Inject() (
         fileData =>
           request.body.file("file") match {
             case Some(file) =>
-              println("onsubmit test - ok")
+              //println("onsubmit test - ok")
               Ok(s"File uploaded successfully: $file")
             //upload the file to upscan AND redirect to next
             case None       =>
-              println("onsubmit test - non ok")
+              //println("onsubmit test - non ok")
               BadRequest("No file uploaded.")
           }
       )
