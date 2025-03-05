@@ -84,7 +84,7 @@
             content = Text(messages(s"$key.Residential")),
             value = Some("0"),
             hint = Some(Hint(
-              content = HtmlContent(messages(s"$key.Residential.helpText"))
+              content = Text(messages(s"$key.Residential.helpText"))
             )),
             checked = form.value.contains(AssetType.Residential)
           ),
@@ -97,7 +97,7 @@
             content = Text(messages(s"$key.MixedUse")),
             value = Some("2"),
             hint = Some(Hint(
-              content = HtmlContent(messages(s"$key$userKey.MixedUse.helpText"))
+              content = Text(messages(s"$key$userKey.MixedUse.helpText"))
             )),
             checked = form.value.contains(AssetType.MixedUse)
           ),
@@ -105,7 +105,7 @@
             content = Text(messages(s"$key$userKey.IndirectDisposal")),
             value = Some("3"),
             hint = Some(Hint(
-              content = HtmlContent(messages(s"$key$userKey.IndirectDisposal.helpText"))
+              content = Text(messages(s"$key$userKey.IndirectDisposal.helpText"))
             )),
             checked = form.value.contains(AssetType.IndirectDisposal)
           )

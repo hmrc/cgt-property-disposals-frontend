@@ -131,7 +131,7 @@
           )
         },
         hint = Some(Hint(
-          content = HtmlContent(messages(s"$key.helpText.p1.text"))
+          content = Text(messages(s"$key.helpText.p1.text"))
         )),
         errorMessage = form.error(key).map(e =>
           ErrorMessage(
@@ -142,7 +142,7 @@
 
       @govukDetails(Details(
         summary = Text(messages(s"$key.details.summary")),
-        content = HtmlContent(messages(s"$key$userKey.details.p1", appConfig.tranferringOwnershipHelp))
+        content = Text(messages(s"$key$userKey.details.p1", appConfig.tranferringOwnershipHelp))
       ))
 
       @govukDetails(Details(

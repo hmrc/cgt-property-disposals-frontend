@@ -66,7 +66,7 @@
     autocomplete= Some(AutoCompleteType.AddressLine1.value),
     classes = "govuk-!-width-two-thirds",
     hint = Some(Hint(
-      content = HtmlContent(messages(s"$key.line1.helpText"))
+      content = Text(messages(s"$key.line1.helpText"))
     )),
     value = form.data.get(line1Key),
     errorMessage = form.error(line1Key).map(e => ErrorMessage(content =Text(messages(s"$line1Key.${e.message}")))),

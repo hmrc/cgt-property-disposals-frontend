@@ -68,7 +68,7 @@
         id = percentageShareKey,
         name = percentageShareKey,
         label = Label(
-            content =  HtmlContent(messages(s"$percentageShareKey$userKey.label")),
+            content =  Text(messages(s"$percentageShareKey$userKey.label")),
         ),
         errorMessage = form.error(percentageShareKey).map(e => ErrorMessage(
           content = Text(messages(s"$percentageShareKey$userKey.${e.message}")),
@@ -77,7 +77,7 @@
         classes = "govuk-!-width-one-third",
         spellcheck = Some(false),
         value = form(percentageShareKey).value,
-        suffix = Some(PrefixOrSuffix(content=HtmlContent("%")))
+        suffix = Some(PrefixOrSuffix(content=Text("%")))
     ))
 }
 

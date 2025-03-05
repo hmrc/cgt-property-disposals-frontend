@@ -17,7 +17,6 @@
 @import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
-@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
@@ -87,31 +86,31 @@
   val rebaseDate = RebasingCutoffDates.allResidents
   (isShare, acquisitionMethod, representativeType) match {
     case (true, _, None) if acquisitionDate.value.isBefore(rebaseDate) =>
-      (messages("acquisitionPrice.3.title", rebaseDate), Html(messages("acquisitionPrice.3.helpText")))
+      (messages("acquisitionPrice.3.title", rebaseDate), messages("acquisitionPrice.3.helpText"))
     case (true, Inherited | Gifted, None) =>
-      (messages("acquisitionPrice.2.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages("acquisitionPrice.2.helpText")))
+      (messages("acquisitionPrice.2.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), messages("acquisitionPrice.2.helpText"))
     case (true, Bought, Some(Capacitor | PersonalRepresentative)) =>
-      (messages("acquisitionPrice.4.title"), Html(messages("acquisitionPrice.4.helpText")))
+      (messages("acquisitionPrice.4.title"), messages("acquisitionPrice.4.helpText"))
     case (true, _, Some(Capacitor | PersonalRepresentative)) =>
-      (messages("acquisitionPrice.5.title"), Html(messages("acquisitionPrice.5.helpText")))
+      (messages("acquisitionPrice.5.title"), messages("acquisitionPrice.5.helpText"))
     case (true, _, Some(PersonalRepresentativeInPeriodOfAdmin)) =>
-      (messages("acquisitionPrice.6.title"), Html(messages("acquisitionPrice.6.helpText")))
+      (messages("acquisitionPrice.6.title"), messages("acquisitionPrice.6.helpText"))
     case (true, _, _) if isAgent && acquisitionDate.value.isBefore(rebaseDate) =>
-      (messages("acquisitionPrice.9.title", rebaseDate), Html(messages("acquisitionPrice.9.helpText")))
+      (messages("acquisitionPrice.9.title", rebaseDate), messages("acquisitionPrice.9.helpText"))
     case (true, Bought, _) if isAgent =>
-      (messages("acquisitionPrice.7.title"), Html(messages("acquisitionPrice.7.helpText")))
+      (messages("acquisitionPrice.7.title"), messages("acquisitionPrice.7.helpText"))
     case (true, Inherited | Gifted, _) if isAgent =>
-      (messages("acquisitionPrice.8.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages("acquisitionPrice.8.helpText")))
+      (messages("acquisitionPrice.8.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), messages("acquisitionPrice.8.helpText"))
     case (true, Bought, _) if isATrust =>
-      (messages("acquisitionPrice.10.title"), Html(messages("acquisitionPrice.10.helpText")))
+      (messages("acquisitionPrice.10.title"), messages("acquisitionPrice.10.helpText"))
     case (true, _, None) =>
-      (messages("acquisitionPrice.1.title"), Html(messages("acquisitionPrice.1.helpText")))
+      (messages("acquisitionPrice.1.title"), messages("acquisitionPrice.1.helpText"))
     case (false, Bought, _) =>
       (messages(s"${key}Bought$userKey$assetTypeKey.title"),
-       Html(messages(s"${key}Bought$userKey.helpText")))
+       messages(s"${key}Bought$userKey.helpText"))
     case (false, _, _) =>
       (messages(s"${key}NotBought$userKey$assetTypeKey.title", TimeUtils.govDisplayFormat(acquisitionDate.value)),
-       Html(messages(s"${key}NotBought$userKey.helpText")))
+       messages(s"${key}NotBought$userKey.helpText"))
   }
 }
 
@@ -138,7 +137,7 @@
       ),
       classes = "govuk-input--width-10",
       hint = Some(Hint(
-        content = assetTypeKey.isEmpty match {case true => HtmlContent(titleWithHelpTextAndContext._2) case false => Text("")}
+        content = assetTypeKey.isEmpty match {case true => Text(titleWithHelpTextAndContext._2) case false => Text("")}
       )),
       prefix = Some(PrefixOrSuffix(
         content = Text("£")

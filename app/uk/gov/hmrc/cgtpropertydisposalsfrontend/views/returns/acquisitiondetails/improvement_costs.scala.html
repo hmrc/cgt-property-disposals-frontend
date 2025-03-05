@@ -154,7 +154,7 @@
         ))
       )),
       hint = Some(Hint(
-        content = HtmlContent(helpText),
+        content = Text(helpText),
       )),
       name = key,
       idPrefix = Some(key),
@@ -181,7 +181,7 @@
 
     @govukDetails(Details(
       summary = Text(messages(s"$key.details.summary")),
-      content = HtmlContent(messages(s"$key.details.p1"))
+      content = Text(messages(s"$key.details.p1"))
     ))
 
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))

@@ -68,7 +68,7 @@
         ),
         classes = "govuk-!-width-one-half",
         hint = Some(Hint(
-        content = HtmlContent(messages("agent.enter-client-cgt-ref.helpText"))
+        content = Text(messages("agent.enter-client-cgt-ref.helpText"))
         )),
         errorMessage = form.error(key).map(e => ErrorMessage(
         content = Text(messages(s"$key.${e.message}")),
