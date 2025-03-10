@@ -54,7 +54,7 @@
   </p>
 
   @govukInsetText(InsetText(
-    content = HtmlContent(
+    content = Text(
       emailJourneyType match {
           case _: EmailJourneyType.Returns.ChangingRepresenteeEmail => messages("confirmEmail.verified.representee.p1")
           case _                                                    => messages("confirmEmail.verified.p1")

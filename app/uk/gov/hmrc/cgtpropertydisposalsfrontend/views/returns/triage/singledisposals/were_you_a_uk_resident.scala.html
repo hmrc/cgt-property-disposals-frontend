@@ -86,7 +86,7 @@
         @if(!isPeriodOfAdmin) {
           @govukDetails(Details(
             summary = Text(messages(s"$key$userMsgKey.summary")),
-            content = HtmlContent(messages(s"$key$userMsgKey.details"))
+            content = Text(messages(s"$key$userMsgKey.details"))
           ))
         }
 
