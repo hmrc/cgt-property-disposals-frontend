@@ -2851,8 +2851,6 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Private Residence 
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=the property had been the only home of a beneficiary, both before and after the deceased’s death
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=that beneficiary was also entitled to at least 75% of the proceeds of the disposal of the property (assuming that none of the proceeds are needed to meet any liabilities of the deceased person’s estate)
 
-privateResidentsRelief.warningMsg=Private Residence Relief changed on 6 April 2020. Make sure you understand the rules.
-
 privateResidentsRelief.details.link=Help with Private Residence Relief
 privateResidentsRelief.details.body.p1=If the property was your main home and you lived there for the entire time you owned it, you can claim full relief.
 privateResidentsRelief.details.body.p2=If you did not live in the property for the entire time you owned it, you can claim relief for the:

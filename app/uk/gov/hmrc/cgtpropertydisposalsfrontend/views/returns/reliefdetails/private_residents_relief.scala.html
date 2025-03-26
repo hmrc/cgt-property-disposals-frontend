@@ -133,7 +133,6 @@
   } else {
     <p class="govuk-body">@messages(s"$key$userKey.helpText")</p>
   }
-  <p class="govuk-inset-text">@messages(s"$key.warningMsg")</p>
   @details(messages(s"$key.details.link"), detailsContent)
   @formWrapper(routes.ReliefDetailsController.privateResidentsReliefSubmit()) {
     @govukRadios(Radios(

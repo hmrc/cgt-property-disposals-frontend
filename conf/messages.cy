@@ -2852,8 +2852,6 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Gellir ond hawlio 
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=mai’r eiddo oedd unig gartref buddiolwr, cyn ac ar ôl marwolaeth yr ymadawedig
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=oedd gan y buddiolwr hwnnw hawl hefyd i o leiaf 75% o dderbyniadau gwaredu’r eiddo (gan dybio nad oedd angen unrhyw un o’r derbyniadau er mwyn bodloni unrhyw rwymedigaethau ystâd yr ymadawedig)
 
-privateResidentsRelief.warningMsg=Newidiodd Rhyddhad Preswylfa Breifat ar 6 Ebrill 2020. Gwnewch yn siŵr eich bod yn deall y rheolau.
-
 privateResidentsRelief.details.link=Help gyda Rhyddhad Preswylfa Breifat
 privateResidentsRelief.details.body.p1=Os mai’ch prif gartref oedd yr eiddo ac os oeddech yn byw yno drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio’r rhyddhad llawn.
 privateResidentsRelief.details.body.p2=Os nad oeddech yn byw yn yr eiddo drwy gydol yr amser yr oeddech yn berchen arno, gallwch hawlio rhyddhad ar gyfer:
