@@ -38,6 +38,8 @@ trait NameMatchRetryStore {
     ggCredId: GGCredId,
     unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]
   ): Future[Either[Error, Unit]]
+
+  def clearCache(ggCredId: GGCredId): Future[Either[Error, Unit]]
 }
 
 @Singleton
@@ -75,4 +77,5 @@ class NameMatchRetryStoreImpl @Inject() (
   ): Future[Either[Error, Unit]] =
     store(ggCredId.value, unsuccessfulAttempts)
 
+  override def clearCache(ggCredId: GGCredId): Future[Either[Error, Unit]] = clearCache(ggCredId.value)
 }
