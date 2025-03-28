@@ -17,12 +17,15 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
 import com.typesafe.config.ConfigFactory
+import org.apache.pekko.stream.Attributes.LogLevels.Error
+import org.mockito.Mockito.when
 import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.test.Helpers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics._factory
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualSautrNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
@@ -33,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.BusinessPartnerRecordNameM
 import uk.gov.hmrc.mongo.TimestampSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object BusinessPartnerRecordNameMatchRetryStoreSpec {
@@ -76,6 +80,12 @@ class NameMatchRetryStoreImplSpec
         retryStore.get[IndividualSautrNameMatchDetails](sample[GGCredId])
       ) should be(Right(None))
     }
+
+    "be able to clear session data from sessions collection" in new TestEnvironment {
+      await(
+        retryStore.clearCache(sample[GGCredId])
+      ) shouldBe Right(())
+    }
   }
 
 }
@@ -86,4 +96,14 @@ class NameMatchRetryStoreFailureSpec extends AnyWordSpec with Matchers with Mong
 
   val retryStore = new NameMatchRetryStoreImpl(mongoComponent, config, timestampSupport)
   mongoComponent.database.drop()
+  "return Left(Error) when an exception occurs during cache clearing" in new TestEnvironment{
+    await(
+      retryStore.clearCache(sample[GGCredId])
+    ) should be(Left(Error("unknown error during clearing session data in mongo")))
+  }
+
+}
+case class Error(message: String)
+object Error {
+  val unknownError = Error("unknown error during clearing session data in mongo")
 }
