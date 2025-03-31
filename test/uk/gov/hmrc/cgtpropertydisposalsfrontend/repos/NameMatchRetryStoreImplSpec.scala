@@ -31,6 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameMatchGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.BusinessPartnerRecordNameMatchRetryStoreSpec._
 import uk.gov.hmrc.mongo.TimestampSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -75,6 +76,19 @@ class NameMatchRetryStoreImplSpec
       await(
         retryStore.get[IndividualSautrNameMatchDetails](sample[GGCredId])
       ) should be(Right(None))
+    }
+
+    "be able to clear session data from sessions collection" in new TestEnvironment {
+      await(
+        retryStore.clearCache(sample[GGCredId])
+      ) shouldBe Right(())
+    }
+
+    "return Left(Error) when an exception occurs during cache clearing" in new TestEnvironment {
+      mongoComponent.client.close()
+      await(
+        retryStore.clearCache(sample[GGCredId])
+      ) should be(Left(Error(Left("unknown error during clearing session data in mongo"))))
     }
   }
 
