@@ -1092,14 +1092,14 @@ completionDate-day.error.dayAndMonthRequired=Completion date must include a day 
 completionDate.cyaChange=the completion date
 
 disposalDateTooEarly.non-uk.title=You cannot use this service
-disposalDateTooEarly.non-uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
+disposalDateTooEarly.non-uk.p1=You can only use this service to report the disposal of UK property in the last 4 tax years. You cannot report disposals from the tax year {0} to {1} or before.
 disposalDateTooEarly.non-uk.p2=If an indirect disposal was made, it’s because the shares were sold before 6 April 2020.
 disposalDateTooEarly.non-uk.h2=What you’ll need to do next
 disposalDateTooEarly.non-uk.p3=You’ll need to complete a <a class="govuk-link" href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 
 disposalDateTooEarly.uk.title=You cannot use this service
-disposalDateTooEarly.uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
-disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a class="govuk-link" href="{0}">UK property sales or disposals before 6 April 2020</a>.
+disposalDateTooEarly.uk.p1=You can only use this service to report the disposal of UK property in the last 4 tax years. You cannot report disposals from the tax year {0} to {1} or before.
+disposalDateTooEarly.uk.p2=You’ll need to <a class="govuk-link" href="{0}">report your Capital Gains Tax on UK property by post</a>.
 
 triage.check-your-answers.title=Check your answers
 triage.cyaChange.countryOfResidence=your country of residence on the day you ‘exchanged’ contracts

@@ -44,8 +44,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.CancelAmendReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, IndividualUserType, ReturnSummary}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, IndividualUserType, ReturnSummary, TaxYearExchanged}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -398,7 +398,7 @@ class AmendReturnControllerSpec
               individualUserType = Some(IndividualUserType.Self)
             )
           ),
-          summary = sample[ReturnSummary].copy(taxYear = TaxYear.thisTaxYearStartDate().getYear.toString)
+          summary = sample[ReturnSummary].copy(taxYear = TaxYearExchanged.currentTaxYear.toString)
         )
 
         "the user is not an agent" in {

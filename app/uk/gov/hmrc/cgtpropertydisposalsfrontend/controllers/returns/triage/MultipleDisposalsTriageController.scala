@@ -562,7 +562,7 @@ class MultipleDisposalsTriageController @Inject() (
 
               val taxYearOfDateOfDeath = getDateOfDeath(state) match {
                 case Some(date) => TimeUtils.getTaxYearExchangedOfADate(date.value)
-                case _          => TaxYearExchanged.taxYearExchangedBefore2020
+                case _          => TaxYearExchanged.taxYearExchangedTooEarly
               }
 
               val representativeType: Option[RepresentativeType] =
@@ -606,7 +606,7 @@ class MultipleDisposalsTriageController @Inject() (
 
           val taxYearOfDateOfDeath = getDateOfDeath(state) match {
             case Some(date) => TimeUtils.getTaxYearExchangedOfADate(date.value)
-            case _          => TaxYearExchanged.taxYearExchangedBefore2020
+            case _          => TaxYearExchanged.taxYearExchangedTooEarly
           }
 
           val representativeType: Option[RepresentativeType] =
@@ -1540,7 +1540,7 @@ class MultipleDisposalsTriageController @Inject() (
     }
 
   private def isAValidCGTTaxTear(taxYearExchanged: TaxYearExchanged): Boolean =
-    !(taxYearExchanged === TaxYearExchanged.taxYearExchangedBefore2020 || taxYearExchanged === TaxYearExchanged.differentTaxYears)
+    !(taxYearExchanged === TaxYearExchanged.taxYearExchangedTooEarly || taxYearExchanged === TaxYearExchanged.differentTaxYears)
 
   private def isTaxYearWithinOriginalSubmissionTaxYear(
     taxYearExchanged: TaxYearExchanged,
