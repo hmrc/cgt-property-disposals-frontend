@@ -35,6 +35,16 @@ trait Repo {
       cacheRepository.get(id)(DataKey(sessionKey)).map(d => Right(d))
     }
 
+  protected def clearCache(id: String)(implicit ec: ExecutionContext): Future[Either[Error, Unit]] =
+    preservingMdc {
+      cacheRepository
+        .delete(id)(DataKey(sessionKey))
+        .map(_ => Right(()))
+        .recover { case _: Exception =>
+          Left(Error("unknown error during clearing session data in mongo"))
+        }
+    }
+
   protected def store[A : Writes](id: String, a: A)(implicit ec: ExecutionContext): Future[Either[Error, Unit]] =
     preservingMdc {
       cacheRepository

@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{SubscriptionRequestEvent, WrongGGAccountEvent}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.{NameMatchRetryStore, SessionStore}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -49,6 +49,7 @@ class SubscriptionController @Inject() (
   val sessionDataAction: SessionDataAction,
   val subscriptionDetailsAction: SubscriptionReadyAction,
   val auditService: AuditService,
+  val nameMatchRetryStore: NameMatchRetryStore,
   alreadySubscribedWithDifferentGGAccountPage: views.html.onboarding.already_subscribed_with_different_gg_account,
   checkYourDetailsPage: views.html.onboarding.subscription.check_your_details,
   subscribedPage: views.html.onboarding.subscription.subscribed,
@@ -124,6 +125,11 @@ class SubscriptionController @Inject() (
                 SubscriptionRequestEvent.fromSubscriptionDetails(details),
                 "subscription-request"
               )
+            val ggCredId = request.subscriptionReady.ggCredId
+            nameMatchRetryStore.clearCache(ggCredId).map {
+              case Left(e)  => logger.warn(s"Failed to clear name mismatch session cache for $ggCredId", e)
+              case Right(_) => logger.info(s"Cleared name mismatch session cache for $ggCredId")
+            }
             Redirect(routes.SubscriptionController.subscribed())
           case AlreadySubscribed                          =>
             logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
