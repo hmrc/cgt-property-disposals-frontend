@@ -408,10 +408,11 @@ class CommonTriageQuestionsController @Inject() (
         ) match {
           case None        => Redirect(redirectToCheckYourAnswers(state))
           case Some(wasUk) =>
+            val cutoffTaxYear = TaxYearExchanged.cutoffTaxYear
             if (wasUk) {
-              Ok(disposalDateTooEarlyUkResidents(backLink))
+              Ok(disposalDateTooEarlyUkResidents(backLink, cutoffTaxYear))
             } else {
-              Ok(disposalDateTooEarlyNonUkResidents(backLink))
+              Ok(disposalDateTooEarlyNonUkResidents(backLink, cutoffTaxYear))
             }
         }
       }
@@ -425,7 +426,7 @@ class CommonTriageQuestionsController @Inject() (
           _ => routes.MultipleDisposalsTriageController.disposalDateOfShares(),
           _ => routes.SingleDisposalsTriageController.disposalDateOfShares()
         )
-        Ok(disposalDateTooEarlyNonUkResidents(backLink))
+        Ok(disposalDateTooEarlyNonUkResidents(backLink, TaxYearExchanged.currentTaxYear))
       }
     }
 

@@ -1092,14 +1092,14 @@ completionDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad cwblhau
 completionDate.cyaChange=y dyddiad cwblhau
 
 disposalDateTooEarly.non-uk.title=Ni allwch ddefnyddio’r gwasanaeth hwn
-disposalDateTooEarly.non-uk.p1=Mae hyn oherwydd pan gafodd yr eiddo ei werthu neu ei waredu, cyfnewidiwyd contractau cyn 6 Ebrill 2020.
+disposalDateTooEarly.non-uk.p1=Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am warediad o eiddo yn y DU a wnaed yn ystod y 4 blwyddyn dreth ddiwethaf. Ni allwch roi gwybod am warediad o flwyddyn dreth {0} i {1} neu’n gynharach.
 disposalDateTooEarly.non-uk.p2=Os cafodd gwarediad anuniongyrchol ei wneud, mae hynny oherwydd bod y cyfranddaliadau wedi cael eu gwerthu cyn 6 Ebrill 2020.
 disposalDateTooEarly.non-uk.h2=Yr hyn y bydd angen i chi ei wneud nesaf
 disposalDateTooEarly.non-uk.p3=Bydd angen i chi lenwi <a class="govuk-link" href="{0}">dibreswyl: ffurflen rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo neu dir yn y DU</a>.
 
 disposalDateTooEarly.uk.title=Ni allwch ddefnyddio’r gwasanaeth hwn
-disposalDateTooEarly.uk.p1=Mae hyn oherwydd pan gafodd yr eiddo ei werthu neu ei waredu, cyfnewidiwyd contractau cyn 6 Ebrill 2020.
-disposalDateTooEarly.uk.p2=Dysgwch sut i roi gwybod am a thalu Treth Enillion Cyfalaf ar <a class="govuk-link" href="{0}">werthiannau neu warediadau eiddo yn y DU cyn 6 Ebrill 2020</a>.
+disposalDateTooEarly.uk.p1=Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am warediad o eiddo yn y DU a wnaed yn ystod y 4 blwyddyn dreth ddiwethaf. Ni allwch roi gwybod am warediad o flwyddyn dreth {0} i {1} neu’n gynharach.
+disposalDateTooEarly.uk.p2=Bydd angen i chi <a class="govuk-link" href="{0}">roi gwybod am eich Treth Enillion Cyfalaf ar eiddo yn y DU drwy’r post</a>.
 
 triage.check-your-answers.title=Gwirio’ch atebion
 triage.cyaChange.countryOfResidence=eich gwlad breswyl ar y diwrnod y gwnaethoch ‘gyfnewid’ contractau

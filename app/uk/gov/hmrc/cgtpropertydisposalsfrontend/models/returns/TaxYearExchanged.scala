@@ -19,12 +19,16 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.OFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 
 final case class TaxYearExchanged(year: Int) extends Product with Serializable
 
 object TaxYearExchanged {
-  val cutoffYear: Int                              = 2020
-  val taxYearExchangedBefore2020: TaxYearExchanged = TaxYearExchanged(-2020)
+  val currentTaxYear: Int = TaxYear.thisTaxYearStartDate().getYear
+
+  // Cutoff tax year must be current tax year minus 4 years
+  val cutoffTaxYear: Int                         = currentTaxYear - 4
+  val taxYearExchangedTooEarly: TaxYearExchanged = TaxYearExchanged(-cutoffTaxYear)
 
   val differentTaxYears: TaxYearExchanged = TaxYearExchanged(-1)
 

@@ -1723,6 +1723,7 @@ class CommonTriageQuestionsControllerSpec
     }
 
     "handling requests to display the disposal date too early page" must {
+      val cutoffTaxYear = TaxYearExchanged.cutoffTaxYear
 
       def performAction(): Future[Result] =
         controller.disposalDateTooEarly()(FakeRequest())
@@ -1745,7 +1746,7 @@ class CommonTriageQuestionsControllerSpec
           countryOfResidence = None,
           assetTypes = Some(List(AssetType.Residential)),
           wereAllPropertiesResidential = Some(true),
-          taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020)
+          taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedTooEarly)
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -1819,7 +1820,9 @@ class CommonTriageQuestionsControllerSpec
                 doc
                   .select("#content > article > p:nth-child(3), #main-content p:nth-child(2)")
                   .text()                                          shouldBe messageFromMessageKey(
-                  "disposalDateTooEarly.uk.p1"
+                  "disposalDateTooEarly.uk.p1",
+                  cutoffTaxYear.toString,
+                  (cutoffTaxYear + 1).toString
                 )
                 doc
                   .select("#content > article > p:nth-child(4), #main-content p:nth-child(3)")
@@ -1848,7 +1851,7 @@ class CommonTriageQuestionsControllerSpec
             )
           }
 
-          "they are on a muliple disposals journey" in {
+          "they are on a multiple disposals journey" in {
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1879,7 +1882,9 @@ class CommonTriageQuestionsControllerSpec
                 doc
                   .select("#content > article > p:nth-child(3), #main-content p:nth-child(2)")
                   .text()                                          shouldBe messageFromMessageKey(
-                  "disposalDateTooEarly.non-uk.p1"
+                  "disposalDateTooEarly.non-uk.p1",
+                  cutoffTaxYear.toString,
+                  (cutoffTaxYear + 1).toString
                 )
                 doc
                   .select("#content > article > p:nth-child(4), #main-content p:nth-child(3)")

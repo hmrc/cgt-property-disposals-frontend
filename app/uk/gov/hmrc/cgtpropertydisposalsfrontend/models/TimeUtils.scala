@@ -239,7 +239,7 @@ object TimeUtils {
   def getTaxYearExchangedOfADate(d: LocalDate): TaxYearExchanged = {
     val taxYearStartDate = taxYearStart(d)
     if (taxYearStartDate.getYear < 2020) {
-      TaxYearExchanged.taxYearExchangedBefore2020
+      TaxYearExchanged.taxYearExchangedTooEarly
     } else {
       TaxYearExchanged(taxYearStartDate.getYear)
     }

@@ -34,9 +34,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiond
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AmendReturnData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmendReturnData, TaxYearExchanged}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.CancelAmendReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -127,7 +127,7 @@ class AmendReturnController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withStartingToAmendReturn(request) { journey =>
         val originalTaxYear               = journey.originalReturn.summary.taxYear
-        val currentTaxYear                = TaxYear.thisTaxYearStartDate().getYear.toString
+        val currentTaxYear                = TaxYearExchanged.currentTaxYear.toString
         val futureDatesEnabled            = viewConfig.futureDatesEnabled
         val isSubmissionInPreviousTaxYear = originalTaxYear =!= currentTaxYear
 

@@ -269,8 +269,8 @@ class MultipleDisposalsTriageControllerSpec
       .returning(uuid)
 
   private def getTaxYearExchanged(taxYear: Option[TaxYear]): Option[TaxYearExchanged] = {
-    val currentTaxYear = TaxYear.thisTaxYearStartDate().getYear
-    val validYears     = TaxYearExchanged.cutoffYear to currentTaxYear
+    val currentTaxYear = TaxYearExchanged.currentTaxYear
+    val validYears     = TaxYearExchanged.cutoffTaxYear to currentTaxYear
     taxYear match {
       case Some(t) if validYears.contains(t.startDateInclusive.getYear) =>
         Some(TaxYearExchanged(t.startDateInclusive.getYear))
@@ -1924,7 +1924,7 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockAvailableTaxYears()(Right(List()))
-              mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedBefore2020.year))(
+              mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedTooEarly.year))(
                 Right(None)
               )
               mockStoreSession(
@@ -1933,7 +1933,7 @@ class MultipleDisposalsTriageControllerSpec
                     journey.copy(
                       newReturnTriageAnswers = Left(
                         answers.copy(
-                          taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020),
+                          taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedTooEarly),
                           taxYear = None
                         )
                       )
@@ -1971,7 +1971,7 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockAvailableTaxYears()(Right(List()))
-              mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedBefore2020.year))(
+              mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedTooEarly.year))(
                 Right(None)
               )
               mockStoreSession(
@@ -1980,7 +1980,7 @@ class MultipleDisposalsTriageControllerSpec
                     journey.copy(
                       newReturnTriageAnswers = Left(
                         answers.copy(
-                          taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020),
+                          taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedTooEarly),
                           taxYear = None,
                           completionDate = None,
                           alreadySentSelfAssessment = None
@@ -2211,7 +2211,7 @@ class MultipleDisposalsTriageControllerSpec
           .copy(
             taxYear = None,
             completionDate = None,
-            taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020),
+            taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedTooEarly),
             alreadySentSelfAssessment = None
           )
         val updatedDraftReturn = draftReturn.copy(
@@ -2227,7 +2227,7 @@ class MultipleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockAvailableTaxYears()(Right(List()))
-            mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedBefore2020.year))(
+            mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedTooEarly.year))(
               Right(None)
             )
             mockStoreDraftReturn(updatedJourney)(
@@ -2243,7 +2243,7 @@ class MultipleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockAvailableTaxYears()(Right(List()))
-            mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedBefore2020.year))(
+            mockGetTaxYear(TimeUtils.getTaxYearStartDate(TaxYearExchanged.taxYearExchangedTooEarly.year))(
               Right(None)
             )
             mockStoreDraftReturn(updatedJourney)(
@@ -4414,7 +4414,7 @@ class MultipleDisposalsTriageControllerSpec
       "redirect to the tax year too early page" when {
         "the user indicated that the tax year was before 6th April 2020" in {
           testRedirectWhenIncomplete(
-            allQuestionsAnsweredUk.copy(taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020)),
+            allQuestionsAnsweredUk.copy(taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedTooEarly)),
             routes.CommonTriageQuestionsController.disposalDateTooEarly()
           )
         }
@@ -4424,7 +4424,7 @@ class MultipleDisposalsTriageControllerSpec
             allQuestionsAnsweredUk
               .copy(
                 assetTypes = Some(List(IndirectDisposal)),
-                taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedBefore2020)
+                taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedTooEarly)
               ),
             routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
           )
