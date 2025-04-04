@@ -256,10 +256,12 @@ class HomePageControllerSpec
 
       // the callToActionButton selector is designed to select the only
       // button on the page for us to check which message it has
-      val callToActionButton    = "#main-content .govuk-button"
-      val resumeDraftMessage    = "drafts.list.resume"
-      val makePaymentMessage    = "account.make.payment.link"
-      val startNewReturnMessage = "account.home.button.start-a-new-return"
+      val callToActionButton            = "#main-content .govuk-button"
+      val resumeDraftMessage            = "drafts.list.resume"
+      val returnsNoLongerVisibleMessage = "returns.noLongerVisible"
+      val makePaymentMessage            = "account.make.payment.link"
+      val startNewReturnMessage         = "account.home.button.start-a-new-return"
+      val currentYear                   = TaxYear.thisTaxYearStartDate().getYear
 
       "display the resume draft link as a button when there is a draft and no sent returns" in {
         val sampleDraftReturn = sample[DraftSingleDisposalReturn]
@@ -544,13 +546,22 @@ class HomePageControllerSpec
         checkPageIsDisplayed(
           performAction(),
           messageFromMessageKey("account.home.title"),
-          doc =>
+          { doc =>
             doc
               .select(callToActionButton)
               .text shouldBe
               messageFromMessageKey(
                 makePaymentMessage
               )
+            doc
+              .select("#main-content > div:nth-child(2) > div > div:nth-child(1) > div > p.govuk-body")
+              .text shouldBe
+              messageFromMessageKey(
+                returnsNoLongerVisibleMessage,
+                (currentYear - 4).toString,
+                (currentYear - 3).toString
+              )
+          }
         )
       }
 

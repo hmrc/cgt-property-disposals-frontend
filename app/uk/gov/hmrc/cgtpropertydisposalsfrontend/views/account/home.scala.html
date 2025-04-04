@@ -17,6 +17,7 @@
 @import cats.instances.boolean._
 @import cats.syntax.order._
 @import play.api.i18n.Messages
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -44,6 +45,7 @@
 @title = @{messages(s"account.home.title")}
 @hasRecentlyAmendedReturn = @{subscribed.sentReturns.exists(r => r.isRecentlyAmended === true)}
 @sentReturnsSorted = @{subscribed.returnsWithDueDates()}
+@currentYear = @{TaxYear.thisTaxYearStartDate().getYear}
 @draftReturn = @{
  subscribed.draftReturns.headOption
 }
@@ -116,7 +118,7 @@
           value = Value(
             content = Text(subscribed.subscribedDetails.makeAccountName())
           )
-        ), 
+        ),
         SummaryListRow(
           key = Key(
             content = Text(messages("account.home.subtitle"))
@@ -158,5 +160,7 @@
   @if(sentReturnsSorted.nonEmpty) {
     @sentReturnsList(sentReturnsSorted)
   }
-
+<div class="govuk-inset-text">
+    <p class="govuk-body">@messages("returns.noLongerVisible", (currentYear-4).toString, (currentYear-3).toString)</p>
+</div>
 }

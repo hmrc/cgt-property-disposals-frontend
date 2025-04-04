@@ -613,6 +613,7 @@ returns.list.sentDate=Anfonwyd i CThEF ar {0}
 returns.list.disposalDetails=Manylion y gwarediad
 returns.list.updating-payment-details=Rydym yn diweddaru’r manylion talu
 returns.paymentTakes3Days=Gall taliadau gymryd hyd at 3 diwrnod gwaith i ddangos ar y dudalen hon
+returns.noLongerVisible=Mae’r gwasanaeth hwn dim ond yn dangos Ffurflenni Treth Enillion Cyfalaf o’r 4 blwyddyn dreth ddiwethaf. Ni allwch fwrw golwg dros Ffurflenni Treth Enillion Cyfalaf o flwyddyn dreth {0} i {1} neu’n gynharach.
 
 drafts.list.title=Ffurflenni Treth drafft
 drafts.list.completionDate=Dyddiad cwblhau’r eiddo
