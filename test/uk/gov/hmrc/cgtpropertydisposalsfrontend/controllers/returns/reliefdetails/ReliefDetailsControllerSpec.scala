@@ -722,7 +722,6 @@ class ReliefDetailsControllerSpec
                   messageFromMessageKey(s"$key.h1"),
                   doc => {
                     doc.select(s"#$valueKey").attr("value") shouldBe "12.34"
-                    doc.select(".govuk-inset-text").text    shouldBe messages(s"$key.warningMsg")
                     doc.select("legend").text()             shouldBe messageFromMessageKey(s"$key$userKey.title")
                   }
                 )

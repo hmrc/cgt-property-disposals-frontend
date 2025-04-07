@@ -87,21 +87,6 @@
     autocomplete = Some(AutoCompleteType.On.value)
   ))
 }
-@detailsContent = {
-  <p class="govuk-body">
-  @Html(messages(s"$key.details.body.p1"))
-  </p>
-  <ul class="govuk-list govuk-list--bullet">
-    <li>@messages(s"$key.details.body.li1")</li>
-    <li>@messages(s"$key.details.body.li2")</li>
-    <li>@messages(s"$key.details.body.li3")</li>
-  </ul>
-  <p class="govuk-body">
-    <a class="govuk-link" href="@{appConfig.lettingReliefInfo}" target="_blank" rel="noopener noreferrer">
-    @messages(s"$key.details.body.link")
-    </a>
-  </p>
-}
 
 @layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
@@ -112,8 +97,11 @@
   @caption(messages("reliefDetails.caption"))
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">@messages(s"$key$userKey.helpText")</p>
-  <p class="govuk-inset-text">@messages(s"$key.warningMsg")</p>
-  @details(messages(s"$key.details.link"), detailsContent)
+<p class="govuk-body">
+    <a class="govuk-link" href="@{appConfig.lettingReliefInfo}" target="_blank" rel="noopener noreferrer">
+        @messages(s"$key.details.body.link")
+    </a>
+</p>
   @formWrapper(routes.ReliefDetailsController.lettingsReliefSubmit()) {
     @govukRadios(Radios(
       fieldset = Some(Fieldset(
