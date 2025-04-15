@@ -55,6 +55,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, multipledisposals => triagePages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged.cutoffTaxYear
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
@@ -1155,9 +1156,9 @@ class MultipleDisposalsTriageController @Inject() (
 
   private def getTaxYearExchanged(taxYear: Option[TaxYear]): Option[TaxYearExchanged] =
     taxYear match {
-      case Some(t) if t.startDateInclusive.getYear < 2020 => None
-      case Some(t)                                        => Some(TaxYearExchanged(t.startDateInclusive.getYear))
-      case _                                              => None
+      case Some(t) if t.startDateInclusive.getYear < cutoffTaxYear => None
+      case Some(t)                                                 => Some(TaxYearExchanged(t.startDateInclusive.getYear))
+      case _                                                       => None
     }
 
   private def isAmendReturn(state: JourneyState): Boolean =
@@ -1811,8 +1812,8 @@ object MultipleDisposalsTriageController {
   ): Form[TaxYearExchanged] = {
     def validate(taxYear: Int) = {
       val deathYear               = taxYearOfDateOfDeath.year
-      lazy val isDeathYearInvalid = !(deathYear >= 2020 && deathYear <= taxYear) && deathYear != -2020
-      taxYear == -2020 || taxYear == -1 || (taxYear >= 2020
+      lazy val isDeathYearInvalid = !(deathYear >= cutoffTaxYear && deathYear <= taxYear) && deathYear != -cutoffTaxYear
+      taxYear == -cutoffTaxYear || taxYear == -1 || (taxYear >= cutoffTaxYear
         && !(representativeType.contains(PersonalRepresentative) && deathYear != taxYear)
         && !(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) && isDeathYearInvalid))
     }

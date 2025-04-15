@@ -65,6 +65,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummar
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TaxYearExchanged.{currentTaxYear, cutoffTaxYear}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -972,8 +973,8 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to cya page" when {
         val taxYear = sample[TaxYear].copy(
-          startDateInclusive = LocalDate.of(2020, 4, 6),
-          endDateExclusive = LocalDate.of(2021, 4, 6)
+          startDateInclusive = LocalDate.of(cutoffTaxYear, 4, 6),
+          endDateExclusive = LocalDate.of(cutoffTaxYear + 1, 4, 6)
         )
 
         val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
@@ -1708,11 +1709,11 @@ class MultipleDisposalsTriageControllerSpec
           FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
         )
 
-      val todayTaxYear2020 = LocalDate.of(2020, 4, 6)
-      val todayTaxYear2021 = LocalDate.of(2021, 4, 6)
-      val todayTaxYear2022 = LocalDate.of(2022, 4, 6)
-      val todayTaxYear2023 = LocalDate.of(2023, 4, 6)
-      val todayTaxYear2024 = LocalDate.of(2024, 4, 6)
+      val cutoffTaxYearDate    = LocalDate.of(cutoffTaxYear, 4, 6)
+      val currentTaxYearMinus3 = LocalDate.of(currentTaxYear - 3, 4, 6)
+      val currentTaxYearMinus2 = LocalDate.of(currentTaxYear - 2, 4, 6)
+      val currentTaxYearMinus1 = LocalDate.of(currentTaxYear - 1, 4, 6)
+      val currentTaxYearDate   = LocalDate.of(currentTaxYear, 4, 6)
 
       val key = "multipleDisposalsTaxYear"
 
@@ -1723,8 +1724,8 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to cya page" when {
         val taxYear = sample[TaxYear].copy(
-          startDateInclusive = LocalDate.of(2020, 4, 6),
-          endDateExclusive = LocalDate.of(2021, 4, 6)
+          startDateInclusive = LocalDate.of(cutoffTaxYear, 4, 6),
+          endDateExclusive = LocalDate.of(cutoffTaxYear + 1, 4, 6)
         )
 
         val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
@@ -1745,7 +1746,7 @@ class MultipleDisposalsTriageControllerSpec
             wasAUKResident = Some(false),
             countryOfResidence = Some(sample[Country]),
             assetTypes = Some(List(AssetType.IndirectDisposal)),
-            taxYearExchanged = Some(TaxYearExchanged(2020))
+            taxYearExchanged = Some(TaxYearExchanged(cutoffTaxYear))
           )
 
           inSequence {
@@ -1759,17 +1760,17 @@ class MultipleDisposalsTriageControllerSpec
         "the user has not started a draft return and" when {
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-          "user has not answered the tax year exchanged section and selects after April 06th, 2024" in {
+          "user has not answered the tax year exchanged section and selects currentTaxYear" in {
             val taxYear = sample[TaxYear].copy(
-              startDateInclusive = LocalDate.of(2024, 4, 6),
-              endDateExclusive = LocalDate.of(2025, 4, 6)
+              startDateInclusive = LocalDate.of(currentTaxYear, 4, 6),
+              endDateExclusive = LocalDate.of(currentTaxYear + 1, 4, 6)
             )
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockAvailableTaxYears()(Right(List(2024)))
-              mockGetTaxYear(todayTaxYear2024)(Right(Some(taxYear)))
+              mockAvailableTaxYears()(Right(List(currentTaxYear)))
+              mockGetTaxYear(currentTaxYearDate)(Right(Some(taxYear)))
               mockStoreSession(
                 session.copy(journeyStatus =
                   Some(
@@ -1787,22 +1788,22 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "2024"),
+              performAction(key -> s"$currentTaxYear"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
 
-          "user has not answered the tax year exchanged section and selects after April 06th, 2023" in {
+          "user has not answered the tax year exchanged section and selects after currentTaxYear minus 1" in {
             val taxYear = sample[TaxYear].copy(
-              startDateInclusive = LocalDate.of(2023, 4, 6),
-              endDateExclusive = LocalDate.of(2024, 4, 6)
+              startDateInclusive = LocalDate.of(currentTaxYear - 1, 4, 6),
+              endDateExclusive = LocalDate.of(currentTaxYear, 4, 6)
             )
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockAvailableTaxYears()(Right(List(2023)))
-              mockGetTaxYear(todayTaxYear2023)(Right(Some(taxYear)))
+              mockAvailableTaxYears()(Right(List(currentTaxYear - 1)))
+              mockGetTaxYear(currentTaxYearMinus1)(Right(Some(taxYear)))
               mockStoreSession(
                 session.copy(journeyStatus =
                   Some(
@@ -1820,22 +1821,22 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "2023"),
+              performAction(key -> s"${currentTaxYear - 1}"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
 
-          "user has not answered the tax year exchanged section and selects after April 06th, 2022" in {
+          "user has not answered the tax year exchanged section and selects after currentTaxYear minus 2" in {
             val taxYear = sample[TaxYear].copy(
-              startDateInclusive = LocalDate.of(2022, 4, 6),
-              endDateExclusive = LocalDate.of(2023, 4, 6)
+              startDateInclusive = LocalDate.of(currentTaxYear - 2, 4, 6),
+              endDateExclusive = LocalDate.of(currentTaxYear - 1, 4, 6)
             )
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockAvailableTaxYears()(Right(List(2022)))
-              mockGetTaxYear(todayTaxYear2022)(Right(Some(taxYear)))
+              mockAvailableTaxYears()(Right(List(currentTaxYear - 2)))
+              mockGetTaxYear(currentTaxYearMinus2)(Right(Some(taxYear)))
               mockStoreSession(
                 session.copy(journeyStatus =
                   Some(
@@ -1853,22 +1854,22 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "2022"),
+              performAction(key -> s"${currentTaxYear - 2}"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
 
-          "user has not answered the tax year exchanged section and selects after April 06th, 2021" in {
+          "user has not answered the tax year exchanged section and selects after currentTaxYear minus 3" in {
             val taxYear = sample[TaxYear].copy(
-              startDateInclusive = LocalDate.of(2021, 4, 6),
-              endDateExclusive = LocalDate.of(2022, 4, 6)
+              startDateInclusive = LocalDate.of(currentTaxYear - 3, 4, 6),
+              endDateExclusive = LocalDate.of(currentTaxYear - 2, 4, 6)
             )
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockAvailableTaxYears()(Right(List(2021)))
-              mockGetTaxYear(todayTaxYear2021)(Right(Some(taxYear)))
+              mockAvailableTaxYears()(Right(List(currentTaxYear - 3)))
+              mockGetTaxYear(currentTaxYearMinus3)(Right(Some(taxYear)))
               mockStoreSession(
                 session.copy(journeyStatus =
                   Some(
@@ -1886,17 +1887,22 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "2021"),
+              performAction(key -> s"${currentTaxYear - 3}"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
 
-          "user has not answered the tax year exchanged section and selects after April 06th, 2020" in {
+          "user has not answered the tax year exchanged section and selects after cutoffTaxYear" in {
+            val taxYear = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(cutoffTaxYear, 4, 6),
+              endDateExclusive = LocalDate.of(cutoffTaxYear + 1, 4, 6)
+            )
+
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockAvailableTaxYears()(Right(List(2020)))
-              mockGetTaxYear(todayTaxYear2020)(Right(Some(taxYear)))
+              mockAvailableTaxYears()(Right(List(cutoffTaxYear)))
+              mockGetTaxYear(cutoffTaxYearDate)(Right(Some(taxYear)))
               mockStoreSession(
                 session.copy(journeyStatus =
                   Some(
@@ -1914,12 +1920,12 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "2020"),
+              performAction(key -> s"$cutoffTaxYear"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
 
-          "user has not answered the tax year exchanged section and selects before April 06th, 2020" in {
+          "user has not answered the tax year exchanged section and selects before cutoffTaxYear" in {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
@@ -1944,7 +1950,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "-2020"),
+              performAction(key -> s"-$cutoffTaxYear"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -1958,7 +1964,7 @@ class MultipleDisposalsTriageControllerSpec
                 countryOfResidence = Some(Country.uk),
                 wereAllPropertiesResidential = Some(true),
                 assetTypes = Some(List(AssetType.Residential)),
-                taxYearExchanged = Some(TaxYearExchanged(2020)),
+                taxYearExchanged = Some(TaxYearExchanged(cutoffTaxYear)),
                 taxYear = Some(taxYear),
                 alreadySentSelfAssessment = None,
                 completionDate = Some(sample[CompletionDate])
@@ -1993,16 +1999,16 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> "-2020"),
+              performAction(key -> s"-$cutoffTaxYear"),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
 
           "personalRepAdmin user has not answered the tax year exchanged section, date of death is 1-1-2018 " +
-            "and selects tax year exchanged as 2021/22" in {
+            "and selects tax year exchanged as currentTaxYear minus 3" in {
               val taxYear = sample[TaxYear].copy(
-                startDateInclusive = LocalDate.of(2021, 4, 6),
-                endDateExclusive = LocalDate.of(2022, 4, 6)
+                startDateInclusive = LocalDate.of(currentTaxYear - 3, 4, 6),
+                endDateExclusive = LocalDate.of(currentTaxYear - 2, 4, 6)
               )
               val answers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(
                 individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
@@ -2028,8 +2034,8 @@ class MultipleDisposalsTriageControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockAvailableTaxYears()(Right(List(2021)))
-                mockGetTaxYear(todayTaxYear2021)(Right(Some(taxYear)))
+                mockAvailableTaxYears()(Right(List(currentTaxYear - 3)))
+                mockGetTaxYear(currentTaxYearMinus3)(Right(Some(taxYear)))
                 mockStoreSession(
                   session.copy(journeyStatus =
                     Some(
@@ -2047,7 +2053,7 @@ class MultipleDisposalsTriageControllerSpec
               }
 
               checkIsRedirect(
-                performAction(key -> "2021"),
+                performAction(key -> s"${currentTaxYear - 3}"),
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
@@ -2056,21 +2062,21 @@ class MultipleDisposalsTriageControllerSpec
         "the user has started a draft return and" when {
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
-              val taxYear2020 = sample[TaxYear].copy(
-                startDateInclusive = LocalDate.of(2020, 4, 6),
-                endDateExclusive = LocalDate.of(2021, 4, 6)
+              val cutoffTaxYearDateRange = sample[TaxYear].copy(
+                startDateInclusive = LocalDate.of(cutoffTaxYear, 4, 6),
+                endDateExclusive = LocalDate.of(currentTaxYear - 3, 4, 6)
               )
-              val taxYear2021 = sample[TaxYear].copy(
-                startDateInclusive = LocalDate.of(2021, 4, 6),
-                endDateExclusive = LocalDate.of(2022, 4, 6)
+              val currentTaxYearMinus3   = sample[TaxYear].copy(
+                startDateInclusive = LocalDate.of(currentTaxYear - 3, 4, 6),
+                endDateExclusive = LocalDate.of(currentTaxYear - 2, 4, 6)
               )
               forAll { c: CompleteMultipleDisposalsTriageAnswers =>
                 val amendReturnData                 = sample[AmendReturnData]
                 val answers                         = c.copy(
                   individualUserType = Some(Self),
-                  taxYear = taxYear2021,
+                  taxYear = currentTaxYearMinus3,
                   assetTypes = List(AssetType.Residential),
-                  taxYearExchanged = Some(TaxYearExchanged(2021)),
+                  taxYearExchanged = Some(TaxYearExchanged(currentTaxYear - 3)),
                   alreadySentSelfAssessment = None
                 )
                 val (session, journey, draftReturn) =
@@ -2082,8 +2088,8 @@ class MultipleDisposalsTriageControllerSpec
                 val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers
                   .fromCompleteAnswers(answers)
                   .copy(
-                    taxYearExchanged = Some(TaxYearExchanged(2020)),
-                    taxYear = Some(taxYear2020),
+                    taxYearExchanged = Some(TaxYearExchanged(cutoffTaxYear)),
+                    taxYear = Some(cutoffTaxYearDateRange),
                     alreadySentSelfAssessment = None,
                     completionDate = None
                   )
@@ -2106,8 +2112,8 @@ class MultipleDisposalsTriageControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockAvailableTaxYears()(Right(List(2020)))
-                  mockGetTaxYear(todayTaxYear2020)(Right(Some(taxYear2020)))
+                  mockAvailableTaxYears()(Right(List(cutoffTaxYear)))
+                  mockGetTaxYear(cutoffTaxYearDate)(Right(Some(cutoffTaxYearDateRange)))
                   mockStoreDraftReturn(updatedJourney)(
                     Right(())
                   )
@@ -2117,7 +2123,7 @@ class MultipleDisposalsTriageControllerSpec
                 }
 
                 checkIsRedirect(
-                  performAction(key -> "2020"),
+                  performAction(key -> s"$cutoffTaxYear"),
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
               }
@@ -2127,11 +2133,11 @@ class MultipleDisposalsTriageControllerSpec
 
       "not update the session" when {
         "user has already answered the tax year exchanged section and re-selected same option" in {
-          val taxYear = sample[TaxYear].copy(
-            startDateInclusive = LocalDate.of(2020, 4, 6),
-            endDateExclusive = LocalDate.of(2021, 4, 6)
+          val cutoffTaxYearDate = sample[TaxYear].copy(
+            startDateInclusive = LocalDate.of(cutoffTaxYear, 4, 6),
+            endDateExclusive = LocalDate.of(currentTaxYear - 3, 4, 6)
           )
-          val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
+          val answers           = sample[IncompleteMultipleDisposalsTriageAnswers]
             .copy(
               individualUserType = Some(Self),
               numberOfProperties = Some(2),
@@ -2139,8 +2145,8 @@ class MultipleDisposalsTriageControllerSpec
               countryOfResidence = Some(Country.uk),
               wereAllPropertiesResidential = Some(true),
               assetTypes = Some(List(AssetType.Residential)),
-              taxYearExchanged = Some(TaxYearExchanged(2020)),
-              taxYear = Some(taxYear)
+              taxYearExchanged = Some(TaxYearExchanged(cutoffTaxYear)),
+              taxYear = Some(cutoffTaxYearDate)
             )
 
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -2148,11 +2154,11 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockAvailableTaxYears()(Right(List(2020)))
+            mockAvailableTaxYears()(Right(List(cutoffTaxYear)))
           }
 
           checkIsRedirect(
-            performAction(key -> "2020"),
+            performAction(key -> s"$cutoffTaxYear"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -2192,15 +2198,15 @@ class MultipleDisposalsTriageControllerSpec
       }
 
       "show an error page" when {
-        val taxYear = sample[TaxYear].copy(
-          startDateInclusive = LocalDate.of(2020, 4, 6),
-          endDateExclusive = LocalDate.of(2021, 4, 6)
+        val cutoffTaxYearDateRange = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(cutoffTaxYear, 4, 6),
+          endDateExclusive = LocalDate.of(currentTaxYear - 3, 4, 6)
         )
 
         val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           assetTypes = List(AssetType.Residential),
-          taxYearExchanged = Some(TaxYearExchanged(2020)),
-          taxYear = taxYear,
+          taxYearExchanged = Some(TaxYearExchanged(cutoffTaxYear)),
+          taxYear = cutoffTaxYearDateRange,
           alreadySentSelfAssessment = Some(false)
         )
         val (session, journey, draftReturn) =
@@ -2234,8 +2240,7 @@ class MultipleDisposalsTriageControllerSpec
               Left(Error(""))
             )
           }
-
-          checkIsTechnicalErrorPage(performAction(key -> "-2020"))
+          checkIsTechnicalErrorPage(performAction(key -> s"-$cutoffTaxYear"))
         }
 
         "there is an error updating the session data" in {
@@ -2254,10 +2259,10 @@ class MultipleDisposalsTriageControllerSpec
             )(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(key -> "-2020"))
+          checkIsTechnicalErrorPage(performAction(key -> s"-$cutoffTaxYear"))
         }
 
-        "a tax year cannot be found when the user selects after April 2020" in {
+        "a tax year cannot be found when the user selects after cutoffTaxYear" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -2265,14 +2270,14 @@ class MultipleDisposalsTriageControllerSpec
                 IncompleteMultipleDisposalsTriageAnswers.empty
               )._1
             )
-            mockAvailableTaxYears()(Right(List(2020)))
-            mockGetTaxYear(todayTaxYear2020)(Right(None))
+            mockAvailableTaxYears()(Right(List(cutoffTaxYear)))
+            mockGetTaxYear(cutoffTaxYearDate)(Right(None))
           }
 
-          checkIsTechnicalErrorPage(performAction(key -> "2020"))
+          checkIsTechnicalErrorPage(performAction(key -> s"$cutoffTaxYear"))
         }
 
-        "there is an error while getting the tax year when the user selects after April 2020" in {
+        "there is an error while getting the tax year when the user selects after cutoffTaxYear" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -2280,11 +2285,11 @@ class MultipleDisposalsTriageControllerSpec
                 IncompleteMultipleDisposalsTriageAnswers.empty
               )._1
             )
-            mockAvailableTaxYears()(Right(List(2020)))
-            mockGetTaxYear(todayTaxYear2020)(Left(Error("")))
+            mockAvailableTaxYears()(Right(List(cutoffTaxYear)))
+            mockGetTaxYear(cutoffTaxYearDate)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(key -> "2020"))
+          checkIsTechnicalErrorPage(performAction(key -> s"$cutoffTaxYear"))
         }
       }
     }
@@ -3421,9 +3426,9 @@ class MultipleDisposalsTriageControllerSpec
       )
 
       "show a form error" when {
-        val taxYear = sample[TaxYear].copy(
-          startDateInclusive = LocalDate.of(2020, 4, 6),
-          endDateExclusive = LocalDate.of(2021, 4, 6)
+        val cutoffTaxYearDateRange = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(cutoffTaxYear, 4, 6),
+          endDateExclusive = LocalDate.of(currentTaxYear - 3, 4, 6)
         )
 
         def testFormError(
@@ -3435,8 +3440,8 @@ class MultipleDisposalsTriageControllerSpec
               sessionDataWithStartingNewDraftReturn(
                 sample[CompleteMultipleDisposalsTriageAnswers].copy(
                   individualUserType = Some(Self),
-                  taxYearExchanged = Some(TaxYearExchanged(2020)),
-                  taxYear = taxYear,
+                  taxYearExchanged = Some(TaxYearExchanged(cutoffTaxYear)),
+                  taxYear = cutoffTaxYearDateRange,
                   alreadySentSelfAssessment = Some(false)
                 ),
                 representeeAnswers = None
@@ -3483,8 +3488,8 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
-        "the date entered is before 06-04-2020" in {
-          testFormError(formData(LocalDate.of(2020, 1, 5)))(
+        "the date entered is before cutoffTaxYear" in {
+          testFormError(formData(LocalDate.of(cutoffTaxYear, 1, 5)))(
             "multipleDisposalsCompletionDate.error.tooFarInPast"
           )
         }
@@ -3494,9 +3499,9 @@ class MultipleDisposalsTriageControllerSpec
         "there is an error updating the draft return" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
           val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
-            case 2020 => TaxYearExchanged(2020)
-            case 2021 => TaxYearExchanged(2021)
-            case _    => TaxYearExchanged(2022)
+            case i if i == cutoffTaxYear - 1 => TaxYearExchanged(cutoffTaxYear - 1)
+            case i if i == cutoffTaxYear     => TaxYearExchanged(cutoffTaxYear)
+            case _                           => TaxYearExchanged(currentTaxYear - 3)
           }
 
           val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
@@ -3530,12 +3535,12 @@ class MultipleDisposalsTriageControllerSpec
         "there is an error updating the session" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
           val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
-            case 2020 => TaxYearExchanged(2020)
-            case 2021 => TaxYearExchanged(2021)
-            case _    => TaxYearExchanged(2022)
+            case i if i == cutoffTaxYear - 1 => TaxYearExchanged(cutoffTaxYear - 1)
+            case i if i == cutoffTaxYear     => TaxYearExchanged(cutoffTaxYear)
+            case _                           => TaxYearExchanged(currentTaxYear - 3)
           }
 
-          val selfAssessmentFlag = if (taxYearStart.getYear === 2021) true else false
+          val selfAssessmentFlag = if (taxYearStart.getYear === cutoffTaxYear) true else false
           val answers            =
             sample[CompleteMultipleDisposalsTriageAnswers].copy(
               individualUserType = Some(Self),
@@ -3572,29 +3577,32 @@ class MultipleDisposalsTriageControllerSpec
       "redirect to the check your answers page" when {
         val taxYearStart             = TimeUtils.taxYearStart(today)
         val taxYearExchangedAdjusted = taxYearStart.getYear match {
-          case 2020 => TaxYearExchanged(2020)
-          case 2021 => TaxYearExchanged(2021)
-          case _    => TaxYearExchanged(2022)
+          case i if i == cutoffTaxYear - 1 => TaxYearExchanged(cutoffTaxYear - 1)
+          case i if i == cutoffTaxYear     => TaxYearExchanged(cutoffTaxYear)
+          case _                           => TaxYearExchanged(currentTaxYear - 3)
         }
 
         val selfAssessmentFlag = taxYearStart.getYear match {
-          case 2020 => Some(false)
-          case 2021 => Some(false)
-          case _    => None
+          case i if i == cutoffTaxYear - 1 => Some(false)
+          case i if i == cutoffTaxYear     => Some(false)
+          case _                           => None
         }
 
         val taxYear = sample[TaxYear].copy(
           startDateInclusive = taxYearStart.getYear match {
-            case 2020 => LocalDate.of(2020, 4, 6)
-            case 2021 => LocalDate.of(2021, 4, 6)
-            case 2022 => LocalDate.of(2022, 4, 6)
-            case _    => LocalDate.of(2023, 4, 6)
+            case i if i == cutoffTaxYear - 1  => LocalDate.of(cutoffTaxYear - 1, 4, 6)
+            case i if i == cutoffTaxYear      => LocalDate.of(cutoffTaxYear, 4, 6)
+            case i if i == currentTaxYear - 3 => LocalDate.of(currentTaxYear - 3, 4, 6)
+            case i if i == currentTaxYear - 2 => LocalDate.of(currentTaxYear - 2, 4, 6)
+            case i if i == currentTaxYear - 1 => LocalDate.of(currentTaxYear - 1, 4, 6)
+            case _                            => LocalDate.of(currentTaxYear, 4, 6)
           },
           endDateExclusive = taxYearStart.getYear match {
-            case 2020 => LocalDate.of(2021, 4, 6)
-            case 2021 => LocalDate.of(2022, 4, 6)
-            case 2022 => LocalDate.of(2023, 4, 6)
-            case _    => LocalDate.of(2024, 4, 6)
+            case i if i == cutoffTaxYear - 1  => LocalDate.of(cutoffTaxYear, 4, 6)
+            case i if i == cutoffTaxYear      => LocalDate.of(currentTaxYear - 3, 4, 6)
+            case i if i == currentTaxYear - 3 => LocalDate.of(currentTaxYear - 2, 4, 6)
+            case i if i == currentTaxYear - 2 => LocalDate.of(currentTaxYear - 1, 4, 6)
+            case _                            => LocalDate.of(currentTaxYear, 4, 6)
           }
         )
 
@@ -3721,9 +3729,9 @@ class MultipleDisposalsTriageControllerSpec
         "the date submitted is the same as one that already exists in session" in {
           val taxYearStart: LocalDate                    = TimeUtils.taxYearStart(today)
           val taxYearExchangedAdjusted: TaxYearExchanged = taxYearStart.getYear match {
-            case 2020 => TaxYearExchanged(2020)
-            case 2021 => TaxYearExchanged(2021)
-            case _    => TaxYearExchanged(2022)
+            case i if i == cutoffTaxYear - 1 => TaxYearExchanged(cutoffTaxYear - 1)
+            case i if i == cutoffTaxYear     => TaxYearExchanged(cutoffTaxYear)
+            case _                           => TaxYearExchanged(currentTaxYear - 3)
           }
 
           val answers      = sample[CompleteMultipleDisposalsTriageAnswers].copy(
@@ -3925,8 +3933,8 @@ class MultipleDisposalsTriageControllerSpec
       "show an error page" when {
         "there is an error updating the session" in {
           val taxYear            = sample[TaxYear].copy(
-            startDateInclusive = LocalDate.of(2020, 4, 6),
-            endDateExclusive = LocalDate.of(2021, 4, 6)
+            startDateInclusive = LocalDate.of(cutoffTaxYear, 4, 6),
+            endDateExclusive = LocalDate.of(currentTaxYear - 3, 4, 6)
           )
           val taxYearExchanged   = getTaxYearExchanged(Some(taxYear))
           val answers            = sample[IncompleteMultipleDisposalsTriageAnswers].copy(
@@ -3971,9 +3979,9 @@ class MultipleDisposalsTriageControllerSpec
         )
 
         val saFlagStatus = taxYear.startDateInclusive.getYear match {
-          case 2020 => Some(false)
-          case 2021 => Some(false)
-          case _    => None
+          case i if i == cutoffTaxYear - 1 => Some(false)
+          case i if i == cutoffTaxYear     => Some(false)
+          case _                           => None
         }
 
         def test(
@@ -4023,7 +4031,7 @@ class MultipleDisposalsTriageControllerSpec
           test(
             sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self)),
             None,
-            LocalDate.of(2020, 1, 1),
+            LocalDate.of(cutoffTaxYear - 1, 1, 1),
             None
           )
         }
@@ -4073,8 +4081,8 @@ class MultipleDisposalsTriageControllerSpec
         )
 
         val saFlagStatus = taxYear.startDateInclusive.getYear match {
-          case 2020 => Some(false)
-          case _    => None
+          case i if i == cutoffTaxYear - 1 => Some(false)
+          case _                           => None
         }
 
         def test(
@@ -4195,7 +4203,7 @@ class MultipleDisposalsTriageControllerSpec
         2,
         Country.uk,
         List(AssetType.Residential),
-        Some(TaxYearExchanged(2020)),
+        Some(TaxYearExchanged(cutoffTaxYear - 1)),
         sample[TaxYear],
         Some(false),
         sample[CompletionDate]
@@ -4208,22 +4216,22 @@ class MultipleDisposalsTriageControllerSpec
         None,
         Some(true),
         Some(completeAnswersUk.assetTypes),
-        Some(TaxYearExchanged(2020)),
+        Some(TaxYearExchanged(cutoffTaxYear - 1)),
         Some(completeAnswersUk.taxYear),
         Some(false),
         Some(completeAnswersUk.completionDate)
       )
 
       val taxYear              = sample[TaxYear].copy(
-        startDateInclusive = LocalDate.of(2020, 4, 6),
-        endDateExclusive = LocalDate.of(2021, 4, 6)
+        startDateInclusive = LocalDate.of(cutoffTaxYear - 1, 4, 6),
+        endDateExclusive = LocalDate.of(cutoffTaxYear, 4, 6)
       )
       val completeAnswersNonUk = CompleteMultipleDisposalsTriageAnswers(
         Some(IndividualUserType.Self),
         2,
         sample[Country],
         List(AssetType.Residential),
-        Some(TaxYearExchanged(2020)),
+        Some(TaxYearExchanged(cutoffTaxYear - 1)),
         taxYear,
         Some(false),
         sample[CompletionDate]
@@ -4236,7 +4244,7 @@ class MultipleDisposalsTriageControllerSpec
         Some(completeAnswersNonUk.countryOfResidence),
         None,
         Some(completeAnswersNonUk.assetTypes),
-        Some(TaxYearExchanged(2020)),
+        Some(TaxYearExchanged(cutoffTaxYear - 1)),
         Some(completeAnswersNonUk.taxYear),
         Some(false),
         Some(completeAnswersNonUk.completionDate)
@@ -4412,14 +4420,14 @@ class MultipleDisposalsTriageControllerSpec
       }
 
       "redirect to the tax year too early page" when {
-        "the user indicated that the tax year was before 6th April 2020" in {
+        "the user indicated that the tax year was before cutoffTaxYear minus one" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(taxYearExchanged = Some(TaxYearExchanged.taxYearExchangedTooEarly)),
             routes.CommonTriageQuestionsController.disposalDateTooEarly()
           )
         }
 
-        "the tax year of a share disposal date was before 6th April 2020" in {
+        "the tax year of a share disposal date was before cutoffTaxYear minus one" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk
               .copy(
@@ -4438,7 +4446,7 @@ class MultipleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 allQuestionsAnsweredUk
-                  .copy(taxYearExchanged = Some(TaxYearExchanged(2020)), taxYear = None),
+                  .copy(taxYearExchanged = Some(TaxYearExchanged(cutoffTaxYear - 1)), taxYear = None),
                 Right(sample[IndividualName])
               )._1
             )
@@ -4938,7 +4946,7 @@ class MultipleDisposalsTriageControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockAvailableTaxYears()(Right(List(2020)))
+      mockAvailableTaxYears()(Right(List(cutoffTaxYear - 1)))
     }
 
     checkPageIsDisplayed(
@@ -4965,8 +4973,8 @@ class MultipleDisposalsTriageControllerSpec
         )
         // Test dynamic content
         selector                                  shouldBe List(
-          "All between 6 April 2020 and 5 April 2021",
-          "All before 6 April 2020",
+          s"All between 6 April ${cutoffTaxYear - 1} and 5 April $cutoffTaxYear",
+          s"All before 6 April ${cutoffTaxYear - 1}",
           "The properties were exchanged in different tax years"
         )
       }
