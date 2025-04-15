@@ -1157,8 +1157,8 @@ class MultipleDisposalsTriageController @Inject() (
   private def getTaxYearExchanged(taxYear: Option[TaxYear]): Option[TaxYearExchanged] =
     taxYear match {
       case Some(t) if t.startDateInclusive.getYear < cutoffTaxYear => None
-      case Some(t)                                        => Some(TaxYearExchanged(t.startDateInclusive.getYear))
-      case _                                              => None
+      case Some(t)                                                 => Some(TaxYearExchanged(t.startDateInclusive.getYear))
+      case _                                                       => None
     }
 
   private def isAmendReturn(state: JourneyState): Boolean =
