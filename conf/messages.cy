@@ -2942,7 +2942,7 @@ lettingsRelief.details.body.p1=Os oeddech yn byw yn eich cartref <strong>ar yr u
 lettingsRelief.details.body.li1=yr un swm a gawsoch mewn Rhyddhad Preswylfa Breifat
 lettingsRelief.details.body.li2=£40,000
 lettingsRelief.details.body.li3=yr un swm â’r enillion trethadwy a wnaethoch wrth roi rhan o’ch cartref ar osod
-lettingsRelief.details.body.link=Dysgwch am Ryddhad Gosod (yn agor tab newydd)
+lettingsRelief.details.body.link=Dysgwch ragor am Ryddhad Gosod (yn agor tab newydd)
 
 lettingsRelief.error.required=Dewiswch ‘Iawn’ os ydych yn hawlio Rhyddhad Gosod
 lettingsRelief.agent.error.required=Dewiswch ‘Iawn’ os oes gan eich cleient hawl i Ryddhad Gosod
