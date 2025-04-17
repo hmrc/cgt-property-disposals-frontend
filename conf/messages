@@ -2928,7 +2928,7 @@ lettingsRelief.trust.title=Is the trust entitled to claim Letting Relief?
 lettingsRelief.capacitor.title=Is the person entitled to claim Letting Relief?
 lettingsRelief.personalRep.title=Was the person entitled to claim Letting Relief?
 
-lettingsRelief.helpText=You might be able to claim this relief if the property was your main home and you also let it out for a time.
+lettingsRelief.helpText=You might be able to claim Letting Relief if you rented out part of your main home. You must have been living there at the same time.
 lettingsRelief.agent.helpText=Your client might be able to claim this relief if the property was their main home and they also let it out for a time.
 lettingsRelief.trust.helpText=The trust might be able to claim this relief if the property was their main home and it also let it out for a time.
 lettingsRelief.capacitor.helpText=The person might be able to claim this relief if the property was their main home and they also let it out for a time.

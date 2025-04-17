@@ -2929,7 +2929,7 @@ lettingsRelief.trust.title=A oes gan yr ymddiriedolaeth hawl i Ryddhad Gosod?
 lettingsRelief.capacitor.title=A oes gan y person hawl i Ryddhad Gosod?
 lettingsRelief.personalRep.title=A oedd gan y person hawl i Ryddhad Gosod?
 
-lettingsRelief.helpText=Mae’n bosibl y gallwch hawlio’r rhyddhad hwn os mai’ch prif gartref oedd yr eiddo, a’ch bod hefyd wedi’i roi ar osod am gyfnod.
+lettingsRelief.helpText=Efallai y gallwch hawlio Rhyddhad Gosod os ydych yn rhentu rhan o’ch prif gartref. Mae’n rhaid eich bod wedi byw yno ar yr un pryd.
 lettingsRelief.agent.helpText=Mae’n bosibl y gall eich cleient hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i fod hefyd wedi’i roi ar osod am gyfnod.
 lettingsRelief.trust.helpText=Mae’n bosibl y gall yr ymddiriedolaeth hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i fod hefyd wedi’i roi ar osod am gyfnod.
 lettingsRelief.capacitor.helpText=Mae’n bosibl y gall yr ymddiriedolaeth hawlio’r rhyddhad hwn os mai’r eiddo oedd ei brif gartref, a’i bod hefyd wedi’i roi ar osod am gyfnod.
