@@ -38,7 +38,7 @@ trait FurtherReturnCalculationEligibilityUtilSupport { this: ControllerSpec =>
     fillingOutReturn: FillingOutReturn
   )(
     result: Either[Error, FurtherReturnCalculationEligibility]
-  ): CallHandler3[FillingOutReturn, HeaderCarrier, RequestWithSessionData[_], EitherT[
+  ): CallHandler3[FillingOutReturn, HeaderCarrier, RequestWithSessionData[?], EitherT[
     Future,
     Error,
     FurtherReturnCalculationEligibility
@@ -49,7 +49,7 @@ trait FurtherReturnCalculationEligibilityUtilSupport { this: ControllerSpec =>
           _: FillingOutReturn
         )(
           _: HeaderCarrier,
-          _: RequestWithSessionData[_]
+          _: RequestWithSessionData[?]
         )
       )
       .expects(fillingOutReturn, *, *)

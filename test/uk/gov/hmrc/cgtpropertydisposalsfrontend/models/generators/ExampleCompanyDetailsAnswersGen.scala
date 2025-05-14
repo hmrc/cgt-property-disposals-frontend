@@ -17,14 +17,17 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import org.scalacheck.Arbitrary
+import io.github.martinhh.derived.scalacheck.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
 
 object ExampleCompanyDetailsAnswersGen extends GenUtils {
 
-  implicit val incompleteExampleCompanyDetailsAnswersGen: Gen[IncompleteExampleCompanyDetailsAnswers] =
+  given incompleteExampleCompanyDetailsAnswersGen: Gen[IncompleteExampleCompanyDetailsAnswers] =
     gen[IncompleteExampleCompanyDetailsAnswers]
 
-  implicit val completeExampleCompanyDetailsAnswersGen: Gen[CompleteExampleCompanyDetailsAnswers] =
+  given completeExampleCompanyDetailsAnswersGen: Gen[CompleteExampleCompanyDetailsAnswers] =
     gen[CompleteExampleCompanyDetailsAnswers]
 
 }

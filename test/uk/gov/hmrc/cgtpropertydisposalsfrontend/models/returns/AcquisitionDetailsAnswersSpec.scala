@@ -20,10 +20,10 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentativeInPeriodOfAdmin, Self}
@@ -34,7 +34,7 @@ class AcquisitionDetailsAnswersSpec extends AnyWordSpec with Matchers with Scala
   "IncompleteAcquisitionDetailsAnswers" must {
 
     "have a method which converts incomplete answers to complete answers" in {
-      forAll { completeAnswers: CompleteAcquisitionDetailsAnswers =>
+      forAll { (completeAnswers: CompleteAcquisitionDetailsAnswers) =>
         IncompleteAcquisitionDetailsAnswers.fromCompleteAnswers(
           completeAnswers
         ) shouldBe IncompleteAcquisitionDetailsAnswers(

@@ -36,7 +36,7 @@ import scala.concurrent.Future
 trait ContactNameControllerSpec[J <: JourneyStatus]
     extends ContactNameFormValidationTests
     with RedirectToStartBehaviour {
-  this: ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks =>
+  this: ControllerSpec & AuthSupport & SessionSupport & ScalaCheckDrivenPropertyChecks =>
 
   val controller: ContactNameController[J]
 

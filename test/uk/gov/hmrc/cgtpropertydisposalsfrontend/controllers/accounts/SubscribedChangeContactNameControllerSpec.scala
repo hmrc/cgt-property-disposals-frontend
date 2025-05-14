@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ContactNameControllerSpec, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
@@ -93,7 +93,7 @@ class SubscribedChangeContactNameControllerSpec
       behave like enterContactNameSubmit(
         data =>
           controller.enterContactNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
+            FakeRequest().withFormUrlEncodedBody(data *).withCSRFToken.withMethod("POST")
           ),
         controllers.accounts.routes.AccountController.contactNameUpdated()
       )

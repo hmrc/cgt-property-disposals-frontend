@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 
 trait BusinessPartnerRecordServiceSupport {
-  this: ControllerSpec with SessionSupport =>
+  this: ControllerSpec & SessionSupport =>
 
   private val mockBusinessPartnerRecordService = mock[BusinessPartnerRecordService]
   def mockGetBusinessPartnerRecord(

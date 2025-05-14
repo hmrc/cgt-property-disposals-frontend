@@ -21,15 +21,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{C
 
 object CompleteReturnGen extends LowerPriorityCompleteReturnGen {
 
-  implicit val completeSingleDisposalReturnGen: Gen[CompleteSingleDisposalReturn] =
+  given completeSingleDisposalReturnGen: Gen[CompleteSingleDisposalReturn] = {
     for {
-      triageAnswers              <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
-      propertyAddress            <- AddressGen.ukAddressGen
-      disposalDetails            <- disposalDetails
-      acquisitionDetails         <- acquisitionDetails
-      reliefDetails              <- ReliefDetailsGen.completeReliefDetailsAnswersGen
+      triageAnswers <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
+      propertyAddress <- AddressGen.ukAddressGen
+      disposalDetails <- disposalDetails
+      acquisitionDetails <- acquisitionDetails
+      reliefDetails <- ReliefDetailsGen.completeReliefDetailsAnswersGen
       exemptionsAndLossesDetails <- ExemptionsAndLossesAnswersGen.completeExemptionAndLossesAnswersGen
-      yearToDateLiabilityAnswers <-
+      chosenYearToDateLiabilityAnswers <-
         Gen.either(yearToDateLiabilityAnswers, YearToDateLiabilityAnswersGen.completeCalculatedYTDLiabilityAnswersGen)
       supportingDocumentAnswers  <- supportingDocumentAnswers
       initialGainOrLoss          <- Gen.option(MoneyGen.amountInPenceGen)
@@ -43,13 +43,14 @@ object CompleteReturnGen extends LowerPriorityCompleteReturnGen {
       acquisitionDetails,
       reliefDetails,
       exemptionsAndLossesDetails,
-      yearToDateLiabilityAnswers,
+      chosenYearToDateLiabilityAnswers,
       supportingDocumentAnswers,
       initialGainOrLoss,
       representeeAnswers,
       gainOrLossAfterReliefs,
       hasAttachments
     )
+  }
 
 }
 
@@ -124,7 +125,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
   implicit val completeSingleMixedUseDisposalReturnGen: Gen[CompleteSingleMixedUseDisposalReturn] = {
     for {
       triageAnswers              <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
-      propertyDetailsAnswers     <- SingleMixedUseDetailsAnswersGen.completeMixedUsePropertyDetailsAnswers
+      propertyDetailsAnswers     <- SingleMixedUseDetailsAnswersGen.given_Gen_CompleteMixedUsePropertyDetailsAnswers
       exemptionsAndLossesDetails <- exemptionAndLossesAnswers
       yearToDateLiabilityAnswers <- yearToDateLiabilityAnswers
       supportingDocumentAnswers  <- supportingDocumentAnswers

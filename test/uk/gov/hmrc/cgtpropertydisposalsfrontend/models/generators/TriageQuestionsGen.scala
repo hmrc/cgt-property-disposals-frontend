@@ -17,9 +17,10 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import io.github.martinhh.derived.scalacheck.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 
 object TriageQuestionsGen extends HigherPriorityTriageQuestionsGen with GenUtils
 
@@ -53,7 +54,7 @@ trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
   val singleDisposalTraiageAnswersGen: Gen[SingleDisposalTriageAnswers] =
     Gen.oneOf(completeSingleDisposalTriageAnswersGen, incompleteSingleDisposalTriageAnswersGen)
 
-  private val taxYearExchangedGen = gen[TaxYearExchanged]
+  given taxYearExchangedGen: Gen[TaxYearExchanged]       = gen[TaxYearExchanged]
 
   implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsTriageAnswers] = {
     for {
@@ -106,7 +107,7 @@ trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
   val multipleDisposalsTriageAnswersGen: Gen[MultipleDisposalsTriageAnswers] =
     Gen.oneOf(completeMultipleDisposalsTriageAnswersGen, incompleteMultipleDisposalsTriageAnswersGen)
 
-  implicit val numberOfPropertiesGen: Gen[NumberOfProperties] =
+  given numberOfPropertiesGen: Gen[NumberOfProperties] =
     Gen.oneOf(NumberOfProperties.One, NumberOfProperties.MoreThanOne)
 }
 

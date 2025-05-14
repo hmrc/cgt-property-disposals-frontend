@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.CompleteReturnWithSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.PreviousReturnData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 
 import java.time.LocalDate
 
@@ -34,6 +34,8 @@ object ReturnGen extends GenUtils {
       CompleteReturnGen.completeMultipleIndirectDisposalReturnGen
     )
 
+  given completeReturnArb: Arbitrary[CompleteReturn] = Arbitrary(completeReturnGen)
+  
   implicit val returnSummaryGen: Gen[ReturnSummary] = {
     for {
       submissionId              <- Generators.stringGen
@@ -94,4 +96,6 @@ object ReturnGen extends GenUtils {
     originalReturn                      <- completeReturnWithSummaryGen
     shouldDisplayGainOrLossAfterReliefs <- Generators.booleanGen
   } yield AmendReturnData(originalReturn, shouldDisplayGainOrLossAfterReliefs)
+  
+  given Arbitrary[AmendReturnData] = Arbitrary(amendReturnDataGen)
 }

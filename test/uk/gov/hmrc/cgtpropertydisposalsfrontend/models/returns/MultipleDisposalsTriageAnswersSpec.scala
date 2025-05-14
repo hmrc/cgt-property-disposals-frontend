@@ -32,7 +32,7 @@ class MultipleDisposalsTriageAnswersSpec extends AnyWordSpec with Matchers with 
     "have a method which converts incomplete answers to complete answers" when {
 
       "the country of residence is uk" in {
-        forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+        forAll { (c: CompleteMultipleDisposalsTriageAnswers) =>
           val completeAnswers = c.copy(
             countryOfResidence = Country.uk,
             assetTypes = List(AssetType.Residential)
@@ -56,7 +56,7 @@ class MultipleDisposalsTriageAnswersSpec extends AnyWordSpec with Matchers with 
       }
 
       "the country of residence is not uk" in {
-        forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+        forAll { (c: CompleteMultipleDisposalsTriageAnswers) =>
           val completeAnswers = c.copy(countryOfResidence = sample[Country])
 
           IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers(

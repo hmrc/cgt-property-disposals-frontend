@@ -17,10 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import io.github.martinhh.derived.scalacheck.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 
-object TaxYearGen extends GenUtils {
+object TaxYearGen extends GenUtils:
 
-  implicit val taxYearGen: Gen[TaxYear] = gen[TaxYear]
-
-}
+  given taxYearGen: Gen[TaxYear] = gen[TaxYear]

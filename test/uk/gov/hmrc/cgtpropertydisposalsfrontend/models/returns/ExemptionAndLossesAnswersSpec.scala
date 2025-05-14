@@ -28,7 +28,7 @@ class ExemptionAndLossesAnswersSpec extends AnyWordSpec with Matchers with Scala
   "IncompleteExemptionAndLossesAnswers" must {
 
     "have a method which converts incomplete answers to complete answers" in {
-      forAll { completeAnswers: CompleteExemptionAndLossesAnswers =>
+      forAll { (completeAnswers: CompleteExemptionAndLossesAnswers) =>
         IncompleteExemptionAndLossesAnswers.fromCompleteAnswers(
           completeAnswers
         ) shouldBe IncompleteExemptionAndLossesAnswers(
