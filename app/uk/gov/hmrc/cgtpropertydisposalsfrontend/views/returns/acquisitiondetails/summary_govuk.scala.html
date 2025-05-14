@@ -43,7 +43,7 @@
     representativeType: Option[RepresentativeType],
     assetType: AssetType,
     isShare: Boolean,
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @userKey = @{
@@ -103,49 +103,47 @@
 @cyaSection() {
   @if(!isPeriodOfAdmin) {
       @cyaRow(
-      messages(s"acquisitionMethod$userKey$assetTypeKey.title"),
-      Html(acquisitionMethodAndPriceTitle._1),
-      Some(cyaChange(
-      messages("acquisitionMethod.cyaChange"),
-      routes.AcquisitionDetailsController.acquisitionMethod().url
-      )),
-      "acquisitionMethod"
+          messages(s"acquisitionMethod$userKey$assetTypeKey.title"),
+          Html(acquisitionMethodAndPriceTitle._1),
+          Some(cyaChange(
+          messages("acquisitionMethod.cyaChange"),
+          routes.AcquisitionDetailsController.acquisitionMethod().url
+          )),
+          "acquisitionMethod"
       )
+      @cyaRow(
+        messages(s"acquisitionDate$userKey$assetTypeKey.title"),
+        Html(TimeUtils.govDisplayFormat(answers.acquisitionDate.value)),
+        Some(cyaChange(
+          messages("acquisitionDate.cyaChange"),
+          routes.AcquisitionDetailsController.acquisitionDate().url
+        )),
+        "acquisitionDate"
+      )
+  }
+
+
+@if(isPeriodOfAdmin) {
   @cyaRow(
-    messages(s"acquisitionDate$userKey$assetTypeKey.title"),
-    Html(TimeUtils.govDisplayFormat(answers.acquisitionDate.value)),
-    Some(cyaChange(
-      messages("acquisitionDate.cyaChange"),
-      routes.AcquisitionDetailsController.acquisitionDate().url
-    )),
-    "acquisitionDate"
+      messages(s"periodOfAdminMarketValue$assetTypeKey$shareKey.title", acquisitionDate),
+      Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
+      Some(cyaChange(
+          messages("periodOfAdminMarketValue.cyaChange", acquisitionDate),
+          routes.AcquisitionDetailsController.periodOfAdminMarketValue().url
+      )),
+      "periodOfAdminMarketValue"
   )
-  }
-
-
-  @{
-      if(isPeriodOfAdmin) {
-          cyaRow(
-              messages(s"periodOfAdminMarketValue$assetTypeKey$shareKey.title", acquisitionDate),
-              Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
-              Some(cyaChange(
-                  messages("periodOfAdminMarketValue.cyaChange", acquisitionDate),
-                  routes.AcquisitionDetailsController.periodOfAdminMarketValue().url
-              )),
-              "periodOfAdminMarketValue"
-          )
-      } else if((isUk && !canRebase) || !isUk) {
-          cyaRow(
-              acquisitionMethodAndPriceTitle._2,
-              Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
-              Some(cyaChange(
-                  acquisitionMethodAndPriceTitle._3,
-                  routes.AcquisitionDetailsController.acquisitionPrice().url
-              )),
-              "acquisitionPrice"
-          )
-      }
-  }
+} else if((isUk && !canRebase) || !isUk) {
+  @cyaRow(
+      acquisitionMethodAndPriceTitle._2,
+      Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
+      Some(cyaChange(
+          acquisitionMethodAndPriceTitle._3,
+          routes.AcquisitionDetailsController.acquisitionPrice().url
+      )),
+      "acquisitionPrice"
+  )
+}
 
 @if(canRebase) {
   @answers.rebasedAcquisitionPrice.map{ rebasedValue =>

@@ -25,7 +25,7 @@
  govukButton: GovukButton
 )
 
-@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(backLink: Call)(implicit request: RequestWithSessionData[?], messages: Messages)
 
  @key=@{"multiple-draft.exit"}
  @title = @{messages(s"$key.title")}

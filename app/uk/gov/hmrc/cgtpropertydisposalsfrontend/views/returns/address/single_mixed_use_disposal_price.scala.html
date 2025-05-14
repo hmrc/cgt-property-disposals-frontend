@@ -42,7 +42,7 @@
  isATrust: Boolean,
  representativeType: Option[RepresentativeType],
  isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "singleMixedUseDisposalsDisposalPrice" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }

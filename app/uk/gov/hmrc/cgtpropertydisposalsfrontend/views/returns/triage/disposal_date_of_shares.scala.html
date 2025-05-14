@@ -36,7 +36,7 @@
         displayReturnToSummaryLink: Boolean,
         submit: Call,
         isAmend: Boolean
-)(implicit request:RequestWithSessionData[_], messages: Messages)
+)(implicit request:RequestWithSessionData[?], messages: Messages)
 
 @key = @{ "sharesDisposalDate" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

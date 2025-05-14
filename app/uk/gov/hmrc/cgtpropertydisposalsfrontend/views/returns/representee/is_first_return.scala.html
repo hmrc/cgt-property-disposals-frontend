@@ -36,7 +36,7 @@
         govukButton: GovukButton
 )
 
-@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean, representativeType: RepresentativeType, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean, representativeType: RepresentativeType, isAmend: Boolean)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"representeeIsFirstReturn"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }

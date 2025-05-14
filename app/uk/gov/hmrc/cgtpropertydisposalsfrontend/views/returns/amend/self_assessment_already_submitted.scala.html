@@ -32,7 +32,7 @@
     isATrust: Boolean,
     taxYearStart: Int,
     representativeType: Option[RepresentativeType]
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[?], messages: Messages, viewConfig: ViewConfig)
 
 @key = @{"selfAssessmentAlreadySubmitted"}
 

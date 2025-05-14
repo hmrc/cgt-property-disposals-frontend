@@ -41,7 +41,7 @@
   isAmend: Boolean,
   addressCaption: String
 
-)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[?], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsDisposalDate"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -68,7 +68,7 @@
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
    errorKey = errorKey.map(e => {
        if(e.message == "error.tooFarInPast") {
-           messages(s"${e.key}.${e.message}", e.args:_*)
+           messages(s"${e.key}.${e.message}", e.args *)
        } else {
            s"${e.key}.${e.message}"
        }

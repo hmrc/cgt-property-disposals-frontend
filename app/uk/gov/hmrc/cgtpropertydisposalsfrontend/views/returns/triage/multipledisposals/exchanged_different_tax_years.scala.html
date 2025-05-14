@@ -24,7 +24,7 @@
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout
 )
 
-@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(backLink: Call)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"multipleDisposalsExchangedInDifferentTaxYears"}
 @title = @{messages(s"$key.title")}

@@ -40,7 +40,7 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     taxYearStartYear: Int
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{"alreadySentSelfAssessment"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -86,7 +86,7 @@
             errorKey = form.error(key).map(e => s"$userErrorKey${e.message}"),
             selected = form.value,
             helpText = None,
-            errorMessage = form.error(key).map(e => messages(s"${e.key}.$userErrorKey${e.message}", e.args:_*) )
+            errorMessage = form.error(key).map(e => messages(s"${e.key}.$userErrorKey${e.message}", e.args *) )
         )
 
         @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))

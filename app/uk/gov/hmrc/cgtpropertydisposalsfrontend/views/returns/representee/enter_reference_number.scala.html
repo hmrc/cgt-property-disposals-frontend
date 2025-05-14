@@ -34,7 +34,7 @@
         govukInput : GovukInput
 )
 
-@(form: Form[RepresenteeReferenceId], backLink: Call, displayReturnToSummaryLink: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
+@(form: Form[RepresenteeReferenceId], backLink: Call, displayReturnToSummaryLink: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "representeeReferenceIdType" }
 @ninoKey = @{ "representeeNino" }

@@ -28,7 +28,7 @@
         formWrapper: FormWithCSRF
 )
 
-@(clientDetails: SubscribedDetails, backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(clientDetails: SubscribedDetails, backLink: Call)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("agent.confirm-client.title")}
 

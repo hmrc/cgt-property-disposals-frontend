@@ -43,7 +43,7 @@
     isIndirectDisposal: Boolean,
     isAmend: Boolean,
     isShare: Boolean,
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "disposalFees" }
 @indirectKey = @{ if(isIndirectDisposal) ".indirect" else ""}

@@ -45,7 +45,7 @@
         representativeType: Option[RepresentativeType],
         representeeAnswers: Option[RepresenteeAnswers],
         isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[?], messages:Messages, appConfig: ViewConfig)
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @isAgent = @{ request.userType.contains(UserType.Agent) }

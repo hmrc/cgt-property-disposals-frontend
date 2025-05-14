@@ -47,7 +47,7 @@
     isMultipleDisposal: Boolean,
     isAmend: Boolean,
     glarCalulatorInput: Option[CalculatedGlarBreakdown]
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{ "gainOrLossAfterReliefs" }
 @gainKey = @{ "gainAfterReliefs" }
