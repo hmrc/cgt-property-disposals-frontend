@@ -2094,9 +2094,14 @@ class CommonTriageQuestionsControllerSpec
               messageFromMessageKey("ukResidentCanOnlyReportResidential.title"),
               { doc =>
                 doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
+
                 doc
                   .select("#content > article > p:nth-child(3), #main-content p:nth-child(2)")
                   .text()                                          shouldBe messageFromMessageKey(expectedP1Key)
+
+                doc
+                  .select("#content > article > p:nth-child(4), #main-content p:nth-child(3)")
+                  .html()                                          shouldBe messageFromMessageKey("ukResidentCanOnlyReportResidential.p2",viewConfig.cgtModernUrl)
               }
             )
 
