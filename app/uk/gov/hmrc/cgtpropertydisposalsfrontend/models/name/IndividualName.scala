@@ -51,7 +51,7 @@ object IndividualName {
 
     nonEmptyText
       .transform[String](_.trim, identity)
-      .verifying(Constraint[String](validateName(_)))
+      .verifying(Constraint[String](validateName))
   }
 
   def form(firstNameKey: String, lastNameKey: String): Form[IndividualName] =
@@ -59,6 +59,6 @@ object IndividualName {
       formMapping(
         firstNameKey -> mapping,
         lastNameKey  -> mapping
-      )(IndividualName.apply)(IndividualName.unapply)
+      )(IndividualName.apply)(o => Some((o.firstName, o.lastName)))
     )
 }

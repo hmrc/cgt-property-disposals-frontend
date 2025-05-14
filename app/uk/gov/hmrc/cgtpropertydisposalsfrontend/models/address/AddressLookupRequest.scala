@@ -31,6 +31,6 @@ object AddressLookupRequest {
         "postcode" -> Postcode.mapping,
         "filter"   -> optional(text)
           .transform[Option[String]](_.filter(_.nonEmpty), identity)
-      )(AddressLookupRequest.apply)(AddressLookupRequest.unapply)
+      )(AddressLookupRequest.apply)(o => Some((o.postcode, o.filter)))
     )
 }

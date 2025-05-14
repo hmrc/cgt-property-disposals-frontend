@@ -54,7 +54,7 @@ object ContactName {
     Form(
       formMapping(
         "contactName" -> mapping
-      )(ContactName.apply)(ContactName.unapply)
+      )(ContactName.apply)(o => Some(o.value))
     )
 
 }

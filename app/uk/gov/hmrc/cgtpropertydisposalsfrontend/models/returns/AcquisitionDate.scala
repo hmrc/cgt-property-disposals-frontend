@@ -21,11 +21,10 @@ import play.api.libs.json.Format
 
 import java.time.LocalDate
 
-final case class AcquisitionDate(value: LocalDate) extends AnyVal
+final case class AcquisitionDate(value: LocalDate)
 
 object AcquisitionDate {
 
-  implicit val format: Format[AcquisitionDate] =
-    implicitly[Format[LocalDate]].inmap(AcquisitionDate(_), _.value)
+  implicit val format: Format[AcquisitionDate] = implicitly[Format[LocalDate]].inmap(AcquisitionDate(_), _.value)
 
 }

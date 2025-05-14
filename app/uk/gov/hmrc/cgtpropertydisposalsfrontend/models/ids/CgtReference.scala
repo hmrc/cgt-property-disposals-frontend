@@ -21,7 +21,7 @@ import play.api.data.Mapping
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.libs.json.{Json, OFormat}
 
-final case class CgtReference(value: String) extends AnyVal
+final case class CgtReference(value: String)
 
 object CgtReference {
 

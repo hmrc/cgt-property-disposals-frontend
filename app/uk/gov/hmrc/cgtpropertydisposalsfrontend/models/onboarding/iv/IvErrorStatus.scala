@@ -20,23 +20,23 @@ sealed trait IvErrorStatus extends Product with Serializable
 
 object IvErrorStatus {
 
-  final case object Incomplete extends IvErrorStatus
+  case object Incomplete extends IvErrorStatus
 
-  final case object FailedMatching extends IvErrorStatus
+  case object FailedMatching extends IvErrorStatus
 
-  final case object FailedIV extends IvErrorStatus
+  case object FailedIV extends IvErrorStatus
 
-  final case object InsufficientEvidence extends IvErrorStatus
+  case object InsufficientEvidence extends IvErrorStatus
 
-  final case object LockedOut extends IvErrorStatus
+  case object LockedOut extends IvErrorStatus
 
-  final case object UserAborted extends IvErrorStatus
+  case object UserAborted extends IvErrorStatus
 
-  final case object Timeout extends IvErrorStatus
+  case object Timeout extends IvErrorStatus
 
-  final case object TechnicalIssue extends IvErrorStatus
+  case object TechnicalIssue extends IvErrorStatus
 
-  final case object PreconditionFailed extends IvErrorStatus
+  case object PreconditionFailed extends IvErrorStatus
 
   final case class Unknown(value: String) extends IvErrorStatus
 

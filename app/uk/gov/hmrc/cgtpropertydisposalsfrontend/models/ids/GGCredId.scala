@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class GGCredId(value: String) extends AnyVal
+final case class GGCredId(value: String)
 
 object GGCredId {
 
