@@ -55,7 +55,7 @@ class RegistrationChangeIndividualNameController @Inject() (
   override val isSubscribedJourney: Boolean = false
 
   override def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, RegistrationReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
@@ -64,7 +64,7 @@ class RegistrationChangeIndividualNameController @Inject() (
 
   override def updateName(journey: RegistrationReady, name: IndividualName)(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, RegistrationReady] = {
     auditService.sendEvent(
       "registrationContactNameChanged",

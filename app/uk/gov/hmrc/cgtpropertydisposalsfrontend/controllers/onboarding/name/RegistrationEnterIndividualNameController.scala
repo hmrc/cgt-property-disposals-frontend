@@ -52,7 +52,7 @@ class RegistrationEnterIndividualNameController @Inject() (
   override val isSubscribedJourney: Boolean = false
 
   override def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, IndividualSupplyingInformation)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, i: IndividualSupplyingInformation)) =>
@@ -65,7 +65,7 @@ class RegistrationEnterIndividualNameController @Inject() (
     name: IndividualName
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, IndividualSupplyingInformation] =
     EitherT.rightT[Future, Error](journey.copy(name = Some(name)))
 

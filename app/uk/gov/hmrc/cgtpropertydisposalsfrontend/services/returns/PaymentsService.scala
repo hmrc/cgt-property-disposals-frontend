@@ -48,7 +48,7 @@ trait PaymentsService {
     backUrl: Call
   )(implicit
     headerCarrier: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, PaymentsJourney]
 
 }
@@ -70,7 +70,7 @@ class PaymentsServiceImpl @Inject() (
     backUrl: Call
   )(implicit
     headerCarrier: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, PaymentsJourney] =
     connector
       .startPaymentJourney(

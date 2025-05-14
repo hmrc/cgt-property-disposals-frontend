@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
 import cats.data.EitherT
-import cats.instances.future._
+import cats.instances.future.*
 import com.typesafe.config.ConfigFactory
 import org.scalacheck.Gen
 import org.scalamock.scalatest.MockFactory
@@ -28,23 +28,23 @@ import play.api.i18n.Lang
 import play.api.libs.json.{Reads, Writes}
 import play.api.mvc.Request
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualRepresenteeNameMatchDetails, IndividualSautrNameMatchDetails, TrustNameMatchDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameMatchGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameMatchGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchAuditDetails.{IndividualNameWithNinoAuditDetails, IndividualNameWithSaUtrAuditDetails, TrustNameWithTrnAuditDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{BusinessPartnerRecordNameMatchAttemptEvent, BusinessPartnerRecordNameMatchAuditDetails, NameMatchAccountLocked}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.CgtAccountNameMatchAttemptEvent
@@ -55,7 +55,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect._
+import scala.reflect.*
 
 class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
 
@@ -101,7 +101,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
           _: ExecutionContext,
           _: HeaderCarrier,
           _: Writes[NameMatchAccountLocked],
-          _: Request[_]
+          _: Request[?]
         )
       )
       .expects("NameMatchAccountLocked", event, "name-match-account-locked", *, *, *, *)
@@ -122,7 +122,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
           _: ExecutionContext,
           _: HeaderCarrier,
           _: Writes[BusinessPartnerRecordNameMatchAttemptEvent],
-          _: Request[_]
+          _: Request[?]
         )
       )
       .expects(
@@ -152,7 +152,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
           _: ExecutionContext,
           _: HeaderCarrier,
           _: Writes[CgtAccountNameMatchAttemptEvent],
-          _: Request[_]
+          _: Request[?]
         )
       )
       .expects(
@@ -176,7 +176,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
     expectedGGCredID: GGCredId
   )(result: Either[Error, Option[UnsuccessfulNameMatchAttempts[A]]]) =
     (retryStore
-      .get[A](_: GGCredId)(_: Reads[A]))
+      .get[A](_: GGCredId)(using _: Reads[A]))
       .expects(expectedGGCredID, *)
       .returning(Future.successful(result))
 
@@ -185,7 +185,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
     unsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[A]
   )(result: Either[Error, Unit]) =
     (retryStore
-      .store[A](_: GGCredId, _: UnsuccessfulNameMatchAttempts[A])(_: Writes[A]))
+      .store[A](_: GGCredId, _: UnsuccessfulNameMatchAttempts[A])(using _: Writes[A]))
       .expects(expectedGGCredID, unsuccessfulNameMatchAttempts, *)
       .returning(Future.successful(result))
 
@@ -254,7 +254,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    implicit val request: Request[_] = FakeRequest()
+    implicit val request: Request[?] = FakeRequest()
 
     "getting the number of previous unsuccessful attempts" must {
 
@@ -895,7 +895,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
   }
 
   private def testIsErrorOfType[A <: NameMatchDetails, E <: NameMatchServiceError[A] : ClassTag](
-    result: EitherT[Future, NameMatchServiceError[A], _]
+    result: EitherT[Future, NameMatchServiceError[A], ?]
   ): Unit =
     await(result.value) match {
       case Left(_: E) => ()

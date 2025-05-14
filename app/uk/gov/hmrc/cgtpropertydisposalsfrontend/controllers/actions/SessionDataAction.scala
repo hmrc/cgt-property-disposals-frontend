@@ -33,6 +33,8 @@ final case class RequestWithSessionData[A](
   override def messagesApi: MessagesApi =
     authenticatedRequest.request.messagesApi
   val userType: Option[UserType]        = sessionData.flatMap(_.userType)
+
+  def toSession: SessionData = sessionData.getOrElse(SessionData.empty)
 }
 
 @Singleton

@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -64,7 +64,7 @@ class MixedUsePropertyDetailsController @Inject() (
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
   val isUkPage: views.html.address.isUk,
   val exitPage: views.html.address.exit_page,
-  singleMixedUseGuidance: views.html.returns.address.single_mixed_use_guidance,
+  singleMixedUseGuidancePage: views.html.returns.address.single_mixed_use_guidance,
   disposalValuePage: views.html.returns.address.single_mixed_use_disposal_price,
   acquisitionValuePage: views.html.returns.address.single_mixed_use_acquisition_price,
   singleMixedUseCheckYourAnswersPage: views.html.returns.address.single_mixed_use_check_your_answers
@@ -81,11 +81,11 @@ class MixedUsePropertyDetailsController @Inject() (
   val toJourneyStatus: EnteringSingleMixedUsePropertyDetails => JourneyStatus = _.journey
 
   def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Future[Result], (SessionData, EnteringSingleMixedUsePropertyDetails)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((_, s: StartingToAmendReturn)) =>
-        implicit val r: RequestWithSessionData[_] = request
+        implicit val r: RequestWithSessionData[?] = request
         Left(convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator))
 
       case Some(
@@ -110,7 +110,7 @@ class MixedUsePropertyDetailsController @Inject() (
     journey: EnteringSingleMixedUsePropertyDetails,
     address: Address,
     isManuallyEnteredAddress: Boolean
-  )(implicit hc: HeaderCarrier, request: Request[_]): EitherT[Future, Error, JourneyStatus] = {
+  )(implicit hc: HeaderCarrier, request: Request[?]): EitherT[Future, Error, JourneyStatus] = {
     val isFurtherOrAmendReturn = journey.journey.isFurtherOrAmendReturn.contains(true)
 
     address match {
@@ -177,7 +177,7 @@ class MixedUsePropertyDetailsController @Inject() (
               _ => routes.MixedUsePropertyDetailsController.checkYourAnswers()
             )
         Ok(
-          singleMixedUseGuidance(
+          singleMixedUseGuidancePage(
             backLink,
             r.representativeType
           )
@@ -281,7 +281,7 @@ class MixedUsePropertyDetailsController @Inject() (
     for {
       _ <- returnsService.storeDraftReturn(updatedJourney)
       _ <- EitherT(
-             updateSession(sessionStore, request)(
+             updateSession(sessionStore, request.toSession)(
                _.copy(journeyStatus = Some(updatedJourney))
              )
            )

@@ -58,7 +58,7 @@ class SubscribedChangeContactNameController @Inject() (
   override val isSubscribedJourney: Boolean = true
 
   override def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, Subscribed)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: Subscribed)) => Right(sessionData -> s)
@@ -67,7 +67,7 @@ class SubscribedChangeContactNameController @Inject() (
 
   override def updateContactName(journey: Subscribed, contactName: ContactName)(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, Subscribed] = {
     val journeyWithUpdatedContactName =
       journey.subscribedDetails.copy(contactName = contactName)

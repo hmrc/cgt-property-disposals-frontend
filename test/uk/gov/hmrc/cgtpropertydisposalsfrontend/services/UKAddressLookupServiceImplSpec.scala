@@ -21,9 +21,10 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{AddressLookupResult, Postcode}
@@ -34,7 +35,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.chaining.scalaUtilChainingOps
 
-class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
+class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with MockFactory with GuiceOneServerPerSuite {
 
   private val mockConnector = mock[AddressLookupConnector]
 
@@ -49,7 +50,7 @@ class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with Mock
       .expects(expectedPostcode, filter, *)
       .returning(EitherT.fromEither[Future](result))
 
-  val service = new UKAddressLookupServiceImpl(mockConnector, MockMetrics.metrics)
+  val service = new UKAddressLookupServiceImpl(mockConnector, app.injector.instanceOf[Metrics])
 
   private def response(addresses: List[RawAddress]) = Right(AddressLookupResponse(addresses))
 

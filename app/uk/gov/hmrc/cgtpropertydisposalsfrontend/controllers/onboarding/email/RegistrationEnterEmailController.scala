@@ -62,7 +62,7 @@ class RegistrationEnterEmailController @Inject() (
     with EmailController[EnteringRegistrationEmail] {
 
   override def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, EnteringRegistrationEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, i: IndividualMissingEmail)) =>
@@ -71,7 +71,7 @@ class RegistrationEnterEmailController @Inject() (
     }
 
   override def validVerificationCompleteJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, EnteringRegistrationEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: RegistrationReady)) =>
@@ -84,7 +84,7 @@ class RegistrationEnterEmailController @Inject() (
     email: Email
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus] =
     EitherT.rightT[Future, Error](
       RegistrationReady(
@@ -103,7 +103,7 @@ class RegistrationEnterEmailController @Inject() (
   override def auditEmailVerifiedEvent(
     enteringRegistrationEmail: EnteringRegistrationEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+  )(implicit hc: HeaderCarrier, request: Request[?]): Unit =
     auditService.sendEvent(
       "registrationSetupEmailAddressVerified",
       RegistrationSetupEmailVerifiedEvent(
@@ -115,7 +115,7 @@ class RegistrationEnterEmailController @Inject() (
   override def auditEmailChangeAttempt(
     enteringRegistrationEmail: EnteringRegistrationEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+  )(implicit hc: HeaderCarrier, request: Request[?]): Unit =
     auditService.sendEvent(
       "registrationSetupEmailAddressAttempted",
       RegistrationSetupEmailAttemptedEvent(

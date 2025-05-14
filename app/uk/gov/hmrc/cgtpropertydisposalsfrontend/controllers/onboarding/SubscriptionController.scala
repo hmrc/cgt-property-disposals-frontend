@@ -23,7 +23,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -75,7 +75,7 @@ class SubscriptionController @Inject() (
         _                    <- EitherT(
                                   subscriptionResponse match {
                                     case SubscriptionSuccessful(cgtReferenceNumber) =>
-                                      updateSession(sessionStore, request)(
+                                      updateSession(sessionStore, request.sessionData)(
                                         _.copy(
                                           journeyStatus = Some(
                                             Subscribed(
@@ -97,7 +97,7 @@ class SubscriptionController @Inject() (
                                         )
                                       )
                                     case AlreadySubscribed                          =>
-                                      updateSession(sessionStore, request)(
+                                      updateSession(sessionStore, request.sessionData)(
                                         _.copy(
                                           journeyStatus = Some(
                                             AlreadySubscribedWithDifferentGGAccount(
@@ -130,7 +130,7 @@ class SubscriptionController @Inject() (
               case Left(e)  => logger.warn(s"Failed to clear name mismatch session cache for $ggCredId", e)
               case Right(_) => logger.info(s"Cleared name mismatch session cache for $ggCredId")
             }
-            Redirect(routes.SubscriptionController.subscribed())
+            Redirect(onboardingRoutes.SubscriptionController.subscribed())
           case AlreadySubscribed                          =>
             logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
             auditService.sendEvent(
@@ -142,7 +142,7 @@ class SubscriptionController @Inject() (
               "access-with-wrong-gg-account"
             )
             Redirect(
-              routes.SubscriptionController
+              onboardingRoutes.SubscriptionController
                 .alreadySubscribedWithDifferentGGAccount()
             )
         }
@@ -169,7 +169,7 @@ class SubscriptionController @Inject() (
 
   def changeGGAccountForSubscription(): Action[AnyContent] =
     authenticatedActionWithSubscriptionReady { implicit request =>
-      Ok(changeGGAccountPage(routes.SubscriptionController.checkYourDetails()))
+      Ok(changeGGAccountPage(onboardingRoutes.SubscriptionController.checkYourDetails()))
     }
 
 }
