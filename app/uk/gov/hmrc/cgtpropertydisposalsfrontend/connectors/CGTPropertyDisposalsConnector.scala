@@ -31,6 +31,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.libs.ws.writeableOf_JsValue
 
 @ImplementedBy(classOf[CGTPropertyDisposalsConnectorImpl])
 trait CGTPropertyDisposalsConnector {
@@ -111,10 +112,11 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (
 
   def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse] =
+  ): EitherT[Future, Error, HttpResponse] = {
     makeCall(
       _.post(url"$registerWithoutIdAndSubscribeUrl").withBody(Json.toJson(registrationDetails)).execute[HttpResponse]
     )
+  }
 
   def getSubscriptionStatus()(implicit
     hc: HeaderCarrier
