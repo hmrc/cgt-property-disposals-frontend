@@ -24,7 +24,7 @@ import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.data.Forms.{of, mapping => formMapping}
+import play.api.data.Forms.{mapping => formMapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 import play.api.http.Writeable

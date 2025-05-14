@@ -256,7 +256,7 @@ class MultipleDisposalsTriageControllerSpec
           .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
-          errorArgs *
+          errorArgs*
         )
         doc.title() should startWith("Error:")
       },
@@ -535,7 +535,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the how many disposals page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.howManyDisposalsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val key = "multipleDisposalsNumberOfProperties"
@@ -717,7 +717,7 @@ class MultipleDisposalsTriageControllerSpec
 
       "display form error" when {
         def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
-          testFormError(data *)(expectedErrorMessageKey)(s"$key.title")(
+          testFormError(data*)(expectedErrorMessageKey)(s"$key.title")(
             performAction
           )
 
@@ -945,7 +945,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the were uk resident page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1297,7 +1297,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the were all properties residential page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.wereAllPropertiesResidentialSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val key = "multipleDisposalsWereAllPropertiesResidential"
@@ -1706,7 +1706,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the tax year exchanged page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.whenWereContractsExchangedSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val cutoffTaxYearDate    = LocalDate.of(cutoffTaxYear, 4, 6)
@@ -2489,7 +2489,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the country of residence page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.countryOfResidenceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -2833,8 +2833,8 @@ class MultipleDisposalsTriageControllerSpec
                 "for",
                 "multipleDisposalsAssetTypeForNonUkResidents-3",
                 s"Residential Non-residential Mixed use ${messageFromMessageKey(
-                  s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey(separatePeriodOfAdminKey = true)}.IndirectDisposal"
-                )}"
+                    s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey(separatePeriodOfAdminKey = true)}.IndirectDisposal"
+                  )}"
               )
             )
           )
@@ -2934,7 +2934,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the asset type for non-uk residents page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.assetTypeForNonUkResidentsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -3390,7 +3390,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submitted completion dates" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.completionDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(d: LocalDate): List[(String, String)] =
@@ -3450,7 +3450,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey("multipleDisposalsCompletionDate.title"),
             doc =>
               doc
@@ -3528,7 +3528,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsTechnicalErrorPage(
-            performAction(formData(today) *)
+            performAction(formData(today)*)
           )
         }
 
@@ -3569,7 +3569,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsTechnicalErrorPage(
-            performAction(formData(newCompletionDate.value) *)
+            performAction(formData(newCompletionDate.value)*)
           )
         }
       }
@@ -3636,7 +3636,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(formData(newCompletionDate.value) *),
+              performAction(formData(newCompletionDate.value)*),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -3671,7 +3671,7 @@ class MultipleDisposalsTriageControllerSpec
               }
 
               checkIsRedirect(
-                performAction(formData(newCompletionDate.value) *),
+                performAction(formData(newCompletionDate.value)*),
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
@@ -3717,7 +3717,7 @@ class MultipleDisposalsTriageControllerSpec
 
               checkIsRedirect(
                 performAction(
-                  formData(submittedDate) *
+                  formData(submittedDate)*
                 ),
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
@@ -3747,7 +3747,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(answers.completionDate.value) *),
+            performAction(formData(answers.completionDate.value)*),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -3810,7 +3810,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submitted disposal of shares date" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateOfSharesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(d: LocalDate): List[(String, String)] =
@@ -3865,7 +3865,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey("sharesDisposalDate.title"),
             doc =>
               doc
@@ -3966,7 +3966,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsTechnicalErrorPage(
-            performAction(formData(newCompletionDate.value) *)
+            performAction(formData(newCompletionDate.value)*)
           )
         }
       }
@@ -4021,7 +4021,7 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsRedirect(
             performAction(
-              formData(submittedDate) *
+              formData(submittedDate)*
             ),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
@@ -4124,7 +4124,7 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsRedirect(
             performAction(
-              formData(submittedDate) *
+              formData(submittedDate)*
             ),
             routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
           )
@@ -4187,7 +4187,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(answers.completionDate.value) *),
+            performAction(formData(answers.completionDate.value)*),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -4908,7 +4908,7 @@ class MultipleDisposalsTriageControllerSpec
 
     checkPageIsDisplayed(
       performAction(),
-      messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs *),
+      messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs*),
       { doc =>
         doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
         doc
@@ -4951,7 +4951,7 @@ class MultipleDisposalsTriageControllerSpec
 
     checkPageIsDisplayed(
       performAction(),
-      messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs *),
+      messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs*),
       { doc =>
         doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
         val selector = doc.body().select(".govuk-label.govuk-radios__label").asScala.map(_.text()).toList

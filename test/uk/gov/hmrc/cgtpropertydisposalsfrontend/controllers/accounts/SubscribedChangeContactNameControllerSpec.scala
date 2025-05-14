@@ -57,7 +57,7 @@ class SubscribedChangeContactNameControllerSpec
 
   override val validJourney: Subscribed = sample[Subscribed]
 
-  override val mockUpdateContactName: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some({
+  override val mockUpdateContactName: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some {
     case (
           oldDetails: Subscribed,
           newDetails: Subscribed,
@@ -69,7 +69,7 @@ class SubscribedChangeContactNameControllerSpec
           oldDetails.subscribedDetails
         )
       )(r)
-  })
+  }
 
   override def updateContactName(
     journey: Subscribed,
@@ -93,7 +93,7 @@ class SubscribedChangeContactNameControllerSpec
       behave like enterContactNameSubmit(
         data =>
           controller.enterContactNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data *).withCSRFToken.withMethod("POST")
+            FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
           ),
         controllers.accounts.routes.AccountController.contactNameUpdated()
       )

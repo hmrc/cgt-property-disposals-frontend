@@ -72,7 +72,7 @@ class TestDefaultMessagesApiProvider @Inject() (
   httpConfiguration: HttpConfiguration
 ) extends DefaultMessagesApiProvider(environment, config, langs, httpConfiguration) {
 
-  override lazy val get: MessagesApi = {
+  override lazy val get: MessagesApi =
     new TestMessagesApi(
       loadAllMessages,
       langs,
@@ -81,7 +81,6 @@ class TestDefaultMessagesApiProvider @Inject() (
       langCookieHttpOnly = langCookieHttpOnly,
       httpConfiguration = httpConfiguration
     )
-  }
 }
 
 trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with MockFactory {
@@ -108,7 +107,7 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
         ).withFallback(additionalConfig)
       )
       .disable[uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore]
-      .overrides(metricsBinding :: overrideBindings *)
+      .overrides(metricsBinding :: overrideBindings*)
       .overrides(bind[MessagesApi].toProvider[TestDefaultMessagesApiProvider])
       .disable[Metrics]
       .build()
@@ -132,7 +131,7 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
   }
 
   def messageFromMessageKey(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String = {
-    val m = messagesApi(messageKey, args *)(lang)
+    val m = messagesApi(messageKey, args*)(lang)
     if (m === messageKey) sys.error(s"Message key `$messageKey` is missing a message")
     m
   }

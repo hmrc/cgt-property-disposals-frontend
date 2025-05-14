@@ -53,7 +53,7 @@ trait HigherPriorityYearToDateLiabilityAnswersGen extends LowerPriorityYearToDat
       case other                                                                                                    => other
     }
 
-  given gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] =gen[GainCalculatedTaxDue]
+  given gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
 
   implicit val ytdLiabilityAnswersGen: Gen[YearToDateLiabilityAnswers] =
     Gen.oneOf(
@@ -99,7 +99,7 @@ trait LowerPriorityYearToDateLiabilityAnswersGen extends EvenLowerPriorityYearTo
       case other => other
     }
 
-  implicit val completeNonCalculatedYTDLiabilityAnswersGen: Gen[CompleteNonCalculatedYTDAnswers] = {
+  implicit val completeNonCalculatedYTDLiabilityAnswersGen: Gen[CompleteNonCalculatedYTDAnswers] =
     for {
       taxableGainOrLoss              <- MoneyGen.amountInPenceGen
       hasEstimatedDetails            <- Generators.booleanGen
@@ -123,14 +123,13 @@ trait LowerPriorityYearToDateLiabilityAnswersGen extends EvenLowerPriorityYearTo
       taxableGainOrLossCalculation,
       yearToDateLiabilityCalculation
     )
-  }
 
 }
 
 trait EvenLowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
   given mandatoryEvidenceGen: Gen[MandatoryEvidence] = gen[MandatoryEvidence]
 
-  implicit val incompleteNonCalculatedYTDLiabilityAnswersGen: Gen[IncompleteNonCalculatedYTDAnswers] = {
+  implicit val incompleteNonCalculatedYTDLiabilityAnswersGen: Gen[IncompleteNonCalculatedYTDAnswers] =
     for {
       taxableGainOrLoss              <- Gen.option(MoneyGen.amountInPenceGen)
       hasEstimatedDetails            <- Gen.option(Generators.booleanGen)
@@ -158,6 +157,5 @@ trait EvenLowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
       taxableGainOrLossCalculation,
       yearToDateLiabilityCalculation
     )
-  }
 
 }

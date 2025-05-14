@@ -43,7 +43,7 @@ object AssetType {
           case "MixedUse"         => JsSuccess(MixedUse)
           case other              => JsError(s"Invalid asset type: $other")
         }
-      case _ => JsError("Expected JSON object with one AssetType key")
+      case _                                    => JsError("Expected JSON object with one AssetType key")
     }
 
     override def writes(o: AssetType): JsValue = o match {

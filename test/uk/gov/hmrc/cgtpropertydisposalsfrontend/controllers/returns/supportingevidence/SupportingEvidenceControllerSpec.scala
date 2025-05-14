@@ -169,13 +169,13 @@ class SupportingEvidenceControllerSpec
     }
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs *),
+      messageFromMessageKey(pageTitleKey, titleArgs*),
       { doc =>
         doc
           .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
-          errorArgs *
+          errorArgs*
         )
         doc.title() should startWith("Error:")
       },
@@ -269,7 +269,7 @@ class SupportingEvidenceControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.doYouWantToUploadSupportingEvidenceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -336,7 +336,7 @@ class SupportingEvidenceControllerSpec
         )._1
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
-          testFormError(data *)(expectedErrorMessageKey)(
+          testFormError(data*)(expectedErrorMessageKey)(
             "supporting-evidence.do-you-want-to-upload.title"
           )(
             performAction,
@@ -1250,7 +1250,7 @@ class SupportingEvidenceControllerSpec
           val updatedUpscanSuccess =
             upscanSuccess.copy(uploadDetails = Map("fileName" -> supportingEvidence.fileName))
 
-          val upscanUpload         =
+          val upscanUpload =
             sample[UpscanUpload].copy(
               uploadReference = uploadReference,
               upscanCallBack = Some(updatedUpscanSuccess)
@@ -1392,7 +1392,7 @@ class SupportingEvidenceControllerSpec
           val updatedUpscanSuccess =
             upscanSuccess.copy(uploadDetails = Map("fileName" -> supportingEvidence.fileName))
 
-          val upscanUpload         =
+          val upscanUpload =
             sample[UpscanUpload].copy(
               uploadReference = uploadReference,
               upscanCallBack = Some(updatedUpscanSuccess)

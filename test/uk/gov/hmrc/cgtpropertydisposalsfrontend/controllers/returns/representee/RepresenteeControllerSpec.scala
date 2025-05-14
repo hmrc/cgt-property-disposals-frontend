@@ -162,8 +162,8 @@ class RepresenteeControllerSpec
   ) =
     (
       mockNameMatchRetryService
-        .getNumberOfUnsuccessfulAttempts[IndividualRepresenteeNameMatchDetails](_: GGCredId)(
-          using _: Reads[IndividualRepresenteeNameMatchDetails],
+        .getNumberOfUnsuccessfulAttempts[IndividualRepresenteeNameMatchDetails](_: GGCredId)(using
+          _: Reads[IndividualRepresenteeNameMatchDetails],
           _: HeaderCarrier,
           _: Request[?]
         )
@@ -299,7 +299,7 @@ class RepresenteeControllerSpec
       def performAction: Seq[(String, String)] => Future[Result] =
         data =>
           controller.changeContactNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data *).withCSRFToken.withMethod("POST")
+            FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
           )
 
       def formDataForContactName(
@@ -577,7 +577,7 @@ class RepresenteeControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterNameSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       val firstNameKey = "representeeFirstName"
@@ -975,7 +975,7 @@ class RepresenteeControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterDateOfDeathSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       val dayKey   = "dateOfDeath-day"
@@ -1603,7 +1603,7 @@ class RepresenteeControllerSpec
     "handling requests to submit the confirm person page" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.confirmPersonSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1732,7 +1732,7 @@ class RepresenteeControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterIdSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       val outerKey        = "representeeReferenceIdType"
@@ -3076,7 +3076,7 @@ class RepresenteeControllerSpec
     "handling submits on the is first return page" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.isFirstReturnSubmit()(FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST"))
+        controller.isFirstReturnSubmit()(FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST"))
 
       val key = "representeeIsFirstReturn"
 

@@ -94,24 +94,25 @@ object MixedUsePropertyDetailsAnswers {
     Json.format[IncompleteMixedUsePropertyDetailsAnswers]
 
   implicit val format: OFormat[MixedUsePropertyDetailsAnswers] = new OFormat[MixedUsePropertyDetailsAnswers] {
-    override def reads(json: play.api.libs.json.JsValue): play.api.libs.json.JsResult[MixedUsePropertyDetailsAnswers] = json match {
-      case play.api.libs.json.JsObject(fields) if fields.size == 1 =>
-        fields.head match {
-          case ("IncompleteMixedUsePropertyDetailsAnswers", value) =>
-            value.validate[IncompleteMixedUsePropertyDetailsAnswers]
-          case ("CompleteMixedUsePropertyDetailsAnswers", value) =>
-            value.validate[CompleteMixedUsePropertyDetailsAnswers]
-          case (other, _) =>
-            play.api.libs.json.JsError(s"Unrecognized MixedUsePropertyDetailsAnswers type: $other")
-        }
-      case _ =>
-        play.api.libs.json.JsError("Expected wrapper object with a single MixedUsePropertyDetailsAnswers entry")
-    }
+    override def reads(json: play.api.libs.json.JsValue): play.api.libs.json.JsResult[MixedUsePropertyDetailsAnswers] =
+      json match {
+        case play.api.libs.json.JsObject(fields) if fields.size == 1 =>
+          fields.head match {
+            case ("IncompleteMixedUsePropertyDetailsAnswers", value) =>
+              value.validate[IncompleteMixedUsePropertyDetailsAnswers]
+            case ("CompleteMixedUsePropertyDetailsAnswers", value)   =>
+              value.validate[CompleteMixedUsePropertyDetailsAnswers]
+            case (other, _)                                          =>
+              play.api.libs.json.JsError(s"Unrecognized MixedUsePropertyDetailsAnswers type: $other")
+          }
+        case _                                                       =>
+          play.api.libs.json.JsError("Expected wrapper object with a single MixedUsePropertyDetailsAnswers entry")
+      }
 
     override def writes(o: MixedUsePropertyDetailsAnswers): play.api.libs.json.JsObject = o match {
       case i: IncompleteMixedUsePropertyDetailsAnswers =>
         play.api.libs.json.Json.obj("IncompleteMixedUsePropertyDetailsAnswers" -> play.api.libs.json.Json.toJson(i))
-      case c: CompleteMixedUsePropertyDetailsAnswers =>
+      case c: CompleteMixedUsePropertyDetailsAnswers   =>
         play.api.libs.json.Json.obj("CompleteMixedUsePropertyDetailsAnswers" -> play.api.libs.json.Json.toJson(c))
     }
   }

@@ -43,4 +43,3 @@ object FurtherReturnCalculationGen extends GenUtils:
 
   given yearToDateLiabilityCalculationGen: Gen[YearToDateLiabilityCalculation] =
     gen[YearToDateLiabilityCalculation]
-

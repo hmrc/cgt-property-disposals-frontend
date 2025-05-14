@@ -24,9 +24,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 
 object AcquisitionDetailsGen extends GenUtils {
 
-  given completeAcquisitionDetailsAnswersGen: Gen[CompleteAcquisitionDetailsAnswers] = gen[CompleteAcquisitionDetailsAnswers]
+  given completeAcquisitionDetailsAnswersGen: Gen[CompleteAcquisitionDetailsAnswers] =
+    gen[CompleteAcquisitionDetailsAnswers]
 
-  given incompleteAcquisitionDetailsAnswersGen: Gen[IncompleteAcquisitionDetailsAnswers] = gen[IncompleteAcquisitionDetailsAnswers]
+  given incompleteAcquisitionDetailsAnswersGen: Gen[IncompleteAcquisitionDetailsAnswers] =
+    gen[IncompleteAcquisitionDetailsAnswers]
 
   given acquisitionMethodGen: Gen[AcquisitionMethod] = gen[AcquisitionMethod]
 

@@ -112,11 +112,10 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (
 
   def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse] = {
+  ): EitherT[Future, Error, HttpResponse] =
     makeCall(
       _.post(url"$registerWithoutIdAndSubscribeUrl").withBody(Json.toJson(registrationDetails)).execute[HttpResponse]
     )
-  }
 
   def getSubscriptionStatus()(implicit
     hc: HeaderCarrier

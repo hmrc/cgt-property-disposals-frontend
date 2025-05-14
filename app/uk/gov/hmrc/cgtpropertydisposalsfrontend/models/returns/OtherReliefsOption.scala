@@ -49,7 +49,7 @@ object OtherReliefsOption {
   )
 
   implicit val otherReliefsFormat: OFormat[OtherReliefs] = Json.format[OtherReliefs]
-  implicit val format: OFormat[OtherReliefsOption] = new OFormat[OtherReliefsOption] {
+  implicit val format: OFormat[OtherReliefsOption]       = new OFormat[OtherReliefsOption] {
     override def reads(json: JsValue): JsResult[OtherReliefsOption] = json match {
       case JsObject(fields) if fields.size == 1 =>
         fields.head match {
@@ -57,12 +57,12 @@ object OtherReliefsOption {
           case ("OtherReliefs", v)   => v.validate[OtherReliefs]
           case (other, _)            => JsError(s"Unrecognized OtherReliefsOption type: $other")
         }
-      case _ => JsError("Expected OtherReliefsOption wrapper object with a single entry")
+      case _                                    => JsError("Expected OtherReliefsOption wrapper object with a single entry")
     }
 
     override def writes(o: OtherReliefsOption): JsObject = o match {
-      case NoOtherReliefs    => Json.obj("NoOtherReliefs" -> Json.obj())
-      case o: OtherReliefs   => Json.obj("OtherReliefs" -> Json.toJson(o))
+      case NoOtherReliefs  => Json.obj("NoOtherReliefs" -> Json.obj())
+      case o: OtherReliefs => Json.obj("OtherReliefs" -> Json.toJson(o))
     }
   }
 

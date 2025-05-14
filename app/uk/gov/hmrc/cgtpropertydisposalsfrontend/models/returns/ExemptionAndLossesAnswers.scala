@@ -94,26 +94,25 @@ object ExemptionAndLossesAnswers {
     Json.format[IncompleteExemptionAndLossesAnswers]
 
   implicit val format: OFormat[ExemptionAndLossesAnswers] = new OFormat[ExemptionAndLossesAnswers] {
-    override def reads(json: JsValue): JsResult[ExemptionAndLossesAnswers] = {
+    override def reads(json: JsValue): JsResult[ExemptionAndLossesAnswers] =
       json match {
         case JsObject(fields) if fields.size == 1 =>
           fields.head match {
             case ("IncompleteExemptionAndLossesAnswers", value) =>
               value.validate[IncompleteExemptionAndLossesAnswers]
-            case ("CompleteExemptionAndLossesAnswers", value) =>
+            case ("CompleteExemptionAndLossesAnswers", value)   =>
               value.validate[CompleteExemptionAndLossesAnswers]
-            case (other, _) =>
+            case (other, _)                                     =>
               JsError(s"Unrecognized ExemptionAndLossesAnswers type: $other")
           }
-        case _ =>
+        case _                                    =>
           JsError("Expected ExemptionAndLossesAnswers wrapper object with a single entry")
       }
-    }
 
     override def writes(e: ExemptionAndLossesAnswers): JsObject = e match {
       case i: IncompleteExemptionAndLossesAnswers =>
         Json.obj("IncompleteExemptionAndLossesAnswers" -> Json.toJson(i))
-      case c: CompleteExemptionAndLossesAnswers =>
+      case c: CompleteExemptionAndLossesAnswers   =>
         Json.obj("CompleteExemptionAndLossesAnswers" -> Json.toJson(c))
     }
   }

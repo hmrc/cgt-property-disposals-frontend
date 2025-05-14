@@ -184,7 +184,7 @@ trait ChangeRepresenteeEmailControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.enterEmailSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())

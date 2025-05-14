@@ -21,21 +21,21 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{C
 
 object CompleteReturnGen extends LowerPriorityCompleteReturnGen {
 
-  given completeSingleDisposalReturnGen: Gen[CompleteSingleDisposalReturn] = {
+  given completeSingleDisposalReturnGen: Gen[CompleteSingleDisposalReturn] =
     for {
-      triageAnswers <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
-      propertyAddress <- AddressGen.ukAddressGen
-      disposalDetails <- disposalDetails
-      acquisitionDetails <- acquisitionDetails
-      reliefDetails <- ReliefDetailsGen.completeReliefDetailsAnswersGen
-      exemptionsAndLossesDetails <- ExemptionsAndLossesAnswersGen.completeExemptionAndLossesAnswersGen
+      triageAnswers                    <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
+      propertyAddress                  <- AddressGen.ukAddressGen
+      disposalDetails                  <- disposalDetails
+      acquisitionDetails               <- acquisitionDetails
+      reliefDetails                    <- ReliefDetailsGen.completeReliefDetailsAnswersGen
+      exemptionsAndLossesDetails       <- ExemptionsAndLossesAnswersGen.completeExemptionAndLossesAnswersGen
       chosenYearToDateLiabilityAnswers <-
         Gen.either(yearToDateLiabilityAnswers, YearToDateLiabilityAnswersGen.completeCalculatedYTDLiabilityAnswersGen)
-      supportingDocumentAnswers  <- supportingDocumentAnswers
-      initialGainOrLoss          <- Gen.option(MoneyGen.amountInPenceGen)
-      representeeAnswers         <- Gen.option(RepresenteeAnswersGen.completeRepresenteeAnswersGen)
-      gainOrLossAfterReliefs     <- Gen.option(MoneyGen.amountInPenceGen)
-      hasAttachments             <- Generators.booleanGen
+      supportingDocumentAnswers        <- supportingDocumentAnswers
+      initialGainOrLoss                <- Gen.option(MoneyGen.amountInPenceGen)
+      representeeAnswers               <- Gen.option(RepresenteeAnswersGen.completeRepresenteeAnswersGen)
+      gainOrLossAfterReliefs           <- Gen.option(MoneyGen.amountInPenceGen)
+      hasAttachments                   <- Generators.booleanGen
     } yield CompleteSingleDisposalReturn(
       triageAnswers,
       propertyAddress,
@@ -50,7 +50,6 @@ object CompleteReturnGen extends LowerPriorityCompleteReturnGen {
       gainOrLossAfterReliefs,
       hasAttachments
     )
-  }
 
 }
 
@@ -76,7 +75,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
     hasAttachments
   )
 
-  implicit val completeSingleIndirectDisposalReturnGen: Gen[CompleteSingleIndirectDisposalReturn] = {
+  implicit val completeSingleIndirectDisposalReturnGen: Gen[CompleteSingleIndirectDisposalReturn] =
     for {
       triageAnswers              <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
       companyAddress             <- AddressGen.addressGen
@@ -100,7 +99,6 @@ trait LowerPriorityCompleteReturnGen extends Common {
       gainOrLossAfterReliefs,
       hasAttachments
     )
-  }
 
   implicit val completeMultipleIndirectDisposalReturnGen: Gen[CompleteMultipleIndirectDisposalReturn] = for {
     triageAnswers                <- TriageQuestionsGen.completeMultipleDisposalsTriageAnswersGen
@@ -122,7 +120,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
     hasAttachments
   )
 
-  implicit val completeSingleMixedUseDisposalReturnGen: Gen[CompleteSingleMixedUseDisposalReturn] = {
+  implicit val completeSingleMixedUseDisposalReturnGen: Gen[CompleteSingleMixedUseDisposalReturn] =
     for {
       triageAnswers              <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
       propertyDetailsAnswers     <- SingleMixedUseDetailsAnswersGen.given_Gen_CompleteMixedUsePropertyDetailsAnswers
@@ -142,6 +140,5 @@ trait LowerPriorityCompleteReturnGen extends Common {
       gainOrLossAfterReliefs,
       hasAttachments
     )
-  }
 
 }

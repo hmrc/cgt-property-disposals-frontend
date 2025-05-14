@@ -123,8 +123,8 @@ class DraftReturnSavedControllerSpec
               doc
                 .select(".govuk-warning-text__text")
                 .text()       shouldBe s"""${messageFromMessageKey(
-                "generic.warning"
-              )} ${messageFromMessageKey(expectedWarningMessageKey, formattedDate)}"""
+                  "generic.warning"
+                )} ${messageFromMessageKey(expectedWarningMessageKey, formattedDate)}"""
             }
           )
         }

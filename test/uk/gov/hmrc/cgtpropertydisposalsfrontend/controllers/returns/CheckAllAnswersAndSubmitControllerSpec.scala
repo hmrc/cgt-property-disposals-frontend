@@ -1566,10 +1566,10 @@ class CheckAllAnswersAndSubmitControllerSpec
 
                 doc.select(".govuk-body").text shouldBe
                   s"""${messageFromMessageKey("submitReturnError.p1")} ${messageFromMessageKey(
-                    "submitReturnError.p2"
-                  )} ${messageFromMessageKey("submitReturnError.p3")} ${messageFromMessageKey(
-                    "submitReturnError.p4"
-                  )}"""
+                      "submitReturnError.p2"
+                    )} ${messageFromMessageKey("submitReturnError.p3")} ${messageFromMessageKey(
+                      "submitReturnError.p4"
+                    )}"""
 
                 doc
                   .select("#main-content ol.govuk-list--number > li:nth-child(1)")

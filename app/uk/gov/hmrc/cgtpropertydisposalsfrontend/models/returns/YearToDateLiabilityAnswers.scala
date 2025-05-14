@@ -242,13 +242,13 @@ object YearToDateLiabilityAnswers {
     override def reads(json: JsValue): JsResult[YearToDateLiabilityAnswers] = json match {
       case JsObject(fields) if fields.size == 1 =>
         fields.head match {
-          case ("CompleteCalculatedYTDAnswers", value)     => value.validate[CompleteCalculatedYTDAnswers]
-          case ("IncompleteCalculatedYTDAnswers", value)   => value.validate[IncompleteCalculatedYTDAnswers]
-          case ("CompleteNonCalculatedYTDAnswers", value)  => value.validate[CompleteNonCalculatedYTDAnswers]
-          case ("IncompleteNonCalculatedYTDAnswers", value)=> value.validate[IncompleteNonCalculatedYTDAnswers]
-          case (other, _)                                  => JsError(s"Unknown YearToDateLiabilityAnswers subtype: $other")
+          case ("CompleteCalculatedYTDAnswers", value)      => value.validate[CompleteCalculatedYTDAnswers]
+          case ("IncompleteCalculatedYTDAnswers", value)    => value.validate[IncompleteCalculatedYTDAnswers]
+          case ("CompleteNonCalculatedYTDAnswers", value)   => value.validate[CompleteNonCalculatedYTDAnswers]
+          case ("IncompleteNonCalculatedYTDAnswers", value) => value.validate[IncompleteNonCalculatedYTDAnswers]
+          case (other, _)                                   => JsError(s"Unknown YearToDateLiabilityAnswers subtype: $other")
         }
-      case _ =>
+      case _                                    =>
         JsError("Expected wrapper object with one YearToDateLiabilityAnswers subtype key")
     }
 

@@ -114,11 +114,10 @@ object MoneyGen extends GenUtils {
     snd <- Generators.stringGen
   } yield PaymentsJourney(fst, snd)
 
-  implicit val amountInPenceWithSourceGen: Gen[AmountInPenceWithSource] = {
+  implicit val amountInPenceWithSourceGen: Gen[AmountInPenceWithSource] =
     for {
       amount <- amountInPenceGen
       source <- Gen.oneOf(Source.Calculated, Source.UserSupplied)
     } yield AmountInPenceWithSource(amount, source)
-  }
 
 }

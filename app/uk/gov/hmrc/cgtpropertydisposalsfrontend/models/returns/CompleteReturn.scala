@@ -458,38 +458,37 @@ object CompleteReturn {
   implicit val completeSingleIndirectDisposalReturnFormat: OFormat[CompleteSingleIndirectDisposalReturn]      = Json.format
 
   implicit val format: OFormat[CompleteReturn] = new OFormat[CompleteReturn] {
-    override def reads(json: play.api.libs.json.JsValue): play.api.libs.json.JsResult[CompleteReturn] = {
+    override def reads(json: play.api.libs.json.JsValue): play.api.libs.json.JsResult[CompleteReturn] =
       json match {
         case play.api.libs.json.JsObject(fields) if fields.size == 1 =>
           fields.head match {
-            case ("CompleteMultipleDisposalsReturn", value) =>
+            case ("CompleteMultipleDisposalsReturn", value)        =>
               value.validate[CompleteMultipleDisposalsReturn]
-            case ("CompleteSingleDisposalReturn", value) =>
+            case ("CompleteSingleDisposalReturn", value)           =>
               value.validate[CompleteSingleDisposalReturn]
-            case ("CompleteSingleIndirectDisposalReturn", value) =>
+            case ("CompleteSingleIndirectDisposalReturn", value)   =>
               value.validate[CompleteSingleIndirectDisposalReturn]
             case ("CompleteMultipleIndirectDisposalReturn", value) =>
               value.validate[CompleteMultipleIndirectDisposalReturn]
-            case ("CompleteSingleMixedUseDisposalReturn", value) =>
+            case ("CompleteSingleMixedUseDisposalReturn", value)   =>
               value.validate[CompleteSingleMixedUseDisposalReturn]
-            case (other, _) =>
+            case (other, _)                                        =>
               play.api.libs.json.JsError(s"Unrecognized CompleteReturn type: $other")
           }
-        case _ =>
+        case _                                                       =>
           play.api.libs.json.JsError("Expected a CompleteReturn wrapper object with a single entry")
       }
-    }
 
     override def writes(c: CompleteReturn): play.api.libs.json.JsObject = c match {
-      case m: CompleteMultipleDisposalsReturn =>
+      case m: CompleteMultipleDisposalsReturn        =>
         play.api.libs.json.Json.obj("CompleteMultipleDisposalsReturn" -> play.api.libs.json.Json.toJson(m))
-      case s: CompleteSingleDisposalReturn =>
+      case s: CompleteSingleDisposalReturn           =>
         play.api.libs.json.Json.obj("CompleteSingleDisposalReturn" -> play.api.libs.json.Json.toJson(s))
-      case s: CompleteSingleIndirectDisposalReturn =>
+      case s: CompleteSingleIndirectDisposalReturn   =>
         play.api.libs.json.Json.obj("CompleteSingleIndirectDisposalReturn" -> play.api.libs.json.Json.toJson(s))
       case m: CompleteMultipleIndirectDisposalReturn =>
         play.api.libs.json.Json.obj("CompleteMultipleIndirectDisposalReturn" -> play.api.libs.json.Json.toJson(m))
-      case s: CompleteSingleMixedUseDisposalReturn =>
+      case s: CompleteSingleMixedUseDisposalReturn   =>
         play.api.libs.json.Json.obj("CompleteSingleMixedUseDisposalReturn" -> play.api.libs.json.Json.toJson(s))
     }
   }

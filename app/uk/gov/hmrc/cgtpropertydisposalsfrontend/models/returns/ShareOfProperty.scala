@@ -43,12 +43,12 @@ object ShareOfProperty {
           case ("Other", v) => (v \ "percentageValue").validate[BigDecimal].map(Other(_))
           case (other, _)   => JsError(s"Unrecognized ShareOfProperty type: $other")
         }
-      case _ => JsError("Expected ShareOfProperty JSON object with one key")
+      case _                                    => JsError("Expected ShareOfProperty JSON object with one key")
     }
 
     override def writes(o: ShareOfProperty): JsValue = o match {
-      case Full  => Json.obj("Full" -> Json.obj())
-      case Half  => Json.obj("Half" -> Json.obj())
+      case Full         => Json.obj("Full" -> Json.obj())
+      case Half         => Json.obj("Half" -> Json.obj())
       case Other(value) => Json.obj("Other" -> Json.obj("percentageValue" -> value))
     }
   }

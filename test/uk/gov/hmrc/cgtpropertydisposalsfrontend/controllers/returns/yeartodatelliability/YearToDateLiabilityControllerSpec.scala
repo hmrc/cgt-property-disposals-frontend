@@ -848,7 +848,7 @@ class YearToDateLiabilityControllerSpec
     "handling submitted answers to the estimated income page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.estimatedIncomeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -872,7 +872,7 @@ class YearToDateLiabilityControllerSpec
           AmountOfMoneyErrorScenarios
             .amountOfMoneyErrorScenarios("estimatedIncome")
             .foreach { scenario =>
-              testFormError(scenario.formData *)(
+              testFormError(scenario.formData*)(
                 scenario.expectedErrorMessageKey
               )("estimatedIncome.title")(
                 performAction
@@ -1257,7 +1257,7 @@ class YearToDateLiabilityControllerSpec
     "handling submitted answers to the personal allowance page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.personalAllowanceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1348,7 +1348,7 @@ class YearToDateLiabilityControllerSpec
             )
             .foreach { scenario =>
               withClue(s"For $scenario: ") {
-                testFormError(scenario.formData *)(
+                testFormError(scenario.formData*)(
                   scenario.expectedErrorMessageKey,
                   args.getOrElse(scenario.expectedErrorMessageKey, Nil)
                 )(
@@ -1998,7 +1998,7 @@ class YearToDateLiabilityControllerSpec
     "handling submitted answers to the has estimated details page" when {
       def performAction(data: (String, String)*): Future[Result] =
         controller.hasEstimatedDetailsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like markUnmetDependencyBehaviour(controller.hasEstimatedDetailsSubmit())
@@ -2059,7 +2059,7 @@ class YearToDateLiabilityControllerSpec
           )._1
 
           def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
-            testFormError(data *)(expectedErrorMessageKey)(
+            testFormError(data*)(expectedErrorMessageKey)(
               "hasEstimatedDetails.title"
             )(performAction, currentSession)
 
@@ -2220,7 +2220,7 @@ class YearToDateLiabilityControllerSpec
           )._1
 
           def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
-            testFormError(data *)(expectedErrorMessageKey)(
+            testFormError(data*)(expectedErrorMessageKey)(
               "hasEstimatedDetails.title"
             )(performAction, currentSession)
 
@@ -2810,7 +2810,7 @@ class YearToDateLiabilityControllerSpec
     "handling submitted answers to the tax due page for a calculated journey" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.taxDueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2963,7 +2963,7 @@ class YearToDateLiabilityControllerSpec
             .foreach { scenario =>
               withClue(s"For $scenario: ") {
                 val formData = ("agreeWithCalculation" -> "1") :: scenario.formData
-                testFormError(formData *)(
+                testFormError(formData*)(
                   scenario.expectedErrorMessageKey
                 )("taxDue.title")(
                   performAction,
@@ -4886,7 +4886,7 @@ class YearToDateLiabilityControllerSpec
     "handling submits on the taxable gain or net loss page" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.taxableGainOrLossSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -4930,7 +4930,7 @@ class YearToDateLiabilityControllerSpec
           )._1
 
           def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-            testFormError(data *)(
+            testFormError(data*)(
               expectedErrorKey
             )("taxableGainOrLoss.pageTitle")(performAction, currentSession)
 
@@ -4944,7 +4944,7 @@ class YearToDateLiabilityControllerSpec
               .foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = ("taxableGainOrLoss" -> "0") :: scenario.formData
-                  test(data *)(scenario.expectedErrorMessageKey)
+                  test(data*)(scenario.expectedErrorMessageKey)
                 }
               }
           }
@@ -4962,7 +4962,7 @@ class YearToDateLiabilityControllerSpec
               .foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = ("taxableGainOrLoss" -> "1") :: scenario.formData
-                  test(data *)(scenario.expectedErrorMessageKey)
+                  test(data*)(scenario.expectedErrorMessageKey)
                 }
               }
           }
@@ -4979,7 +4979,7 @@ class YearToDateLiabilityControllerSpec
           def test(
             state: (SessionData, FillingOutReturn)
           )(data: (String, String)*)(expectedTitleKey: String, expectedErrorKey: String): Unit =
-            testFormError(data *)(
+            testFormError(data*)(
               expectedErrorKey
             )(expectedTitleKey)(
               performAction,
@@ -5039,7 +5039,7 @@ class YearToDateLiabilityControllerSpec
                 .foreach { scenario =>
                   withClue(s"For user key '$userKey' and $scenario: ") {
                     val data = ("taxableGainOrLoss" -> "0") :: scenario.formData
-                    test(session)(data *)(
+                    test(session)(data*)(
                       s"taxableGainOrLoss$userKey.furtherReturn.title",
                       scenario.expectedErrorMessageKey
                     )
@@ -5069,7 +5069,7 @@ class YearToDateLiabilityControllerSpec
                 .foreach { scenario =>
                   withClue(s"For user key '$userKey' and $scenario: ") {
                     val data = ("taxableGainOrLoss" -> "1") :: scenario.formData
-                    test(session)(data *)(
+                    test(session)(data*)(
                       s"taxableGainOrLoss$userKey.furtherReturn.title",
                       scenario.expectedErrorMessageKey
                     )
@@ -5564,7 +5564,7 @@ class YearToDateLiabilityControllerSpec
                 doc
                   .select("#main-content dl.govuk-summary-list > div:nth-child(2) > dd")
                   .text() shouldBe s"- ${MoneyUtils
-                  .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
+                    .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
 
                 doc
                   .select("#main-content dl.govuk-summary-list > div.sum-total > dd")
@@ -5800,7 +5800,7 @@ class YearToDateLiabilityControllerSpec
                   .formatAmountOfMoneyWithPoundSign(yearToDateLiability.inPounds())
 
                 doc.select("#main-content dl.govuk-summary-list > div:nth-child(2) > dd").text() shouldBe s"${MoneyUtils
-                  .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
+                    .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
 
                 doc.select("#main-content dl.govuk-summary-list > div.sum-total > dd").text() shouldBe formattedTaxDue
 
@@ -5987,7 +5987,7 @@ class YearToDateLiabilityControllerSpec
     "handling submits on the non calculated enter tax due page" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.nonCalculatedEnterTaxDueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -6039,7 +6039,7 @@ class YearToDateLiabilityControllerSpec
         )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-          testFormError(data *)(
+          testFormError(data*)(
             expectedErrorKey
           )("nonCalculatedTaxDue.title")(performAction, currentSession)
 
@@ -6048,7 +6048,7 @@ class YearToDateLiabilityControllerSpec
             .amountOfMoneyErrorScenarios("nonCalculatedTaxDue")
             .foreach { scenario =>
               withClue(s"For $scenario: ") {
-                test(scenario.formData *)(scenario.expectedErrorMessageKey)
+                test(scenario.formData*)(scenario.expectedErrorMessageKey)
               }
             }
         }
@@ -6512,8 +6512,8 @@ class YearToDateLiabilityControllerSpec
             wasUkResident = sample[Boolean]
           )
 
-        val fileName       = "file"
-        val callback       = sample[UpscanSuccess]
+        val fileName = "file"
+        val callback = sample[UpscanSuccess]
           .copy(uploadDetails = Map("fileName" -> fileName))
 
         val newAnswers     = answers.copy(
@@ -7752,7 +7752,7 @@ class YearToDateLiabilityControllerSpec
 
     "handling submits on the year to date liability page" must {
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.yearToDateLiabilitySubmit()(FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST"))
+        controller.yearToDateLiabilitySubmit()(FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST"))
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -7831,10 +7831,10 @@ class YearToDateLiabilityControllerSpec
           expectedTitleKey: String,
           expectedTitleArgs: String*
         )(expectedErrorKey: String, expectedErrorArgs: String*): Unit =
-          testFormError(data *)(
+          testFormError(data*)(
             expectedErrorKey,
             expectedErrorArgs
-          )(expectedTitleKey, expectedTitleArgs *)(
+          )(expectedTitleKey, expectedTitleArgs*)(
             performAction,
             sessionData,
             _ => mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
@@ -7892,7 +7892,7 @@ class YearToDateLiabilityControllerSpec
               .filter(s => s.input.exists(_.nonEmpty))
               .foreach { scenario =>
                 withClue(s"For user key '$userKey' and $scenario: ") {
-                  test(session._1, session._2)(scenario.formData *)(
+                  test(session._1, session._2)(scenario.formData*)(
                     s"yearToDateLiability$userKey.title",
                     taxYearStart,
                     taxYearEnd
@@ -8282,7 +8282,7 @@ class YearToDateLiabilityControllerSpec
 
     "handling submits on the repayment page" must {
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.repaymentSubmit()(FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST"))
+        controller.repaymentSubmit()(FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST"))
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -8340,7 +8340,7 @@ class YearToDateLiabilityControllerSpec
         )(
           data: (String, String)*
         )(expectedTitleKey: String, expectedErrorKey: String): Unit =
-          testFormError(data *)(
+          testFormError(data*)(
             expectedErrorKey
           )(expectedTitleKey)(performAction, sessionData)
 
@@ -8891,13 +8891,13 @@ class YearToDateLiabilityControllerSpec
     }
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs *),
+      messageFromMessageKey(pageTitleKey, titleArgs*),
       { doc =>
         doc
           .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
-          errorArgs *
+          errorArgs*
         )
         doc.title() should startWith("Error:")
       },

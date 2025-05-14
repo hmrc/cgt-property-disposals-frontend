@@ -79,7 +79,7 @@ class SubscriptionChangeContactNameControllerSpec
       behave like enterContactNameSubmit(
         data =>
           controller.enterContactNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data *).withCSRFToken.withMethod("POST")
+            FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
           ),
         controllers.onboarding.routes.SubscriptionController.checkYourDetails()
       )

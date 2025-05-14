@@ -259,7 +259,7 @@ class AgentAccessControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsCgtRefSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -614,7 +614,7 @@ class AgentAccessControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -998,7 +998,7 @@ class AgentAccessControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsCountrySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -1038,7 +1038,7 @@ class AgentAccessControllerSpec
             )
           }
 
-          val result = performAction(formData *)
+          val result = performAction(formData*)
           status(result) shouldBe BAD_REQUEST
           val content = contentAsString(result)
           content should include(

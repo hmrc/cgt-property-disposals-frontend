@@ -40,7 +40,7 @@ object DisposalMethod {
           case "Other"  => JsSuccess(Other)
           case other    => JsError(s"Invalid disposal method: $other")
         }
-      case _ => JsError("Expected JSON object with one DisposalMethod key")
+      case _                                    => JsError("Expected JSON object with one DisposalMethod key")
     }
 
     override def writes(o: DisposalMethod): JsValue = o match {

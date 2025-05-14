@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import play.api.data.Form
-import play.api.data.Forms.{optional, text, mapping => formMapping}
+import play.api.data.Forms.{mapping => formMapping, optional, text}
 
 final case class AddressLookupRequest(
   postcode: Postcode,

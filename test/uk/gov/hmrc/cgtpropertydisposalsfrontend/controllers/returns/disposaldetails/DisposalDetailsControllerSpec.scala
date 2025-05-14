@@ -407,7 +407,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.howMuchDidYouOwnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1028,7 +1028,7 @@ class DisposalDetailsControllerSpec
         individualUserType: IndividualUserType,
         userType: UserType
       ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
-        val userMsgKey = userMessageKey(individualUserType, userType)
+        val userMsgKey                                                            = userMessageKey(individualUserType, userType)
         def row(disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty) = {
           val expectedMessage = (disposalMethod, individualUserType, userType) match {
             case (_, Capacitor | PersonalRepresentative, _)                             => "disposalPrice.1.title"
@@ -1195,7 +1195,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWasDisposalPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1300,7 +1300,7 @@ class DisposalDetailsControllerSpec
                 errorContext = Some(s"$key$userKey$disposalMethodKey")
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData *)(scenario.expectedErrorMessageKey)(
+                  test(scenario.formData*)(scenario.expectedErrorMessageKey)(
                     disposalMethod,
                     userType,
                     individualUserType
@@ -1834,7 +1834,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWasDisposalPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1933,7 +1933,7 @@ class DisposalDetailsControllerSpec
                 errorContext = Some(s"$key$userKey.indirect$disposalMethodKey")
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData *)(scenario.expectedErrorMessageKey)(
+                  test(scenario.formData*)(scenario.expectedErrorMessageKey)(
                     disposalMethod,
                     userType,
                     individualUserType
@@ -2334,7 +2334,7 @@ class DisposalDetailsControllerSpec
           }
           (disposalMethod, shareOfProperty, expectedMessage)
         }
-        val userKey = userMessageKey(individualUserType, userType)
+        val userKey                                                               = userMessageKey(individualUserType, userType)
         List(
           (DisposalMethod.Sold, ShareOfProperty.Full, s"disposalFees$userKey.title"),
           (DisposalMethod.Gifted, ShareOfProperty.Full, s"disposalFees$userKey.title"),
@@ -2517,7 +2517,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWereDisposalFeesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -2643,7 +2643,7 @@ class DisposalDetailsControllerSpec
                 errorContext = Some(s"disposalFees$userKey")
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData *)(scenario.expectedErrorMessageKey)(
+                  test(scenario.formData*)(scenario.expectedErrorMessageKey)(
                     disposalMethod,
                     userType,
                     individualUserType
@@ -3317,7 +3317,7 @@ class DisposalDetailsControllerSpec
                 userMessageKey(
                   individualUserType,
                   userType
-                ) //TODO - change when the CYA changes go in
+                ) // TODO - change when the CYA changes go in
               doc
                 .select("#propertyShare-question")
                 .text() shouldBe messageFromMessageKey(

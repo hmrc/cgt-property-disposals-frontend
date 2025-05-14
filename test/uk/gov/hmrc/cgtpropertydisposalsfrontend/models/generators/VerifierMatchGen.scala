@@ -26,4 +26,3 @@ object VerifierMatchGen extends GenUtils:
 
   given unsuccessfulVerifierMatchAttemptsGen: Gen[UnsuccessfulVerifierAttempts] =
     gen[UnsuccessfulVerifierAttempts]
-

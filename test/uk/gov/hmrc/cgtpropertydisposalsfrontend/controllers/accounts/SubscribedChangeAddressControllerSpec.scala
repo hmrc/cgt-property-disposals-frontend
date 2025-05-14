@@ -116,7 +116,7 @@ class SubscribedChangeAddressControllerSpec
     "handling requests to submit the is UK page" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.isUkSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -147,7 +147,7 @@ class SubscribedChangeAddressControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -173,7 +173,7 @@ class SubscribedChangeAddressControllerSpec
     "handling requests to submit the enter non UK address page" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterNonUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -202,7 +202,7 @@ class SubscribedChangeAddressControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -244,7 +244,7 @@ class SubscribedChangeAddressControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.selectAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))

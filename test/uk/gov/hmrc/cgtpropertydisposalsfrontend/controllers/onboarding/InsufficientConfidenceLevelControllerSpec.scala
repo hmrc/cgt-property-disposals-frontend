@@ -85,8 +85,8 @@ class InsufficientConfidenceLevelControllerSpec
       mockBprNameMatchService
         .getNumberOfUnsuccessfulAttempts[IndividualSautrNameMatchDetails](
           _: GGCredId
-        )(
-          using _: Reads[IndividualSautrNameMatchDetails],
+        )(using
+          _: Reads[IndividualSautrNameMatchDetails],
           _: HeaderCarrier,
           _: Request[?]
         )
@@ -204,7 +204,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.doYouHaveNINOSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like commonBehaviour(() => performAction())
@@ -502,7 +502,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.doYouHaveSaUtrSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like commonBehaviour(() => performAction())
@@ -820,13 +820,13 @@ class InsufficientConfidenceLevelControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterSautrAndNameSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like commonBehaviour(() => performAction())
 
       behave like nameFormValidationTests(
-        data => performAction(data :+ ("saUtr" -> validSautr.value) *),
+        data => performAction(data :+ ("saUtr" -> validSautr.value)*),
         () =>
           inSequence {
             mockAuthWithNoRetrievals()

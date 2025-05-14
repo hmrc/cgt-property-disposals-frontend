@@ -44,7 +44,7 @@ object ClearingReason {
           case "SomeOtherClearingReason" => JsSuccess(SomeOtherClearingReason)
           case other                     => JsError(s"Invalid clearing reason: $other")
         }
-      case _ => JsError("Expected JSON object with one ClearingReason key")
+      case _                                    => JsError("Expected JSON object with one ClearingReason key")
     }
 
     override def writes(reason: ClearingReason): JsValue = reason match {

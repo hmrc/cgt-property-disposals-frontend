@@ -180,7 +180,7 @@ object JourneyStatus {
     agentReferenceNumber: Option[AgentReferenceNumber]
   ) extends JourneyStatus
 
-  //in progress submission
+  // in progress submission
   final case class SubmittingReturn(
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
@@ -425,56 +425,58 @@ object JourneyStatus {
     override def reads(json: JsValue): JsResult[JourneyStatus] = json match {
       case JsObject(fields) if fields.size == 1 =>
         fields.head match {
-          case ("Registering", _)                               => JsSuccess(Registering)
-          case ("NonGovernmentGatewayJourney", _)               => JsSuccess(NonGovernmentGatewayJourney)
-          case ("AgentWithoutAgentEnrolment", _)                => JsSuccess(AgentWithoutAgentEnrolment)
-          case ("DeterminingIfOrganisationIsTrust", v)         => v.validate[DeterminingIfOrganisationIsTrust]
-          case ("TryingToGetIndividualsFootprint", v)          => v.validate[TryingToGetIndividualsFootprint]
-          case ("SubscriptionMissingData", v)                  => v.validate[SubscriptionMissingData]
-          case ("SubscriptionReady", v)                        => v.validate[SubscriptionReady]
-          case ("SubmittingReturn", v)                         => v.validate[SubmittingReturn]
-          case ("NewEnrolmentCreatedForMissingEnrolment", v)   => v.validate[NewEnrolmentCreatedForMissingEnrolment]
-          case ("Subscribed", v)                               => v.validate[Subscribed]
-          case ("StartingNewDraftReturn", v)                   => v.validate[StartingNewDraftReturn]
-          case ("FillingOutReturn", v)                         => v.validate[FillingOutReturn]
-          case ("JustSubmittedReturn", v)                      => v.validate[JustSubmittedReturn]
-          case ("SubmitReturnFailed", v)                       => v.validate[SubmitReturnFailed]
-          case ("ViewingReturn", v)                            => v.validate[ViewingReturn]
-          case ("StartingToAmendReturn", v)                    => v.validate[StartingToAmendReturn]
-          case ("AlreadySubscribedWithDifferentGGAccount", v)  => v.validate[AlreadySubscribedWithDifferentGGAccount]
-          case ("IndividualWantsToRegisterTrust", v)           => v.validate[IndividualWantsToRegisterTrust]
-          case ("IndividualSupplyingInformation", v)           => v.validate[IndividualSupplyingInformation]
-          case ("IndividualMissingEmail", v)                   => v.validate[IndividualMissingEmail]
-          case ("RegistrationReady", v)                        => v.validate[RegistrationReady]
-          case ("AgentSupplyingClientDetails", v)              => v.validate[AgentSupplyingClientDetails]
-          case _                                               => JsError("Unrecognized JourneyStatus type")
+          case ("Registering", _)                             => JsSuccess(Registering)
+          case ("NonGovernmentGatewayJourney", _)             => JsSuccess(NonGovernmentGatewayJourney)
+          case ("AgentWithoutAgentEnrolment", _)              => JsSuccess(AgentWithoutAgentEnrolment)
+          case ("DeterminingIfOrganisationIsTrust", v)        => v.validate[DeterminingIfOrganisationIsTrust]
+          case ("TryingToGetIndividualsFootprint", v)         => v.validate[TryingToGetIndividualsFootprint]
+          case ("SubscriptionMissingData", v)                 => v.validate[SubscriptionMissingData]
+          case ("SubscriptionReady", v)                       => v.validate[SubscriptionReady]
+          case ("SubmittingReturn", v)                        => v.validate[SubmittingReturn]
+          case ("NewEnrolmentCreatedForMissingEnrolment", v)  => v.validate[NewEnrolmentCreatedForMissingEnrolment]
+          case ("Subscribed", v)                              => v.validate[Subscribed]
+          case ("StartingNewDraftReturn", v)                  => v.validate[StartingNewDraftReturn]
+          case ("FillingOutReturn", v)                        => v.validate[FillingOutReturn]
+          case ("JustSubmittedReturn", v)                     => v.validate[JustSubmittedReturn]
+          case ("SubmitReturnFailed", v)                      => v.validate[SubmitReturnFailed]
+          case ("ViewingReturn", v)                           => v.validate[ViewingReturn]
+          case ("StartingToAmendReturn", v)                   => v.validate[StartingToAmendReturn]
+          case ("AlreadySubscribedWithDifferentGGAccount", v) => v.validate[AlreadySubscribedWithDifferentGGAccount]
+          case ("IndividualWantsToRegisterTrust", v)          => v.validate[IndividualWantsToRegisterTrust]
+          case ("IndividualSupplyingInformation", v)          => v.validate[IndividualSupplyingInformation]
+          case ("IndividualMissingEmail", v)                  => v.validate[IndividualMissingEmail]
+          case ("RegistrationReady", v)                       => v.validate[RegistrationReady]
+          case ("AgentSupplyingClientDetails", v)             => v.validate[AgentSupplyingClientDetails]
+          case _                                              => JsError("Unrecognized JourneyStatus type")
         }
-      case _ => JsError("Expected wrapper object for JourneyStatus")
+      case _                                    => JsError("Expected wrapper object for JourneyStatus")
     }
 
     override def writes(o: JourneyStatus): JsObject = o match {
-      case Registering                                 => Json.obj("Registering" -> Json.obj())
-      case NonGovernmentGatewayJourney                 => Json.obj("NonGovernmentGatewayJourney" -> Json.obj())
-      case AgentWithoutAgentEnrolment                  => Json.obj("AgentWithoutAgentEnrolment" -> Json.obj())
-      case v: DeterminingIfOrganisationIsTrust         => Json.obj("DeterminingIfOrganisationIsTrust" -> Json.toJson(v))
-      case v: TryingToGetIndividualsFootprint          => Json.obj("TryingToGetIndividualsFootprint" -> Json.toJson(v))
-      case v: SubscriptionMissingData                  => Json.obj("SubscriptionMissingData" -> Json.toJson(v))
-      case v: SubscriptionReady                        => Json.obj("SubscriptionReady" -> Json.toJson(v))
-      case v: SubmittingReturn                         => Json.obj("SubmittingReturn" -> Json.toJson(v))
-      case v: NewEnrolmentCreatedForMissingEnrolment   => Json.obj("NewEnrolmentCreatedForMissingEnrolment" -> Json.toJson(v))
-      case v: Subscribed                               => Json.obj("Subscribed" -> Json.toJson(v))
-      case v: StartingNewDraftReturn                   => Json.obj("StartingNewDraftReturn" -> Json.toJson(v))
-      case v: FillingOutReturn                         => Json.obj("FillingOutReturn" -> Json.toJson(v))
-      case v: JustSubmittedReturn                      => Json.obj("JustSubmittedReturn" -> Json.toJson(v))
-      case v: SubmitReturnFailed                       => Json.obj("SubmitReturnFailed" -> Json.toJson(v))
-      case v: ViewingReturn                            => Json.obj("ViewingReturn" -> Json.toJson(v))
-      case v: StartingToAmendReturn                    => Json.obj("StartingToAmendReturn" -> Json.toJson(v))
-      case v: AlreadySubscribedWithDifferentGGAccount  => Json.obj("AlreadySubscribedWithDifferentGGAccount" -> Json.toJson(v))
-      case v: IndividualWantsToRegisterTrust           => Json.obj("IndividualWantsToRegisterTrust" -> Json.toJson(v))
-      case v: IndividualSupplyingInformation           => Json.obj("IndividualSupplyingInformation" -> Json.toJson(v))
-      case v: IndividualMissingEmail                   => Json.obj("IndividualMissingEmail" -> Json.toJson(v))
-      case v: RegistrationReady                        => Json.obj("RegistrationReady" -> Json.toJson(v))
-      case v: AgentSupplyingClientDetails              => Json.obj("AgentSupplyingClientDetails" -> Json.toJson(v))
+      case Registering                                => Json.obj("Registering" -> Json.obj())
+      case NonGovernmentGatewayJourney                => Json.obj("NonGovernmentGatewayJourney" -> Json.obj())
+      case AgentWithoutAgentEnrolment                 => Json.obj("AgentWithoutAgentEnrolment" -> Json.obj())
+      case v: DeterminingIfOrganisationIsTrust        => Json.obj("DeterminingIfOrganisationIsTrust" -> Json.toJson(v))
+      case v: TryingToGetIndividualsFootprint         => Json.obj("TryingToGetIndividualsFootprint" -> Json.toJson(v))
+      case v: SubscriptionMissingData                 => Json.obj("SubscriptionMissingData" -> Json.toJson(v))
+      case v: SubscriptionReady                       => Json.obj("SubscriptionReady" -> Json.toJson(v))
+      case v: SubmittingReturn                        => Json.obj("SubmittingReturn" -> Json.toJson(v))
+      case v: NewEnrolmentCreatedForMissingEnrolment  =>
+        Json.obj("NewEnrolmentCreatedForMissingEnrolment" -> Json.toJson(v))
+      case v: Subscribed                              => Json.obj("Subscribed" -> Json.toJson(v))
+      case v: StartingNewDraftReturn                  => Json.obj("StartingNewDraftReturn" -> Json.toJson(v))
+      case v: FillingOutReturn                        => Json.obj("FillingOutReturn" -> Json.toJson(v))
+      case v: JustSubmittedReturn                     => Json.obj("JustSubmittedReturn" -> Json.toJson(v))
+      case v: SubmitReturnFailed                      => Json.obj("SubmitReturnFailed" -> Json.toJson(v))
+      case v: ViewingReturn                           => Json.obj("ViewingReturn" -> Json.toJson(v))
+      case v: StartingToAmendReturn                   => Json.obj("StartingToAmendReturn" -> Json.toJson(v))
+      case v: AlreadySubscribedWithDifferentGGAccount =>
+        Json.obj("AlreadySubscribedWithDifferentGGAccount" -> Json.toJson(v))
+      case v: IndividualWantsToRegisterTrust          => Json.obj("IndividualWantsToRegisterTrust" -> Json.toJson(v))
+      case v: IndividualSupplyingInformation          => Json.obj("IndividualSupplyingInformation" -> Json.toJson(v))
+      case v: IndividualMissingEmail                  => Json.obj("IndividualMissingEmail" -> Json.toJson(v))
+      case v: RegistrationReady                       => Json.obj("RegistrationReady" -> Json.toJson(v))
+      case v: AgentSupplyingClientDetails             => Json.obj("AgentSupplyingClientDetails" -> Json.toJson(v))
     }
   }
 

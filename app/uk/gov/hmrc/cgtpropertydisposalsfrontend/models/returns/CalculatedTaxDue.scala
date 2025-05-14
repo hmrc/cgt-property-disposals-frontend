@@ -41,7 +41,7 @@ object Source {
           case "Calculated"   => JsSuccess(Calculated)
           case other          => JsError(s"Invalid Source type: $other")
         }
-      case _ => JsError("Expected Source wrapper object with one key")
+      case _                                    => JsError("Expected Source wrapper object with one key")
     }
 
     override def writes(o: Source): JsValue = o match {
@@ -103,11 +103,11 @@ object CalculatedTaxDue {
           case ("NonGainCalculatedTaxDue", value) => value.validate[NonGainCalculatedTaxDue]
           case (other, _)                         => JsError(s"Unknown CalculatedTaxDue subtype: $other")
         }
-      case _ => JsError("Expected wrapper object with one CalculatedTaxDue key")
+      case _                                    => JsError("Expected wrapper object with one CalculatedTaxDue key")
     }
 
     override def writes(o: CalculatedTaxDue): JsObject = o match {
-      case g: GainCalculatedTaxDue    => Json.obj("GainCalculatedTaxDue" -> Json.toJson(g))
+      case g: GainCalculatedTaxDue     => Json.obj("GainCalculatedTaxDue" -> Json.toJson(g))
       case ng: NonGainCalculatedTaxDue => Json.obj("NonGainCalculatedTaxDue" -> Json.toJson(ng))
     }
   }

@@ -1016,7 +1016,7 @@ class MultipleDisposalsTriageController @Inject() (
             viewConfig.futureDatesEnabled,
             viewConfig.maxYearForDisposalsAndCompletion
           )
-          val form = {
+          val form           = {
             val blankForm = sharesDisposalDateForm(personalRepDetails, maxDateAllowed)
             answers
               .fold(_.completionDate, e => Some(e.completionDate))

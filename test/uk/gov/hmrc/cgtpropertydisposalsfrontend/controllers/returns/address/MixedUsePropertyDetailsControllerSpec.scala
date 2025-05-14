@@ -420,7 +420,7 @@ class MixedUsePropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -436,7 +436,7 @@ class MixedUsePropertyDetailsControllerSpec
           formData: (String, String)*
         )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
@@ -693,7 +693,7 @@ class MixedUsePropertyDetailsControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData *),
+            performAction(formData*),
             routes.MixedUsePropertyDetailsController.checkYourAnswers()
           )
         }
@@ -956,7 +956,7 @@ class MixedUsePropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterDisposalValueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1030,7 +1030,7 @@ class MixedUsePropertyDetailsControllerSpec
             userMessageKey(draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType), Individual)
 
           checkPageIsDisplayed(
-            performAction(data *),
+            performAction(data*),
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
               doc
@@ -1046,7 +1046,7 @@ class MixedUsePropertyDetailsControllerSpec
           amountOfMoneyErrorScenarios(key).foreach { scenario =>
             withClue(s"For $scenario: ") {
               val data = scenario.formData
-              test(data *)(scenario.expectedErrorMessageKey)
+              test(data*)(scenario.expectedErrorMessageKey)
             }
           }
         }
@@ -1199,7 +1199,7 @@ class MixedUsePropertyDetailsControllerSpec
           val userKey = userMessageKey(individualUserType, userType)
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"$key$userKey.title", titleArgs *),
+            messageFromMessageKey(s"$key$userKey.title", titleArgs*),
             { doc =>
               doc.select(".govuk-back-link").attr("href") shouldBe expectedBackLink.url
               doc
@@ -1366,7 +1366,7 @@ class MixedUsePropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterAcquisitionValueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1442,7 +1442,7 @@ class MixedUsePropertyDetailsControllerSpec
           val dateOfDeath = draftReturn.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
           val titleArg    = dateOfDeath.map(e => TimeUtils.govDisplayFormat(e.value)).getOrElse("")
           checkPageIsDisplayed(
-            performAction(data *),
+            performAction(data*),
             messageFromMessageKey(s"$key$userKey.title", titleArg),
             doc =>
               doc
@@ -1460,7 +1460,7 @@ class MixedUsePropertyDetailsControllerSpec
               amountOfMoneyErrorScenarios(key).foreach { scenario =>
                 withClue(s"For $individualUserType and $scenario: ") {
                   val data = scenario.formData
-                  test(data *)(
+                  test(data*)(
                     sample[DraftSingleMixedUseDisposalReturn].copy(
                       triageAnswers =
                         sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType),
@@ -1482,7 +1482,7 @@ class MixedUsePropertyDetailsControllerSpec
             scenario =>
               withClue(s"For $scenario: ") {
                 val data = scenario.formData
-                test(data *)(
+                test(data*)(
                   sample[DraftSingleMixedUseDisposalReturn].copy(
                     triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                       .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),

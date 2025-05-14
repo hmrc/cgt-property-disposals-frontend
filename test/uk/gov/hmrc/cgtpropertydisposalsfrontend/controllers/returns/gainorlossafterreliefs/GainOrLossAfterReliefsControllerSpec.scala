@@ -1004,7 +1004,7 @@ class GainOrLossAfterReliefsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.enterGainOrLossAfterReliefsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1037,7 +1037,7 @@ class GainOrLossAfterReliefsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(data *),
+            performAction(data*),
             messageFromMessageKey(pageTitleKey),
             doc =>
               doc
@@ -1070,7 +1070,7 @@ class GainOrLossAfterReliefsControllerSpec
                 withClue(s"For test case '$userKey' and scenario $scenario: ") {
                   val data = ("gainOrLossAfterReliefs" -> "0") :: scenario.formData
 
-                  testFormError(session._1, session._2, data *)(
+                  testFormError(session._1, session._2, data*)(
                     s"gainOrLossAfterReliefs$userKey.title",
                     scenario.expectedErrorMessageKey
                   )
@@ -1086,7 +1086,7 @@ class GainOrLossAfterReliefsControllerSpec
                 withClue(s"For test case '$userKey' and scenario $scenario: ") {
                   val data = ("gainOrLossAfterReliefs" -> "1") :: scenario.formData
 
-                  testFormError(session._1, session._2, data *)(
+                  testFormError(session._1, session._2, data*)(
                     s"gainOrLossAfterReliefs$userKey.title",
                     scenario.expectedErrorMessageKey
                   )
@@ -1184,7 +1184,7 @@ class GainOrLossAfterReliefsControllerSpec
             )(Right(()))
           }
           checkIsRedirect(
-            performAction(formData *),
+            performAction(formData*),
             routes.GainOrLossAfterReliefsController.checkYourAnswers()
           )
         }

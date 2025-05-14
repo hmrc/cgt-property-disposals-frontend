@@ -164,7 +164,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -202,7 +202,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -258,7 +258,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.selectAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -490,7 +490,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.singleDisposalHasUkPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -596,7 +596,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.checkUPRNSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -719,7 +719,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.singleDisposalEnterLandUprnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(ukAddress: UkAddress): List[(String, String)] =
@@ -779,7 +779,7 @@ class SingleDisposalPropertyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey("enterUPRN.title"),
             { doc =>
               val errors = doc.select("[data-spec='errorSummaryDisplay'] ul").first()
@@ -869,7 +869,7 @@ class SingleDisposalPropertyDetailsControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(newAddress) *),
+            performAction(formData(newAddress)*),
             routes.PropertyDetailsController.checkYourAnswers()
           )
         }
@@ -911,7 +911,7 @@ class SingleDisposalPropertyDetailsControllerSpec
             mockStoreDraftReturn(newJourney)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(newAddress) *))
+          checkIsTechnicalErrorPage(performAction(formData(newAddress)*))
         }
 
         "there is an error updating the session" in {
@@ -929,7 +929,7 @@ class SingleDisposalPropertyDetailsControllerSpec
             )(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(newAddress) *))
+          checkIsTechnicalErrorPage(performAction(formData(newAddress)*))
         }
 
       }
@@ -1008,7 +1008,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.noUPRNEnterAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(ukAddress: UkAddress): List[(String, String)] =
@@ -1071,7 +1071,7 @@ class SingleDisposalPropertyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey("noUPRN.title"),
             { doc =>
               val errors = doc.select("[data-spec='errorSummaryDisplay'] ul").first()
@@ -1160,7 +1160,7 @@ class SingleDisposalPropertyDetailsControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(newAddress) *),
+            performAction(formData(newAddress)*),
             routes.PropertyDetailsController.checkYourAnswers()
           )
         }
@@ -1202,7 +1202,7 @@ class SingleDisposalPropertyDetailsControllerSpec
             mockStoreDraftReturn(newJourney)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(newAddress) *))
+          checkIsTechnicalErrorPage(performAction(formData(newAddress)*))
         }
 
         "there is an error updating the session" in {
@@ -1220,7 +1220,7 @@ class SingleDisposalPropertyDetailsControllerSpec
             )(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(newAddress) *))
+          checkIsTechnicalErrorPage(performAction(formData(newAddress)*))
         }
 
       }

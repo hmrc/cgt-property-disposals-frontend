@@ -55,7 +55,7 @@ object RepresenteeReferenceId {
           case ("NoReferenceId", value)           => value.validate[NoReferenceId.type]
           case (other, _)                         => JsError(s"Unrecognized RepresenteeReferenceId: $other")
         }
-      case _ =>
+      case _                                    =>
         JsError("Expected a RepresenteeReferenceId wrapper object with a single entry")
     }
 

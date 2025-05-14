@@ -103,7 +103,7 @@ object PaymentMethod {
           case "VoluntaryDirectPayments"            => JsSuccess(VoluntaryDirectPayments)
           case other                                => JsError(s"Invalid payment method: $other")
         }
-      case _ => JsError("Expected a JSON object with one PaymentMethod key")
+      case _                                    => JsError("Expected a JSON object with one PaymentMethod key")
     }
 
     override def writes(o: PaymentMethod): JsValue = o match {

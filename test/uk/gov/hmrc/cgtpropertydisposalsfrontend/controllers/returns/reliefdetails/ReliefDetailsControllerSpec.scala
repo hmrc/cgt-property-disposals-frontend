@@ -322,7 +322,7 @@ class ReliefDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.privateResidentsReliefSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -391,7 +391,7 @@ class ReliefDetailsControllerSpec
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data *)(scenario.expectedErrorMessageKey)(
+                  test(data*)(scenario.expectedErrorMessageKey)(
                     userType,
                     individualUserType,
                     userKey
@@ -798,7 +798,7 @@ class ReliefDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.lettingsReliefSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -849,7 +849,7 @@ class ReliefDetailsControllerSpec
               doc.select("legend").text()                              shouldBe messageFromMessageKey(s"$key$userKey.title")
               doc.select("[data-spec='errorSummaryDisplay'] a").text() shouldBe Messages(
                 expectedErrorMessageKey,
-                args *
+                args*
               )
             },
             BAD_REQUEST
@@ -863,7 +863,7 @@ class ReliefDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data *)(scenario.expectedErrorMessageKey, Nil)(
+                  test(data*)(scenario.expectedErrorMessageKey, Nil)(
                     userType,
                     individualUserType,
                     userKey
@@ -1338,7 +1338,7 @@ class ReliefDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.otherReliefsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1396,7 +1396,7 @@ class ReliefDetailsControllerSpec
                 withClue(s"For $scenario: ") {
                   val data =
                     (key -> "0") :: (nameKey -> "ReliefsName") :: scenario.formData
-                  test(data *)(scenario.expectedErrorMessageKey)(
+                  test(data*)(scenario.expectedErrorMessageKey)(
                     userType,
                     individualUserType,
                     userKey

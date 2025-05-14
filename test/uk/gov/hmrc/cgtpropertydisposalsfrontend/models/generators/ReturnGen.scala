@@ -35,8 +35,8 @@ object ReturnGen extends GenUtils {
     )
 
   given completeReturnArb: Arbitrary[CompleteReturn] = Arbitrary(completeReturnGen)
-  
-  implicit val returnSummaryGen: Gen[ReturnSummary] = {
+
+  implicit val returnSummaryGen: Gen[ReturnSummary] =
     for {
       submissionId              <- Generators.stringGen
       submissionDate            <- Arbitrary.arbitrary[LocalDate]
@@ -62,14 +62,13 @@ object ReturnGen extends GenUtils {
       isRecentlyAmended,
       expired
     )
-  }
 
   private val furtherReturnCalculationData = for {
     address                <- AddressGen.ukAddressGen
     gainOrLossAfterReliefs <- MoneyGen.amountInPenceGen
   } yield FurtherReturnCalculationData(address, gainOrLossAfterReliefs)
 
-  implicit val previousReturnDataGen: Gen[PreviousReturnData] = {
+  implicit val previousReturnDataGen: Gen[PreviousReturnData] =
     for {
       summaries                                     <- Gen.listOf(returnSummaryGen)
       previousYearToDate                            <- Gen.option(MoneyGen.amountInPenceGen)
@@ -81,7 +80,6 @@ object ReturnGen extends GenUtils {
       previousReturnsImplyEligibilityForCalculation,
       calculationData
     )
-  }
 
   implicit val returnTypeGen: Gen[ReturnType] =
     Gen.oneOf(ReturnType.FirstReturn, ReturnType.FurtherReturn, ReturnType.AmendedReturn)
@@ -96,6 +94,6 @@ object ReturnGen extends GenUtils {
     originalReturn                      <- completeReturnWithSummaryGen
     shouldDisplayGainOrLossAfterReliefs <- Generators.booleanGen
   } yield AmendReturnData(originalReturn, shouldDisplayGainOrLossAfterReliefs)
-  
+
   given Arbitrary[AmendReturnData] = Arbitrary(amendReturnDataGen)
 }

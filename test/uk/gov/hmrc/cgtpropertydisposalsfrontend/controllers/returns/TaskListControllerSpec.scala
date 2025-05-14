@@ -182,7 +182,7 @@ class TaskListControllerSpec
                       .select(s"li#$sectionLinkId > span")
                       .text shouldBe sectionLinkText
 
-                  case _                          =>
+                  case _ =>
                     doc
                       .select(s"li#$sectionLinkId > a")
                       .text         shouldBe sectionLinkText

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json, JsValue, JsResult, JsError, JsObject, OFormat, Reads, Writes}
+import play.api.libs.json.{Format, JsError, JsObject, JsResult, JsValue, Json, OFormat, Reads, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.*
 
@@ -71,7 +71,7 @@ object RetrievedUserType {
   implicit val emailFormat: Format[Email]                                                                          = Email.format
   implicit val nonGovernmentGatewayRetrievedUserFormat: OFormat[NonGovernmentGatewayRetrievedUser]                 =
     Json.format[NonGovernmentGatewayRetrievedUser]
-  implicit val individualFormat: OFormat[Individual] = {
+  implicit val individualFormat: OFormat[Individual]                                                               = {
     implicit val _: Format[Either[SAUTR, NINO]] =
       Format(
         Reads[Either[SAUTR, NINO]] { json =>
@@ -91,26 +91,28 @@ object RetrievedUserType {
     override def reads(json: JsValue): JsResult[RetrievedUserType] = json match {
       case JsObject(fields) if fields.size == 1 =>
         fields.head match {
-          case ("Individual", value)                                 => value.validate[Individual]
-          case ("Trust", value)                                      => value.validate[Trust]
-          case ("OrganisationUnregisteredTrust", value)              => value.validate[OrganisationUnregisteredTrust]
-          case ("IndividualWithInsufficientConfidenceLevel", value) => value.validate[IndividualWithInsufficientConfidenceLevel]
-          case ("Subscribed", value)                                 => value.validate[Subscribed]
-          case ("Agent", value)                                      => value.validate[Agent]
+          case ("Individual", value)                                => value.validate[Individual]
+          case ("Trust", value)                                     => value.validate[Trust]
+          case ("OrganisationUnregisteredTrust", value)             => value.validate[OrganisationUnregisteredTrust]
+          case ("IndividualWithInsufficientConfidenceLevel", value) =>
+            value.validate[IndividualWithInsufficientConfidenceLevel]
+          case ("Subscribed", value)                                => value.validate[Subscribed]
+          case ("Agent", value)                                     => value.validate[Agent]
           case ("NonGovernmentGatewayRetrievedUser", value)         => value.validate[NonGovernmentGatewayRetrievedUser]
-          case (other, _)                                            => JsError(s"Unrecognized RetrievedUserType: $other")
+          case (other, _)                                           => JsError(s"Unrecognized RetrievedUserType: $other")
         }
-      case _ => JsError("Expected RetrievedUserType wrapper object with a single entry")
+      case _                                    => JsError("Expected RetrievedUserType wrapper object with a single entry")
     }
 
     override def writes(o: RetrievedUserType): JsObject = o match {
-      case i: Individual                                 => Json.obj("Individual" -> Json.toJson(i))
-      case t: Trust                                      => Json.obj("Trust" -> Json.toJson(t))
-      case o: OrganisationUnregisteredTrust              => Json.obj("OrganisationUnregisteredTrust" -> Json.toJson(o))
-      case i: IndividualWithInsufficientConfidenceLevel  => Json.obj("IndividualWithInsufficientConfidenceLevel" -> Json.toJson(i))
-      case s: Subscribed                                 => Json.obj("Subscribed" -> Json.toJson(s))
-      case a: Agent                                      => Json.obj("Agent" -> Json.toJson(a))
-      case n: NonGovernmentGatewayRetrievedUser          => Json.obj("NonGovernmentGatewayRetrievedUser" -> Json.toJson(n))
+      case i: Individual                                => Json.obj("Individual" -> Json.toJson(i))
+      case t: Trust                                     => Json.obj("Trust" -> Json.toJson(t))
+      case o: OrganisationUnregisteredTrust             => Json.obj("OrganisationUnregisteredTrust" -> Json.toJson(o))
+      case i: IndividualWithInsufficientConfidenceLevel =>
+        Json.obj("IndividualWithInsufficientConfidenceLevel" -> Json.toJson(i))
+      case s: Subscribed                                => Json.obj("Subscribed" -> Json.toJson(s))
+      case a: Agent                                     => Json.obj("Agent" -> Json.toJson(a))
+      case n: NonGovernmentGatewayRetrievedUser         => Json.obj("NonGovernmentGatewayRetrievedUser" -> Json.toJson(n))
     }
   }
 }

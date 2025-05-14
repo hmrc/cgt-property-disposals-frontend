@@ -100,16 +100,19 @@ object ExamplePropertyDetailsAnswers {
     override def reads(json: JsValue): JsResult[ExamplePropertyDetailsAnswers] = json match {
       case JsObject(fields) if fields.size == 1 =>
         fields.head match {
-          case ("IncompleteExamplePropertyDetailsAnswers", value) => value.validate[IncompleteExamplePropertyDetailsAnswers]
+          case ("IncompleteExamplePropertyDetailsAnswers", value) =>
+            value.validate[IncompleteExamplePropertyDetailsAnswers]
           case ("CompleteExamplePropertyDetailsAnswers", value)   => value.validate[CompleteExamplePropertyDetailsAnswers]
           case (other, _)                                         => JsError(s"Unrecognized ExamplePropertyDetailsAnswers type: $other")
         }
-      case _ => JsError("Expected ExamplePropertyDetailsAnswers wrapper object with a single entry")
+      case _                                    => JsError("Expected ExamplePropertyDetailsAnswers wrapper object with a single entry")
     }
 
     override def writes(o: ExamplePropertyDetailsAnswers): JsObject = o match {
-      case i: IncompleteExamplePropertyDetailsAnswers => Json.obj("IncompleteExamplePropertyDetailsAnswers" -> Json.toJson(i))
-      case c: CompleteExamplePropertyDetailsAnswers   => Json.obj("CompleteExamplePropertyDetailsAnswers" -> Json.toJson(c))
+      case i: IncompleteExamplePropertyDetailsAnswers =>
+        Json.obj("IncompleteExamplePropertyDetailsAnswers" -> Json.toJson(i))
+      case c: CompleteExamplePropertyDetailsAnswers   =>
+        Json.obj("CompleteExamplePropertyDetailsAnswers" -> Json.toJson(c))
     }
   }
 

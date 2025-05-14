@@ -26,7 +26,7 @@ object TriageQuestionsGen extends HigherPriorityTriageQuestionsGen with GenUtils
 
 trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen { this: GenUtils =>
 
-  implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] = {
+  implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] =
     for {
       individualUserType        <- Gen.option(individualUserTypeGen)
       disposalMethod            <- DisposalMethodGen.disposalMethodGen
@@ -44,7 +44,6 @@ trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
       alreadySentSelfAssessment,
       completionDate
     )
-  }
 
   implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] = Gen.oneOf(
     completeSingleDisposalTriageAnswersGen,
@@ -54,9 +53,9 @@ trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
   val singleDisposalTraiageAnswersGen: Gen[SingleDisposalTriageAnswers] =
     Gen.oneOf(completeSingleDisposalTriageAnswersGen, incompleteSingleDisposalTriageAnswersGen)
 
-  given taxYearExchangedGen: Gen[TaxYearExchanged]       = gen[TaxYearExchanged]
+  given taxYearExchangedGen: Gen[TaxYearExchanged] = gen[TaxYearExchanged]
 
-  implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsTriageAnswers] = {
+  implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsTriageAnswers] =
     for {
       individualUserType        <- Gen.option(individualUserTypeGen)
       numberOfProperties        <- Gen.size
@@ -76,9 +75,8 @@ trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
       alreadySentSelfAssessment,
       completionDate
     )
-  }
 
-  implicit val incompleteMultipleDisposalsTriageAnswersGen: Gen[IncompleteMultipleDisposalsTriageAnswers] = {
+  implicit val incompleteMultipleDisposalsTriageAnswersGen: Gen[IncompleteMultipleDisposalsTriageAnswers] =
     for {
       individualUserType           <- Gen.option(individualUserTypeGen)
       numberOfProperties           <- Gen.option(Gen.size)
@@ -102,7 +100,6 @@ trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
       alreadySentSelfAssessment,
       completionDate
     )
-  }
 
   val multipleDisposalsTriageAnswersGen: Gen[MultipleDisposalsTriageAnswers] =
     Gen.oneOf(completeMultipleDisposalsTriageAnswersGen, incompleteMultipleDisposalsTriageAnswersGen)

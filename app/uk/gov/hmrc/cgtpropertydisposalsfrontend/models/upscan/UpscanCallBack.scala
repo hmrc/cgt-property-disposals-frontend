@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import play.api.libs.json.{Json, OFormat, JsValue, JsResult, JsObject, JsError}
+import play.api.libs.json.{JsError, JsObject, JsResult, JsValue, Json, OFormat}
 
 sealed trait UpscanCallBack extends Product with Serializable
 
@@ -63,7 +63,7 @@ object UpscanCallBack {
           case ("UpscanFailure", value) => value.validate[UpscanFailure]
           case (other, _)               => JsError(s"Unknown UpscanCallBack type: $other")
         }
-      case _ =>
+      case _                                    =>
         JsError("Expected UpscanCallBack wrapper object with a single entry")
     }
 

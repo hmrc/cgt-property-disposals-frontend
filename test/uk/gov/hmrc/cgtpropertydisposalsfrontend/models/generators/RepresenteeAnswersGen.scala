@@ -32,7 +32,6 @@ trait HigherPriorityRepresenteeAnswersGen extends LowerPriorityRepresenteeAnswer
 
   given representeeAnswersGen: Gen[RepresenteeAnswers] = gen[RepresenteeAnswers]
 
-
   given incompleteRepresenteeAnswersGen: Gen[IncompleteRepresenteeAnswers] = gen[IncompleteRepresenteeAnswers]
 
   given representeeReferenceIdGen: Gen[RepresenteeReferenceId] = gen[RepresenteeReferenceId]

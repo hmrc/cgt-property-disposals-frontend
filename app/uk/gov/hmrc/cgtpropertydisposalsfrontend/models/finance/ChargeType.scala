@@ -62,7 +62,7 @@ object ChargeType {
           case ("PenaltyInterest", _)               => JsSuccess(PenaltyInterest)
           case (other, _)                           => JsError(s"Unrecognized ChargeType: $other")
         }
-      case _ => JsError("Expected JSON object with a single ChargeType field")
+      case _                                    => JsError("Expected JSON object with a single ChargeType field")
     }
 
     override def writes(o: ChargeType): JsValue = o match {

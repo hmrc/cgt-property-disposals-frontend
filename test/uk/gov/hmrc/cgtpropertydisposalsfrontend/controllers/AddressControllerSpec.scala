@@ -85,7 +85,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
   private val postcode = Postcode("AB1 2CD")
 
-  def ukAddress(i: Int): UkAddress                       =
+  def ukAddress(i: Int): UkAddress =
     UkAddress(s"$i the Street", Some("The Town"), None, None, postcode)
 
   private val (_, lastAddress, lastAddressIndex, addresses) = {
@@ -93,7 +93,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     val last = ukAddress(5)
     (head, last, 4, head :: ((2 to 4).map(ukAddress).toList ::: List(last)))
   }
-  protected val addressLookupResult: AddressLookupResult = AddressLookupResult(postcode, None, addresses)
+  protected val addressLookupResult: AddressLookupResult    = AddressLookupResult(postcode, None, addresses)
 
   protected lazy val sessionWithValidJourneyStatus: SessionData =
     SessionData.empty.copy(journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)))

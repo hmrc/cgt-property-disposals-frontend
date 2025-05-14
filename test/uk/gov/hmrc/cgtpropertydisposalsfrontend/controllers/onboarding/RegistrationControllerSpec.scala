@@ -171,7 +171,7 @@ class RegistrationControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.selectEntityTypeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       val sessionData =
@@ -665,7 +665,7 @@ class RegistrationControllerSpec
         SessionData.empty.copy(journeyStatus = Some(registrationReady))
       val subscriptionSuccessfulResponse = sample[SubscriptionSuccessful]
       val sapNumber                      = sample[SapNumber]
-      val subscriptionDetails = {
+      val subscriptionDetails            = {
         val details = registrationReady.registrationDetails
         SubscriptionDetails(
           Right(details.name),

@@ -93,15 +93,17 @@ object ExampleCompanyDetailsAnswers {
     override def reads(json: JsValue): JsResult[ExampleCompanyDetailsAnswers] = json match {
       case JsObject(fields) if fields.size == 1 =>
         fields.head match {
-          case ("IncompleteExampleCompanyDetailsAnswers", value) => value.validate[IncompleteExampleCompanyDetailsAnswers]
+          case ("IncompleteExampleCompanyDetailsAnswers", value) =>
+            value.validate[IncompleteExampleCompanyDetailsAnswers]
           case ("CompleteExampleCompanyDetailsAnswers", value)   => value.validate[CompleteExampleCompanyDetailsAnswers]
-          case (other, _) => JsError(s"Unrecognized ExampleCompanyDetailsAnswers type: $other")
+          case (other, _)                                        => JsError(s"Unrecognized ExampleCompanyDetailsAnswers type: $other")
         }
-      case _ => JsError("Expected ExampleCompanyDetailsAnswers wrapper object with a single entry")
+      case _                                    => JsError("Expected ExampleCompanyDetailsAnswers wrapper object with a single entry")
     }
 
     override def writes(o: ExampleCompanyDetailsAnswers): JsObject = o match {
-      case i: IncompleteExampleCompanyDetailsAnswers => Json.obj("IncompleteExampleCompanyDetailsAnswers" -> Json.toJson(i))
+      case i: IncompleteExampleCompanyDetailsAnswers =>
+        Json.obj("IncompleteExampleCompanyDetailsAnswers" -> Json.toJson(i))
       case c: CompleteExampleCompanyDetailsAnswers   => Json.obj("CompleteExampleCompanyDetailsAnswers" -> Json.toJson(c))
     }
   }

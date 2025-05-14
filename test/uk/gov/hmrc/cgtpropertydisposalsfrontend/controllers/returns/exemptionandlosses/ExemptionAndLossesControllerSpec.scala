@@ -641,7 +641,7 @@ class ExemptionAndLossesControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.inYearLossesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -693,7 +693,7 @@ class ExemptionAndLossesControllerSpec
             Some(individualUserType)
           )._1
 
-          testFormError(data *)(key, expectedErrorKey)(
+          testFormError(data*)(key, expectedErrorKey)(
             s"$key$userKey.title",
             disposalDate.taxYear.startDateInclusive.getYear.toString,
             disposalDate.taxYear.endDateExclusive.getYear.toString
@@ -731,7 +731,7 @@ class ExemptionAndLossesControllerSpec
                 withClue(s"For $scenario: ") {
                   val data    = (key -> "0") :: scenario.formData
                   val userKey = userMessageKey(individualUserType, userType)
-                  test(data *)(scenario.expectedErrorMessageKey)(
+                  test(data*)(scenario.expectedErrorMessageKey)(
                     userType,
                     individualUserType,
                     userKey
@@ -1218,7 +1218,7 @@ class ExemptionAndLossesControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.previousYearsLossesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1268,7 +1268,7 @@ class ExemptionAndLossesControllerSpec
             Some(individualUserType)
           )._1
 
-          testFormError(data *)(key, expectedErrorKey)(s"$key$userKey.title")(
+          testFormError(data*)(key, expectedErrorKey)(s"$key$userKey.title")(
             performAction,
             session
           )
@@ -1305,7 +1305,7 @@ class ExemptionAndLossesControllerSpec
                 withClue(s"For $scenario: ") {
                   val data    = (key -> "0") :: scenario.formData
                   val userKey = userMessageKey(individualUserType, userType)
-                  test(data *)(scenario.expectedErrorMessageKey)(
+                  test(data*)(scenario.expectedErrorMessageKey)(
                     userType,
                     individualUserType,
                     userKey
@@ -1911,7 +1911,7 @@ class ExemptionAndLossesControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.annualExemptAmountSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val maximumAnnualExemptAmount = AmountInPence(10000L)
@@ -1997,7 +1997,7 @@ class ExemptionAndLossesControllerSpec
             Some(individualUserType)
           )._1
 
-          testFormError(data *)(
+          testFormError(data*)(
             key,
             expectedErrorKey,
             MoneyUtils.formatAmountOfMoneyWithoutPoundSign(
@@ -2015,7 +2015,7 @@ class ExemptionAndLossesControllerSpec
                 errorContext = Some(s"$key$userKey")
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData *)(scenario.expectedErrorMessageKey)(
+                  test(scenario.formData*)(scenario.expectedErrorMessageKey)(
                     userType,
                     individualUserType,
                     userKey
@@ -2562,13 +2562,13 @@ class ExemptionAndLossesControllerSpec
 
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs *),
+      messageFromMessageKey(pageTitleKey, titleArgs*),
       { doc =>
         doc
           .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
-          errorArgs *
+          errorArgs*
         )
 
         doc.title() should startWith("Error:")

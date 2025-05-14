@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
 import org.scalacheck.Arbitrary
-import io.github.martinhh.derived.scalacheck.given 
+import io.github.martinhh.derived.scalacheck.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.B64Html
@@ -28,13 +28,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxD
 object ReturnAPIGen extends Common {
 
   given submitReturnRequestGen: Gen[SubmitReturnRequest] = for {
-    completeReturn <- ReturnGen.completeReturnGen
-    id <- Gen.uuid
-    subscribedDetails <- SubscribedDetailsGen.subscribedDetailsGen
-    agentReferenceNumber <- Gen.option(IdGen.arnGen)
-    isFurtherReturn <- Generators.booleanGen
+    completeReturn          <- ReturnGen.completeReturnGen
+    id                      <- Gen.uuid
+    subscribedDetails       <- SubscribedDetailsGen.subscribedDetailsGen
+    agentReferenceNumber    <- Gen.option(IdGen.arnGen)
+    isFurtherReturn         <- Generators.booleanGen
     checkYourAnswerPageHtml <- Generators.stringGen.map(B64Html(_))
-    amendReturnData <- Gen.option(ReturnGen.amendReturnDataGen)
+    amendReturnData         <- Gen.option(ReturnGen.amendReturnDataGen)
   } yield SubmitReturnRequest(
     completeReturn,
     id,

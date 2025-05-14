@@ -775,7 +775,7 @@ class YearToDateLiabilityController @Inject() (
                         if (existingPersonalAllowance.contains(personalAllowance)) {
                           draftReturn
                         } else {
-                          val newAnswers = {
+                          val newAnswers =
                             answers match {
                               case calculatedAnswers: CalculatedYTDAnswers =>
                                 calculatedAnswers
@@ -802,7 +802,6 @@ class YearToDateLiabilityController @Inject() (
                                     n.fold(_.taxableGainOrLossCalculation, _.taxableGainOrLossCalculation)
                                 )
                             }
-                          }
 
                           draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
 
@@ -1475,7 +1474,7 @@ class YearToDateLiabilityController @Inject() (
   )(implicit
     hc: HeaderCarrier,
     request: RequestWithSessionData[?]
-  ): EitherT[Future, Error, Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]]               =
+  ): EitherT[Future, Error, Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]] =
     for {
       requiredAnswers <-
         EitherT.fromEither[Future](
@@ -1662,7 +1661,7 @@ class YearToDateLiabilityController @Inject() (
                   logger.warn("Could not determine page to be used", e)
                   errorHandler.errorResult()
                 }
-                .semiflatMap((submitBehaviour).tupled)
+                .semiflatMap(submitBehaviour.tupled)
                 .merge
             }
         }
@@ -1890,7 +1889,7 @@ class YearToDateLiabilityController @Inject() (
       if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue)) {
         Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
       } else {
-        val newAnswers = {
+        val newAnswers =
           if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
             nonCalculatedAnswers
               .unset(_.checkForRepayment)
@@ -1905,7 +1904,6 @@ class YearToDateLiabilityController @Inject() (
               .unset(_.pendingUpscanUpload)
               .copy(taxDue = Some(taxDue))
           }
-        }
 
         val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
         val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)

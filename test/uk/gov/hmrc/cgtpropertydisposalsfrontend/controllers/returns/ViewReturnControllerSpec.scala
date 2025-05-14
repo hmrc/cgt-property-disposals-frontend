@@ -248,8 +248,8 @@ class ViewReturnControllerSpec
         paymentDetails(4)                                     shouldBe messageFromMessageKey("viewReturn.charge.status.paid")
 
         paymentDetails(5) shouldBe s"${formatAmountOfMoneyWithPoundSign(
-          fullPaymentForUkResidentReturnCharge.amount.inPounds()
-        )} direct debit payment received on ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
+            fullPaymentForUkResidentReturnCharge.amount.inPounds()
+          )} direct debit payment received on ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
 
         paymentDetails(6)    should startWith(messageFromMessageKey("viewReturn.chargeType.PenaltyInterest"))
         paymentDetails(7)  shouldBe govShortDisplayFormat(
@@ -291,8 +291,8 @@ class ViewReturnControllerSpec
         paymentDetails(4)                                     shouldBe messageFromMessageKey("viewReturn.charge.status.paid")
 
         paymentDetails(5) shouldBe s"${formatAmountOfMoneyWithPoundSign(
-          fullPaymentForUkResidentReturnCharge.amount.inPounds()
-        )} ${messageFromMessageKey("viewReturn.charge.paymentMethod.DirectDebit")} ${messageFromMessageKey("generic.on")} ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
+            fullPaymentForUkResidentReturnCharge.amount.inPounds()
+          )} ${messageFromMessageKey("viewReturn.charge.paymentMethod.DirectDebit")} ${messageFromMessageKey("generic.on")} ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
 
         paymentDetails(6)    should startWith(messageFromMessageKey("viewReturn.chargeType.DeltaCharge"))
         paymentDetails(7)  shouldBe govShortDisplayFormat(

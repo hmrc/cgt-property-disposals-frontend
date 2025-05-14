@@ -49,7 +49,7 @@ object IndividualUserType {
           case "PersonalRepresentativeInPeriodOfAdmin" => JsSuccess(PersonalRepresentativeInPeriodOfAdmin)
           case other                                   => JsError(s"Invalid representative type: $other")
         }
-      case _ => JsError("Expected JSON object with one RepresentativeType key")
+      case _                                    => JsError("Expected JSON object with one RepresentativeType key")
     }
 
     override def writes(r: RepresentativeType): JsValue = r match {
@@ -69,7 +69,7 @@ object IndividualUserType {
           case "PersonalRepresentativeInPeriodOfAdmin" => JsSuccess(PersonalRepresentativeInPeriodOfAdmin)
           case other                                   => JsError(s"Invalid individual user type: $other")
         }
-      case _ => JsError("Expected JSON object with one IndividualUserType key")
+      case _                                    => JsError("Expected JSON object with one IndividualUserType key")
     }
 
     override def writes(o: IndividualUserType): JsValue = o match {

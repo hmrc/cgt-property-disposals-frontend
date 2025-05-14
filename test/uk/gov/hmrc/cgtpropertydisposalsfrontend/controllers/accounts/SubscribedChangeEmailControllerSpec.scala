@@ -92,7 +92,7 @@ class SubscribedChangeEmailControllerSpec
   }
 
   override val mockUpdateEmail: Option[(ChangingAccountEmail, ChangingAccountEmail, Either[Error, Unit]) => Unit] =
-    Some({
+    Some {
       case (
             oldDetails: ChangingAccountEmail,
             newDetails: ChangingAccountEmail,
@@ -104,7 +104,7 @@ class SubscribedChangeEmailControllerSpec
             oldDetails.journey.subscribedDetails
           )
         )(r)
-    })
+    }
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -133,7 +133,7 @@ class SubscribedChangeEmailControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.enterEmailSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())

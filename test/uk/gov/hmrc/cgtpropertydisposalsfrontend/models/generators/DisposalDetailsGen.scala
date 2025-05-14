@@ -33,6 +33,6 @@ object DisposalDetailsGen extends GenUtils {
   given shareOfPropertyGen: Gen[ShareOfProperty] = gen[ShareOfProperty].map {
     case a: ShareOfProperty.Other if a.percentageValue > 100 =>
       ShareOfProperty.Full
-    case other: ShareOfProperty => other
+    case other: ShareOfProperty                              => other
   }
 }

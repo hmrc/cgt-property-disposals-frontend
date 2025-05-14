@@ -33,7 +33,7 @@ trait BusinessPartnerRecordServiceSupport {
     businessPartnerRecordRequest: BusinessPartnerRecordRequest,
     expectedBusinessPartnerRecordResponse: Either[Error, BusinessPartnerRecordResponse],
     lang: Lang
-  ): Unit                                      =
+  ): Unit =
     (mockBusinessPartnerRecordService
       .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
         _: HeaderCarrier

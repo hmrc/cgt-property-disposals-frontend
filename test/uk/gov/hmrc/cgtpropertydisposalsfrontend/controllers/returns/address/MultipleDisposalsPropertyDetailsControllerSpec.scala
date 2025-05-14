@@ -605,7 +605,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submits on the has a uk postcode page" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleDisposalsHasUkPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -705,7 +705,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.checkUPRNSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -826,7 +826,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submits on the enter UPRN page" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleDisposalsEnterLandUprnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(ukAddress: UkAddress): List[(String, String)] =
@@ -874,7 +874,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey("enterUPRN.title"),
             { doc =>
               val errors = doc.select("[data-spec='errorSummaryDisplay'] ul").first()
@@ -965,7 +965,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(newAddress) *),
+            performAction(formData(newAddress)*),
             routes.PropertyDetailsController.checkYourAnswers()
           )
         }
@@ -1006,7 +1006,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockStoreDraftReturn(newJourney)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(newAddress) *))
+          checkIsTechnicalErrorPage(performAction(formData(newAddress)*))
         }
 
         "there is an error updating the session" in {
@@ -1023,7 +1023,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(newAddress) *))
+          checkIsTechnicalErrorPage(performAction(formData(newAddress)*))
         }
       }
     }
@@ -1045,7 +1045,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submitted addresses from enter UK address page" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1079,7 +1079,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submitted postcodes and filters" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1133,7 +1133,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submitted selected addresses" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.selectAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1479,7 +1479,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       def formData(d: LocalDate): List[(String, String)] =
@@ -1582,7 +1582,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(disposalDate.value) *),
+            performAction(formData(disposalDate.value)*),
             routes.PropertyDetailsController.checkYourAnswers()
           )
         }
@@ -1632,14 +1632,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
                 .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
-                args *
+                args*
               ),
             BAD_REQUEST,
             messageRegexPrefix
@@ -1781,7 +1781,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             test(
-              performAction(formData(updatedDisposalDate.value) *),
+              performAction(formData(updatedDisposalDate.value)*),
               oldDraftReturn,
               updatedDraftReturn,
               isAmend = false
@@ -1816,7 +1816,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             test(
-              performAction(formData(updatedDisposalDate.value) *),
+              performAction(formData(updatedDisposalDate.value)*),
               oldDraftReturn,
               updatedDraftReturn,
               isAmend = false
@@ -1857,7 +1857,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               )
 
               test(
-                performAction(formData(disposalDate.value) *),
+                performAction(formData(disposalDate.value)*),
                 oldDraftReturn,
                 updatedDraftReturn,
                 isAmend = true
@@ -2131,7 +2131,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2200,7 +2200,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(data *),
+            performAction(data*),
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
@@ -2216,7 +2216,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           amountOfMoneyErrorScenarios(key).foreach { scenario =>
             withClue(s"For $scenario: ") {
               val data = scenario.formData
-              test(data *)(scenario.expectedErrorMessageKey)
+              test(data*)(scenario.expectedErrorMessageKey)
             }
           }
         }
@@ -2731,7 +2731,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.acquisitionPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2796,7 +2796,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(data *),
+            performAction(data*),
             expectedTitle,
             doc =>
               doc
@@ -2811,7 +2811,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             whenever(!individualUserType.contains(PersonalRepresentativeInPeriodOfAdmin)) {
               amountOfMoneyErrorScenarios(key).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData *)(
+                  test(scenario.formData*)(
                     sample[DraftMultipleDisposalsReturn].copy(
                       triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
                       examplePropertyDetailsAnswers = Some(
@@ -2834,7 +2834,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             scenario =>
               withClue(s"For $scenario: ") {
                 val data = scenario.formData
-                test(data *)(
+                test(data*)(
                   sample[DraftMultipleDisposalsReturn].copy(
                     triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                       .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),

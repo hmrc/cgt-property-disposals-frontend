@@ -3346,7 +3346,7 @@ class StartControllerSpec
 
       def performAction(sessionData: Seq[(String, String)]): Future[Result] =
         controller.signOutAndRegisterForGG()(
-          FakeRequest().withSession(sessionData *).withMethod("GET")
+          FakeRequest().withSession(sessionData*).withMethod("GET")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -3380,7 +3380,7 @@ class StartControllerSpec
 
       def performAction(sessionData: Seq[(String, String)]): Future[Result] =
         controller.signOutAndSignIn()(
-          FakeRequest().withSession(sessionData *).withMethod("GET")
+          FakeRequest().withSession(sessionData*).withMethod("GET")
         )
 
       behave like redirectToStartWhenInvalidJourney(

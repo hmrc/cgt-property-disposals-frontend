@@ -52,7 +52,7 @@ object ReturnType {
           case "AmendedReturn" => JsSuccess(AmendedReturn)
           case other           => JsError(s"Invalid return type: $other")
         }
-      case _ => JsError("Expected JSON object with one ReturnType key")
+      case _                                    => JsError("Expected JSON object with one ReturnType key")
     }
 
     override def writes(o: ReturnType): JsValue = o match {

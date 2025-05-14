@@ -160,19 +160,19 @@ object SingleDisposalTriageAnswers {
         fields.head match {
           case ("IncompleteSingleDisposalTriageAnswers", value) =>
             value.validate[IncompleteSingleDisposalTriageAnswers]
-          case ("CompleteSingleDisposalTriageAnswers", value) =>
+          case ("CompleteSingleDisposalTriageAnswers", value)   =>
             value.validate[CompleteSingleDisposalTriageAnswers]
-          case (other, _) =>
+          case (other, _)                                       =>
             JsError(s"Unrecognized SingleDisposalTriageAnswers type: $other")
         }
-      case _ =>
+      case _                                    =>
         JsError("Expected SingleDisposalTriageAnswers wrapper object with a single entry")
     }
 
     override def writes(o: SingleDisposalTriageAnswers): JsObject = o match {
       case i: IncompleteSingleDisposalTriageAnswers =>
         Json.obj("IncompleteSingleDisposalTriageAnswers" -> Json.toJson(i))
-      case c: CompleteSingleDisposalTriageAnswers =>
+      case c: CompleteSingleDisposalTriageAnswers   =>
         Json.obj("CompleteSingleDisposalTriageAnswers" -> Json.toJson(c))
     }
   }

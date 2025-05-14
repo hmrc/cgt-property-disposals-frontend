@@ -46,14 +46,14 @@ object BusinessPartnerRecordRequest {
     override def reads(json: JsValue): JsResult[BusinessPartnerRecordRequest] =
       (json \ "IndividualBusinessPartnerRecordRequest", json \ "TrustBusinessPartnerRecordRequest") match {
         case (JsDefined(individualJson), _) => individualJson.validate[IndividualBusinessPartnerRecordRequest]
-        case (_, JsDefined(trustJson)) => trustJson.validate[TrustBusinessPartnerRecordRequest]
-        case _ => JsError("Could not determine BusinessPartnerRecordRequest subtype from JSON")
+        case (_, JsDefined(trustJson))      => trustJson.validate[TrustBusinessPartnerRecordRequest]
+        case _                              => JsError("Could not determine BusinessPartnerRecordRequest subtype from JSON")
       }
 
     override def writes(bpr: BusinessPartnerRecordRequest): JsObject = bpr match {
       case i: IndividualBusinessPartnerRecordRequest =>
         Json.obj("IndividualBusinessPartnerRecordRequest" -> Json.toJson(i)(individualFormat))
-      case t: TrustBusinessPartnerRecordRequest =>
+      case t: TrustBusinessPartnerRecordRequest      =>
         Json.obj("TrustBusinessPartnerRecordRequest" -> Json.toJson(t)(trustFormat))
     }
   }

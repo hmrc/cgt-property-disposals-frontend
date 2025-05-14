@@ -40,7 +40,7 @@ object AcquisitionMethod {
           case ("Other", value) => (value \ "value").validate[String].map(Other(_))
           case (other, _)       => JsError(s"Unrecognized acquisition method: $other")
         }
-      case _ => JsError("Expected JSON object with one AcquisitionMethod key")
+      case _                                    => JsError("Expected JSON object with one AcquisitionMethod key")
     }
 
     override def writes(o: AcquisitionMethod): JsValue = o match {

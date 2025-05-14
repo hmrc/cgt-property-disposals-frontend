@@ -232,7 +232,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
 
           result shouldBe
             Left(Error(s"GET to http://localhost:$wireMockPort/returns/CGT12345678/${date.format(dateFormatter)}/${date
-              .format(dateFormatter)} came back with with status $status"))
+                .format(dateFormatter)} came back with with status $status"))
         }
       }
     }

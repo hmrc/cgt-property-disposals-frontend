@@ -25,6 +25,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessP
 
 object BusinessPartnerRecordGen extends GenUtils:
 
-  given Gen[BusinessPartnerRecord]       = gen[BusinessPartnerRecord]
+  given Gen[BusinessPartnerRecord] = gen[BusinessPartnerRecord]
 
-  given Gen[BusinessPartnerRecordRequest]       = gen[BusinessPartnerRecordRequest]
+  given Gen[BusinessPartnerRecordRequest] = gen[BusinessPartnerRecordRequest]

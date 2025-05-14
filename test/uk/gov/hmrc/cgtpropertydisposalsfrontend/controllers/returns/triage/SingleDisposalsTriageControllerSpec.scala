@@ -360,7 +360,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howDidYouDisposeOfPropertySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -797,7 +797,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1298,7 +1298,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.didYouDisposeOfAResidentialPropertySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       val requiredPreviousAnswers =
@@ -1956,7 +1956,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasDisposalDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(date: LocalDate): Seq[(String, String)] =
@@ -2039,7 +2039,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetTaxYear(today)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(today) *))
+          checkIsTechnicalErrorPage(performAction(formData(today)*))
         }
 
       }
@@ -2436,7 +2436,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(today) *),
+            performAction(formData(today)*),
             routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
           )
         }
@@ -2639,7 +2639,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasCompletionDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(date: LocalDate) =
@@ -3041,7 +3041,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(disposalDate.value) *),
+            performAction(formData(disposalDate.value)*),
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -3222,7 +3222,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.countryOfResidenceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -3694,7 +3694,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.assetTypeForNonUkResidentsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -4341,7 +4341,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateOfSharesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(date: LocalDate): Seq[(String, String)] =
@@ -4424,7 +4424,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetTaxYear(today)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(today) *))
+          checkIsTechnicalErrorPage(performAction(formData(today)*))
         }
 
       }
@@ -4856,7 +4856,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(today) *),
+            performAction(formData(today)*),
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
         }

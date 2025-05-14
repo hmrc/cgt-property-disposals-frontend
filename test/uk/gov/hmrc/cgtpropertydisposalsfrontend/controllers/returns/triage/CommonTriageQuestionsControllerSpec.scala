@@ -525,7 +525,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whoIsIndividualRepresentingSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -579,7 +579,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey("who-are-you-reporting-for.title"),
             { doc =>
               doc
@@ -1183,7 +1183,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howManyPropertiesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -1256,7 +1256,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey("numberOfProperties.title"),
             { doc =>
               doc
@@ -1592,7 +1592,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howManyPropertiesFurtherReturnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -1657,7 +1657,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey("numberOfProperties.title"),
             { doc =>
               doc
@@ -2258,8 +2258,8 @@ class CommonTriageQuestionsControllerSpec
               { doc =>
                 doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
                 doc.select(".govuk-warning-text__text").text()     shouldBe s"""${messageFromMessageKey(
-                  "generic.warning"
-                )} ${messageFromMessageKey(expectedWarningKey)}"""
+                    "generic.warning"
+                  )} ${messageFromMessageKey(expectedWarningKey)}"""
               }
             )
 
@@ -2988,7 +2988,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.amendsHaveYouAlreadySentSelfAssessmentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -3040,7 +3040,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey(
               s"$key.title",
               startDateInclusive.getYear.toString,
@@ -3260,7 +3260,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.haveYouAlreadySentSelfAssessmentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -3302,7 +3302,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData *),
+            performAction(formData*),
             messageFromMessageKey(
               s"$key.title",
               startDateInclusive.getYear.toString,

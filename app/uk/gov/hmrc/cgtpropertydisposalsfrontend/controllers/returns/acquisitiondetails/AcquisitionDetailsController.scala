@@ -757,7 +757,7 @@ class AcquisitionDetailsController @Inject() (
                     )
                   }
                 )(
-                  requiredPreviousAnswer = answers => {
+                  requiredPreviousAnswer = answers =>
                     if (wasUkResident) {
                       noAnswersRequired
                     } else {
@@ -767,8 +767,7 @@ class AcquisitionDetailsController @Inject() (
                           c => Some(c.acquisitionPrice)
                         )
                         .isDefined
-                    }
-                  },
+                    },
                   redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionPrice()
                 )(
                   updateState = { (p, answers, draftReturn) =>

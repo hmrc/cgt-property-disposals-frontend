@@ -82,7 +82,7 @@ object RepresenteeAnswers {
           case ("CompleteRepresenteeAnswers", value)   => value.validate[CompleteRepresenteeAnswers]
           case (other, _)                              => JsError(s"Unrecognized RepresenteeAnswers type: $other")
         }
-      case _ => JsError("Expected RepresenteeAnswers wrapper object with a single entry")
+      case _                                    => JsError("Expected RepresenteeAnswers wrapper object with a single entry")
     }
 
     override def writes(r: RepresenteeAnswers): JsObject = r match {

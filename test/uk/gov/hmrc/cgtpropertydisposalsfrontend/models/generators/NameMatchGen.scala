@@ -30,7 +30,7 @@ object NameMatchGen extends GenUtils:
     gen[IndividualSautrNameMatchDetails]
 
   given individualUnsuccessfulNameMatchAttemptsGen
-  : Gen[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]] =
+    : Gen[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]] =
     gen[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]]
 
   given individualRepresenteeNameMatchDetailsGen: Gen[IndividualRepresenteeNameMatchDetails] =

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import cats.Eq
-import play.api.data.Forms.{nonEmptyText, number, of, optional, text, mapping => formMapping}
+import play.api.data.Forms.{mapping => formMapping, nonEmptyText, number, of, optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.data.{Form, Mapping}
 import play.api.i18n.Messages
@@ -59,22 +59,22 @@ object Address {
   implicit val format: OFormat[Address] = new OFormat[Address] {
     override def reads(json: JsValue): JsResult[Address] =
       (json \ "UkAddress", json \ "NonUkAddress") match {
-        case (JsDefined(ukJson), _) => ukJson.validate[UkAddress]
+        case (JsDefined(ukJson), _)    => ukJson.validate[UkAddress]
         case (_, JsDefined(nonUkJson)) => nonUkJson.validate[NonUkAddress]
-        case _ =>
+        case _                         =>
           (json \ "_type").validate[String] match {
-            case JsSuccess("uk", _) => json.validate[UkAddress]
+            case JsSuccess("uk", _)    => json.validate[UkAddress]
             case JsSuccess("nonUk", _) => json.validate[NonUkAddress]
-            case JsSuccess(other, _) => JsError(s"Unknown _type: $other")
-            case JsError(_) =>
+            case JsSuccess(other, _)   => JsError(s"Unknown _type: $other")
+            case JsError(_)            =>
               if ((json \ "countryCode").isDefined) json.validate[NonUkAddress]
               else json.validate[UkAddress]
           }
       }
 
     override def writes(address: Address): JsObject = address match {
-      case uk: UkAddress        => Json.obj("UkAddress" -> Json.toJson(uk)(ukAddressFormat))
-      case nonUk: NonUkAddress  => Json.obj("NonUkAddress" -> Json.toJson(nonUk)(nonUkAddressFormat))
+      case uk: UkAddress       => Json.obj("UkAddress" -> Json.toJson(uk)(ukAddressFormat))
+      case nonUk: NonUkAddress => Json.obj("NonUkAddress" -> Json.toJson(nonUk)(nonUkAddressFormat))
     }
   }
 

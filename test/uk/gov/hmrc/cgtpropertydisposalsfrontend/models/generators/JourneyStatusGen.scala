@@ -26,7 +26,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.EmailGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
 
-
 object JourneyStatusGen extends JourneyStatusLowerPriorityGen with GenUtils {
 
   given subscriptionReadyGen: Gen[SubscriptionReady] = for {
@@ -179,7 +178,7 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
     agentReferenceNumber <- Gen.option(IdGen.arnGen)
   } yield SubmittingReturn(subscribedDetails, ggCredId, agentReferenceNumber)
 
-  implicit val startingToAmendReturnGen: Gen[StartingToAmendReturn] = {
+  implicit val startingToAmendReturnGen: Gen[StartingToAmendReturn] =
     for {
       subscribedDetails       <- SubscribedDetailsGen.subscribedDetailsGen
       ggCredId                <- IdGen.ggCredIdGen
@@ -197,6 +196,5 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
       previousSentReturns,
       unmetDependencyFieldUrl
     )
-  }
 
 }

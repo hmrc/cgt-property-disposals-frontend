@@ -22,15 +22,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, Indivi
 object NameGen extends GenUtils {
 
   implicit val contactNameGen: Gen[ContactName] = Generators.stringGen.map(ContactName(_))
-  given contactNameArb: Arbitrary[ContactName] = Arbitrary(contactNameGen)
+  given contactNameArb: Arbitrary[ContactName]  = Arbitrary(contactNameGen)
 
   implicit val individualNameGen: Gen[IndividualName] =
     for {
       firstName <- Generators.stringGen
       lastName  <- Generators.stringGen
     } yield IndividualName(firstName, lastName)
-  given individualNameArb: Arbitrary[IndividualName] = Arbitrary(individualNameGen)
+  given individualNameArb: Arbitrary[IndividualName]  = Arbitrary(individualNameGen)
 
   implicit val trustNameGen: Gen[TrustName] = Generators.stringGen.map(TrustName(_))
-  given trustNameArb: Arbitrary[TrustName] = Arbitrary(trustNameGen)
+  given trustNameArb: Arbitrary[TrustName]  = Arbitrary(trustNameGen)
 }

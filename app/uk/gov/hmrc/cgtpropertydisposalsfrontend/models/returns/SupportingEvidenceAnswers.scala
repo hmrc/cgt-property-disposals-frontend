@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import play.api.libs.json.{Json, OFormat, JsValue, JsResult, JsObject, JsError}
+import play.api.libs.json.{JsError, JsObject, JsResult, JsValue, Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.UpscanSuccess
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUploadMeta}
 
@@ -80,19 +80,19 @@ object SupportingEvidenceAnswers {
         fields.head match {
           case ("IncompleteSupportingEvidenceAnswers", value) =>
             value.validate[IncompleteSupportingEvidenceAnswers]
-          case ("CompleteSupportingEvidenceAnswers", value) =>
+          case ("CompleteSupportingEvidenceAnswers", value)   =>
             value.validate[CompleteSupportingEvidenceAnswers]
-          case (other, _) =>
+          case (other, _)                                     =>
             JsError(s"Unrecognized SupportingEvidenceAnswers type: $other")
         }
-      case _ =>
+      case _                                    =>
         JsError("Expected SupportingEvidenceAnswers wrapper object with a single entry")
     }
 
     override def writes(a: SupportingEvidenceAnswers): JsObject = a match {
       case i: IncompleteSupportingEvidenceAnswers =>
         Json.obj("IncompleteSupportingEvidenceAnswers" -> Json.toJson(i))
-      case c: CompleteSupportingEvidenceAnswers =>
+      case c: CompleteSupportingEvidenceAnswers   =>
         Json.obj("CompleteSupportingEvidenceAnswers" -> Json.toJson(c))
     }
   }

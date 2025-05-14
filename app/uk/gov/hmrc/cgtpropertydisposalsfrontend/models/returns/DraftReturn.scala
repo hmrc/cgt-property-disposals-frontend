@@ -267,33 +267,33 @@ object DraftReturn {
     override def reads(json: JsValue): JsResult[DraftReturn] = json match {
       case JsObject(fields) if fields.size == 1 =>
         fields.head match {
-          case ("DraftSingleDisposalReturn", value) =>
+          case ("DraftSingleDisposalReturn", value)            =>
             value.validate[DraftSingleDisposalReturn]
-          case ("DraftMultipleDisposalsReturn", value) =>
+          case ("DraftMultipleDisposalsReturn", value)         =>
             value.validate[DraftMultipleDisposalsReturn]
-          case ("DraftSingleIndirectDisposalReturn", value) =>
+          case ("DraftSingleIndirectDisposalReturn", value)    =>
             value.validate[DraftSingleIndirectDisposalReturn]
           case ("DraftMultipleIndirectDisposalsReturn", value) =>
             value.validate[DraftMultipleIndirectDisposalsReturn]
-          case ("DraftSingleMixedUseDisposalReturn", value) =>
+          case ("DraftSingleMixedUseDisposalReturn", value)    =>
             value.validate[DraftSingleMixedUseDisposalReturn]
-          case (other, _) =>
+          case (other, _)                                      =>
             JsError(s"Unrecognized DraftReturn type: $other")
         }
-      case _ =>
+      case _                                    =>
         JsError("Expected a DraftReturn wrapper object with a single entry")
     }
 
     override def writes(d: DraftReturn): JsObject = d match {
-      case s: DraftSingleDisposalReturn =>
+      case s: DraftSingleDisposalReturn            =>
         Json.obj("DraftSingleDisposalReturn" -> Json.toJson(s))
-      case m: DraftMultipleDisposalsReturn =>
+      case m: DraftMultipleDisposalsReturn         =>
         Json.obj("DraftMultipleDisposalsReturn" -> Json.toJson(m))
-      case s: DraftSingleIndirectDisposalReturn =>
+      case s: DraftSingleIndirectDisposalReturn    =>
         Json.obj("DraftSingleIndirectDisposalReturn" -> Json.toJson(s))
       case m: DraftMultipleIndirectDisposalsReturn =>
         Json.obj("DraftMultipleIndirectDisposalsReturn" -> Json.toJson(m))
-      case s: DraftSingleMixedUseDisposalReturn =>
+      case s: DraftSingleMixedUseDisposalReturn    =>
         Json.obj("DraftSingleMixedUseDisposalReturn" -> Json.toJson(s))
     }
   }

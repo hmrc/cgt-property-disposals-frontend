@@ -267,7 +267,7 @@ class InitialGainOrLossControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.submitInitialGainOrLoss()(
-          FakeRequest().withFormUrlEncodedBody(data *).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -402,7 +402,7 @@ class InitialGainOrLossControllerSpec
                 .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
-                errorArgs *
+                errorArgs*
               ),
             BAD_REQUEST
           )
@@ -416,7 +416,7 @@ class InitialGainOrLossControllerSpec
         )(
           expectedErrorKey: String
         ): Unit =
-          testFormError(fillingOutReturn, isAgent, data *)(
+          testFormError(fillingOutReturn, isAgent, data*)(
             expectedErrorKey
           )(s"initialGainOrLoss$userKey.title")(performAction)
 
@@ -442,7 +442,7 @@ class InitialGainOrLossControllerSpec
                   keyWithReturn._1,
                   keyWithReturn._2,
                   keyWithReturn._3,
-                  data *
+                  data*
                 )(scenario.expectedErrorMessageKey)
               }
             }
@@ -458,7 +458,7 @@ class InitialGainOrLossControllerSpec
                   keyWithReturn._1,
                   keyWithReturn._2,
                   keyWithReturn._3,
-                  data *
+                  data*
                 )(scenario.expectedErrorMessageKey)
               }
             }
