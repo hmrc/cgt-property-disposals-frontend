@@ -1014,14 +1014,14 @@ didYouDisposeOfResidentialProperty.personalRepInPeriodOfAdmin.error.boolean=Sele
 didYouDisposeOfResidentialProperty.cyaChange=whether UK residential property was disposed of
 
 ukResidentCanOnlyReportResidential.title=You cannot use this service
-ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property sales or disposals.
+ukResidentCanOnlyReportResidential.p1=You can only use this service for residential properties. This is because you were a UK resident when you sold or gave away the property.
 ukResidentCanOnlyReportResidential.agent.p1=You told us your client was a UK resident on the day they sold or disposed of the UK property. You can only use this service to report UK residential property sales or disposals.
 ukResidentCanOnlyReportResidential.trust.p1=You told us the trust was a UK resident on the day it sold or disposed of the UK property. You can only use this service to report UK residential property sales or disposals.
 ukResidentCanOnlyReportResidential.capacitor.p1=You told us the person was a UK resident on the day they sold or disposed of the UK property. You can only use this service to report UK residential property sales or disposals.
 ukResidentCanOnlyReportResidential.personalRep.p1=You told us the person was a UK resident on the day they sold or disposed of the UK property. You can only use this service to report UK residential property sales or disposals.
 ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.p1=You told us the person was a UK resident for the tax year in which they died. You can only use this service to report UK residential property sales or disposals.
 ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.agent.p1=You told us your client was a UK resident for the tax year in which they died. You can only use this service to report UK residential property sales or disposals.
-ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a class="govuk-link" href="{0}">non-residential UK property sales or disposals</a>.
+ukResidentCanOnlyReportResidential.p2=Find out how to <a class="govuk-link" href="{0}">report and pay Capital Gains Tax on non-residential properties</a>.
 
 disposalDate.title=What date did you exchange contracts when disposing of the property?
 disposalDate.agent.title=When the property was disposed of, what date were contracts exchanged?
