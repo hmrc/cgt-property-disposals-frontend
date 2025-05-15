@@ -44,7 +44,7 @@
 @(
     draftReturn: DraftSingleDisposalReturn,
     fillingOutReturn: FillingOutReturn
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("service.title")}
 
@@ -147,7 +147,7 @@
           case n: NonCalculatedYTDAnswers => n.fold(_ => InProgress, _ => Complete)
       }
 
-      case _ => TaskListStatus.CannotStart
+    case _ => TaskListStatus.CannotStart
   }
 }
 

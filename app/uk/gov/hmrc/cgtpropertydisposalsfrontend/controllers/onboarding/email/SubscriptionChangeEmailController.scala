@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
 import cats.data.EitherT
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
-import shapeless.lens
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
@@ -61,7 +60,7 @@ class SubscriptionChangeEmailController @Inject() (
     with EmailController[ChangingSubscriptionEmail] {
 
   override def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, ChangingSubscriptionEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: SubscriptionReady)) =>
@@ -70,34 +69,29 @@ class SubscriptionChangeEmailController @Inject() (
     }
 
   override def validVerificationCompleteJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, ChangingSubscriptionEmail)] =
     validJourney(request)
-
-  private val subscriptionReadyEmailLens =
-    lens[SubscriptionReady].subscriptionDetails.emailAddress
-
-  private val subscriptionReadyEmailSourceLens =
-    lens[SubscriptionReady].subscriptionDetails.emailSource
 
   override def updateEmail(
     changingSubscriptionEmail: ChangingSubscriptionEmail,
     email: Email
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus] =
     EitherT.rightT[Future, Error](
-      (subscriptionReadyEmailLens ~ subscriptionReadyEmailSourceLens)
-        .set(changingSubscriptionEmail.journey)(
-          email -> EmailSource.ManuallyEntered
+      changingSubscriptionEmail.journey
+        .copy(subscriptionDetails =
+          changingSubscriptionEmail.journey.subscriptionDetails
+            .copy(emailAddress = email, emailSource = EmailSource.ManuallyEntered)
         )
     )
 
   override def auditEmailVerifiedEvent(
     changingSubscriptionEmail: ChangingSubscriptionEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+  )(implicit hc: HeaderCarrier, request: Request[?]): Unit =
     auditService.sendEvent(
       "subscriptionChangeEmailAddressVerified",
       SubscriptionChangeEmailAddressVerifiedEvent(
@@ -110,7 +104,7 @@ class SubscriptionChangeEmailController @Inject() (
   override def auditEmailChangeAttempt(
     changingSubscriptionEmail: ChangingSubscriptionEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+  )(implicit hc: HeaderCarrier, request: Request[?]): Unit =
     auditService.sendEvent(
       "subscriptionChangeEmailAddressAttempted",
       SubscriptionChangeEmailAddressAttemptedEvent(
@@ -125,21 +119,21 @@ class SubscriptionChangeEmailController @Inject() (
   ): ContactName =
     changingSubscriptionEmail.journey.subscriptionDetails.contactName
 
-  override lazy protected val backLinkCall: Option[Call] = Some(
+  override protected lazy val backLinkCall: Option[Call] = Some(
     controllers.onboarding.routes.SubscriptionController.checkYourDetails()
   )
 
-  override lazy protected val enterEmailCall: Call            =
+  override protected lazy val enterEmailCall: Call            =
     routes.SubscriptionChangeEmailController.enterEmail()
-  override lazy protected val enterEmailSubmitCall: Call      =
+  override protected lazy val enterEmailSubmitCall: Call      =
     routes.SubscriptionChangeEmailController.enterEmailSubmit()
-  override lazy protected val checkYourInboxCall: Call        =
+  override protected lazy val checkYourInboxCall: Call        =
     routes.SubscriptionChangeEmailController.checkYourInbox()
-  override lazy protected val verifyEmailCall: UUID => Call   =
+  override protected lazy val verifyEmailCall: UUID => Call   =
     routes.SubscriptionChangeEmailController.verifyEmail
-  override lazy protected val emailVerifiedCall: Call         =
+  override protected lazy val emailVerifiedCall: Call         =
     routes.SubscriptionChangeEmailController.emailVerified()
-  override lazy protected val emailVerifiedContinueCall: Call =
+  override protected lazy val emailVerifiedContinueCall: Call =
     controllers.onboarding.routes.SubscriptionController.checkYourDetails()
 
 }

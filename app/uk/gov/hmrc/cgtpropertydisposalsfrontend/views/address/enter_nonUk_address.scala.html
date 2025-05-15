@@ -60,7 +60,7 @@
     submit: Call,
     addressJourneyType: AddressJourneyType,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"nonUkAddress"}
 @line1Key = @{s"$key-line1"}

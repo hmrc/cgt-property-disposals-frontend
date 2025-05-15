@@ -50,7 +50,7 @@
     representativeType: Option[RepresentativeType],
     isAmend: Boolean,
     isFurtherOrAmendReturn: Option[Boolean]
-)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[?], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "annualExemptAmount" }
 @furtherReturnKey = @{if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}
@@ -116,7 +116,7 @@
           content = Text("£")
         )),
         errorMessage = form.error(key).map(e => ErrorMessage(
-          content = Text(messages(s"$key$userKey.${e.message}", e.args: _*)),
+          content = Text(messages(s"$key$userKey.${e.message}", e.args *)),
           visuallyHiddenText = Some(messages("generic.error"))
         )),
         autocomplete = Some(AutoCompleteType.On.value)

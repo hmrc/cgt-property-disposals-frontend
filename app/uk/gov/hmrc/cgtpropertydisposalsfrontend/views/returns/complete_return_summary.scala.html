@@ -50,7 +50,7 @@
         isFurtherOrAmendReturn: Option[Boolean],
         isAmend: Boolean,
         returnSummaryClass: Option[String] = None
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key= @{ "viewReturn" }
 @showAnnualExemptAmount = @{ !(isFurtherOrAmendReturn.contains(true) && completeReturn.exemptionAndLossesAnswers.annualExemptAmount.isZero) }

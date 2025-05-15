@@ -28,7 +28,7 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
 )
 
-@(expired: List[SupportingEvidence])(implicit request: RequestWithSessionData[_], messages: Messages)
+@(expired: List[SupportingEvidence])(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"supporting-evidence.expired"}
 @title = @{messages(s"$key.title")}

@@ -5,7 +5,7 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
-    scalaVersion := "2.13.16",
+    scalaVersion := "3.6.4",
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test(),
     onLoadMessage := "",
@@ -18,11 +18,15 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
     Test / testOptions += Tests.Argument(
       TestFrameworks.ScalaTest,
       "-oNCHPQR",
-      "-u", "target/test-reports",
-      "-h", "target/test-reports/html-report"),
-    scalacOptions ++= "-Wconf:src=routes/.*:s" :: "-Wconf:cat=unused-imports&src=html/.*:s"
-                      :: "-Ymacro-annotations" :: "-Xlint:-byname-implicit" :: Nil,
+      "-u",
+      "target/test-reports",
+      "-h",
+      "target/test-reports/html-report"
+    ),
+    scalacOptions ++= Seq(
+      "-Wconf:src=routes/.*:s",
+      "-Wconf:msg=unused import&src=html/.*:s",
+      "-source:3.5"
+    )
   )
   .settings(CodeCoverageSettings.settings *)
-
-libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always

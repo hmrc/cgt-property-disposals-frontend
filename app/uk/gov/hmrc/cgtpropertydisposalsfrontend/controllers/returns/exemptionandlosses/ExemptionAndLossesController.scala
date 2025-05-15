@@ -40,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{exemptionandlosses => pages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -76,7 +76,7 @@ class ExemptionAndLossesController @Inject() (
       DraftReturn,
       ExemptionAndLossesAnswers
     ) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
 
       case Some((_, s: StartingToAmendReturn)) =>
@@ -198,7 +198,7 @@ class ExemptionAndLossesController @Inject() (
   )(
     updateAnswers: (A, ExemptionAndLossesAnswers) => ExemptionAndLossesAnswers
   )(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
       lazy val backLink = currentAnswers.fold(
@@ -254,7 +254,7 @@ class ExemptionAndLossesController @Inject() (
               val result = for {
                 _ <- returnsService.storeDraftReturn(updatedJourney)
                 _ <- EitherT(
-                       updateSession(sessionStore, request)(
+                       updateSession(sessionStore, request.toSession)(
                          _.copy(journeyStatus = Some(updatedJourney))
                        )
                      )
@@ -609,7 +609,7 @@ class ExemptionAndLossesController @Inject() (
                   val result = for {
                     _ <- returnsService.storeDraftReturn(newJourney)
                     _ <- EitherT(
-                           updateSession(sessionStore, request)(
+                           updateSession(sessionStore, request.toSession)(
                              _.copy(journeyStatus = Some(newJourney))
                            )
                          )

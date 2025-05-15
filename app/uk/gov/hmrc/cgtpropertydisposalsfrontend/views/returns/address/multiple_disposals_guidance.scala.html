@@ -35,7 +35,7 @@
     backLink: Call,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType]
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"property-details.multiple-disposals.guidance"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }

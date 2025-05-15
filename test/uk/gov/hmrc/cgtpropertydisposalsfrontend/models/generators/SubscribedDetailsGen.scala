@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import org.scalacheck.Gen
+import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TelephoneNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 
 object SubscribedDetailsGen extends GenUtils {
 
-  implicit val subscribedDetailsGen: Gen[SubscribedDetails] = for {
+  given subscribedDetailsGen: Gen[SubscribedDetails] = for {
     name: Either[TrustName, IndividualName] <-
       Gen.oneOf(NameGen.trustNameGen.map(Left(_)), NameGen.individualNameGen.map(Right(_)))
     emailAddress                            <- EmailGen.emailGen
@@ -33,5 +33,7 @@ object SubscribedDetailsGen extends GenUtils {
     telephoneNumber                         <- Gen.option(Generators.stringGen.map(TelephoneNumber(_)))
     registeredWithId                        <- Generators.booleanGen
   } yield SubscribedDetails(name, emailAddress, address, contactName, cgtReference, telephoneNumber, registeredWithId)
+
+  given Arbitrary[SubscribedDetails] = Arbitrary(subscribedDetailsGen)
 
 }

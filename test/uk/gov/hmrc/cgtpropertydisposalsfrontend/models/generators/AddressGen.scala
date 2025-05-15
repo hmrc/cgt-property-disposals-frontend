@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import org.scalacheck.Gen
+import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 
@@ -47,4 +47,10 @@ object AddressGen extends AddressHigherPriorityGen {
   } yield NonUkAddress(line1, line2, line3, line4, postcode, country)
 
   implicit val addressGen: Gen[Address] = Gen.oneOf(ukAddressGen, nonUkAddressGen)
+
+  given addressArb: Arbitrary[Address]           = Arbitrary(AddressGen.addressGen)
+  given postcodeArb: Arbitrary[Postcode]         = Arbitrary(AddressGen.postcodeGen)
+  given countryArb: Arbitrary[Country]           = Arbitrary(AddressGen.countryGen)
+  given ukAddressArb: Arbitrary[UkAddress]       = Arbitrary(AddressGen.ukAddressGen)
+  given nonUkAddressArb: Arbitrary[NonUkAddress] = Arbitrary(AddressGen.nonUkAddressGen)
 }

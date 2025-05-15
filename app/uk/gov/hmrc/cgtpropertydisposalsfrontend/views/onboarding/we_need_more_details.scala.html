@@ -24,7 +24,7 @@
  govukButton: GovukButton
 )
 
-@(details: NeedMoreDetailsDetails)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(details: NeedMoreDetailsDetails)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("weNeedMoreDetails.title")}
 @affinity = @{details.affinityGroup match {

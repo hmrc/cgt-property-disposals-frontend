@@ -17,20 +17,28 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait AddressSource extends Product with Serializable
 
 object AddressSource {
 
-  final case object BusinessPartnerRecord extends AddressSource
+  case object BusinessPartnerRecord extends AddressSource
 
-  final case object ManuallyEntered extends AddressSource
+  case object ManuallyEntered extends AddressSource
 
   implicit val eq: Eq[AddressSource] = Eq.fromUniversalEquals[AddressSource]
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[AddressSource] = derived.oformat()
+  implicit val format: Format[AddressSource] = new Format[AddressSource] {
+    override def reads(json: JsValue): JsResult[AddressSource] = json match {
+      case JsString("BusinessPartnerRecord") => JsSuccess(BusinessPartnerRecord)
+      case JsString("ManuallyEntered")       => JsSuccess(ManuallyEntered)
+      case _                                 => JsError("Invalid address source")
+    }
 
+    override def writes(o: AddressSource): JsValue = o match {
+      case BusinessPartnerRecord => JsString("BusinessPartnerRecord")
+      case ManuallyEntered       => JsString("ManuallyEntered")
+    }
+  }
 }

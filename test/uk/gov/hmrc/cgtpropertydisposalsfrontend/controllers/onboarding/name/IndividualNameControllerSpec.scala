@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.Subscription
 import scala.concurrent.Future
 
 trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidationTests with RedirectToStartBehaviour {
-  this: ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks =>
+  this: ControllerSpec & AuthSupport & SessionSupport & ScalaCheckDrivenPropertyChecks =>
 
   val controller: IndividualNameController[J]
 

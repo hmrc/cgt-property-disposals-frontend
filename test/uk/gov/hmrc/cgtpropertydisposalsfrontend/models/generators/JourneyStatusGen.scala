@@ -15,16 +15,21 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
-import org.scalacheck.Gen
+import io.github.martinhh.derived.scalacheck.given
+import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, IndividualWantsToRegisterTrust, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NewEnrolmentCreatedForMissingEnrolment, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, SubmittingReturn, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.EmailGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
 
 object JourneyStatusGen extends JourneyStatusLowerPriorityGen with GenUtils {
-  implicit val subscriptionReadyGen: Gen[SubscriptionReady] = for {
-    subscriptionDetails <- OnboardingDetailsGen.subscriptionDetailsArb
+
+  given subscriptionReadyGen: Gen[SubscriptionReady] = for {
+    subscriptionDetails <- OnboardingDetailsGen.subscriptionDetailsGen
     ggCredId            <- IdGen.ggCredIdGen
   } yield SubscriptionReady(subscriptionDetails, ggCredId)
 
@@ -35,7 +40,7 @@ object JourneyStatusGen extends JourneyStatusLowerPriorityGen with GenUtils {
     registrationReadyGen
   )
 
-  implicit val journeyStatusGen: Gen[JourneyStatus] = Gen.oneOf(
+  given journeyStatusGen: Gen[JourneyStatus] = Gen.oneOf(
     subscriptionReadyGen,
     individualSupplyingInformationGen,
     subscribedGen,
@@ -60,8 +65,7 @@ object JourneyStatusGen extends JourneyStatusLowerPriorityGen with GenUtils {
 
 trait JourneyStatusLowerPriorityGen extends GenUtils {
 
-  implicit val subscriptionSuccessfulGen: Gen[SubscriptionSuccessful] =
-    gen[SubscriptionSuccessful]
+  given subscriptionSuccessfulGen: Gen[SubscriptionSuccessful] = gen[SubscriptionSuccessful]
 
   implicit val individualSupplyingInformationGen: Gen[IndividualSupplyingInformation] =
     for {
@@ -72,15 +76,13 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
       ggCredId    <- IdGen.ggCredIdGen
     } yield IndividualSupplyingInformation(name, address, email, emailSource, ggCredId)
 
-  implicit val subscribedGen: Gen[Subscribed] = {
-    for {
-      subscribedDetails    <- SubscribedDetailsGen.subscribedDetailsGen
-      ggCredId             <- IdGen.ggCredIdGen
-      agentReferenceNumber <- Gen.option(IdGen.arnGen)
-      draftReturns         <- Gen.listOf(DraftReturnGen.draftReturnGen)
-      sentReturns          <- Gen.listOf(ReturnGen.returnSummaryGen)
-    } yield Subscribed(subscribedDetails, ggCredId, agentReferenceNumber, draftReturns, sentReturns)
-  }
+  given subscribedGen: Gen[Subscribed] = for {
+    subscribedDetails    <- SubscribedDetailsGen.subscribedDetailsGen
+    ggCredId             <- IdGen.ggCredIdGen
+    agentReferenceNumber <- Gen.option(IdGen.arnGen)
+    draftReturns         <- Gen.listOf(DraftReturnGen.draftReturnGen)
+    sentReturns          <- Gen.listOf(ReturnGen.returnSummaryGen)
+  } yield Subscribed(subscribedDetails, ggCredId, agentReferenceNumber, draftReturns, sentReturns)
 
   implicit val individualMissingEmailGen: Gen[IndividualMissingEmail] = for {
     name     <- NameGen.individualNameGen
@@ -88,8 +90,7 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
     ggCredId <- IdGen.ggCredIdGen
   } yield IndividualMissingEmail(name, address, ggCredId)
 
-  implicit val registrationReadyGen: Gen[RegistrationReady] =
-    gen[RegistrationReady]
+  given registrationReadyGen: Gen[RegistrationReady] = gen[RegistrationReady]
 
   implicit val startingNewDraftReturnGen: Gen[StartingNewDraftReturn] =
     for {
@@ -177,7 +178,7 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
     agentReferenceNumber <- Gen.option(IdGen.arnGen)
   } yield SubmittingReturn(subscribedDetails, ggCredId, agentReferenceNumber)
 
-  implicit val startingToAmendReturnGen: Gen[StartingToAmendReturn] = {
+  implicit val startingToAmendReturnGen: Gen[StartingToAmendReturn] =
     for {
       subscribedDetails       <- SubscribedDetailsGen.subscribedDetailsGen
       ggCredId                <- IdGen.ggCredIdGen
@@ -195,6 +196,5 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
       previousSentReturns,
       unmetDependencyFieldUrl
     )
-  }
 
 }

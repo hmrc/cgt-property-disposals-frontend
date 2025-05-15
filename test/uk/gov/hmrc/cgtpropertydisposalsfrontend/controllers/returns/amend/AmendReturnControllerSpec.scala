@@ -35,9 +35,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.completeSingleDisposalReturnGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -82,7 +82,7 @@ class AmendReturnControllerSpec
         _: ExecutionContext,
         _: HeaderCarrier,
         _: Writes[CancelAmendReturn],
-        _: Request[_]
+        _: Request[?]
       ))
       .expects("CancelAmendReturn", auditEvent, "cancel-amend-return", *, *, *, *)
       .returning(())
@@ -187,7 +187,7 @@ class AmendReturnControllerSpec
     "handling submits on the confirm cancellation page" must {
 
       def performAction(formData: (String, String)*)(back: String): Future[Result] =
-        controller.confirmCancelSubmit(back)(FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST"))
+        controller.confirmCancelSubmit(back)(FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST"))
 
       behave like redirectToStartWhenInvalidJourney(
         () => performAction()(AmendReturnController.ConfirmCancelBackLocations.checkAnswers),
@@ -228,7 +228,7 @@ class AmendReturnControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(data: _*)(AmendReturnController.ConfirmCancelBackLocations.checkAnswers),
+            performAction(data*)(AmendReturnController.ConfirmCancelBackLocations.checkAnswers),
             messageFromMessageKey("confirmCancelAmendReturn.title"),
             { doc =>
               doc.select("#back, .govuk-back-link").attr("href") shouldBe routes.AmendReturnController

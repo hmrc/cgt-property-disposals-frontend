@@ -30,7 +30,7 @@
     taxYear: TaxYear,
     isATrust: Boolean,
     isPeriodOfAdmin: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @taxableIncome = @{ yearToDateLiabilityCalculation.taxableIncome }
 

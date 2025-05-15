@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
 import monocle.Lens
-import monocle.macros.Lenses
-import play.api.libs.json.OFormat
+import monocle.macros.GenLens
+import play.api.libs.json._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
@@ -29,7 +28,6 @@ sealed trait AcquisitionDetailsAnswers extends Product with Serializable
 @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object AcquisitionDetailsAnswers {
 
-  @Lenses
   final case class IncompleteAcquisitionDetailsAnswers(
     acquisitionMethod: Option[AcquisitionMethod],
     acquisitionDate: Option[AcquisitionDate],
@@ -41,6 +39,14 @@ object AcquisitionDetailsAnswers {
   ) extends AcquisitionDetailsAnswers
 
   object IncompleteAcquisitionDetailsAnswers {
+
+    val acquisitionFees         = GenLens[IncompleteAcquisitionDetailsAnswers](_.acquisitionFees)
+    val acquisitionMethod       = GenLens[IncompleteAcquisitionDetailsAnswers](_.acquisitionMethod)
+    val acquisitionPrice        = GenLens[IncompleteAcquisitionDetailsAnswers](_.acquisitionPrice)
+    val acquisitionDate         = GenLens[IncompleteAcquisitionDetailsAnswers](_.acquisitionDate)
+    val shouldUseRebase         = GenLens[IncompleteAcquisitionDetailsAnswers](_.shouldUseRebase)
+    val improvementCosts        = GenLens[IncompleteAcquisitionDetailsAnswers](_.improvementCosts)
+    val rebasedAcquisitionPrice = GenLens[IncompleteAcquisitionDetailsAnswers](_.rebasedAcquisitionPrice)
 
     val empty: IncompleteAcquisitionDetailsAnswers =
       IncompleteAcquisitionDetailsAnswers(
@@ -94,7 +100,7 @@ object AcquisitionDetailsAnswers {
     def unset[A](
       fieldLens: IncompleteAcquisitionDetailsAnswers.type => Lens[IncompleteAcquisitionDetailsAnswers, Option[A]]
     ): IncompleteAcquisitionDetailsAnswers =
-      fieldLens(IncompleteAcquisitionDetailsAnswers).set(None)(
+      fieldLens(IncompleteAcquisitionDetailsAnswers).replace(None)(
         fold(identity, IncompleteAcquisitionDetailsAnswers.fromCompleteAnswers)
       )
 
@@ -126,7 +132,32 @@ object AcquisitionDetailsAnswers {
 
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[AcquisitionDetailsAnswers] = derived.oformat()
+  implicit val completeFormat: OFormat[CompleteAcquisitionDetailsAnswers]     =
+    Json.format[CompleteAcquisitionDetailsAnswers]
+  implicit val inCompleteFormat: OFormat[IncompleteAcquisitionDetailsAnswers] =
+    Json.format[IncompleteAcquisitionDetailsAnswers]
+
+  implicit val format: OFormat[AcquisitionDetailsAnswers] = new OFormat[AcquisitionDetailsAnswers] {
+    override def reads(json: JsValue): JsResult[AcquisitionDetailsAnswers] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("IncompleteAcquisitionDetailsAnswers", value) =>
+            value.validate[IncompleteAcquisitionDetailsAnswers]
+          case ("CompleteAcquisitionDetailsAnswers", value)   =>
+            value.validate[CompleteAcquisitionDetailsAnswers]
+          case (other, _)                                     =>
+            JsError(s"Unrecognized AcquisitionDetailsAnswers type: $other")
+        }
+      case _                                    =>
+        JsError("Expected AcquisitionDetailsAnswers wrapper object with a single entry")
+    }
+
+    override def writes(a: AcquisitionDetailsAnswers): JsObject = a match {
+      case i: IncompleteAcquisitionDetailsAnswers =>
+        Json.obj("IncompleteAcquisitionDetailsAnswers" -> Json.toJson(i))
+      case c: CompleteAcquisitionDetailsAnswers   =>
+        Json.obj("CompleteAcquisitionDetailsAnswers" -> Json.toJson(c))
+    }
+  }
 
 }

@@ -182,7 +182,7 @@ class CalculatedGlarBreakdownSpec extends AnyWordSpec with Matchers {
         rebasedAcquisitionPrice = None
       )
       "Throw an exception" in {
-        assertThrows[Exception](breakdown.acquisitionOrRebased) //edge case - shouldn't happen
+        assertThrows[Exception](breakdown.acquisitionOrRebased) // edge case - shouldn't happen
       }
     }
   }

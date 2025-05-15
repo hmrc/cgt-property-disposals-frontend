@@ -16,11 +16,14 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import org.scalacheck.Gen
+import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 
 object EmailGen extends GenUtils {
-  implicit val emailGen: Gen[Email]             = Generators.stringGen.map(Email(_))
+  implicit val emailGen: Gen[Email] = Generators.stringGen.map(Email(_))
+
+  given emailArb: Arbitrary[Email] = Arbitrary(EmailGen.emailGen)
+
   implicit val emailSourceGen: Gen[EmailSource] =
     Gen.oneOf(EmailSource.GovernmentGateway, EmailSource.BusinessPartnerRecord, EmailSource.ManuallyEntered)
 }

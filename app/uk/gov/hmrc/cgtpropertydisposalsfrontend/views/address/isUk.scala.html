@@ -31,7 +31,7 @@
  yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk,
 )
 
-@(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"isUk"}
 @isAgent = @{ request.userType.contains(Agent) }

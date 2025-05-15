@@ -32,6 +32,8 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
+import play.api.libs.ws.writeableOf_JsValue
+
 @ImplementedBy(classOf[UpscanConnectorImpl])
 trait UpscanConnector {
   def getUpscanUpload(

@@ -26,14 +26,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 
 trait BusinessPartnerRecordServiceSupport {
-  this: ControllerSpec with SessionSupport =>
+  this: ControllerSpec & SessionSupport =>
 
   private val mockBusinessPartnerRecordService = mock[BusinessPartnerRecordService]
   def mockGetBusinessPartnerRecord(
     businessPartnerRecordRequest: BusinessPartnerRecordRequest,
     expectedBusinessPartnerRecordResponse: Either[Error, BusinessPartnerRecordResponse],
     lang: Lang
-  ): Unit                                      =
+  ): Unit =
     (mockBusinessPartnerRecordService
       .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
         _: HeaderCarrier

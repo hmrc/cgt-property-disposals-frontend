@@ -28,7 +28,7 @@
         govukButton: GovukButton
         )
 
-@(backLink: Call, key: String)(implicit messages:Messages, request: RequestWithSessionData[_])
+@(backLink: Call, key: String)(implicit messages:Messages, request: RequestWithSessionData[?])
 
 @title = @{messages(s"$key.title")}
 

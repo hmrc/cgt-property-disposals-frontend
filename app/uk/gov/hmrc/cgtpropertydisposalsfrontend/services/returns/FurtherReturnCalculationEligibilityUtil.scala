@@ -56,7 +56,7 @@ trait FurtherReturnCalculationEligibilityUtil {
 
   def isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn: FillingOutReturn)(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): EitherT[Future, Error, FurtherReturnCalculationEligibility]
 
 }
@@ -100,7 +100,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
     fillingOutReturn: FillingOutReturn
   )(implicit
     headerCarrier: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): EitherT[Future, Error, FurtherReturnCalculationEligibility] =
     for {
       updatedFillingOutReturn <- filterPreviousTaxYearReturns(fillingOutReturn)
@@ -126,7 +126,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
       _                       <- if (updatedJourney === updatedFillingOutReturn) {
                                    EitherT.pure[Future, Error](())
                                  } else {
-                                   EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+                                   EitherT(updateSession(sessionStore, request.toSession)(_.copy(journeyStatus = Some(updatedJourney))))
                                  }
     } yield eligibility
 

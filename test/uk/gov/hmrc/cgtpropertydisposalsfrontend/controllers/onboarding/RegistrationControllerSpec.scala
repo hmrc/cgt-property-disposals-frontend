@@ -42,7 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.EmailGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, IndividualName}
@@ -171,7 +171,7 @@ class RegistrationControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.selectEntityTypeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       val sessionData =
@@ -665,7 +665,7 @@ class RegistrationControllerSpec
         SessionData.empty.copy(journeyStatus = Some(registrationReady))
       val subscriptionSuccessfulResponse = sample[SubscriptionSuccessful]
       val sapNumber                      = sample[SapNumber]
-      val subscriptionDetails = {
+      val subscriptionDetails            = {
         val details = registrationReady.registrationDetails
         SubscriptionDetails(
           Right(details.name),

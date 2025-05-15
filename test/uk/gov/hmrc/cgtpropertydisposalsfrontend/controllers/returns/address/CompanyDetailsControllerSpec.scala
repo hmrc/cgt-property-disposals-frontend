@@ -39,16 +39,16 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -214,7 +214,7 @@ class CompanyDetailsControllerSpec
   val allIndividualUserTypeGen: Gen[IndividualUserType] =
     individualUserTypeGen.filter {
       case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
-      case _                                                                                 => false
+      case null                                                                              => false
     }
 
   def userMessageKey(individualUserType: IndividualUserType): String =
@@ -413,7 +413,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.isUkSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -429,7 +429,7 @@ class CompanyDetailsControllerSpec
           formData: (String, String)*
         )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
@@ -511,7 +511,7 @@ class CompanyDetailsControllerSpec
           formData: (String, String)*
         )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
@@ -753,7 +753,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -769,7 +769,7 @@ class CompanyDetailsControllerSpec
           formData: (String, String)*
         )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
@@ -965,7 +965,7 @@ class CompanyDetailsControllerSpec
           formData: (String, String)*
         )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
@@ -1512,7 +1512,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterNonUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1528,7 +1528,7 @@ class CompanyDetailsControllerSpec
           formData: (String, String)*
         )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
@@ -1711,7 +1711,7 @@ class CompanyDetailsControllerSpec
           formData: (String, String)*
         )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey(expectedTitleKey),
             doc =>
               doc
@@ -2226,7 +2226,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleIndirectDisposalsGuidance()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2278,7 +2278,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleIndirectDisposalsGuidanceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2332,7 +2332,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleIndirectDisposalPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2402,7 +2402,7 @@ class CompanyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(data: _*),
+            performAction(data*),
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
@@ -2418,7 +2418,7 @@ class CompanyDetailsControllerSpec
           amountOfMoneyErrorScenarios(key).foreach { scenario =>
             withClue(s"For $scenario: ") {
               val data = scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
+              test(data*)(scenario.expectedErrorMessageKey)
             }
           }
         }
@@ -2812,7 +2812,7 @@ class CompanyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleIndirectAcquisitionPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2882,7 +2882,7 @@ class CompanyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(data: _*),
+            performAction(data*),
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
@@ -2898,7 +2898,7 @@ class CompanyDetailsControllerSpec
           amountOfMoneyErrorScenarios(key).foreach { scenario =>
             withClue(s"For $scenario: ") {
               val data = scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
+              test(data*)(scenario.expectedErrorMessageKey)
             }
           }
         }

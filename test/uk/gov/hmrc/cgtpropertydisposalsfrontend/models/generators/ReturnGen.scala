@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.CompleteReturnWithSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.PreviousReturnData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 
 import java.time.LocalDate
 
@@ -34,7 +34,9 @@ object ReturnGen extends GenUtils {
       CompleteReturnGen.completeMultipleIndirectDisposalReturnGen
     )
 
-  implicit val returnSummaryGen: Gen[ReturnSummary] = {
+  given completeReturnArb: Arbitrary[CompleteReturn] = Arbitrary(completeReturnGen)
+
+  implicit val returnSummaryGen: Gen[ReturnSummary] =
     for {
       submissionId              <- Generators.stringGen
       submissionDate            <- Arbitrary.arbitrary[LocalDate]
@@ -60,14 +62,13 @@ object ReturnGen extends GenUtils {
       isRecentlyAmended,
       expired
     )
-  }
 
   private val furtherReturnCalculationData = for {
     address                <- AddressGen.ukAddressGen
     gainOrLossAfterReliefs <- MoneyGen.amountInPenceGen
   } yield FurtherReturnCalculationData(address, gainOrLossAfterReliefs)
 
-  implicit val previousReturnDataGen: Gen[PreviousReturnData] = {
+  implicit val previousReturnDataGen: Gen[PreviousReturnData] =
     for {
       summaries                                     <- Gen.listOf(returnSummaryGen)
       previousYearToDate                            <- Gen.option(MoneyGen.amountInPenceGen)
@@ -79,7 +80,6 @@ object ReturnGen extends GenUtils {
       previousReturnsImplyEligibilityForCalculation,
       calculationData
     )
-  }
 
   implicit val returnTypeGen: Gen[ReturnType] =
     Gen.oneOf(ReturnType.FirstReturn, ReturnType.FurtherReturn, ReturnType.AmendedReturn)
@@ -94,4 +94,6 @@ object ReturnGen extends GenUtils {
     originalReturn                      <- completeReturnWithSummaryGen
     shouldDisplayGainOrLossAfterReliefs <- Generators.booleanGen
   } yield AmendReturnData(originalReturn, shouldDisplayGainOrLossAfterReliefs)
+
+  given Arbitrary[AmendReturnData] = Arbitrary(amendReturnDataGen)
 }

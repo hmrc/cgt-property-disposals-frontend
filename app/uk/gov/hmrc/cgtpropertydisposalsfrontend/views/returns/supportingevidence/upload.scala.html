@@ -33,7 +33,7 @@
     backLink: Call,
     isAmend: Boolean,
     isReplaymentDue: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"supporting-evidence.upload"}
 @field = @{"file"}

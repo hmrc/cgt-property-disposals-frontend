@@ -17,28 +17,29 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import io.github.martinhh.derived.scalacheck.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 
-object FurtherReturnCalculationGen extends GenUtils {
+object FurtherReturnCalculationGen extends GenUtils:
 
-  implicit val calculatedGlarBreakdownGen: Gen[CalculatedGlarBreakdown] =
-    gen[CalculatedGlarBreakdown]
+  given calculatedGlarBreakdownGen: Gen[CalculatedGlarBreakdown] = gen[CalculatedGlarBreakdown]
 
-  implicit val eligibleGen: Gen[Eligible] = gen[Eligible]
+  given Gen[FurtherReturnCalculationData] = gen[FurtherReturnCalculationData]
 
-  implicit val ineligibleGen: Gen[Ineligible] = gen[Ineligible]
+  given eligibleGen: Gen[Eligible] = gen[Eligible]
 
-  implicit val taxableGainOrLossCalculationRequestGen: Gen[TaxableGainOrLossCalculationRequest] =
+  given ineligibleGen: Gen[Ineligible] = gen[Ineligible]
+
+  given taxableGainOrLossCalculationRequestGen: Gen[TaxableGainOrLossCalculationRequest] =
     gen[TaxableGainOrLossCalculationRequest]
 
-  implicit val taxableGainOrLossCalculationGen: Gen[TaxableGainOrLossCalculation] =
+  given taxableGainOrLossCalculationGen: Gen[TaxableGainOrLossCalculation] =
     gen[TaxableGainOrLossCalculation]
 
-  implicit val yearToDateLiabilityCalculationRequestGen: Gen[YearToDateLiabilityCalculationRequest] =
+  given yearToDateLiabilityCalculationRequestGen: Gen[YearToDateLiabilityCalculationRequest] =
     gen[YearToDateLiabilityCalculationRequest]
 
-  implicit val yearToDateLiabilityCalculationGen: Gen[YearToDateLiabilityCalculation] =
+  given yearToDateLiabilityCalculationGen: Gen[YearToDateLiabilityCalculation] =
     gen[YearToDateLiabilityCalculation]
-
-}

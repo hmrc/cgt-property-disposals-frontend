@@ -44,7 +44,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.Dir
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
@@ -52,7 +53,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.completeReliefDetailsAnswersGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -114,7 +115,7 @@ class ViewReturnControllerSpec
           _: Call
         )(
           _: HeaderCarrier,
-          _: Request[_]
+          _: Request[?]
         )
       )
       .expects(cgtReference, chargeReference, amount, dueDate, returnUrl, backUrl, *, *)
@@ -247,8 +248,8 @@ class ViewReturnControllerSpec
         paymentDetails(4)                                     shouldBe messageFromMessageKey("viewReturn.charge.status.paid")
 
         paymentDetails(5) shouldBe s"${formatAmountOfMoneyWithPoundSign(
-          fullPaymentForUkResidentReturnCharge.amount.inPounds()
-        )} direct debit payment received on ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
+            fullPaymentForUkResidentReturnCharge.amount.inPounds()
+          )} direct debit payment received on ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
 
         paymentDetails(6)    should startWith(messageFromMessageKey("viewReturn.chargeType.PenaltyInterest"))
         paymentDetails(7)  shouldBe govShortDisplayFormat(
@@ -290,8 +291,8 @@ class ViewReturnControllerSpec
         paymentDetails(4)                                     shouldBe messageFromMessageKey("viewReturn.charge.status.paid")
 
         paymentDetails(5) shouldBe s"${formatAmountOfMoneyWithPoundSign(
-          fullPaymentForUkResidentReturnCharge.amount.inPounds()
-        )} ${messageFromMessageKey("viewReturn.charge.paymentMethod.DirectDebit")} ${messageFromMessageKey("generic.on")} ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
+            fullPaymentForUkResidentReturnCharge.amount.inPounds()
+          )} ${messageFromMessageKey("viewReturn.charge.paymentMethod.DirectDebit")} ${messageFromMessageKey("generic.on")} ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
 
         paymentDetails(6)    should startWith(messageFromMessageKey("viewReturn.chargeType.DeltaCharge"))
         paymentDetails(7)  shouldBe govShortDisplayFormat(

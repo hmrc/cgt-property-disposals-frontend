@@ -17,8 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait IndividualUserType extends Product with Serializable
 
@@ -41,7 +40,43 @@ object IndividualUserType {
 
   implicit val representativeTypeEq: Eq[RepresentativeType] = Eq.fromUniversalEquals
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[IndividualUserType] = derived.oformat()
+  implicit val representativeTypeFormat: Format[RepresentativeType] = new Format[RepresentativeType] {
+    override def reads(json: JsValue): JsResult[RepresentativeType] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head._1 match {
+          case "Capacitor"                             => JsSuccess(Capacitor)
+          case "PersonalRepresentative"                => JsSuccess(PersonalRepresentative)
+          case "PersonalRepresentativeInPeriodOfAdmin" => JsSuccess(PersonalRepresentativeInPeriodOfAdmin)
+          case other                                   => JsError(s"Invalid representative type: $other")
+        }
+      case _                                    => JsError("Expected JSON object with one RepresentativeType key")
+    }
 
+    override def writes(r: RepresentativeType): JsValue = r match {
+      case Capacitor                             => Json.obj("Capacitor" -> Json.obj())
+      case PersonalRepresentative                => Json.obj("PersonalRepresentative" -> Json.obj())
+      case PersonalRepresentativeInPeriodOfAdmin => Json.obj("PersonalRepresentativeInPeriodOfAdmin" -> Json.obj())
+    }
+  }
+
+  implicit val individualUserTypeFormat: Format[IndividualUserType] = new Format[IndividualUserType] {
+    override def reads(json: JsValue): JsResult[IndividualUserType] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head._1 match {
+          case "Self"                                  => JsSuccess(Self)
+          case "Capacitor"                             => JsSuccess(Capacitor)
+          case "PersonalRepresentative"                => JsSuccess(PersonalRepresentative)
+          case "PersonalRepresentativeInPeriodOfAdmin" => JsSuccess(PersonalRepresentativeInPeriodOfAdmin)
+          case other                                   => JsError(s"Invalid individual user type: $other")
+        }
+      case _                                    => JsError("Expected JSON object with one IndividualUserType key")
+    }
+
+    override def writes(o: IndividualUserType): JsValue = o match {
+      case Self                                  => Json.obj("Self" -> Json.obj())
+      case Capacitor                             => Json.obj("Capacitor" -> Json.obj())
+      case PersonalRepresentative                => Json.obj("PersonalRepresentative" -> Json.obj())
+      case PersonalRepresentativeInPeriodOfAdmin => Json.obj("PersonalRepresentativeInPeriodOfAdmin" -> Json.obj())
+    }
+  }
 }

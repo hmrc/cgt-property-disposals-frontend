@@ -17,6 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import org.scalacheck.Arbitrary
+import io.github.martinhh.derived.scalacheck.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.EmailGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DateOfDeath, RepresenteeAnswers, RepresenteeContactDetails, RepresenteeReferenceId}
@@ -25,31 +30,25 @@ object RepresenteeAnswersGen extends HigherPriorityRepresenteeAnswersGen with Ge
 
 trait HigherPriorityRepresenteeAnswersGen extends LowerPriorityRepresenteeAnswersGen { this: GenUtils =>
 
-  implicit val representeeAnswersGen: Gen[RepresenteeAnswers] =
-    gen[RepresenteeAnswers]
+  given representeeAnswersGen: Gen[RepresenteeAnswers] = gen[RepresenteeAnswers]
 
-  implicit val incompleteRepresenteeAnswersGen: Gen[IncompleteRepresenteeAnswers] = gen[IncompleteRepresenteeAnswers]
+  given incompleteRepresenteeAnswersGen: Gen[IncompleteRepresenteeAnswers] = gen[IncompleteRepresenteeAnswers]
 
-  implicit val representeeReferenceIdGen: Gen[RepresenteeReferenceId] =
-    gen[RepresenteeReferenceId]
+  given representeeReferenceIdGen: Gen[RepresenteeReferenceId] = gen[RepresenteeReferenceId]
 
-  implicit val representeeCgtReferenceGen: Gen[RepresenteeCgtReference] =
-    gen[RepresenteeCgtReference]
+  given representeeCgtReferenceGen: Gen[RepresenteeCgtReference] = gen[RepresenteeCgtReference]
 
-  implicit val representeeContactDetailsGen: Gen[RepresenteeContactDetails] =
-    gen[RepresenteeContactDetails]
+  given representeeContactDetailsGen: Gen[RepresenteeContactDetails] = gen[RepresenteeContactDetails]
 
 }
 
 trait LowerPriorityRepresenteeAnswersGen { this: GenUtils =>
 
-  implicit val completeRepresenteeAnswersGen: Gen[CompleteRepresenteeAnswers] =
-    gen[CompleteRepresenteeAnswers]
+  given completeRepresenteeAnswersGen: Gen[CompleteRepresenteeAnswers] = gen[CompleteRepresenteeAnswers]
 
-  implicit val representeeSautrGen: Gen[RepresenteeSautr] =
-    gen[RepresenteeSautr]
+  given representeeSautrGen: Gen[RepresenteeSautr] = gen[RepresenteeSautr]
 
-  implicit val representeeNinoGen: Gen[RepresenteeNino] = gen[RepresenteeNino]
+  given representeeNinoGen: Gen[RepresenteeNino] = gen[RepresenteeNino]
 
-  implicit val dateOfDeathGen: Gen[DateOfDeath] = gen[DateOfDeath]
+  given dateOfDeathGen: Gen[DateOfDeath] = gen[DateOfDeath]
 }

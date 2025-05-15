@@ -73,7 +73,7 @@ class AddressLookupConnectorSpec extends AnyWordSpec with Matchers with Connecto
           town = "town",
           county = Some("county"),
           postcode = "ABC 123"
-        ) pipe (List(_)) pipe AddressLookupResponse pipe (Right(_)))
+        ) pipe (List(_)) pipe AddressLookupResponse.apply pipe (Right(_)))
     }
 
     "Return error if Reject if JSON is missing fields" in {

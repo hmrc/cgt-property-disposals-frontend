@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -94,11 +94,11 @@ class PropertyDetailsController @Inject() (
     journey.journey.subscribedDetails.isATrust
 
   def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Future[Result], (SessionData, FillingOutReturnAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((_, s: StartingToAmendReturn)) =>
-        implicit val r: RequestWithSessionData[_] = request
+        implicit val r: RequestWithSessionData[?] = request
         Left(convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator))
 
       case Some((sessionData, r: FillingOutReturn)) =>
@@ -162,7 +162,7 @@ class PropertyDetailsController @Inject() (
     isManuallyEnteredAddress: Boolean
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus] =
     address match {
       case _: NonUkAddress =>
@@ -266,7 +266,7 @@ class PropertyDetailsController @Inject() (
     authenticatedActionWithSessionData.async(implicit request => commonHasUkPostcodeBehaviour())
 
   private def commonHasUkPostcodeBehaviour()(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn) { assetTypes =>
@@ -293,7 +293,7 @@ class PropertyDetailsController @Inject() (
     authenticatedActionWithSessionData.async(implicit request => commonHasUkPostcodeSubmitBehaviour())
 
   private def commonHasUkPostcodeSubmitBehaviour()(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn) { assetTypes =>
@@ -448,7 +448,7 @@ class PropertyDetailsController @Inject() (
     authenticatedActionWithSessionData.async(implicit request => commonEnterLandUprnBehaviour())
 
   private def commonEnterLandUprnBehaviour()(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn) { assetTypes =>
@@ -476,7 +476,7 @@ class PropertyDetailsController @Inject() (
     authenticatedActionWithSessionData.async(implicit request => commonEnterLandUprnSubmitBehaviour())
 
   private def commonEnterLandUprnSubmitBehaviour()(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn) { assetTypes =>
@@ -676,7 +676,7 @@ class PropertyDetailsController @Inject() (
                             val result = for {
                               _ <- returnsService.storeDraftReturn(updatedJourney)
                               _ <- EitherT(
-                                     updateSession(sessionStore, request)(
+                                     updateSession(sessionStore, request.toSession)(
                                        _.copy(journeyStatus = Some(updatedJourney))
                                      )
                                    )
@@ -795,7 +795,7 @@ class PropertyDetailsController @Inject() (
                       val result             = for {
                         _ <- returnsService.storeDraftReturn(updatedJourney)
                         _ <- EitherT(
-                               updateSession(sessionStore, request)(
+                               updateSession(sessionStore, request.toSession)(
                                  _.copy(journeyStatus = Some(updatedJourney))
                                )
                              )
@@ -907,7 +907,7 @@ class PropertyDetailsController @Inject() (
                       val result             = for {
                         _ <- returnsService.storeDraftReturn(updatedJourney)
                         _ <- EitherT(
-                               updateSession(sessionStore, request)(
+                               updateSession(sessionStore, request.toSession)(
                                  _.copy(journeyStatus = Some(updatedJourney))
                                )
                              )
@@ -969,7 +969,7 @@ class PropertyDetailsController @Inject() (
                   val result             = for {
                     _ <- returnsService.storeDraftReturn(updatedJourney)
                     _ <- EitherT(
-                           updateSession(sessionStore, request)(
+                           updateSession(sessionStore, request.toSession)(
                              _.copy(journeyStatus = Some(updatedJourney))
                            )
                          )
@@ -1106,7 +1106,7 @@ class PropertyDetailsController @Inject() (
 
   private def withPersonalRepresentativeDetails(draftReturn: DraftMultipleDisposalsReturn)(
     f: Option[PersonalRepresentativeDetails] => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     PersonalRepresentativeDetails
       .fromDraftReturn(draftReturn)
       .fold(
@@ -1119,7 +1119,7 @@ class PropertyDetailsController @Inject() (
 
   def withAddress(
     answers: ExamplePropertyDetailsAnswers
-  )(f: UkAddress => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(f: UkAddress => Future[Result])(implicit request: RequestWithSessionData[?]): Future[Result] =
     answers.fold(
       i =>
         i.address match {
@@ -1173,7 +1173,7 @@ object PropertyDetailsController {
         "address-town"    -> optional(addressLineMapping),
         "address-county"  -> optional(addressLineMapping),
         "postcode"        -> Postcode.mapping
-      )(UkAddress.apply)(UkAddress.unapply)
+      )(UkAddress.apply)(o => Some(o.line1, o.line2, o.town, o.county, o.postcode))
     )
   }
 

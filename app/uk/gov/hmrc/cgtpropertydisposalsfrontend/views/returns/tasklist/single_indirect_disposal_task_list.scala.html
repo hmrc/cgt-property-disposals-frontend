@@ -37,7 +37,7 @@
 @(
     draftReturn: DraftSingleIndirectDisposalReturn,
     fillingOutReturn: FillingOutReturn
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("service.title")}
 

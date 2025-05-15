@@ -64,7 +64,7 @@ class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with Session
     def performAction(): Future[Result] =
       action.invokeBlock(
         authenticatedRequest,
-        { r: RequestWithSessionDataAndRetrievedData[_] =>
+        { (r: RequestWithSessionDataAndRetrievedData[?]) =>
           r.messagesApi shouldBe messagesRequest.messagesApi
           r.sessionData shouldBe sessionData.copy(userType = Some(Individual))
           Future.successful(Ok)

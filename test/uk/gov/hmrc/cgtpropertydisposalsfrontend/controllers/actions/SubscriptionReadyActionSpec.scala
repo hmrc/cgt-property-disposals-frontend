@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.OnboardingDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.OnboardingDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SessionDataGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails
@@ -58,7 +58,7 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
 
       action.invokeBlock(
         authenticatedRequest,
-        { r: RequestWithSubscriptionReady[_] =>
+        { (r: RequestWithSubscriptionReady[?]) =>
           r.sessionData       shouldBe sessionData
           r.subscriptionReady shouldBe SubscriptionReady(
             subscriptionDetails,

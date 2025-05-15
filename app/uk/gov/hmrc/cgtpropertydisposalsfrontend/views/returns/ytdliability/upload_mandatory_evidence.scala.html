@@ -36,7 +36,7 @@
     isAmend: Boolean,
     isMultipleDisposal: Boolean,
     isRepaymentDue: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
     @key = @{ "mandatoryEvidence" }
     @fieldId = @{ "file" }

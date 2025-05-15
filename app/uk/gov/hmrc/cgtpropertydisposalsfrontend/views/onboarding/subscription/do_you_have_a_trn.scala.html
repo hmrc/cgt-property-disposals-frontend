@@ -30,7 +30,7 @@ layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
     formWrapper: FormWithCSRF
 )
 
-@(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"hasTrn"}
 @title = @{messages("haveATrn.title")}

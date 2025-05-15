@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.syntax.eq._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates.SessionProvider
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, RequestWithSessionDataAndRetrievedData, RequestWithSubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -27,20 +26,16 @@ import scala.concurrent.Future
 
 trait SessionUpdates {
 
-  def updateSession[R](sessionStore: SessionStore, request: R)(
+  def updateSession[R](sessionStore: SessionStore, session: SessionData)(
     update: SessionData => SessionData
-  )(implicit
-    sessionProvider: SessionProvider[R],
-    hc: HeaderCarrier
-  ): Future[Either[Error, Unit]] = {
-    val session        = sessionProvider.toSession(request)
+  )(implicit hc: HeaderCarrier): Future[Either[Error, Unit]] = {
     val updatedSession = update(session)
 
     if (session === updatedSession) {
       // don't bother updating the session if it's the same
       Future.successful(Right(()))
     } else {
-      sessionStore.store(update(sessionProvider.toSession(request)))
+      sessionStore.store(update(session))
     }
   }
 }

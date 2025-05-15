@@ -28,7 +28,7 @@
         addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display_govuk
 )
 
-@(details: RegistrationDetails)(implicit request:RequestWithSessionData[_], messages: Messages)
+@(details: RegistrationDetails)(implicit request:RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("registration.title")}
 

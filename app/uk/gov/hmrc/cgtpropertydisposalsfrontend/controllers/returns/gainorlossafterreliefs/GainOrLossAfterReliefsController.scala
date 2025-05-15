@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, F
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -167,7 +167,7 @@ class GainOrLossAfterReliefsController @Inject() (
                 val result = for {
                   _ <- returnsService.storeDraftReturn(updatedJourney)
                   _ <- EitherT(
-                         updateSession(sessionStore, request)(
+                         updateSession(sessionStore, request.toSession)(
                            _.copy(journeyStatus = Some(updatedJourney))
                          )
                        )
@@ -223,7 +223,7 @@ class GainOrLossAfterReliefsController @Inject() (
       DraftReturn,
       Option[AmountInPence]
     ) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(s: StartingToAmendReturn) =>
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)

@@ -17,21 +17,29 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait ContactNameSource extends Product with Serializable
 
 object ContactNameSource {
 
-  final case object DerivedFromBusinessPartnerRecord extends ContactNameSource
+  case object DerivedFromBusinessPartnerRecord extends ContactNameSource
 
-  final case object ManuallyEntered extends ContactNameSource
+  case object ManuallyEntered extends ContactNameSource
 
-  implicit val eq: Eq[ContactNameSource] =
-    Eq.fromUniversalEquals[ContactNameSource]
+  implicit val eq: Eq[ContactNameSource] = Eq.fromUniversalEquals[ContactNameSource]
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[ContactNameSource] = derived.oformat()
+  implicit val format: Format[ContactNameSource] = new Format[ContactNameSource] {
+    override def reads(json: JsValue): JsResult[ContactNameSource] = json match {
+      case JsString("DerivedFromBusinessPartnerRecord") => JsSuccess(DerivedFromBusinessPartnerRecord)
+      case JsString("ManuallyEntered")                  => JsSuccess(ManuallyEntered)
+      case _                                            => JsError("Invalid contact name source")
+    }
+
+    override def writes(o: ContactNameSource): JsValue = o match {
+      case DerivedFromBusinessPartnerRecord => JsString("DerivedFromBusinessPartnerRecord")
+      case ManuallyEntered                  => JsString("ManuallyEntered")
+    }
+  }
 
 }

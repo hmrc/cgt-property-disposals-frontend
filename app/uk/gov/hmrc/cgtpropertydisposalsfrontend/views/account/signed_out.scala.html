@@ -26,7 +26,7 @@
   govukButton: GovukButton
 )
 
-@()(implicit messages: Messages, appConfig: ViewConfig, request: Request[_])
+@()(implicit messages: Messages, appConfig: ViewConfig, request: Request[?])
 
 @title = @{messages("signed-out.title")}
 

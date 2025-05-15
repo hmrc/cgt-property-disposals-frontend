@@ -39,7 +39,7 @@
     isIndirectDisposal: Boolean,
     isFurtherOrAmendReturn: Option[Boolean],
     backLink: Call
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "amendCya" }
 

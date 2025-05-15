@@ -49,7 +49,7 @@
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
     returnType: ReturnType
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @title = @{messages("viewReturn.title")}
 @amountOwed = @{returnSummary.mainReturnChargeAmount}
@@ -113,14 +113,14 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
             None,
             "date-sent-table"
         )
-        @{if(amountOwed.isPositive) {
-            cyaRow(
+        @if(amountOwed.isPositive) {
+            @cyaRow(
                 messages(s"$key.returnReference"),
                 Html(returnSummary.submissionId),
                 None,
                 "return-reference-table"
             )
-        }}
+        }
         @cyaRow(
             propertyAddressLabel,
             completeReturn match {

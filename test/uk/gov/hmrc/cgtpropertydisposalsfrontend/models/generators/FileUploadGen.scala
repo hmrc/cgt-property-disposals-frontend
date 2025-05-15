@@ -16,28 +16,31 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import org.scalacheck.Gen
+import org.scalacheck.{Arbitrary, Gen}
+import io.github.martinhh.derived.scalacheck.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.uploadReferenceGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadRequest, UpscanUpload}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UploadRequest, UpscanCallBack, UpscanUpload}
 
 object FileUploadGen extends GenUtils {
 
-  implicit val completeUploadSupportingEvidenceAnswersGen: Gen[CompleteSupportingEvidenceAnswers] =
+  given completeUploadSupportingEvidenceAnswersGen: Gen[CompleteSupportingEvidenceAnswers] =
     gen[CompleteSupportingEvidenceAnswers]
 
-  implicit val incompleteUploadSupportingEvidenceAnswersGen: Gen[IncompleteSupportingEvidenceAnswers] =
+  given incompleteUploadSupportingEvidenceAnswersGen: Gen[IncompleteSupportingEvidenceAnswers] =
     gen[IncompleteSupportingEvidenceAnswers]
 
-  implicit val supportingEvidenceGen: Gen[SupportingEvidence] =
-    gen[SupportingEvidence]
+  given uploadReferenceArb: Arbitrary[UploadReference] = Arbitrary(uploadReferenceGen)
+  given supportingEvidenceGen: Gen[SupportingEvidence] = gen[SupportingEvidence]
 
-  implicit val uploadRequestGen: Gen[UploadRequest] = gen[UploadRequest]
+  given uploadRequestGen: Gen[UploadRequest] = gen[UploadRequest]
 
-  implicit val upscanUploadGen: Gen[UpscanUpload] = gen[UpscanUpload]
+  given upscanUploadGen: Gen[UpscanUpload] = gen[UpscanUpload]
 
-  implicit val upscanSuccessGen: Gen[UpscanSuccess] = gen[UpscanSuccess]
+  given upscanSuccessGen: Gen[UpscanSuccess] = gen[UpscanSuccess]
 
-  implicit val upscanFailureGen: Gen[UpscanFailure] = gen[UpscanFailure]
+  given upscanFailureGen: Gen[UpscanFailure] = gen[UpscanFailure]
 
+  given Gen[UpscanCallBack] = Gen.oneOf(upscanSuccessGen, upscanFailureGen)
 }

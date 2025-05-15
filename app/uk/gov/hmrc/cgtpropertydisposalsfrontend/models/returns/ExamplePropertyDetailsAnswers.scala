@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
 import monocle.Lens
-import monocle.macros.Lenses
+import monocle.macros.GenLens
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
@@ -27,7 +26,6 @@ sealed trait ExamplePropertyDetailsAnswers extends Product with Serializable
 
 object ExamplePropertyDetailsAnswers {
 
-  @Lenses
   final case class IncompleteExamplePropertyDetailsAnswers(
     address: Option[UkAddress],
     disposalDate: Option[DisposalDate],
@@ -36,6 +34,11 @@ object ExamplePropertyDetailsAnswers {
   ) extends ExamplePropertyDetailsAnswers
 
   object IncompleteExamplePropertyDetailsAnswers {
+    val address          = GenLens[IncompleteExamplePropertyDetailsAnswers](_.address)
+    val disposalPrice    = GenLens[IncompleteExamplePropertyDetailsAnswers](_.disposalPrice)
+    val disposalDate     = GenLens[IncompleteExamplePropertyDetailsAnswers](_.disposalDate)
+    val acquisitionPrice = GenLens[IncompleteExamplePropertyDetailsAnswers](_.acquisitionPrice)
+
     val empty: IncompleteExamplePropertyDetailsAnswers =
       IncompleteExamplePropertyDetailsAnswers(None, None, None, None)
 
@@ -75,7 +78,7 @@ object ExamplePropertyDetailsAnswers {
         A
       ]]
     ): IncompleteExamplePropertyDetailsAnswers =
-      fieldLens(IncompleteExamplePropertyDetailsAnswers).set(None)(
+      fieldLens(IncompleteExamplePropertyDetailsAnswers).replace(None)(
         fold(
           identity,
           IncompleteExamplePropertyDetailsAnswers.fromCompleteAnswers
@@ -84,7 +87,33 @@ object ExamplePropertyDetailsAnswers {
 
   }
 
-  implicit val ukAddressFormat: OFormat[UkAddress]            = Json.format
-  implicit val format: OFormat[ExamplePropertyDetailsAnswers] = derived.oformat()
+  implicit val ukAddressFormat: OFormat[UkAddress] = Json.format
+
+  implicit val completeExamplePropertyDetailsAnswersFormat: OFormat[CompleteExamplePropertyDetailsAnswers]     =
+    Json.format[CompleteExamplePropertyDetailsAnswers]
+  implicit val incompleteExamplePropertyDetailsAnswersFormat: OFormat[IncompleteExamplePropertyDetailsAnswers] =
+    Json.format[IncompleteExamplePropertyDetailsAnswers]
+
+  import play.api.libs.json._
+
+  implicit val format: OFormat[ExamplePropertyDetailsAnswers] = new OFormat[ExamplePropertyDetailsAnswers] {
+    override def reads(json: JsValue): JsResult[ExamplePropertyDetailsAnswers] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("IncompleteExamplePropertyDetailsAnswers", value) =>
+            value.validate[IncompleteExamplePropertyDetailsAnswers]
+          case ("CompleteExamplePropertyDetailsAnswers", value)   => value.validate[CompleteExamplePropertyDetailsAnswers]
+          case (other, _)                                         => JsError(s"Unrecognized ExamplePropertyDetailsAnswers type: $other")
+        }
+      case _                                    => JsError("Expected ExamplePropertyDetailsAnswers wrapper object with a single entry")
+    }
+
+    override def writes(o: ExamplePropertyDetailsAnswers): JsObject = o match {
+      case i: IncompleteExamplePropertyDetailsAnswers =>
+        Json.obj("IncompleteExamplePropertyDetailsAnswers" -> Json.toJson(i))
+      case c: CompleteExamplePropertyDetailsAnswers   =>
+        Json.obj("CompleteExamplePropertyDetailsAnswers" -> Json.toJson(c))
+    }
+  }
 
 }

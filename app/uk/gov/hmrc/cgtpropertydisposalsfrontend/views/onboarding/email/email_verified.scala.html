@@ -28,7 +28,7 @@
   govukButton: GovukButton
 )
 
-@(email: Email, continueCall: Call, emailJourneyType: EmailJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(email: Email, continueCall: Call, emailJourneyType: EmailJourneyType)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("confirmEmail.verified.title")}
 

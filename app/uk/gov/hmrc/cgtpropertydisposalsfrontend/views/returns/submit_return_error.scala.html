@@ -25,7 +25,7 @@
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk
 )
 
-@()(implicit request: RequestWithSessionData[_], messages: Messages)
+@()(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"submitReturnError"}
 @title = @{messages(s"$key.title")}

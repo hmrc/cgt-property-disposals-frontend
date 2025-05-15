@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsError, JsObject, JsResult, JsValue, Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.UpscanSuccess
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUploadMeta}
 
@@ -70,7 +69,32 @@ object SupportingEvidenceAnswers {
 
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[SupportingEvidenceAnswers] = derived.oformat()
+  implicit val completeFormat: OFormat[CompleteSupportingEvidenceAnswers]     =
+    Json.format[CompleteSupportingEvidenceAnswers]
+  implicit val inCompleteFormat: OFormat[IncompleteSupportingEvidenceAnswers] =
+    Json.format[IncompleteSupportingEvidenceAnswers]
+
+  implicit val format: OFormat[SupportingEvidenceAnswers] = new OFormat[SupportingEvidenceAnswers] {
+    override def reads(json: JsValue): JsResult[SupportingEvidenceAnswers] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("IncompleteSupportingEvidenceAnswers", value) =>
+            value.validate[IncompleteSupportingEvidenceAnswers]
+          case ("CompleteSupportingEvidenceAnswers", value)   =>
+            value.validate[CompleteSupportingEvidenceAnswers]
+          case (other, _)                                     =>
+            JsError(s"Unrecognized SupportingEvidenceAnswers type: $other")
+        }
+      case _                                    =>
+        JsError("Expected SupportingEvidenceAnswers wrapper object with a single entry")
+    }
+
+    override def writes(a: SupportingEvidenceAnswers): JsObject = a match {
+      case i: IncompleteSupportingEvidenceAnswers =>
+        Json.obj("IncompleteSupportingEvidenceAnswers" -> Json.toJson(i))
+      case c: CompleteSupportingEvidenceAnswers   =>
+        Json.obj("CompleteSupportingEvidenceAnswers" -> Json.toJson(c))
+    }
+  }
 
 }

@@ -36,18 +36,18 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOut
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalMethodGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
@@ -282,7 +282,7 @@ class DisposalDetailsControllerSpec
   val acceptedIndividualUserType: Gen[IndividualUserType] =
     individualUserTypeGen.filter {
       case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
-      case _                                                                                 => false
+      case null                                                                              => false
     }
 
   "DisposalDetailsController" when {
@@ -407,7 +407,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.howMuchDidYouOwnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -826,7 +826,7 @@ class DisposalDetailsControllerSpec
                 disposalMethod: DisposalMethod,
                 individualUserType: IndividualUserType
               ) =>
-                forAll { c: CompleteDisposalDetailsAnswers =>
+                forAll { (c: CompleteDisposalDetailsAnswers) =>
                   val currentAnswers                  =
                     c.copy(shareOfProperty = ShareOfProperty.Full)
                   val percentage                      = 40.23
@@ -1028,7 +1028,7 @@ class DisposalDetailsControllerSpec
         individualUserType: IndividualUserType,
         userType: UserType
       ): Seq[(DisposalMethod, ShareOfProperty, String)] = {
-        val userMsgKey = userMessageKey(individualUserType, userType)
+        val userMsgKey                                                            = userMessageKey(individualUserType, userType)
         def row(disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty) = {
           val expectedMessage = (disposalMethod, individualUserType, userType) match {
             case (_, Capacitor | PersonalRepresentative, _)                             => "disposalPrice.1.title"
@@ -1195,7 +1195,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWasDisposalPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1300,7 +1300,7 @@ class DisposalDetailsControllerSpec
                 errorContext = Some(s"$key$userKey$disposalMethodKey")
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData: _*)(scenario.expectedErrorMessageKey)(
+                  test(scenario.formData*)(scenario.expectedErrorMessageKey)(
                     disposalMethod,
                     userType,
                     individualUserType
@@ -1834,7 +1834,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWasDisposalPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1933,7 +1933,7 @@ class DisposalDetailsControllerSpec
                 errorContext = Some(s"$key$userKey.indirect$disposalMethodKey")
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData: _*)(scenario.expectedErrorMessageKey)(
+                  test(scenario.formData*)(scenario.expectedErrorMessageKey)(
                     disposalMethod,
                     userType,
                     individualUserType
@@ -2334,7 +2334,7 @@ class DisposalDetailsControllerSpec
           }
           (disposalMethod, shareOfProperty, expectedMessage)
         }
-        val userKey = userMessageKey(individualUserType, userType)
+        val userKey                                                               = userMessageKey(individualUserType, userType)
         List(
           (DisposalMethod.Sold, ShareOfProperty.Full, s"disposalFees$userKey.title"),
           (DisposalMethod.Gifted, ShareOfProperty.Full, s"disposalFees$userKey.title"),
@@ -2517,7 +2517,7 @@ class DisposalDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWereDisposalFeesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -2643,7 +2643,7 @@ class DisposalDetailsControllerSpec
                 errorContext = Some(s"disposalFees$userKey")
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData: _*)(scenario.expectedErrorMessageKey)(
+                  test(scenario.formData*)(scenario.expectedErrorMessageKey)(
                     disposalMethod,
                     userType,
                     individualUserType
@@ -3317,7 +3317,7 @@ class DisposalDetailsControllerSpec
                 userMessageKey(
                   individualUserType,
                   userType
-                ) //TODO - change when the CYA changes go in
+                ) // TODO - change when the CYA changes go in
               doc
                 .select("#propertyShare-question")
                 .text() shouldBe messageFromMessageKey(

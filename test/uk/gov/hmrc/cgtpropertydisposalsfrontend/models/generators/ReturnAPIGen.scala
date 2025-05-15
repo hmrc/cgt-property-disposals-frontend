@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,17 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import org.scalacheck.Arbitrary
+import io.github.martinhh.derived.scalacheck.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.B64Html
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, SubmitReturnRequest, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, SubmitReturnRequest, SubmitReturnResponse}
 
 object ReturnAPIGen extends Common {
 
-  implicit val submitReturnRequestGen: Gen[SubmitReturnRequest] = for {
+  given submitReturnRequestGen: Gen[SubmitReturnRequest] = for {
     completeReturn          <- ReturnGen.completeReturnGen
     id                      <- Gen.uuid
     subscribedDetails       <- SubscribedDetailsGen.subscribedDetailsGen
@@ -41,14 +45,14 @@ object ReturnAPIGen extends Common {
     amendReturnData
   )
 
-  implicit val submitReturnResponseGen: Gen[SubmitReturnResponse] =
+  given submitReturnResponseGen: Gen[SubmitReturnResponse] =
     gen[SubmitReturnResponse]
 
-  implicit val listReturnsResponseGen: Gen[ListReturnsResponse] = for {
+  given listReturnsResponseGen: Gen[ListReturnsResponse] = for {
     returns <- Gen.listOf(ReturnGen.returnSummaryGen)
   } yield ListReturnsResponse(returns)
 
-  implicit val calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] =
+  given calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] =
     for {
       triageAnswers      <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
       address            <- AddressGen.ukAddressGen

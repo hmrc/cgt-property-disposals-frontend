@@ -32,20 +32,20 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.ukAddressGen
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
@@ -200,7 +200,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
         sessionData: SessionData,
         expected: FurtherReturnCalculationEligibility
       )(service: FurtherReturnCalculationEligibilityUtil): Assertion = {
-        implicit val request: RequestWithSessionData[_] = requestWithSessionData(sessionData)
+        implicit val request: RequestWithSessionData[?] = requestWithSessionData(sessionData)
         await(service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn).value) shouldBe Right(expected)
       }
 
@@ -621,10 +621,10 @@ class FurtherReturnCalculationEligibilityUtilSpec
           service: FurtherReturnCalculationEligibilityUtilImpl
         ): Unit = {
           val sessionData                                 = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
-          implicit val request: RequestWithSessionData[_] = requestWithSessionData(sessionData)
+          implicit val request: RequestWithSessionData[?] = requestWithSessionData(sessionData)
 
           val result = service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
-          await(result.value) shouldBe a[Left[_, _]]
+          await(result.value) shouldBe a[Left[?, ?]]
         }
 
         "the triage section isn't complete in a DraftSingleDisposalReturn" in new TestEnvironment() {
@@ -701,7 +701,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
           }
 
           private val result = service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
-          await(result.value) shouldBe a[Left[_, _]]
+          await(result.value) shouldBe a[Left[?, ?]]
         }
 
         "there is an error updating the session" in new TestEnvironment() {
@@ -734,7 +734,7 @@ class FurtherReturnCalculationEligibilityUtilSpec
             )(Left(Error("")))
 
             val result = service.isEligibleForFurtherReturnOrAmendCalculation(fillingOutReturn)
-            await(result.value) shouldBe a[Left[_, _]]
+            await(result.value) shouldBe a[Left[?, ?]]
           }
 
         }
