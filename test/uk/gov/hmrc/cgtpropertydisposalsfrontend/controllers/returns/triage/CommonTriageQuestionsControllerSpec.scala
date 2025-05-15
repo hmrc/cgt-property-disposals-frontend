@@ -1828,7 +1828,7 @@ class CommonTriageQuestionsControllerSpec
                   .select("#content > article > p:nth-child(4), #main-content p:nth-child(3)")
                   .html()                                          shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.uk.p2",
-                  viewConfig.cgtLegacyUrl
+                  viewConfig.cgtModernUrl
                 )
               }
             )
@@ -2097,11 +2097,14 @@ class CommonTriageQuestionsControllerSpec
 
                 doc
                   .select("#content > article > p:nth-child(3), #main-content p:nth-child(2)")
-                  .text()                                          shouldBe messageFromMessageKey(expectedP1Key)
+                  .text() shouldBe messageFromMessageKey(expectedP1Key)
 
                 doc
                   .select("#content > article > p:nth-child(4), #main-content p:nth-child(3)")
-                  .html()                                          shouldBe messageFromMessageKey("ukResidentCanOnlyReportResidential.p2",viewConfig.cgtModernUrl)
+                  .html() shouldBe messageFromMessageKey(
+                  "ukResidentCanOnlyReportResidential.p2",
+                  viewConfig.cgtModernUrl
+                )
               }
             )
 
