@@ -38,7 +38,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val additionalNeedsUrl: String                      = getString("external-url.additional-needs")
   val taxSellHomeUrl: String                          = getString("external-url.tax-sell-home")
   val cgtUrl: String                                  = getString("external-url.capital-gains-tax")
-  val cgtLegacyUrl: String                            = getString("external-url.capital-gains-tax-legacy")
+  val cgtModernUrl: String                            = getString("external-url.capital-gains-tax-modern")
   val legacyCgtNonResidentUrl: String                 = getString("external-url.legacy-cgt-non-resident")
   val agentsStartPageUrl: String                      = getString("external-url.agents-start-page")
   val createAgentsAccountUrl: String                  = getString("external-url.create-agents-account")

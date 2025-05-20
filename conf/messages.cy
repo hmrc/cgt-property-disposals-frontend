@@ -1014,14 +1014,14 @@ didYouDisposeOfResidentialProperty.personalRepInPeriodOfAdmin.error.boolean=Dewi
 didYouDisposeOfResidentialProperty.cyaChange=p’un a gafodd eiddo preswyl yn y DU ei waredu
 
 ukResidentCanOnlyReportResidential.title=Ni allwch ddefnyddio’r gwasanaeth hwn
-ukResidentCanOnlyReportResidential.p1=Gwnaethoch ddweud wrthym eich bod yn breswylydd yn y DU ar y diwrnod y gwnaethoch werthu neu waredu eiddo yn y DU. Dim ond i roi gwybod am eiddo preswyl yn y DU y gallwch ddefnyddio’r gwasanaeth hwn.
+ukResidentCanOnlyReportResidential.p1=Gallwch ond defnyddio’r gwasanaeth hwn ar gyfer eiddo preswyl yn unig. Mae hyn oherwydd eich bod yn breswylydd yn y DU pan wnaethoch werthu neu roi’r eiddo i ffwrdd.
 ukResidentCanOnlyReportResidential.agent.p1=Gwnaethoch roi gwybod i ni fod eich cleient yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
 ukResidentCanOnlyReportResidential.trust.p1=Gwnaethoch roi gwybod i ni fod yr ymddiriedolaeth yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
 ukResidentCanOnlyReportResidential.capacitor.p1=Gwnaethoch roi gwybod i ni fod y person yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
 ukResidentCanOnlyReportResidential.personalRep.p1=Gwnaethoch roi gwybod i ni fod y person yn breswylydd yn y DU ar y diwrnod pan wnaeth werthu neu waredu’r eiddo yn y DU. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
 ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.p1=Gwnaethoch roi gwybod i ni fod y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
 ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.agent.p1=Gwnaethoch roi gwybod i ni fod eich cleient yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi. Gallwch dim ond defnyddio’r gwasanaeth hwn i roi gwybod am werthiannau neu warediadau eiddo yn y DU.
-ukResidentCanOnlyReportResidential.p2=Dysgwch sut i roi gwybod am a thalu Treth Enillion Cyfalaf ar <a class="govuk-link" href="{0}">werthiannau neu warediadau eiddo dibreswyl yn y DU</a>.
+ukResidentCanOnlyReportResidential.p2=Dysgwch sut i <a class="govuk-link" href="{0}"> roi gwybod am Dreth Enillion Cyfalaf a’i thalu ar eiddo dibreswyl</a>.
 
 disposalDate.title=Ar ba ddyddiad y gwnaethoch gyfnewid contractau wrth waredu’r eiddo?
 disposalDate.agent.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
