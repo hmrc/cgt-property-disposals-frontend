@@ -86,8 +86,7 @@ class UpscanConnectorImplSpec
         s"http://$wireMockHost:$wireMockPort/cgt-property-disposals/upscan-call-back/upload-reference/${reference.value}",
         s"host1.com${mockSuccess.url}",
         s"host1.com${mockFailure.url}",
-        0,
-        1234
+        maximumFileSize = 1234
       )
       behave like upscanConnectorBehaviour(
         when(POST, expectedUrl, body = Some(Json.toJson(payload).toString())),
