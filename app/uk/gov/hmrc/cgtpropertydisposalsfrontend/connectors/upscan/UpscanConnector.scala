@@ -89,8 +89,7 @@ class UpscanConnectorImpl @Inject() (
       backEndBaseUrl + s"/cgt-property-disposals/upscan-call-back/upload-reference/${uploadReference.value}",
       selfBaseUrl + successRedirect.url,
       selfBaseUrl + errorRedirect.url,
-      0,
-      maxFileSize
+      maximumFileSize = maxFileSize
     )
 
     logger.info(
