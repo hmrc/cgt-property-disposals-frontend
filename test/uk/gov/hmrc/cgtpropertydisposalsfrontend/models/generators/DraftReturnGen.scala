@@ -17,16 +17,19 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.{Arbitrary, Gen}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import io.github.martinhh.derived.scalacheck.{*, given}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.given
 
 import java.time.LocalDate
 
 object DraftReturnGen extends HigherPriorityDraftReturnGen with GenUtils
 
 trait HigherPriorityDraftReturnGen extends LowerPriorityDraftReturnGen {
-  implicit val singleDisposalDraftReturnGen: Gen[DraftSingleDisposalReturn] = singleDisposalDraftReturnGen2
+  given singleDisposalDraftReturnGen: Gen[DraftSingleDisposalReturn] = singleDisposalDraftReturnGen2
 
-  implicit val draftReturnGen: Gen[DraftReturn] = Gen.oneOf(
+  given draftReturnGen: Gen[DraftReturn] = Gen.oneOf(
     singleDisposalDraftReturnGen,
     singleIndirectDisposalDraftReturnGen,
     singleMixedUseDraftReturnGen,
@@ -37,7 +40,8 @@ trait HigherPriorityDraftReturnGen extends LowerPriorityDraftReturnGen {
 
 trait LowerPriorityDraftReturnGen extends GenUtils {
 
-  private val supportingEvidenceGen: Gen[SupportingEvidenceAnswers]  = gen[SupportingEvidenceAnswers]
+  given supportingEvidenceGen: Gen[SupportingEvidenceAnswers] = gen[SupportingEvidenceAnswers]
+
   private val exemptionsAndLossesAnswersGen                          = Gen.oneOf(
     ExemptionsAndLossesAnswersGen.completeExemptionAndLossesAnswersGen,
     ExemptionsAndLossesAnswersGen.incompleteExemptionAndLossesAnswersGen
@@ -47,9 +51,10 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       DisposalDetailsGen.completeDisposalDetailsAnswersGen,
       DisposalDetailsGen.incompleteDisposalDetailsAnswersGen
     )
-  private val acquisitionDetailsAnswersGen                           = gen[AcquisitionDetailsAnswers]
 
-  val singleDisposalDraftReturnGen2: Gen[DraftSingleDisposalReturn] =
+  given acquisitionDetailsAnswersGen: Gen[AcquisitionDetailsAnswers] = gen[AcquisitionDetailsAnswers]
+
+  given singleDisposalDraftReturnGen2: Gen[DraftSingleDisposalReturn] =
     for {
       id                         <- Gen.uuid
       triageAnswers              <- TriageQuestionsGen.singleDisposalTraiageAnswersGen
@@ -80,11 +85,16 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       lastUpdatedDate
     )
 
-  implicit val multipleDisposalDraftReturnGen: Gen[DraftMultipleDisposalsReturn] = {
+  given multipleDisposalDraftReturnGen: Gen[DraftMultipleDisposalsReturn] =
     for {
       id                            <- Gen.uuid
       triageAnswers                 <- TriageQuestionsGen.multipleDisposalsTriageAnswersGen
-      examplePropertyDetailsAnswers <- Gen.option(gen[ExamplePropertyDetailsAnswers])
+      examplePropertyDetailsAnswers <- Gen.option(
+                                         Gen.oneOf(
+                                           ExamplePropertyDetailsAnswersGen.completeExamplePropertyDetailsAnswersGen,
+                                           ExamplePropertyDetailsAnswersGen.incompleteExamplePropertyDetailsAnswersGen
+                                         )
+                                       )
       exemptionAndLossesAnswers     <- Gen.option(exemptionsAndLossesAnswersGen)
       yearToDateLiabilityAnswers    <- Gen.option(YearToDateLiabilityAnswersGen.ytdLiabilityAnswersGen)
       supportingEvidenceAnswers     <- Gen.option(supportingEvidenceGen)
@@ -102,13 +112,17 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       gainOrLossAfterReliefs,
       lastUpdatedDate
     )
-  }
 
-  implicit val multipleIndirectDisposalDraftReturnGen: Gen[DraftMultipleIndirectDisposalsReturn] = {
+  given multipleIndirectDisposalDraftReturnGen: Gen[DraftMultipleIndirectDisposalsReturn] =
     for {
       id                           <- Gen.uuid
       triageAnswers                <- TriageQuestionsGen.multipleDisposalsTriageAnswersGen
-      exampleCompanyDetailsAnswers <- Gen.option(gen[ExampleCompanyDetailsAnswers])
+      exampleCompanyDetailsAnswers <- Gen.option(
+                                        Gen.oneOf(
+                                          ExampleCompanyDetailsAnswersGen.completeExampleCompanyDetailsAnswersGen,
+                                          ExampleCompanyDetailsAnswersGen.incompleteExampleCompanyDetailsAnswersGen
+                                        )
+                                      )
       exemptionAndLossesAnswers    <- Gen.option(exemptionsAndLossesAnswersGen)
       yearToDateLiabilityAnswers   <- Gen.option(YearToDateLiabilityAnswersGen.ytdLiabilityAnswersGen)
       supportingEvidenceAnswers    <- Gen.option(supportingEvidenceGen)
@@ -126,9 +140,8 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       gainOrLossAfterReliefs,
       lastUpdatedDate
     )
-  }
 
-  implicit val singleIndirectDisposalDraftReturnGen: Gen[DraftSingleIndirectDisposalReturn] =
+  given singleIndirectDisposalDraftReturnGen: Gen[DraftSingleIndirectDisposalReturn] =
     for {
       id                         <- Gen.uuid
       triageAnswers              <- TriageQuestionsGen.singleDisposalTraiageAnswersGen
@@ -155,11 +168,16 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       lastUpdatedDate
     )
 
-  implicit val singleMixedUseDraftReturnGen: Gen[DraftSingleMixedUseDisposalReturn] =
+  given singleMixedUseDraftReturnGen: Gen[DraftSingleMixedUseDisposalReturn] =
     for {
       id                             <- Gen.uuid
       triageAnswers                  <- TriageQuestionsGen.singleDisposalTraiageAnswersGen
-      mixedUsePropertyDetailsAnswers <- Gen.option(gen[MixedUsePropertyDetailsAnswers])
+      mixedUsePropertyDetailsAnswers <- Gen.option(
+                                          Gen.oneOf(
+                                            SingleMixedUseDetailsAnswersGen.given_Gen_CompleteMixedUsePropertyDetailsAnswers,
+                                            SingleMixedUseDetailsAnswersGen.given_Gen_IncompleteMixedUsePropertyDetailsAnswers
+                                          )
+                                        )
       exemptionAndLossesAnswers      <- Gen.option(exemptionsAndLossesAnswersGen)
       yearToDateLiabilityAnswers     <- Gen.option(YearToDateLiabilityAnswersGen.ytdLiabilityAnswersGen)
       supportingEvidenceAnswers      <- Gen.option(supportingEvidenceGen)

@@ -21,13 +21,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 
 object ExemptionsAndLossesAnswersGen extends GenUtils {
 
-  implicit val completeExemptionAndLossesAnswersGen: Gen[CompleteExemptionAndLossesAnswers] = {
+  implicit val completeExemptionAndLossesAnswersGen: Gen[CompleteExemptionAndLossesAnswers] =
     for {
       inYearLosses        <- MoneyGen.amountInPenceGen
       previousYearsLosses <- MoneyGen.amountInPenceGen
       annualExemptAmount  <- MoneyGen.amountInPenceGen
     } yield CompleteExemptionAndLossesAnswers(inYearLosses, previousYearsLosses, annualExemptAmount)
-  }
 
   implicit val incompleteExemptionAndLossesAnswersGen: Gen[IncompleteExemptionAndLossesAnswers] =
     for {

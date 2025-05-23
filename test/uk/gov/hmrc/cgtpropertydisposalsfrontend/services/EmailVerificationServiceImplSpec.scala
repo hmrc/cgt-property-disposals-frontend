@@ -21,10 +21,11 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.mvc.Call
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
@@ -35,7 +36,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class EmailVerificationServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
+class EmailVerificationServiceImplSpec extends AnyWordSpec with Matchers with MockFactory with GuiceOneServerPerSuite {
 
   private val mockConnector = mock[EmailVerificationConnector]
 
@@ -52,8 +53,7 @@ class EmailVerificationServiceImplSpec extends AnyWordSpec with Matchers with Mo
       .expects(expectedEmail, expectedName, expectedContinueCall, expectedLanguage, *)
       .returning(EitherT.fromEither[Future](result))
 
-  val service =
-    new EmailVerificationServiceImpl(mockConnector, MockMetrics.metrics)
+  val service = new EmailVerificationServiceImpl(mockConnector, app.injector.instanceOf[Metrics])
 
   private val emptyJsonBody = "{}"
 

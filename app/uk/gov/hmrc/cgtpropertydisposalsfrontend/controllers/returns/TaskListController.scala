@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{tasklist => taskListPages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -89,7 +89,7 @@ class TaskListController @Inject() (
     draftReturn: DraftReturn,
     journey: FillingOutReturn
   )(implicit
-    request: RequestWithSessionData[_],
+    request: RequestWithSessionData[?],
     hc: HeaderCarrier
   ) = {
     val updatedUploadSupportingEvidenceAnswers =
@@ -175,7 +175,7 @@ class TaskListController @Inject() (
       for {
         _ <- returnsService.storeDraftReturn(journey)
         _ <- EitherT(
-               updateSession(sessionStore, request)(
+               updateSession(sessionStore, request.toSession)(
                  _.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
                )
              )

@@ -44,7 +44,7 @@
     dateOfDeath: Option[DateOfDeath],
     isAmend: Boolean,
     addressCaption: String
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "multipleDisposalsAcquisitionPrice" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }

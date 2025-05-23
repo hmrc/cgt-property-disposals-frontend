@@ -29,7 +29,7 @@
 
 @(backLink: Call,
         isATrust: Boolean,
-representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[?], messages: Messages, appConfig: ViewConfig)
 
 
 @key = @{"ukResidentCanOnlyReportResidential"}

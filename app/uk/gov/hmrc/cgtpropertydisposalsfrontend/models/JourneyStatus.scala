@@ -18,8 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Eq
 import cats.implicits.catsSyntaxPartialOrder
-import julienrf.json.derived
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
@@ -181,7 +180,7 @@ object JourneyStatus {
     agentReferenceNumber: Option[AgentReferenceNumber]
   ) extends JourneyStatus
 
-  //in progress submission
+  // in progress submission
   final case class SubmittingReturn(
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
@@ -255,7 +254,7 @@ object JourneyStatus {
 
   }
 
-  final case object Registering extends JourneyStatus
+  case object Registering extends JourneyStatus
 
   object AgentStatus {
 
@@ -270,8 +269,10 @@ object JourneyStatus {
       correctVerifierSupplied: Boolean
     )
 
-    implicit val verifierMatchingDetailsFormat: OFormat[VerifierMatchingDetails] =
-      Json.format
+    implicit val agentSupplyingClientDetailsFormat: OFormat[AgentSupplyingClientDetails] =
+      Json.format[AgentSupplyingClientDetails]
+    implicit val verifierMatchingDetailsFormat: OFormat[VerifierMatchingDetails]         =
+      Json.format[VerifierMatchingDetails]
 
   }
 
@@ -286,9 +287,9 @@ object JourneyStatus {
     implicit val format: OFormat[PreviousReturnData] = Json.format
   }
 
-  final case object NonGovernmentGatewayJourney extends JourneyStatus
+  case object NonGovernmentGatewayJourney extends JourneyStatus
 
-  final case object AgentWithoutAgentEnrolment extends JourneyStatus
+  case object AgentWithoutAgentEnrolment extends JourneyStatus
 
   implicit class StartingNewDraftReturnOps(private val s: StartingNewDraftReturn) extends AnyVal {
 
@@ -357,8 +358,127 @@ object JourneyStatus {
     }
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[JourneyStatus] = derived.oformat()
+  import AgentStatus.*
+  import SubscriptionStatus.*
+  import RegistrationStatus.*
+
+  implicit val trustSubscriptionFormat: OFormat[DeterminingIfOrganisationIsTrust]    =
+    Json.format[DeterminingIfOrganisationIsTrust]
+  implicit val footprintSubscriptionFormat: OFormat[TryingToGetIndividualsFootprint] =
+    Json.format[TryingToGetIndividualsFootprint]
+  implicit val missingSubscriptionFormat: OFormat[SubscriptionMissingData]           = Json.format[SubscriptionMissingData]
+  implicit val readySubscriptionFormat: OFormat[SubscriptionReady]                   = Json.format[SubscriptionReady]
+  implicit val submittingSubscriptionFormat: OFormat[SubmittingReturn]               = Json.format[SubmittingReturn]
+  implicit val statusSubscriptionFormat: OFormat[SubscriptionStatus]                 = Json.format[SubscriptionStatus]
+
+  implicit val newEnrolmentCreatedFormat: OFormat[NewEnrolmentCreatedForMissingEnrolment]                      =
+    Json.format[NewEnrolmentCreatedForMissingEnrolment]
+  implicit val subscribedFormat: OFormat[Subscribed]                                                           = Json.format[Subscribed]
+  implicit val startingNewDraftReturnFormat: OFormat[StartingNewDraftReturn]                                   =
+    Json.format[StartingNewDraftReturn]
+  implicit val fillingOutReturnFormat: OFormat[FillingOutReturn]                                               = Json.format[FillingOutReturn]
+  implicit val justSubmittedReturnFormat: OFormat[JustSubmittedReturn]                                         = Json.format[JustSubmittedReturn]
+  implicit val submitReturnFailedFormat: OFormat[SubmitReturnFailed]                                           = Json.format[SubmitReturnFailed]
+  implicit val viewingReturnFormat: OFormat[ViewingReturn]                                                     = Json.format[ViewingReturn]
+  implicit val startingToAmendReturnFormat: OFormat[StartingToAmendReturn]                                     =
+    Json.format[StartingToAmendReturn]
+  implicit val alreadySubscribedWithDifferentGGAccountFormat: OFormat[AlreadySubscribedWithDifferentGGAccount] =
+    Json.format[AlreadySubscribedWithDifferentGGAccount]
+
+  implicit val registrationReadyFormat: OFormat[RegistrationStatus.RegistrationReady]                           =
+    Json.format[RegistrationStatus.RegistrationReady]
+  implicit val individualWantsToRegisterTrustFormat: OFormat[RegistrationStatus.IndividualWantsToRegisterTrust] =
+    Json.format[RegistrationStatus.IndividualWantsToRegisterTrust]
+  implicit val individualSupplyingInformationFormat: OFormat[RegistrationStatus.IndividualSupplyingInformation] =
+    Json.format[RegistrationStatus.IndividualSupplyingInformation]
+  implicit val individualMissingEmailFormat: OFormat[RegistrationStatus.IndividualMissingEmail]                 =
+    Json.format[RegistrationStatus.IndividualMissingEmail]
+  implicit val registrationStatusFormat: OFormat[RegistrationStatus]                                            =
+    Json.format[RegistrationStatus]
+
+  implicit val registeringFormat: OFormat[Registering.type] = OFormat[Registering.type](
+    Reads[Registering.type] {
+      case JsObject(_) => JsSuccess(Registering)
+      case _           => JsError("Empty object expected")
+    },
+    OWrites[Registering.type](_ => Json.obj())
+  )
+
+  implicit val ggJourneyFormat: OFormat[NonGovernmentGatewayJourney.type] = OFormat[NonGovernmentGatewayJourney.type](
+    Reads[NonGovernmentGatewayJourney.type] {
+      case JsObject(_) => JsSuccess(NonGovernmentGatewayJourney)
+      case _           => JsError("No valid GG journey")
+    },
+    OWrites[NonGovernmentGatewayJourney.type](_ => Json.obj())
+  )
+
+  implicit val agentEnrolmentFormat: OFormat[AgentWithoutAgentEnrolment.type] =
+    OFormat[AgentWithoutAgentEnrolment.type](
+      Reads[AgentWithoutAgentEnrolment.type] {
+        case JsObject(_) => JsSuccess(AgentWithoutAgentEnrolment)
+        case _           => JsError("No valid agent enrolment")
+      },
+      OWrites[AgentWithoutAgentEnrolment.type](_ => Json.obj())
+    )
+
+  implicit val format: OFormat[JourneyStatus] = new OFormat[JourneyStatus] {
+    override def reads(json: JsValue): JsResult[JourneyStatus] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("Registering", _)                             => JsSuccess(Registering)
+          case ("NonGovernmentGatewayJourney", _)             => JsSuccess(NonGovernmentGatewayJourney)
+          case ("AgentWithoutAgentEnrolment", _)              => JsSuccess(AgentWithoutAgentEnrolment)
+          case ("DeterminingIfOrganisationIsTrust", v)        => v.validate[DeterminingIfOrganisationIsTrust]
+          case ("TryingToGetIndividualsFootprint", v)         => v.validate[TryingToGetIndividualsFootprint]
+          case ("SubscriptionMissingData", v)                 => v.validate[SubscriptionMissingData]
+          case ("SubscriptionReady", v)                       => v.validate[SubscriptionReady]
+          case ("SubmittingReturn", v)                        => v.validate[SubmittingReturn]
+          case ("NewEnrolmentCreatedForMissingEnrolment", v)  => v.validate[NewEnrolmentCreatedForMissingEnrolment]
+          case ("Subscribed", v)                              => v.validate[Subscribed]
+          case ("StartingNewDraftReturn", v)                  => v.validate[StartingNewDraftReturn]
+          case ("FillingOutReturn", v)                        => v.validate[FillingOutReturn]
+          case ("JustSubmittedReturn", v)                     => v.validate[JustSubmittedReturn]
+          case ("SubmitReturnFailed", v)                      => v.validate[SubmitReturnFailed]
+          case ("ViewingReturn", v)                           => v.validate[ViewingReturn]
+          case ("StartingToAmendReturn", v)                   => v.validate[StartingToAmendReturn]
+          case ("AlreadySubscribedWithDifferentGGAccount", v) => v.validate[AlreadySubscribedWithDifferentGGAccount]
+          case ("IndividualWantsToRegisterTrust", v)          => v.validate[IndividualWantsToRegisterTrust]
+          case ("IndividualSupplyingInformation", v)          => v.validate[IndividualSupplyingInformation]
+          case ("IndividualMissingEmail", v)                  => v.validate[IndividualMissingEmail]
+          case ("RegistrationReady", v)                       => v.validate[RegistrationReady]
+          case ("AgentSupplyingClientDetails", v)             => v.validate[AgentSupplyingClientDetails]
+          case _                                              => JsError("Unrecognized JourneyStatus type")
+        }
+      case _                                    => JsError("Expected wrapper object for JourneyStatus")
+    }
+
+    override def writes(o: JourneyStatus): JsObject = o match {
+      case Registering                                => Json.obj("Registering" -> Json.obj())
+      case NonGovernmentGatewayJourney                => Json.obj("NonGovernmentGatewayJourney" -> Json.obj())
+      case AgentWithoutAgentEnrolment                 => Json.obj("AgentWithoutAgentEnrolment" -> Json.obj())
+      case v: DeterminingIfOrganisationIsTrust        => Json.obj("DeterminingIfOrganisationIsTrust" -> Json.toJson(v))
+      case v: TryingToGetIndividualsFootprint         => Json.obj("TryingToGetIndividualsFootprint" -> Json.toJson(v))
+      case v: SubscriptionMissingData                 => Json.obj("SubscriptionMissingData" -> Json.toJson(v))
+      case v: SubscriptionReady                       => Json.obj("SubscriptionReady" -> Json.toJson(v))
+      case v: SubmittingReturn                        => Json.obj("SubmittingReturn" -> Json.toJson(v))
+      case v: NewEnrolmentCreatedForMissingEnrolment  =>
+        Json.obj("NewEnrolmentCreatedForMissingEnrolment" -> Json.toJson(v))
+      case v: Subscribed                              => Json.obj("Subscribed" -> Json.toJson(v))
+      case v: StartingNewDraftReturn                  => Json.obj("StartingNewDraftReturn" -> Json.toJson(v))
+      case v: FillingOutReturn                        => Json.obj("FillingOutReturn" -> Json.toJson(v))
+      case v: JustSubmittedReturn                     => Json.obj("JustSubmittedReturn" -> Json.toJson(v))
+      case v: SubmitReturnFailed                      => Json.obj("SubmitReturnFailed" -> Json.toJson(v))
+      case v: ViewingReturn                           => Json.obj("ViewingReturn" -> Json.toJson(v))
+      case v: StartingToAmendReturn                   => Json.obj("StartingToAmendReturn" -> Json.toJson(v))
+      case v: AlreadySubscribedWithDifferentGGAccount =>
+        Json.obj("AlreadySubscribedWithDifferentGGAccount" -> Json.toJson(v))
+      case v: IndividualWantsToRegisterTrust          => Json.obj("IndividualWantsToRegisterTrust" -> Json.toJson(v))
+      case v: IndividualSupplyingInformation          => Json.obj("IndividualSupplyingInformation" -> Json.toJson(v))
+      case v: IndividualMissingEmail                  => Json.obj("IndividualMissingEmail" -> Json.toJson(v))
+      case v: RegistrationReady                       => Json.obj("RegistrationReady" -> Json.toJson(v))
+      case v: AgentSupplyingClientDetails             => Json.obj("AgentSupplyingClientDetails" -> Json.toJson(v))
+    }
+  }
 
   implicit val eq: Eq[JourneyStatus] = Eq.fromUniversalEquals
 

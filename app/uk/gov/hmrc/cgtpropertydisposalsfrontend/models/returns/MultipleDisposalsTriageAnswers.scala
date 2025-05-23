@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import cats.instances.list._
-import cats.syntax.eq._
-import julienrf.json.derived
+import cats.instances.list.*
+import cats.syntax.eq.*
 import monocle.Lens
-import monocle.macros.Lenses
-import play.api.libs.json.OFormat
+import monocle.macros.GenLens
+import play.api.libs.json._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
@@ -32,7 +31,6 @@ sealed trait MultipleDisposalsTriageAnswers
 @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object MultipleDisposalsTriageAnswers {
 
-  @Lenses
   final case class IncompleteMultipleDisposalsTriageAnswers(
     individualUserType: Option[IndividualUserType],
     numberOfProperties: Option[Int],
@@ -47,6 +45,18 @@ object MultipleDisposalsTriageAnswers {
   ) extends MultipleDisposalsTriageAnswers
 
   object IncompleteMultipleDisposalsTriageAnswers {
+    val taxYear                      = GenLens[IncompleteMultipleDisposalsTriageAnswers](_.taxYear)
+    val assetTypes                   = GenLens[IncompleteMultipleDisposalsTriageAnswers](_.assetTypes)
+    val wasAUKResident               = GenLens[IncompleteMultipleDisposalsTriageAnswers](_.wasAUKResident)
+    val completionDate               = GenLens[IncompleteMultipleDisposalsTriageAnswers](_.completionDate)
+    val countryOfResidence           = GenLens[IncompleteMultipleDisposalsTriageAnswers](_.countryOfResidence)
+    val numberOfProperties           = GenLens[IncompleteMultipleDisposalsTriageAnswers](_.numberOfProperties)
+    val individualUserType           = GenLens[IncompleteMultipleDisposalsTriageAnswers](_.individualUserType)
+    val taxYearExchanged             = GenLens[IncompleteMultipleDisposalsTriageAnswers](_.taxYearExchanged)
+    val alreadySentSelfAssessment    = GenLens[IncompleteMultipleDisposalsTriageAnswers](_.alreadySentSelfAssessment)
+    val wereAllPropertiesResidential =
+      GenLens[IncompleteMultipleDisposalsTriageAnswers](_.wereAllPropertiesResidential)
+
     val empty: IncompleteMultipleDisposalsTriageAnswers =
       IncompleteMultipleDisposalsTriageAnswers(
         None,
@@ -107,7 +117,7 @@ object MultipleDisposalsTriageAnswers {
         Option[A]
       ]
     ): IncompleteMultipleDisposalsTriageAnswers =
-      fieldLens(IncompleteMultipleDisposalsTriageAnswers).set(None)(
+      fieldLens(IncompleteMultipleDisposalsTriageAnswers).replace(None)(
         fold(
           identity,
           IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers
@@ -136,7 +146,31 @@ object MultipleDisposalsTriageAnswers {
 
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[MultipleDisposalsTriageAnswers] =
-    derived.oformat()
+  implicit val completeMultipleDisposalsTriageAnswersFormat: OFormat[CompleteMultipleDisposalsTriageAnswers]     =
+    Json.format[CompleteMultipleDisposalsTriageAnswers]
+  implicit val incompleteMultipleDisposalsTriageAnswersFormat: OFormat[IncompleteMultipleDisposalsTriageAnswers] =
+    Json.format[IncompleteMultipleDisposalsTriageAnswers]
+
+  implicit val format: OFormat[MultipleDisposalsTriageAnswers] = new OFormat[MultipleDisposalsTriageAnswers] {
+    override def reads(json: JsValue): JsResult[MultipleDisposalsTriageAnswers] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("IncompleteMultipleDisposalsTriageAnswers", value) =>
+            value.validate[IncompleteMultipleDisposalsTriageAnswers]
+          case ("CompleteMultipleDisposalsTriageAnswers", value)   =>
+            value.validate[CompleteMultipleDisposalsTriageAnswers]
+          case (other, _)                                          =>
+            JsError(s"Unrecognized MultipleDisposalsTriageAnswers type: $other")
+        }
+      case _                                    =>
+        JsError("Expected wrapper object with one MultipleDisposalsTriageAnswers entry")
+    }
+
+    override def writes(o: MultipleDisposalsTriageAnswers): JsObject = o match {
+      case i: IncompleteMultipleDisposalsTriageAnswers =>
+        Json.obj("IncompleteMultipleDisposalsTriageAnswers" -> Json.toJson(i))
+      case c: CompleteMultipleDisposalsTriageAnswers   =>
+        Json.obj("CompleteMultipleDisposalsTriageAnswers" -> Json.toJson(c))
+    }
+  }
 }

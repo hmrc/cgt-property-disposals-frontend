@@ -46,7 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{reliefdetails => pages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -80,7 +80,7 @@ class ReliefDetailsController @Inject() (
       DraftSingleDisposalReturn,
       ReliefDetailsAnswers
     ) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((_, s: StartingToAmendReturn)) =>
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
@@ -145,7 +145,7 @@ class ReliefDetailsController @Inject() (
       DraftSingleDisposalReturn
     ) => DraftSingleDisposalReturn
   )(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     if (hasRequiredPreviousAnswer(currentAnswers)) {
       lazy val backLink = currentAnswers.fold(
@@ -170,7 +170,7 @@ class ReliefDetailsController @Inject() (
                      returnsService.storeDraftReturn(newJourney)
                    }
               _ <- EitherT(
-                     updateSession(sessionStore, request)(
+                     updateSession(sessionStore, request.toSession)(
                        _.copy(journeyStatus = Some(newJourney))
                      )
                    )
@@ -566,7 +566,7 @@ class ReliefDetailsController @Inject() (
     prr: AmountInPence,
     lr: AmountInPence,
     or: Option[OtherReliefsOption]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+  )(implicit request: RequestWithSessionData[?]): Future[Result] = {
     val completeAnswers = CompleteReliefDetailsAnswers(prr, lr, or)
     val newDraftReturn  = draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
     val newJourney      = fillingOutReturn.copy(draftReturn = newDraftReturn)
@@ -574,7 +574,7 @@ class ReliefDetailsController @Inject() (
     val result = for {
       _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
-             updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourney)))
+             updateSession(sessionStore, request.toSession)(_.copy(journeyStatus = Some(newJourney)))
            )
     } yield ()
 

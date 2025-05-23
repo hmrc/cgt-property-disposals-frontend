@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error,
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, NameMatchRetryService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -73,7 +73,7 @@ class InsufficientConfidenceLevelController @Inject() (
 
   private def withInsufficientConfidenceLevelUser(
     f: TryingToGetIndividualsFootprint => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(i: TryingToGetIndividualsFootprint) => f(i)
       case _                                        => Redirect(controllers.routes.StartController.start())
@@ -95,7 +95,7 @@ class InsufficientConfidenceLevelController @Inject() (
           .fold(
             e => BadRequest(doYouHaveANinoPage(e)),
             hasNino =>
-              updateSession(sessionStore, request)(
+              updateSession(sessionStore, request.toSession)(
                 _.copy(journeyStatus =
                   Some(
                     insufficientConfidenceLevel.copy(hasNino = Some(hasNino))
@@ -166,7 +166,7 @@ class InsufficientConfidenceLevelController @Inject() (
                   )
                 ),
               hasSautr =>
-                updateSession(sessionStore, request)(
+                updateSession(sessionStore, request.toSession)(
                   _.copy(journeyStatus =
                     Some(
                       insufficientConfidenceLevel
@@ -336,7 +336,7 @@ class InsufficientConfidenceLevelController @Inject() (
     ]
   )(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): EitherT[Future, NameMatchServiceError[
     IndividualSautrNameMatchDetails
   ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
@@ -363,7 +363,7 @@ class InsufficientConfidenceLevelController @Inject() (
                                  }
                                }
       _                   <- EitherT(
-                               updateSession(sessionStore, request)(
+                               updateSession(sessionStore, request.toSession)(
                                  _.copy(journeyStatus =
                                    Some(
                                      bprWithCgtReference._2.cgtReference.fold[JourneyStatus](
@@ -386,13 +386,13 @@ class InsufficientConfidenceLevelController @Inject() (
                                  )
                                )
                              ).leftMap[NameMatchServiceError[IndividualSautrNameMatchDetails]](
-                               NameMatchServiceError.BackendError
+                               NameMatchServiceError.BackendError.apply
                              )
     } yield bprWithCgtReference
 
   private def handleNameMatchServiceError(
     nameMatchError: NameMatchServiceError[IndividualSautrNameMatchDetails]
-  )(implicit request: RequestWithSessionData[_]): Result =
+  )(implicit request: RequestWithSessionData[?]): Result =
     nameMatchError match {
       case NameMatchServiceError.BackendError(error) =>
         logger.warn("Could not get BPR with entered SA UTR", error)

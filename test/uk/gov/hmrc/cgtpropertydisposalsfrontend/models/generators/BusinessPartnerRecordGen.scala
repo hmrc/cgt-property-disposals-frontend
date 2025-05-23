@@ -17,13 +17,14 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import org.scalacheck.Arbitrary
+import io.github.martinhh.derived.scalacheck.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.EmailGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest}
 
-object BusinessPartnerRecordGen extends GenUtils {
+object BusinessPartnerRecordGen extends GenUtils:
 
-  implicit val bprArb: Gen[BusinessPartnerRecord] = gen[BusinessPartnerRecord]
+  given Gen[BusinessPartnerRecord] = gen[BusinessPartnerRecord]
 
-  implicit val bprRequestArb: Gen[BusinessPartnerRecordRequest] =
-    gen[BusinessPartnerRecordRequest]
-
-}
+  given Gen[BusinessPartnerRecordRequest] = gen[BusinessPartnerRecordRequest]

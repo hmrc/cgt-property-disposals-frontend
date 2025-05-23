@@ -36,19 +36,19 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServ
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -256,7 +256,7 @@ class MultipleDisposalsTriageControllerSpec
           .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
-          errorArgs: _*
+          errorArgs*
         )
         doc.title() should startWith("Error:")
       },
@@ -265,7 +265,7 @@ class MultipleDisposalsTriageControllerSpec
   }
 
   private def mockGenerateUUID(uuid: UUID): Unit =
-    (mockUUIDGenerator.nextId _)
+    (() => mockUUIDGenerator.nextId())
       .expects()
       .returning(uuid)
 
@@ -330,7 +330,7 @@ class MultipleDisposalsTriageControllerSpec
               personalRepDisplay,
               capacitorDisplay,
               periodOfAdminDisplay
-            ).foreach { displayType: UserTypeDisplay =>
+            ).foreach { (displayType: UserTypeDisplay) =>
               withClue(
                 s"For user name ${displayType.name.fold(_ => "Trust name", _ => "Individual name")} ${displayType.getSubKey()} "
               ) {
@@ -374,7 +374,7 @@ class MultipleDisposalsTriageControllerSpec
               personalRepDisplay,
               capacitorDisplay,
               periodOfAdminDisplay
-            ).foreach { displayType: UserTypeDisplay =>
+            ).foreach { (displayType: UserTypeDisplay) =>
               withClue(
                 s"For user type ${displayType.getSubKey()} "
               ) {
@@ -535,7 +535,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the how many disposals page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.howManyDisposalsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val key = "multipleDisposalsNumberOfProperties"
@@ -717,7 +717,7 @@ class MultipleDisposalsTriageControllerSpec
 
       "display form error" when {
         def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
-          testFormError(data: _*)(expectedErrorMessageKey)(s"$key.title")(
+          testFormError(data*)(expectedErrorMessageKey)(s"$key.title")(
             performAction
           )
 
@@ -846,7 +846,7 @@ class MultipleDisposalsTriageControllerSpec
               personalRepDisplay,
               capacitorDisplay,
               periodOfAdminDisplay
-            ).foreach { displayType: UserTypeDisplay =>
+            ).foreach { (displayType: UserTypeDisplay) =>
               withClue(
                 s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
@@ -875,7 +875,7 @@ class MultipleDisposalsTriageControllerSpec
               personalRepDisplay,
               capacitorDisplay,
               periodOfAdminDisplay
-            ).foreach { displayType: UserTypeDisplay =>
+            ).foreach { (displayType: UserTypeDisplay) =>
               withClue(
                 s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
@@ -918,7 +918,7 @@ class MultipleDisposalsTriageControllerSpec
               personalRepDisplay,
               capacitorDisplay,
               periodOfAdminDisplay
-            ).foreach { displayType: UserTypeDisplay =>
+            ).foreach { (displayType: UserTypeDisplay) =>
               withClue(
                 s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
@@ -945,7 +945,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the were uk resident page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1072,7 +1072,7 @@ class MultipleDisposalsTriageControllerSpec
         "the user has started a draft return and" when {
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
-              forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+              forAll { (c: CompleteMultipleDisposalsTriageAnswers) =>
                 val answers                         = c.copy(
                   countryOfResidence = sample[Country],
                   taxYearExchanged = getTaxYearExchanged(Some(taxYear)),
@@ -1126,7 +1126,7 @@ class MultipleDisposalsTriageControllerSpec
             capacitorDisplay,
             personalRepDisplay,
             periodOfAdminDisplay
-          ).foreach { displayType: UserTypeDisplay =>
+          ).foreach { (displayType: UserTypeDisplay) =>
             withClue(
               s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
             ) {
@@ -1297,7 +1297,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the were all properties residential page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.wereAllPropertiesResidentialSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val key = "multipleDisposalsWereAllPropertiesResidential"
@@ -1706,7 +1706,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the tax year exchanged page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.whenWereContractsExchangedSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val cutoffTaxYearDate    = LocalDate.of(cutoffTaxYear, 4, 6)
@@ -2070,7 +2070,7 @@ class MultipleDisposalsTriageControllerSpec
                 startDateInclusive = LocalDate.of(currentTaxYear - 3, 4, 6),
                 endDateExclusive = LocalDate.of(currentTaxYear - 2, 4, 6)
               )
-              forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+              forAll { (c: CompleteMultipleDisposalsTriageAnswers) =>
                 val amendReturnData                 = sample[AmendReturnData]
                 val answers                         = c.copy(
                   individualUserType = Some(Self),
@@ -2376,7 +2376,7 @@ class MultipleDisposalsTriageControllerSpec
               capacitorDisplay,
               personalRepDisplay,
               periodOfAdminDisplay
-            ).foreach { displayType: UserTypeDisplay =>
+            ).foreach { (displayType: UserTypeDisplay) =>
               withClue(
                 s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
@@ -2412,7 +2412,7 @@ class MultipleDisposalsTriageControllerSpec
               personalRepDisplay,
               capacitorDisplay,
               periodOfAdminDisplay
-            ).foreach { displayType: UserTypeDisplay =>
+            ).foreach { (displayType: UserTypeDisplay) =>
               withClue(
                 s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
@@ -2489,7 +2489,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the country of residence page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.countryOfResidenceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -2590,7 +2590,7 @@ class MultipleDisposalsTriageControllerSpec
         "the user has started a draft return and" when {
           "have completed the section and they enter a country which is " +
             "different than one they have already entered" in {
-              forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+              forAll { (c: CompleteMultipleDisposalsTriageAnswers) =>
                 val answers = c.copy(countryOfResidence = Country("FI"))
 
                 val (session, journey, draftReturn) =
@@ -2621,7 +2621,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
           "the user is on an amend journey where the estimates answer should be preserved" in {
-            forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+            forAll { (c: CompleteMultipleDisposalsTriageAnswers) =>
               val answers = c.copy(countryOfResidence = Country("FI"))
 
               val (session, journey, draftReturn) =
@@ -2833,8 +2833,8 @@ class MultipleDisposalsTriageControllerSpec
                 "for",
                 "multipleDisposalsAssetTypeForNonUkResidents-3",
                 s"Residential Non-residential Mixed use ${messageFromMessageKey(
-                  s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey(separatePeriodOfAdminKey = true)}.IndirectDisposal"
-                )}"
+                    s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey(separatePeriodOfAdminKey = true)}.IndirectDisposal"
+                  )}"
               )
             )
           )
@@ -2848,7 +2848,7 @@ class MultipleDisposalsTriageControllerSpec
               capacitorDisplay,
               personalRepDisplay,
               periodOfAdminDisplay
-            ).foreach { displayType: UserTypeDisplay =>
+            ).foreach { (displayType: UserTypeDisplay) =>
               withClue(
                 s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
@@ -2877,7 +2877,7 @@ class MultipleDisposalsTriageControllerSpec
               personalRepDisplay,
               capacitorDisplay,
               periodOfAdminDisplay
-            ).foreach { displayType: UserTypeDisplay =>
+            ).foreach { (displayType: UserTypeDisplay) =>
               withClue(
                 s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
@@ -2934,7 +2934,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the asset type for non-uk residents page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.assetTypeForNonUkResidentsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -3098,7 +3098,7 @@ class MultipleDisposalsTriageControllerSpec
         "the user has started a draft return and" when {
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
-              forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+              forAll { (c: CompleteMultipleDisposalsTriageAnswers) =>
                 val amendReturnData                 = sample[AmendReturnData]
                 val answers                         = c.copy(
                   countryOfResidence = sample[Country],
@@ -3184,7 +3184,7 @@ class MultipleDisposalsTriageControllerSpec
             capacitorDisplay,
             personalRepDisplay,
             periodOfAdminDisplay
-          ).foreach { displayType: UserTypeDisplay =>
+          ).foreach { (displayType: UserTypeDisplay) =>
             withClue(
               s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
             ) {
@@ -3390,7 +3390,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submitted completion dates" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.completionDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(d: LocalDate): List[(String, String)] =
@@ -3450,7 +3450,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey("multipleDisposalsCompletionDate.title"),
             doc =>
               doc
@@ -3528,7 +3528,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsTechnicalErrorPage(
-            performAction(formData(today): _*)
+            performAction(formData(today)*)
           )
         }
 
@@ -3569,7 +3569,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsTechnicalErrorPage(
-            performAction(formData(newCompletionDate.value): _*)
+            performAction(formData(newCompletionDate.value)*)
           )
         }
       }
@@ -3636,13 +3636,13 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(formData(newCompletionDate.value): _*),
+              performAction(formData(newCompletionDate.value)*),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
 
           "the user has already answered the question" in {
-            forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+            forAll { (c: CompleteMultipleDisposalsTriageAnswers) =>
               val answers            = c.copy(
                 individualUserType = Some(Self),
                 completionDate = CompletionDate(today),
@@ -3671,7 +3671,7 @@ class MultipleDisposalsTriageControllerSpec
               }
 
               checkIsRedirect(
-                performAction(formData(newCompletionDate.value): _*),
+                performAction(formData(newCompletionDate.value)*),
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
             }
@@ -3717,7 +3717,7 @@ class MultipleDisposalsTriageControllerSpec
 
               checkIsRedirect(
                 performAction(
-                  formData(submittedDate): _*
+                  formData(submittedDate)*
                 ),
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
@@ -3747,7 +3747,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(answers.completionDate.value): _*),
+            performAction(formData(answers.completionDate.value)*),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -3810,7 +3810,7 @@ class MultipleDisposalsTriageControllerSpec
     "handling submitted disposal of shares date" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateOfSharesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(d: LocalDate): List[(String, String)] =
@@ -3865,7 +3865,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey("sharesDisposalDate.title"),
             doc =>
               doc
@@ -3966,7 +3966,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsTechnicalErrorPage(
-            performAction(formData(newCompletionDate.value): _*)
+            performAction(formData(newCompletionDate.value)*)
           )
         }
       }
@@ -4021,7 +4021,7 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsRedirect(
             performAction(
-              formData(submittedDate): _*
+              formData(submittedDate)*
             ),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
@@ -4124,7 +4124,7 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsRedirect(
             performAction(
-              formData(submittedDate): _*
+              formData(submittedDate)*
             ),
             routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
           )
@@ -4187,7 +4187,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(answers.completionDate.value): _*),
+            performAction(formData(answers.completionDate.value)*),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -4355,7 +4355,7 @@ class MultipleDisposalsTriageControllerSpec
             List(AssetType.MixedUse, AssetType.IndirectDisposal)
           )
 
-          forAll { assetTypes: List[AssetType] =>
+          forAll { (assetTypes: List[AssetType]) =>
             whenever(
               !invalidAssetTypes
                 .contains(assetTypes.distinct) && assetTypes.nonEmpty
@@ -4908,7 +4908,7 @@ class MultipleDisposalsTriageControllerSpec
 
     checkPageIsDisplayed(
       performAction(),
-      messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs: _*),
+      messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs*),
       { doc =>
         doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
         doc
@@ -4951,7 +4951,7 @@ class MultipleDisposalsTriageControllerSpec
 
     checkPageIsDisplayed(
       performAction(),
-      messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs: _*),
+      messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs*),
       { doc =>
         doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
         val selector = doc.body().select(".govuk-label.govuk-radios__label").asScala.map(_.text()).toList

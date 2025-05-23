@@ -40,6 +40,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.chaining.scalaUtilChainingOps
 import scala.util.control.NonFatal
 
+import play.api.libs.ws.writeableOf_JsValue
+
 @ImplementedBy(classOf[ReturnsConnectorImpl])
 trait ReturnsConnector {
   def storeDraftReturn(draftReturn: DraftReturn, cgtReference: CgtReference)(implicit

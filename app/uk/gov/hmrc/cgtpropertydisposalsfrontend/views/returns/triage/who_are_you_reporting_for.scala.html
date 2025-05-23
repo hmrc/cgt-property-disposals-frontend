@@ -36,7 +36,7 @@
 )
 
 
-@(form: Form[IndividualUserType], backLink: Option[Call], displayReturnToSummaryLink: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
+@(form: Form[IndividualUserType], backLink: Option[Call], displayReturnToSummaryLink: Boolean, isAmend: Boolean)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @key = @{"individualUserType"}

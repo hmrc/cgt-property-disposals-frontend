@@ -20,23 +20,24 @@ import cats.data.EitherT
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.i18n.Lang
 import play.api.libs.json.{JsNumber, JsObject, Json}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource.{ManuallyEntered => ManuallyEnteredAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource.{ManuallyEntered => ManuallyEnteredEmail}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource.ManuallyEntered as ManuallyEnteredAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource.ManuallyEntered as ManuallyEnteredEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.OnboardingDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.OnboardingDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SapNumber}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactNameSource.{ManuallyEntered => ManuallyEnteredContactName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactNameSource.ManuallyEntered as ManuallyEnteredContactName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -44,11 +45,11 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
+class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFactory with GuiceOneServerPerSuite {
 
   private val mockConnector = mock[CGTPropertyDisposalsConnector]
 
-  val service = new SubscriptionServiceImpl(mockConnector, MockMetrics.metrics)
+  val service = new SubscriptionServiceImpl(mockConnector, app.injector.instanceOf[Metrics])
 
   private def mockSubscribe(
     expectedSubscriptionDetails: SubscriptionDetails,

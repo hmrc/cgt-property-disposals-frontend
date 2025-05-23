@@ -24,7 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, ret
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TaxYear}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -116,7 +116,7 @@ class FurtherReturnGuidanceController @Inject() (
         )
     )
 
-  private def withJourneyState(request: RequestWithSessionData[_])(
+  private def withJourneyState(request: RequestWithSessionData[?])(
     f: (
       SessionData,
       Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]

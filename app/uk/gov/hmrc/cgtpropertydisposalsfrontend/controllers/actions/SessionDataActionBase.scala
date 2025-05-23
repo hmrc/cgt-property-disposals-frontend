@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait SessionDataActionBase[R[_] <: Request[_], P[_] <: Request[_]] extends ActionRefiner[R, P] with Logging {
+trait SessionDataActionBase[R[_] <: Request[?], P[_] <: Request[?]] extends ActionRefiner[R, P] with Logging {
 
   val sessionStore: SessionStore
 

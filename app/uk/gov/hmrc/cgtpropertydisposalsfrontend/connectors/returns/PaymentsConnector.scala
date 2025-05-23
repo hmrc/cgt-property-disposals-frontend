@@ -33,6 +33,8 @@ import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
+import play.api.libs.ws.writeableOf_JsValue
+
 @ImplementedBy(classOf[PaymentsConnectorImpl])
 trait PaymentsConnector {
   def startPaymentJourney(
@@ -75,10 +77,11 @@ class PaymentsConnectorImpl @Inject() (
       s"$selfBaseUrl${backUrl.url}"
     )
 
+    val value = Json.toJson(body)
     EitherT(
       http
         .post(url"$startPaymentJourneyUrl")
-        .withBody(Json.toJson(body))
+        .withBody(value)
         .execute[HttpResponse]
         .map(
           Right(_)

@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -45,7 +45,7 @@ import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EmailController[T <: EmailJourneyType] {
-  this: FrontendController with WithAuthAndSessionDataAction with Logging with SessionUpdates =>
+  this: FrontendController & WithAuthAndSessionDataAction & Logging & SessionUpdates =>
 
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
@@ -62,41 +62,41 @@ trait EmailController[T <: EmailJourneyType] {
 
   def updateEmail(journey: T, email: Email)(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus]
 
   def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, T)]
 
   def validVerificationCompleteJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, T)]
 
   def auditEmailVerifiedEvent(journey: T, email: Email)(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): Unit
 
   def auditEmailChangeAttempt(journey: T, email: Email)(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): Unit
 
   def name(journeyStatus: T): ContactName
 
-  private def withValidJourney(request: RequestWithSessionData[_])(
+  private def withValidJourney(request: RequestWithSessionData[?])(
     f: (SessionData, T) => Future[Result]
   ): Future[Result] =
-    validJourney(request).fold[Future[Result]](toFuture, f.tupled)
+    validJourney(request).fold[Future[Result]](given_Conversion_Result_Future, f.tupled)
 
-  protected val backLinkCall: Option[Call]
-  protected val enterEmailCall: Call
-  protected val enterEmailSubmitCall: Call
-  protected val checkYourInboxCall: Call
-  protected val verifyEmailCall: UUID => Call
-  protected val emailVerifiedCall: Call
-  protected val emailVerifiedContinueCall: Call
+  protected lazy val backLinkCall: Option[Call]
+  protected lazy val enterEmailCall: Call
+  protected lazy val enterEmailSubmitCall: Call
+  protected lazy val checkYourInboxCall: Call
+  protected lazy val verifyEmailCall: UUID => Call
+  protected lazy val emailVerifiedCall: Call
+  protected lazy val emailVerifiedContinueCall: Call
 
   def enterEmail(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -152,7 +152,7 @@ trait EmailController[T <: EmailJourneyType] {
                               Error("could not find Play application language")
                             )
                 _        <- EitherT(
-                              updateSession(sessionStore, request)(
+                              updateSession(sessionStore, request.toSession)(
                                 _.copy(emailToBeVerified = Some(emailToBeVerified))
                               )
                             )
@@ -228,7 +228,7 @@ trait EmailController[T <: EmailJourneyType] {
             val result = for {
               updatedJourney <- updateEmail(journey, emailToBeVerified.email)
               _              <- EitherT[Future, Error, Unit](
-                                  updateSession(sessionStore, request) { s =>
+                                  updateSession(sessionStore, request.toSession) { s =>
                                     s.copy(
                                       journeyStatus = Some(updatedJourney),
                                       emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
@@ -253,7 +253,7 @@ trait EmailController[T <: EmailJourneyType] {
     authenticatedActionWithSessionData.async { implicit request =>
       validVerificationCompleteJourney(request)
         .fold[Future[Result]](
-          toFuture,
+          given_Conversion_Result_Future,
           { case (sessionData, journey) =>
             sessionData.emailToBeVerified.fold(
               Redirect(enterEmailCall)
@@ -288,7 +288,7 @@ object EmailController {
       mapping(
         "email"                   -> Email.mapping,
         "resendVerificationEmail" -> of(BooleanFormatter.formatter)
-      )(SubmitEmailDetails.apply)(SubmitEmailDetails.unapply)
+      )(SubmitEmailDetails.apply)(o => Some(o.email, o.resendVerificationEmail))
     )
 
 }

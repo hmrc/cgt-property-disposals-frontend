@@ -44,7 +44,7 @@
         representativeType: Option[RepresentativeType],
         isAmend: Boolean,
         addressCaption: String
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{
     "multipleDisposalsDisposalPrice"

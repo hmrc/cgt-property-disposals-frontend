@@ -38,7 +38,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     dateOfDeath: Option[DateOfDeath]
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{

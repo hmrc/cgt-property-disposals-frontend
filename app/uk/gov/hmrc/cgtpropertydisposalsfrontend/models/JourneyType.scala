@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait JourneyType
 
@@ -28,6 +27,14 @@ case object Returns extends JourneyType
 case object Amend extends JourneyType
 
 object JourneyType {
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[JourneyType] = derived.oformat()
+  implicit val format: Format[JourneyType] = new Format[JourneyType] {
+    override def reads(json: JsValue): JsResult[JourneyType] = json match {
+      case JsString("OnBoarding") => JsSuccess(OnBoarding)
+      case JsString("Returns")    => JsSuccess(Returns)
+      case JsString("Amend")      => JsSuccess(Amend)
+      case _                      => JsError("Invalid journey type")
+    }
+
+    override def writes(o: JourneyType): JsValue = JsString(o.toString)
+  }
 }

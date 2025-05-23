@@ -21,7 +21,7 @@
 @this(govukErrorSummary : GovukErrorSummary)
 
 @(
-        form: Form[_],
+        form: Form[?],
         customErrorKey: Option[String] = None,
         userKeyOnly: String = "",
         dateField: Option[String] = None
@@ -33,7 +33,7 @@
   errorList = form.errors.map { error =>
       ErrorLink(
         href = Some(s"#${if(dateField.isDefined && dateField.getOrElse("").matches(error.key)) { s"${error.key}-day" } else { error.key }}"),
-        content = Text(messages(s"${customErrorKey.getOrElse(error.key)}$userKeyOnly.${error.message}", error.args: _*))
+        content = Text(messages(s"${customErrorKey.getOrElse(error.key)}$userKeyOnly.${error.message}", error.args *))
       )
   }
 ))

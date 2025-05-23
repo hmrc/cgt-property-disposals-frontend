@@ -22,7 +22,7 @@
 
 @this(caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk)
 
-@(fillingOutReturn: FillingOutReturn)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(fillingOutReturn: FillingOutReturn)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @isAnAgent = @{ request.userType.contains(UserType.Agent)}
 

@@ -17,8 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait AssetType extends Product with Serializable
 
@@ -34,6 +33,25 @@ object AssetType {
 
   implicit val eq: Eq[AssetType] = Eq.fromUniversalEquals
 
-  implicit val format: OFormat[AssetType] = derived.oformat()
+  implicit val format: Format[AssetType] = new Format[AssetType] {
+    override def reads(json: JsValue): JsResult[AssetType] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head._1 match {
+          case "Residential"      => JsSuccess(Residential)
+          case "NonResidential"   => JsSuccess(NonResidential)
+          case "IndirectDisposal" => JsSuccess(IndirectDisposal)
+          case "MixedUse"         => JsSuccess(MixedUse)
+          case other              => JsError(s"Invalid asset type: $other")
+        }
+      case _                                    => JsError("Expected JSON object with one AssetType key")
+    }
+
+    override def writes(o: AssetType): JsValue = o match {
+      case Residential      => Json.obj("Residential" -> Json.obj())
+      case NonResidential   => Json.obj("NonResidential" -> Json.obj())
+      case IndirectDisposal => Json.obj("IndirectDisposal" -> Json.obj())
+      case MixedUse         => Json.obj("MixedUse" -> Json.obj())
+    }
+  }
 
 }

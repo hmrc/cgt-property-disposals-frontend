@@ -27,7 +27,7 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Registering, RegistrationStatus, Subscribed}
@@ -42,7 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -70,7 +70,7 @@ class RegistrationController @Inject() (
     with Logging {
   import RegistrationController._
 
-  private def withValidUser(request: RequestWithSessionData[_])(
+  private def withValidUser(request: RequestWithSessionData[?])(
     f: Either[TryingToGetIndividualsFootprint, RegistrationStatus] => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
@@ -106,7 +106,7 @@ class RegistrationController @Inject() (
         Ok(
           selectEntityTypePage(
             form,
-            routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()
+            onboardingRoutes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()
           )
         )
       }
@@ -122,7 +122,7 @@ class RegistrationController @Inject() (
               BadRequest(
                 selectEntityTypePage(
                   e,
-                  routes.InsufficientConfidenceLevelController
+                  onboardingRoutes.InsufficientConfidenceLevelController
                     .enterSautrAndName()
                 )
               ),
@@ -148,7 +148,7 @@ class RegistrationController @Inject() (
                 case EntityType.Trust      =>
                   metrics.individualWantingToRegisterTrustCounter.inc()
                   RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId) ->
-                    routes.RegistrationController.wrongGGAccountForTrusts()
+                    onboardingRoutes.RegistrationController.wrongGGAccountForTrusts()
               }
 
               (status, newRegistrationStatus) match {
@@ -166,7 +166,7 @@ class RegistrationController @Inject() (
                   Redirect(redirectTo)
 
                 case _ =>
-                  updateSession(sessionStore, request)(
+                  updateSession(sessionStore, request.toSession)(
                     _.copy(journeyStatus = Some(newRegistrationStatus))
                   ).map {
                     case Left(e)  =>
@@ -187,12 +187,12 @@ class RegistrationController @Inject() (
         case Right(RegistrationStatus.IndividualWantsToRegisterTrust(_)) =>
           Ok(
             wrongGGAccountForTrustPage(
-              routes.RegistrationController.selectEntityType()
+              onboardingRoutes.RegistrationController.selectEntityType()
             )
           )
 
         case _ =>
-          Redirect(routes.RegistrationController.selectEntityType())
+          Redirect(onboardingRoutes.RegistrationController.selectEntityType())
       }
     }
 
@@ -226,7 +226,7 @@ class RegistrationController @Inject() (
                 ggCredId
               )
             ) =>
-          updateSession(sessionStore, request)(
+          updateSession(sessionStore, request.toSession)(
             _.copy(journeyStatus =
               Some(
                 RegistrationStatus
@@ -258,7 +258,7 @@ class RegistrationController @Inject() (
             RegistrationDetails(name, email, address, emailSource),
             ggCredId
           )
-          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(r)))
+          updateSession(sessionStore, request.toSession)(_.copy(journeyStatus = Some(r)))
             .map {
               case Left(error) =>
                 logger.warn("Could not update session for registration ready", error)
@@ -284,7 +284,7 @@ class RegistrationController @Inject() (
             ) =>
           val result = for {
             _                    <- EitherT(
-                                      updateSession(sessionStore, request)(
+                                      updateSession(sessionStore, request.toSession)(
                                         _.copy(
                                           journeyStatus = Some(Registering)
                                         )
@@ -318,7 +318,7 @@ class RegistrationController @Inject() (
             }
             _                    <- EitherT(subscriptionResponse match {
                                       case SubscriptionSuccessful(cgtReferenceNumber) =>
-                                        updateSession(sessionStore, request)(
+                                        updateSession(sessionStore, request.toSession)(
                                           _.copy(
                                             journeyStatus = Some(
                                               Subscribed(
@@ -342,7 +342,7 @@ class RegistrationController @Inject() (
                                           )
                                         )
                                       case AlreadySubscribed                          =>
-                                        updateSession(sessionStore, request)(
+                                        updateSession(sessionStore, request.toSession)(
                                           _.copy(journeyStatus =
                                             Some(
                                               AlreadySubscribedWithDifferentGGAccount(ggCredId, None)
@@ -360,7 +360,7 @@ class RegistrationController @Inject() (
             {
               case SubscriptionSuccessful(cgtReferenceNumber) =>
                 logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
-                Redirect(routes.SubscriptionController.subscribed())
+                Redirect(onboardingRoutes.SubscriptionController.subscribed())
               case AlreadySubscribed                          =>
                 logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
                 auditService.sendEvent(
@@ -368,10 +368,7 @@ class RegistrationController @Inject() (
                   WrongGGAccountEvent(None, ggCredId.value),
                   "access-with-wrong-gg-account"
                 )
-                Redirect(
-                  routes.SubscriptionController
-                    .alreadySubscribedWithDifferentGGAccount()
-                )
+                Redirect(onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
             }
           )
 
@@ -404,8 +401,8 @@ object RegistrationController {
   sealed trait EntityType extends Product with Serializable
 
   object EntityType {
-    final case object Individual extends EntityType
-    final case object Trust extends EntityType
+    case object Individual extends EntityType
+    case object Trust extends EntityType
   }
 
   private val selectEntityTypeForm =

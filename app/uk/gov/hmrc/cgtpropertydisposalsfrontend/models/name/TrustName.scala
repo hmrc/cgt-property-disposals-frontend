@@ -21,7 +21,7 @@ import play.api.data.Mapping
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.libs.json.{Format, Json}
 
-final case class TrustName(value: String) extends AnyVal
+final case class TrustName(value: String)
 
 object TrustName {
 
@@ -40,7 +40,7 @@ object TrustName {
 
     nonEmptyText
       .transform[String](_.trim, identity)
-      .verifying(Constraint[String](validateTrustName(_)))
+      .verifying(Constraint[String](validateTrustName))
   }
 
 }

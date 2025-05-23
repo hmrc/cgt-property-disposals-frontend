@@ -32,7 +32,7 @@ class SingleDisposalTriageAnswersSpec extends AnyWordSpec with Matchers with Sca
   "IncompleteSingleDisposalTriageAnswers" must {
 
     "have a method which converts incomplete answers to complete answers for uk resident" in {
-      forAll { c: CompleteSingleDisposalTriageAnswers =>
+      forAll { (c: CompleteSingleDisposalTriageAnswers) =>
         val completeAnswers = c.copy(countryOfResidence = Country.uk)
 
         IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers(
@@ -53,7 +53,7 @@ class SingleDisposalTriageAnswersSpec extends AnyWordSpec with Matchers with Sca
     }
 
     "have a method which converts incomplete answers to complete answers for non-uk residents" in {
-      forAll { c: CompleteSingleDisposalTriageAnswers =>
+      forAll { (c: CompleteSingleDisposalTriageAnswers) =>
         val completeAnswers = c.copy(countryOfResidence = sample[Country])
 
         IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers(

@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import julienrf.json.derived
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsError, JsObject, JsResult, JsValue, Json, OFormat}
 
 sealed trait UpscanCallBack extends Product with Serializable
 
@@ -53,6 +52,25 @@ object UpscanCallBack {
       )
   }
 
-  implicit val format: OFormat[UpscanCallBack] = derived.oformat()
+  implicit val successFormat: OFormat[UpscanSuccess] = Json.format[UpscanSuccess]
+  implicit val failureFormat: OFormat[UpscanFailure] = Json.format[UpscanFailure]
+
+  implicit val format: OFormat[UpscanCallBack] = new OFormat[UpscanCallBack] {
+    override def reads(json: JsValue): JsResult[UpscanCallBack] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("UpscanSuccess", value) => value.validate[UpscanSuccess]
+          case ("UpscanFailure", value) => value.validate[UpscanFailure]
+          case (other, _)               => JsError(s"Unknown UpscanCallBack type: $other")
+        }
+      case _                                    =>
+        JsError("Expected UpscanCallBack wrapper object with a single entry")
+    }
+
+    override def writes(o: UpscanCallBack): JsObject = o match {
+      case s: UpscanSuccess => Json.obj("UpscanSuccess" -> Json.toJson(s))
+      case f: UpscanFailure => Json.obj("UpscanFailure" -> Json.toJson(f))
+    }
+  }
 
 }

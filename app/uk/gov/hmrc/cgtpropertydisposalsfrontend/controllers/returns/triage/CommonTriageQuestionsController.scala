@@ -42,7 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error,
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{amend => amendPages, triage => triagePages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -164,7 +164,7 @@ class CommonTriageQuestionsController @Inject() (
                              returnsService.storeDraftReturn(_)
                            )
                       _ <- EitherT(
-                             updateSession(sessionStore, request)(
+                             updateSession(sessionStore, request.toSession)(
                                _.copy(journeyStatus = Some(updatedState.merge))
                              )
                            )
@@ -218,7 +218,7 @@ class CommonTriageQuestionsController @Inject() (
   private def howManyPropertiesCommon(
     state: Either[StartingNewDraftReturn, FillingOutReturn],
     isFurtherOrAmendReturn: Boolean
-  )(implicit r: RequestWithSessionData[_]): Future[Result] = {
+  )(implicit r: RequestWithSessionData[?]): Future[Result] = {
     val form =
       getNumberOfProperties(state).fold(numberOfPropertiesForm)(
         numberOfPropertiesForm.fill
@@ -284,7 +284,7 @@ class CommonTriageQuestionsController @Inject() (
   private def howManyPropertiesSubmitCommon(
     state: Either[StartingNewDraftReturn, FillingOutReturn],
     isFurtherOrAmendReturn: Boolean
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     numberOfPropertiesForm
       .bindFromRequest()
       .fold(
@@ -317,7 +317,7 @@ class CommonTriageQuestionsController @Inject() (
                        returnsService.storeDraftReturn(_)
                      )
                 _ <- EitherT(
-                       updateSession(sessionStore, request)(
+                       updateSession(sessionStore, request.toSession)(
                          _.copy(journeyStatus = Some(updatedState.merge))
                        )
                      )
@@ -705,7 +705,7 @@ class CommonTriageQuestionsController @Inject() (
                            returnsService.storeDraftReturn(_)
                          )
                     _ <- EitherT(
-                           updateSession(sessionStore, request)(
+                           updateSession(sessionStore, request.toSession)(
                              _.copy(journeyStatus = Some(updatedState.merge))
                            )
                          )
@@ -892,7 +892,7 @@ class CommonTriageQuestionsController @Inject() (
                            returnsService.storeDraftReturn(_)
                          )
                     _ <- EitherT(
-                           updateSession(sessionStore, request)(
+                           updateSession(sessionStore, request.toSession)(
                              _.copy(journeyStatus = Some(updatedState.merge))
                            )
                          )
@@ -1255,7 +1255,7 @@ class CommonTriageQuestionsController @Inject() (
       SessionData,
       Either[StartingNewDraftReturn, FillingOutReturn]
     ) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((_, s: StartingToAmendReturn)) =>
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
@@ -1326,7 +1326,7 @@ object CommonTriageQuestionsController {
             List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, key))
           )
         )
-      )(ShareDisposalDate)(d => Some(d.value))
+      )(ShareDisposalDate.apply)(d => Some(d.value))
     )
   }
 

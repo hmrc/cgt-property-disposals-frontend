@@ -17,30 +17,29 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
 import cats.data.EitherT
-import cats.instances.future._
+import cats.instances.future.*
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.Reads
 import play.api.mvc.{Request, Result}
-import play.api.test.CSRFTokenHelper._
+import play.api.test.CSRFTokenHelper.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes as onboardingRoutes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NameMatchServiceError.TooManyUnsuccessfulAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameMatchGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameMatchGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -93,13 +92,10 @@ class DeterminingIfOrganisationIsTrustControllerSpec
     ]]
   ) =
     (
-      mockBprNameMatchService
-        .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](_: GGCredId)(
-          _: Reads[TrustNameMatchDetails],
-          _: HeaderCarrier,
-          _: Request[_]
-        )
-      )
+      (credId: GGCredId, reads: Reads[TrustNameMatchDetails], hc: HeaderCarrier, req: Request[?]) =>
+        mockBprNameMatchService
+          .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](credId)(using reads, hc, req)
+    )
       .expects(ggCredId, *, *, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -121,7 +117,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           _: Lang
         )(
           _: HeaderCarrier,
-          _: Request[_]
+          _: Request[?]
         )
       )
       .expects(
@@ -197,7 +193,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.doYouWantToReportForATrustSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -297,7 +293,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           checkIsRedirect(
             performAction("isReportingForATrust" -> "false"),
-            routes.DeterminingIfOrganisationIsTrustController
+            onboardingRoutes.DeterminingIfOrganisationIsTrustController
               .reportWithCorporateTax()
           )
         }
@@ -521,7 +517,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.doYouHaveATrnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -951,7 +947,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterTrnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1382,7 +1378,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           )
           checkIsRedirect(
             result,
-            routes.SubscriptionController
+            onboardingRoutes.SubscriptionController
               .alreadySubscribedWithDifferentGGAccount()
           )
         }

@@ -39,7 +39,7 @@
     backLink: Call,
     isSingleDisposal: Boolean,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{"enterUPRN"}
 @line1Key = @{s"$key-line1"}

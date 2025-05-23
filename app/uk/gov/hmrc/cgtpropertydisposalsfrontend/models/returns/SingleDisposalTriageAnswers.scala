@@ -17,9 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.Eq
-import julienrf.json.derived
 import monocle.Lens
-import monocle.macros.Lenses
+import monocle.macros.GenLens
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
@@ -31,7 +30,6 @@ sealed trait SingleDisposalTriageAnswers extends Product with Serializable
 @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object SingleDisposalTriageAnswers {
 
-  @Lenses
   final case class IncompleteSingleDisposalTriageAnswers(
     individualUserType: Option[IndividualUserType],
     hasConfirmedSingleDisposal: Boolean,
@@ -46,6 +44,16 @@ object SingleDisposalTriageAnswers {
   ) extends SingleDisposalTriageAnswers
 
   object IncompleteSingleDisposalTriageAnswers {
+    val assetType                 = GenLens[IncompleteSingleDisposalTriageAnswers](_.assetType)
+    val disposalDate              = GenLens[IncompleteSingleDisposalTriageAnswers](_.disposalDate)
+    val completionDate            = GenLens[IncompleteSingleDisposalTriageAnswers](_.completionDate)
+    val wasAUKResident            = GenLens[IncompleteSingleDisposalTriageAnswers](_.wasAUKResident)
+    val disposalMethod            = GenLens[IncompleteSingleDisposalTriageAnswers](_.disposalMethod)
+    val countryOfResidence        = GenLens[IncompleteSingleDisposalTriageAnswers](_.countryOfResidence)
+    val individualUserType        = GenLens[IncompleteSingleDisposalTriageAnswers](_.individualUserType)
+    val tooEarlyDisposalDate      = GenLens[IncompleteSingleDisposalTriageAnswers](_.tooEarlyDisposalDate)
+    val alreadySentSelfAssessment = GenLens[IncompleteSingleDisposalTriageAnswers](_.alreadySentSelfAssessment)
+
     val empty: IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers(
         None,
@@ -108,7 +116,7 @@ object SingleDisposalTriageAnswers {
     def unset[A](
       fieldLens: IncompleteSingleDisposalTriageAnswers.type => Lens[IncompleteSingleDisposalTriageAnswers, Option[A]]
     ): IncompleteSingleDisposalTriageAnswers =
-      fieldLens(IncompleteSingleDisposalTriageAnswers).set(None)(
+      fieldLens(IncompleteSingleDisposalTriageAnswers).replace(None)(
         fold(
           identity,
           IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers
@@ -140,7 +148,33 @@ object SingleDisposalTriageAnswers {
   implicit val eq: Eq[IncompleteSingleDisposalTriageAnswers] =
     Eq.fromUniversalEquals
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[SingleDisposalTriageAnswers] = derived.oformat()
+  implicit val completeFormat: OFormat[CompleteSingleDisposalTriageAnswers]     =
+    Json.format[CompleteSingleDisposalTriageAnswers]
+  implicit val inCompleteFormat: OFormat[IncompleteSingleDisposalTriageAnswers] =
+    Json.format[IncompleteSingleDisposalTriageAnswers]
+
+  implicit val format: OFormat[SingleDisposalTriageAnswers] = new OFormat[SingleDisposalTriageAnswers] {
+    import play.api.libs.json._
+    override def reads(json: JsValue): JsResult[SingleDisposalTriageAnswers] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("IncompleteSingleDisposalTriageAnswers", value) =>
+            value.validate[IncompleteSingleDisposalTriageAnswers]
+          case ("CompleteSingleDisposalTriageAnswers", value)   =>
+            value.validate[CompleteSingleDisposalTriageAnswers]
+          case (other, _)                                       =>
+            JsError(s"Unrecognized SingleDisposalTriageAnswers type: $other")
+        }
+      case _                                    =>
+        JsError("Expected SingleDisposalTriageAnswers wrapper object with a single entry")
+    }
+
+    override def writes(o: SingleDisposalTriageAnswers): JsObject = o match {
+      case i: IncompleteSingleDisposalTriageAnswers =>
+        Json.obj("IncompleteSingleDisposalTriageAnswers" -> Json.toJson(i))
+      case c: CompleteSingleDisposalTriageAnswers   =>
+        Json.obj("CompleteSingleDisposalTriageAnswers" -> Json.toJson(c))
+    }
+  }
 
 }

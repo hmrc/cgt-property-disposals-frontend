@@ -17,8 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait DisposalMethod extends Product with Serializable
 
@@ -32,7 +31,23 @@ object DisposalMethod {
 
   implicit val eq: Eq[DisposalMethod] = Eq.fromUniversalEquals
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[DisposalMethod] = derived.oformat()
+  implicit val format: Format[DisposalMethod] = new Format[DisposalMethod] {
+    override def reads(json: JsValue): JsResult[DisposalMethod] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head._1 match {
+          case "Sold"   => JsSuccess(Sold)
+          case "Gifted" => JsSuccess(Gifted)
+          case "Other"  => JsSuccess(Other)
+          case other    => JsError(s"Invalid disposal method: $other")
+        }
+      case _                                    => JsError("Expected JSON object with one DisposalMethod key")
+    }
+
+    override def writes(o: DisposalMethod): JsValue = o match {
+      case Sold   => Json.obj("Sold" -> Json.obj())
+      case Gifted => Json.obj("Gifted" -> Json.obj())
+      case Other  => Json.obj("Other" -> Json.obj())
+    }
+  }
 
 }

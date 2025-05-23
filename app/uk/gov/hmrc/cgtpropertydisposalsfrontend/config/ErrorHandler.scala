@@ -45,7 +45,7 @@ class ErrorHandler @Inject() (
   ): Future[Html] =
     Future.successful(error_template(None, pageTitle, heading, message))
 
-  def errorResult[R <: Request[_]](
+  def errorResult[R <: Request[?]](
     userType: Option[UserType]
   )(implicit request: R): Result =
     InternalServerError(
@@ -57,6 +57,6 @@ class ErrorHandler @Inject() (
       )
     )
 
-  def errorResult()(implicit request: RequestWithSessionData[_]): Result =
+  def errorResult()(implicit request: RequestWithSessionData[?]): Result =
     errorResult(request.userType)
 }

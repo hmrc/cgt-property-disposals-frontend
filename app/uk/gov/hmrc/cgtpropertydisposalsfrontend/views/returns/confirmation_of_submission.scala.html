@@ -47,7 +47,7 @@
         govukTable: GovukTable
 )
 
-@(justSubmittedReturn: JustSubmittedReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(justSubmittedReturn: JustSubmittedReturn)(implicit request: RequestWithSessionData[?], messages:Messages, viewConfig: ViewConfig)
 
 @key=@{"confirmationOfSubmission"}
 @title = @{ messages(s"$key.title") }
@@ -207,15 +207,15 @@
       None,
       "property-address-table"
     )
-    @{if(showDueDate && deltaCharge.isEmpty) {
-      justSubmittedReturn.submissionResponse.charge.map { charge =>
-        cyaRow(
+    @if(showDueDate && deltaCharge.isEmpty) {
+      @justSubmittedReturn.submissionResponse.charge.map { charge =>
+        @cyaRow(
           messages(s"$key.taxDue"),
           Html(TimeUtils.govDisplayFormat(charge.dueDate)),
           None,
           "tax-due-date-table"
         )
-      }}
+      }
     }
   }
 
@@ -321,7 +321,9 @@
           } else {
             <p class="govuk-hint">@messages(s"$key${if(isATrust && isAgent) ".trust" else ""}.paymentNotice")</p>
           }
-          @{if (!isAgent) payNowButton }
+          @if(!isAgent) {
+            @payNowButton
+          }
         }
       }
     }

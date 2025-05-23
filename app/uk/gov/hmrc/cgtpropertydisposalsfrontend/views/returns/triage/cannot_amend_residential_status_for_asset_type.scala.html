@@ -27,7 +27,7 @@
 )
 
 @(backLink: Call,
-        isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+        isATrust: Boolean)(implicit request: RequestWithSessionData[?], messages: Messages, appConfig: ViewConfig)
 
 
 @key = @{"cannotAmendResidentialStatusForAssetType"}

@@ -38,18 +38,19 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
@@ -362,7 +363,7 @@ class ExemptionAndLossesControllerSpec
   val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
     individualUserTypeGen.filter {
       case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
-      case _                                                                                 => false
+      case null                                                                              => false
     }
 
   "ExemptionAndLossesController" when {
@@ -640,7 +641,7 @@ class ExemptionAndLossesControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.inYearLossesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -692,7 +693,7 @@ class ExemptionAndLossesControllerSpec
             Some(individualUserType)
           )._1
 
-          testFormError(data: _*)(key, expectedErrorKey)(
+          testFormError(data*)(key, expectedErrorKey)(
             s"$key$userKey.title",
             disposalDate.taxYear.startDateInclusive.getYear.toString,
             disposalDate.taxYear.endDateExclusive.getYear.toString
@@ -730,7 +731,7 @@ class ExemptionAndLossesControllerSpec
                 withClue(s"For $scenario: ") {
                   val data    = (key -> "0") :: scenario.formData
                   val userKey = userMessageKey(individualUserType, userType)
-                  test(data: _*)(scenario.expectedErrorMessageKey)(
+                  test(data*)(scenario.expectedErrorMessageKey)(
                     userType,
                     individualUserType,
                     userKey
@@ -1217,7 +1218,7 @@ class ExemptionAndLossesControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.previousYearsLossesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1267,7 +1268,7 @@ class ExemptionAndLossesControllerSpec
             Some(individualUserType)
           )._1
 
-          testFormError(data: _*)(key, expectedErrorKey)(s"$key$userKey.title")(
+          testFormError(data*)(key, expectedErrorKey)(s"$key$userKey.title")(
             performAction,
             session
           )
@@ -1304,7 +1305,7 @@ class ExemptionAndLossesControllerSpec
                 withClue(s"For $scenario: ") {
                   val data    = (key -> "0") :: scenario.formData
                   val userKey = userMessageKey(individualUserType, userType)
-                  test(data: _*)(scenario.expectedErrorMessageKey)(
+                  test(data*)(scenario.expectedErrorMessageKey)(
                     userType,
                     individualUserType,
                     userKey
@@ -1910,7 +1911,7 @@ class ExemptionAndLossesControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.annualExemptAmountSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val maximumAnnualExemptAmount = AmountInPence(10000L)
@@ -1996,7 +1997,7 @@ class ExemptionAndLossesControllerSpec
             Some(individualUserType)
           )._1
 
-          testFormError(data: _*)(
+          testFormError(data*)(
             key,
             expectedErrorKey,
             MoneyUtils.formatAmountOfMoneyWithoutPoundSign(
@@ -2014,7 +2015,7 @@ class ExemptionAndLossesControllerSpec
                 errorContext = Some(s"$key$userKey")
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData: _*)(scenario.expectedErrorMessageKey)(
+                  test(scenario.formData*)(scenario.expectedErrorMessageKey)(
                     userType,
                     individualUserType,
                     userKey
@@ -2561,13 +2562,13 @@ class ExemptionAndLossesControllerSpec
 
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs: _*),
+      messageFromMessageKey(pageTitleKey, titleArgs*),
       { doc =>
         doc
           .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
-          errorArgs: _*
+          errorArgs*
         )
 
         doc.title() should startWith("Error:")

@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Amend, CompleteReturnWit
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -100,7 +100,7 @@ class ViewReturnController @Inject() (
             None
           )
 
-          updateSession(sessionStore, request)(
+          updateSession(sessionStore, request.toSession)(
             _.copy(journeyStatus = Some(newJourneyStatus), journeyType = Some(Amend))
           )
             .map {
@@ -151,7 +151,7 @@ class ViewReturnController @Inject() (
 
   private def withViewingReturn()(
     f: ViewingReturn => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(v: ViewingReturn) => f(v)
 
@@ -166,7 +166,7 @@ class ViewReturnController @Inject() (
           s.previousSentReturns
         )
 
-        updateSession(sessionStore, request)(_.copy(journeyStatus = Some(journeyStatus))).flatMap {
+        updateSession(sessionStore, request.toSession)(_.copy(journeyStatus = Some(journeyStatus))).flatMap {
           case Left(e) =>
             logger.warn("Could not update session", e)
             errorHandler.errorResult()

@@ -20,7 +20,6 @@ import cats.data.EitherT
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
-import shapeless.lens
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
@@ -30,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{AuditAd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.SubscriptionReadyAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -62,17 +61,11 @@ class SubscriptionAddressController @Inject() (
 
   override val toJourneyStatus: SubscriptionReadyAddressJourney => JourneyStatus = _.journey
 
-  private val subscriptionReadyAddressLens =
-    lens[SubscriptionReady].subscriptionDetails.address
-
-  private val subscriptionReadyAddressSourceLens =
-    lens[SubscriptionReady].subscriptionDetails.addressSource
-
   def isATrust(journey: SubscriptionReadyAddressJourney): Boolean =
     journey.journey.subscriptionDetails.name.isLeft
 
   def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Future[Result], (SessionData, SubscriptionReadyAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: SubscriptionReady)) =>
@@ -86,7 +79,7 @@ class SubscriptionAddressController @Inject() (
     isManuallyEnteredAddress: Boolean
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus] = {
     auditService.sendEvent(
       "subscriptionContactAddressChanged",
@@ -106,8 +99,9 @@ class SubscriptionAddressController @Inject() (
       }
 
     EitherT.pure[Future, Error](
-      (subscriptionReadyAddressLens ~ subscriptionReadyAddressSourceLens)
-        .set(journey.journey)(address -> addressSource)
+      journey.journey.copy(subscriptionDetails =
+        journey.journey.subscriptionDetails.copy(address = address, addressSource = addressSource)
+      )
     )
   }
 

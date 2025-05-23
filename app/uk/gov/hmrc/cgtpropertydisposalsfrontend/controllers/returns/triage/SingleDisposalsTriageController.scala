@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{singledisposals => triagePages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -545,7 +545,7 @@ class SingleDisposalsTriageController @Inject() (
                                              returnsService.storeDraftReturn(_)
                                            )
                           _             <- EitherT(
-                                             updateSession(sessionStore, request)(
+                                             updateSession(sessionStore, request.toSession)(
                                                _.copy(journeyStatus = Some(newState.merge))
                                              )
                                            )
@@ -1177,7 +1177,7 @@ class SingleDisposalsTriageController @Inject() (
                                                                returnsService.storeDraftReturn(_)
                                                              )
                           _                               <- EitherT(
-                                                               updateSession(sessionStore, request)(
+                                                               updateSession(sessionStore, request.toSession)(
                                                                  _.copy(journeyStatus = Some(newState.merge))
                                                                )
                                                              )
@@ -1557,7 +1557,7 @@ class SingleDisposalsTriageController @Inject() (
     displayReturnToSummaryLink: Boolean,
     representeeAnswers: Option[RepresenteeAnswers]
   )(implicit
-    request: RequestWithSessionData[_],
+    request: RequestWithSessionData[?],
     hc: HeaderCarrier
   ): Future[Result] = {
     val updatedJourney = state.fold(
@@ -1575,7 +1575,7 @@ class SingleDisposalsTriageController @Inject() (
       }
     )
 
-    updateSession(sessionStore, request)(
+    updateSession(sessionStore, request.toSession)(
       _.copy(journeyStatus = Some(updatedJourney))
     ).map {
       case Left(e) =>
@@ -1652,7 +1652,7 @@ class SingleDisposalsTriageController @Inject() (
               val result = for {
                 _ <- returnsService.storeDraftReturn(newJourney)
                 _ <- EitherT(
-                       updateSession(sessionStore, request)(
+                       updateSession(sessionStore, request.toSession)(
                          _.copy(journeyStatus = Some(newJourney))
                        )
                      )
@@ -1708,7 +1708,7 @@ class SingleDisposalsTriageController @Inject() (
       SingleDisposalTriageAnswers
     ) => Either[StartingNewDraftReturn, FillingOutReturn]
   )(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     requiredField(triageAnswers) match {
       case None    => Redirect(redirectToIfNotValidJourney(triageAnswers))
@@ -1737,7 +1737,7 @@ class SingleDisposalsTriageController @Inject() (
                          }
                      )
                 _ <- EitherT(
-                       updateSession(sessionStore, request)(
+                       updateSession(sessionStore, request.toSession)(
                          _.copy(journeyStatus = Some(updatedState.merge))
                        )
                      )
@@ -1787,7 +1787,7 @@ class SingleDisposalsTriageController @Inject() (
 
   private def withSingleDisposalTriageAnswers(
     f: (SessionData, JourneyState, SingleDisposalTriageAnswers) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((_, s: StartingToAmendReturn)) =>
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
@@ -1896,7 +1896,7 @@ class SingleDisposalsTriageController @Inject() (
 
   private def withPersonalRepresentativeDetails(state: JourneyState)(
     f: Option[PersonalRepresentativeDetails] => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+  )(implicit request: RequestWithSessionData[?]): Future[Result] = {
     val personalRepresentativeDetails = state.fold(
       PersonalRepresentativeDetails.fromStartingNewDraftReturn,
       { case (_, fillingOutReturn) =>

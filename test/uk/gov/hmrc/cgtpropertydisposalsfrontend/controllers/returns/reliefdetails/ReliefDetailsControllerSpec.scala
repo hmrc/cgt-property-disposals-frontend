@@ -36,19 +36,19 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
@@ -199,7 +199,7 @@ class ReliefDetailsControllerSpec
   val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
     individualUserTypeGen.filter {
       case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
-      case _                                                                                 => false
+      case null                                                                              => false
     }
 
   val acceptedIndividualUserTypeForLettingsRelief: Gen[IndividualUserType] =
@@ -322,7 +322,7 @@ class ReliefDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.privateResidentsReliefSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -391,7 +391,7 @@ class ReliefDetailsControllerSpec
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(scenario.expectedErrorMessageKey)(
+                  test(data*)(scenario.expectedErrorMessageKey)(
                     userType,
                     individualUserType,
                     userKey
@@ -596,7 +596,7 @@ class ReliefDetailsControllerSpec
 
           "the private residence relief value changes" in {
 
-            forAll { ic: IncompleteReliefDetailsAnswers =>
+            forAll { (ic: IncompleteReliefDetailsAnswers) =>
               forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
                 (userType: UserType, individualUserType: IndividualUserType) =>
                   val lettingRelief =
@@ -798,7 +798,7 @@ class ReliefDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.lettingsReliefSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -849,7 +849,7 @@ class ReliefDetailsControllerSpec
               doc.select("legend").text()                              shouldBe messageFromMessageKey(s"$key$userKey.title")
               doc.select("[data-spec='errorSummaryDisplay'] a").text() shouldBe Messages(
                 expectedErrorMessageKey,
-                args: _*
+                args*
               )
             },
             BAD_REQUEST
@@ -863,7 +863,7 @@ class ReliefDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(scenario.expectedErrorMessageKey, Nil)(
+                  test(data*)(scenario.expectedErrorMessageKey, Nil)(
                     userType,
                     individualUserType,
                     userKey
@@ -1058,7 +1058,7 @@ class ReliefDetailsControllerSpec
 
         "the user has answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
-            forAll { c: CompleteReliefDetailsAnswers =>
+            forAll { (c: CompleteReliefDetailsAnswers) =>
               val currentAnswers    =
                 c.copy(
                   privateResidentsRelief = AmountInPence(Long.MaxValue),
@@ -1338,7 +1338,7 @@ class ReliefDetailsControllerSpec
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.otherReliefsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1396,7 +1396,7 @@ class ReliefDetailsControllerSpec
                 withClue(s"For $scenario: ") {
                   val data =
                     (key -> "0") :: (nameKey -> "ReliefsName") :: scenario.formData
-                  test(data: _*)(scenario.expectedErrorMessageKey)(
+                  test(data*)(scenario.expectedErrorMessageKey)(
                     userType,
                     individualUserType,
                     userKey
@@ -1684,7 +1684,7 @@ class ReliefDetailsControllerSpec
 
         "the user has answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
-            forAll { c: CompleteReliefDetailsAnswers =>
+            forAll { (c: CompleteReliefDetailsAnswers) =>
               val otherReliefs    =
                 OtherReliefs("ReliefName1", AmountInPence.fromPounds(1d))
               val newOtherReliefs =
@@ -2103,7 +2103,7 @@ class ReliefDetailsControllerSpec
         }
 
         "the user has already answered all the questions" in {
-          forAll { completeAnswers: CompleteReliefDetailsAnswers =>
+          forAll { (completeAnswers: CompleteReliefDetailsAnswers) =>
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 inSequence {

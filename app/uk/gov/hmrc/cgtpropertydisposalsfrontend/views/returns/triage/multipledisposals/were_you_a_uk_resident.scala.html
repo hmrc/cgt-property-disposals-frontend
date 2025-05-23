@@ -43,7 +43,7 @@
   representativeType: Option[RepresentativeType],
   isAmend: Boolean
 )(
-  implicit request: RequestWithSessionData[_],
+  implicit request: RequestWithSessionData[?],
   messages:Messages,
   viewConfig: ViewConfig
 )
@@ -102,7 +102,7 @@
       errorKey = form.error(key).map(e => s"$userErrorKey${e.message}"),
       selected = form.value,
       helpText = Some(Html(messages(s"$key.helpText"))).filterNot(_ => isPeriodOfAdmin),
-      errorMessage = form.error(key).map(e => messages(s"${e.key}.$userErrorKey${e.message}", e.args:_*) )
+      errorMessage = form.error(key).map(e => messages(s"${e.key}.$userErrorKey${e.message}", e.args *) )
     )
 
     <p class="govuk-body">@Html(messages(s"$key$userKey.link", viewConfig.workOurYouResidenceStatusUrl))</p>

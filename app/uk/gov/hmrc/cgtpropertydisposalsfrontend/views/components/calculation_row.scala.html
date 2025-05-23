@@ -27,6 +27,10 @@
 <span class="calc-total">
  @{MoneyUtils.formatAmountOfMoneyWithPoundSign(total.abs().inPounds())}
  @if(showGainType) {
-  @{if (total.isNegative) s"(${messages("generic.loss")})" else if (!total.isZero) s"(${messages("generic.gain")})"}
+  @if(total.isNegative) {
+    (@messages("generic.loss"))
+  } else if(!total.isZero) {
+    (@messages("generic.gain"))
+  }
  }
 </span>

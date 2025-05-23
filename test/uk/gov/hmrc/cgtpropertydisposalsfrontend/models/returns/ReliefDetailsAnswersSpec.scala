@@ -21,7 +21,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 
 class ReliefDetailsAnswersSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
@@ -29,7 +29,7 @@ class ReliefDetailsAnswersSpec extends AnyWordSpec with Matchers with ScalaCheck
   "IncompleteReliefDetailsAnswers" must {
 
     "have a method which converts incomplete answers to complete answers" in {
-      forAll { completeAnswers: CompleteReliefDetailsAnswers =>
+      forAll { (completeAnswers: CompleteReliefDetailsAnswers) =>
         IncompleteReliefDetailsAnswers.fromCompleteAnswers(
           completeAnswers
         ) shouldBe IncompleteReliefDetailsAnswers(

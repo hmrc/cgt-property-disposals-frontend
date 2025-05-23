@@ -36,7 +36,7 @@
     form: Form[BigDecimal],
     backLink: Call,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "multipleIndirectDisposalsDisposalPrice" }
 

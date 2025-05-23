@@ -46,7 +46,7 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
     val request = new MessagesRequest[A](r, stub[MessagesApi])
     authenticatedAction.invokeBlock(
       request,
-      { a: AuthenticatedRequest[A] =>
+      { (a: AuthenticatedRequest[A]) =>
         a.request.messagesApi shouldBe request.messagesApi
         Future.successful(Ok)
       }
